@@ -4,3 +4,4 @@ certs
 data
 .env
 config/credentials.json
+config/routeros-ca.crt
