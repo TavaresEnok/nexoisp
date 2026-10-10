@@ -75,7 +75,30 @@ function ProvisionForm({ contractId, onDone }: { contractId: string; onDone: (pw
 }
 
 /** As cinco informações separadas do serviço: comercial, financeira, desejada, observada e operação. */
-export function ServicePanel({ contract, financial }: { contract: any; financial?: ReactNode }) {
+/** Uma frase dizendo o que fazer agora com este acesso, a partir do que já está na tela. A ordem é a da urgência. */
+function nextStep(contract: any, r: any, ops: any[], fin: { overdue: number } | undefined, stale: boolean): { tone: 'green' | 'red' | 'amber' | 'blue' | 'gray'; text: string } {
+  const last = ops[0];
+  if (!r) return contract.status === 'active' ? { tone: 'blue', text: 'Provisione o acesso PPPoE para o assinante poder navegar.' } : { tone: 'gray', text: 'Contrato encerrado, sem acesso provisionado. Nada a fazer.' };
+  if (ops.some((o) => o.status === 'UNCERTAIN')) return { tone: 'red', text: 'Aguarde: o agente precisa verificar o que foi aplicado na última operação. Não repita manualmente.' };
+  if (!r.agent_online) return { tone: 'red', text: 'Verifique o agente do provedor: sem ele nenhuma alteração chega ao equipamento. Quem já está autorizado continua autenticando.' };
+  if (ops.some((o) => ['PENDING', 'RESERVED', 'EXECUTING', 'VERIFYING'].includes(o.status))) return { tone: 'blue', text: 'Alteração em andamento. Aguarde a confirmação do equipamento.' };
+  if (last && ['FAILED', 'EXPIRED'].includes(last.status)) return { tone: 'amber', text: 'A última operação não foi concluída. Veja as evidências e use “Reaplicar”.' };
+  if (r.desired_version === 0) return { tone: 'blue', text: 'Conta importada: use “Provisionar” para enviá-la ao equipamento.' };
+  if (r.drift) return { tone: 'amber', text: 'O que está no equipamento difere do que foi pedido. Use “Reaplicar” ou ajuste a intenção.' };
+  if (r.desired_policy === 'suspended') {
+    if (contract.status !== 'active') return { tone: 'gray', text: 'Contrato encerrado e acesso suspenso. Nada a fazer.' };
+    return fin?.overdue ? { tone: 'amber', text: `Acesso suspenso. Há ${fin.overdue} fatura(s) vencida(s): reative depois do pagamento.` }
+      : { tone: 'amber', text: 'Acesso suspenso e sem fatura vencida visível. Reative se a suspensão não for mais necessária.' };
+  }
+  const ses = r.observed_session;
+  if (!r.observed_at) return { tone: 'blue', text: 'Aguardando a primeira leitura do equipamento.' };
+  if (ses?.unknown) return { tone: 'amber', text: 'A autorização está correta, mas o concentrador não respondeu: não dá para saber se há sessão.' };
+  if (stale) return { tone: 'amber', text: 'A leitura abaixo está desatualizada. Confira se o agente está relatando antes de concluir algo.' };
+  if (ses?.online) return { tone: 'green', text: 'Nada a fazer: acesso liberado e sessão online.' };
+  return { tone: 'blue', text: 'Acesso liberado, mas sem sessão. Verifique o equipamento do assinante: energia, cabo, usuário e senha PPPoE.' };
+}
+
+export function ServicePanel({ contract, financial, fin }: { contract: any; financial?: ReactNode; fin?: { overdue: number } }) {
   const { me } = useMe();
   const { data, loading, error, reload } = useLoad<any>(can(me, 'network:read') ? `/contracts/${contract.id}/service` : null, 3000);
   const [opId, setOpId] = useState<string | null>(null);
@@ -99,6 +122,7 @@ export function ServicePanel({ contract, financial }: { contract: any; financial
       <button onClick={() => setNewPw('')}>Trocar senha</button>
     </>}>
       <State loading={loading && !data} error={error}>
+        {data && !r && <div className="next"><Badge tone={nextStep(contract, null, [], fin, false).tone}>Próxima ação</Badge> <span>{nextStep(contract, null, [], fin, false).text}</span></div>}
         {data && !r && (contract.status !== 'active'
           ? <div className="state">Contrato encerrado sem acesso provisionado.</div>
           : operate ? <ProvisionForm contractId={contract.id} onDone={(pw) => { setGenerated(pw); reload(); }} />
@@ -114,6 +138,7 @@ export function ServicePanel({ contract, financial }: { contract: any; financial
           {r.drift && <div className="state err">Divergência: o estado lido no equipamento difere da intenção e não há operação em andamento (possível alteração manual externa). Nada foi corrigido automaticamente — use “Reaplicar” ou ajuste a intenção.</div>}
           {!r.agent_online && <div className="state err">Agente {r.agent_name ? `“${r.agent_name}” ` : ''}offline (último contato {ago(r.agent_last_seen)}). Novas operações aguardam; a autenticação local segue com a última política conhecida.</div>}
           {r.maintenance && <div className="state err">Equipamento em modo manutenção: o ERP não envia escritas.</div>}
+          {(() => { const n = nextStep(contract, r, data.operations, fin, !!stale); return <div className="next"><Badge tone={n.tone}>Próxima ação</Badge> <span>{n.text}</span></div>; })()}
           <div className="five">
             <Card title="Comercial">
               {contract.status === 'active' ? <Badge tone="green">Contrato vigente</Badge> : <Badge>Contrato encerrado</Badge>}
@@ -130,7 +155,7 @@ export function ServicePanel({ contract, financial }: { contract: any; financial
               {r.observed_at ? (<>
                 <Badge tone={POLICY[r.observed_policy][1]}>{POLICY[r.observed_policy][0]}</Badge> {stale && <Badge tone="amber">desatualizada</Badge>}
                 <div className="small">perfil <span className="mono">{r.observed_profile ?? '—'}</span></div>
-                <div className="small">{r.observed_session?.online ? <>sessão online · <span className="mono">{r.observed_session.ip}</span></> : 'sem sessão conhecida'}</div>
+                <div className="small">{r.observed_session?.online ? <>sessão online · <span className="mono">{r.observed_session.ip}</span></> : r.observed_session?.unknown ? <b>sessão desconhecida: o concentrador não respondeu</b> : 'sem sessão'}</div>
                 <div className="small muted">lida {ago(r.observed_at)} ({dt(r.observed_at)})</div>
               </>) : <span className="muted small">ainda não observada</span>}
             </Card>

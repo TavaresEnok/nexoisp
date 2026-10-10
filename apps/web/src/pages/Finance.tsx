@@ -282,7 +282,7 @@ export function FinanceSettings() {
 }
 
 /** Resumo financeiro do contrato (uma das cinco informações) + lista de faturas. */
-export function ContractFinance({ contractId, children }: { contractId: string; children: (summary: ReactNode) => ReactNode }) {
+export function ContractFinance({ contractId, children }: { contractId: string; children: (summary: ReactNode, numbers?: { overdue: number; open: number; reconciling: number }) => ReactNode }) {
   const { me } = useMe();
   const ok = can(me, 'finance:read');
   const { data, reload } = useLoad<any>(ok ? `/contracts/${contractId}/finance` : null, 5000);
@@ -295,7 +295,7 @@ export function ContractFinance({ contractId, children }: { contractId: string; 
     </>)
   );
   return (<>
-    {children(summary)}
+    {children(summary, ok && data ? { overdue: data.overdue, open: data.open, reconciling: data.reconciling } : undefined)}
     {ok && data && data.invoices.length > 0 && <Card title="Faturas do contrato"><InvoiceTable rows={data.invoices} onOpen={setOpen} showSubscriber={false} /></Card>}
     {open && <InvoiceModal id={open} onClose={() => { setOpen(null); reload(); }} />}
   </>);

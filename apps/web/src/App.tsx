@@ -23,36 +23,38 @@ import { Users } from './pages/Users';
 import { ActionButton, Brand, Icon } from './ui';
 
 export interface Me {
-  id: string; name: string; email: string; role: string; perms: string[]; support: boolean; demo: boolean; mfa_enabled: boolean; mfa_pending: boolean;
+  id: string; name: string; email: string; role: string; perms: string[]; modules: string[]; support: boolean; demo: boolean; mfa_enabled: boolean; mfa_pending: boolean;
   tenant: { id: string; name: string; slug: string } | null;
 }
 const MeCtx = createContext<{ me: Me; reload: () => Promise<void> }>(null as any);
 export const useMe = () => useContext(MeCtx);
 export const can = (me: Me, perm: string) => me.perms.includes(perm);
+/** Módulo adicional liberado para o provedor (o servidor aplica a mesma regra). */
+export const has = (me: Me, mod: string) => me.modules.includes(mod);
 
 const ROLE_LABEL: Record<string, string> = {
   saas_operator: 'Operador do SaaS', admin: 'Administrador', attendant: 'Atendimento', finance: 'Financeiro', noc: 'Técnico/NOC', subscriber: 'Assinante',
 };
 
 /** Menu por área. A cor de cada área segue o código de cores da fibra óptica (ver styles.css). */
-const NAV: { id: string; label: string; items: { to: string; label: string; icon: string; perm: string }[] }[] = [
+const NAV: { id: string; label: string; items: { to: string; label: string; icon: string; perm: string; mod?: string }[] }[] = [
   { id: 'inicio', label: '', items: [{ to: '/', label: 'Início', icon: 'home', perm: 'subscribers:read' }] },
   { id: 'cadastro', label: 'Cadastro', items: [
     { to: '/assinantes', label: 'Assinantes', icon: 'users', perm: 'subscribers:read' }, { to: '/planos', label: 'Planos', icon: 'gauge', perm: 'plans:read' },
     { to: '/contratos', label: 'Contratos', icon: 'doc', perm: 'contracts:read' }] },
   { id: 'atendimento', label: 'Atendimento', items: [
-    { to: '/atendimentos', label: 'Atendimentos', icon: 'chat', perm: 'crm:read' }, { to: '/prospectos', label: 'Prospectos', icon: 'funnel', perm: 'crm:read' },
-    { to: '/meu-trabalho', label: 'Meu trabalho', icon: 'phone', perm: 'os:write' }, { to: '/ordens-servico', label: 'Ordens de serviço', icon: 'wrench', perm: 'os:read' },
-    { to: '/estoque', label: 'Estoque', icon: 'box', perm: 'stock:read' }, { to: '/relatorios-atendimento', label: 'Relatórios', icon: 'chart', perm: 'crm:read' }] },
+    { to: '/atendimentos', label: 'Atendimentos', icon: 'chat', perm: 'crm:read', mod: 'crm' }, { to: '/prospectos', label: 'Prospectos', icon: 'funnel', perm: 'crm:read', mod: 'crm' },
+    { to: '/meu-trabalho', label: 'Meu trabalho', icon: 'phone', perm: 'os:write', mod: 'field' }, { to: '/ordens-servico', label: 'Ordens de serviço', icon: 'wrench', perm: 'os:read', mod: 'field' },
+    { to: '/estoque', label: 'Estoque', icon: 'box', perm: 'stock:read', mod: 'field' }, { to: '/relatorios-atendimento', label: 'Relatórios', icon: 'chart', perm: 'crm:read', mod: 'crm' }] },
   { id: 'financeiro', label: 'Financeiro', items: [
     { to: '/faturas', label: 'Faturas', icon: 'receipt', perm: 'finance:read' }, { to: '/conciliacao', label: 'Conciliação', icon: 'scale', perm: 'finance:read' },
     { to: '/politica-cobranca', label: 'Política de cobrança', icon: 'sliders', perm: 'finance:read' }] },
   { id: 'rede', label: 'Rede', items: [
-    { to: '/noc', label: 'NOC', icon: 'pulse', perm: 'network:read' }, { to: '/rede', label: 'Agentes e equipamentos', icon: 'server', perm: 'network:read' },
-    { to: '/onus', label: 'ONUs', icon: 'onu', perm: 'network:read' }, { to: '/ftth', label: 'Rede óptica', icon: 'fiber', perm: 'network:read' },
-    { to: '/ipam', label: 'Endereços IP e CGNAT', icon: 'ip', perm: 'network:read' }, { to: '/operacoes', label: 'Operações', icon: 'list', perm: 'network:read' }] },
+    { to: '/noc', label: 'NOC', icon: 'pulse', perm: 'network:read', mod: 'noc' }, { to: '/rede', label: 'Agentes e equipamentos', icon: 'server', perm: 'network:read' },
+    { to: '/onus', label: 'ONUs', icon: 'onu', perm: 'network:read', mod: 'olt' }, { to: '/ftth', label: 'Rede óptica', icon: 'fiber', perm: 'network:read', mod: 'ftth' },
+    { to: '/ipam', label: 'Endereços IP e CGNAT', icon: 'ip', perm: 'network:read', mod: 'ipam' }, { to: '/operacoes', label: 'Operações', icon: 'list', perm: 'network:read' }] },
   { id: 'admin', label: 'Administração', items: [
-    { to: '/usuarios', label: 'Usuários', icon: 'user', perm: 'users:manage' }, { to: '/avisos', label: 'Avisos', icon: 'bell', perm: 'settings:manage' },
+    { to: '/usuarios', label: 'Usuários', icon: 'user', perm: 'users:manage' }, { to: '/avisos', label: 'Avisos', icon: 'bell', perm: 'settings:manage', mod: 'notices' },
     { to: '/importacao', label: 'Importação', icon: 'upload', perm: 'import:run' }, { to: '/auditoria', label: 'Auditoria', icon: 'shield', perm: 'audit:read' }] },
 ];
 
@@ -90,7 +92,7 @@ export function App() {
   };
   if (me.role === 'subscriber') return <MeCtx.Provider value={{ me, reload }}><Portal /></MeCtx.Provider>;
   const inTenant = !!me.tenant && !me.mfa_pending;
-  const groups = NAV.map((g) => ({ ...g, items: g.items.filter((i) => can(me, i.perm) && (!find || i.label.toLowerCase().includes(find.toLowerCase()))) })).filter((g) => g.items.length);
+  const groups = NAV.map((g) => ({ ...g, items: g.items.filter((i) => can(me, i.perm) && (!i.mod || has(me, i.mod)) && (!find || i.label.toLowerCase().includes(find.toLowerCase()))) })).filter((g) => g.items.length);
   const area = NAV.find((g) => g.items.some((i) => (i.to === '/' ? loc.pathname === '/' : loc.pathname.startsWith(i.to))))?.id
     ?? (loc.pathname.startsWith('/contratos') || loc.pathname.startsWith('/assinantes') ? 'cadastro' : 'admin');
   const toggle = (id: string) => { const n = { ...closed, [id]: !closed[id] }; setClosed(n); localStorage.setItem('nexo_nav', JSON.stringify(n)); };

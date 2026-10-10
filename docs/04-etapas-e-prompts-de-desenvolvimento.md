@@ -245,7 +245,7 @@ Detalhes de operação e produção: `docs/operacao.md`. Decisões técnicas tom
 ### Verificações realizadas (10/10/2026)
 
 - Tipos e build de API e web: sem erros.
-- `./nexo test` — 60 testes na API (26 do MVP + 6 da expansão OLT/ONU + 27 das expansões 2 a 5 e complementos), com o papel real `nexo_app`: isolamento entre provedores (API, SQL direto, conexão reutilizada, FK composta); permissões;
+- `./nexo test` — 61 testes na API (26 do MVP + 6 da expansão OLT/ONU + 27 das expansões 2 a 5 e complementos), com o papel real `nexo_app`: isolamento entre provedores (API, SQL direto, conexão reutilizada, FK composta); permissões;
   recorrência e webhook/pagamento duplicados; evento perdido recuperado; valor divergente sem baixa; assinatura inválida;
   suspensão obsoleta (antes de reservar, na revalidação e após pagamento); posse expirada → incerta → verificação; agente de outro provedor; divergência manual;
   importação (prévia não grava, reimportação não duplica, conta sem senha não provisiona); portal isolado na API e no banco; MFA;
@@ -306,6 +306,8 @@ Detalhes de operação e produção: `docs/operacao.md`. Decisões técnicas tom
 | Amostra autorizada do MK-Auth (com versão) | Migração real | Mapear para o CSV intermediário ou escrever conversor; conferir a prévia |
 | Provedor piloto, volume, RPO/RTO, processo fiscal, canal de alerta | E6 | Preencher a lista de entrada em produção em `docs/operacao.md` |
 | Autorização explícita de produção | Virada | Importar base real → "Provisionar lote" → reapontar o RADIUS do NAS do grupo piloto |
+
+**Prioridade atual (desde 10/10/2026): `docs/06-plano-entrada-producao-7-dias.md`** — fechar o núcleo para a primeira entrada em produção; o acompanhamento diário fica na seção 11 daquele documento.
 
 **Para retomar:** `./nexo up && ./nexo test` (e `./nexo lab-up` para o laboratório PPPoE). Seguir `docs/05-prioridades-pos-projeto.md`: o primeiro item
 de engenharia é o adaptador do gateway real, assim que o gateway for definido.

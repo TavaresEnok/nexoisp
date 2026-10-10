@@ -1,0 +1,4 @@
+# tudo aqui é gerado nesta máquina (segredos, certificados): nada vai para o repositório
+*
+!.gitignore
+!homolog.sh

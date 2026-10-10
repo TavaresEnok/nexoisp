@@ -94,6 +94,7 @@ export async function networkRoutes(app: FastifyInstance) {
   app.post('/api/devices', { preHandler: guard('network:write') }, async (req) => {
     const b = zDevice.parse(req.body);
     if (b.driver.endsWith('demo') && process.env.NEXO_DEMO_MODE !== '1') throw new HttpError(400, 'driver de demonstração só é permitido em ambiente de demonstração');
+    if (b.driver.startsWith('olt') && !req.ctx.modules.includes('olt')) throw new HttpError(403, 'a integração com OLT não está liberada para o provedor', 'module_disabled');
     return withScope(req.ctx.scope, async (c) => {
       const d = (await c.query(
         `insert into devices (tenant_id, name, driver, host, api_port, credential_ref, agent_id) values ($1,$2,$3,$4,$5,$6,$7) returning *`,
@@ -111,6 +112,7 @@ export async function networkRoutes(app: FastifyInstance) {
       if (!cur) throw new HttpError(404, 'equipamento não encontrado');
       const n = { ...cur, ...Object.fromEntries(Object.entries(b).filter(([, v]) => v !== undefined)) };
       if (n.driver.endsWith('demo') && process.env.NEXO_DEMO_MODE !== '1') throw new HttpError(400, 'driver de demonstração só é permitido em ambiente de demonstração');
+      if (n.driver.startsWith('olt') && !req.ctx.modules.includes('olt')) throw new HttpError(403, 'a integração com OLT não está liberada para o provedor', 'module_disabled');
       const d = (await c.query(
         `update devices set name=$2, driver=$3, host=$4, api_port=$5, credential_ref=$6, agent_id=$7, maintenance=$8 where id=$1 returning *`,
         [id, n.name, n.driver, n.host, n.api_port, n.credential_ref, n.agent_id, n.maintenance])).rows[0];

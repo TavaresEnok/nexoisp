@@ -4,6 +4,9 @@
 #   backup.sh restore-check <arquivo> -> restaura em banco temporário, compara contagens com o banco atual e remove
 #   backup.sh restore <arquivo> --yes -> SUBSTITUI o banco principal pelo backup (para a API durante a operação)
 # Variáveis: NEXO_DB_CONTAINER (padrão nexoisp-db-1), NEXO_API_SERVICE_STOP / _START (comandos opcionais).
+#   NEXO_BACKUP_COPY: comando que leva o backup para FORA deste host; recebe o arquivo e o .sha256 como argumentos.
+#     Ex.: NEXO_BACKUP_COPY=/opt/nexo/enviar-backup.sh  (um script seu com scp, rclone ou o cliente do seu armazenamento)
+#     Se o comando falhar, o backup local fica, mas o script termina com erro (para o agendador alertar).
 set -euo pipefail
 DBC="${NEXO_DB_CONTAINER:-nexoisp-db-1}"
 psqlc() { docker exec -i "$DBC" psql -v ON_ERROR_STOP=1 -q -U nexo_owner "$@"; }
@@ -20,7 +23,11 @@ case "${1:-}" in
     dir="${2:-backups}"; mkdir -p "$dir"; f="$dir/nexo-$(date +%Y%m%d-%H%M%S).dump"
     docker exec "$DBC" pg_dump -U nexo_owner -Fc nexo > "$f"
     (cd "$dir" && sha256sum "$(basename "$f")" > "$(basename "$f").sha256")
-    chmod 600 "$f"; echo "backup: $f ($(du -h "$f" | cut -f1))" ;;
+    chmod 600 "$f"; echo "backup: $f ($(du -h "$f" | cut -f1))"
+    if [ -n "${NEXO_BACKUP_COPY:-}" ]; then
+      $NEXO_BACKUP_COPY "$f" "$f.sha256" || { echo "ERRO: a cópia para fora do host falhou; o backup existe só neste servidor"; exit 1; }
+      echo "cópia externa: ok"
+    else echo "AVISO: NEXO_BACKUP_COPY não definido — o backup está só neste host (mesmo domínio de falha do banco)"; fi ;;
   restore-check)
     f="$2"; verify "$f"; load nexo_restore_check "$f"
     a="$(counts nexo_restore_check)"; b="$(counts nexo)"

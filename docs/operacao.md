@@ -37,6 +37,33 @@ Guardar cópia de `.env` e de `infra/prod/certs` em cofre separado do backup do 
 **Rotação de `NEXO_SECRET_KEY`:** (1) backup; (2) no `.env`, mover a chave atual para `NEXO_SECRET_KEY_PREVIOUS` e gerar a nova em `NEXO_SECRET_KEY`; (3) `docker compose up -d api`;
 (4) `docker compose exec api node apps/api/dist/cli.js rotate-secrets` até mostrar "0 pendente(s)"; (5) remover `NEXO_SECRET_KEY_PREVIOUS` e reiniciar. A aplicação segue funcionando durante o processo.
 
+### Módulos por provedor
+
+Um provedor novo nasce só com o núcleo: cadastro, planos, contratos, acesso PPPoE, financeiro, portal, importação, auditoria e agentes.
+Atendimentos/prospectos, ordens de serviço e estoque, avisos, NOC, rede óptica, IP/CGNAT e OLT são **módulos** que o operador do SaaS libera em
+Provedores → Módulos. Sem o módulo, o item some do menu **e o servidor recusa a chamada** (`module_disabled`). O módulo de OLT libera um driver
+não homologado em equipamento real: a conferência de produção avisa quando ele está ligado.
+
+### Conferência antes de entrar em produção
+
+```bash
+docker compose exec api node apps/api/dist/cli.js preflight
+```
+
+Não altera nada. **FALHA** impede a entrada (modo demonstração ligado, MFA não obrigatório, cookie sem HTTPS, contas ou equipamentos de demonstração,
+gateway de demonstração, migration pendente, operação incerta). **AVISO** é uma decisão que alguém precisa ter tomado (provedor sem gateway,
+suspensão automática ligada, módulo de OLT ligado, agente que não conecta, alerta sem webhook). Sair sem falhas não substitui a homologação no
+equipamento nem o ensaio do ciclo completo.
+
+### Homologação local
+
+`./nexo homolog up` sobe, nesta máquina, uma instância com **a mesma configuração de produção** (`infra/prod`), em outro projeto do Docker, outro
+banco, segredos e certificados próprios e outras portas (painel em https://localhost:28443, agentes em 28444). A senha do operador fica em
+`infra/homolog/operador.txt`. `./nexo homolog preflight` roda a conferência; `./nexo homolog destroy` apaga tudo.
+Exercitado em 10/10/2026: MFA obrigatório para operador e administrador, provedor novo só com o núcleo, driver e gateway de demonstração recusados,
+recorrência sem duplicar, agente recusado sem certificado de cliente, backup + `restore-check`, conferência sem falhas.
+**Não é o ambiente do provedor**: host público, domínio e certificado reais continuam por exercitar.
+
 ## 2. Instalação no provedor (agente + RADIUS)
 
 Ver `docs/lab-pppoe.md` (passos 1 e 2). Resumo: `infra/site/` com `.env`, `certs/` (certificado individual `CN=agent:<id>`) e `config/credentials.json`.
@@ -87,7 +114,8 @@ Não há envio nativo por e-mail/WhatsApp: use o webhook com o serviço escolhid
 ./nexo restore <arquivo> --yes      # substitui o banco principal (para a API durante a operação)
 ```
 
-Em produção use `scripts/backup.sh` com `NEXO_DB_CONTAINER=nexoisp-prod-db-1`.
+Em produção use `scripts/backup.sh` com `NEXO_DB_CONTAINER=nexoisp-prod-db-1` e `NEXO_BACKUP_COPY=<comando ou script>` para levar cada backup para **fora do host**
+(o comando recebe o arquivo e o `.sha256`; se falhar, o script termina com erro para o agendador alertar). Sem ele o script avisa que o backup está no mesmo domínio de falha do banco.
 Exercício feito em 10/10/2026 (ambiente local): backup → criação de um registro → `restore-check` → `restore` → registro posterior ausente, login e consultas funcionando, 31 políticas RLS presentes; arquivo adulterado recusado pela soma de verificação.
 
 - O backup do banco **não** inclui: `.env`, certificados, SQLite dos agentes e do RADIUS (ficam nos sites).

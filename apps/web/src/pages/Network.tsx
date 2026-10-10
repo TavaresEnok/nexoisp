@@ -103,9 +103,9 @@ export function Network() {
             <Field label="Integração">
               <select value={f.driver} onChange={(e) => setF({ ...f, driver: e.target.value })}>
                 <option value="mikrotik_radius">MikroTik RouterOS v7 + RADIUS local</option>
-                <option value="olt_huawei">OLT Huawei SmartAX MA5600/MA5800 (CLI por SSH) — não homologado</option>
+                {me.modules.includes('olt') && <option value="olt_huawei">OLT Huawei SmartAX MA5600/MA5800 (CLI por SSH), não homologado</option>}
                 {me.demo && <option value="demo">Concentrador PPPoE — demonstração (simulado)</option>}
-                {me.demo && <option value="olt_demo">OLT — demonstração (simulada)</option>}
+                {me.demo && me.modules.includes('olt') && <option value="olt_demo">OLT — demonstração (simulada)</option>}
               </select>
             </Field>
             {!f.driver.endsWith('demo') && (<>

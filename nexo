@@ -31,6 +31,7 @@ case "${1:-help}" in
   lab-up)    infra/lab/lab.sh up ;;
   lab-down)  infra/lab/lab.sh down ;;
   lab)       shift; infra/lab/lab.sh "$@" ;;
+  homolog)   shift; infra/homolog/homolog.sh "$@" ;;
   demo-tool) shift; $COMPOSE exec agent-demo python -m nexo_agent.demo_tool "$@" ;;
   npm)       shift; nodebox "$NODE_IMG" npm "$@" ;;
   sh)        shift; nodebox -it "$NODE_IMG" sh ;;
@@ -54,5 +55,5 @@ case "${1:-help}" in
              export DATABASE_URL_OWNER="postgres://nexo_owner:${POSTGRES_PASSWORD}@db:5432/nexo_test"
              export DATABASE_URL_APP="postgres://nexo_app:${NEXO_APP_DB_PASSWORD}@db:5432/nexo_test"
              export NEXO_LOAD=1; nodebox -e NEXO_LOAD "$NODE_IMG" npm -w apps/api test ;;
-  *) echo "uso: ./nexo {backup|restore-check <arq>|restore <arq> --yes|lab-radius|lab-up|lab-down|lab client ...|init|agent-cert <id>|agent-test|demo-tool ...|install|typecheck|build|up|down|logs|ps|test|npm ...|compose ...}" ;;
+  *) echo "uso: ./nexo {homolog up|preflight|down|backup|restore-check <arq>|restore <arq> --yes|lab-radius|lab-up|lab-down|lab client ...|init|agent-cert <id>|agent-test|demo-tool ...|install|typecheck|build|up|down|logs|ps|test|npm ...|compose ...}" ;;
 esac

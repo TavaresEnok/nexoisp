@@ -115,7 +115,8 @@ export async function nocRoutes(app: FastifyInstance) {
 
   /** Início: só o que pede ação de quem está logado, conforme as permissões. Lista vazia = nada pendente. */
   app.get('/api/today', { preHandler: guard('subscribers:read') }, async (req) => {
-    const has = (p: string) => req.ctx.perms.includes(p);
+    const has = (p: string, mod?: string) => req.ctx.perms.includes(p) && (!mod || req.ctx.modules.includes(mod));
+    const nocLink = req.ctx.modules.includes('noc') ? '/noc' : '/rede';
     return withScope(req.ctx.scope, async (c) => {
       const one = async (sql: string, p: unknown[] = []) => (await c.query(sql, p)).rows[0];
       const items: { n: number | string; title: string; detail?: string; link: string; severity: Severity }[] = [];
@@ -126,18 +127,18 @@ export async function nocRoutes(app: FastifyInstance) {
                   (select count(*) from operations where status = 'UNCERTAIN')::int as uncertain,
                   (select count(*) from operations where status in ('FAILED','EXPIRED') and finished_at > now() - interval '24 hours')::int as failed,
                   (select count(*) from onus where desired_state = 'authorized' and observed_at is not null and (observed_state = 'absent' or observed_online is false))::int as onus`);
-        add(r.agents, 'critical', 'agente offline', 'agentes offline', '/noc', 'Leituras e operações desse site estão paradas.');
+        add(r.agents, 'critical', 'agente offline', 'agentes offline', nocLink, 'Leituras e operações desse site estão paradas.');
         add(r.uncertain, 'critical', 'operação com resultado incerto', 'operações com resultado incerto', '/operacoes?filter=problem', 'O equipamento fica bloqueado até a verificação.');
-        add(r.onus, 'warning', 'ONU sem sinal', 'ONUs sem sinal', '/noc');
+        if (req.ctx.modules.includes('olt')) add(r.onus, 'warning', 'ONU sem sinal', 'ONUs sem sinal', req.ctx.modules.includes('noc') ? '/noc' : '/onus');
         add(r.failed, 'warning', 'operação falhou ou expirou em 24 h', 'operações falharam ou expiraram em 24 h', '/operacoes?filter=problem');
       }
-      if (has('crm:read')) {
+      if (has('crm:read', 'crm')) {
         const r = await one(`select count(*) filter (where status = 'open')::int as open, count(*) filter (where status = 'open' and assignee_id = $1)::int as mine,
                                     (select count(*) from leads where stage = 'new')::int as leads from tickets`, [req.ctx.userId]);
         add(r.open, 'warning', 'atendimento aguardando resposta do provedor', 'atendimentos aguardando resposta do provedor', '/atendimentos', r.mine ? `${r.mine} com você.` : undefined);
         add(r.leads, 'info', 'prospecto novo sem contato', 'prospectos novos sem contato', '/prospectos');
       }
-      if (has('os:read')) {
+      if (has('os:read', 'field')) {
         const r = await one(`select count(*) filter (where status in ('open','scheduled') and scheduled_for < now())::int as late,
                                     count(*) filter (where status in ('open','scheduled','in_progress') and assignee_id = $1)::int as mine,
                                     count(*) filter (where status = 'open' and assignee_id is null)::int as unassigned from work_orders`, [req.ctx.userId]);
@@ -154,7 +155,7 @@ export async function nocRoutes(app: FastifyInstance) {
         add(r.reconciling, 'warning', 'fatura em conciliação', 'faturas em conciliação', '/conciliacao', 'Pagamento divergente aguardando decisão.');
         add(r.overdue, 'info', 'fatura vencida', 'faturas vencidas', '/faturas', `Total de ${(r.overdue_cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}.`);
       }
-      if (has('stock:read')) {
+      if (has('stock:read', 'field')) {
         const r = await one(`select count(*)::int as low from stock_items i where i.active and coalesce((select sum(m.qty) from stock_movements m where m.item_id = i.id), 0) < i.min_qty`);
         add(r.low, 'info', 'item de estoque abaixo do mínimo', 'itens de estoque abaixo do mínimo', '/estoque');
       }

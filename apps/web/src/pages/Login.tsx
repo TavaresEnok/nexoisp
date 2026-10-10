@@ -14,6 +14,7 @@ export function Login({ onLogin }: { onLogin: () => Promise<void> }) {
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
   const [needCode, setNeedCode] = useState(false);
+  const [show, setShow] = useState(false);
   const nav = useNavigate();
   const [demo, setDemo] = useState(false);
   useEffect(() => { fetch('/api/health').then((r) => r.json()).then((h) => setDemo(!!h.demo)).catch(() => {}); }, []);
@@ -46,9 +47,15 @@ export function Login({ onLogin }: { onLogin: () => Promise<void> }) {
           nav('/');
         }}>
           <Field label="E-mail"><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoFocus required autoComplete="username" /></Field>
-          <Field label="Senha"><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" /></Field>
+          <Field label="Senha">
+            <div className="row" style={{ flexWrap: 'nowrap' }}>
+              <input type={show ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
+              <button type="button" onClick={() => setShow(!show)} aria-pressed={show} style={{ whiteSpace: 'nowrap' }}>{show ? 'Ocultar' : 'Mostrar'}</button>
+            </div>
+          </Field>
           {needCode && <Field label="Código do aplicativo autenticador"><input value={code} onChange={(e) => setCode(e.target.value)} inputMode="numeric" autoFocus required /></Field>}
         </Form>
+        <p className="small muted" style={{ marginTop: 16 }}>Esqueceu a senha? Quem redefine é o administrador do seu provedor, em Usuários. Assinantes pedem ao provedor um novo acesso ao portal.</p>
         {demo && (
           <div className="demo-users">
             <b>Ambiente de demonstração.</b> Contas sintéticas, todas com a senha <code>demo1234</code>. Escolha uma para preencher:

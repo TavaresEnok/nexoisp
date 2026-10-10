@@ -116,6 +116,7 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--brand); }
 .kv dt { font-size: 13px; color: var(--muted); font-weight: 600; } .kv dd { margin: 1px 0 0; overflow-wrap: anywhere; }
 .five { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; } .five .card { margin: 0; } .five h3 { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
 pre.ev { background: #0f1b1f; color: #d7e6e4; padding: 11px; border-radius: 8px; overflow: auto; font-family: var(--mono); font-size: 13px; max-height: 260px; margin: 6px 0 0; }
+.next { display: flex; gap: 10px; align-items: baseline; padding: 10px 12px; margin-bottom: 12px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; font-weight: 600; }
 .steps { list-style: none; padding: 0; margin: 6px 0 0; } .steps li { padding: 4px 0; display: flex; gap: 10px; align-items: baseline; }
 .meter { height: 7px; border-radius: 99px; background: var(--line); overflow: hidden; min-width: 70px; } .meter i { display: block; height: 100%; background: var(--brand); border-radius: 99px; }
 .meter.warn i { background: var(--amber); } .meter.bad i { background: var(--red); }
@@ -134,7 +135,7 @@ pre.ev { background: #0f1b1f; color: #d7e6e4; padding: 11px; border-radius: 8px;
 .login .pitch .brand { color: #fff; } .login .pitch .brand span { color: #56d0c8; }
 .login .pitch .strands { position: absolute; z-index: 0; inset: auto 0 0 0; width: 100%; height: 40%; }
 .login .box { padding: 56px 48px; width: 100%; max-width: 460px; align-self: center; justify-self: center; }
-.login .box h2 { font-size: 24px; margin-bottom: 4px; } .login .box > p { color: var(--muted); margin: 0 0 20px; }
+.login .box h2 { font-size: 24px; margin-bottom: 4px; } .login .form footer button.primary { width: 100%; padding: 10px; font-size: 16px; } .login .box > p { color: var(--muted); margin: 0 0 20px; }
 .demo-users { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 14px; font-size: 13px; color: var(--muted); }
 .demo-users button { all: unset; box-sizing: border-box; cursor: pointer; display: flex; justify-content: space-between; gap: 12px; width: 100%; padding: 6px 8px; border-radius: 6px; }
 .demo-users button:hover { background: var(--panel-2); color: var(--ink); } .demo-users button span:first-child { font-family: var(--mono); color: var(--ink); }

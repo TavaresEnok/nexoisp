@@ -74,7 +74,7 @@ async function seedDemoBase(log: (m: string) => void) {
     await c.query(`insert into users (email, name, password_hash, role) values ('operador@nexoisp.demo','Operador SaaS (demo)',$1,'saas_operator')`, [pw]);
     const out: { id: string; slug: string }[] = [];
     for (const [name, slug] of [['Provedor Alfa (demo)', 'alfa'], ['Provedor Beta (demo)', 'beta']]) {
-      const t = (await c.query('insert into tenants (name, slug) values ($1,$2) returning id, slug', [name, slug])).rows[0];
+      const t = (await c.query(`insert into tenants (name, slug, modules) values ($1,$2,'{olt,ipam,field,ftth,crm,noc,notices}') returning id, slug`, [name, slug])).rows[0];   // demonstração mostra tudo
       for (const [role, label] of [['admin', 'Admin'], ['attendant', 'Atendimento'], ['finance', 'Financeiro'], ['noc', 'Técnico NOC']])
         await c.query('insert into users (tenant_id, email, name, password_hash, role) values ($1,$2,$3,$4,$5)',
           [t.id, `${role === 'attendant' ? 'atendimento' : role === 'finance' ? 'financeiro' : role}@${slug}.demo`, `${label} ${slug}`, pw, role]);

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { api, d, doc, money, speed, useLoad } from '../api';
-import { useMe } from '../App';
+import { has, useMe } from '../App';
 import { Badge, Brand, Card, Icon, KV, Modal, State } from '../ui';
 import { PortalTickets } from './Crm';
 import { InvoiceBadge } from './Finance';
@@ -68,11 +68,11 @@ export function Portal() {
               </table>
             </State>
           </Card>
-          <PortalTickets />
+          {has(me, 'crm') && <PortalTickets />}
           <Card title="Meus dados">
             <KV items={[['Nome', data.subscriber.name], ['CPF/CNPJ', doc(data.subscriber.document)], ['E-mail', data.subscriber.email], ['Telefone', data.subscriber.phone],
               ['Endereço', [data.subscriber.address_street, data.subscriber.address_number, data.subscriber.address_city].filter(Boolean).join(', ') || '—']]} />
-            <p className="small muted" style={{ marginBottom: 0 }}>Algo errado? Abra um chamado pedindo a correção.</p>
+            <p className="small muted" style={{ marginBottom: 0 }}>Algo errado? {has(me, 'crm') ? 'Abra um chamado pedindo a correção.' : 'Fale com o provedor para corrigir.'}</p>
           </Card>
         </>)}
       </State>

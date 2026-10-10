@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api, d, doc, dt, money, speed, useLoad, usePaged } from '../api';
-import { can, useMe } from '../App';
+import { can, has, useMe } from '../App';
 import { ActionButton, Badge, Card, Field, Form, KV, Modal, Page, Pager, State, Tabs } from '../ui';
 import { ContractFinance } from './Finance';
 import { OnuPanel } from './Olt';
@@ -81,7 +81,7 @@ export function ContractDetail() {
   const [tab, setTab] = useState('acesso');
   const w = can(me, 'contracts:write') && c?.status === 'active';
   const net = can(me, 'network:read');
-  const tabs = [...(net ? [{ id: 'acesso', label: 'Acesso' }] : []), { id: 'contrato', label: 'Contrato' }, ...(can(me, 'os:read') ? [{ id: 'os', label: 'Ordens de serviço' }] : []), { id: 'historico', label: 'Histórico', count: c?.history.length }];
+  const tabs = [...(net ? [{ id: 'acesso', label: 'Acesso' }] : []), { id: 'contrato', label: 'Contrato' }, ...(can(me, 'os:read') && has(me, 'field') ? [{ id: 'os', label: 'Ordens de serviço' }] : []), { id: 'historico', label: 'Histórico', count: c?.history.length }];
   const cur = tabs.some((t) => t.id === tab) ? tab : tabs[0].id;
   return (
     <Page title={c ? c.subscriber_name : 'Contrato'}
@@ -96,8 +96,8 @@ export function ContractDetail() {
           <Tabs tabs={tabs} value={cur} onChange={setTab} />
           {cur === 'acesso' && (<>
             <InfraPanel contractId={c.id} />
-            <ContractFinance contractId={c.id}>{(fin) => <ServicePanel contract={c} financial={fin} />}</ContractFinance>
-            <OnuPanel contract={c} />
+            <ContractFinance contractId={c.id}>{(fin, numbers) => <ServicePanel contract={c} financial={fin} fin={numbers} />}</ContractFinance>
+            {has(me, 'olt') && <OnuPanel contract={c} />}
           </>)}
           {cur === 'contrato' && (<>
             <Card title="Situação comercial">

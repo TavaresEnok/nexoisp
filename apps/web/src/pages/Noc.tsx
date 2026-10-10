@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ago, api, dt, useLoad } from '../api';
-import { can, useMe } from '../App';
+import { can, has, useMe } from '../App';
 import { Badge, Card, Field, Form, Meter, Modal, Page, State } from '../ui';
 
 const SEV: Record<string, [string, 'gray' | 'green' | 'red' | 'amber' | 'blue']> = { critical: ['Crítico', 'red'], warning: ['Atenção', 'amber'], info: ['Informação', 'blue'], ok: ['OK', 'green'] };
@@ -112,20 +112,21 @@ export function Diagnosis({ contractId, onClose }: { contractId: string; onClose
 /** Endereço IP fixo e porta da rede óptica do contrato (somente leitura; a edição fica nas telas de IPAM e FTTH). */
 export function InfraPanel({ contractId }: { contractId: string }) {
   const { me } = useMe();
-  const ips = useLoad<any[]>(can(me, 'network:read') ? `/contracts/${contractId}/ips` : null);
-  const ftth = useLoad<any>(can(me, 'network:read') ? `/contracts/${contractId}/ftth` : null);
-  const v6 = useLoad<any>(can(me, 'network:read') ? `/contracts/${contractId}/ipv6` : null);
+  const net = can(me, 'network:read');
+  const ips = useLoad<any[]>(net && has(me, 'ipam') ? `/contracts/${contractId}/ips` : null);
+  const ftth = useLoad<any>(net && has(me, 'ftth') ? `/contracts/${contractId}/ftth` : null);
+  const v6 = useLoad<any>(net && has(me, 'ipam') ? `/contracts/${contractId}/ipv6` : null);
   const [diag, setDiag] = useState(false);
-  if (!can(me, 'network:read')) return null;
+  if (!net || !['ipam', 'ftth', 'noc'].some((m) => has(me, m))) return null;
   const drop = ftth.data?.drop;
   return (
-    <Card title="Infraestrutura" actions={<button className="primary" onClick={() => setDiag(true)}>Diagnosticar acesso</button>}>
+    <Card title="Infraestrutura" actions={has(me, 'noc') && <button className="primary" onClick={() => setDiag(true)}>Diagnosticar acesso</button>}>
       <div className="grid2">
-        <div><div className="small muted" style={{ fontWeight: 600 }}>Endereço IP fixo</div>
+        {has(me, 'ipam') && <div><div className="small muted" style={{ fontWeight: 600 }}>Endereço IP fixo</div>
           {ips.data?.length ? ips.data.map((a) => <div key={a.id}><span className="mono">{a.address}</span> <span className="small muted">{a.pool_name}</span></div>) : <span className="muted">nenhum (endereço dinâmico) — <Link to="/ipam">gerenciar</Link></span>}
-          {v6.data?.delegation && <div><span className="mono">{v6.data.delegation.prefix}</span> <span className="small muted">prefixo IPv6 reservado</span></div>}</div>
-        <div><div className="small muted" style={{ fontWeight: 600 }}>Rede óptica</div>
-          {drop ? <span>{drop.box_name} · porta {drop.port}{drop.device_name && <span className="small muted"> · {drop.device_name} PON {drop.pon_port ?? '—'}</span>}</span> : <span className="muted">sem porta registrada — <Link to="/ftth">gerenciar</Link></span>}</div>
+          {v6.data?.delegation && <div><span className="mono">{v6.data.delegation.prefix}</span> <span className="small muted">prefixo IPv6 reservado</span></div>}</div>}
+        {has(me, 'ftth') && <div><div className="small muted" style={{ fontWeight: 600 }}>Rede óptica</div>
+          {drop ? <span>{drop.box_name} · porta {drop.port}{drop.device_name && <span className="small muted"> · {drop.device_name} PON {drop.pon_port ?? '—'}</span>}</span> : <span className="muted">sem porta registrada — <Link to="/ftth">gerenciar</Link></span>}</div>}
       </div>
       {diag && <Diagnosis contractId={contractId} onClose={() => setDiag(false)} />}
     </Card>

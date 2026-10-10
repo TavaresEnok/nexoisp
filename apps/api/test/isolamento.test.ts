@@ -108,4 +108,27 @@ describe('isolamento entre provedores', () => {
     expect((await call(novo, 'GET', '/api/me')).status).toBe(401);
     expect((await call(null, 'POST', '/api/auth/login', { email: `admin@${slug}.demo`, password: 'demo1234' })).status).toBe(401);
   });
+  it('módulos por provedor: provedor novo nasce só com o núcleo; o servidor recusa o que não foi liberado', async () => {
+    const op = await login('operador@nexoisp.demo');
+    const slug = `mod-${Date.now()}`;
+    const t = (await call(op, 'POST', '/api/tenants', { name: 'Provedor Módulos', slug, admin_name: 'Admin', admin_email: `admin@${slug}.demo`, admin_password: 'demo1234' })).body;
+    const adm = await login(`admin@${slug}.demo`);
+    expect((await call(adm, 'GET', '/api/me')).body.modules).toEqual([]);
+    for (const url of ['/api/subscribers', '/api/plans', '/api/contracts', '/api/invoices', '/api/agents', '/api/devices', '/api/operations', '/api/audit', '/api/today'])
+      expect((await call(adm, 'GET', url)).status, url).toBe(200);                                    // núcleo sempre disponível
+    for (const url of ['/api/onus', '/api/olt/discoveries', '/api/ipam/pools', '/api/cgnat/plans', '/api/work-orders', '/api/stock/items', '/api/ftth/boxes',
+      '/api/leads', '/api/tickets', '/api/crm/report?from=2026-01-01&to=2026-01-02', '/api/noc/overview', '/api/notifications']) {
+      const r = await call(adm, 'GET', url);
+      expect([r.status, r.body.code], url).toEqual([403, 'module_disabled']);
+    }
+    expect((await call(adm, 'POST', '/api/devices', { name: 'olt', driver: 'olt_huawei', host: '192.0.2.1', api_port: 22, credential_ref: 'x' })).body.code).toBe('module_disabled');
+    expect((await call(adm, 'POST', '/api/devices', { name: 'nas', driver: 'mikrotik_radius', host: '192.0.2.2', api_port: 8729, credential_ref: 'x' })).status).toBe(200);
+    expect((await call(adm, 'PATCH', `/api/tenants/${t.id}`, { modules: ['olt'] })).status).toBe(403);   // o próprio provedor não se libera
+    expect((await call(op, 'PATCH', `/api/tenants/${t.id}`, { modules: ['inexistente'] })).status).toBe(400);
+    expect((await call(op, 'PATCH', `/api/tenants/${t.id}`, { modules: ['crm', 'crm', 'field'] })).body.modules).toEqual(['crm', 'field']);
+    expect((await call(adm, 'GET', '/api/tickets')).status).toBe(200);
+    expect((await call(adm, 'GET', '/api/work-orders')).status).toBe(200);
+    expect((await call(adm, 'GET', '/api/onus')).status).toBe(403);
+    expect((await call(await login('admin@alfa.demo'), 'GET', '/api/me')).body.modules).toHaveLength(7);   // demonstração mostra tudo
+  });
 });

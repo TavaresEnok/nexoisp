@@ -21,6 +21,23 @@ export const PERMISSIONS: Record<Role, string[]> = {
   subscriber: ['portal:self'],
 };
 
+/**
+ * Módulos adicionais, liberados por provedor pelo operador do SaaS. A rota decide o módulo; sem ele, o servidor recusa
+ * (não basta esconder o menu). O núcleo da operação não aparece aqui: está sempre disponível.
+ */
+export const MODULES = ['olt', 'ipam', 'field', 'ftth', 'crm', 'noc', 'notices'] as const;
+export type Module = (typeof MODULES)[number];
+const MODULE_ROUTES: [Module, RegExp][] = [
+  ['olt', /^\/api\/(olt\/|onus(\/|$)|contracts\/[^/]+\/onu$)/],
+  ['ipam', /^\/api\/(ipam\/|cgnat\/|contracts\/[^/]+\/(ips|ipv6)$)/],
+  ['field', /^\/api\/(work-orders(\/|$)|stock\/)/],
+  ['ftth', /^\/api\/(ftth\/|contracts\/[^/]+\/ftth$)/],
+  ['crm', /^\/api\/(leads(\/|$)|tickets(\/|$)|crm\/|portal\/tickets(\/|$))/],
+  ['noc', /^\/api\/(noc\/|contracts\/[^/]+\/diagnosis$)/],
+  ['notices', /^\/api\/notifications(\/|$)/],
+];
+export const moduleOf = (url: string): Module | null => MODULE_ROUTES.find(([, re]) => re.test(url.split('?')[0]))?.[0] ?? null;
+
 export class HttpError extends Error {
   constructor(public status: number, message: string, public code?: string) {
     super(message);
@@ -55,6 +72,8 @@ export interface Ctx {
   scope: DbScope;
   /** conta administrativa obrigada a ter MFA e ainda sem configurar */
   mfaPending: boolean;
+  /** módulos adicionais liberados para o provedor da sessão */
+  modules: string[];
 }
 declare module 'fastify' {
   interface FastifyRequest {
@@ -89,7 +108,11 @@ export async function loadCtx(req: FastifyRequest): Promise<Ctx> {
   const isOp = s.role === 'saas_operator';
   const support = isOp && !!s.support_tenant_id;
   const tenantId: string | null = isOp ? s.support_tenant_id : s.tenant_id;
+  const modules: string[] = tenantId
+    ? (await withScope({ tenantId, operator: false }, async (c) => (await c.query('select modules from tenants where id = $1', [tenantId])).rows[0]))?.modules ?? []
+    : [];
   return {
+    modules,
     userId: s.user_id, name: s.name, email: s.email, role: s.role, tenantId, support,
     subscriberId: s.subscriber_id, tokenHash,
     mfaPending: mfaRequiredFor(s.role) && !s.mfa_enabled,
@@ -113,6 +136,8 @@ export function guard(perm?: string, opts: { allowMfaPending?: boolean } = {}) {
     }
     if (perm && perm !== 'tenants:manage' && perm !== 'portal:self' && !req.ctx.tenantId)
       throw new HttpError(403, 'selecione um provedor (acesso de suporte) para esta ação');
+    const mod = moduleOf(req.url);
+    if (mod && !req.ctx.modules.includes(mod)) throw new HttpError(403, 'este recurso não está liberado para o provedor', 'module_disabled');
   };
 }
 

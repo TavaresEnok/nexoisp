@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { authenticator } from 'otplib';
 import { z } from 'zod';
-import { audit, guard, hashPassword, HttpError, newToken, sessionCookie, sha256, verifyPassword } from '../auth.js';
+import { audit, guard, hashPassword, HttpError, newToken, sessionCookie, sha256, verifyPassword, MODULES } from '../auth.js';
 import { noScope, paged, withScope } from '../db.js';
 import { decryptSecret, encryptSecret } from '../network/crypto.js';
 import { zPage, zUuid } from '../validators.js';
@@ -62,7 +62,7 @@ export async function identityRoutes(app: FastifyInstance) {
       ? await withScope(x.scope, async (c) => (await c.query('select id, name, slug from tenants where id = $1', [x.tenantId])).rows[0])
       : null;
     const self = await withScope(noScope, async (c) => (await c.query('select mfa_enabled from user_self_get($1)', [x.userId])).rows[0]);
-    return { id: x.userId, name: x.name, email: x.email, role: x.role, perms: x.perms, support: x.support, tenant,
+    return { id: x.userId, name: x.name, email: x.email, role: x.role, perms: x.perms, support: x.support, tenant, modules: x.modules,
       demo: process.env.NEXO_DEMO_MODE === '1', mfa_enabled: self.mfa_enabled, mfa_pending: x.mfaPending };
   });
 
@@ -145,10 +145,11 @@ export async function identityRoutes(app: FastifyInstance) {
   app.patch('/api/tenants/:id', { preHandler: guard('tenants:manage') }, async (req) => {
     if (req.ctx.support) throw new HttpError(400, 'saia do acesso de suporte para gerenciar provedores');
     const id = zUuid.parse((req.params as any).id);
-    const b = z.object({ name: z.string().trim().min(2).optional(), status: z.enum(['active', 'suspended']).optional() }).parse(req.body);
+    const b = z.object({ name: z.string().trim().min(2).optional(), status: z.enum(['active', 'suspended']).optional(),
+      modules: z.array(z.enum(MODULES)).max(MODULES.length).transform((m) => [...new Set(m)]).optional() }).parse(req.body);
     return withScope(req.ctx.scope, async (c) => {
-      const t = (await c.query('update tenants set name = coalesce($2,name), status = coalesce($3,status) where id = $1 returning *',
-        [id, b.name ?? null, b.status ?? null])).rows[0];
+      const t = (await c.query('update tenants set name = coalesce($2,name), status = coalesce($3,status), modules = coalesce($4::text[], modules) where id = $1 returning *',
+        [id, b.name ?? null, b.status ?? null, b.modules ?? null])).rows[0];
       if (!t) throw new HttpError(404, 'provedor não encontrado');
       await c.query(`insert into audit_events (tenant_id, actor_type, actor_id, action, entity_type, entity_id, detail) values ($1::uuid,'user',$2,'tenant.update','tenant',$1::text,$3)`,
         [id, req.ctx.userId, JSON.stringify(b)]);

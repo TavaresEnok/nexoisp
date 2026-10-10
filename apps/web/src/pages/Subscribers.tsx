@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api, d, doc, money, speed, useLoad, usePaged } from '../api';
-import { can, useMe } from '../App';
+import { can, has, useMe } from '../App';
 import { Badge, Card, Field, Form, KV, Modal, Page, Pager, State } from '../ui';
 import { ContractForm } from './Contracts';
 import { TicketList } from './Crm';
@@ -128,8 +128,8 @@ export function SubscriberDetail() {
               </table>
             </State>
           </Card>
-          {can(me, 'crm:read') && <TicketList subscriberId={s.id} />}
-          {can(me, 'os:read') && <WorkOrderList subscriberId={s.id} />}
+          {can(me, 'crm:read') && has(me, 'crm') && <TicketList subscriberId={s.id} />}
+          {can(me, 'os:read') && has(me, 'field') && <WorkOrderList subscriberId={s.id} />}
           {modal === 'edit' && (
             <Modal title="Editar assinante" onClose={() => setModal(null)}>
               <SubscriberForm initial={s} onCancel={() => setModal(null)} onDone={() => { setModal(null); reload(); }} />
