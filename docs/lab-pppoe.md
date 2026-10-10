@@ -117,13 +117,20 @@ As contas locais do cenário continuaram autenticando sem o RADIUS; a senha do `
 | + | API com TLS | ✅ Operações pela `api-ssl` (8729) com a CA exportada do nó; CA errada recusada (`CERTIFICATE_VERIFY_FAILED`) |
 | + | Vários clientes | ✅ 4 contas pelo RADIUS em 4 VLANs, simultâneas com a conta local do cenário; suspender uma derrubou só ela |
 | + | IP fixo | ✅ `Framed-IP-Address` gravado, sessão derrubada, reconexão com 100.64.0.5 (antes 100.64.1.253); ao liberar, mantém até reconectar e volta ao dinâmico |
+| + | Segunda instância do RADIUS (`trio.sh radius-ha`) | ✅ Segunda instância sobre o mesmo banco (porta 1822) cadastrada no nó; principal parada; sessão derrubada; cliente reautenticou em menos de 25 s |
+| + | CGNAT determinístico (`trio.sh cgnat 2 3 4 5`) | ✅ 517 regras geradas pelo painel aplicadas pela API **antes** do NAT que o nó já tinha (a configuração do provedor tem CGNAT próprio para o mesmo bloco); 4 clientes com IP fixo, TCP e UDP: 19 traduções conferidas, 0 divergente; regras removidas ao final (NAT do nó voltou às 524 regras) |
 
 Diferenças em relação à seção 3, para não ler mais do que foi feito:
 
 - **Casos 9 a 11:** o concentrador ficou inacessível soltando a placa dele da ponte no servidor, não pausando a VM (os nós do cenário não podem ser parados).
   O erro observado foi `No route to host`, não tempo esgotado: o caso “NAS travado que aceita a conexão e não responde” **não** foi exercitado aqui.
 - **Velocidade:** só a existência e o valor das filas foram conferidos; a licença gratuita do CHR impede medir tráfego.
-- **Não repetidos aqui:** MS-CHAPv2 com hash NT, perda do site e “Reaplicar”, RADIUS local parado, segunda instância do RADIUS, atualização do agente, CGNAT.
+- **Não repetidos aqui:** MS-CHAPv2 com hash NT, perda do site e “Reaplicar”, RADIUS local parado sem segunda instância, atualização do agente.
+- **CGNAT:** as regras foram aplicadas pela API, não importando o `.rsc` pelo terminal; a ordem em relação ao NAT existente foi resolvida pelo script de teste
+  (`place-before`), não pelo arquivo gerado — quem importar o `.rsc` num roteador que já tem NAT para o mesmo bloco precisa posicionar o desvio à mão.
+  O RouterOS 7.17 devolve endereço e porta juntos na tabela de conexões (`ip:porta`); `infra/lab/cgnat_check.py` passou a aceitar os dois formatos.
+- **Aviso do FreeRADIUS:** o RouterOS 7.17 envia `Message-Authenticator` e o FreeRADIUS recomenda exigir o atributo (`require_message_authenticator`, proteção contra BlastRADIUS).
+  `infra/site/radius/clients.conf` continua com `no`; ligar depende da versão do RouterOS do piloto e ficou como decisão pendente.
 - **Achado do cenário:** dois clientes PPPoE com o mesmo MAC em VLANs diferentes derrubam um ao outro no concentrador (`one-session-per-host`);
   por isso os clientes de teste usam MAC próprio. Não é defeito do NexoISP, mas vale lembrar ao montar bancada.
 

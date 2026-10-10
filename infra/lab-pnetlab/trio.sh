@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Laboratório PPPoE sobre o cenário Trio do PNETLab (substitui infra/lab, que usava um CHR em container).
 # ESCREVE em nós do cenário: só rodar com autorização do dono do laboratório. Tudo o que cria leva a marca "nexo-lab".
-#   trio.sh up | down | status | nas '<comando RouterOS>' | cli '<comando RouterOS>' | client up <n> <usuario> <senha> | client down <n> | ros '<caminho>'
+#   trio.sh up | down | status | radius-ha [usuario] | cgnat <n>... | nas '<comando RouterOS>' | cli '<comando RouterOS>' | client up <n> <usuario> <senha> | client down <n> | ros '<caminho>'
 # Variáveis: NEXO_DOCKER (ex.: "sudo docker"), NEXO_ROOT (checkout com .env e infra/certs; padrão: este repositório).
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"; ROOT="${NEXO_ROOT:-$(cd "$HERE/../.." && pwd)}"
@@ -45,7 +45,7 @@ case "${1:-}" in
       if [ -n "$AID" ]; then A=$(curl -s -X PATCH $B/agents/$AID -H "$H" -H "$J" -d '{"rotate_token":true,"status":"active","reset_certificate":true}')
       else A=$(curl -s $B/agents -H "$H" -H "$J" -d "{\"name\":\"$AGENT_NAME\"}"); AID=$(echo "$A" | jq -r .id); fi
       { echo "NEXO_AGENT_ID=$AID"; echo "NEXO_AGENT_TOKEN=$(echo "$A" | jq -r .token)"; echo "RADIUS_NAS_SECRET=$(openssl rand -hex 12)"
-        echo "NAS_AGENT_PASSWORD=$(openssl rand -hex 12)"; echo "NAS_IP=$NAS_IP"; echo "STATE=$STATE"; } > "$STATE/.env"; chmod 600 "$STATE/.env"
+        echo "NAS_AGENT_PASSWORD=$(openssl rand -hex 12)"; echo "NAS_IP=$NAS_IP"; echo "HOST_IP=$HOST_IP"; echo "STATE=$STATE"; } > "$STATE/.env"; chmod 600 "$STATE/.env"
       "$ROOT/scripts/dev-certs.sh" agent "$AID" "$STATE/certs" >/dev/null; chmod 644 "$STATE/certs/agent.key"
       [ -n "$(curl -s $B/devices -H "$H" | jq -r --arg n "$DEVICE_NAME" '.[] | select(.name==$n) | .id')" ] || \
         curl -s $B/devices -H "$H" -H "$J" -d "{\"name\":\"$DEVICE_NAME\",\"driver\":\"mikrotik_radius\",\"host\":\"$NAS_IP\",\"api_port\":8729,\"credential_ref\":\"$CRED\",\"agent_id\":\"$AID\"}" | jq -c '{id,name}'
@@ -61,8 +61,59 @@ case "${1:-}" in
     py nexoisp-agent python /setup_nas.py down || echo "AVISO: concentrador não foi limpo pela API; confira com: trio.sh nas '/radius print'"
     cli '/interface pppoe-client remove [find comment="nexo-lab"]' '/interface macvlan remove [find comment="nexo-lab"]' '/interface vlan remove [find comment="nexo-lab"]' >/dev/null
     nas '/ip address remove [find comment="nexo-lab"]' >/dev/null
-    $C down; sudo ip link set $NAS_TAP nomaster; sudo ip link del $BR
+    $C --profile ha down; sudo ip link set $NAS_TAP nomaster; sudo ip link del $BR
     echo "desfeito. O estado local ficou em $STATE (apague para recomeçar do zero); antes-nexo.rsc continua no concentrador." ;;
+  radius-ha)  # 2ª instância do RADIUS sobre o mesmo banco: para a principal, derruba a sessão e o cliente precisa reautenticar pela segunda
+    set -a; . "$STATE/.env"; set +a; U="${2:-nexo-w2}"
+    $C --profile ha up -d radius2 >/dev/null 2>&1; sleep 4
+    rpy() { $D run --rm --network host --security-opt seccomp=unconfined -v "$STATE/config:/c:ro" -e P="$NAS_AGENT_PASSWORD" -e H="$NAS_IP" -e R="$HOST_IP" -e SECRET="$RADIUS_NAS_SECRET" nexoisp-agent python -c "
+import os,sys,ssl
+from librouteros import connect
+ctx=ssl.create_default_context(cafile='/c/routeros-ca.crt'); h=os.environ['H']
+api=connect(host=h,username='nexo-agent',password=os.environ['P'],port=8729,timeout=10,ssl_wrapper=lambda s: ctx.wrap_socket(s, server_hostname=h))
+m=sys.argv[1]
+if m=='add':
+    r=api.path('radius')
+    if not [x for x in r if str(x.get('authentication-port'))=='1822']:
+        r.add(service='ppp', address=os.environ['R'], secret=os.environ['SECRET'], timeout='3s', comment='nexo-lab', **{'authentication-port': 1822, 'accounting-port': 1823, 'src-address': h})
+    print('servidores RADIUS no NAS:', [(x.get('address'), x.get('authentication-port')) for x in r])
+elif m=='kick':
+    p=api.path('ppp','active'); ids=[x['.id'] for x in p if x['name']==sys.argv[2]]
+    if ids: p.remove(*ids)
+    print('sessão derrubada:', sys.argv[2], len(ids))
+elif m=='who':
+    print([(x['name'], x['address'], x['uptime']) for x in api.path('ppp','active') if x['name']==sys.argv[2]])
+" "$@"; }
+    rpy add
+    $D stop nexo-trio-radius-1 >/dev/null; echo "RADIUS principal PARADO"
+    rpy kick "$U"; sleep 25; W=$(rpy who "$U"); echo "com a principal parada, sessão de $U: $W"
+    $D start nexo-trio-radius-1 >/dev/null; echo "RADIUS principal religado"
+    case "$W" in *"$U"*) echo "ok: o cliente reautenticou pela segunda instância" ;; *) echo "FALHA: o cliente não reautenticou"; exit 1 ;; esac ;;
+  cgnat)  # CGNAT determinístico no concentrador do cenário: aplica as regras geradas ANTES do NAT que o nó já tem, passa tráfego dos clientes
+          # nexo-c<n> (precisam ter IP fixo dentro do bloco privado do plano), confere a tradução e remove as regras.
+    set -a; . "$STATE/.env"; set +a; shift
+    H="authorization: Bearer $(login)"; T=$(mktemp -d)
+    PLAN=$(curl -s $B/cgnat/plans -H "$H" | jq -r '.[] | select(.name=="CGNAT lab" and .retired_at==null) | .id')
+    [ -n "$PLAN" ] || { echo "crie o plano de CGNAT \"CGNAT lab\" no painel (./nexo lab cgnat fazia isso no laboratório antigo)"; exit 1; }
+    curl -s "$B/cgnat/plans/$PLAN/script" -H "$H" > "$T/cgnat.rsc"; chmod -R a+rX "$T"; TAG="nexo-cgnat:${PLAN:0:8}"
+    ros() { $D run --rm --network host --security-opt seccomp=unconfined -v "$STATE/config:/c:ro" -v "$HERE/../lab/cgnat_check.py:/cgnat_check.py:ro" -v "$T:/t:ro" \
+      -e P="$NAS_AGENT_PASSWORD" -e H="$NAS_IP" -e CGNAT_FIRST=1 nexoisp-agent python /cgnat_check.py "$@"; }
+    ros remove "$TAG" >/dev/null; ros apply /t/cgnat.rsc; sleep 2
+    DP=$((20000 + RANDOM % 9999))   # porta de destino única: só os fluxos desta execução entram na conferência
+    for n in "$@"; do
+      cli '/ip route remove [find comment="nexo-lab-cgnat"]' "/ip route add dst-address=198.18.0.1/32 gateway=nexo-c$n comment=nexo-lab-cgnat" \
+          ":execute {/tool fetch url=\"http://198.18.0.1:$DP/\" output=none}" ":execute {:resolve nexo.test server=198.18.0.1 server-port=$DP}" ':delay 3s' >/dev/null
+    done
+    cli '/ip route remove [find comment="nexo-lab-cgnat"]' >/dev/null
+    ros conns "$DP" > "$T/conns"; OK=0; BAD=0
+    while read -r c; do
+      SRC=$(echo "$c" | jq -r '."src-address"'); NIP=$(echo "$c" | jq -r '."reply-dst-address"'); PORT=$(echo "$c" | jq -r '."reply-dst-port"'); PROTO=$(echo "$c" | jq -r .protocol)
+      E=$(curl -s "$B/cgnat/plans/$PLAN/lookup?private_ip=$SRC" -H "$H"); EIP=$(echo "$E" | jq -r .public_ip); LO=$(echo "$E" | jq -r .port_start); HI=$(echo "$E" | jq -r .port_end)
+      if [ "$NIP" = "$EIP" ] && [ "$PORT" -ge "$LO" ] && [ "$PORT" -le "$HI" ]; then OK=$((OK+1)); R=ok; else BAD=$((BAD+1)); R=DIVERGENTE; fi
+      echo "$R  $PROTO $SRC -> $NIP:$PORT  (calculado: $EIP:$LO-$HI)"
+    done < "$T/conns"
+    ros remove "$TAG"; rm -rf "$T"
+    echo "traduções conferidas: $OK ok, $BAD divergente(s)"; [ "$BAD" = 0 ] && [ "$OK" -gt 0 ] ;;
   status)
     ip -br addr show $BR 2>/dev/null || echo "ponte $BR ausente"; $C ps 2>/dev/null || true
     nas '/ppp aaa print' '/radius print' '/ppp active print' ;;

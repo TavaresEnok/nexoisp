@@ -34,6 +34,7 @@ case "${1:-help}" in
   lab-up)    infra/lab/lab.sh up ;;
   lab-down)  infra/lab/lab.sh down ;;
   lab)       shift; infra/lab/lab.sh "$@" ;;
+  trio)      shift; infra/lab-pnetlab/trio.sh "$@" ;;   # laboratório sobre o cenário do PNETLab (escreve em nós do cenário)
   homolog)   shift; infra/homolog/homolog.sh "$@" ;;
   demo-tool) shift; $COMPOSE exec agent-demo python -m nexo_agent.demo_tool "$@" ;;
   npm)       shift; if [ -n "$NEXO_TOOL_NET" ]; then docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp -e npm_config_cache=/tmp/.npm --network "$NEXO_TOOL_NET" -v "$PWD":/app -w /app "$NODE_IMG" npm "$@"; else nodebox "$NODE_IMG" npm "$@"; fi ;;
@@ -58,5 +59,5 @@ case "${1:-help}" in
              export DATABASE_URL_OWNER="postgres://nexo_owner:${POSTGRES_PASSWORD}@db:5432/nexo_test"
              export DATABASE_URL_APP="postgres://nexo_app:${NEXO_APP_DB_PASSWORD}@db:5432/nexo_test"
              export NEXO_LOAD=1; nodebox -e NEXO_LOAD "$NODE_IMG" npm -w apps/api test ;;
-  *) echo "uso: ./nexo {homolog up|preflight|down|backup|restore-check <arq>|restore <arq> --yes|lab-radius|lab-up|lab-down|lab client ...|init|agent-cert <id>|agent-test|demo-tool ...|install|typecheck|build|up|down|logs|ps|test|npm ...|compose ...}" ;;
+  *) echo "uso: ./nexo {homolog up|preflight|down|backup|restore-check <arq>|restore <arq> --yes|lab-radius|lab-up|lab-down|lab client ...|trio up|down|status|...|init|agent-cert <id>|agent-test|demo-tool ...|install|typecheck|build|up|down|logs|ps|test|npm ...|compose ...}" ;;
 esac

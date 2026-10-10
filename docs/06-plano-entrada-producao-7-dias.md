@@ -206,5 +206,7 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   (resultado por caso na seção 5 daquele documento). Nenhum nó foi parado ou reiniciado.
 - **Classificação:** validado no cenário do PNETLab. **Não** é homologação em equipamento físico; o item 0.3 do doc 05 continua aberto. O proprietário informou que vai comprar um MikroTik.
 - **Ficou de fora, com motivo:** OLT (o cenário não tem OLT de fabricante); medição de velocidade (licença gratuita do CHR); NAS travado sem resposta (os nós não podem ser pausados).
-- **Próxima ação:** segunda instância do RADIUS e CGNAT no cenário; repetir o roteiro no equipamento físico quando chegar.
+- **Também validado no cenário:** segunda instância do RADIUS (cliente reautentica com a principal parada) e CGNAT determinístico (19 traduções conferidas, TCP e UDP,
+  com as regras colocadas antes do NAT que o nó já tinha e removidas ao final). CGNAT continua fora do escopo desta semana (item 2); o teste só atualiza o item 1.2 do doc 05.
+- **Próxima ação:** repetir o roteiro no equipamento físico quando chegar; decidir `require_message_authenticator` no RADIUS conforme a versão do RouterOS do piloto.
 - **Impedimentos externos:** os mesmos da tabela de 10/10 (provedor piloto, gateway, MK-Auth, servidor de produção, política de cobrança e fiscal). Data-alvo inalterada e condicionada a eles.

@@ -12,6 +12,15 @@ services:
     image: nexoisp-site-radius   # montada por trio.sh (o build do Docker 20.10.9 não aceita seccomp)
     environment: { RADIUS_NAS_SECRET: "${RADIUS_NAS_SECRET}", RADIUS_NAS_NET: "${NAS_IP}/32" }
     volumes: ["${STATE}/data:/data"]
+  # Segunda instância (perfil ha) sobre o MESMO banco. Na rede do host não dá para remapear portas: -i/-p fazem o
+  # FreeRADIUS escutar só em HOST_IP:1822 (contabilização em 1823). Cobre a queda do processo, não a perda do host.
+  radius2:
+    <<: *common
+    profiles: [ha]
+    image: nexoisp-site-radius
+    command: ["freeradius", "-f", "-l", "stdout", "-i", "${HOST_IP}", "-p", "1822"]
+    environment: { RADIUS_NAS_SECRET: "${RADIUS_NAS_SECRET}", RADIUS_NAS_NET: "${NAS_IP}/32", RADIUS_SECONDARY: "1" }
+    volumes: ["${STATE}/data:/data"]
   agent:
     <<: *common
     image: nexoisp-agent
