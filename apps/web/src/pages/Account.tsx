@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { api } from '../api';
 import { useMe } from '../App';
-import { Badge, Card, Field, Form, Page } from '../ui';
+import { Badge, Card, Field, Form, Page, toastError } from '../ui';
 
 export function Account() {
   const { me, reload } = useMe();
@@ -16,7 +16,7 @@ export function Account() {
       <Card title={<>Verificação em duas etapas {me.mfa_enabled ? <Badge tone="green">ativa</Badge> : <Badge tone="amber">inativa</Badge>}</>}>
         {!me.mfa_enabled && !setup && (<>
           <p className="small muted" style={{ marginTop: 0 }}>Use um aplicativo autenticador (TOTP). Recomendado para todos e obrigatório para administradores no piloto com dados reais.</p>
-          <button className="primary" onClick={async () => { try { setSetup(await api('/me/mfa/setup', { method: 'POST' })); } catch (e: any) { alert(e.message); } }}>Configurar</button>
+          <button className="primary" onClick={async () => { try { setSetup(await api('/me/mfa/setup', { method: 'POST' })); } catch (e: any) { toastError(e); } }}>Configurar</button>
         </>)}
         {!me.mfa_enabled && setup && (
           <Form submit="Ativar" onSubmit={async () => { await api('/me/mfa/enable', { body: { code } }); setSetup(null); setCode(''); await reload(); }}>

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { Navigate, NavLink, Route, Routes, useNavigate } from 'react-router-dom';
+import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { api } from './api';
 import { Account } from './pages/Account';
 import { Audit } from './pages/Audit';
@@ -20,7 +20,7 @@ import { Portal } from './pages/Portal';
 import { SubscriberDetail, Subscribers } from './pages/Subscribers';
 import { Tenants } from './pages/Tenants';
 import { Users } from './pages/Users';
-import { ActionButton } from './ui';
+import { ActionButton, Brand, Icon } from './ui';
 
 export interface Me {
   id: string; name: string; email: string; role: string; perms: string[]; support: boolean; demo: boolean; mfa_enabled: boolean; mfa_pending: boolean;
@@ -34,10 +34,36 @@ const ROLE_LABEL: Record<string, string> = {
   saas_operator: 'Operador do SaaS', admin: 'Administrador', attendant: 'Atendimento', finance: 'Financeiro', noc: 'Técnico/NOC', subscriber: 'Assinante',
 };
 
+/** Menu por área. A cor de cada área segue o código de cores da fibra óptica (ver styles.css). */
+const NAV: { id: string; label: string; items: { to: string; label: string; icon: string; perm: string }[] }[] = [
+  { id: 'inicio', label: '', items: [{ to: '/', label: 'Início', icon: 'home', perm: 'subscribers:read' }] },
+  { id: 'cadastro', label: 'Cadastro', items: [
+    { to: '/assinantes', label: 'Assinantes', icon: 'users', perm: 'subscribers:read' }, { to: '/planos', label: 'Planos', icon: 'gauge', perm: 'plans:read' },
+    { to: '/contratos', label: 'Contratos', icon: 'doc', perm: 'contracts:read' }] },
+  { id: 'atendimento', label: 'Atendimento', items: [
+    { to: '/atendimentos', label: 'Atendimentos', icon: 'chat', perm: 'crm:read' }, { to: '/prospectos', label: 'Prospectos', icon: 'funnel', perm: 'crm:read' },
+    { to: '/meu-trabalho', label: 'Meu trabalho', icon: 'phone', perm: 'os:write' }, { to: '/ordens-servico', label: 'Ordens de serviço', icon: 'wrench', perm: 'os:read' },
+    { to: '/estoque', label: 'Estoque', icon: 'box', perm: 'stock:read' }, { to: '/relatorios-atendimento', label: 'Relatórios', icon: 'chart', perm: 'crm:read' }] },
+  { id: 'financeiro', label: 'Financeiro', items: [
+    { to: '/faturas', label: 'Faturas', icon: 'receipt', perm: 'finance:read' }, { to: '/conciliacao', label: 'Conciliação', icon: 'scale', perm: 'finance:read' },
+    { to: '/politica-cobranca', label: 'Política de cobrança', icon: 'sliders', perm: 'finance:read' }] },
+  { id: 'rede', label: 'Rede', items: [
+    { to: '/noc', label: 'NOC', icon: 'pulse', perm: 'network:read' }, { to: '/rede', label: 'Agentes e equipamentos', icon: 'server', perm: 'network:read' },
+    { to: '/onus', label: 'ONUs', icon: 'onu', perm: 'network:read' }, { to: '/ftth', label: 'Rede óptica', icon: 'fiber', perm: 'network:read' },
+    { to: '/ipam', label: 'Endereços IP e CGNAT', icon: 'ip', perm: 'network:read' }, { to: '/operacoes', label: 'Operações', icon: 'list', perm: 'network:read' }] },
+  { id: 'admin', label: 'Administração', items: [
+    { to: '/usuarios', label: 'Usuários', icon: 'user', perm: 'users:manage' }, { to: '/avisos', label: 'Avisos', icon: 'bell', perm: 'settings:manage' },
+    { to: '/importacao', label: 'Importação', icon: 'upload', perm: 'import:run' }, { to: '/auditoria', label: 'Auditoria', icon: 'shield', perm: 'audit:read' }] },
+];
+
 export function App() {
   const [me, setMe] = useState<Me | null | undefined>(undefined);
   const nav = useNavigate();
+  const loc = useLocation();
   const [menu, setMenu] = useState(false);   // no celular o menu abre e fecha
+  const [find, setFind] = useState('');
+  const [closed, setClosed] = useState<Record<string, boolean>>(() => { try { return JSON.parse(localStorage.getItem('nexo_nav') ?? '{}'); } catch { return {}; } });
+  const [theme, setTheme] = useState(document.documentElement.dataset.theme);
   const reload = async () => {
     try {
       setMe(await api<Me>('/me'));
@@ -64,54 +90,41 @@ export function App() {
   };
   if (me.role === 'subscriber') return <MeCtx.Provider value={{ me, reload }}><Portal /></MeCtx.Provider>;
   const inTenant = !!me.tenant && !me.mfa_pending;
-  const link = (to: string, label: string, perm?: string) =>
-    (!perm || can(me, perm)) && <NavLink to={to} end={to === '/'}>{label}</NavLink>;
+  const groups = NAV.map((g) => ({ ...g, items: g.items.filter((i) => can(me, i.perm) && (!find || i.label.toLowerCase().includes(find.toLowerCase()))) })).filter((g) => g.items.length);
+  const area = NAV.find((g) => g.items.some((i) => (i.to === '/' ? loc.pathname === '/' : loc.pathname.startsWith(i.to))))?.id
+    ?? (loc.pathname.startsWith('/contratos') || loc.pathname.startsWith('/assinantes') ? 'cadastro' : 'admin');
+  const toggle = (id: string) => { const n = { ...closed, [id]: !closed[id] }; setClosed(n); localStorage.setItem('nexo_nav', JSON.stringify(n)); };
+  const flipTheme = () => { const t = theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = t; localStorage.setItem('nexo_theme', t); setTheme(t); };
 
   return (
     <MeCtx.Provider value={{ me, reload }}>
       <div className="shell">
-        <nav className={`side ${menu ? 'open' : ''}`} onClick={(e) => (e.target as HTMLElement).tagName === 'A' && setMenu(false)}>
-          <div className="logo"><b>Nexo<span>ISP</span></b><button className="menu-btn" onClick={() => setMenu(!menu)} aria-label="Menu">☰ Menu</button></div>
-          {me.role === 'saas_operator' && !me.support && !me.mfa_pending && link('/provedores', 'Provedores')}
+        <nav className={`side ${menu ? 'open' : ''}`} aria-label="Navegação principal" onClick={(e) => (e.target as HTMLElement).closest('a.nav') && setMenu(false)}>
+          <div className="logo"><Brand /><button className="menu-btn" onClick={() => setMenu(!menu)} aria-expanded={menu}><Icon name="menu" /> Menu</button></div>
+          {me.role === 'saas_operator' && !me.support && !me.mfa_pending && <NavLink className="nav" to="/provedores"><Icon name="building" />Provedores</NavLink>}
           {inTenant && (<>
-            {link('/', 'Início', 'subscribers:read')}
-            <div className="group">Cadastro</div>
-            {link('/assinantes', 'Assinantes', 'subscribers:read')}
-            {link('/planos', 'Planos', 'plans:read')}
-            {link('/contratos', 'Contratos', 'contracts:read')}
-            {(can(me, 'crm:read') || can(me, 'os:read')) && <div className="group">Atendimento</div>}
-            {link('/atendimentos', 'Atendimentos', 'crm:read')}
-            {link('/prospectos', 'Prospectos', 'crm:read')}
-            {link('/meu-trabalho', 'Meu trabalho (campo)', 'os:write')}
-            {link('/ordens-servico', 'Ordens de serviço', 'os:read')}
-            {link('/estoque', 'Estoque', 'stock:read')}
-            {link('/relatorios-atendimento', 'Relatórios', 'crm:read')}
-            {can(me, 'finance:read') && <div className="group">Financeiro</div>}
-            {link('/faturas', 'Faturas', 'finance:read')}
-            {link('/conciliacao', 'Conciliação', 'finance:read')}
-            {link('/politica-cobranca', 'Política de cobrança', 'finance:read')}
-            {can(me, 'network:read') && <div className="group">Rede</div>}
-            {link('/noc', 'NOC', 'network:read')}
-            {link('/rede', 'Agentes e equipamentos', 'network:read')}
-            {link('/onus', 'ONUs', 'network:read')}
-            {link('/ftth', 'Rede óptica (FTTH)', 'network:read')}
-            {link('/ipam', 'Endereços IP e CGNAT', 'network:read')}
-            {link('/operacoes', 'Operações', 'network:read')}
-            {(can(me, 'users:manage') || can(me, 'audit:read')) && <div className="group">Administração</div>}
-            {link('/usuarios', 'Usuários', 'users:manage')}
-            {link('/avisos', 'Avisos', 'settings:manage')}
-            {link('/importacao', 'Importação', 'import:run')}
-            {link('/auditoria', 'Auditoria', 'audit:read')}
+            <div className="find"><Icon name="search" /><input value={find} onChange={(e) => setFind(e.target.value)} placeholder="Ir para…" aria-label="Filtrar o menu"
+              onKeyDown={(e) => { if (e.key === 'Enter' && groups[0]) { nav(groups[0].items[0].to); setFind(''); setMenu(false); } }} /></div>
+            {groups.map((g) => (
+              <div key={g.id} data-area={g.id}>
+                {g.label && <button className="group" aria-expanded={!!find || !closed[g.id]} onClick={() => toggle(g.id)}><span className="dot" />{g.label}<Icon name="chev" /></button>}
+                {(!g.label || find || !closed[g.id]) && g.items.map((i) => <NavLink key={i.to} className="nav" to={i.to} end={i.to === '/'}><Icon name={i.icon} />{i.label}</NavLink>)}
+              </div>
+            ))}
+            {find && groups.length === 0 && <div className="state small">Nenhuma tela com esse nome.</div>}
           </>)}
           <div className="who">
             <b>{me.name}</b>
-            {ROLE_LABEL[me.role]}{me.tenant && <> · {me.tenant.name}</>}
-            <NavLink to="/conta" style={{ padding: '6px 0 0' }}>Minha conta</NavLink>
-            <button onClick={logout}>Sair</button>
+            {ROLE_LABEL[me.role]}{me.tenant && <>, {me.tenant.name}</>}
+            <div className="row">
+              <NavLink className="btn sm" to="/conta" style={{ flex: 1 }}><Icon name="user" />Conta</NavLink>
+              <button className="sm icon" onClick={flipTheme} aria-label={theme === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'} title={theme === 'dark' ? 'Tema claro' : 'Tema escuro'}><Icon name={theme === 'dark' ? 'sun' : 'moon'} /></button>
+              <button className="sm" onClick={logout}><Icon name="out" />Sair</button>
+            </div>
           </div>
         </nav>
-        <div className="main">
-          {me.demo && <div className="banner">Ambiente de demonstração — dados sintéticos; integrações externas simuladas são identificadas nas telas.</div>}
+        <div className="main" data-area={area}>
+          {me.demo && <div className="banner">Ambiente de demonstração: os dados são sintéticos e as integrações simuladas estão identificadas nas telas.</div>}
           {me.support && (
             <div className="banner support">
               <span>Acesso de suporte ao provedor <b>{me.tenant?.name}</b> — todas as ações são auditadas.</span>

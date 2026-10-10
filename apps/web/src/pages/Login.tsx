@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
-import { Field, Form } from '../ui';
+import { Brand, Field, Form } from '../ui';
 
 // Contas SINTÉTICAS do modo demonstração. Só existem (e só aparecem) quando o servidor roda com NEXO_DEMO_MODE=1.
 const DEMO: [string, string][] = [
-  ['admin@alfa.demo', 'Administrador — Provedor Alfa'], ['atendimento@alfa.demo', 'Atendimento — Alfa'], ['financeiro@alfa.demo', 'Financeiro — Alfa'],
-  ['noc@alfa.demo', 'Técnico/NOC — Alfa'], ['admin@beta.demo', 'Administrador — Provedor Beta'], ['operador@nexoisp.demo', 'Operador do SaaS'],
+  ['admin@alfa.demo', 'Administrador, Provedor Alfa'], ['atendimento@alfa.demo', 'Atendimento, Alfa'], ['financeiro@alfa.demo', 'Financeiro, Alfa'],
+  ['noc@alfa.demo', 'Técnico/NOC, Alfa'], ['admin@beta.demo', 'Administrador, Provedor Beta'], ['operador@nexoisp.demo', 'Operador do SaaS'],
 ];
 
 export function Login({ onLogin }: { onLogin: () => Promise<void> }) {
@@ -19,9 +19,22 @@ export function Login({ onLogin }: { onLogin: () => Promise<void> }) {
   useEffect(() => { fetch('/api/health').then((r) => r.json()).then((h) => setDemo(!!h.demo)).catch(() => {}); }, []);
   return (
     <div className="login">
+      <aside className="pitch">
+        <Brand />
+        <div>
+          <h1>Do contrato ao sinal na casa do assinante.</h1>
+          <p>Cadastro, cobrança, PPPoE, fibra, atendimento e operação de rede do provedor em um só lugar.</p>
+        </div>
+        {/* fibras saindo de um mesmo cabo: o código de cores que todo técnico conhece */}
+        <svg className="strands" viewBox="0 0 800 300" preserveAspectRatio="none" aria-hidden="true" fill="none" strokeWidth="5" strokeLinecap="round">
+          {['#2f6fb0', '#d9661a', '#2e8b57', '#8a5a3c', '#8b98a1', '#f4f6f5', '#b8322a', '#0a8f8a'].map((c, i) => (
+            <path key={c} stroke={c} d={`M-20 ${150 + (i - 3.5) * 5} C 260 ${150 + (i - 3.5) * 5}, 380 ${150 + (i - 3.5) * 30}, 820 ${150 + (i - 3.5) * 42}`} />
+          ))}
+        </svg>
+      </aside>
       <div className="box">
-        <h1>NexoISP</h1>
-        <p>Gestão para provedores de internet</p>
+        <h2>Entrar</h2>
+        <p>Use o e-mail e a senha da sua conta.</p>
         <Form submit="Entrar" onSubmit={async () => {
           try {
             await api('/auth/login', { body: { email, password, ...(code ? { code } : {}) } });
@@ -32,20 +45,16 @@ export function Login({ onLogin }: { onLogin: () => Promise<void> }) {
           await onLogin();
           nav('/');
         }}>
-          <Field label="E-mail"><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoFocus required /></Field>
-          <Field label="Senha"><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></Field>
+          <Field label="E-mail"><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoFocus required autoComplete="username" /></Field>
+          <Field label="Senha"><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" /></Field>
           {needCode && <Field label="Código do aplicativo autenticador"><input value={code} onChange={(e) => setCode(e.target.value)} inputMode="numeric" autoFocus required /></Field>}
         </Form>
         {demo && (
           <div className="demo-users">
-            <b>Ambiente de demonstração</b> — contas sintéticas, todas com a senha <code>demo1234</code>. Clique para preencher:
-            <table style={{ marginTop: 6, border: 0 }}>
-              <tbody>{DEMO.map(([e, label]) => (
-                <tr key={e} style={{ cursor: 'pointer' }} onClick={() => { setEmail(e); setPassword('demo1234'); }}>
-                  <td style={{ padding: '3px 6px', border: 0 }} className="mono">{e}</td><td style={{ padding: '3px 6px', border: 0 }}>{label}</td>
-                </tr>
-              ))}</tbody>
-            </table>
+            <b>Ambiente de demonstração.</b> Contas sintéticas, todas com a senha <code>demo1234</code>. Escolha uma para preencher:
+            <div style={{ marginTop: 8 }}>{DEMO.map(([e, label]) => (
+              <button key={e} type="button" onClick={() => { setEmail(e); setPassword('demo1234'); }}><span>{e}</span><span>{label}</span></button>
+            ))}</div>
           </div>
         )}
       </div>

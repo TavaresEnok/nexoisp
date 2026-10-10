@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { api, d, doc, money, speed, useLoad } from '../api';
 import { useMe } from '../App';
-import { Badge, Card, KV, Modal, State } from '../ui';
+import { Badge, Brand, Card, Icon, KV, Modal, State } from '../ui';
 import { PortalTickets } from './Crm';
 import { InvoiceBadge } from './Finance';
 
@@ -18,23 +18,39 @@ export function Portal() {
     if (c.desired_policy === 'suspended') return <Badge tone="red">Acesso suspenso{pending ? ' (em aplicação)' : ''}</Badge>;
     return pending ? <Badge tone="amber">Liberação em andamento</Badge> : <Badge tone="green">Acesso liberado</Badge>;
   };
+  const first = (data?.subscriber.name ?? me.name).split(' ')[0];
+  const active = data?.contracts.filter((c: any) => c.status === 'active') ?? [];
+  const suspended = active.some((c: any) => c.desired_policy === 'suspended');
+  const installing = !suspended && active.some((c: any) => c.desired_policy == null);   // contrato sem acesso provisionado ainda
+  const next = data?.invoices.filter((i: any) => i.status === 'open').sort((a: any, b: any) => a.due_date.localeCompare(b.due_date))[0];
   return (
-    <div style={{ maxWidth: 860, margin: '0 auto', padding: '20px 16px 40px' }}>
-      <header className="page-head">
-        <h1>Nexo<span style={{ color: 'var(--brand)' }}>ISP</span> <span className="muted" style={{ fontWeight: 400, fontSize: 15 }}>· {me.tenant?.name}</span></h1>
-        <div className="row"><span className="muted">{me.name}</span><button onClick={logout}>Sair</button></div>
+    <div className="portal" data-area="rede">
+      <header className="page-head" style={{ alignItems: 'center' }}>
+        <div><Brand /><div className="small muted">{me.tenant?.name}</div></div>
+        <button onClick={logout}><Icon name="out" />Sair</button>
       </header>
-      {me.demo && <div className="banner" style={{ marginBottom: 12, borderRadius: 8 }}>Ambiente de demonstração — meios de pagamento exibidos são fictícios.</div>}
+      {me.demo && <div className="banner" style={{ marginBottom: 12, borderRadius: 8 }}>Ambiente de demonstração: os meios de pagamento exibidos são fictícios.</div>}
       <State loading={loading} error={error}>
         {data && (<>
-          <Card title="Meus dados">
-            <KV items={[['Nome', data.subscriber.name], ['CPF/CNPJ', doc(data.subscriber.document)], ['E-mail', data.subscriber.email], ['Telefone', data.subscriber.phone],
-              ['Endereço', [data.subscriber.address_street, data.subscriber.address_number, data.subscriber.address_city].filter(Boolean).join(', ') || '—']]} />
-          </Card>
+          <div className="hello"><h1>Olá, {first}</h1></div>
+          <div className="grid2">
+            <Card>
+              <div className={`status ${suspended ? 'bad' : installing ? 'warn' : ''}`} style={{ paddingLeft: 14 }}>
+                <b>{active.length === 0 ? 'Você não tem plano ativo' : suspended ? 'Sua internet está suspensa' : installing ? 'Seu acesso está em instalação' : 'Sua internet está liberada'}</b>
+                <span className="muted">{suspended ? 'Regularize a fatura em aberto ou fale com o provedor.' : active.map((c: any) => `${c.plan_name}, ${speed(c.down_kbps)}`).join(' e ')}</span>
+              </div>
+            </Card>
+            <Card>
+              <div className={`status ${next?.overdue ? 'bad' : next ? 'warn' : ''}`} style={{ paddingLeft: 14 }}>
+                <b>{next ? `${money(next.amount_cents)} ${next.overdue ? 'em atraso' : `vence em ${d(next.due_date)}`}` : 'Nenhuma fatura em aberto'}</b>
+                {next ? <button className="primary" style={{ marginTop: 8 }} onClick={() => setInv(next)}>Pagar agora</button> : <span className="muted">Está tudo em dia.</span>}
+              </div>
+            </Card>
+          </div>
           <Card title="Meus planos">
             <State empty={data.contracts.length === 0}>
               <table>
-                <thead><tr><th>Plano</th><th>Velocidade</th><th className="num">Mensalidade</th><th>Vencimento</th><th>Situação do acesso</th></tr></thead>
+                <thead><tr><th>Plano</th><th>Velocidade</th><th className="num">Mensalidade</th><th>Vencimento</th><th>Acesso</th></tr></thead>
                 <tbody>{data.contracts.map((c: any) => (
                   <tr key={c.id}><td>{c.plan_name}</td><td>{speed(c.down_kbps)} / {speed(c.up_kbps)}</td><td className="num">{money(c.price_cents)}</td><td>dia {c.due_day}</td><td>{service(c)}</td></tr>
                 ))}</tbody>
@@ -53,6 +69,11 @@ export function Portal() {
             </State>
           </Card>
           <PortalTickets />
+          <Card title="Meus dados">
+            <KV items={[['Nome', data.subscriber.name], ['CPF/CNPJ', doc(data.subscriber.document)], ['E-mail', data.subscriber.email], ['Telefone', data.subscriber.phone],
+              ['Endereço', [data.subscriber.address_street, data.subscriber.address_number, data.subscriber.address_city].filter(Boolean).join(', ') || '—']]} />
+            <p className="small muted" style={{ marginBottom: 0 }}>Algo errado? Abra um chamado pedindo a correção.</p>
+          </Card>
         </>)}
       </State>
       {inv && (

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api, doc, dt, useLoad, usePaged } from '../api';
 import { can, useMe } from '../App';
-import { ActionButton, Badge, Card, Field, Form, KV, Modal, Page, Pager, State } from '../ui';
+import { ActionButton, Badge, Card, Field, Form, KV, Modal, Page, Pager, State, toastError } from '../ui';
 import { SubscriberPick, WO_KIND, WoBadge, WorkOrderForm } from './Field';
 
 // ---- Prospectos ----
@@ -99,7 +99,7 @@ export function Leads() {
       )}
       <div className="row" style={{ marginBottom: 12 }}>
         <input className="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Nome, telefone ou e-mail…" />
-        <select style={{ width: 200 }} value={stage} onChange={(e) => setStage(e.target.value)}><option value="open">Em negociação</option><option value="">Todos</option>{Object.entries(STAGE).map(([k, v]) => <option key={k} value={k}>{v[0]}</option>)}</select>
+        <select aria-label="Filtrar por situação" style={{ width: 200 }} value={stage} onChange={(e) => setStage(e.target.value)}><option value="open">Em negociação</option><option value="">Todos</option>{Object.entries(STAGE).map(([k, v]) => <option key={k} value={k}>{v[0]}</option>)}</select>
       </div>
       <State loading={list.loading && !list.data} error={list.error} empty={list.data?.length === 0}>
         <table>
@@ -156,7 +156,7 @@ function TicketDetail({ id, onClose }: { id: string; onClose: () => void }) {
           <KV items={[
             ['Situação', <TicketBadge status={t.status} />], ['Assinante', <Link to={`/assinantes/${t.subscriber_id}`}>{t.subscriber_name}</Link>], ['Categoria', CATEGORY[t.category]],
             ['Prioridade', PRIORITY[t.priority]], ['Aberto', <>{dt(t.created_at)} <span className="small muted">{t.origin === 'portal' ? 'pelo assinante (portal)' : 'pelo provedor'}</span></>],
-            ['Responsável', w && staff.data ? <select value={t.assignee_id ?? ''} onChange={async (e) => { try { await api(`/tickets/${id}`, { method: 'PATCH', body: { assignee_id: e.target.value || null } }); reload(); } catch (x: any) { alert(x.message); } }}>
+            ['Responsável', w && staff.data ? <select aria-label="Responsável" value={t.assignee_id ?? ''} onChange={async (e) => { try { await api(`/tickets/${id}`, { method: 'PATCH', body: { assignee_id: e.target.value || null } }); reload(); } catch (x: any) { toastError(x); } }}>
               <option value="">— a definir —</option>{staff.data.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}</select> : t.assignee_name],
           ]} />
           <div style={{ margin: '12px 0' }}>{t.thread.map((m: any) => (
@@ -222,7 +222,7 @@ export function TicketList({ subscriberId }: { subscriberId?: string }) {
     <Page title="Atendimentos" actions={w && <button className="primary" onClick={() => setAdding(true)}>Novo atendimento</button>}>
       <div className="row" style={{ marginBottom: 12 }}>
         <input className="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Assinante, assunto ou protocolo…" />
-        <select style={{ width: 220 }} value={status} onChange={(e) => setStatus(e.target.value)}><option value="pending">Em aberto</option><option value="">Todos</option>{Object.entries(TK_STATUS).map(([k, v]) => <option key={k} value={k}>{v[0]}</option>)}</select>
+        <select aria-label="Filtrar por situação" style={{ width: 220 }} value={status} onChange={(e) => setStatus(e.target.value)}><option value="pending">Em aberto</option><option value="">Todos</option>{Object.entries(TK_STATUS).map(([k, v]) => <option key={k} value={k}>{v[0]}</option>)}</select>
         <label className="row small"><input type="checkbox" style={{ width: 'auto' }} checked={mine} onChange={(e) => setMine(e.target.checked)} /> só os meus</label>
       </div>
       {table}{modals}
@@ -240,8 +240,8 @@ export function CrmReport() {
   const pct = (a: number, b: number) => (b ? `${Math.round((a / b) * 100)}%` : '—');
   return (
     <Page title="Relatórios de atendimento" actions={<>
-      <input type="date" style={{ width: 160 }} value={f.from} onChange={(e) => setF({ ...f, from: e.target.value })} /><span className="muted">até</span>
-      <input type="date" style={{ width: 160 }} value={f.to} onChange={(e) => setF({ ...f, to: e.target.value })} />
+      <input type="date" aria-label="Data inicial" style={{ width: 160 }} value={f.from} onChange={(e) => setF({ ...f, from: e.target.value })} /><span className="muted">até</span>
+      <input type="date" aria-label="Data final" style={{ width: 160 }} value={f.to} onChange={(e) => setF({ ...f, to: e.target.value })} />
     </>}>
       <State loading={loading && !r} error={error}>
         {r && (<>

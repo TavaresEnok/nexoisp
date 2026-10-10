@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api, dt, useLoad, usePaged } from '../api';
 import { can, useMe } from '../App';
-import { ActionButton, Badge, Card, Field, Form, KV, Modal, Page, Pager, State } from '../ui';
+import { ActionButton, Badge, Card, dialog, Field, Form, KV, Meter, Modal, Page, Pager, State, toastError } from '../ui';
 
 export const WO_KIND: Record<string, string> = { install: 'Instalação', repair: 'Reparo', address_change: 'Mudança de endereço', removal: 'Retirada', other: 'Outro' };
 const WO_STATUS: Record<string, [string, 'gray' | 'green' | 'red' | 'amber' | 'blue']> = {
@@ -77,8 +77,8 @@ export function WorkOrderDetail({ id, onClose }: { id: string; onClose: () => vo
             ['Situação', <WoBadge status={w.status} />], ['Assinante', <Link to={`/assinantes/${w.subscriber_id}`}>{w.subscriber_name}</Link>], ['Telefone', w.subscriber_phone],
             ['Endereço', w.subscriber_address || '—'], ['Contrato', w.contract_id ? <Link to={`/contratos/${w.contract_id}`}>abrir</Link> : '—'],
             ['Aberta', <>{dt(w.created_at)} <span className="muted small">por {w.created_by_name ?? 'sistema'}</span></>],
-            ['Responsável', write ? <select value={w.assignee_id ?? ''} onChange={(e) => patch({ assignee_id: e.target.value || null }).catch((x) => alert(x.message))}><option value="">— a definir —</option>{staff.data?.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}</select> : w.assignee_name],
-            ['Agendada para', write ? <input type="datetime-local" defaultValue={toLocal(w.scheduled_for)} onBlur={(e) => { if (e.target.value !== toLocal(w.scheduled_for)) patch({ scheduled_for: toIso(e.target.value) }).catch((x) => alert(x.message)); }} /> : dt(w.scheduled_for)],
+            ['Responsável', write ? <select aria-label="Responsável" value={w.assignee_id ?? ''} onChange={(e) => patch({ assignee_id: e.target.value || null }).catch((x) => toastError(x))}><option value="">— a definir —</option>{staff.data?.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}</select> : w.assignee_name],
+            ['Agendada para', write ? <input aria-label="Agendada para" type="datetime-local" defaultValue={toLocal(w.scheduled_for)} onBlur={(e) => { if (e.target.value !== toLocal(w.scheduled_for)) patch({ scheduled_for: toIso(e.target.value) }).catch((x) => toastError(x)); }} /> : dt(w.scheduled_for)],
           ]} />
           <p style={{ whiteSpace: 'pre-wrap' }}>{w.description}</p>
           {w.resolution && <div className="state" style={{ textAlign: 'left' }}><b>{w.status === 'canceled' ? 'Motivo do cancelamento' : 'O que foi feito'}:</b> {w.resolution}</div>}
@@ -99,9 +99,9 @@ export function WorkOrderDetail({ id, onClose }: { id: string; onClose: () => vo
               </State>
               {write && items.data && (
                 <div className="row" style={{ marginTop: 8 }}>
-                  <select style={{ flex: 1 }} value={mat.item_id} onChange={(e) => setMat({ ...mat, item_id: e.target.value })}><option value="">Item do estoque…</option>
+                  <select aria-label="Item do estoque" style={{ flex: 1 }} value={mat.item_id} onChange={(e) => setMat({ ...mat, item_id: e.target.value })}><option value="">Item do estoque…</option>
                     {items.data.filter((i) => i.active && !i.serialized).map((i) => <option key={i.id} value={i.id}>{i.name} (saldo {i.balance})</option>)}</select>
-                  <input style={{ width: 80 }} type="number" value={mat.qty} onChange={(e) => setMat({ ...mat, qty: e.target.value })} title="Negativo devolve ao estoque" />
+                  <input aria-label="Quantidade" style={{ width: 80 }} type="number" value={mat.qty} onChange={(e) => setMat({ ...mat, qty: e.target.value })} title="Negativo devolve ao estoque" />
                   <ActionButton disabled={!mat.item_id} onClick={async () => { await api(`/work-orders/${id}/materials`, { body: { item_id: mat.item_id, qty: Number(mat.qty) } }); await reload(); items.reload(); }}>Lançar</ActionButton>
                 </div>
               )}
@@ -174,7 +174,7 @@ export function WorkOrderList({ subscriberId, contractId }: { subscriberId?: str
     <Page title="Ordens de serviço" actions={w && <button className="primary" onClick={() => setAdding(true)}>Nova ordem de serviço</button>}>
       <div className="row" style={{ marginBottom: 12 }}>
         <input className="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Assinante, descrição ou número…" />
-        <select style={{ width: 180 }} value={status} onChange={(e) => setStatus(e.target.value)}>
+        <select aria-label="Filtrar por situação" style={{ width: 180 }} value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="pending">Em aberto</option><option value="">Todas</option>{Object.entries(WO_STATUS).map(([k, v]) => <option key={k} value={k}>{v[0]}</option>)}
         </select>
         <label className="row small"><input type="checkbox" style={{ width: 'auto' }} checked={mine} onChange={(e) => setMine(e.target.checked)} /> só as minhas</label>
@@ -268,7 +268,7 @@ function Units({ item, write, onClose }: { item: any; write: boolean; onClose: (
   const [serials, setSerials] = useState('');
   const [hist, setHist] = useState<any>(null);
   const events = useLoad<any[]>(hist ? `/stock/units/${hist.id}/events` : null);
-  const run = async (fn: () => Promise<unknown>) => { try { await fn(); list.reload(); } catch (e: any) { alert(e.message); } };
+  const run = async (fn: () => Promise<unknown>) => { try { await fn(); list.reload(); } catch (e: any) { toastError(e); } };
   return (
     <Modal title={`Unidades — ${item.name}`} onClose={onClose} wide>
       {write && (
@@ -288,13 +288,13 @@ function Units({ item, write, onClose }: { item: any; write: boolean; onClose: (
               <td className="small">{u.status === 'with_tech' ? u.holder_name : u.status === 'installed' ? <><Link to={`/contratos/${u.contract_id}`}>{u.subscriber_name}</Link>{u.work_order_number && ` · OS ${u.work_order_number}`}</> : '—'}</td>
               <td><div className="row" style={{ justifyContent: 'flex-end' }}>
                 {write && ['in_stock', 'with_tech'].includes(u.status) && (
-                  <select style={{ width: 170 }} value={u.holder_id ?? ''} onChange={(e) => run(() => api(`/stock/units/${u.id}/transfer`, { body: { holder_id: e.target.value || null } }))}>
+                  <select aria-label={`Onde está ${u.serial}`} style={{ width: 170 }} value={u.holder_id ?? ''} onChange={(e) => run(() => api(`/stock/units/${u.id}/transfer`, { body: { holder_id: e.target.value || null } }))}>
                     <option value="">Almoxarifado</option>{staff.data?.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
                   </select>)}
-                {write && u.status === 'installed' && <button className="sm" onClick={() => window.confirm(`Registrar a retirada de ${u.serial} do assinante?`) && run(() => api(`/stock/units/${u.id}/status`, { body: { status: 'in_stock' } }))}>Retirada</button>}
+                {write && u.status === 'installed' && <button className="sm" onClick={async () => (await dialog.confirm(`Registrar a retirada de ${u.serial} do assinante?`, { action: 'Registrar retirada' })) && run(() => api(`/stock/units/${u.id}/status`, { body: { status: 'in_stock' } }))}>Retirada</button>}
                 {write && ['in_stock', 'with_tech', 'installed'].includes(u.status) && <button className="sm" onClick={() => run(() => api(`/stock/units/${u.id}/status`, { body: { status: 'defective' } }))}>Defeito</button>}
                 {write && u.status === 'defective' && <button className="sm" onClick={() => run(() => api(`/stock/units/${u.id}/status`, { body: { status: 'in_stock' } }))}>Consertada</button>}
-                {write && u.status !== 'written_off' && <button className="sm danger" onClick={() => { const note = window.prompt(`Motivo da baixa de ${u.serial}:`); if (note) run(() => api(`/stock/units/${u.id}/status`, { body: { status: 'written_off', note } })); }}>Baixar</button>}
+                {write && u.status !== 'written_off' && <button className="sm danger" onClick={async () => { const note = await dialog.prompt(`Dar baixa em ${u.serial}? A unidade sai do saldo e não volta ao estoque.`, { label: 'Motivo da baixa', action: 'Dar baixa' }); if (note) run(() => api(`/stock/units/${u.id}/status`, { body: { status: 'written_off', note } })); }}>Baixar</button>}
                 <button className="sm" onClick={() => setHist(u)}>histórico</button>
               </div></td></tr>
           ))}</tbody>
@@ -461,11 +461,11 @@ export function Ftth() {
       {view === 'map' && data && <FtthMap boxes={data} onOpen={(b) => setModal({ kind: 'ports', box: b })} />}
       <State loading={loading} error={error} empty={data?.length === 0}>
         <table style={{ display: view === 'list' ? undefined : 'none' }}>
-          <thead><tr><th>Caixa</th><th>Tipo</th><th>Caixa anterior</th><th>OLT / PON</th><th>Endereço</th><th className="num">Ocupação</th><th></th></tr></thead>
+          <thead><tr><th>Caixa</th><th>Tipo</th><th>Caixa anterior</th><th>OLT / PON</th><th>Endereço</th><th>Ocupação</th><th></th></tr></thead>
           <tbody>{data?.map((b) => (
             <tr key={b.id}><td>{b.name}</td><td className="small">{BOX_KIND[b.kind]}</td><td className="small">{b.parent_name ?? '—'}</td>
               <td className="small">{b.device_name ? `${b.device_name} · ${b.pon_port ?? '—'}` : '—'}</td><td className="small">{b.address ?? '—'}</td>
-              <td className="num">{b.used}/{b.ports} {b.used >= b.ports && <Badge tone="red">cheia</Badge>}</td>
+              <td><div className="row" style={{ flexWrap: 'nowrap' }}><Meter value={b.used} max={b.ports} /><span className="small" style={{ whiteSpace: 'nowrap' }}>{b.used} de {b.ports}</span></div></td>
               <td><div className="row" style={{ justifyContent: 'flex-end' }}>
                 <button className="sm" onClick={() => setModal({ kind: 'ports', box: b })}>Portas</button>
                 {w && <button className="sm" onClick={() => setModal({ kind: 'edit', box: b })}>Editar</button>}

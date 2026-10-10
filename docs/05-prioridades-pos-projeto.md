@@ -69,6 +69,9 @@ Na terceira rodada: estoque por número de série e por técnico, avisos ao prov
 e registro de prefixos IPv6 por contrato. Ficaram de fora, de propósito: entrega do prefixo IPv6 pelo RADIUS (o laboratório não tem IPv6 para provar),
 mapa com imagem de fundo e trajeto de cabos, e locais de estoque além de “almoxarifado” e “com o técnico”.
 
+Design (10/10/2026): identidade visual, menu por área com busca, diálogos próprios, início com o que pede atenção, contrato em abas, portal refeito,
+tema escuro. Ficou de fora: a marca do provedor no portal (logotipo e cor), teste com leitor de tela e teste de uso com atendentes e técnicos reais.
+
 ## P3 — Módulos que exigem decisão antes de qualquer código
 
 | # | Item | Tipo | O que precisa ser decidido |

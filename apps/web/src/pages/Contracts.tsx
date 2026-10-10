@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api, d, doc, dt, money, speed, useLoad, usePaged } from '../api';
 import { can, useMe } from '../App';
-import { ActionButton, Badge, Card, Field, Form, KV, Modal, Page, Pager, State } from '../ui';
+import { ActionButton, Badge, Card, Field, Form, KV, Modal, Page, Pager, State, Tabs } from '../ui';
 import { ContractFinance } from './Finance';
 import { OnuPanel } from './Olt';
 import { WorkOrderList } from './Field';
@@ -45,7 +45,7 @@ export function Contracts() {
   return (
     <Page title="Contratos" actions={<>
       <input className="search" placeholder="Buscar por assinante ou plano…" value={q} onChange={(e) => setQ(e.target.value)} />
-      <select style={{ width: 150 }} value={status} onChange={(e) => setStatus(e.target.value)}>
+      <select aria-label="Filtrar por situação" style={{ width: 150 }} value={status} onChange={(e) => setStatus(e.target.value)}>
         <option value="active">Vigentes</option><option value="ended">Encerrados</option><option value="">Todos</option>
       </select>
     </>}>
@@ -78,37 +78,51 @@ export function ContractDetail() {
   const { me } = useMe();
   const { data: c, loading, error, reload } = useLoad<any>(`/contracts/${id}`);
   const [editing, setEditing] = useState(false);
+  const [tab, setTab] = useState('acesso');
   const w = can(me, 'contracts:write') && c?.status === 'active';
+  const net = can(me, 'network:read');
+  const tabs = [...(net ? [{ id: 'acesso', label: 'Acesso' }] : []), { id: 'contrato', label: 'Contrato' }, ...(can(me, 'os:read') ? [{ id: 'os', label: 'Ordens de serviço' }] : []), { id: 'historico', label: 'Histórico', count: c?.history.length }];
+  const cur = tabs.some((t) => t.id === tab) ? tab : tabs[0].id;
   return (
-    <Page title={c ? `Contrato — ${c.subscriber_name}` : 'Contrato'} actions={w && <>
-      <button onClick={() => setEditing(true)}>Trocar plano / vencimento</button>
-      <ActionButton className="danger" confirm="Encerrar este contrato? A ação não pode ser desfeita."
-        onClick={async () => { await api(`/contracts/${id}`, { method: 'PATCH', body: { end: true } }); reload(); }}>Encerrar contrato</ActionButton>
-    </>}>
+    <Page title={c ? c.subscriber_name : 'Contrato'}
+      sub={c && <span className="row">{c.plan_name}, {speed(c.down_kbps)}, {money(c.price_cents)} por mês {c.status === 'active' ? <Badge tone="green">Vigente</Badge> : <Badge>Encerrado em {d(c.end_date)}</Badge>}</span>}
+      actions={w && <>
+        <button onClick={() => setEditing(true)}>Trocar plano ou vencimento</button>
+        <ActionButton className="danger" confirm="Encerrar este contrato? A ação não pode ser desfeita."
+          onClick={async () => { await api(`/contracts/${id}`, { method: 'PATCH', body: { end: true } }); reload(); }}>Encerrar contrato</ActionButton>
+      </>}>
       <State loading={loading} error={error}>
         {c && (<>
-          <Card title="Situação comercial">
-            <KV items={[
-              ['Assinante', <Link to={`/assinantes/${c.subscriber_id}`}>{c.subscriber_name}</Link>], ['CPF/CNPJ', <span className="mono">{doc(c.subscriber_document)}</span>],
-              ['Plano', `${c.plan_name} (v${c.plan_version})`], ['Velocidade', `${speed(c.down_kbps)} / ${speed(c.up_kbps)}`],
-              ['Mensalidade', money(c.price_cents)], ['Vencimento', `dia ${c.due_day}`], ['Início', d(c.start_date)],
-              ['Situação', c.status === 'active' ? <Badge tone="green">Vigente</Badge> : <Badge>Encerrado em {d(c.end_date)}</Badge>],
-            ]} />
-          </Card>
-          <ContractFinance contractId={c.id}>{(fin) => <ServicePanel contract={c} financial={fin} />}</ContractFinance>
-          <OnuPanel contract={c} />
-          <InfraPanel contractId={c.id} />
-          {can(me, 'os:read') && <WorkOrderList subscriberId={c.subscriber_id} contractId={c.id} />}
-          <Card title="Histórico do contrato">
-            <table>
-              <thead><tr><th>Quando</th><th>Evento</th><th>Detalhe</th><th>Por</th></tr></thead>
-              <tbody>{c.history.map((h: any, i: number) => (
-                <tr key={i}><td>{dt(h.at)}</td><td>{EVENT[h.event] ?? h.event}</td>
-                  <td className="small">{h.detail.from !== undefined ? `${h.detail.from} → ${h.detail.to}` : h.detail.plan ? `${h.detail.plan} v${h.detail.plan_version}` : ''}</td>
-                  <td>{h.actor_name ?? 'sistema'}</td></tr>
-              ))}</tbody>
-            </table>
-          </Card>
+          <Tabs tabs={tabs} value={cur} onChange={setTab} />
+          {cur === 'acesso' && (<>
+            <InfraPanel contractId={c.id} />
+            <ContractFinance contractId={c.id}>{(fin) => <ServicePanel contract={c} financial={fin} />}</ContractFinance>
+            <OnuPanel contract={c} />
+          </>)}
+          {cur === 'contrato' && (<>
+            <Card title="Situação comercial">
+              <KV items={[
+                ['Assinante', <Link to={`/assinantes/${c.subscriber_id}`}>{c.subscriber_name}</Link>], ['CPF/CNPJ', <span className="mono">{doc(c.subscriber_document)}</span>],
+                ['Plano', `${c.plan_name} (v${c.plan_version})`], ['Velocidade', `${speed(c.down_kbps)} / ${speed(c.up_kbps)}`],
+                ['Mensalidade', money(c.price_cents)], ['Vencimento', `dia ${c.due_day}`], ['Início', d(c.start_date)],
+                ['Situação', c.status === 'active' ? <Badge tone="green">Vigente</Badge> : <Badge>Encerrado em {d(c.end_date)}</Badge>],
+              ]} />
+            </Card>
+            {!net && <ContractFinance contractId={c.id}>{(fin) => <Card title="Financeiro">{fin}</Card>}</ContractFinance>}
+          </>)}
+          {cur === 'os' && <WorkOrderList subscriberId={c.subscriber_id} contractId={c.id} />}
+          {cur === 'historico' && (
+            <Card title="Histórico do contrato">
+              <table>
+                <thead><tr><th>Quando</th><th>Evento</th><th>Detalhe</th><th>Por</th></tr></thead>
+                <tbody>{c.history.map((h: any, i: number) => (
+                  <tr key={i}><td>{dt(h.at)}</td><td>{EVENT[h.event] ?? h.event}</td>
+                    <td className="small">{h.detail.from !== undefined ? `${h.detail.from} → ${h.detail.to}` : h.detail.plan ? `${h.detail.plan} v${h.detail.plan_version}` : ''}</td>
+                    <td>{h.actor_name ?? 'sistema'}</td></tr>
+                ))}</tbody>
+              </table>
+            </Card>
+          )}
           {editing && (
             <Modal title="Alterar contrato" onClose={() => setEditing(false)}>
               <ContractForm contract={c} onCancel={() => setEditing(false)} onDone={() => { setEditing(false); reload(); }} />

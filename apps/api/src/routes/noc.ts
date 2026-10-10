@@ -113,6 +113,56 @@ export async function nocRoutes(app: FastifyInstance) {
         pons: pons.map((g) => ({ ...g, outage: outage(g, cfg.pon_outage_min) })) };
     }));
 
+  /** Início: só o que pede ação de quem está logado, conforme as permissões. Lista vazia = nada pendente. */
+  app.get('/api/today', { preHandler: guard('subscribers:read') }, async (req) => {
+    const has = (p: string) => req.ctx.perms.includes(p);
+    return withScope(req.ctx.scope, async (c) => {
+      const one = async (sql: string, p: unknown[] = []) => (await c.query(sql, p)).rows[0];
+      const items: { n: number | string; title: string; detail?: string; link: string; severity: Severity }[] = [];
+      const add = (n: number, severity: Severity, one: string, many: string, link: string, detail?: string) => { if (n > 0) items.push({ n, title: n === 1 ? one : many, detail, link, severity }); };
+      if (has('network:read')) {
+        const r = await one(
+          `select (select count(*) from agents where status = 'active' and (last_seen_at is null or last_seen_at <= now() - interval '${AGENT_OFFLINE_S} seconds'))::int as agents,
+                  (select count(*) from operations where status = 'UNCERTAIN')::int as uncertain,
+                  (select count(*) from operations where status in ('FAILED','EXPIRED') and finished_at > now() - interval '24 hours')::int as failed,
+                  (select count(*) from onus where desired_state = 'authorized' and observed_at is not null and (observed_state = 'absent' or observed_online is false))::int as onus`);
+        add(r.agents, 'critical', 'agente offline', 'agentes offline', '/noc', 'Leituras e operações desse site estão paradas.');
+        add(r.uncertain, 'critical', 'operação com resultado incerto', 'operações com resultado incerto', '/operacoes?filter=problem', 'O equipamento fica bloqueado até a verificação.');
+        add(r.onus, 'warning', 'ONU sem sinal', 'ONUs sem sinal', '/noc');
+        add(r.failed, 'warning', 'operação falhou ou expirou em 24 h', 'operações falharam ou expiraram em 24 h', '/operacoes?filter=problem');
+      }
+      if (has('crm:read')) {
+        const r = await one(`select count(*) filter (where status = 'open')::int as open, count(*) filter (where status = 'open' and assignee_id = $1)::int as mine,
+                                    (select count(*) from leads where stage = 'new')::int as leads from tickets`, [req.ctx.userId]);
+        add(r.open, 'warning', 'atendimento aguardando resposta do provedor', 'atendimentos aguardando resposta do provedor', '/atendimentos', r.mine ? `${r.mine} com você.` : undefined);
+        add(r.leads, 'info', 'prospecto novo sem contato', 'prospectos novos sem contato', '/prospectos');
+      }
+      if (has('os:read')) {
+        const r = await one(`select count(*) filter (where status in ('open','scheduled') and scheduled_for < now())::int as late,
+                                    count(*) filter (where status in ('open','scheduled','in_progress') and assignee_id = $1)::int as mine,
+                                    count(*) filter (where status = 'open' and assignee_id is null)::int as unassigned from work_orders`, [req.ctx.userId]);
+        add(r.late, 'warning', 'ordem de serviço com agendamento vencido', 'ordens de serviço com agendamento vencido', '/ordens-servico');
+        add(r.mine, 'info', 'ordem de serviço em aberto com você', 'ordens de serviço em aberto com você', '/meu-trabalho');
+        add(r.unassigned, 'info', 'ordem de serviço sem responsável', 'ordens de serviço sem responsável', '/ordens-servico');
+      }
+      if (has('finance:read')) {
+        const r = await one(
+          `select count(*) filter (where i.status = 'open' and i.due_date < (now() at time zone coalesce(ts.timezone, 'America/Sao_Paulo'))::date)::int as overdue,
+                  coalesce(sum(i.amount_cents) filter (where i.status = 'open' and i.due_date < (now() at time zone coalesce(ts.timezone, 'America/Sao_Paulo'))::date), 0)::int as overdue_cents,
+                  count(*) filter (where i.status = 'reconciling')::int as reconciling
+           from invoices i left join tenant_settings ts on ts.tenant_id = i.tenant_id`);
+        add(r.reconciling, 'warning', 'fatura em conciliação', 'faturas em conciliação', '/conciliacao', 'Pagamento divergente aguardando decisão.');
+        add(r.overdue, 'info', 'fatura vencida', 'faturas vencidas', '/faturas', `Total de ${(r.overdue_cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}.`);
+      }
+      if (has('stock:read')) {
+        const r = await one(`select count(*)::int as low from stock_items i where i.active and coalesce((select sum(m.qty) from stock_movements m where m.item_id = i.id), 0) < i.min_qty`);
+        add(r.low, 'info', 'item de estoque abaixo do mínimo', 'itens de estoque abaixo do mínimo', '/estoque');
+      }
+      items.sort((a, b) => RANK[a.severity] - RANK[b.severity]);
+      return { name: req.ctx.name, items };
+    });
+  });
+
   /** Diagnóstico de um contrato: junta o que o sistema já sabe e aponta a causa mais provável, sempre com a evidência. */
   app.get('/api/contracts/:id/diagnosis', { preHandler: guard('network:read') }, async (req) => {
     const id = zUuid.parse((req.params as any).id);

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { api, useLoad } from '../api';
 import { useMe } from '../App';
-import { ActionButton, Badge, Field, Form, Modal, Page, State } from '../ui';
+import { ActionButton, Badge, Field, Form, Modal, Page, State, toastError } from '../ui';
 
 const ROLES: [string, string][] = [['admin', 'Administrador'], ['attendant', 'Atendimento'], ['finance', 'Financeiro'], ['noc', 'Técnico/NOC']];
 
@@ -19,8 +19,8 @@ export function Users() {
             <tr key={u.id}>
               <td>{u.name}</td><td>{u.email}</td>
               <td>
-                <select style={{ width: 170 }} value={u.role} disabled={u.id === me.id}
-                  onChange={async (e) => { try { await api(`/users/${u.id}`, { method: 'PATCH', body: { role: e.target.value } }); } catch (err: any) { alert(err.message); } reload(); }}>
+                <select aria-label={`Papel de ${u.name}`} style={{ width: 170 }} value={u.role} disabled={u.id === me.id}
+                  onChange={async (e) => { try { await api(`/users/${u.id}`, { method: 'PATCH', body: { role: e.target.value } }); } catch (err: any) { toastError(err); } reload(); }}>
                   {ROLES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                 </select>
               </td>

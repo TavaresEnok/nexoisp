@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ago, api, dt, useLoad } from '../api';
 import { can, useMe } from '../App';
-import { Badge, Card, Field, Form, Modal, Page, State } from '../ui';
+import { Badge, Card, Field, Form, Meter, Modal, Page, State } from '../ui';
 
 const SEV: Record<string, [string, 'gray' | 'green' | 'red' | 'amber' | 'blue']> = { critical: ['Crítico', 'red'], warning: ['Atenção', 'amber'], info: ['Informação', 'blue'], ok: ['OK', 'green'] };
 const SevBadge = ({ s }: { s: string }) => <Badge tone={SEV[s]?.[1]}>{SEV[s]?.[0] ?? s}</Badge>;
@@ -37,14 +37,14 @@ export function Noc() {
         {o && (<>
           <p className="small muted" style={{ marginTop: 0 }}>Painel somente de leitura, atualizado {ago(o.generated_at)}. Os alertas vêm de regras fixas sobre as leituras dos agentes; nenhum deles altera a rede.</p>
           <div className="grid">
-            {stat(c.agents_offline, 'agente(s) offline', c.agents_offline > 0)}
-            {stat(`${c.sessions}/${c.accounts}`, `sessões PPPoE online · ${c.suspended} suspensa(s)`)}
-            {stat(`${c.onus_down}/${c.onus}`, 'ONU(s) sem sinal', c.onus_down > 0)}
+            {stat(c.agents_offline, c.agents_offline === 1 ? 'agente offline' : 'agentes offline', c.agents_offline > 0)}
+            {stat(`${c.sessions} de ${c.accounts}`, `sessões PPPoE online, ${c.suspended} ${c.suspended === 1 ? 'suspensa' : 'suspensas'}`)}
+            {stat(`${c.onus_down} de ${c.onus}`, 'ONUs sem sinal', c.onus_down > 0)}
             {stat(c.work_orders, `OS em aberto${c.work_orders_late ? ` · ${c.work_orders_late} vencida(s)` : ''}`, c.work_orders_late > 0)}
-            {stat(c.tickets_technical, 'atendimento(s) técnico(s) em aberto')}
+            {stat(c.tickets_technical, c.tickets_technical === 1 ? 'atendimento técnico em aberto' : 'atendimentos técnicos em aberto')}
           </div>
           <Card title={`Alertas (${o.alerts.length})`}>
-            <State empty={o.alerts.length === 0}>
+            <State empty={o.alerts.length === 0} emptyText="Nenhum alerta agora.">
               <table>
                 <thead><tr><th>Gravidade</th><th>Alerta</th><th></th></tr></thead>
                 <tbody>{o.alerts.map((a: any, i: number) => (
@@ -67,9 +67,9 @@ export function Noc() {
           <Card title="Portas PON">
             <State empty={o.pons.length === 0}>
               <table>
-                <thead><tr><th>OLT</th><th>Porta PON</th><th className="num">ONUs autorizadas</th><th className="num">Sem sinal</th><th>Situação</th><th>Última leitura</th></tr></thead>
+                <thead><tr><th>OLT</th><th>Porta PON</th><th className="num">ONUs autorizadas</th><th>Sem sinal</th><th>Situação</th><th>Última leitura</th></tr></thead>
                 <tbody>{o.pons.map((g: any) => (
-                  <tr key={`${g.device_id}|${g.pon_port}`}><td>{g.device_name}</td><td className="mono">{g.pon_port}</td><td className="num">{g.total}</td><td className="num">{g.down}</td>
+                  <tr key={`${g.device_id}|${g.pon_port}`}><td>{g.device_name}</td><td className="mono">{g.pon_port}</td><td className="num">{g.total}</td><td><div className="row" style={{ flexWrap: 'nowrap' }}><Meter value={g.down} max={g.total} warn={0.01} bad={0.5} /><span className="small">{g.down}</span></div></td>
                     <td>{g.outage ? <Badge tone="red">possível falha coletiva</Badge> : g.down ? <Badge tone="amber">falhas isoladas</Badge> : <Badge tone="green">normal</Badge>}</td><td className="small">{ago(g.read_at)}</td></tr>
                 ))}</tbody>
               </table>

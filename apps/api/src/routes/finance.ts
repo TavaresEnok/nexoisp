@@ -188,6 +188,16 @@ export async function financeRoutes(app: FastifyInstance) {
     return reply.header('content-type', 'text/csv; charset=utf-8').header('content-disposition', `attachment; filename="nexoisp-${q.kind}-${q.from}_${q.to}.csv"`).send('\uFEFF' + csv);
   });
 
+  /** Recebido por mês nos últimos 6 meses (fuso do provedor), para o gráfico de Faturas. */
+  app.get('/api/finance/monthly', { preHandler: guard('finance:read') }, async (req) =>
+    withScope(req.ctx.scope, async (c) => {
+      const tz = (await getSettings(c, req.ctx.tenantId!)).timezone;
+      return (await c.query(
+        `select to_char(m, 'YYYY-MM') as month,
+                coalesce((select sum(p.amount_cents) from payments p where date_trunc('month', p.paid_at at time zone $1) = m), 0)::int as received_cents
+         from generate_series(date_trunc('month', now() at time zone $1) - interval '5 months', date_trunc('month', now() at time zone $1), interval '1 month') m order by m`, [tz])).rows;
+    }));
+
   // ---- Conciliação ----
   app.get('/api/finance/reconciliation', { preHandler: guard('finance:read') }, async (req) =>
     withScope(req.ctx.scope, async (c) => ({

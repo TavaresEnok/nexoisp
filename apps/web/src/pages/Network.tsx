@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ago, api, dt, useLoad, usePaged } from '../api';
 import { can, useMe } from '../App';
-import { ActionButton, Badge, Card, Field, Form, Modal, Page, Pager, State } from '../ui';
+import { ActionButton, Badge, Card, Field, Form, Modal, Page, Pager, State, toast } from '../ui';
 import { ACTION, OpBadge, OperationModal, SimBadge } from './Service';
 
 export function HealthCards() {
@@ -77,7 +77,7 @@ export function Network() {
                 <td className="num">{d.driver.startsWith('olt') ? d.onus : d.accounts}</td>
                 <td>{w && <div className="row" style={{ justifyContent: 'flex-end' }}>
                   {d.accounts > 0 && <ActionButton className="sm" confirm={`Reenviar ao equipamento a intenção atual de todas as contas (${d.accounts})? Use após reinstalar o site ou perder o RADIUS local.`}
-                    onClick={async () => { const r = await api(`/devices/${d.id}/reapply`, { method: 'POST' }); alert(`${r.requested} operação(ões) solicitada(s).`); }}>Reaplicar todas as contas</ActionButton>}
+                    onClick={async () => { const r = await api(`/devices/${d.id}/reapply`, { method: 'POST' }); toast(`${r.requested} operação(ões) solicitada(s).`); }}>Reaplicar todas as contas</ActionButton>}
                   <ActionButton className="sm" confirm={d.maintenance ? undefined : 'Em manutenção o ERP para de enviar escritas a este equipamento. Continuar?'}
                   onClick={async () => { await api(`/devices/${d.id}`, { method: 'PATCH', body: { maintenance: !d.maintenance } }); devices.reload(); }}>
                   {d.maintenance ? 'Encerrar manutenção' : 'Modo manutenção'}</ActionButton></div>}</td>
@@ -146,7 +146,7 @@ export function Operations() {
   const [opId, setOpId] = useState<string | null>(null);
   return (
     <Page title="Operações de rede" actions={
-      <select style={{ width: 220 }} value={filter} onChange={(e) => setFilter(e.target.value)}>
+      <select aria-label="Filtrar operações" style={{ width: 220 }} value={filter} onChange={(e) => setFilter(e.target.value)}>
         <option value="all">Todas</option><option value="open">Em andamento</option><option value="problem">Com problema ou atrasadas</option>
       </select>}>
       {!!drift.data?.length && (

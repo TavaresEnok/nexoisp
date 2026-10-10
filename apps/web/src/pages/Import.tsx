@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { api, dt, money, useLoad } from '../api';
-import { ActionButton, Badge, Card, Field, Modal, Page, State } from '../ui';
+import { ActionButton, Badge, Card, Field, Modal, Page, State, toast } from '../ui';
 
 const STATUS: Record<string, [string, 'green' | 'blue' | 'gray' | 'red']> = { created: ['novo', 'green'], updated: ['atualizado', 'blue'], unchanged: ['sem alteração', 'gray'], error: ['erro', 'red'] };
 
@@ -125,7 +125,7 @@ export function Import() {
                   <button className="sm" onClick={async () => setDetail({ batch: b, rows: await api(`/import/batches/${b.id}`) })}>erros e avisos</button>
                   {b.accounts_to_provision > 0 && (
                     <ActionButton className="sm primary" confirm={`Enviar ao agente o provisionamento de ${b.accounts_to_provision} conta(s) PPPoE deste lote? Faça isso apenas no momento combinado para a virada do grupo.`}
-                      onClick={async () => { const r = await api(`/import/batches/${b.id}/provision`, { method: 'POST' }); alert(`${r.requested} operação(ões) solicitada(s). Acompanhe em Rede → Operações.`); batches.reload(); }}>
+                      onClick={async () => { const r = await api(`/import/batches/${b.id}/provision`, { method: 'POST' }); toast(`${r.requested} operação(ões) solicitada(s). Acompanhe em Rede → Operações.`); batches.reload(); }}>
                       Provisionar {b.accounts_to_provision} conta(s)</ActionButton>
                   )}
                 </div></td>

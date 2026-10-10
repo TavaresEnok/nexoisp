@@ -117,6 +117,20 @@ export function InvoiceTable({ rows, onOpen, showSubscriber = true }: { rows: an
   );
 }
 
+function MonthlyChart() {
+  const { data } = useLoad<any[]>('/finance/monthly');
+  if (!data) return null;
+  const max = Math.max(1, ...data.map((m) => m.received_cents));
+  const name = (m: string) => new Date(`${m}-15`).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
+  return (
+    <Card title="Recebido por mês">
+      <div className="bars" role="img" aria-label={`Recebido por mês: ${data.map((m) => `${name(m.month)} ${money(m.received_cents)}`).join(', ')}`}>
+        {data.map((m) => <div key={m.month}><b>{m.received_cents ? money(m.received_cents) : ''}</b><i style={{ height: `${(m.received_cents / max) * 100}%` }} /><span>{name(m.month)}</span></div>)}
+      </div>
+    </Card>
+  );
+}
+
 /** CSV para a contabilidade. Não substitui nota fiscal: a emissão fiscal não é feita pelo sistema. */
 function AccountingExport() {
   const today = new Date().toISOString().slice(0, 10);
@@ -124,12 +138,12 @@ function AccountingExport() {
   return (
     <Card title="Exportar para a contabilidade">
       <div className="row">
-        <select style={{ width: 240 }} value={f.kind} onChange={(e) => setF({ ...f, kind: e.target.value })}>
+        <select aria-label="O que exportar" style={{ width: 240 }} value={f.kind} onChange={(e) => setF({ ...f, kind: e.target.value })}>
           <option value="payments">Recebimentos (por data de pagamento)</option><option value="invoices">Faturas (por vencimento)</option>
         </select>
-        <input type="date" style={{ width: 160 }} value={f.from} onChange={(e) => setF({ ...f, from: e.target.value })} />
+        <input type="date" aria-label="Data inicial" style={{ width: 160 }} value={f.from} onChange={(e) => setF({ ...f, from: e.target.value })} />
         <span className="muted">até</span>
-        <input type="date" style={{ width: 160 }} value={f.to} onChange={(e) => setF({ ...f, to: e.target.value })} />
+        <input type="date" aria-label="Data final" style={{ width: 160 }} value={f.to} onChange={(e) => setF({ ...f, to: e.target.value })} />
         <ActionButton onClick={() => download(`/finance/export?kind=${f.kind}&from=${f.from}&to=${f.to}`, `nexoisp-${f.kind}-${f.from}_${f.to}.csv`)}>Baixar CSV</ActionButton>
       </div>
       <p className="small muted" style={{ marginBottom: 0 }}>Planilha de conferência (separador “;”). Não é documento fiscal: a emissão de nota não é feita pelo NexoISP.</p>
@@ -150,7 +164,7 @@ export function Invoices() {
   return (
     <Page title="Faturas" actions={<>
       <input className="search" placeholder="Buscar assinante…" value={q} onChange={(e) => setQ(e.target.value)} />
-      <select style={{ width: 170 }} value={status} onChange={(e) => setStatus(e.target.value)}>
+      <select aria-label="Filtrar por situação" style={{ width: 170 }} value={status} onChange={(e) => setStatus(e.target.value)}>
         <option value="">Todas</option><option value="open">Em aberto</option><option value="overdue">Vencidas</option>
         <option value="paid">Pagas</option><option value="reconciling">Em conciliação</option><option value="canceled">Canceladas</option>
       </select>
@@ -166,13 +180,14 @@ export function Invoices() {
       {can(me, 'finance:write') && (
         <Card title="Gerar mensalidades">
           <div className="row">
-            <input type="month" style={{ width: 170 }} value={competence} onChange={(e) => setCompetence(e.target.value)} />
+            <input type="month" aria-label="Competência" style={{ width: 170 }} value={competence} onChange={(e) => setCompetence(e.target.value)} />
             <ActionButton className="primary" onClick={async () => { setGen(await api('/finance/generate', { body: { competence } })); reload(); sum.reload(); }}>Gerar faturas da competência</ActionButton>
             {gen && <span className="small">{gen.created} criada(s); {gen.already_existing} já existia(m) — nada duplicado. {gen.gateway === 'none' ? 'Sem gateway configurado: cobranças não emitidas.' : `${gen.charges_emitted} cobrança(s) emitida(s).`}</span>}
           </div>
           <p className="small muted" style={{ marginBottom: 0 }}>Valor cheio do plano contratado. Proporcionalidade, juros, multa e descontos não são aplicados: dependem de regra comercial ainda não definida.</p>
         </Card>
       )}
+      <MonthlyChart />
       <AccountingExport />
       <State loading={loading && !data} error={error} empty={data?.length === 0}>
         {data && <InvoiceTable rows={data} onOpen={setOpen} />}
