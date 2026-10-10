@@ -1,0 +1,25 @@
+# Site do provedor (agente + RADIUS) ligado a um concentrador do cenário do PNETLab. Ver trio.sh.
+# Rede do host: o Docker do PNETLab roda com --iptables=false, então só assim o RADIUS vê o endereço real do NAS
+# e o agente alcança a api-ssl do concentrador pela ponte do laboratório.
+name: nexo-trio
+x-common: &common
+  network_mode: host
+  restart: unless-stopped
+  security_opt: ["seccomp=unconfined"]   # exigido pelo Docker 20.10.9 do PNETLab; não usar em produção
+services:
+  radius:
+    <<: *common
+    build: { context: ../site/radius, network: host }
+    environment: { RADIUS_NAS_SECRET: "${RADIUS_NAS_SECRET}", RADIUS_NAS_NET: "${NAS_IP}/32" }
+    volumes: ["${STATE}/data:/data"]
+  agent:
+    <<: *common
+    image: nexoisp-agent
+    depends_on: [radius]
+    environment:
+      NEXO_API_URL: https://127.0.0.1:18443
+      NEXO_AGENT_TOKEN: ${NEXO_AGENT_TOKEN}
+      NEXO_AGENT_TLS_DIR: /certs
+      NEXO_AGENT_DATA: /data
+      NEXO_AGENT_CREDENTIALS: /config/credentials.json
+    volumes: ["${STATE}/data:/data", "${STATE}/certs:/certs:ro", "${STATE}/config:/config:ro"]
