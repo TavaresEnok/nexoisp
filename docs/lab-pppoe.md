@@ -3,6 +3,7 @@
 **Situação: EXECUTADO em laboratório virtual em 10/10/2026 — os 12 casos passaram.**
 Ambiente: MikroTik CHR **RouterOS 7.24.5 (stable)** em QEMU/KVM, cliente PPPoE real (`pppd` 2.4.9), **FreeRADIUS 3.2.10**, autenticação CHAP.
 Reproduzir: `./nexo lab-up` (com o painel de demonstração rodando) e seguir a seção 3; `./nexo lab-down` remove tudo.
+**Repetido em 10/10/2026 no cenário do PNETLab** (CHR 7.17 com a configuração de um provedor): seção 5. Continua sendo ambiente virtual.
 
 O que isso comprova e o que não comprova:
 - Comprova o ciclo completo contra um RouterOS real: provisionar, autenticar, aplicar perfil, suspender, reativar e os casos de falha.
@@ -82,6 +83,49 @@ Não exercitado: mais de um NAS, dezenas/centenas de clientes, IPv6, CoA, desemp
 
 Registrar versão do RouterOS, modelo, método de autenticação, resultado de cada caso e data, e só então considerar o equipamento homologado.
 Os passos 1 e 2 abaixo valem para o equipamento real; no laboratório eles são feitos por `infra/lab/lab.sh` e `infra/lab/setup_chr.py`.
+
+## 5. Repetição no cenário do PNETLab (10/10/2026)
+
+**Validado em cenário virtual; não é homologação em equipamento físico.**
+
+| Item | Valor |
+|---|---|
+| Concentrador | Nó `WORLD-MK4011` do cenário Trio do PNETLab: MikroTik **CHR, RouterOS 7.17 (stable)**, licença gratuita (1 Mbps por interface), com a configuração de um provedor (8 servidores PPPoE por VLAN, contas locais, NAT) |
+| Clientes | Nó `WORLD-CLIENTE` (CHR 7.17) com `pppoe-client`, um por VLAN de PON, cada um com MAC próprio (macvlan) |
+| RADIUS / agente | FreeRADIUS 3.2 e agente 0.3.0 em containers na rede do servidor, ligados ao nó por uma ponte própria (`nexolab0`) |
+| Autenticação | Servidor PPPoE do cenário aceita PAP e CHAP; senha em `Cleartext-Password`. Não foi conferido qual dos dois foi negociado |
+| Como reproduzir | `infra/lab-pnetlab/trio.sh up` (escreve no nó: só com autorização do dono do cenário); `trio.sh down` desfaz |
+
+O que foi acrescentado ao concentrador (tudo com a marca `nexo-lab`, removível): endereço na placa de gerência, servidor RADIUS e `use-radius=yes`,
+perfis `plano-200m/500m/1000m`, certificado e `api-ssl`, usuário `nexo-agent` (`api,read,write`, só a partir do servidor).
+As contas locais do cenário continuaram autenticando sem o RADIUS; a senha do `admin` e os demais serviços não foram alterados.
+
+| # | Caso | Resultado no cenário |
+|---|---|---|
+| 1 | Provisionar | ✅ Concluída; `radcheck`/`radreply` gravados; verificação por leitura |
+| 2 | Autenticar | ✅ `/ppp active` com `radius=true`, fila 100M/200M criada pelo perfil; painel mostra sessão, IP e MAC |
+| 3 | Suspender com cliente online | ✅ `Auth-Type := Reject`, `sessions_removed: 1`; o concentrador passa a registrar `authentication failed` |
+| 4 | Reativar | ✅ Concluída; cliente reconecta sozinho |
+| 5 | Troca de plano online | ✅ `Mikrotik-Group` novo, sessão derrubada, reconexão com fila 250M/500M |
+| 6 | Nuvem indisponível | ✅ API parada; cliente rediscado autentica pelo RADIUS local |
+| 7 | Agente parado | ✅ Agente e API parados; cliente rediscado autentica |
+| 8 | Suspensão obsoleta | ✅ Suspensão “substituída pela versão 8 antes de iniciar”; reativação concluída; sessão não caiu |
+| 9 | Agente morto no meio | ✅ Com o concentrador inacessível, agente morto logo após gravar a autorização. Ao voltar: “consulta antes de repetir”, autorização “já aplicada nesta versão”, só derrubou a sessão e verificou |
+| 10 | Posse expirada | ✅ Mesma operação do caso 9, com o agente fora por 150 s: “Incerta” no painel e na saúde da rede (`uncertain: 1`); resolvida pela verificação |
+| 11 | NAS inacessível | ✅ Duas tentativas falharam e a operação **não** foi dada como concluída; ao voltar, a terceira consultou antes de repetir e concluiu |
+| 12 | Alteração manual | ✅ `Auth-Type` apagado no SQLite: divergência no painel em ~20 s, nenhuma operação criada sozinha (o cliente voltou a autenticar); “Suspender” de novo corrigiu |
+| + | API com TLS | ✅ Operações pela `api-ssl` (8729) com a CA exportada do nó; CA errada recusada (`CERTIFICATE_VERIFY_FAILED`) |
+| + | Vários clientes | ✅ 4 contas pelo RADIUS em 4 VLANs, simultâneas com a conta local do cenário; suspender uma derrubou só ela |
+| + | IP fixo | ✅ `Framed-IP-Address` gravado, sessão derrubada, reconexão com 100.64.0.5 (antes 100.64.1.253); ao liberar, mantém até reconectar e volta ao dinâmico |
+
+Diferenças em relação à seção 3, para não ler mais do que foi feito:
+
+- **Casos 9 a 11:** o concentrador ficou inacessível soltando a placa dele da ponte no servidor, não pausando a VM (os nós do cenário não podem ser parados).
+  O erro observado foi `No route to host`, não tempo esgotado: o caso “NAS travado que aceita a conexão e não responde” **não** foi exercitado aqui.
+- **Velocidade:** só a existência e o valor das filas foram conferidos; a licença gratuita do CHR impede medir tráfego.
+- **Não repetidos aqui:** MS-CHAPv2 com hash NT, perda do site e “Reaplicar”, RADIUS local parado, segunda instância do RADIUS, atualização do agente, CGNAT.
+- **Achado do cenário:** dois clientes PPPoE com o mesmo MAC em VLANs diferentes derrubam um ao outro no concentrador (`one-session-per-host`);
+  por isso os clientes de teste usam MAC próprio. Não é defeito do NexoISP, mas vale lembrar ao montar bancada.
 
 ## Pendências conhecidas do driver
 

@@ -198,3 +198,13 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
 - **Cuidado:** os concentradores carregam configuração derivada de backups reais dos provedores, com contas PPPoE. Nada disso entra no repositório (público).
 - **Nada foi alterado** em equipamento, no PNETLab nem no Docker. Situação inalterada: pronta para homologação, não para corte; nada homologado em equipamento físico.
 - **Próxima ação:** proposta da etapa 2 e ok do proprietário antes de qualquer escrita em nó do cenário.
+
+### 10/10/2026 — cenário do PNETLab, etapas 2 e 3 (PPPoE)
+
+- **Autorizado pelo proprietário:** concentrador `WORLD-MK4011` (CHR 7.17), mantendo a licença gratuita. Configuração acrescentada ao nó é marcada e reversível (`infra/lab-pnetlab/trio.sh down`).
+- **Concluído:** site (agente + RADIUS) ligado ao nó; agente e equipamento cadastrados; os 12 casos de `docs/lab-pppoe.md` repetidos e aprovados, mais TLS, vários clientes e IP fixo
+  (resultado por caso na seção 5 daquele documento). Nenhum nó foi parado ou reiniciado.
+- **Classificação:** validado no cenário do PNETLab. **Não** é homologação em equipamento físico; o item 0.3 do doc 05 continua aberto. O proprietário informou que vai comprar um MikroTik.
+- **Ficou de fora, com motivo:** OLT (o cenário não tem OLT de fabricante); medição de velocidade (licença gratuita do CHR); NAS travado sem resposta (os nós não podem ser pausados).
+- **Próxima ação:** segunda instância do RADIUS e CGNAT no cenário; repetir o roteiro no equipamento físico quando chegar.
+- **Impedimentos externos:** os mesmos da tabela de 10/10 (provedor piloto, gateway, MK-Auth, servidor de produção, política de cobrança e fiscal). Data-alvo inalterada e condicionada a eles.

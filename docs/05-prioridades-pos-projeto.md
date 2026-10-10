@@ -21,7 +21,7 @@ São os seis itens que fecham o MVP. Sem eles o sistema continua sendo uma demon
 |---|---|---|---|---|
 | 0.1 | Provedor piloto com autorização por escrito (quais assinantes, qual NAS, responsáveis) | Terceiro | Fechar o piloto e preencher a lista de `docs/operacao.md` §7 | — |
 | 0.2 | Gateway de pagamento real com credenciais de sandbox | Terceiro | Escolher o gateway; depois escrever o adaptador e repetir os testes de webhook e conciliação | `apps/api/src/finance/gateway.ts` (interface `Gateway`) |
-| 0.3 | Equipamento físico do piloto (MikroTik e versão do RouterOS) | Terceiro | Repetir os 12 casos de `docs/lab-pppoe.md` nele, com mais de um cliente | `infra/site/` |
+| 0.3 | Equipamento físico do piloto (MikroTik e versão do RouterOS). Em 10/10/2026 os 12 casos foram repetidos num CHR 7.17 do cenário do PNETLab: isso **não** fecha este item | Terceiro | Repetir os 12 casos de `docs/lab-pppoe.md` nele, com mais de um cliente | `infra/site/` |
 | 0.4 | Exportação real do MK-Auth (com a versão) | Terceiro | Mapear para o CSV intermediário e conferir a prévia | `docs/importacao-csv.md` |
 | 0.5 | Política comercial mínima: dias para suspender, reativação automática, modalidade de suspensão | Terceiro | Provedor configura em “Política de cobrança” | só configuração |
 | 0.6 | Servidor público com domínio, backup automático e um `restore-check` feito nele | Nosso (precisa do host) | Subir `infra/prod` no host real | `infra/prod/` |

@@ -17,8 +17,17 @@ login() { curl -s $B/auth/login -H "$J" -d '{"email":"admin@alfa.demo","password
 nas() { python3 "$HERE/con.py" $NAS_CON "$@"; }
 cli() { python3 "$HERE/con.py" $CLI_CON "$@"; }
 py() { $D run --rm --network host --security-opt seccomp=unconfined -v "$STATE/config:/out" -v "$HERE/setup_nas.py:/setup_nas.py:ro" \
-  -e NAS_IP -e HOST_IP -e RADIUS_NAS_SECRET="$RADIUS_NAS_SECRET" -e NAS_AGENT_PASSWORD="$NAS_AGENT_PASSWORD" \
+  -e NAS_IP="$NAS_IP" -e HOST_IP="$HOST_IP" -e RADIUS_NAS_SECRET="$RADIUS_NAS_SECRET" -e NAS_AGENT_PASSWORD="$NAS_AGENT_PASSWORD" \
   -e NAS_LOCAL_ADDRESS="$NAS_LOCAL_ADDRESS" -e NAS_REMOTE_POOL="$NAS_REMOTE_POOL" "$@"; }
+radius_image() {  # mesma receita de infra/site/radius/Dockerfile, por container + commit: o build deste Docker não aceita seccomp=unconfined
+  [ -z "$($D images -q nexoisp-site-radius)" ] || return 0
+  local R="$HERE/../site/radius" N=nexo-radius-build; $D rm -f $N >/dev/null 2>&1 || true
+  $D create --name $N --network host --security-opt seccomp=unconfined --entrypoint sh freeradius/freeradius-server:latest-3.2 -c \
+    'apt-get update -qq && apt-get install -y -qq --no-install-recommends sqlite3 >/dev/null && rm -rf /var/lib/apt/lists/* && groupadd -g 10001 nexodata && usermod -aG nexodata freerad && ln -sf ../mods-available/sql /etc/raddb/mods-enabled/sql && chmod +x /nexo-entrypoint.sh' >/dev/null
+  $D cp "$R/sql" $N:/etc/raddb/mods-available/sql; $D cp "$R/clients.conf" $N:/etc/raddb/clients.conf; $D cp "$R/entrypoint.sh" $N:/nexo-entrypoint.sh
+  $D start -a $N >/dev/null
+  $D commit --change 'ENTRYPOINT ["/nexo-entrypoint.sh"]' --change 'CMD ["freeradius","-f","-l","stdout"]' $N nexoisp-site-radius >/dev/null; $D rm $N >/dev/null
+}
 case "${1:-}" in
   up)
     mkdir -p "$STATE/config" "$STATE/data"
@@ -44,13 +53,13 @@ case "${1:-}" in
     set -a; . "$STATE/.env"; set +a
     printf '{"%s": {"username": "nexo-agent", "password": "%s", "ca_file": "/config/routeros-ca.crt"}}\n' "$CRED" "$NAS_AGENT_PASSWORD" > "$STATE/config/credentials.json"
     # 4. RADIUS local, configuração do concentrador pela API e agente
-    $C up -d --build radius
+    radius_image; $C up -d radius
     py -u "$(id -u)" nexoisp-agent python /setup_nas.py up
     $C up -d agent ;;
   down)
     set -a; . "$STATE/.env"; set +a
     py nexoisp-agent python /setup_nas.py down || echo "AVISO: concentrador não foi limpo pela API; confira com: trio.sh nas '/radius print'"
-    cli '/interface pppoe-client remove [find comment="nexo-lab"]' '/interface vlan remove [find comment="nexo-lab"]' >/dev/null
+    cli '/interface pppoe-client remove [find comment="nexo-lab"]' '/interface macvlan remove [find comment="nexo-lab"]' '/interface vlan remove [find comment="nexo-lab"]' >/dev/null
     nas '/ip address remove [find comment="nexo-lab"]' >/dev/null
     $C down; sudo ip link set $NAS_TAP nomaster; sudo ip link del $BR
     echo "desfeito. O estado local ficou em $STATE (apague para recomeçar do zero); antes-nexo.rsc continua no concentrador." ;;
@@ -62,9 +71,11 @@ case "${1:-}" in
   client)  # clientes PPPoE adicionais no nó cliente, um por VLAN de PON (n = 2..8); o pppoe-lab do cenário (VLAN 301) não é tocado
     n="$3"; case "$n" in [2-8]) ;; *) echo "n deve ser 2..8"; exit 1 ;; esac
     case "$2" in
-      up) cli ":if ([:len [/interface vlan find name=nexo-v30$n]] = 0) do={/interface vlan add name=nexo-v30$n interface=ether1 vlan-id=30$n comment=nexo-lab}" \
-              "/interface pppoe-client remove [find name=nexo-c$n]" \
-              "/interface pppoe-client add name=nexo-c$n interface=nexo-v30$n user=\"$4\" password=\"$5\" add-default-route=no use-peer-dns=no disabled=no comment=nexo-lab" ;;
+      # MAC próprio por cliente (macvlan): com o MAC da placa, o concentrador derruba a sessão do pppoe-lab quando outra conecta
+      up) cli "/interface pppoe-client remove [find name=nexo-c$n]" \
+              ":if ([:len [/interface vlan find name=nexo-v30$n]] = 0) do={/interface vlan add name=nexo-v30$n interface=ether1 vlan-id=30$n comment=nexo-lab}" \
+              ":if ([:len [/interface macvlan find name=nexo-m$n]] = 0) do={/interface macvlan add name=nexo-m$n interface=nexo-v30$n mac-address=02:4E:58:00:00:0$n mode=private comment=nexo-lab}" \
+              "/interface pppoe-client add name=nexo-c$n interface=nexo-m$n user=\"$4\" password=\"$5\" add-default-route=no use-peer-dns=no disabled=no comment=nexo-lab" ;;
       down) cli "/interface pppoe-client remove [find name=nexo-c$n]" ;;
     esac ;;
   ros) set -a; . "$STATE/.env"; set +a

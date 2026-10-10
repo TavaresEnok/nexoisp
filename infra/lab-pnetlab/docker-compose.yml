@@ -9,7 +9,7 @@ x-common: &common
 services:
   radius:
     <<: *common
-    build: { context: ../site/radius, network: host }
+    image: nexoisp-site-radius   # montada por trio.sh (o build do Docker 20.10.9 não aceita seccomp)
     environment: { RADIUS_NAS_SECRET: "${RADIUS_NAS_SECRET}", RADIUS_NAS_NET: "${NAS_IP}/32" }
     volumes: ["${STATE}/data:/data"]
   agent:
