@@ -3,6 +3,7 @@ Regra central: se o efeito pode ter ocorrido, CONSULTAR antes de repetir (ADR-01
 
 O fluxo é o mesmo para qualquer tipo de recurso; o que muda por família (conta PPPoE, ONU) é como ler o estado,
 como decidir se a intenção já está aplicada e quais etapas executar."""
+import time
 import json
 import logging
 from datetime import datetime, timezone
@@ -14,6 +15,9 @@ from .envelope import Envelope, EnvelopeError, verify_envelope
 from .store import Store
 
 log = logging.getLogger("nexo.executor")
+
+
+SESSION_SETTLE_TRIES, SESSION_SETTLE_S = 3, 1.0
 
 
 def _now() -> str:
@@ -44,8 +48,14 @@ def needs_disconnect(st: AccountState, env: Envelope) -> bool:
     return st.session.get("profile") not in (None, p.profile)
 
 
+def session_unknown(st: AccountState) -> bool:
+    """O NAS não respondeu: não se sabe se existe sessão, nem com que perfil/endereço. Diferente de "não há sessão"."""
+    return bool(st.session and st.session.get("unknown"))
+
+
 def fully_applied(st: AccountState, env: Envelope) -> bool:
-    return authorization_matches(st, env) and not needs_disconnect(st, env)
+    """Autorização local na versão pedida E nenhuma sessão conhecida (ou possível) ainda com o que valia antes."""
+    return authorization_matches(st, env) and not session_unknown(st) and not needs_disconnect(st, env)
 
 
 class PppoeFamily:
@@ -67,6 +77,7 @@ class PppoeFamily:
         """Aplica as etapas e devolve True se a leitura final confirma a intenção."""
         p = env.parameters
         st = driver.read(p.username)
+        fresh = not st.exists   # conta que não existia antes desta operação não pode ter sessão com configuração antiga
         if authorization_matches(st, env):
             step("autorização local", "ok", "já aplicada nesta versão")
         else:
@@ -77,7 +88,8 @@ class PppoeFamily:
         checkpoint("EXECUTING")
 
         st = driver.read(p.username)
-        if needs_disconnect(st, env):
+        dropped = needs_disconnect(st, env)
+        if dropped:
             try:
                 step("tratamento da sessão", "ok", driver.disconnect(p.username))
             except AckLost as e:
@@ -87,8 +99,17 @@ class PppoeFamily:
 
         checkpoint("VERIFYING")
         st = driver.read(p.username)
-        ok = authorization_matches(st, env) and not (p.policy == "suspended" and needs_disconnect(st, env))
-        step("verificação", "ok" if ok else "falha", {"policy": st.policy, "profile": st.profile, "applied_version": st.applied_version, "session_online": bool(st.session),
+        for _ in range(SESSION_SETTLE_TRIES if dropped else 0):   # o NAS pode levar um instante para tirar a sessão da lista
+            if not needs_disconnect(st, env):
+                break
+            time.sleep(SESSION_SETTLE_S)
+            st = driver.read(p.username)
+        # Mesmo critério para suspender e para liberar/trocar plano: a sessão em uso também precisa refletir a intenção.
+        # Sem resposta do NAS a sessão é desconhecida e a operação não é dada como concluída (exceto conta recém-criada).
+        unknown = session_unknown(st)
+        ok = authorization_matches(st, env) and not needs_disconnect(st, env) and (fresh or not unknown)
+        step("verificação", "ok" if ok else "falha", {"policy": st.policy, "profile": st.profile, "applied_version": st.applied_version,
+                                                          "session": "desconhecida (NAS sem resposta)" if unknown else "online" if st.session else "sem sessão",
                                                           **({"framed_ip": st.framed_ip} if st.framed_ip or p.framed_ip else {})})
         return ok
 

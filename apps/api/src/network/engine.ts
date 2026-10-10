@@ -101,7 +101,9 @@ export async function reserve(c: Tx, agentId: string) {
 
 async function lockAttempt(c: Tx, agentId: string, attemptId: string) {
   const a = (await c.query(
-    `select a.id as attempt_id, a.status as attempt_status, o.* from operation_attempts a join operations o on o.id = a.operation_id
+    `select a.id as attempt_id, a.status as attempt_status, o.*,
+            (o.lease_until is null or o.lease_until < now()) as lease_expired, (o.valid_until < now()) as validity_expired
+     from operation_attempts a join operations o on o.id = a.operation_id
      where a.id = $1 and a.agent_id = $2 for update of o`, [attemptId, agentId])).rows[0];
   if (!a) throw new HttpError(404, 'tentativa não encontrada');
   return a;
@@ -113,6 +115,13 @@ const finishAttempt = (c: Tx, id: string, status: string, steps?: unknown) =>
 export async function begin(c: Tx, agentId: string, attemptId: string): Promise<{ go: boolean; reason?: string; secret?: string }> {
   const o = await lockAttempt(c, agentId, attemptId);
   if (o.status !== 'RESERVED' || o.current_attempt_id !== attemptId) return { go: false, reason: 'not_owner' };
+  // A posse é conferida AQUI, na transação que autoriza a escrita e pelo relógio do banco: não depende de outra rotina já ter
+  // devolvido a reserva vencida à fila. Reserva vencida não inicia; a tarefa volta a ficar disponível.
+  if (o.lease_expired) {
+    await c.query(`update operations set status = 'PENDING', current_attempt_id = null, lease_until = null, updated_at = now(), note = 'reserva expirou antes de iniciar' where id = $1`, [o.id]);
+    await finishAttempt(c, attemptId, 'ABANDONED');
+    return { go: false, reason: 'lease_expired' };
+  }
   const r = (o.onu_id
     ? await c.query(
       `select n.desired_version, null as secret_enc, k.status as contract_status, d.maintenance from onus n join contracts k on k.id = n.contract_id
@@ -127,7 +136,7 @@ export async function begin(c: Tx, agentId: string, attemptId: string): Promise<
   };
   if (r.desired_version !== o.desired_version)
     return stop('SUPERSEDED', `intenção atual é a versão ${r.desired_version}; esta tarefa (v${o.desired_version}) não foi aplicada`, 'superseded');
-  if (new Date(o.valid_until) < new Date()) return stop('EXPIRED', 'prazo de validade vencido', 'expired');
+  if (o.validity_expired) return stop('EXPIRED', 'prazo de validade vencido', 'expired');
   // ações que liberam serviço exigem contrato vigente; suspender/desautorizar não
   if (!['subscriber.suspend', 'onu.deauthorize'].includes(o.action) && r.contract_status !== 'active') return stop('CANCELED', 'contrato não está mais vigente', 'contract_ineligible');
   if (r.maintenance) {

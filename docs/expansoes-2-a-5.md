@@ -107,7 +107,7 @@ O que existe é o diagnóstico por regras, que é a parte “com evidência” q
 
 ## Verificação (10/10/2026)
 
-- `./nexo test`: 59 testes na API (32 anteriores + 27 destas expansões), todos com o papel real `nexo_app`. `./nexo agent-test`: 29 testes.
+- `./nexo test`: 60 testes na API, todos com o papel real `nexo_app`. `./nexo agent-test`: 31 testes.
 - Isolamento: outro provedor não lê nem altera blocos, planos de CGNAT, OS, estoque, caixas, prospectos, atendimentos nem diagnóstico; a sessão do portal,
   mesmo com SQL direto, vê só os próprios atendimentos, nunca notas internas, e nada de OS, prospectos ou endereços IP.
 - Interface em navegador headless: todas as telas novas com quatro perfis e o portal, e os fluxos de CGNAT, estoque, OS, FTTH, prospecto, chamado e diagnóstico,

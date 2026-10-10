@@ -245,12 +245,15 @@ Detalhes de operação e produção: `docs/operacao.md`. Decisões técnicas tom
 ### Verificações realizadas (10/10/2026)
 
 - Tipos e build de API e web: sem erros.
-- `./nexo test` — 59 testes na API (26 do MVP + 6 da expansão OLT/ONU + 27 das expansões 2 a 5 e complementos), com o papel real `nexo_app`: isolamento entre provedores (API, SQL direto, conexão reutilizada, FK composta); permissões;
+- `./nexo test` — 60 testes na API (26 do MVP + 6 da expansão OLT/ONU + 27 das expansões 2 a 5 e complementos), com o papel real `nexo_app`: isolamento entre provedores (API, SQL direto, conexão reutilizada, FK composta); permissões;
   recorrência e webhook/pagamento duplicados; evento perdido recuperado; valor divergente sem baixa; assinatura inválida;
   suspensão obsoleta (antes de reservar, na revalidação e após pagamento); posse expirada → incerta → verificação; agente de outro provedor; divergência manual;
   importação (prévia não grava, reimportação não duplica, conta sem senha não provisiona); portal isolado na API e no banco; MFA;
   operador do SaaS (criar/suspender provedor, suporte auditado); cookie de sessão e CSRF; paginação; rotação da chave de segredos.
-- `./nexo agent-test` — 29 testes no agente (10 da expansão OLT/ONU, incluindo o driver Huawei contra emulador; 2 do IP fixo; 4 de migração do banco local, rollback e disco cheio): confirmação perdida, reinício após aplicar, queda no meio, reentrega, envelope adulterado/vencido, NAS indisponível, hash NT, recusa de downgrade.
+- `./nexo agent-test` — 31 testes no agente (10 da expansão OLT/ONU, incluindo o driver Huawei contra emulador; 2 do IP fixo; 4 de migração do banco local, rollback e disco cheio): confirmação perdida, reinício após aplicar, queda no meio, reentrega, envelope adulterado/vencido, NAS indisponível, hash NT, recusa de downgrade.
+- Correções após revisão externa do commit `314e29d` (10/10/2026): (1) `begin()` passou a conferir a posse da reserva na própria transação, pelo relógio do banco;
+  (2) a verificação final do agente usa o mesmo critério para suspender e para liberar/trocar plano, e sessão desconhecida (NAS sem resposta) deixou de valer como
+  “sem sessão”. Cada uma tem regressão que falha no código anterior. Troca de plano repetida no laboratório com cliente online: concluída.
 - **Laboratório PPPoE real** (`./nexo lab-up`): MikroTik CHR 7.24.5 em KVM, cliente `pppd`, FreeRADIUS 3.2.10 — autenticação CHAP, perfil/fila aplicados, suspensão e reativação,
   troca de plano, nuvem e agente parados, suspensão obsoleta, agente morto no meio da execução, posse expirada, NAS inacessível, alteração manual, API com TLS e perda do site;
   depois também MS-CHAPv2 com hash NT, 6 clientes simultâneos vindos de um lote importado, RADIUS local parado e atualização assinada do agente. Resultados em `docs/lab-pppoe.md`.

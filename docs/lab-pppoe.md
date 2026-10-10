@@ -87,4 +87,5 @@ Os passos 1 e 2 abaixo valem para o equipamento real; no laboratório eles são 
 
 - Suspensão implementada só na modalidade de demonstração "negar autenticação + derrubar sessão". Modalidade real (ex.: perfil restrito/aviso) depende da política comercial.
 - Sessão é lida pela API (`/ppp/active`); CoA/Disconnect-Request por RADIUS não é usado.
+- Com o NAS sem resposta, troca de plano, IP fixo e suspensão **não** são dadas como concluídas (a sessão é desconhecida); a operação fica como falha e a nova tentativa consulta antes de repetir. Só o primeiro provisionamento de uma conta conclui sem o NAS.
 - Segredo PPPoE fica em `Cleartext-Password` no SQLite local (exigido por CHAP/MS-CHAP). Proteção do arquivo: permissões 660 + disco do host; criptografia do SQLite **não** implementada (ADR-008).

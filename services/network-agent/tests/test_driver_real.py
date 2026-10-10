@@ -90,6 +90,65 @@ if __name__ == "__main__":
     unittest.main()
 
 
+class VerificacaoDaSessao(unittest.TestCase):
+    """A operação só conclui quando a sessão em uso também reflete a intenção — para liberar/trocar plano, não só para suspender."""
+
+    def setUp(self):
+        import nexo_agent.executor as ex
+        ex.SESSION_SETTLE_S = 0.01
+        d = tempfile.mkdtemp()
+        db = sqlite3.connect(os.path.join(d, "radius.sqlite"))
+        db.executescript("create table radcheck (id integer primary key, username text, attribute text, op text, value text);"
+                         "create table radreply (id integer primary key, username text, attribute text, op text, value text);")
+        db.close()
+        self.nas, self.cloud = FakeNas(), FakeCloud()
+        self.radius = RadiusStore(os.path.join(d, "radius.sqlite"))
+        self.driver = MikrotikRadiusDriver(self.radius, self.nas)
+        ident = {"agent_id": AGENT, "tenant_id": TENANT, "public_key": PUB, "device_ids": {DEVICE}}
+        self.ex = Executor(Store(os.path.join(d, "agent.sqlite")), self.cloud, lambda _: self.driver, lambda: ident)
+
+    def plano(self, version, profile, op=None):
+        import json
+        d = delivery(version=version, op=op)
+        env = json.loads(d["envelope"]); env["parameters"]["profile"] = profile
+        from tests.test_recuperacao import KEY
+        import base64
+        d["envelope"] = json.dumps(env); d["signature"] = base64.b64encode(KEY.sign(d["envelope"].encode())).decode()
+        return d
+
+    def outcome(self):
+        return self.cloud.results[-1][1]["outcome"]
+
+    def test_troca_de_plano_nao_conclui_enquanto_a_sessao_continua_no_perfil_antigo(self):
+        self.ex.handle(delivery())
+        self.nas.online["cliente01"] = {".id": "*1", "name": "cliente01", "address": "100.64.0.9", "uptime": "1h"}
+        self.nas.remove = lambda username: 0          # o NAS responde, mas a sessão continua lá
+        op = self.plano(2, "plano-500m")
+        self.ex.handle(op)
+        self.assertEqual(self.outcome(), "FAILED")    # antes era dada como concluída só com a autorização local certa
+        self.assertEqual(self.radius.read("cliente01")["profile"], "plano-500m")
+        del self.nas.remove                            # NAS volta a derrubar a sessão
+        import json
+        self.ex.handle(self.plano(2, "plano-500m", op=json.loads(op["envelope"])["operation_id"]))
+        out = self.cloud.results[-1][1]
+        self.assertEqual(out["outcome"], "SUCCEEDED")
+        self.assertIn("já aplicada nesta versão", str(out["steps"]))   # não regravou a autorização: só tratou a sessão
+        self.assertEqual(self.nas.online, {})
+
+    def test_sessao_desconhecida_nao_e_tratada_como_sessao_inexistente(self):
+        self.nas.down = True
+        self.ex.handle(delivery())                    # conta nova: não pode haver sessão antiga; a autorização basta
+        self.assertEqual(self.outcome(), "SUCCEEDED")
+        op = self.plano(2, "plano-500m")              # conta existente + NAS sem resposta: não dá para afirmar que a sessão mudou
+        self.ex.handle(op)
+        self.assertEqual(self.outcome(), "FAILED")
+        self.assertIn("desconhecida", str(self.cloud.results[-1][1]["steps"]))
+        self.nas.down = False
+        import json
+        self.ex.handle(self.plano(2, "plano-500m", op=json.loads(op["envelope"])["operation_id"]))
+        self.assertEqual(self.outcome(), "SUCCEEDED")   # sem cliente online de verdade: agora se sabe que não há sessão
+
+
 class IpFixo(unittest.TestCase):
     """Framed-IP-Address: gravado junto da autorização, lido de volta e removido quando a intenção deixa de trazê-lo."""
 

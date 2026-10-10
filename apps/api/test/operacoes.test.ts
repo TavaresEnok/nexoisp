@@ -157,4 +157,18 @@ describe('motor de operações de rede', () => {
     await agent(agentToken, `attempts/${d.attempt_id}/begin`);
     await agent(agentToken, `attempts/${d.attempt_id}/result`, { outcome: 'SUCCEEDED', steps: [], observed: obs('suspended') });
   });
+  it('reserva vencida não recebe autorização para executar, mesmo sem outra rotina ter devolvido a tarefa à fila', async () => {
+    const op = await request('provision');
+    const d = (await poll()).operation;
+    await withScope({ tenantId, operator: false }, (c) => c.query(`update operations set lease_until = now() - interval '1 second' where id = $1`, [op.operation_id]));
+    // nenhuma leitura/varredura entre o vencimento e o begin: a própria autorização confere a posse
+    expect((await agent(agentToken, `attempts/${d.attempt_id}/begin`)).body).toEqual({ go: false, reason: 'lease_expired' });
+    expect(await opStatus(op.operation_id)).toBe('PENDING');
+    expect((await agent(agentToken, `attempts/${d.attempt_id}/begin`)).body).toMatchObject({ go: false, reason: 'not_owner' });   // a tentativa antiga não volta
+    const d2 = (await poll()).operation;                                       // reentregue como nova tentativa
+    expect(d2.attempt_id).not.toBe(d.attempt_id);
+    expect((await agent(agentToken, `attempts/${d2.attempt_id}/begin`)).body.go).toBe(true);
+    await agent(agentToken, `attempts/${d2.attempt_id}/result`, { outcome: 'SUCCEEDED', steps: [], observed: obs('active') });
+    expect(await opStatus(op.operation_id)).toBe('SUCCEEDED');
+  });
 });
