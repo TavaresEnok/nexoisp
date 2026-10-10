@@ -10,24 +10,26 @@ const SESSION_HOURS = 12;
 const zPassword = z.string().min(8, 'senha deve ter ao menos 8 caracteres').max(200);
 authenticator.options = { window: 1 };
 
-// Limite simples de tentativas de login por e-mail (em memória, por processo).
-const fails = new Map<string, { n: number; until: number }>();
-function throttle(email: string) {
-  const f = fails.get(email);
-  if (f && f.n >= 8 && f.until > Date.now()) throw new HttpError(429, 'muitas tentativas; aguarde alguns minutos');
-  if (f && f.until <= Date.now()) fails.delete(email);
+// Limite de tentativas de login, no banco (vale para todas as réplicas e sobrevive a reinício).
+// Por e-mail: 8 falhas; por endereço de origem: 40 falhas (cobre uma rede inteira atrás de um NAT, mas barra quem varre e-mails).
+const WINDOW_S = 10 * 60, LIMIT_EMAIL = 8, LIMIT_IP = 40;
+const keys = (email: string, ip: string) => [[`email:${email}`, LIMIT_EMAIL], [`ip:${ip}`, LIMIT_IP]] as const;
+async function throttle(email: string, ip: string) {
+  const wait = await withScope(noScope, async (c) => {
+    let w = 0;
+    for (const [k, limit] of keys(email, ip)) w = Math.max(w, (await c.query('select login_throttle_blocked($1,$2) as s', [k, limit])).rows[0].s);
+    return w;
+  });
+  if (wait > 0) throw new HttpError(429, `muitas tentativas; aguarde ${Math.ceil(wait / 60)} minuto(s)`);
 }
-function failed(email: string) {
-  const f = fails.get(email) ?? { n: 0, until: 0 };
-  fails.set(email, { n: f.n + 1, until: Date.now() + 10 * 60_000 });
-  if (fails.size > 10_000) fails.clear();
-}
+const failed = (email: string, ip: string) => withScope(noScope, async (c) => { for (const [k] of keys(email, ip)) await c.query('select login_throttle_fail($1,$2)', [k, WINDOW_S]); });
+const cleared = (email: string) => withScope(noScope, (c) => c.query('select login_throttle_clear($1)', [`email:${email}`]));   // o contador do endereço continua: um acerto não apaga a varredura
 
 export async function identityRoutes(app: FastifyInstance) {
   app.post('/api/auth/login', async (req, reply) => {
     const b = z.object({ email: z.string().email(), password: z.string().min(1), code: z.string().trim().max(10).optional() }).parse(req.body);
     const key = b.email.toLowerCase();
-    throttle(key);
+    await throttle(key, req.ip);
     const u = await withScope(noScope, async (c) => (await c.query('select * from auth_find_user($1)', [b.email])).rows[0]);
     let ok = u && u.active && (u.tenant_status ?? 'active') === 'active' && verifyPassword(b.password, u.password_hash);
     if (ok && u.mfa_enabled) {
@@ -35,7 +37,7 @@ export async function identityRoutes(app: FastifyInstance) {
       ok = authenticator.check(b.code.replace(/\s/g, ''), decryptSecret(u.mfa_secret_enc));
     }
     if (!ok) {
-      failed(key);
+      await failed(key, req.ip);
       if (u) await audit(null, { userId: u.id, tenantId: u.tenant_id, support: false, scope: { tenantId: u.tenant_id, operator: !u.tenant_id } },
         'auth.login', 'user', u.id, {}, 'denied');
       throw new HttpError(401, 'e-mail ou senha inválidos');
@@ -45,7 +47,7 @@ export async function identityRoutes(app: FastifyInstance) {
       c.query(`select session_create($1,$2, now() + interval '${SESSION_HOURS} hours')`, [u.id, sha256(token)]));
     await audit(null, { userId: u.id, tenantId: u.tenant_id, support: false, scope: { tenantId: u.tenant_id, operator: !u.tenant_id } },
       'auth.login', 'user', u.id);
-    fails.delete(key);
+    await cleared(key);
     reply.header('set-cookie', sessionCookie(req, token, SESSION_HOURS * 3600));
     return { token }; // o painel usa o cookie; o token no corpo serve a integrações
   });

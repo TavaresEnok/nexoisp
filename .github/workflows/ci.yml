@@ -1,0 +1,94 @@
+name: verificação
+on:
+  push:
+  pull_request:
+
+# Roda a cada envio: tipos, build, dependências de produção, testes da API, testes do agente e fumaça da interface.
+# Não prova nada contra equipamento real nem contra gateway real: isso continua sendo laboratório/homologação.
+env:
+  NEXO_DEMO_MODE: "1"
+  NEXO_DEMO_AGENT_TOKEN: ci-demo-agent-token
+  NEXO_GATEWAY_WEBHOOK_SECRET: ci-gateway-webhook-secret
+  POSTGRES_PASSWORD: ci-postgres
+  NEXO_APP_DB_PASSWORD: ci-app-db
+
+jobs:
+  api-e-web:
+    runs-on: ubuntu-24.04
+    services:
+      db:
+        image: postgres:16-alpine
+        env: { POSTGRES_USER: nexo_owner, POSTGRES_PASSWORD: ci-postgres, POSTGRES_DB: nexo_test }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U nexo_owner -d nexo_test" --health-interval 3s --health-retries 20
+    env:
+      DATABASE_URL_OWNER: postgres://nexo_owner:ci-postgres@localhost:5432/nexo_test
+      DATABASE_URL_APP: postgres://nexo_app:ci-app-db@localhost:5432/nexo_test
+      NEXO_AGENT_MTLS: "off"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Chaves descartáveis (geradas nesta execução, nunca versionadas)
+        run: |
+          echo "NEXO_OP_SIGNING_KEY=$(openssl genpkey -algorithm ed25519 -outform DER | base64 -w0)" >> "$GITHUB_ENV"
+          echo "NEXO_SECRET_KEY=$(openssl rand -base64 32)" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Dependências de produção sem vulnerabilidade alta
+        run: npm audit --omit=dev --audit-level=high
+      - name: Tipos
+        run: npm -w apps/api run typecheck && npm -w apps/web run typecheck
+      - name: Build
+        run: npm -w apps/api run build && npm -w apps/web run build
+      - name: Testes da API (papel real do banco, com RLS)
+        run: npm -w apps/api test
+
+  agente:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip, cache-dependency-path: services/network-agent/requirements.txt }
+      - run: pip install -r services/network-agent/requirements.txt
+      - name: Testes do agente
+        working-directory: services/network-agent
+        run: python -m unittest discover -s tests -t .
+
+  interface:
+    runs-on: ubuntu-24.04
+    services:
+      db:
+        image: postgres:16-alpine
+        env: { POSTGRES_USER: nexo_owner, POSTGRES_PASSWORD: ci-postgres, POSTGRES_DB: nexo }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U nexo_owner -d nexo" --health-interval 3s --health-retries 20
+    env:
+      DATABASE_URL_OWNER: postgres://nexo_owner:ci-postgres@localhost:5432/nexo
+      DATABASE_URL_APP: postgres://nexo_app:ci-app-db@localhost:5432/nexo
+      PORT: "8080"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Chaves descartáveis (geradas nesta execução, nunca versionadas)
+        run: |
+          echo "NEXO_OP_SIGNING_KEY=$(openssl genpkey -algorithm ed25519 -outform DER | base64 -w0)" >> "$GITHUB_ENV"
+          echo "NEXO_SECRET_KEY=$(openssl rand -base64 32)" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm -w apps/api run build && npm -w apps/web run build
+      - name: Sobe a API em modo demonstração
+        run: |
+          node apps/api/dist/main.js > api.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf localhost:8080/api/health && break; sleep 1; done
+          curl -sf localhost:8080/api/health || { cat api.log; exit 1; }
+      - name: Navegador
+        working-directory: e2e
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          BASE=http://localhost:8080 node smoke.mjs
+      - name: Log da API (em caso de falha)
+        if: failure()
+        run: tail -n 80 api.log

@@ -95,6 +95,8 @@ Compatibilidade: o manifesto traz `protocol_schema` (envelope) e `local_schema` 
 
 ## 3. Monitoramento básico
 
+**Limite de login:** as tentativas ficam no banco (8 falhas por e-mail e 40 por endereço de origem, em janela de 10 minutos), então valem para todas as réplicas e sobrevivem a reinício. Atrás do Caddy a instalação define `NEXO_TRUST_PROXY=1` para usar o endereço real do cliente; **sem proxy confiável essa variável não deve ser ligada** (o cabeçalho seria forjável).
+
 | O quê | Onde |
 |---|---|
 | API e banco | `GET /api/health` (200 = ok; 503 = banco indisponível) — apontar o monitor externo |

@@ -72,4 +72,24 @@ describe('rotinas periódicas com mais de uma réplica', () => {
     await expect(withWorkerLock(async () => { throw new Error('falhou'); })).rejects.toThrow('falhou');
     expect(await withWorkerLock(async () => {})).toBe(true);     // falha dentro da rotina não deixa a trava presa
   });
+  it('limite de login no banco: bloqueia por e-mail e por endereço, não é zerado por outra réplica e um acerto não apaga a varredura', async () => {
+    const { withScope, noScope } = await import('../src/db.js');
+    const tag = Date.now();
+    const tentar = (email: string, password: string, ip: string) =>
+      getApp().then((a) => a.inject({ method: 'POST', url: '/api/auth/login', remoteAddress: ip, payload: { email, password } })).then((r) => r.statusCode);
+    // 8 falhas no mesmo e-mail (a partir de endereços diferentes): a 9ª é recusada mesmo com a senha certa
+    const alvo = `limite${tag}@alfa.demo`;
+    for (let i = 0; i < 8; i++) expect(await tentar(alvo, 'errada', `10.99.0.${i + 1}`)).toBe(401);
+    expect(await tentar(alvo, 'errada', '10.99.1.1')).toBe(429);
+    expect(await tentar('admin@alfa.demo', 'demo1234', '10.99.1.2')).toBe(200);          // outra conta não é afetada
+    // o estado está no banco: uma "outra réplica" (nova conexão) vê o mesmo bloqueio
+    const wait = await withScope(noScope, async (c) => (await c.query(`select login_throttle_blocked($1, 8) as s`, [`email:${alvo}`])).rows[0].s);
+    expect(wait).toBeGreaterThan(0);
+    // varredura de e-mails a partir de um só endereço: 40 falhas bloqueiam o endereço, até para uma conta válida
+    for (let i = 0; i < 40; i++) await tentar(`varre${tag}${i}@alfa.demo`, 'x', '10.99.2.2');
+    expect(await tentar('admin@alfa.demo', 'demo1234', '10.99.2.2')).toBe(429);
+    expect(await tentar('admin@alfa.demo', 'demo1234', '10.99.2.3')).toBe(200);          // outro endereço segue normal
+    // a aplicação não lê nem escreve a tabela direto
+    await expect(withScope(noScope, (c) => c.query('select * from login_throttle'))).rejects.toThrow();
+  });
 });

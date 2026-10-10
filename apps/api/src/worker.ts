@@ -1,4 +1,4 @@
-import { pool, withScope } from './db.js';
+import { noScope, pool, withScope } from './db.js';
 import { runWorkerOnce } from './finance/core.js';
 import { deliverNotifications } from './notify.js';
 
@@ -53,6 +53,7 @@ export function startWorker(log: (m: string) => void, everyMs = 60_000) {
         for (const t of h) log(`ALERTA tenant=${t.tenant_id} agentes_offline=${t.agents_offline} operacoes_incertas=${t.uncertain}`);
         await notify(h, log);
         await deliverNotifications(log);
+        await withScope(noScope, (c) => c.query('select login_throttle_purge()'));
       });
     } catch (e) {
       log(`rotina periódica falhou: ${(e as Error).message}`);

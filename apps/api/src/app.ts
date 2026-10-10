@@ -18,7 +18,8 @@ import { nocRoutes } from './routes/noc.js';
 import { oltRoutes } from './routes/olt.js';
 
 export async function buildApp(opts: { logger?: boolean } = {}) {
-  const app = Fastify({ logger: opts.logger ?? false, bodyLimit: 20 * 1024 * 1024 });
+  // Atrás do Caddy (produção) o endereço real vem em X-Forwarded-For; sem proxy, o cabeçalho seria forjável e não é confiado.
+  const app = Fastify({ logger: opts.logger ?? false, bodyLimit: 20 * 1024 * 1024, trustProxy: process.env.NEXO_TRUST_PROXY === '1' });
   app.decorateRequest('ctx', null as any);
 
   app.setErrorHandler((err: any, _req, reply) => {

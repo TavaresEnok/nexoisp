@@ -176,3 +176,11 @@ Atualizar ao final de cada dia: entrega concluída, impedimento externo, respons
 
 **Decisão sobre a data-alvo:** 17/10 mantida como meta, condicionada a o gateway, a amostra do MK-Auth e o acesso ao equipamento chegarem até 12/10.
 Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobrança no sistema anterior, suspensão automática desligada) mantém a data.
+
+### 10/10/2026 — correções de engenharia da revisão interna
+
+- **Integração contínua** (`.github/workflows/ci.yml`): a cada envio roda auditoria de dependências, tipos, build, 62 testes da API com o papel real do banco,
+  31 testes do agente e a fumaça da interface em navegador sobre banco vazio.
+- **Fumaça da interface versionada** (`e2e/smoke.mjs`): login, assinantes, contrato, faturas, confirmação do sistema, NOC, tema, perfil sem acesso à rede e portal no celular.
+- **Dependências:** `@fastify/static` 8 → 10 e `react-router-dom` 6 → 7 (quatro avisos altos e dois moderados); `npm audit --omit=dev` sem vulnerabilidades.
+- **Limite de login no banco**, por e-mail e por endereço de origem, com teste que simula outra réplica.
