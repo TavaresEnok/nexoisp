@@ -1,0 +1,347 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { api, dt, useLoad, usePaged } from '../api';
+import { can, useMe } from '../App';
+import { ActionButton, Badge, Card, Field, Form, KV, Modal, Page, Pager, State } from '../ui';
+
+export const WO_KIND: Record<string, string> = { install: 'Instalação', repair: 'Reparo', address_change: 'Mudança de endereço', removal: 'Retirada', other: 'Outro' };
+const WO_STATUS: Record<string, [string, 'gray' | 'green' | 'red' | 'amber' | 'blue']> = {
+  open: ['Aberta', 'amber'], scheduled: ['Agendada', 'blue'], in_progress: ['Em execução', 'blue'], done: ['Concluída', 'green'], canceled: ['Cancelada', 'gray'],
+};
+export const WoBadge = ({ status }: { status: string }) => <Badge tone={WO_STATUS[status]?.[1]}>{WO_STATUS[status]?.[0] ?? status}</Badge>;
+const WO_EVENT: Record<string, string> = { created: 'Aberta', status: 'Situação', assigned: 'Responsável', scheduled: 'Agendamento', note: 'Anotação', material: 'Material' };
+const toLocal = (s?: string | null) => { if (!s) return ''; const x = new Date(s); return new Date(x.getTime() - x.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
+const toIso = (s: string) => (s ? new Date(s).toISOString() : null);
+
+/** Busca de assinante + contrato, usada ao abrir OS e atendimento fora da ficha do assinante. */
+export function SubscriberPick({ value, onChange }: { value: { subscriber_id: string; contract_id: string }; onChange: (v: { subscriber_id: string; contract_id: string }) => void }) {
+  const [q, setQ] = useState('');
+  const subs = useLoad<any[]>(q.length >= 2 ? `/subscribers?limit=20&q=${encodeURIComponent(q)}` : null);
+  const detail = useLoad<any>(value.subscriber_id ? `/subscribers/${value.subscriber_id}` : null);
+  return (
+    <div className="cols3">
+      <Field label="Assinante (busque pelo nome)"><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="nome, CPF ou telefone…" autoFocus /></Field>
+      <Field label="Selecione">
+        <select value={value.subscriber_id} onChange={(e) => onChange({ subscriber_id: e.target.value, contract_id: '' })} required>
+          <option value="">{subs.data ? (subs.data.length ? 'Selecione…' : 'nenhum encontrado') : '—'}</option>
+          {subs.data?.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+        </select>
+      </Field>
+      <Field label="Contrato (opcional)">
+        <select value={value.contract_id} onChange={(e) => onChange({ ...value, contract_id: e.target.value })}>
+          <option value="">—</option>
+          {detail.data?.contracts.map((k: any) => <option key={k.id} value={k.id}>{k.plan_name}{k.status !== 'active' ? ' (encerrado)' : ''}</option>)}
+        </select>
+      </Field>
+    </div>
+  );
+}
+
+export function WorkOrderForm({ subscriberId, contractId, ticketId, onDone, onCancel }: { subscriberId?: string; contractId?: string; ticketId?: string; onDone: (w: any) => void; onCancel: () => void }) {
+  const staff = useLoad<any[]>('/staff');
+  const [who, setWho] = useState({ subscriber_id: subscriberId ?? '', contract_id: contractId ?? '' });
+  const [f, setF] = useState({ kind: 'repair', description: '', assignee_id: '', scheduled_for: '' });
+  return (
+    <Form submit="Abrir ordem de serviço" onCancel={onCancel} onSubmit={async () => {
+      onDone(await api('/work-orders', { body: { ...f, ...who, contract_id: who.contract_id || null, assignee_id: f.assignee_id || null, scheduled_for: toIso(f.scheduled_for), ticket_id: ticketId ?? null } }));
+    }}>
+      {!subscriberId && <SubscriberPick value={who} onChange={setWho} />}
+      <div className="cols3">
+        <Field label="Tipo"><select value={f.kind} onChange={(e) => setF({ ...f, kind: e.target.value })}>{Object.entries(WO_KIND).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></Field>
+        <Field label="Responsável"><select value={f.assignee_id} onChange={(e) => setF({ ...f, assignee_id: e.target.value })}><option value="">— a definir —</option>{staff.data?.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}</select></Field>
+        <Field label="Agendar para"><input type="datetime-local" value={f.scheduled_for} onChange={(e) => setF({ ...f, scheduled_for: e.target.value })} /></Field>
+      </div>
+      <Field label="O que precisa ser feito"><textarea rows={3} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} required /></Field>
+    </Form>
+  );
+}
+
+function WorkOrderDetail({ id, onClose }: { id: string; onClose: () => void }) {
+  const { me } = useMe();
+  const { data: w, loading, error, reload } = useLoad<any>(`/work-orders/${id}`);
+  const staff = useLoad<any[]>('/staff');
+  const items = useLoad<any[]>(can(me, 'stock:read') ? '/stock/items' : null);
+  const [res, setRes] = useState('');
+  const [note, setNote] = useState('');
+  const [mat, setMat] = useState({ item_id: '', qty: '1' });
+  const write = can(me, 'os:write') && w && !['done', 'canceled'].includes(w.status);
+  const status = (s: string, resolution?: string) => async () => { await api(`/work-orders/${id}/status`, { body: { status: s, resolution } }); setRes(''); await reload(); };
+  const patch = async (body: any) => { await api(`/work-orders/${id}`, { method: 'PATCH', body }); await reload(); };
+  return (
+    <Modal title={w ? `OS ${w.number} — ${WO_KIND[w.kind]}` : 'Ordem de serviço'} onClose={onClose} wide>
+      <State loading={loading && !w} error={error}>
+        {w && (<>
+          <KV items={[
+            ['Situação', <WoBadge status={w.status} />], ['Assinante', <Link to={`/assinantes/${w.subscriber_id}`}>{w.subscriber_name}</Link>], ['Telefone', w.subscriber_phone],
+            ['Endereço', w.subscriber_address || '—'], ['Contrato', w.contract_id ? <Link to={`/contratos/${w.contract_id}`}>abrir</Link> : '—'],
+            ['Aberta', <>{dt(w.created_at)} <span className="muted small">por {w.created_by_name ?? 'sistema'}</span></>],
+            ['Responsável', write ? <select value={w.assignee_id ?? ''} onChange={(e) => patch({ assignee_id: e.target.value || null }).catch((x) => alert(x.message))}><option value="">— a definir —</option>{staff.data?.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}</select> : w.assignee_name],
+            ['Agendada para', write ? <input type="datetime-local" defaultValue={toLocal(w.scheduled_for)} onBlur={(e) => { if (e.target.value !== toLocal(w.scheduled_for)) patch({ scheduled_for: toIso(e.target.value) }).catch((x) => alert(x.message)); }} /> : dt(w.scheduled_for)],
+          ]} />
+          <p style={{ whiteSpace: 'pre-wrap' }}>{w.description}</p>
+          {w.resolution && <div className="state" style={{ textAlign: 'left' }}><b>{w.status === 'canceled' ? 'Motivo do cancelamento' : 'O que foi feito'}:</b> {w.resolution}</div>}
+          {write && (
+            <div className="row" style={{ margin: '10px 0' }}>
+              {w.status !== 'in_progress' && <ActionButton className="primary" onClick={status('in_progress')}>Iniciar execução</ActionButton>}
+              {w.status === 'in_progress' && <ActionButton onClick={status('open')}>Devolver para a fila</ActionButton>}
+              <input style={{ flex: 1, minWidth: 220 }} value={res} onChange={(e) => setRes(e.target.value)} placeholder={w.status === 'in_progress' ? 'O que foi feito (para concluir) ou motivo (para cancelar)' : 'Motivo do cancelamento'} />
+              {w.status === 'in_progress' && <ActionButton className="primary" disabled={!res.trim()} onClick={status('done', res)}>Concluir</ActionButton>}
+              <ActionButton className="danger" disabled={!res.trim()} confirm="Cancelar esta ordem de serviço?" onClick={status('canceled', res)}>Cancelar OS</ActionButton>
+            </div>
+          )}
+          <div className="grid2">
+            <Card title="Material utilizado">
+              <State empty={w.materials.length === 0}>
+                <table><thead><tr><th>Item</th><th className="num">Qtd.</th><th>Por</th></tr></thead>
+                  <tbody>{w.materials.map((m: any) => <tr key={m.id}><td>{m.item_name}</td><td className="num">{m.qty} {m.unit}</td><td className="small">{m.created_by_name}</td></tr>)}</tbody></table>
+              </State>
+              {write && items.data && (
+                <div className="row" style={{ marginTop: 8 }}>
+                  <select style={{ flex: 1 }} value={mat.item_id} onChange={(e) => setMat({ ...mat, item_id: e.target.value })}><option value="">Item do estoque…</option>
+                    {items.data.filter((i) => i.active).map((i) => <option key={i.id} value={i.id}>{i.name} (saldo {i.balance})</option>)}</select>
+                  <input style={{ width: 80 }} type="number" value={mat.qty} onChange={(e) => setMat({ ...mat, qty: e.target.value })} title="Negativo devolve ao estoque" />
+                  <ActionButton disabled={!mat.item_id} onClick={async () => { await api(`/work-orders/${id}/materials`, { body: { item_id: mat.item_id, qty: Number(mat.qty) } }); await reload(); items.reload(); }}>Lançar</ActionButton>
+                </div>
+              )}
+            </Card>
+            <Card title="Histórico">
+              {can(me, 'os:write') && <div className="row" style={{ marginBottom: 8 }}>
+                <input style={{ flex: 1 }} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Anotação…" />
+                <ActionButton disabled={!note.trim()} onClick={async () => { await api(`/work-orders/${id}/notes`, { body: { note } }); setNote(''); await reload(); }}>Anotar</ActionButton>
+              </div>}
+              <ul className="steps">{w.events.map((e: any, i: number) => (
+                <li key={i}><span className="small muted" style={{ minWidth: 118 }}>{dt(e.at)}</span>
+                  <span className="small"><b>{WO_EVENT[e.event] ?? e.event}</b>{' '}
+                    {e.event === 'status' ? <>{WO_STATUS[e.detail.from]?.[0]} → {WO_STATUS[e.detail.to]?.[0]}</> : e.event === 'assigned' ? (e.detail.to ?? 'sem responsável') : e.event === 'scheduled' ? dt(e.detail.for)
+                      : e.event === 'note' ? e.detail.note : e.event === 'material' ? `${e.detail.item} × ${e.detail.qty}` : ''} <span className="muted">· {e.actor_name ?? 'sistema'}</span></span></li>
+              ))}</ul>
+            </Card>
+          </div>
+        </>)}
+      </State>
+    </Modal>
+  );
+}
+
+/** Lista de OS; com `subscriberId`/`contractId` vira o cartão da ficha. */
+export function WorkOrderList({ subscriberId, contractId }: { subscriberId?: string; contractId?: string }) {
+  const { me } = useMe();
+  const [status, setStatus] = useState(subscriberId ? '' : 'pending');
+  const [q, setQ] = useState('');
+  const [mine, setMine] = useState(false);
+  const p = new URLSearchParams();
+  if (status) p.set('status', status);
+  if (q) p.set('q', q);
+  if (mine) p.set('mine', '1');
+  if (contractId) p.set('contract_id', contractId); else if (subscriberId) p.set('subscriber_id', subscriberId);
+  const list = usePaged<any>(`/work-orders?${p}`);
+  const [open, setOpen] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
+  const w = can(me, 'os:write');
+  const table = (
+    <State loading={list.loading && !list.data} error={list.error} empty={list.data?.length === 0}>
+      <table>
+        <thead><tr><th>OS</th><th>Tipo</th>{!subscriberId && <th>Assinante</th>}<th>Situação</th><th>Agendada</th><th>Responsável</th><th>Descrição</th><th></th></tr></thead>
+        <tbody>{list.data?.map((o) => (
+          <tr key={o.id}><td className="mono">{o.number}</td><td>{WO_KIND[o.kind]}</td>{!subscriberId && <td><Link to={`/assinantes/${o.subscriber_id}`}>{o.subscriber_name}</Link></td>}
+            <td><WoBadge status={o.status} /></td>
+            <td className="small">{o.scheduled_for ? <>{dt(o.scheduled_for)} {['open', 'scheduled'].includes(o.status) && new Date(o.scheduled_for) < new Date() && <Badge tone="red">vencida</Badge>}</> : '—'}</td>
+            <td className="small">{o.assignee_name ?? '—'}</td><td className="small" style={{ maxWidth: 320 }}>{o.description.slice(0, 90)}</td>
+            <td><button className="sm" onClick={() => setOpen(o.id)}>abrir</button></td></tr>
+        ))}</tbody>
+      </table>
+      <Pager p={list} />
+    </State>
+  );
+  const modals = (<>
+    {open && <WorkOrderDetail id={open} onClose={() => { setOpen(null); list.reload(); }} />}
+    {adding && <Modal title="Nova ordem de serviço" onClose={() => setAdding(false)} wide><WorkOrderForm subscriberId={subscriberId} contractId={contractId} onCancel={() => setAdding(false)} onDone={() => { setAdding(false); list.reload(); }} /></Modal>}
+  </>);
+  if (subscriberId) return <Card title="Ordens de serviço" actions={w && <button onClick={() => setAdding(true)}>Nova OS</button>}>{table}{modals}</Card>;
+  return (
+    <Page title="Ordens de serviço" actions={w && <button className="primary" onClick={() => setAdding(true)}>Nova ordem de serviço</button>}>
+      <div className="row" style={{ marginBottom: 12 }}>
+        <input className="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Assinante, descrição ou número…" />
+        <select style={{ width: 180 }} value={status} onChange={(e) => setStatus(e.target.value)}>
+          <option value="pending">Em aberto</option><option value="">Todas</option>{Object.entries(WO_STATUS).map(([k, v]) => <option key={k} value={k}>{v[0]}</option>)}
+        </select>
+        <label className="row small"><input type="checkbox" style={{ width: 'auto' }} checked={mine} onChange={(e) => setMine(e.target.checked)} /> só as minhas</label>
+      </div>
+      {table}{modals}
+    </Page>
+  );
+}
+export const WorkOrders = () => <WorkOrderList />;
+
+// ---- Estoque ----
+const MOVE: Record<string, string> = { in: 'Entrada', out: 'Saída', adjust: 'Ajuste' };
+
+function ItemForm({ item, onDone, onCancel }: { item?: any; onDone: () => void; onCancel: () => void }) {
+  const [f, setF] = useState({ name: item?.name ?? '', sku: item?.sku ?? '', unit: item?.unit ?? 'un', min_qty: String(item?.min_qty ?? 0) });
+  return (
+    <Form onCancel={onCancel} onSubmit={async () => { await api(item ? `/stock/items/${item.id}` : '/stock/items', { method: item ? 'PATCH' : 'POST', body: { ...f, sku: f.sku || null, min_qty: Number(f.min_qty) } }); onDone(); }}>
+      <Field label="Item"><input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} required autoFocus /></Field>
+      <div className="cols3">
+        <Field label="Código (opcional)"><input value={f.sku} onChange={(e) => setF({ ...f, sku: e.target.value })} /></Field>
+        <Field label="Unidade" hint="un, m, cx…"><input value={f.unit} onChange={(e) => setF({ ...f, unit: e.target.value })} required /></Field>
+        <Field label="Estoque mínimo"><input type="number" min="0" value={f.min_qty} onChange={(e) => setF({ ...f, min_qty: e.target.value })} required /></Field>
+      </div>
+    </Form>
+  );
+}
+
+function Movements({ item, write, onClose }: { item: any; write: boolean; onClose: () => void }) {
+  const list = useLoad<any[]>(`/stock/items/${item.id}/movements`);
+  const [f, setF] = useState({ kind: 'in', qty: '', note: '' });
+  return (
+    <Modal title={`Movimentos — ${item.name}`} onClose={onClose} wide>
+      {write && (
+        <Form submit="Lançar movimento" onSubmit={async () => { await api(`/stock/items/${item.id}/movements`, { body: { kind: f.kind, qty: Number(f.qty), note: f.note || null } }); setF({ ...f, qty: '', note: '' }); list.reload(); }}>
+          <div className="cols3">
+            <Field label="Tipo"><select value={f.kind} onChange={(e) => setF({ ...f, kind: e.target.value })}>{Object.entries(MOVE).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></Field>
+            <Field label="Quantidade" hint={f.kind === 'adjust' ? 'Diferença com sinal: -2 retira, 3 acrescenta.' : 'Sempre positiva.'}><input type="number" value={f.qty} onChange={(e) => setF({ ...f, qty: e.target.value })} required /></Field>
+            <Field label={f.kind === 'adjust' ? 'Justificativa (obrigatória)' : 'Observação'}><input value={f.note} onChange={(e) => setF({ ...f, note: e.target.value })} required={f.kind === 'adjust'} /></Field>
+          </div>
+        </Form>
+      )}
+      <p className="small muted">Movimentos não são alterados nem apagados: um lançamento errado é corrigido com um ajuste.</p>
+      <State loading={list.loading} error={list.error} empty={list.data?.length === 0}>
+        <table><thead><tr><th>Quando</th><th>Tipo</th><th className="num">Qtd.</th><th>Observação</th><th>Por</th></tr></thead>
+          <tbody>{list.data?.map((m) => <tr key={m.id}><td className="small">{dt(m.created_at)}</td><td>{MOVE[m.kind]}</td><td className="num" style={{ color: m.qty < 0 ? 'var(--red)' : 'var(--green)' }}>{m.qty > 0 ? `+${m.qty}` : m.qty}</td>
+            <td className="small">{m.note ?? '—'}</td><td className="small">{m.created_by_name ?? '—'}</td></tr>)}</tbody></table>
+      </State>
+    </Modal>
+  );
+}
+
+export function Stock() {
+  const { me } = useMe();
+  const w = can(me, 'stock:write');
+  const { data, loading, error, reload } = useLoad<any[]>('/stock/items');
+  const [modal, setModal] = useState<{ kind: 'new' | 'edit' | 'moves'; item?: any } | null>(null);
+  const close = () => { setModal(null); reload(); };
+  return (
+    <Page title="Estoque" actions={w && <button className="primary" onClick={() => setModal({ kind: 'new' })}>Novo item</button>}>
+      <State loading={loading} error={error} empty={data?.length === 0}>
+        <table>
+          <thead><tr><th>Item</th><th>Código</th><th className="num">Saldo</th><th className="num">Mínimo</th><th>Situação</th><th></th></tr></thead>
+          <tbody>{data?.map((i) => (
+            <tr key={i.id}><td>{i.name}</td><td className="mono">{i.sku ?? '—'}</td><td className="num"><b>{i.balance}</b> {i.unit}</td><td className="num">{i.min_qty}</td>
+              <td>{!i.active ? <Badge>Inativo</Badge> : i.low ? <Badge tone="red">Abaixo do mínimo</Badge> : <Badge tone="green">OK</Badge>}</td>
+              <td><div className="row" style={{ justifyContent: 'flex-end' }}>
+                <button className="sm" onClick={() => setModal({ kind: 'moves', item: i })}>Movimentos</button>
+                {w && <button className="sm" onClick={() => setModal({ kind: 'edit', item: i })}>Editar</button>}
+                {w && <ActionButton className="sm" onClick={async () => { await api(`/stock/items/${i.id}`, { method: 'PATCH', body: { active: !i.active } }); reload(); }}>{i.active ? 'Desativar' : 'Ativar'}</ActionButton>}
+              </div></td></tr>
+          ))}</tbody>
+        </table>
+      </State>
+      {modal?.kind === 'new' && <Modal title="Novo item de estoque" onClose={() => setModal(null)}><ItemForm onCancel={() => setModal(null)} onDone={close} /></Modal>}
+      {modal?.kind === 'edit' && <Modal title="Editar item" onClose={() => setModal(null)}><ItemForm item={modal.item} onCancel={() => setModal(null)} onDone={close} /></Modal>}
+      {modal?.kind === 'moves' && <Movements item={modal.item} write={w} onClose={close} />}
+    </Page>
+  );
+}
+
+// ---- FTTH ----
+const BOX_KIND: Record<string, string> = { cto: 'CTO (atendimento)', ceo: 'CEO (emenda)' };
+
+function BoxForm({ box, boxes, onDone, onCancel }: { box?: any; boxes: any[]; onDone: () => void; onCancel: () => void }) {
+  const devices = useLoad<any[]>('/devices');
+  const [f, setF] = useState({ name: box?.name ?? '', kind: box?.kind ?? 'cto', ports: String(box?.ports ?? 8), parent_id: box?.parent_id ?? '', device_id: box?.device_id ?? '',
+    pon_port: box?.pon_port ?? '', address: box?.address ?? '', latitude: box?.latitude ?? '', longitude: box?.longitude ?? '', notes: box?.notes ?? '' });
+  const set = (k: string) => (e: any) => setF({ ...f, [k]: e.target.value });
+  return (
+    <Form onCancel={onCancel} onSubmit={async () => {
+      await api(box ? `/ftth/boxes/${box.id}` : '/ftth/boxes', { method: box ? 'PATCH' : 'POST', body: { ...f, ports: Number(f.ports), parent_id: f.parent_id || null, device_id: f.device_id || null,
+        latitude: f.latitude === '' ? null : Number(f.latitude), longitude: f.longitude === '' ? null : Number(f.longitude) } });
+      onDone();
+    }}>
+      <div className="cols3">
+        <Field label="Identificação"><input value={f.name} onChange={set('name')} required autoFocus /></Field>
+        <Field label="Tipo"><select value={f.kind} onChange={set('kind')}>{Object.entries(BOX_KIND).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></Field>
+        <Field label="Portas"><input type="number" min="1" max="144" value={f.ports} onChange={set('ports')} required /></Field>
+      </div>
+      <div className="cols3">
+        <Field label="Caixa anterior"><select value={f.parent_id} onChange={set('parent_id')}><option value="">— nenhuma —</option>{boxes.filter((b) => b.id !== box?.id).map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}</select></Field>
+        <Field label="OLT"><select value={f.device_id} onChange={set('device_id')}><option value="">—</option>{devices.data?.filter((d) => d.driver.startsWith('olt')).map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></Field>
+        <Field label="Porta PON" hint="Ex.: 0/1/3"><input className="mono" value={f.pon_port} onChange={set('pon_port')} /></Field>
+      </div>
+      <Field label="Endereço / referência"><input value={f.address} onChange={set('address')} /></Field>
+      <div className="cols3">
+        <Field label="Observações"><input value={f.notes} onChange={set('notes')} /></Field>
+        <Field label="Latitude"><input value={f.latitude} onChange={set('latitude')} inputMode="decimal" /></Field>
+        <Field label="Longitude"><input value={f.longitude} onChange={set('longitude')} inputMode="decimal" /></Field>
+      </div>
+    </Form>
+  );
+}
+
+function BoxPorts({ id, write, onClose }: { id: string; write: boolean; onClose: () => void }) {
+  const { data: b, loading, error, reload } = useLoad<any>(`/ftth/boxes/${id}`);
+  const [port, setPort] = useState<number | null>(null);
+  const [q, setQ] = useState('');
+  const contracts = useLoad<any[]>(q.length >= 2 ? `/contracts?status=active&limit=20&q=${encodeURIComponent(q)}` : null);
+  const [f, setF] = useState({ contract_id: '', note: '' });
+  const byPort = new Map<number, any>(b?.drops.map((x: any) => [x.port, x]));
+  return (
+    <Modal title={b ? `${b.name} — ${b.used} de ${b.ports} portas ocupadas` : 'Caixa'} onClose={onClose} wide>
+      <State loading={loading && !b} error={error}>
+        {b && (<>
+          <KV items={[['Tipo', BOX_KIND[b.kind]], ['Caixa anterior', b.parent_name], ['OLT / PON', b.device_name ? `${b.device_name} · ${b.pon_port ?? '—'}` : '—'], ['Endereço', b.address],
+            ['Coordenadas', b.latitude != null ? <a href={`https://www.openstreetmap.org/?mlat=${b.latitude}&mlon=${b.longitude}#map=18/${b.latitude}/${b.longitude}`} target="_blank" rel="noreferrer">{b.latitude}, {b.longitude}</a> : '—']]} />
+          <table style={{ marginTop: 10 }}>
+            <thead><tr><th>Porta</th><th>Ocupação</th><th></th></tr></thead>
+            <tbody>{Array.from({ length: b.ports }, (_, i) => i + 1).map((n) => { const x = byPort.get(n); return (
+              <tr key={n}><td className="mono">{n}</td>
+                <td>{x ? (x.contract_id ? <Link to={`/contratos/${x.contract_id}`}>{x.subscriber_name}</Link> : <span className="muted">reservada: {x.note}</span>) : <Badge tone="green">livre</Badge>}</td>
+                <td>{write && (x
+                  ? <ActionButton className="sm danger" confirm={`Liberar a porta ${n}?`} onClick={async () => { await api(`/ftth/drops/${x.id}`, { method: 'DELETE' }); reload(); }}>Liberar</ActionButton>
+                  : <button className="sm" onClick={() => { setPort(n); setF({ contract_id: '', note: '' }); setQ(''); }}>Ocupar</button>)}</td></tr>); })}</tbody>
+          </table>
+          {port && (
+            <Card title={`Ocupar a porta ${port}`}>
+              <Form submit="Salvar" onCancel={() => setPort(null)} onSubmit={async () => { await api(`/ftth/boxes/${id}/drops`, { body: { port, contract_id: f.contract_id || null, note: f.note || null } }); setPort(null); reload(); }}>
+                <div className="cols3">
+                  <Field label="Contrato (busque pelo assinante)"><input value={q} onChange={(e) => setQ(e.target.value)} autoFocus /></Field>
+                  <Field label="Selecione"><select value={f.contract_id} onChange={(e) => setF({ ...f, contract_id: e.target.value })}><option value="">— reserva sem contrato —</option>
+                    {contracts.data?.map((k) => <option key={k.id} value={k.id}>{k.subscriber_name} — {k.plan_name}</option>)}</select></Field>
+                  <Field label="Anotação" hint="Obrigatória na reserva."><input value={f.note} onChange={(e) => setF({ ...f, note: e.target.value })} /></Field>
+                </div>
+              </Form>
+            </Card>
+          )}
+        </>)}
+      </State>
+    </Modal>
+  );
+}
+
+export function Ftth() {
+  const { me } = useMe();
+  const w = can(me, 'network:write');
+  const { data, loading, error, reload } = useLoad<any[]>('/ftth/boxes');
+  const [modal, setModal] = useState<{ kind: 'new' | 'edit' | 'ports'; box?: any } | null>(null);
+  const close = () => { setModal(null); reload(); };
+  return (
+    <Page title="Rede óptica (FTTH)" actions={w && <button className="primary" onClick={() => setModal({ kind: 'new' })}>Nova caixa</button>}>
+      <State loading={loading} error={error} empty={data?.length === 0}>
+        <table>
+          <thead><tr><th>Caixa</th><th>Tipo</th><th>Caixa anterior</th><th>OLT / PON</th><th>Endereço</th><th className="num">Ocupação</th><th></th></tr></thead>
+          <tbody>{data?.map((b) => (
+            <tr key={b.id}><td>{b.name}</td><td className="small">{BOX_KIND[b.kind]}</td><td className="small">{b.parent_name ?? '—'}</td>
+              <td className="small">{b.device_name ? `${b.device_name} · ${b.pon_port ?? '—'}` : '—'}</td><td className="small">{b.address ?? '—'}</td>
+              <td className="num">{b.used}/{b.ports} {b.used >= b.ports && <Badge tone="red">cheia</Badge>}</td>
+              <td><div className="row" style={{ justifyContent: 'flex-end' }}>
+                <button className="sm" onClick={() => setModal({ kind: 'ports', box: b })}>Portas</button>
+                {w && <button className="sm" onClick={() => setModal({ kind: 'edit', box: b })}>Editar</button>}
+                {w && <ActionButton className="sm danger" confirm={`Excluir a caixa ${b.name}?`} onClick={async () => { await api(`/ftth/boxes/${b.id}`, { method: 'DELETE' }); reload(); }}>Excluir</ActionButton>}
+              </div></td></tr>
+          ))}</tbody>
+        </table>
+      </State>
+      {(modal?.kind === 'new' || modal?.kind === 'edit') && <Modal title={modal.box ? `Editar ${modal.box.name}` : 'Nova caixa'} onClose={() => setModal(null)} wide><BoxForm box={modal.box} boxes={data ?? []} onCancel={() => setModal(null)} onDone={close} /></Modal>}
+      {modal?.kind === 'ports' && <BoxPorts id={modal.box.id} write={w} onClose={close} />}
+    </Page>
+  );
+}

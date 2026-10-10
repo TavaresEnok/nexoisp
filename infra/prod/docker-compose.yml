@@ -1,0 +1,44 @@
+# Instalação central do NexoISP (produção/piloto). Sem modo demonstração, sem dados sintéticos.
+# HTTPS do painel: Caddy com certificado automático para NEXO_DOMAIN. Agentes: porta 8443 com mTLS direto na API.
+# Exercitado localmente em 10/10/2026 (NEXO_DOMAIN=localhost, portas alternativas). Ainda NÃO exercitado em host público
+# com domínio e certificado reais.
+name: nexoisp-prod
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: nexo_owner
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_DB: nexo
+    volumes: [dbdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U nexo_owner -d nexo"], interval: 5s, retries: 20 }
+  api:
+    build: { context: ../.., dockerfile: infra/compose/Dockerfile.api }
+    restart: unless-stopped
+    depends_on: { db: { condition: service_healthy } }
+    environment:
+      NODE_ENV: production
+      NEXO_DEMO_MODE: "0"
+      NEXO_REQUIRE_ADMIN_MFA: "1"
+      NEXO_COOKIE_SECURE: "1"
+      DATABASE_URL_OWNER: postgres://nexo_owner:${POSTGRES_PASSWORD}@db:5432/nexo
+      DATABASE_URL_APP: postgres://nexo_app:${NEXO_APP_DB_PASSWORD:?}@db:5432/nexo
+      NEXO_APP_DB_PASSWORD: ${NEXO_APP_DB_PASSWORD}
+      NEXO_OP_SIGNING_KEY: ${NEXO_OP_SIGNING_KEY:?}
+      NEXO_SECRET_KEY: ${NEXO_SECRET_KEY:?}
+      NEXO_AGENT_TLS_DIR: /certs
+      NEXO_SECRET_KEY_PREVIOUS: ${NEXO_SECRET_KEY_PREVIOUS:-}   # só durante a rotação da chave
+      NEXO_ALERT_WEBHOOK_URL: ${NEXO_ALERT_WEBHOOK_URL:-}
+    volumes: ["./certs:/certs:ro"]
+    ports: ["${NEXO_AGENT_PORT:-8443}:8443"]   # agentes (mTLS). O painel (8080) só é alcançado pelo Caddy.
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on: [api]
+    command: caddy reverse-proxy --from ${NEXO_DOMAIN:?} --to api:8080
+    ports: ["${NEXO_HTTP_PORT:-80}:80", "${NEXO_HTTPS_PORT:-443}:443"]
+    volumes: [caddydata:/data]
+volumes:
+  dbdata:
+  caddydata:

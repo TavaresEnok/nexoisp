@@ -1,0 +1,6 @@
+id_externo;id_externo_assinante;vencimento;valor;competencia;descricao
+T-5001;1000;05/09/2026;79,90;2026-09;Mensalidade 09/2026
+T-5002;1001;2026-09-10;99,90;2026-09;Mensalidade 09/2026
+T-5003;1002;15/08/2026;1.149,90;;Instalação parcelada
+T-5004;9999;10/09/2026;50,00;;Assinante inexistente
+T-5005;1003;31/02/2026;10,00;;Data inválida

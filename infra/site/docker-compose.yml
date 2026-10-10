@@ -1,0 +1,40 @@
+# Instalação local do provedor: agente NexoISP + RADIUS (FreeRADIUS). Roda na rede do provedor, perto do NAS.
+# O agente só faz conexões de SAÍDA para a nuvem; a única porta exposta é o RADIUS (UDP 1812/1813) para o NAS.
+name: nexo-site
+services:
+  radius:
+    build: ./radius
+    restart: unless-stopped
+    environment:
+      RADIUS_NAS_SECRET: ${RADIUS_NAS_SECRET}
+      RADIUS_NAS_NET: ${RADIUS_NAS_NET}
+      # dono dos dados = usuário do agente (uid/gid 10001); o radiusd participa do grupo
+    ports: ["${RADIUS_BIND:-0.0.0.0}:1812:1812/udp", "${RADIUS_BIND:-0.0.0.0}:1813:1813/udp"]
+    volumes: ["./data:/data"]
+  # Segunda instância do RADIUS (opcional): docker compose --profile ha up -d
+  # Lê o MESMO banco local; o NAS deve ter as duas como servidores RADIUS (a segunda na porta 1822/1823).
+  # Cobre queda/reinício do processo ou do container principal. NÃO cobre a perda do host nem do disco.
+  radius2:
+    profiles: [ha]
+    build: ./radius
+    restart: unless-stopped
+    depends_on: [radius]
+    environment:
+      RADIUS_NAS_SECRET: ${RADIUS_NAS_SECRET}
+      RADIUS_NAS_NET: ${RADIUS_NAS_NET}
+      RADIUS_SECONDARY: "1"
+    ports: ["${RADIUS_BIND:-0.0.0.0}:1822:1812/udp", "${RADIUS_BIND:-0.0.0.0}:1823:1813/udp"]
+    volumes: ["./data:/data"]
+  agent:
+    # instalação por pacote assinado: scripts/agent-release.sh install ...  e AGENT_IMAGE=nexoisp-agent:<versão> no .env
+    image: ${AGENT_IMAGE:-nexoisp-agent:local}
+    build: ../../services/network-agent
+    restart: unless-stopped
+    depends_on: [radius]
+    environment:
+      NEXO_API_URL: ${NEXO_API_URL}
+      NEXO_AGENT_TOKEN: ${NEXO_AGENT_TOKEN}
+      NEXO_AGENT_TLS_DIR: /certs
+      NEXO_AGENT_DATA: /data
+      NEXO_AGENT_CREDENTIALS: /config/credentials.json
+    volumes: ["./data:/data", "./certs:/certs:ro", "./config:/config:ro"]

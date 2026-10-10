@@ -1,0 +1,11 @@
+node_modules
+dist
+.env
+*.sqlite
+*.sqlite-journal
+infra/certs
+.venv
+__pycache__
+.data
+backups
+releases

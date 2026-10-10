@@ -1,0 +1,52 @@
+name: nexoisp
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: nexo_owner          # dono do schema; usado só por migrations
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: nexo
+    ports: ["127.0.0.1:15432:5432"]
+    volumes: [dbdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexo_owner -d nexo"]
+      interval: 3s
+      retries: 20
+  api:
+    build: { context: ../.., dockerfile: infra/compose/Dockerfile.api }
+    depends_on: { db: { condition: service_healthy } }
+    environment:
+      DATABASE_URL_OWNER: postgres://nexo_owner:${POSTGRES_PASSWORD}@db:5432/nexo
+      DATABASE_URL_APP: postgres://nexo_app:${NEXO_APP_DB_PASSWORD}@db:5432/nexo
+      NEXO_APP_DB_PASSWORD: ${NEXO_APP_DB_PASSWORD}
+      NEXO_DEMO_MODE: ${NEXO_DEMO_MODE:-0}
+      PORT: "8080"
+      NEXO_OP_SIGNING_KEY: ${NEXO_OP_SIGNING_KEY}
+      NEXO_SECRET_KEY: ${NEXO_SECRET_KEY}
+      NEXO_DEMO_AGENT_TOKEN: ${NEXO_DEMO_AGENT_TOKEN:-}
+      NEXO_GATEWAY_WEBHOOK_SECRET: ${NEXO_GATEWAY_WEBHOOK_SECRET:-}
+      NEXO_AGENT_TLS_DIR: /certs
+    volumes: ["../certs:/certs:ro"]
+    ports: ["${NEXO_PANEL_BIND:-127.0.0.1}:18080:8080", "127.0.0.1:18443:8443"]
+  # Agente de DEMONSTRAÇÃO do Provedor Alfa (driver simulado). Em instalação real o agente roda na rede do provedor.
+  agent-demo:
+    build: ../../services/network-agent
+    user: ${NEXO_UID:-1000:1000}
+    depends_on: [api]
+    restart: unless-stopped
+    environment:
+      NEXO_API_URL: https://api:8443
+      NEXO_AGENT_TOKEN: ${NEXO_DEMO_AGENT_TOKEN:-}
+      NEXO_AGENT_TLS_DIR: /certs
+      NEXO_AGENT_DATA: /data
+      NEXO_AGENT_CREDENTIALS: /config/credentials.json
+    volumes: ["../certs/agent-demo:/certs:ro", "../../.data/agent-demo:/data", "./agent-demo-credentials.json:/config/credentials.json:ro"]
+  # EMULADOR da CLI Huawei (escrito por nós; não é equipamento nem software da Huawei). Só para exercitar o driver olt_huawei.
+  olt-huawei-emu:
+    build: ../../services/network-agent
+    restart: unless-stopped
+    user: ${NEXO_UID:-1000:1000}
+    command: ["python", "-m", "nexo_agent.drivers.olt_huawei_emulator", "2222", "/state/olt-state.json"]
+    volumes: ["../../.data/olt-huawei-emu:/state"]   # estado do emulador sobrevive a recriações do container
+volumes:
+  dbdata:

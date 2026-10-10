@@ -1,0 +1,6 @@
+chr/*.img
+chr/*.zip
+certs
+data
+.env
+config/credentials.json

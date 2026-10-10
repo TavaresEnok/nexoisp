@@ -1,0 +1,13 @@
+id_externo;nome;cpf_cnpj;email;telefone;logradouro;numero;bairro;cidade;uf;cep;observacoes;situacao;plano;vencimento_dia;pppoe_usuario;pppoe_senha
+1000;Marcos Teixeira;200.007.717-08;importado1000@exemplo.demo;(11) 98888-1000;Av. Sintética;100;Centro;Cidade Demo;SP;01000-000;;ativo;Fibra 200;5;marcos1000;Sint3tica-1000
+1001;Juliana Prado;200.015.434-40;importado1001@exemplo.demo;(11) 98888-1001;Av. Sintética;101;Centro;Cidade Demo;SP;01000-000;;ativo;Fibra 500;10;juliana1001;Sint3tica-1001
+1002;Otávio Ramos;200.023.151-90;importado1002@exemplo.demo;(11) 98888-1002;Av. Sintética;102;Centro;Cidade Demo;SP;01000-000;;ativo;Fibra 1 Giga;15;otvio1002;Sint3tica-1002
+1003;Patrícia Lemos;200.030.868-60;importado1003@exemplo.demo;(11) 98888-1003;Av. Sintética;103;Centro;Cidade Demo;SP;01000-000;;ativo;Fibra 200;20;patrcia1003;Sint3tica-1003
+1004;Renato Farias;200.038.585-02;importado1004@exemplo.demo;(11) 98888-1004;Av. Sintética;104;Centro;Cidade Demo;SP;01000-000;;ativo;Fibra 500;5;renato1004;Sint3tica-1004
+1005;Sílvia Moraes;200.046.302-97;importado1005@exemplo.demo;(11) 98888-1005;Av. Sintética;105;Centro;Cidade Demo;SP;01000-000;;ativo;Fibra 1 Giga;10;slvia1005;Sint3tica-1005
+1006;Tiago Barros;200.054.019-84;importado1006@exemplo.demo;(11) 98888-1006;Av. Sintética;106;Centro;Cidade Demo;SP;01000-000;;ativo;Fibra 200;15;tiago1006;Sint3tica-1006
+1007;Úrsula Pinto;200.061.736-08;importado1007@exemplo.demo;(11) 98888-1007;Av. Sintética;107;Centro;Cidade Demo;SP;01000-000;;ativo;Fibra 500;20;rsula1007;
+1008;Valter Queiroz;200.069.453-50;importado1008@exemplo.demo;(11) 98888-1008;Av. Sintética;108;Centro;Cidade Demo;SP;01000-000;;ativo;Fibra 1 Giga;5;valter1008;Sint3tica-1008
+1009;Wanda Siqueira;200.077.170-08;importado1009@exemplo.demo;(11) 98888-1009;Av. Sintética;109;Centro;Cidade Demo;SP;01000-000;;inativo;Fibra 200;10;wanda1009;Sint3tica-1009
+1010;Linha Com Erro;111.111.111-11;;;;;;;;;;ativo;Fibra 200;10;erro1010;x
+1011;Plano Desconhecido da Silva;;;;;;;;;;;ativo;Plano Antigo 50M;10;antigo1011;Sint3tica-1011

@@ -1,0 +1,46 @@
+# LABORATÓRIO PPPoE do NexoISP: MikroTik CHR real (QEMU/KVM) + cliente PPPoE + RADIUS e agente do pacote de site.
+# Somente para homologação local. O container "chr" é privilegiado (KVM, tap e /dev/ppp). Não usar em produção.
+name: nexolab
+services:
+  chr:
+    build: ./chr
+    container_name: lab-chr
+    privileged: true
+    volumes: ["./chr/${CHR_IMAGE:-chr-7.24.5.img}:/images/chr.img:ro"]
+    networks: [nexo]
+  radius:
+    build: ../site/radius
+    container_name: lab-radius
+    environment:
+      RADIUS_NAS_SECRET: ${RADIUS_NAS_SECRET}
+      RADIUS_NAS_NET: ${RADIUS_NAS_NET}
+    volumes: ["labdata:/data"]
+    networks: [nexo]
+  radius2:   # segunda instância sobre o mesmo banco, para a prova de redundância (lab.sh radius-ha)
+    build: ../site/radius
+    container_name: lab-radius2
+    depends_on: [radius]
+    environment:
+      RADIUS_NAS_SECRET: ${RADIUS_NAS_SECRET}
+      RADIUS_NAS_NET: ${RADIUS_NAS_NET}
+      RADIUS_SECONDARY: "1"
+    volumes: ["labdata:/data"]
+    networks: [nexo]
+  agent:
+    build: ../../services/network-agent
+    image: ${AGENT_IMAGE:-nexolab-agent}     # AGENT_IMAGE=nexoisp-agent:<versão> para exercitar a atualização assinada
+    container_name: lab-agent
+    depends_on: [radius]
+    restart: unless-stopped
+    environment:
+      NEXO_API_URL: https://api:8443
+      NEXO_AGENT_TOKEN: ${NEXO_AGENT_TOKEN}
+      NEXO_AGENT_TLS_DIR: /certs
+      NEXO_AGENT_DATA: /data
+      NEXO_AGENT_CREDENTIALS: /config/credentials.json
+    volumes: ["labdata:/data", "./certs:/certs:ro", "./config:/config:ro"]
+    networks: [nexo]
+volumes:
+  labdata:
+networks:
+  nexo: { name: nexoisp_default, external: true }

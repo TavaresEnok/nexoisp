@@ -1,0 +1,7 @@
+httpx==0.28.1
+cryptography==44.0.0
+pydantic==2.10.4
+librouteros==3.4.1
+passlib==1.7.4
+netmiko==4.5.0
+paramiko==3.5.0

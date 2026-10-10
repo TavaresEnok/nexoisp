@@ -1,0 +1,6 @@
+{
+  "name": "nexoisp",
+  "private": true,
+  "workspaces": ["apps/api", "apps/web"],
+  "engines": { "node": ">=22" }
+}
