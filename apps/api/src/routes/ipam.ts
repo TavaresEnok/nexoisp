@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { audit, guard, HttpError } from '../auth.js';
 import { withScope, type Tx } from '../db.js';
 import { requestOperation } from '../network/engine.js';
-import { blocks, capacity, forward, isIpv4, parseCidr4, reverse, routerosScript, type CgnatPlan } from '../network/cgnat.js';
+import { blocks, capacity, forward, ipv6Subnet, isIpv4, parseCidr4, reverse, routerosScript, type CgnatPlan } from '../network/cgnat.js';
 import { zUuid } from '../validators.js';
 
 /** Expansão IPAM/CGNAT: blocos, endereços fixos/reservados, plano de CGNAT determinístico, script para revisão e rastreabilidade. */
@@ -14,7 +14,7 @@ const zAddr = z.string().trim().regex(/^[0-9a-fA-F:.]{2,45}$/, 'endereço IP inv
 const POOL_SELECT = `
   select p.*, family(p.cidr) as family, masklen(p.cidr) as masklen, d.name as device_name,
          case when family(p.cidr) = 4 then (2 ^ (32 - masklen(p.cidr)))::bigint end as size,
-         (select count(*) from ip_allocations a where a.pool_id = p.id) as allocated,
+         (select count(*) from ip_allocations a where a.pool_id = p.id) + (select count(*) from ip6_delegations x where x.pool_id = p.id) as allocated,
          (select g.id from cgnat_plans g where g.retired_at is null and (g.private_pool_id = p.id or g.public_pool_id = p.id) limit 1) as cgnat_plan_id
   from ip_pools p left join devices d on d.id = p.device_id`;
 const ALLOC_SELECT = `
@@ -50,7 +50,7 @@ export async function ipamRoutes(app: FastifyInstance) {
   app.post('/api/ipam/pools', { preHandler: guard('network:write') }, async (req) => {
     const b = z.object({
       name: z.string().trim().min(2).max(80), cidr: zCidr, kind: z.enum(['public', 'cgnat', 'private', 'management']),
-      device_id: zUuid.nullish(), notes: z.string().trim().max(500).nullish(),
+      device_id: zUuid.nullish(), notes: z.string().trim().max(500).nullish(), delegation_len: z.number().int().min(48).max(64).nullish(),
     }).parse(req.body);
     return withScope(req.ctx.scope, async (c) => {
       // o tipo cidr recusa bits de host ligados (ex.: 10.0.0.5/24): a mensagem padrão do banco não ajuda o operador
@@ -58,8 +58,10 @@ export async function ipamRoutes(app: FastifyInstance) {
       if (!ok) throw new HttpError(400, 'bloco inválido: use o endereço de rede, ex.: 100.64.0.0/22');
       const clash = (await c.query('select name, cidr from ip_pools where cidr && $1::cidr limit 1', [b.cidr])).rows[0];
       if (clash) throw new HttpError(409, `o bloco se sobrepõe a “${clash.name}” (${clash.cidr})`);
-      const p = (await c.query(`insert into ip_pools (tenant_id, name, cidr, kind, device_id, notes) values ($1,$2,$3,$4,$5,$6) returning *`,
-        [req.ctx.tenantId, b.name, b.cidr, b.kind, b.device_id ?? null, b.notes || null])).rows[0];
+      const shape = (await c.query('select family($1::cidr) as family, masklen($1::cidr) as masklen', [b.cidr])).rows[0];
+      if (b.delegation_len && (shape.family !== 6 || b.delegation_len < shape.masklen)) throw new HttpError(400, 'prefixo por assinante só se aplica a bloco IPv6 e não pode ser maior que o próprio bloco');
+      const p = (await c.query(`insert into ip_pools (tenant_id, name, cidr, kind, device_id, notes, delegation_len) values ($1,$2,$3,$4,$5,$6,$7) returning *`,
+        [req.ctx.tenantId, b.name, b.cidr, b.kind, b.device_id ?? null, b.notes || null, b.delegation_len ?? null])).rows[0];
       await audit(c, req.ctx, 'ipam.pool_create', 'ip_pool', p.id, { cidr: p.cidr, kind: b.kind });
       return p;
     });
@@ -147,6 +149,62 @@ export async function ipamRoutes(app: FastifyInstance) {
       await audit(c, req.ctx, 'ipam.release', 'ip_allocation', id, a);
       const network = a.contract_id && a.family === 4 ? await reapplyFixedIp(c, req.ctx, a.contract_id, `IP fixo ${a.address} liberado`, true) : null;
       return { ok: true, network };
+    });
+  });
+
+  // ---- IPv6: prefixo delegado por contrato (registro; a entrega ao assinante não é feita pelo sistema) ----
+  const DELEG_SELECT = `
+    select x.id, x.pool_id, x.prefix, x.contract_id, x.created_at, p.name as pool_name, s.id as subscriber_id, s.name as subscriber_name
+    from ip6_delegations x join ip_pools p on p.id = x.pool_id join contracts k on k.id = x.contract_id join subscribers s on s.id = k.subscriber_id`;
+
+  app.get('/api/ipam/pools/:id/delegations', { preHandler: guard('network:read') }, async (req) =>
+    withScope(req.ctx.scope, async (c) => (await c.query(`${DELEG_SELECT} where x.pool_id = $1 order by x.prefix limit 2000`, [zUuid.parse((req.params as any).id)])).rows));
+
+  app.get('/api/contracts/:id/ipv6', { preHandler: guard('network:read') }, async (req) =>
+    withScope(req.ctx.scope, async (c) => ({ delegation: (await c.query(`${DELEG_SELECT} where x.contract_id = $1`, [zUuid.parse((req.params as any).id)])).rows[0] ?? null })));
+
+  /** Sem `prefix`, o sistema escolhe o primeiro prefixo livre do tamanho configurado no bloco. */
+  app.post('/api/ipam/pools/:id/delegations', { preHandler: guard('network:write') }, async (req) => {
+    const id = zUuid.parse((req.params as any).id);
+    const b = z.object({ contract_id: zUuid, prefix: zCidr.nullish().or(z.literal('')) }).parse(req.body);
+    return withScope(req.ctx.scope, async (c) => {
+      const p = (await c.query(`${POOL_SELECT} where p.id = $1 for update of p`, [id])).rows[0];
+      if (!p) throw new HttpError(404, 'bloco não encontrado');
+      if (p.family !== 6 || !p.delegation_len) throw new HttpError(400, 'este bloco não está configurado para delegar prefixos IPv6');
+      const k = (await c.query('select status from contracts where id = $1', [b.contract_id])).rows[0];
+      if (!k) throw new HttpError(400, 'contrato não encontrado');
+      if (k.status !== 'active') throw new HttpError(400, 'contrato encerrado');
+      if ((await c.query('select 1 from ip6_delegations where contract_id = $1', [b.contract_id])).rowCount) throw new HttpError(409, 'o contrato já tem um prefixo IPv6; libere-o antes de delegar outro');
+      let prefix = b.prefix || null;
+      if (prefix) {
+        const ok = (await c.query(`select pg_input_is_valid($1, 'cidr') as valid`, [prefix])).rows[0].valid
+          && (await c.query('select ($1::cidr <<= $2::cidr and masklen($1::cidr) = $3) as ok', [prefix, p.cidr, p.delegation_len])).rows[0].ok;
+        if (!ok) throw new HttpError(400, `o prefixo precisa ser um /${p.delegation_len} dentro de ${p.cidr}`);
+        if ((await c.query('select 1 from ip6_delegations where prefix && $1::cidr', [prefix])).rowCount) throw new HttpError(409, 'prefixo já delegado');
+      } else {
+        const total = Math.min(2 ** (p.delegation_len - p.masklen), MAX_AUTO);
+        for (let from = 0; from < total && !prefix; from += 1024) {
+          const cand = Array.from({ length: Math.min(1024, total - from) }, (_, i) => ipv6Subnet(p.cidr, p.delegation_len, from + i));
+          prefix = (await c.query(
+            `select c.prefix::text as prefix from unnest($1::cidr[]) with ordinality as c(prefix, ord)
+             where not exists (select 1 from ip6_delegations d where d.prefix && c.prefix) order by c.ord limit 1`, [cand])).rows[0]?.prefix ?? null;
+        }
+        if (!prefix) throw new HttpError(409, `não há prefixo /${p.delegation_len} livre entre os primeiros ${MAX_AUTO} deste bloco`);
+      }
+      const x = (await c.query('insert into ip6_delegations (tenant_id, pool_id, prefix, contract_id, created_by) values ($1,$2,$3,$4,$5) returning id, prefix',
+        [req.ctx.tenantId, id, prefix, b.contract_id, req.ctx.userId])).rows[0];
+      await audit(c, req.ctx, 'ipam.delegate_v6', 'ip6_delegation', x.id, { prefix: x.prefix, contract_id: b.contract_id });
+      return x;
+    });
+  });
+
+  app.delete('/api/ipam/delegations/:id', { preHandler: guard('network:write') }, async (req) => {
+    const id = zUuid.parse((req.params as any).id);
+    return withScope(req.ctx.scope, async (c) => {
+      const x = (await c.query('delete from ip6_delegations where id = $1 returning prefix, contract_id', [id])).rows[0];
+      if (!x) throw new HttpError(404, 'delegação não encontrada');
+      await audit(c, req.ctx, 'ipam.release_v6', 'ip6_delegation', id, x);
+      return { ok: true };
     });
   });
 

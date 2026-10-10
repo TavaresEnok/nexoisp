@@ -8,9 +8,9 @@ const KIND: Record<string, string> = { public: 'Público', cgnat: 'CGNAT (assina
 
 function PoolForm({ onDone, onCancel }: { onDone: () => void; onCancel: () => void }) {
   const devices = useLoad<any[]>('/devices');
-  const [f, setF] = useState({ name: '', cidr: '', kind: 'cgnat', device_id: '', notes: '' });
+  const [f, setF] = useState({ name: '', cidr: '', kind: 'cgnat', device_id: '', notes: '', delegation_len: '' });
   return (
-    <Form onCancel={onCancel} onSubmit={async () => { await api('/ipam/pools', { body: { ...f, device_id: f.device_id || null } }); onDone(); }}>
+    <Form onCancel={onCancel} onSubmit={async () => { await api('/ipam/pools', { body: { ...f, device_id: f.device_id || null, delegation_len: f.cidr.includes(':') && f.delegation_len ? Number(f.delegation_len) : null } }); onDone(); }}>
       <div className="cols">
         <Field label="Nome"><input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} required autoFocus /></Field>
         <Field label="Bloco (CIDR)" hint="Endereço de rede, ex.: 100.64.0.0/22"><input className="mono" value={f.cidr} onChange={(e) => setF({ ...f, cidr: e.target.value })} required /></Field>
@@ -21,8 +21,40 @@ function PoolForm({ onDone, onCancel }: { onDone: () => void; onCancel: () => vo
           <select value={f.device_id} onChange={(e) => setF({ ...f, device_id: e.target.value })}><option value="">—</option>{devices.data?.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select>
         </Field>
       </div>
+      {f.cidr.includes(':') && <Field label="Prefixo delegado por assinante (IPv6)" hint="Ex.: 56 para entregar um /56 a cada contrato. Em branco: o bloco é só registrado.">
+        <input type="number" min="48" max="64" value={f.delegation_len} onChange={(e) => setF({ ...f, delegation_len: e.target.value })} /></Field>}
       <Field label="Observações"><input value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} /></Field>
     </Form>
+  );
+}
+
+/** Prefixos IPv6 delegados a contratos (registro e planejamento). */
+function Delegations({ pool, onClose, write }: { pool: any; onClose: () => void; write: boolean }) {
+  const list = useLoad<any[]>(`/ipam/pools/${pool.id}/delegations`);
+  const [q, setQ] = useState('');
+  const contracts = useLoad<any[]>(q.length >= 2 ? `/contracts?status=active&limit=20&q=${encodeURIComponent(q)}` : null);
+  const [f, setF] = useState({ contract_id: '', prefix: '' });
+  return (
+    <Modal title={`Prefixos /${pool.delegation_len} — ${pool.name} (${pool.cidr})`} onClose={onClose} wide>
+      <p className="small muted" style={{ marginTop: 0 }}>Registro do prefixo reservado a cada contrato. <b>O sistema ainda não entrega o prefixo ao assinante</b>: a configuração no concentrador é feita pela equipe de rede.</p>
+      {write && (
+        <Form submit="Delegar prefixo" onSubmit={async () => { await api(`/ipam/pools/${pool.id}/delegations`, { body: { contract_id: f.contract_id, prefix: f.prefix || null } }); setF({ contract_id: '', prefix: '' }); list.reload(); }}>
+          <div className="cols3">
+            <Field label="Contrato (busque pelo assinante)"><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="nome do assinante…" /></Field>
+            <Field label="Selecione"><select value={f.contract_id} onChange={(e) => setF({ ...f, contract_id: e.target.value })} required><option value="">Selecione…</option>
+              {contracts.data?.map((k) => <option key={k.id} value={k.id}>{k.subscriber_name} — {k.plan_name}</option>)}</select></Field>
+            <Field label="Prefixo" hint="Em branco: primeiro livre."><input className="mono" value={f.prefix} onChange={(e) => setF({ ...f, prefix: e.target.value })} /></Field>
+          </div>
+        </Form>
+      )}
+      <State loading={list.loading} error={list.error} empty={list.data?.length === 0}>
+        <table><thead><tr><th>Prefixo</th><th>Contrato</th><th>Delegado em</th><th></th></tr></thead>
+          <tbody>{list.data?.map((x) => (
+            <tr key={x.id}><td className="mono">{x.prefix}</td><td><Link to={`/contratos/${x.contract_id}`}>{x.subscriber_name}</Link></td><td className="small">{dt(x.created_at)}</td>
+              <td>{write && <ActionButton className="sm danger" confirm={`Liberar ${x.prefix}?`} onClick={async () => { await api(`/ipam/delegations/${x.id}`, { method: 'DELETE' }); list.reload(); }}>Liberar</ActionButton>}</td></tr>
+          ))}</tbody></table>
+      </State>
+    </Modal>
   );
 }
 
@@ -156,7 +188,7 @@ export function Ipam() {
   const w = can(me, 'network:write');
   const pools = useLoad<any[]>('/ipam/pools');
   const plans = useLoad<any[]>('/cgnat/plans');
-  const [modal, setModal] = useState<{ kind: 'pool' | 'alloc' | 'cgnat' | 'map'; item?: any } | null>(null);
+  const [modal, setModal] = useState<{ kind: 'pool' | 'alloc' | 'deleg' | 'cgnat' | 'map'; item?: any } | null>(null);
   const reload = () => { pools.reload(); plans.reload(); };
   return (
     <Page title="Endereços IP e CGNAT" actions={w && <button className="primary" onClick={() => setModal({ kind: 'pool' })}>Novo bloco</button>}>
@@ -170,7 +202,9 @@ export function Ipam() {
                 <td>{KIND[p.kind]} {p.cgnat_plan_id && <Badge tone="blue">em plano de CGNAT</Badge>}</td><td className="small">{p.device_name ?? '—'}</td>
                 <td className="num">{p.allocated}</td><td className="num">{p.size ?? '—'}</td>
                 <td><div className="row" style={{ justifyContent: 'flex-end' }}>
-                  <button className="sm" onClick={() => setModal({ kind: 'alloc', item: p })}>Endereços</button>
+                  {p.delegation_len
+                    ? <button className="sm" onClick={() => setModal({ kind: 'deleg', item: p })}>Prefixos /{p.delegation_len}</button>
+                    : <button className="sm" onClick={() => setModal({ kind: 'alloc', item: p })}>Endereços</button>}
                   {w && <ActionButton className="sm danger" confirm={`Excluir o bloco ${p.cidr}?`} onClick={async () => { await api(`/ipam/pools/${p.id}`, { method: 'DELETE' }); reload(); }}>Excluir</ActionButton>}
                 </div></td>
               </tr>
@@ -201,6 +235,7 @@ export function Ipam() {
       </Card>
       <Trace />
       {modal?.kind === 'pool' && <Modal title="Novo bloco de endereços" onClose={() => setModal(null)}><PoolForm onCancel={() => setModal(null)} onDone={() => { setModal(null); reload(); }} /></Modal>}
+      {modal?.kind === 'deleg' && <Delegations pool={modal.item} write={w} onClose={() => { setModal(null); reload(); }} />}
       {modal?.kind === 'alloc' && <Allocations pool={modal.item} write={w} onClose={() => { setModal(null); reload(); }} />}
       {modal?.kind === 'cgnat' && <Modal title="Novo plano de CGNAT" onClose={() => setModal(null)}><CgnatForm pools={pools.data ?? []} onCancel={() => setModal(null)} onDone={() => { setModal(null); reload(); }} /></Modal>}
       {modal?.kind === 'map' && <CgnatMap plan={modal.item} onClose={() => setModal(null)} />}

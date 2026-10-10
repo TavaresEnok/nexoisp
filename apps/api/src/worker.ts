@@ -1,9 +1,10 @@
 import { pool, withScope } from './db.js';
 import { runWorkerOnce } from './finance/core.js';
+import { deliverNotifications } from './notify.js';
 
 let lastAlertKey = '';
 /** Alerta por webhook genérico (NEXO_ALERT_WEBHOOK_URL): envia só quando o conjunto de alertas muda, inclusive ao normalizar. */
-async function notify(alerts: { tenant_id: string; agents_offline: number; uncertain: number }[], log: (m: string) => void) {
+export async function notify(alerts: { tenant_id: string; agents_offline: number; uncertain: number }[], log: (m: string) => void) {
   const key = JSON.stringify(alerts);
   if (key === lastAlertKey) return;
   lastAlertKey = key;
@@ -51,6 +52,7 @@ export function startWorker(log: (m: string) => void, everyMs = 60_000) {
           (await c.query('select tenant_id, agents_offline, uncertain from platform_health() where agents_offline > 0 or uncertain > 0 order by tenant_id')).rows);
         for (const t of h) log(`ALERTA tenant=${t.tenant_id} agentes_offline=${t.agents_offline} operacoes_incertas=${t.uncertain}`);
         await notify(h, log);
+        await deliverNotifications(log);
       });
     } catch (e) {
       log(`rotina periódica falhou: ${(e as Error).message}`);

@@ -69,3 +69,17 @@ input:focus, select:focus, textarea:focus { outline: 2px solid #9fd3ea; border-c
 .five .card { margin: 0; } .five h3 { font-size: 11.5px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 6px; }
 pre.ev { background: #0f1b24; color: #d7e3ea; padding: 10px; border-radius: 8px; overflow: auto; font-size: 12px; max-height: 260px; margin: 6px 0 0; }
 .steps { list-style: none; padding: 0; margin: 6px 0 0; } .steps li { padding: 3px 0; display: flex; gap: 8px; align-items: baseline; }
+
+/* celular: menu recolhível, botões maiores, tabelas roláveis */
+.menu-btn { display: none; }
+button.big { width: 100%; padding: 12px; font-size: 16px; }
+.work { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); } .work .card { margin: 0; }
+@media (max-width: 900px) {
+  .shell { grid-template-rows: auto 1fr; } .side .logo b { font-weight: 700; }
+  .side { padding: 8px 10px; } .side .logo { display: flex; justify-content: space-between; align-items: center; padding-bottom: 4px; }
+  .menu-btn { display: inline-block; background: transparent; color: #fff; border-color: #24404f; }
+  .side:not(.open) > :not(.logo) { display: none; }
+  .page { padding: 14px 12px 32px; } .card, .modal { overflow-x: auto; } .page > .state > table, .page > table { display: block; overflow-x: auto; }
+  .cols, .cols3, .five { grid-template-columns: 1fr !important; } .overlay { padding: 2vh 6px; }
+  button, .btn, input, select, textarea { min-height: 40px; font-size: 16px; } button.sm { min-height: 32px; font-size: 14px; }
+}

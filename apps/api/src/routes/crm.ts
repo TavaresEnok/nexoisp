@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { audit, guard, HttpError, type Ctx } from '../auth.js';
 import { nextNumber, paged, withScope, type Tx } from '../db.js';
+import { assertSafeWebhookUrl, deliverNotifications, queueNotice, sendTestNotice } from '../notify.js';
 import { zDate, zDocument, zPage, zSubscriber, zUuid } from '../validators.js';
 
 /** Expansão 4: CRM — prospectos (funil) e atendimentos (protocolos), inclusive abertos pelo assinante no portal. */
@@ -227,6 +228,34 @@ export async function crmRoutes(app: FastifyInstance) {
     });
   });
 
+  // ---- Avisos ao provedor (webhook) ----
+  app.get('/api/notifications', { preHandler: guard('settings:manage') }, async (req) =>
+    withScope(req.ctx.scope, async (c) => ({
+      webhook_url: (await c.query('select notify_webhook_url from tenant_settings where tenant_id = $1', [req.ctx.tenantId])).rows[0]?.notify_webhook_url ?? null,
+      recent: (await c.query(`select id, event, payload->>'text' as text, status, attempts, last_error, created_at, sent_at from notifications order by id desc limit 50`)).rows,
+    })));
+
+  app.put('/api/notifications/settings', { preHandler: guard('settings:manage') }, async (req) => {
+    const b = z.object({ webhook_url: z.string().trim().max(500).nullable().transform((v) => v || null) }).parse(req.body);
+    if (b.webhook_url) await assertSafeWebhookUrl(b.webhook_url);
+    return withScope(req.ctx.scope, async (c) => {
+      await c.query(`insert into tenant_settings (tenant_id, notify_webhook_url, updated_by) values ($1,$2,$3)
+                     on conflict (tenant_id) do update set notify_webhook_url = excluded.notify_webhook_url, updated_by = excluded.updated_by, updated_at = now()`, [req.ctx.tenantId, b.webhook_url, req.ctx.userId]);
+      await audit(c, req.ctx, 'notifications.settings_update', 'tenant_settings', req.ctx.tenantId, { configured: !!b.webhook_url });   // o endereço pode conter um token: não vai para a auditoria
+      return { webhook_url: b.webhook_url };
+    });
+  });
+
+  /** Envia um aviso de teste agora e devolve o erro do destino, se houver. */
+  app.post('/api/notifications/test', { preHandler: guard('settings:manage') }, async (req) => {
+    const url = await withScope(req.ctx.scope, async (c) => (await c.query('select notify_webhook_url from tenant_settings where tenant_id = $1', [req.ctx.tenantId])).rows[0]?.notify_webhook_url);
+    if (!url) throw new HttpError(400, 'configure o endereço do webhook primeiro');
+    try { await sendTestNotice(url); } catch (e) { throw new HttpError(502, `o aviso de teste não foi entregue: ${(e as Error).message}`); }
+    return { ok: true };
+  });
+
+  app.post('/api/notifications/deliver', { preHandler: guard('settings:manage') }, async (req) => deliverNotifications(() => {}, req.ctx.tenantId!));
+
   /** Relatório do período (datas no fuso do provedor): conversão por origem, atendimentos por categoria e OS por tipo. */
   app.get('/api/crm/report', { preHandler: guard('crm:read') }, async (req) => {
     const q = z.object({ from: zDate, to: zDate }).parse(req.query);
@@ -280,6 +309,7 @@ export async function crmRoutes(app: FastifyInstance) {
       const abertos = (await c.query(`select count(*) as n from tickets where subscriber_id = $1 and status <> 'closed'`, [sid])).rows[0].n;
       if (abertos >= 5) throw new HttpError(429, 'você já tem atendimentos em aberto: acompanhe ou responda um deles');
       const t = await openTicket(c, req.ctx, { ...b, subscriber_id: sid, contract_id: null, priority: 'normal', origin: 'portal' });
+      await queueNotice(c, req.ctx.tenantId!, 'ticket.opened', `novo chamado pelo portal — protocolo ${t.number}: ${b.subject} (${req.ctx.name})`, { ticket_id: t.id, number: t.number });
       await audit(c, req.ctx, 'ticket.create', 'ticket', t.id, { number: t.number, origin: 'portal' });
       return { id: t.id, number: t.number };
     });
@@ -293,7 +323,8 @@ export async function crmRoutes(app: FastifyInstance) {
       if (!t) throw new HttpError(404, 'atendimento não encontrado');
       if (t.status === 'closed') throw new HttpError(400, 'atendimento encerrado: abra um novo');
       await c.query(`insert into ticket_messages (tenant_id, ticket_id, author_id, author_kind, body) values ($1,$2,$3,'subscriber',$4)`, [req.ctx.tenantId, id, req.ctx.userId, b.body]);
-      await c.query(`update tickets set status = 'open', updated_at = now() where id = $1`, [id]);
+      const t2 = (await c.query(`update tickets set status = 'open', updated_at = now() where id = $1 returning number, subject`, [id])).rows[0];
+      await queueNotice(c, req.ctx.tenantId!, 'ticket.subscriber_reply', `o assinante respondeu o protocolo ${t2.number}: ${t2.subject} (${req.ctx.name})`, { ticket_id: id, number: t2.number });
       return { ok: true };
     });
   });

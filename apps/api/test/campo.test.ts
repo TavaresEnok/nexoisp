@@ -77,6 +77,49 @@ describe('ordens de serviço e estoque', () => {
   });
 });
 
+describe('estoque por número de série', () => {
+  it('unidade rastreada da entrada à instalação e à retirada; saldo sempre igual às unidades disponíveis', async () => {
+    const item = (await call(noc, 'POST', '/api/stock/items', { name: `ONU série ${tag}`, serialized: true })).body;
+    const saldo = async () => (await call(noc, 'GET', '/api/stock/items')).body.find((i: any) => i.id === item.id);
+    expect((await call(noc, 'POST', `/api/stock/items/${item.id}/movements`, { kind: 'in', qty: 3 })).status).toBe(400);           // só por unidade
+    expect((await call(noc, 'POST', `/api/stock/items/${item.id}/units`, { serials: [`sn${tag}a`, `SN${tag}A`, `SN${tag}B`, `SN${tag}C`] })).body).toMatchObject({ received: 3, balance: 3 });
+    expect((await call(noc, 'POST', `/api/stock/items/${item.id}/units`, { serials: [`SN${tag}B`] })).status).toBe(409);            // série repetida
+    expect((await saldo()).balance).toBe(3);
+    expect((await call(noc, 'PATCH', `/api/stock/items/${item.id}`, { serialized: false })).status).toBe(409);
+    const [a, b, c] = (await call(noc, 'GET', `/api/stock/items/${item.id}/units`)).body;
+    expect((await call(beta, 'POST', `/api/stock/units/${a.id}/transfer`, { holder_id: null })).status).toBe(404);
+
+    const eu = (await call(noc, 'GET', '/api/me')).body;
+    const tecnicoBeta = (await call(beta, 'GET', '/api/staff')).body[0];
+    expect((await call(noc, 'POST', `/api/stock/units/${a.id}/transfer`, { holder_id: tecnicoBeta.id })).status).toBe(400);
+    await call(noc, 'POST', `/api/stock/units/${a.id}/transfer`, { holder_id: eu.id });
+    expect(await saldo()).toMatchObject({ balance: 3, with_tech: 1 });                                                               // com o técnico ainda é do provedor
+    expect((await call(noc, 'GET', `/api/stock/units?holder=${eu.id}`)).body.map((u: any) => u.serial)).toEqual([`SN${tag}A`]);
+
+    const wo = (await call(noc, 'POST', '/api/work-orders', { kind: 'install', subscriber_id: sub.id, contract_id: contract.id, description: 'instalar ONU' })).body;
+    const semContrato = (await call(noc, 'POST', '/api/work-orders', { kind: 'install', subscriber_id: sub.id, description: 'sem contrato' })).body;
+    expect((await call(noc, 'POST', `/api/work-orders/${semContrato.id}/units`, { unit_id: a.id })).status).toBe(400);
+    expect((await call(noc, 'POST', `/api/work-orders/${wo.id}/materials`, { item_id: item.id, qty: 1 })).status).toBe(400);        // item com série não entra por quantidade
+    expect((await call(noc, 'POST', `/api/work-orders/${wo.id}/units`, { unit_id: a.id })).body.balance).toBe(2);
+    expect((await call(noc, 'POST', `/api/work-orders/${wo.id}/units`, { unit_id: a.id })).status).toBe(409);                       // a mesma unidade não se instala duas vezes
+    const onde = (await call(noc, 'GET', `/api/stock/units?serial=SN${tag}A`)).body[0];
+    expect(onde).toMatchObject({ status: 'installed', contract_id: contract.id, work_order_number: wo.number, holder_id: null });
+    expect((await call(noc, 'GET', `/api/work-orders/${wo.id}`)).body.materials).toHaveLength(1);
+
+    expect((await call(noc, 'POST', `/api/stock/units/${b.id}/status`, { status: 'written_off' })).status).toBe(400);               // baixa exige motivo
+    await call(noc, 'POST', `/api/stock/units/${b.id}/status`, { status: 'written_off', note: 'queimada por raio' });
+    expect((await saldo()).balance).toBe(1);
+    expect((await call(noc, 'POST', `/api/stock/units/${b.id}/status`, { status: 'in_stock' })).status).toBe(400);
+    await call(noc, 'POST', `/api/stock/units/${a.id}/status`, { status: 'in_stock' });                                               // retirada do assinante
+    expect((await saldo()).balance).toBe(2);
+    const disponiveis = (await call(noc, 'GET', `/api/stock/items/${item.id}/units`)).body.filter((u: any) => u.status === 'in_stock' || u.status === 'with_tech');
+    expect(disponiveis.map((u: any) => u.serial).sort()).toEqual([`SN${tag}A`, `SN${tag}C`]);
+    expect((await call(noc, 'GET', `/api/stock/units/${a.id}/events`)).body.map((e: any) => e.event)).toEqual(['returned', 'installed', 'to_tech', 'received']);
+    expect((await call(beta, 'GET', `/api/stock/units?serial=SN${tag}`)).body).toEqual([]);
+    expect(c.status).toBe('in_stock');
+  });
+});
+
 describe('FTTH', () => {
   it('porta única por contrato e por caixa; ciclo entre caixas recusado; outro provedor não vê', async () => {
     const olt = (await call(admin, 'POST', '/api/devices', { name: `olt-ftth-${tag}`, driver: 'olt_demo' })).body;

@@ -42,7 +42,7 @@ Tudo abaixo está implementado e testado, mas **nunca encostou em equipamento ou
 | 1.1 | Driver OLT Huawei (`olt_huawei`) | Terceiro | Formato real das saídas por firmware, sintaxe aceita, login e paginação | Conseguir acesso a uma OLT e seguir o roteiro de `docs/expansao-olt-onu.md` |
 | 1.2 | CGNAT no roteador do provedor | Terceiro | Só foi provado no CHR 7.24.5 do laboratório, com 6 clientes e regras aplicadas pela API. Falta: importar o `.rsc` pelo terminal, interface de saída real, volume real de regras e de tráfego, comportamento com jogos/VoIP | Rodar `./nexo lab cgnat` como referência e repetir no equipamento do provedor em janela de manutenção |
 | 1.3 | NOC com dados reais | Terceiro | Os limiares (sinal mínimo, ONUs por PON) vêm vazios ou com padrão genérico; a heurística de falha coletiva nunca viu uma queda de fibra de verdade | Ajustar os limiares com o provedor após duas semanas de leituras |
-| 1.4 | Alerta por webhook | Nosso | Nunca foi enviado a um serviço real | Apontar `NEXO_ALERT_WEBHOOK_URL` para o canal do provedor e derrubar um agente |
+| 1.4 | Webhooks no canal real do provedor | Nosso | Alertas de rede e avisos foram testados contra um servidor HTTP local, não contra o serviço de chat do provedor | Configurar o endereço em Administração → Avisos e usar “Enviar aviso de teste” |
 | 1.5 | Capacidade | Terceiro | Só existe medição sintética (5.000 assinantes, uma máquina). Estoque, OS, CRM e NOC não foram medidos | Medir com o volume do piloto |
 | 1.6 | Portal: chamados do assinante | Terceiro | Fluxo testado só com contas sintéticas; não há aviso ao provedor quando chega um chamado | Usar com o grupo piloto e decidir o canal de aviso (ver 2.5) |
 
@@ -55,18 +55,19 @@ Não depende de ninguém. Foi adiado para não arriscar o que já estava validad
 | 2.1 | Enviar o repositório para um servidor remoto (GitHub, GitLab ou próprio) | O `git init` e o primeiro commit foram feitos em 10/10/2026, mas o histórico só existe nesta máquina | Minutos |
 | 2.3 | Redundância do RADIUS **entre hosts** | Já existe uma segunda instância opcional no mesmo host (cobre queda do processo; provada no laboratório). Perda do host ou do disco continua derrubando a autenticação: exige replicar o banco local para outro servidor | Médio |
 | 2.4 | Juros, multa, proporcionalidade, pagamento parcial, estorno | O código é nosso, mas as regras são do provedor (0.5) e parte depende do gateway (0.2) | Médio |
-| 2.5 | Notificações (e-mail, WhatsApp, SMS) para chamados, OS e cobrança | Precisa de um serviço de envio (terceiro) e de modelos de mensagem aprovados | Médio |
+| 2.5 | Mensagens **ao assinante** (e-mail, WhatsApp, SMS) para chamados, OS e cobrança | Os avisos **ao provedor** por webhook já existem. Falar com o assinante precisa de um serviço de envio (terceiro) e de modelos de mensagem aprovados | Médio |
 | 2.7 | Criar perfis de linha, VLANs e `service-port` na OLT | Depende do fabricante e do desenho de rede; hoje são digitados | Médio, por fabricante |
-| 2.8 | Estoque por local e por número de série | Hoje o saldo é único por item; não rastreia qual ONU está em qual técnico | Médio |
-| 2.9 | Mapa da rede óptica | As caixas já guardam latitude e longitude; falta a tela de mapa e o traçado dos cabos | Médio |
-| 2.10 | Tela do técnico para celular | As telas funcionam no navegador do celular, mas não foram desenhadas para uso em campo, nem funcionam sem sinal | Médio |
-| 2.11 | IPv6 no IPAM | Blocos IPv6 são aceitos só como registro; não há escolha automática nem delegação de prefixo | Médio |
+| 2.10 | Uso em campo sem sinal | A tela “Meu trabalho” funciona no celular, mas precisa de conexão; trabalhar sem internet e sincronizar depois não existe | Médio |
 
 Concluídos depois da primeira versão desta lista (10/10/2026): IP fixo aplicado no RADIUS (provado no laboratório), remoção da ONU ao encerrar contrato
 (regra configurável, desligada por padrão), relatórios do CRM e teste da trava das rotinas periódicas com duas sessões concorrentes do banco
 (duas réplicas em hosts distintos continuam sem exercício: ver 0.6).
 Na rodada seguinte: segunda instância do RADIUS no mesmo host, migração do banco local do agente com cópia automática, rollback assistido
 (`python -m nexo_agent.rollback`, testado em unidade; **não exercitado num site real**) e cenário de disco cheio (testado com o erro real do SQLite).
+
+Na terceira rodada: estoque por número de série e por técnico, avisos ao provedor por webhook, tela de campo para celular, mapa esquemático da rede óptica
+e registro de prefixos IPv6 por contrato. Ficaram de fora, de propósito: entrega do prefixo IPv6 pelo RADIUS (o laboratório não tem IPv6 para provar),
+mapa com imagem de fundo e trajeto de cabos, e locais de estoque além de “almoxarifado” e “com o técnico”.
 
 ## P3 — Módulos que exigem decisão antes de qualquer código
 

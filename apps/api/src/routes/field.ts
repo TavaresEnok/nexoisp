@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { audit, guard, HttpError, type Ctx } from '../auth.js';
 import { nextNumber, paged, withScope, type Tx } from '../db.js';
+import { queueNotice } from '../notify.js';
 import { zPage, zUuid } from '../validators.js';
 
 /** Expansão 3: ordens de serviço, estoque (razão de movimentos) e inventário FTTH (caixas e portas). */
@@ -43,9 +44,11 @@ async function staff(c: Tx, id: string) {
   return u;
 }
 /** Lança um movimento garantindo que o saldo não fique negativo (trava a linha do item). */
-export async function stockMove(c: Tx, ctx: Ctx, itemId: string, qty: number, kind: 'in' | 'out' | 'adjust', note: string | null, workOrderId: string | null = null) {
-  const item = (await c.query('select id, name, active from stock_items where id = $1 for update', [itemId])).rows[0];
+export async function stockMove(c: Tx, ctx: Ctx, itemId: string, qty: number, kind: 'in' | 'out' | 'adjust', note: string | null, workOrderId: string | null = null, byUnit = false) {
+  const item = (await c.query('select id, name, active, serialized from stock_items where id = $1 for update', [itemId])).rows[0];
   if (!item) throw new HttpError(404, 'item de estoque não encontrado');
+  // item com número de série só se movimenta unidade a unidade, para o saldo bater com as unidades rastreadas
+  if (item.serialized !== byUnit) throw new HttpError(400, item.serialized ? `“${item.name}” é controlado por número de série: movimente pelas unidades` : `“${item.name}” não é controlado por número de série`);
   if (!item.active && qty > 0) throw new HttpError(400, 'item inativo não recebe entradas');
   const balance = (await c.query('select coalesce(sum(qty),0)::int as b from stock_movements where item_id = $1', [itemId])).rows[0].b;
   if (balance + qty < 0) throw new HttpError(409, `saldo insuficiente de “${item.name}”: há ${balance}`);
@@ -107,6 +110,8 @@ export async function fieldRoutes(app: FastifyInstance) {
         [req.ctx.tenantId, number, b.kind, b.scheduled_for ? 'scheduled' : 'open', b.subscriber_id, b.contract_id ?? null, b.assignee_id ?? null,
           b.scheduled_for ?? null, b.description, req.ctx.userId, b.ticket_id ?? null])).rows[0];
       await woEvent(c, req.ctx, w.id, 'created', { kind: b.kind });
+      const sn = (await c.query('select name from subscribers where id = $1', [b.subscriber_id])).rows[0].name;
+      await queueNotice(c, req.ctx.tenantId!, 'work_order.created', `OS ${number} aberta (${b.kind}) para ${sn}${b.scheduled_for ? `, agendada para ${b.scheduled_for}` : ''}`, { work_order_id: w.id, number });
       await audit(c, req.ctx, 'work_order.create', 'work_order', w.id, { number, kind: b.kind });
       return w;
     });
@@ -125,6 +130,7 @@ export async function fieldRoutes(app: FastifyInstance) {
         const u = b.assignee_id ? await staff(c, b.assignee_id) : null;
         n.assignee_id = b.assignee_id ?? null;
         await woEvent(c, req.ctx, id, 'assigned', { to: u?.name ?? null });
+        if (u) await queueNotice(c, req.ctx.tenantId!, 'work_order.assigned', `OS ${cur.number} atribuída a ${u.name}`, { work_order_id: id, number: cur.number });
       }
       if (b.scheduled_for !== undefined) {
         n.scheduled_for = b.scheduled_for ?? null;
@@ -179,7 +185,7 @@ export async function fieldRoutes(app: FastifyInstance) {
         const used = (await c.query('select coalesce(-sum(qty),0)::int as n from stock_movements where work_order_id = $1 and item_id = $2', [id, b.item_id])).rows[0].n;
         if (used + b.qty < 0) throw new HttpError(400, `devolução maior que o lançado nesta OS (${used})`);
       }
-      const m = await stockMove(c, req.ctx, b.item_id, -b.qty, b.qty > 0 ? 'out' : 'in', `OS ${w.number}`, id);
+      const m = await stockMove(c, req.ctx, b.item_id, -b.qty, b.qty > 0 ? 'out' : 'in', `OS ${w.number}`, id);   // itens com série entram por /units
       await woEvent(c, req.ctx, id, 'material', { item: m.item_name, qty: b.qty });
       return m;
     });
@@ -189,15 +195,17 @@ export async function fieldRoutes(app: FastifyInstance) {
   const zItem = z.object({
     name: z.string().trim().min(2).max(120), sku: z.string().trim().max(60).nullish().transform((v) => v || null),
     unit: z.string().trim().regex(/^[a-zA-Z]{1,6}$/, 'unidade: até 6 letras').default('un'), min_qty: z.number().int().min(0).max(1_000_000).default(0),
+    serialized: z.boolean().default(false),
   });
 
   app.get('/api/stock/items', { preHandler: guard('stock:read') }, async (req) =>
-    withScope(req.ctx.scope, async (c) => (await c.query(`select x.*, (x.active and x.balance < x.min_qty) as low from (${ITEM_SELECT}) x order by x.active desc, x.name`)).rows));
+    withScope(req.ctx.scope, async (c) => (await c.query(`select x.*, (x.active and x.balance < x.min_qty) as low,
+        (select count(*) from stock_units u where u.item_id = x.id and u.status = 'with_tech')::int as with_tech from (${ITEM_SELECT}) x order by x.active desc, x.name`)).rows));
 
   app.post('/api/stock/items', { preHandler: guard('stock:write') }, async (req) => {
     const b = zItem.parse(req.body);
     return withScope(req.ctx.scope, async (c) => {
-      const i = (await c.query('insert into stock_items (tenant_id, name, sku, unit, min_qty) values ($1,$2,$3,$4,$5) returning *', [req.ctx.tenantId, b.name, b.sku, b.unit, b.min_qty])).rows[0];
+      const i = (await c.query('insert into stock_items (tenant_id, name, sku, unit, min_qty, serialized) values ($1,$2,$3,$4,$5,$6) returning *', [req.ctx.tenantId, b.name, b.sku, b.unit, b.min_qty, b.serialized])).rows[0];
       await audit(c, req.ctx, 'stock.item_create', 'stock_item', i.id);
       return i;
     });
@@ -209,7 +217,11 @@ export async function fieldRoutes(app: FastifyInstance) {
     return withScope(req.ctx.scope, async (c) => {
       const cur = (await c.query('select * from stock_items where id = $1 for update', [id])).rows[0];
       if (!cur) throw new HttpError(404, 'item de estoque não encontrado');
+      // trocar o tipo de controle com movimentos lançados deixaria saldo e unidades incoerentes
+      if (b.serialized !== undefined && b.serialized !== cur.serialized && (await c.query('select 1 from stock_movements where item_id = $1 limit 1', [id])).rowCount)
+        throw new HttpError(409, 'o item já tem movimentos: o controle por número de série não pode mais ser alterado');
       const n = { ...cur, ...Object.fromEntries(Object.entries(b).filter(([, v]) => v !== undefined)) };
+      await c.query('update stock_items set serialized = $2 where id = $1', [id, n.serialized]);
       const i = (await c.query('update stock_items set name=$2, sku=$3, unit=$4, min_qty=$5, active=$6 where id=$1 returning *', [id, n.name, n.sku, n.unit, n.min_qty, n.active])).rows[0];
       await audit(c, req.ctx, 'stock.item_update', 'stock_item', id, b);
       return i;
@@ -233,6 +245,105 @@ export async function fieldRoutes(app: FastifyInstance) {
       const m = await stockMove(c, req.ctx, id, b.kind === 'out' ? -b.qty : b.qty, b.kind, b.note || null);
       await audit(c, req.ctx, `stock.${b.kind}`, 'stock_item', id, { qty: b.qty, balance: m.balance });
       return m;
+    });
+  });
+
+  // ---- Unidades com número de série ----
+  const UNIT_SELECT = `
+    select u.*, i.name as item_name, h.name as holder_name, s.name as subscriber_name, w.number as work_order_number
+    from stock_units u join stock_items i on i.id = u.item_id left join users h on h.id = u.holder_id
+    left join contracts k on k.id = u.contract_id left join subscribers s on s.id = k.subscriber_id left join work_orders w on w.id = u.work_order_id`;
+  const unitEvent = (c: Tx, ctx: Ctx, id: string, event: string, detail: object = {}) =>
+    c.query('insert into stock_unit_events (tenant_id, unit_id, actor_id, event, detail) values ($1,$2,$3,$4,$5)', [ctx.tenantId, id, ctx.userId, event, JSON.stringify(detail)]);
+  const lockUnit = async (c: Tx, id: string) => {
+    const u = (await c.query('select * from stock_units where id = $1 for update', [id])).rows[0];
+    if (!u) throw new HttpError(404, 'unidade não encontrada');
+    return u;
+  };
+
+  app.get('/api/stock/items/:id/units', { preHandler: guard('stock:read') }, async (req) =>
+    withScope(req.ctx.scope, async (c) => (await c.query(`${UNIT_SELECT} where u.item_id = $1 order by (u.status in ('installed','written_off')), u.serial limit 2000`, [zUuid.parse((req.params as any).id)])).rows));
+
+  /** Onde está este equipamento? Busca pelo número de série em todos os itens. */
+  app.get('/api/stock/units', { preHandler: guard('stock:read') }, async (req) => {
+    const q = z.object({ serial: z.string().trim().min(3).max(40).optional(), holder: zUuid.optional(), contract_id: zUuid.optional() }).parse(req.query);
+    return withScope(req.ctx.scope, async (c) =>
+      (await c.query(`${UNIT_SELECT} where ($1::text is null or u.serial ilike '%'||$1||'%') and ($2::uuid is null or u.holder_id = $2) and ($3::uuid is null or u.contract_id = $3)
+                      order by u.updated_at desc limit 200`, [q.serial ?? null, q.holder ?? null, q.contract_id ?? null])).rows);
+  });
+
+  app.get('/api/stock/units/:id/events', { preHandler: guard('stock:read') }, async (req) =>
+    withScope(req.ctx.scope, async (c) =>
+      (await c.query('select e.at, e.event, e.detail, u.name as actor_name from stock_unit_events e left join users u on u.id = e.actor_id where e.unit_id = $1 order by e.id desc', [zUuid.parse((req.params as any).id)])).rows));
+
+  // Entrada: uma unidade por número de série; o saldo do item sobe na mesma transação.
+  app.post('/api/stock/items/:id/units', { preHandler: guard('stock:write') }, async (req) => {
+    const id = zUuid.parse((req.params as any).id);
+    const b = z.object({ serials: z.array(z.string().trim().regex(/^[A-Za-z0-9._:-]{4,40}$/, 'série: 4 a 40 letras, números, . _ : -').transform((v) => v.toUpperCase())).min(1).max(500),
+      note: z.string().trim().max(300).nullish() }).parse(req.body);
+    const serials = [...new Set(b.serials)];
+    return withScope(req.ctx.scope, async (c) => {
+      const m = await stockMove(c, req.ctx, id, serials.length, 'in', b.note || `entrada de ${serials.length} unidade(s)`, null, true);
+      const dup = (await c.query('select serial from stock_units where item_id = $1 and serial = any($2)', [id, serials])).rows.map((r) => r.serial);
+      if (dup.length) throw new HttpError(409, `número(s) de série já cadastrado(s): ${dup.slice(0, 5).join(', ')}`);
+      for (const s of serials) {
+        const u = (await c.query('insert into stock_units (tenant_id, item_id, serial) values ($1,$2,$3) returning id', [req.ctx.tenantId, id, s])).rows[0];
+        await unitEvent(c, req.ctx, u.id, 'received');
+      }
+      await audit(c, req.ctx, 'stock.units_receive', 'stock_item', id, { count: serials.length });
+      return { received: serials.length, balance: m.balance };
+    });
+  });
+
+  // Entrega ao técnico / devolução ao almoxarifado. Não altera o saldo: a unidade continua sendo do provedor.
+  app.post('/api/stock/units/:id/transfer', { preHandler: guard('stock:write') }, async (req) => {
+    const id = zUuid.parse((req.params as any).id);
+    const b = z.object({ holder_id: zUuid.nullable() }).parse(req.body);
+    return withScope(req.ctx.scope, async (c) => {
+      const u = await lockUnit(c, id);
+      if (!['in_stock', 'with_tech'].includes(u.status)) throw new HttpError(400, 'só unidades em estoque ou com técnico podem ser transferidas');
+      const h = b.holder_id ? await staff(c, b.holder_id) : null;
+      await c.query(`update stock_units set status = $2, holder_id = $3, updated_at = now() where id = $1`, [id, h ? 'with_tech' : 'in_stock', b.holder_id]);
+      await unitEvent(c, req.ctx, id, h ? 'to_tech' : 'to_stock', h ? { to: h.name } : {});
+      return { ok: true };
+    });
+  });
+
+  /** Baixa (defeito sem conserto, perda) tira do saldo; "com defeito" e "voltou ao estoque" mantêm. Retirada do assinante devolve ao saldo. */
+  app.post('/api/stock/units/:id/status', { preHandler: guard('stock:write') }, async (req) => {
+    const id = zUuid.parse((req.params as any).id);
+    const b = z.object({ status: z.enum(['in_stock', 'defective', 'written_off']), note: z.string().trim().max(300).nullish() }).parse(req.body);
+    return withScope(req.ctx.scope, async (c) => {
+      const u = await lockUnit(c, id);
+      if (u.status === 'written_off') throw new HttpError(400, 'unidade baixada não volta ao estoque: cadastre uma nova entrada');
+      if (u.status === b.status) throw new HttpError(400, 'a unidade já está nessa situação');
+      if (b.status === 'written_off' && !b.note) throw new HttpError(400, 'informe o motivo da baixa');
+      const wasOut = u.status === 'installed';                    // instalada já tinha saído do saldo
+      if (wasOut && b.status !== 'written_off') await stockMove(c, req.ctx, u.item_id, 1, 'in', `retirada do assinante: ${u.serial}`, null, true);
+      if (!wasOut && b.status === 'written_off') await stockMove(c, req.ctx, u.item_id, -1, 'adjust', `baixa ${u.serial}: ${b.note}`, null, true);
+      await c.query(`update stock_units set status = $2, holder_id = null, contract_id = null, work_order_id = null, updated_at = now() where id = $1`, [id, b.status]);
+      await unitEvent(c, req.ctx, id, wasOut && b.status === 'in_stock' ? 'returned' : b.status === 'in_stock' ? 'to_stock' : b.status, { note: b.note ?? undefined, from: u.status });
+      await audit(c, req.ctx, `stock.unit_${b.status}`, 'stock_unit', id, { serial: u.serial });
+      return { ok: true };
+    });
+  });
+
+  // Instalação pela OS: a unidade sai do saldo e fica vinculada ao contrato da ordem de serviço.
+  app.post('/api/work-orders/:id/units', { preHandler: guard('os:write') }, async (req) => {
+    const id = zUuid.parse((req.params as any).id);
+    const b = z.object({ unit_id: zUuid }).parse(req.body);
+    return withScope(req.ctx.scope, async (c) => {
+      const w = (await c.query('select status, number, contract_id from work_orders where id = $1 for update', [id])).rows[0];
+      if (!w) throw new HttpError(404, 'ordem de serviço não encontrada');
+      if (FINAL.includes(w.status)) throw new HttpError(400, 'ordem de serviço encerrada não aceita material');
+      if (!w.contract_id) throw new HttpError(400, 'a ordem de serviço não tem contrato: informe o contrato para instalar um equipamento com série');
+      const u = await lockUnit(c, b.unit_id);
+      if (!['in_stock', 'with_tech'].includes(u.status)) throw new HttpError(409, 'a unidade não está disponível (já instalada, com defeito ou baixada)');
+      const m = await stockMove(c, req.ctx, u.item_id, -1, 'out', `OS ${w.number}: ${u.serial}`, id, true);
+      await c.query(`update stock_units set status = 'installed', holder_id = null, contract_id = $2, work_order_id = $3, updated_at = now() where id = $1`, [b.unit_id, w.contract_id, id]);
+      await unitEvent(c, req.ctx, b.unit_id, 'installed', { work_order: w.number });
+      await woEvent(c, req.ctx, id, 'material', { item: m.item_name, qty: 1, serial: u.serial });
+      return { ok: true, balance: m.balance };
     });
   });
 

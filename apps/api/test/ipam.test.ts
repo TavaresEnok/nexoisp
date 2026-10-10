@@ -148,3 +148,35 @@ describe('IP fixo entregue pelo RADIUS', () => {
     expect('framed_ip' in env2.parameters).toBe(false);
   });
 });
+
+describe('IPv6: prefixo delegado por contrato', () => {
+  it('escolhe o próximo prefixo livre, não sobrepõe, um por contrato, e não vaza entre provedores', async () => {
+    const { ipv6Subnet } = await import('../src/network/cgnat.js');
+    expect(ipv6Subnet('2001:db8::/40', 56, 0)).toBe('2001:db8:0:0:0:0:0:0/56');
+    expect(ipv6Subnet('2001:db8::/40', 56, 257)).toBe('2001:db8:1:100:0:0:0:0/56');
+    const hex = (Date.now() % 0xffff).toString(16);
+    const cidr = `2001:db8:${hex}::/48`;
+    expect((await call(admin, 'POST', '/api/ipam/pools', { name: `v4-deleg-${hex}`, cidr: `10.250.${Date.now() % 250}.0/24`, kind: 'private', delegation_len: 56 })).status).toBe(400);
+    const pool = (await call(admin, 'POST', '/api/ipam/pools', { name: `v6-${hex}`, cidr, kind: 'public', delegation_len: 56 })).body;
+    expect(pool.delegation_len).toBe(56);
+    const ks = (await call(admin, 'GET', '/api/contracts?status=active')).body;
+    for (const k of ks.slice(0, 2)) {
+      const cur = (await call(admin, 'GET', `/api/contracts/${k.id}/ipv6`)).body.delegation;
+      if (cur) await call(admin, 'DELETE', `/api/ipam/delegations/${cur.id}`);
+    }
+    const a = (await call(admin, 'POST', `/api/ipam/pools/${pool.id}/delegations`, { contract_id: ks[0].id })).body;
+    const b = (await call(admin, 'POST', `/api/ipam/pools/${pool.id}/delegations`, { contract_id: ks[1].id })).body;
+    expect([a.prefix, b.prefix]).toEqual([`2001:db8:${hex}::/56`, `2001:db8:${hex}:100::/56`]);
+    expect((await call(admin, 'POST', `/api/ipam/pools/${pool.id}/delegations`, { contract_id: ks[0].id })).status).toBe(409);       // um por contrato
+    await call(admin, 'DELETE', `/api/ipam/delegations/${a.id}`);
+    expect((await call(admin, 'POST', `/api/ipam/pools/${pool.id}/delegations`, { contract_id: ks[0].id, prefix: `2001:db8:${hex}:100::/56` })).status).toBe(409);   // já delegado
+    expect((await call(admin, 'POST', `/api/ipam/pools/${pool.id}/delegations`, { contract_id: ks[0].id, prefix: `2001:db8:${hex}:200::/60` })).status).toBe(400);   // tamanho errado
+    expect((await call(admin, 'POST', `/api/ipam/pools/${pool.id}/delegations`, { contract_id: ks[0].id, prefix: '2001:db9::/56' })).status).toBe(400);              // fora do bloco
+    expect((await call(admin, 'POST', `/api/ipam/pools/${pool.id}/delegations`, { contract_id: ks[0].id })).body.prefix).toBe(`2001:db8:${hex}::/56`);               // o liberado volta
+    expect((await call(admin, 'GET', `/api/contracts/${ks[1].id}/ipv6`)).body.delegation.prefix).toBe(`2001:db8:${hex}:100::/56`);
+    expect((await call(admin, 'GET', '/api/ipam/pools')).body.find((p: any) => p.id === pool.id).allocated).toBe(2);
+    expect((await call(beta, 'GET', `/api/ipam/pools/${pool.id}/delegations`)).body).toEqual([]);
+    expect((await call(beta, 'POST', `/api/ipam/pools/${pool.id}/delegations`, { contract_id: ks[0].id })).status).toBe(404);
+    expect((await call(admin, 'DELETE', `/api/ipam/pools/${pool.id}`)).status).toBe(409);
+  });
+});

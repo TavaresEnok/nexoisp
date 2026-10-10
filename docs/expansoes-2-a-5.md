@@ -33,7 +33,8 @@ Decisões e limites:
 - **O plano é imutável.** Para mudar, encerra-se e cria-se outro. Assim uma consulta sobre uma data passada responde pelo plano daquela data.
 - **O IP fixo é entregue pelo RADIUS local** (`Framed-IP-Address`, agente 0.3.0+). Alocar ou liberar reenvia a intenção atual pela fila normal de operações, preservando a suspensão; a sessão em uso é derrubada para reconectar com o endereço novo. Um IPv4 fixo por contrato. Provado no laboratório com cliente PPPoE real (`docs/lab-pppoe.md`). O sistema não confere se o endereço está fora da faixa dinâmica do NAS: isso é responsabilidade de quem aloca.
 - **Rastreio de IP dinâmico termina no IP privado.** Quem usava aquele IP privado na data está no accounting do RADIUS local (`radacct`), que fica no site do provedor e não é copiado para a nuvem. A tela diz isso e não inventa um titular.
-- IPv6 e blocos maiores que /16 não entram no cálculo de CGNAT nem na escolha automática.
+- **IPv6:** um bloco IPv6 pode ter um tamanho de prefixo por assinante (ex.: /56); o sistema reserva o próximo prefixo livre para o contrato, sem sobreposição. É **registro e planejamento**: o prefixo não é entregue pelo RADIUS (o laboratório não tem IPv6 para provar a entrega).
+- CGNAT e escolha automática de endereço valem para IPv4 em blocos de até /16.
 
 **Laboratório (10/10/2026):** `./nexo lab cgnat` cria um plano sobre o pool PPPoE do laboratório (100.64.0.0/24 → 198.51.100.0/30, 960 portas),
 aplica as 517 regras no MikroTik CHR 7.24.5 pela API, passa tráfego UDP e TCP dos 6 clientes PPPoE reais, lê as traduções na tabela de conexões
@@ -50,9 +51,12 @@ Observação: numa tentativa manual, dois pacotes UDP enviados no mesmo segundo 
 | Material | Lançado na OS, baixa o estoque na mesma transação. Devolução limitada ao que a própria OS consumiu |
 | Estoque | O saldo é a soma dos movimentos. Movimento não é alterado nem apagado: corrige-se com ajuste justificado. O saldo nunca fica negativo, nem com duas saídas simultâneas |
 | FTTH | Caixas (CTO/CEO) com N portas, caixa anterior, OLT e porta PON, endereço e coordenadas. Uma porta atende um contrato; um contrato usa uma porta |
+| Meu trabalho | As OS do técnico em cartões grandes para o celular, com telefone e endereço clicáveis; o menu recolhe em telas pequenas |
+| Mapa | Desenho esquemático das caixas pelas coordenadas, ligadas à caixa anterior, coloridas pela ocupação. Sem imagem de fundo: nenhum dado sai para serviços de mapas |
+| Itens com número de série | Cada unidade (ONU, roteador) é rastreada: almoxarifado, com qual técnico, instalada em qual contrato por qual OS, com defeito ou baixada, com histórico. O saldo do item acompanha as unidades |
 
-Limites: estoque sem locais e sem número de série; FTTH sem mapa e sem traçado de cabos; sem aplicativo de campo; OS não dispara operação de rede
-(concluir uma instalação não provisiona nada sozinho).
+Limites: estoque só distingue almoxarifado e técnico (sem depósitos); o mapa não mostra ruas nem o trajeto dos cabos; a tela de campo precisa de conexão;
+OS não dispara operação de rede (concluir uma instalação não provisiona nada sozinho).
 
 ## 4 — CRM
 
@@ -66,8 +70,9 @@ Limites: estoque sem locais e sem número de série; FTTH sem mapa e sem traçad
 | OS a partir do atendimento | A ordem de serviço guarda o protocolo de origem |
 | Exportação contábil | CSV de recebimentos (por data de pagamento) ou de faturas (por vencimento), no fuso do provedor, com proteção contra fórmulas de planilha |
 | Relatórios | Por período: conversão de prospectos por origem; atendimentos por categoria com tempo médio até a primeira resposta e até encerrar; OS por tipo com tempo até concluir |
+| Avisos ao provedor | Um webhook (canal de chat da equipe) recebe: chamado aberto ou respondido pelo portal, OS aberta ou atribuída. Fila durável com até 5 tentativas; fora do modo demonstração só aceita HTTPS e recusa endereços internos |
 
-Limites: **não há emissão fiscal** (a exportação é planilha de conferência); sem envio de e-mail/WhatsApp; sem meta de prazo (SLA); sem chat.
+Limites: **não há emissão fiscal** (a exportação é planilha de conferência); nenhuma mensagem é enviada ao assinante (e-mail/WhatsApp/SMS); sem meta de prazo (SLA); sem chat.
 “Multivendor” e “fiscal adicional”, que o roteiro agrupava nesta expansão, não foram feitos: dependem de escolha de fabricante e de processo fiscal.
 
 ## 5 — NOC e diagnóstico
@@ -102,7 +107,7 @@ O que existe é o diagnóstico por regras, que é a parte “com evidência” q
 
 ## Verificação (10/10/2026)
 
-- `./nexo test`: 53 testes na API (32 anteriores + 21 destas expansões), todos com o papel real `nexo_app`. `./nexo agent-test`: 29 testes.
+- `./nexo test`: 59 testes na API (32 anteriores + 27 destas expansões), todos com o papel real `nexo_app`. `./nexo agent-test`: 29 testes.
 - Isolamento: outro provedor não lê nem altera blocos, planos de CGNAT, OS, estoque, caixas, prospectos, atendimentos nem diagnóstico; a sessão do portal,
   mesmo com SQL direto, vê só os próprios atendimentos, nunca notas internas, e nada de OS, prospectos ou endereços IP.
 - Interface em navegador headless: todas as telas novas com quatro perfis e o portal, e os fluxos de CGNAT, estoque, OS, FTTH, prospecto, chamado e diagnóstico,

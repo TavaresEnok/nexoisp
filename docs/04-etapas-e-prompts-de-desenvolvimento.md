@@ -245,7 +245,7 @@ Detalhes de operação e produção: `docs/operacao.md`. Decisões técnicas tom
 ### Verificações realizadas (10/10/2026)
 
 - Tipos e build de API e web: sem erros.
-- `./nexo test` — 53 testes na API (26 do MVP + 6 da expansão OLT/ONU + 21 das expansões 2 a 5 e complementos), com o papel real `nexo_app`: isolamento entre provedores (API, SQL direto, conexão reutilizada, FK composta); permissões;
+- `./nexo test` — 59 testes na API (26 do MVP + 6 da expansão OLT/ONU + 27 das expansões 2 a 5 e complementos), com o papel real `nexo_app`: isolamento entre provedores (API, SQL direto, conexão reutilizada, FK composta); permissões;
   recorrência e webhook/pagamento duplicados; evento perdido recuperado; valor divergente sem baixa; assinatura inválida;
   suspensão obsoleta (antes de reservar, na revalidação e após pagamento); posse expirada → incerta → verificação; agente de outro provedor; divergência manual;
   importação (prévia não grava, reimportação não duplica, conta sem senha não provisiona); portal isolado na API e no banco; MFA;
@@ -287,7 +287,7 @@ Detalhes de operação e produção: `docs/operacao.md`. Decisões técnicas tom
 
 - Suspensão só na modalidade "negar autenticação + derrubar sessão". Sem juros, multa, proporcionalidade, pagamento parcial automático ou estorno: vão para conciliação manual.
 - Site do provedor: com CHAP a senha PPPoE fica em claro no RADIUS local; a alternativa `nt_hash` exige MS-CHAPv2 no NAS. Criptografia de disco fica a cargo do host.
-- RADIUS local: segunda instância opcional no mesmo host (provada no laboratório); sem redundância entre hosts. Alerta por webhook não foi testado contra um serviço real.
+- RADIUS local: segunda instância opcional no mesmo host (provada no laboratório); sem redundância entre hosts. Alerta por webhook testado contra um servidor HTTP local, não contra o serviço de chat do provedor.
 - Trava das rotinas periódicas: testada com duas sessões concorrentes do banco (mesmo mecanismo); duas réplicas da API em hosts distintos não foram exercitadas.
 - `infra/prod` não foi exercitado em host público com domínio real. O repositório não está sob controle de versão (git não inicializado).
 - Laboratório: um NAS, até 6 clientes, sem medição de desempenho.

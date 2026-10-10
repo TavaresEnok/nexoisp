@@ -114,6 +114,7 @@ export function InfraPanel({ contractId }: { contractId: string }) {
   const { me } = useMe();
   const ips = useLoad<any[]>(can(me, 'network:read') ? `/contracts/${contractId}/ips` : null);
   const ftth = useLoad<any>(can(me, 'network:read') ? `/contracts/${contractId}/ftth` : null);
+  const v6 = useLoad<any>(can(me, 'network:read') ? `/contracts/${contractId}/ipv6` : null);
   const [diag, setDiag] = useState(false);
   if (!can(me, 'network:read')) return null;
   const drop = ftth.data?.drop;
@@ -121,7 +122,8 @@ export function InfraPanel({ contractId }: { contractId: string }) {
     <Card title="Infraestrutura" actions={<button className="primary" onClick={() => setDiag(true)}>Diagnosticar acesso</button>}>
       <div className="grid2">
         <div><div className="small muted" style={{ fontWeight: 600 }}>Endereço IP fixo</div>
-          {ips.data?.length ? ips.data.map((a) => <div key={a.id}><span className="mono">{a.address}</span> <span className="small muted">{a.pool_name}</span></div>) : <span className="muted">nenhum (endereço dinâmico) — <Link to="/ipam">gerenciar</Link></span>}</div>
+          {ips.data?.length ? ips.data.map((a) => <div key={a.id}><span className="mono">{a.address}</span> <span className="small muted">{a.pool_name}</span></div>) : <span className="muted">nenhum (endereço dinâmico) — <Link to="/ipam">gerenciar</Link></span>}
+          {v6.data?.delegation && <div><span className="mono">{v6.data.delegation.prefix}</span> <span className="small muted">prefixo IPv6 reservado</span></div>}</div>
         <div><div className="small muted" style={{ fontWeight: 600 }}>Rede óptica</div>
           {drop ? <span>{drop.box_name} · porta {drop.port}{drop.device_name && <span className="small muted"> · {drop.device_name} PON {drop.pon_port ?? '—'}</span>}</span> : <span className="muted">sem porta registrada — <Link to="/ftth">gerenciar</Link></span>}</div>
       </div>

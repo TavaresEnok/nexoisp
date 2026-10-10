@@ -6,13 +6,14 @@ import { Audit } from './pages/Audit';
 import { ContractDetail, Contracts } from './pages/Contracts';
 import { CrmReport, Leads, Tickets } from './pages/Crm';
 import { Dashboard } from './pages/Dashboard';
-import { Ftth, Stock, WorkOrders } from './pages/Field';
+import { Ftth, MyWork, Stock, WorkOrders } from './pages/Field';
 import { FinanceSettings, Invoices, Reconciliation } from './pages/Finance';
 import { Import } from './pages/Import';
 import { Ipam } from './pages/Ipam';
 import { Login } from './pages/Login';
 import { Network, Operations } from './pages/Network';
 import { Noc } from './pages/Noc';
+import { Notices } from './pages/Notices';
 import { Onus } from './pages/Olt';
 import { Plans } from './pages/Plans';
 import { Portal } from './pages/Portal';
@@ -36,6 +37,7 @@ const ROLE_LABEL: Record<string, string> = {
 export function App() {
   const [me, setMe] = useState<Me | null | undefined>(undefined);
   const nav = useNavigate();
+  const [menu, setMenu] = useState(false);   // no celular o menu abre e fecha
   const reload = async () => {
     try {
       setMe(await api<Me>('/me'));
@@ -68,8 +70,8 @@ export function App() {
   return (
     <MeCtx.Provider value={{ me, reload }}>
       <div className="shell">
-        <nav className="side">
-          <div className="logo">Nexo<span>ISP</span></div>
+        <nav className={`side ${menu ? 'open' : ''}`} onClick={(e) => (e.target as HTMLElement).tagName === 'A' && setMenu(false)}>
+          <div className="logo"><b>Nexo<span>ISP</span></b><button className="menu-btn" onClick={() => setMenu(!menu)} aria-label="Menu">☰ Menu</button></div>
           {me.role === 'saas_operator' && !me.support && !me.mfa_pending && link('/provedores', 'Provedores')}
           {inTenant && (<>
             {link('/', 'Início', 'subscribers:read')}
@@ -80,6 +82,7 @@ export function App() {
             {(can(me, 'crm:read') || can(me, 'os:read')) && <div className="group">Atendimento</div>}
             {link('/atendimentos', 'Atendimentos', 'crm:read')}
             {link('/prospectos', 'Prospectos', 'crm:read')}
+            {link('/meu-trabalho', 'Meu trabalho (campo)', 'os:write')}
             {link('/ordens-servico', 'Ordens de serviço', 'os:read')}
             {link('/estoque', 'Estoque', 'stock:read')}
             {link('/relatorios-atendimento', 'Relatórios', 'crm:read')}
@@ -96,6 +99,7 @@ export function App() {
             {link('/operacoes', 'Operações', 'network:read')}
             {(can(me, 'users:manage') || can(me, 'audit:read')) && <div className="group">Administração</div>}
             {link('/usuarios', 'Usuários', 'users:manage')}
+            {link('/avisos', 'Avisos', 'settings:manage')}
             {link('/importacao', 'Importação', 'import:run')}
             {link('/auditoria', 'Auditoria', 'audit:read')}
           </>)}
@@ -135,6 +139,8 @@ export function App() {
               <Route path="/prospectos" element={<Leads />} />
               <Route path="/ordens-servico" element={<WorkOrders />} />
               <Route path="/estoque" element={<Stock />} />
+              <Route path="/meu-trabalho" element={<MyWork />} />
+              <Route path="/avisos" element={<Notices />} />
               <Route path="/relatorios-atendimento" element={<CrmReport />} />
               <Route path="/usuarios" element={<Users />} />
               <Route path="/importacao" element={<Import />} />

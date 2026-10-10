@@ -57,6 +57,18 @@ export function* blocks(p: CgnatPlan): Generator<Block> {
   }
 }
 
+/** n-ésimo prefixo de tamanho `len` dentro de um bloco IPv6 (ex.: 3º /56 de 2001:db8::/40). O banco normaliza a escrita. */
+export function ipv6Subnet(pool: string, len: number, n: number): string {
+  const [addr, mask] = pool.split('/');
+  const [head, tail = ''] = addr.split('::');
+  const h = head ? head.split(':') : [], t = tail ? tail.split(':') : [];
+  const groups = addr.includes('::') ? [...h, ...Array(8 - h.length - t.length).fill('0'), ...t] : h;
+  if (groups.length !== 8 || Number(mask) > len || len > 128) throw new Error(`bloco IPv6 inválido: ${pool}`);
+  const base = groups.reduce((a, g) => (a << 16n) | BigInt(parseInt(g, 16)), 0n);
+  const v = base + (BigInt(n) << BigInt(128 - len));
+  return Array.from({ length: 8 }, (_, i) => ((v >> BigInt(16 * (7 - i))) & 0xffffn).toString(16)).join(':') + `/${len}`;
+}
+
 /** Script RouterOS v7 para REVISÃO HUMANA. Não é enviado a nenhum equipamento pelo sistema. */
 export function routerosScript(p: CgnatPlan): string {
   const tag = `nexo-cgnat:${p.id.slice(0, 8)}`, chain = `nexo-cgnat-${p.id.slice(0, 8)}`;

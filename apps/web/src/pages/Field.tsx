@@ -56,7 +56,7 @@ export function WorkOrderForm({ subscriberId, contractId, ticketId, onDone, onCa
   );
 }
 
-function WorkOrderDetail({ id, onClose }: { id: string; onClose: () => void }) {
+export function WorkOrderDetail({ id, onClose }: { id: string; onClose: () => void }) {
   const { me } = useMe();
   const { data: w, loading, error, reload } = useLoad<any>(`/work-orders/${id}`);
   const staff = useLoad<any[]>('/staff');
@@ -64,6 +64,8 @@ function WorkOrderDetail({ id, onClose }: { id: string; onClose: () => void }) {
   const [res, setRes] = useState('');
   const [note, setNote] = useState('');
   const [mat, setMat] = useState({ item_id: '', qty: '1' });
+  const [sn, setSn] = useState('');
+  const found = useLoad<any[]>(can(me, 'stock:read') && sn.trim().length >= 3 ? `/stock/units?serial=${encodeURIComponent(sn.trim())}` : null);
   const write = can(me, 'os:write') && w && !['done', 'canceled'].includes(w.status);
   const status = (s: string, resolution?: string) => async () => { await api(`/work-orders/${id}/status`, { body: { status: s, resolution } }); setRes(''); await reload(); };
   const patch = async (body: any) => { await api(`/work-orders/${id}`, { method: 'PATCH', body }); await reload(); };
@@ -98,9 +100,19 @@ function WorkOrderDetail({ id, onClose }: { id: string; onClose: () => void }) {
               {write && items.data && (
                 <div className="row" style={{ marginTop: 8 }}>
                   <select style={{ flex: 1 }} value={mat.item_id} onChange={(e) => setMat({ ...mat, item_id: e.target.value })}><option value="">Item do estoque…</option>
-                    {items.data.filter((i) => i.active).map((i) => <option key={i.id} value={i.id}>{i.name} (saldo {i.balance})</option>)}</select>
+                    {items.data.filter((i) => i.active && !i.serialized).map((i) => <option key={i.id} value={i.id}>{i.name} (saldo {i.balance})</option>)}</select>
                   <input style={{ width: 80 }} type="number" value={mat.qty} onChange={(e) => setMat({ ...mat, qty: e.target.value })} title="Negativo devolve ao estoque" />
                   <ActionButton disabled={!mat.item_id} onClick={async () => { await api(`/work-orders/${id}/materials`, { body: { item_id: mat.item_id, qty: Number(mat.qty) } }); await reload(); items.reload(); }}>Lançar</ActionButton>
+                </div>
+              )}
+              {write && can(me, 'stock:read') && (
+                <div style={{ marginTop: 8 }}>
+                  <input className="mono" value={sn} onChange={(e) => setSn(e.target.value)} placeholder="Equipamento com série: digite o número…" />
+                  {found.data?.filter((u) => ['in_stock', 'with_tech'].includes(u.status)).slice(0, 5).map((u) => (
+                    <div key={u.id} className="row small" style={{ marginTop: 4 }}><span className="mono">{u.serial}</span><span>{u.item_name}</span><span className="muted">{u.holder_name ? `com ${u.holder_name}` : 'almoxarifado'}</span>
+                      <ActionButton className="sm primary" onClick={async () => { await api(`/work-orders/${id}/units`, { body: { unit_id: u.id } }); setSn(''); await reload(); }}>Instalar</ActionButton></div>
+                  ))}
+                  {found.data && sn.trim().length >= 3 && !found.data.some((u) => ['in_stock', 'with_tech'].includes(u.status)) && <div className="small muted" style={{ marginTop: 4 }}>Nenhuma unidade disponível com essa série.</div>}
                 </div>
               )}
             </Card>
@@ -173,11 +185,37 @@ export function WorkOrderList({ subscriberId, contractId }: { subscriberId?: str
 }
 export const WorkOrders = () => <WorkOrderList />;
 
+/** Modo de campo: as OS do técnico em cartões grandes, para o celular. Precisa de conexão; não funciona sem sinal. */
+export function MyWork() {
+  const list = useLoad<any[]>('/work-orders?status=pending&mine=1&limit=50', 30000);
+  const [open, setOpen] = useState<string | null>(null);
+  const map = (o: any) => `https://www.openstreetmap.org/search?query=${encodeURIComponent(o.subscriber_address)}`;
+  return (
+    <Page title="Meu trabalho">
+      <State loading={list.loading && !list.data} error={list.error}>
+        {list.data?.length === 0 && <div className="state">Nenhuma ordem de serviço em aberto atribuída a você.</div>}
+        <div className="work">{list.data?.map((o) => (
+          <section key={o.id} className="card">
+            <header><h3>OS {o.number} · {WO_KIND[o.kind]}</h3><WoBadge status={o.status} /></header>
+            <div style={{ fontSize: 16 }}><b>{o.subscriber_name}</b></div>
+            {o.subscriber_address && <div>{o.subscriber_address} · <a href={map(o)} target="_blank" rel="noreferrer">mapa</a></div>}
+            {o.subscriber_phone && <div><a href={`tel:${o.subscriber_phone}`}>{o.subscriber_phone}</a></div>}
+            {o.scheduled_for && <div className="small">Agendada: {dt(o.scheduled_for)} {['open', 'scheduled'].includes(o.status) && new Date(o.scheduled_for) < new Date() && <Badge tone="red">vencida</Badge>}</div>}
+            <p style={{ whiteSpace: 'pre-wrap', margin: '8px 0' }}>{o.description}</p>
+            <button className="primary big" onClick={() => setOpen(o.id)}>{o.status === 'in_progress' ? 'Continuar atendimento' : 'Abrir'}</button>
+          </section>
+        ))}</div>
+      </State>
+      {open && <WorkOrderDetail id={open} onClose={() => { setOpen(null); list.reload(); }} />}
+    </Page>
+  );
+}
+
 // ---- Estoque ----
 const MOVE: Record<string, string> = { in: 'Entrada', out: 'Saída', adjust: 'Ajuste' };
 
 function ItemForm({ item, onDone, onCancel }: { item?: any; onDone: () => void; onCancel: () => void }) {
-  const [f, setF] = useState({ name: item?.name ?? '', sku: item?.sku ?? '', unit: item?.unit ?? 'un', min_qty: String(item?.min_qty ?? 0) });
+  const [f, setF] = useState({ name: item?.name ?? '', sku: item?.sku ?? '', unit: item?.unit ?? 'un', min_qty: String(item?.min_qty ?? 0), serialized: !!item?.serialized });
   return (
     <Form onCancel={onCancel} onSubmit={async () => { await api(item ? `/stock/items/${item.id}` : '/stock/items', { method: item ? 'PATCH' : 'POST', body: { ...f, sku: f.sku || null, min_qty: Number(f.min_qty) } }); onDone(); }}>
       <Field label="Item"><input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} required autoFocus /></Field>
@@ -186,6 +224,9 @@ function ItemForm({ item, onDone, onCancel }: { item?: any; onDone: () => void; 
         <Field label="Unidade" hint="un, m, cx…"><input value={f.unit} onChange={(e) => setF({ ...f, unit: e.target.value })} required /></Field>
         <Field label="Estoque mínimo"><input type="number" min="0" value={f.min_qty} onChange={(e) => setF({ ...f, min_qty: e.target.value })} required /></Field>
       </div>
+      <label className="row"><input type="checkbox" style={{ width: 'auto' }} checked={f.serialized} onChange={(e) => setF({ ...f, serialized: e.target.checked })} />
+        <span>Controlar por número de série (ONU, roteador): cada unidade é rastreada individualmente</span></label>
+      <p className="small muted" style={{ marginTop: 2 }}>Não pode ser alterado depois do primeiro movimento.</p>
     </Form>
   );
 }
@@ -195,7 +236,8 @@ function Movements({ item, write, onClose }: { item: any; write: boolean; onClos
   const [f, setF] = useState({ kind: 'in', qty: '', note: '' });
   return (
     <Modal title={`Movimentos — ${item.name}`} onClose={onClose} wide>
-      {write && (
+      {item.serialized && <p className="small muted">Item controlado por número de série: entradas, instalações e baixas são feitas em “Unidades”.</p>}
+      {write && !item.serialized && (
         <Form submit="Lançar movimento" onSubmit={async () => { await api(`/stock/items/${item.id}/movements`, { body: { kind: f.kind, qty: Number(f.qty), note: f.note || null } }); setF({ ...f, qty: '', note: '' }); list.reload(); }}>
           <div className="cols3">
             <Field label="Tipo"><select value={f.kind} onChange={(e) => setF({ ...f, kind: e.target.value })}>{Object.entries(MOVE).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></Field>
@@ -214,11 +256,63 @@ function Movements({ item, write, onClose }: { item: any; write: boolean; onClos
   );
 }
 
+const UNIT_STATUS: Record<string, [string, 'gray' | 'green' | 'red' | 'amber' | 'blue']> = {
+  in_stock: ['No almoxarifado', 'green'], with_tech: ['Com técnico', 'blue'], installed: ['Instalada', 'gray'], defective: ['Com defeito', 'amber'], written_off: ['Baixada', 'red'],
+};
+const UNIT_EVENT: Record<string, string> = { received: 'Entrada', to_tech: 'Entregue ao técnico', to_stock: 'Voltou ao almoxarifado', installed: 'Instalada', returned: 'Retirada do assinante', defective: 'Marcada com defeito', written_off: 'Baixada' };
+
+/** Unidades de um item com número de série: onde está cada uma e com quem. */
+function Units({ item, write, onClose }: { item: any; write: boolean; onClose: () => void }) {
+  const list = useLoad<any[]>(`/stock/items/${item.id}/units`);
+  const staff = useLoad<any[]>('/staff');
+  const [serials, setSerials] = useState('');
+  const [hist, setHist] = useState<any>(null);
+  const events = useLoad<any[]>(hist ? `/stock/units/${hist.id}/events` : null);
+  const run = async (fn: () => Promise<unknown>) => { try { await fn(); list.reload(); } catch (e: any) { alert(e.message); } };
+  return (
+    <Modal title={`Unidades — ${item.name}`} onClose={onClose} wide>
+      {write && (
+        <Form submit="Dar entrada" onSubmit={async () => {
+          const s = serials.split(/[\s,;]+/).filter(Boolean);
+          if (!s.length) throw new Error('Informe ao menos um número de série');
+          await api(`/stock/items/${item.id}/units`, { body: { serials: s } }); setSerials(''); list.reload();
+        }}>
+          <Field label="Números de série para entrada" hint="Um por linha, ou separados por espaço ou vírgula."><textarea rows={2} className="mono" value={serials} onChange={(e) => setSerials(e.target.value)} /></Field>
+        </Form>
+      )}
+      <State loading={list.loading} error={list.error} empty={list.data?.length === 0}>
+        <table>
+          <thead><tr><th>Série</th><th>Situação</th><th>Onde</th><th></th></tr></thead>
+          <tbody>{list.data?.map((u) => (
+            <tr key={u.id}><td className="mono">{u.serial}</td><td><Badge tone={UNIT_STATUS[u.status][1]}>{UNIT_STATUS[u.status][0]}</Badge></td>
+              <td className="small">{u.status === 'with_tech' ? u.holder_name : u.status === 'installed' ? <><Link to={`/contratos/${u.contract_id}`}>{u.subscriber_name}</Link>{u.work_order_number && ` · OS ${u.work_order_number}`}</> : '—'}</td>
+              <td><div className="row" style={{ justifyContent: 'flex-end' }}>
+                {write && ['in_stock', 'with_tech'].includes(u.status) && (
+                  <select style={{ width: 170 }} value={u.holder_id ?? ''} onChange={(e) => run(() => api(`/stock/units/${u.id}/transfer`, { body: { holder_id: e.target.value || null } }))}>
+                    <option value="">Almoxarifado</option>{staff.data?.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
+                  </select>)}
+                {write && u.status === 'installed' && <button className="sm" onClick={() => window.confirm(`Registrar a retirada de ${u.serial} do assinante?`) && run(() => api(`/stock/units/${u.id}/status`, { body: { status: 'in_stock' } }))}>Retirada</button>}
+                {write && ['in_stock', 'with_tech', 'installed'].includes(u.status) && <button className="sm" onClick={() => run(() => api(`/stock/units/${u.id}/status`, { body: { status: 'defective' } }))}>Defeito</button>}
+                {write && u.status === 'defective' && <button className="sm" onClick={() => run(() => api(`/stock/units/${u.id}/status`, { body: { status: 'in_stock' } }))}>Consertada</button>}
+                {write && u.status !== 'written_off' && <button className="sm danger" onClick={() => { const note = window.prompt(`Motivo da baixa de ${u.serial}:`); if (note) run(() => api(`/stock/units/${u.id}/status`, { body: { status: 'written_off', note } })); }}>Baixar</button>}
+                <button className="sm" onClick={() => setHist(u)}>histórico</button>
+              </div></td></tr>
+          ))}</tbody>
+        </table>
+      </State>
+      {hist && <Modal title={`Histórico — ${hist.serial}`} onClose={() => setHist(null)}>
+        <ul className="steps">{events.data?.map((e, i) => <li key={i} className="small"><span className="muted" style={{ minWidth: 118 }}>{dt(e.at)}</span>
+          <span><b>{UNIT_EVENT[e.event] ?? e.event}</b> {e.detail.to ?? ''}{e.detail.work_order ? `OS ${e.detail.work_order}` : ''}{e.detail.note ? `(${e.detail.note})` : ''} <span className="muted">· {e.actor_name ?? 'sistema'}</span></span></li>)}</ul>
+      </Modal>}
+    </Modal>
+  );
+}
+
 export function Stock() {
   const { me } = useMe();
   const w = can(me, 'stock:write');
   const { data, loading, error, reload } = useLoad<any[]>('/stock/items');
-  const [modal, setModal] = useState<{ kind: 'new' | 'edit' | 'moves'; item?: any } | null>(null);
+  const [modal, setModal] = useState<{ kind: 'new' | 'edit' | 'moves' | 'units'; item?: any } | null>(null);
   const close = () => { setModal(null); reload(); };
   return (
     <Page title="Estoque" actions={w && <button className="primary" onClick={() => setModal({ kind: 'new' })}>Novo item</button>}>
@@ -226,9 +320,10 @@ export function Stock() {
         <table>
           <thead><tr><th>Item</th><th>Código</th><th className="num">Saldo</th><th className="num">Mínimo</th><th>Situação</th><th></th></tr></thead>
           <tbody>{data?.map((i) => (
-            <tr key={i.id}><td>{i.name}</td><td className="mono">{i.sku ?? '—'}</td><td className="num"><b>{i.balance}</b> {i.unit}</td><td className="num">{i.min_qty}</td>
+            <tr key={i.id}><td>{i.name} {i.serialized && <Badge tone="blue">com série</Badge>}</td><td className="mono">{i.sku ?? '—'}</td><td className="num"><b>{i.balance}</b> {i.unit}{i.with_tech > 0 && <div className="small muted">{i.with_tech} com técnico</div>}</td><td className="num">{i.min_qty}</td>
               <td>{!i.active ? <Badge>Inativo</Badge> : i.low ? <Badge tone="red">Abaixo do mínimo</Badge> : <Badge tone="green">OK</Badge>}</td>
               <td><div className="row" style={{ justifyContent: 'flex-end' }}>
+                {i.serialized && <button className="sm primary" onClick={() => setModal({ kind: 'units', item: i })}>Unidades</button>}
                 <button className="sm" onClick={() => setModal({ kind: 'moves', item: i })}>Movimentos</button>
                 {w && <button className="sm" onClick={() => setModal({ kind: 'edit', item: i })}>Editar</button>}
                 {w && <ActionButton className="sm" onClick={async () => { await api(`/stock/items/${i.id}`, { method: 'PATCH', body: { active: !i.active } }); reload(); }}>{i.active ? 'Desativar' : 'Ativar'}</ActionButton>}
@@ -239,6 +334,7 @@ export function Stock() {
       {modal?.kind === 'new' && <Modal title="Novo item de estoque" onClose={() => setModal(null)}><ItemForm onCancel={() => setModal(null)} onDone={close} /></Modal>}
       {modal?.kind === 'edit' && <Modal title="Editar item" onClose={() => setModal(null)}><ItemForm item={modal.item} onCancel={() => setModal(null)} onDone={close} /></Modal>}
       {modal?.kind === 'moves' && <Movements item={modal.item} write={w} onClose={close} />}
+      {modal?.kind === 'units' && <Units item={modal.item} write={w} onClose={close} />}
     </Page>
   );
 }
@@ -317,16 +413,54 @@ function BoxPorts({ id, write, onClose }: { id: string; write: boolean; onClose:
   );
 }
 
+/** Mapa esquemático: posição pelas coordenadas das caixas, sem mapa de fundo (nenhum dado sai para serviços de mapas). */
+function FtthMap({ boxes, onOpen }: { boxes: any[]; onOpen: (b: any) => void }) {
+  const pts = boxes.filter((b) => b.latitude != null && b.longitude != null).map((b) => ({ ...b, lat: Number(b.latitude), lng: Number(b.longitude) }));
+  if (pts.length === 0) return <div className="state">Nenhuma caixa tem coordenadas. Informe latitude e longitude ao editar a caixa para vê-la aqui.</div>;
+  const W = 1000, H = 560, pad = 60;
+  const minLat = Math.min(...pts.map((p) => p.lat)), maxLat = Math.max(...pts.map((p) => p.lat)), minLng = Math.min(...pts.map((p) => p.lng)), maxLng = Math.max(...pts.map((p) => p.lng));
+  // um grau de longitude encolhe com a latitude: sem a correção o desenho fica esticado
+  const k = Math.cos(((minLat + maxLat) / 2) * Math.PI / 180);
+  const spanX = Math.max((maxLng - minLng) * k, 1e-5), spanY = Math.max(maxLat - minLat, 1e-5);
+  const scale = Math.min((W - 2 * pad) / spanX, (H - 2 * pad) / spanY);
+  const x = (p: any) => W / 2 + ((p.lng - (minLng + maxLng) / 2) * k) * scale, y = (p: any) => H / 2 - (p.lat - (minLat + maxLat) / 2) * scale;
+  const byId = new Map(pts.map((p) => [p.id, p]));
+  const color = (b: any) => (b.used >= b.ports ? 'var(--red)' : b.used / b.ports >= 0.8 ? '#c98a00' : 'var(--green)');
+  const meters = Math.round((spanY * 111_320 * 200) / (spanY * scale));     // quantos metros valem 200 px
+  return (
+    <Card>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', background: '#f7fafc', borderRadius: 8 }}>
+        {pts.filter((p) => byId.has(p.parent_id)).map((p) => <line key={`l${p.id}`} x1={x(p)} y1={y(p)} x2={x(byId.get(p.parent_id))} y2={y(byId.get(p.parent_id))} stroke="#9fb3c2" strokeWidth="2" />)}
+        {pts.map((p) => (
+          <g key={p.id} style={{ cursor: 'pointer' }} onClick={() => onOpen(p)}>
+            {p.kind === 'ceo' ? <rect x={x(p) - 9} y={y(p) - 9} width="18" height="18" fill={color(p)} stroke="#fff" strokeWidth="2" /> : <circle cx={x(p)} cy={y(p)} r="10" fill={color(p)} stroke="#fff" strokeWidth="2" />}
+            <text x={x(p) + 14} y={y(p) + 4} fontSize="13" fill="#17202a">{p.name} ({p.used}/{p.ports})</text>
+          </g>
+        ))}
+        <line x1={pad} y1={H - 24} x2={pad + 200} y2={H - 24} stroke="#64707d" strokeWidth="2" /><text x={pad} y={H - 30} fontSize="12" fill="#64707d">≈ {meters >= 1000 ? `${(meters / 1000).toFixed(1)} km` : `${meters} m`}</text>
+      </svg>
+      <p className="small muted" style={{ marginBottom: 0 }}>● CTO · ■ CEO · verde: com portas livres · amarelo: 80% ou mais · vermelho: cheia. Linhas ligam cada caixa à anterior; não representam o trajeto real do cabo.
+        {pts.length < boxes.length && ` ${boxes.length - pts.length} caixa(s) sem coordenadas não aparecem.`} Norte para cima. Clique numa caixa para ver as portas.</p>
+    </Card>
+  );
+}
+
 export function Ftth() {
   const { me } = useMe();
   const w = can(me, 'network:write');
   const { data, loading, error, reload } = useLoad<any[]>('/ftth/boxes');
   const [modal, setModal] = useState<{ kind: 'new' | 'edit' | 'ports'; box?: any } | null>(null);
+  const [view, setView] = useState<'list' | 'map'>('list');
   const close = () => { setModal(null); reload(); };
   return (
-    <Page title="Rede óptica (FTTH)" actions={w && <button className="primary" onClick={() => setModal({ kind: 'new' })}>Nova caixa</button>}>
+    <Page title="Rede óptica (FTTH)" actions={<>
+      <button className={view === 'list' ? 'primary' : ''} onClick={() => setView('list')}>Lista</button>
+      <button className={view === 'map' ? 'primary' : ''} onClick={() => setView('map')}>Mapa</button>
+      {w && <button onClick={() => setModal({ kind: 'new' })}>Nova caixa</button>}
+    </>}>
+      {view === 'map' && data && <FtthMap boxes={data} onOpen={(b) => setModal({ kind: 'ports', box: b })} />}
       <State loading={loading} error={error} empty={data?.length === 0}>
-        <table>
+        <table style={{ display: view === 'list' ? undefined : 'none' }}>
           <thead><tr><th>Caixa</th><th>Tipo</th><th>Caixa anterior</th><th>OLT / PON</th><th>Endereço</th><th className="num">Ocupação</th><th></th></tr></thead>
           <tbody>{data?.map((b) => (
             <tr key={b.id}><td>{b.name}</td><td className="small">{BOX_KIND[b.kind]}</td><td className="small">{b.parent_name ?? '—'}</td>
