@@ -10,3 +10,4 @@ __pycache__
 backups
 releases
 e2e/node_modules
+.nexo.local

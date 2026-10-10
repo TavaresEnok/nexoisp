@@ -1,0 +1,18 @@
+# Sobreposição para rodar no servidor PNETLab (ativada por .nexo.local). Não altera nada do PNETLab.
+# Motivos, medidos em 10/10/2026 no Docker 20.10.9 de lá (dockerd --iptables=false, pool único 10.177.0.0/16):
+#  - rede nova só é criada com faixa explícita (o pool padrão já está ocupado pela docker0);
+#  - containers fora da rede do host não têm saída para a internet: o build baixa pacotes pela rede do host;
+#  - imagens Debian/Ubuntu recentes não criam threads sob o seccomp padrão dessa versão do Docker.
+#    seccomp=unconfined reduz o isolamento desses containers: aceitável em servidor de laboratório, não em produção.
+networks:
+  default:
+    ipam: { config: [{ subnet: 172.30.250.0/24 }] }
+services:
+  api:
+    build: { network: host }
+  agent-demo:
+    build: { network: host }
+    security_opt: ["seccomp=unconfined"]
+  olt-huawei-emu:
+    build: { network: host }
+    security_opt: ["seccomp=unconfined"]

@@ -3,7 +3,10 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 NODE_IMG=node:22-alpine
-COMPOSE="docker compose -p nexoisp -f infra/compose/docker-compose.yml --env-file .env"
+# Ajustes só deste servidor (não versionados): ver .nexo.local.example. Ex.: Docker antigo/sem iptables, como o do PNETLab.
+NEXO_COMPOSE_OVERRIDE=""; NEXO_BUILD_OPTS=""; NEXO_RUN_OPTS=""; NEXO_TOOL_NET=""
+[ -f .nexo.local ] && . ./.nexo.local
+COMPOSE="docker compose -p nexoisp -f infra/compose/docker-compose.yml ${NEXO_COMPOSE_OVERRIDE:+-f $NEXO_COMPOSE_OVERRIDE} --env-file .env"
 nodebox() { docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp -e npm_config_cache=/tmp/.npm \
   --network nexoisp_default -e DATABASE_URL_OWNER -e DATABASE_URL_APP -e NEXO_AGENT_MTLS -e NEXO_DEMO_MODE -e NEXO_GATEWAY_WEBHOOK_SECRET \
   -v "$PWD":/app -w /app "$@"; }
@@ -23,7 +26,7 @@ init_env() {  # segredos e certificados de DESENVOLVIMENTO, gerados localmente (
 case "${1:-help}" in
   init)      init_env ;;
   agent-cert) scripts/dev-certs.sh agent "$2" "${3:-infra/certs/agent-$2}" ;;
-  agent-test) docker build -q -t nexoisp-agent services/network-agent >/dev/null && docker run --rm nexoisp-agent python -m unittest discover -s tests -t . ;;
+  agent-test) docker build -q $NEXO_BUILD_OPTS -t nexoisp-agent services/network-agent >/dev/null && docker run --rm $NEXO_RUN_OPTS nexoisp-agent python -m unittest discover -s tests -t . ;;
   backup)    scripts/backup.sh backup "${2:-backups}" ;;
   restore-check) scripts/backup.sh restore-check "$2" ;;
   restore)   NEXO_API_SERVICE_STOP="$COMPOSE stop api" NEXO_API_SERVICE_START="$COMPOSE start api" scripts/backup.sh restore "$2" "${3:-}" ;;
@@ -33,9 +36,9 @@ case "${1:-help}" in
   lab)       shift; infra/lab/lab.sh "$@" ;;
   homolog)   shift; infra/homolog/homolog.sh "$@" ;;
   demo-tool) shift; $COMPOSE exec agent-demo python -m nexo_agent.demo_tool "$@" ;;
-  npm)       shift; nodebox "$NODE_IMG" npm "$@" ;;
+  npm)       shift; if [ -n "$NEXO_TOOL_NET" ]; then docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp -e npm_config_cache=/tmp/.npm --network "$NEXO_TOOL_NET" -v "$PWD":/app -w /app "$NODE_IMG" npm "$@"; else nodebox "$NODE_IMG" npm "$@"; fi ;;
   sh)        shift; nodebox -it "$NODE_IMG" sh ;;
-  install)   nodebox "$NODE_IMG" npm install ;;
+  install)   "$0" npm install ;;
   typecheck) nodebox "$NODE_IMG" sh -c "npm -w apps/api run typecheck && npm -w apps/web run typecheck" ;;
   build)     nodebox "$NODE_IMG" sh -c "npm -w apps/api run build && npm -w apps/web run build" ;;
   up)        init_env; $COMPOSE up -d --build ;;

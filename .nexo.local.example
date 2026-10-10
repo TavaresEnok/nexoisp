@@ -1,0 +1,11 @@
+# Copie para .nexo.local (não versionado) quando o Docker deste servidor precisar de ajustes.
+# Exemplo abaixo: servidor PNETLab (Docker 20.10 iniciado com --iptables=false e um único bloco de endereços).
+
+# arquivo de sobreposição do compose (faixa de rede explícita, build pela rede do host, seccomp)
+NEXO_COMPOSE_OVERRIDE=infra/compose/docker-compose.pnetlab.yml
+# builds avulsos (./nexo agent-test) precisam da rede do host para baixar pacotes
+NEXO_BUILD_OPTS="--network host"
+# imagens baseadas em Debian/Ubuntu recentes não criam threads sob o seccomp padrão do Docker < 20.10.10
+NEXO_RUN_OPTS="--security-opt seccomp=unconfined"
+# ./nexo npm / install: rede com saída para a internet
+NEXO_TOOL_NET=host
