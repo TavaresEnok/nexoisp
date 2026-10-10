@@ -184,3 +184,17 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
 - **Fumaça da interface versionada** (`e2e/smoke.mjs`): login, assinantes, contrato, faturas, confirmação do sistema, NOC, tema, perfil sem acesso à rede e portal no celular.
 - **Dependências:** `@fastify/static` 8 → 10 e `react-router-dom` 6 → 7 (quatro avisos altos e dois moderados); `npm audit --omit=dev` sem vulnerabilidades.
 - **Limite de login no banco**, por e-mail e por endereço de origem, com teste que simula outra réplica.
+
+### 10/10/2026 — cenário do PNETLab, etapa 1 (levantamento, só leitura)
+
+- **Estado conferido no servidor novo (10.10.0.26):** 4 containers no ar, 62 testes da API e 31 do agente passando. O usuário `enok` não está no grupo `docker`:
+  `./nexo` só funciona com `sudo docker` (pendência de ambiente, decisão do proprietário).
+- **Cenário `Trio_ISP_FoxNet_WorldFibra_AlphaNet.unl`:** 13 nós, todos MikroTik CHR **7.17 (stable)**, licença gratuita, todos ligados. Três concentradores PPPoE
+  (um por provedor), cada um com um nó cliente (CHR com `pppoe-client`) já conectado por usuário local; RADIUS desligado (`use-radius=no`) nos três.
+- **Não há OLT de fabricante:** os três nós “OLT” são CHR em bridge de duas portas. O driver `olt_huawei` não tem com quem falar neste cenário; a homologação de OLT
+  continua pendente (item 1.1 do doc 05). Nenhum driver novo será escrito sem decisão do proprietário.
+- **Gerência:** só console telnet local (portas 30115–30127) e Winbox de um nó; **não existe caminho IP** entre o servidor e os nós (a rede de gerência foi retirada
+  do cenário). RADIUS e `api-ssl` exigem criar esse caminho: entra na proposta da etapa 2.
+- **Cuidado:** os concentradores carregam configuração derivada de backups reais dos provedores, com contas PPPoE. Nada disso entra no repositório (público).
+- **Nada foi alterado** em equipamento, no PNETLab nem no Docker. Situação inalterada: pronta para homologação, não para corte; nada homologado em equipamento físico.
+- **Próxima ação:** proposta da etapa 2 e ok do proprietário antes de qualquer escrita em nó do cenário.
