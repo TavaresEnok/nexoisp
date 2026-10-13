@@ -80,7 +80,7 @@ export async function atendimentoRoutes(app: FastifyInstance) {
         `select h.at, h.event, h.detail, h.contract_id, u.name as by from contract_history h join contracts k on k.id = h.contract_id left join users u on u.id = h.actor_id
          where k.subscriber_id = $1 order by h.at desc limit $2`, [id, lim])).rows,
       (r) => ({ at: r.at, kind: 'contract', contract_id: r.contract_id, by: r.by,
-        title: ({ created: 'Contrato criado', plan_changed: 'Troca de plano', ended: 'Contrato encerrado', due_day_changed: 'Vencimento alterado', credit_restricted: 'Restrição de crédito', credit_released: 'Restrição de crédito retirada' } as any)[r.event] ?? r.event,
+        title: ({ created: 'Contrato criado', plan_changed: 'Troca de plano', ended: 'Contrato encerrado', due_day_changed: 'Vencimento alterado', credit_restricted: 'Restrição de crédito', credit_released: 'Restrição de crédito retirada', loyalty_set: 'Fidelidade definida', penalty_charged: 'Multa rescisória cobrada', penalty_waived: 'Multa rescisória dispensada', amendment: 'Aditivo registrado' } as any)[r.event] ?? r.event,
         detail: r.detail?.from !== undefined ? `${r.detail.from} → ${r.detail.to}` : (r.detail?.plan ?? null) }));
       if (finance) {
         push((await c.query(

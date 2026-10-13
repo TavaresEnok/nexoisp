@@ -40,7 +40,10 @@ describe('financeiro', () => {
     const b = (await call(admin, 'POST', '/api/finance/generate', { competence: C1 })).body;
     expect(b).toMatchObject({ created: 0, already_existing: a.created });
     expect((await invoices()).length).toBe(n);
-    expect((await invoices()).every((i) => i.gateway_charge_id && Number.isInteger(i.amount_cents))).toBe(true);
+    // só o que a recorrência desta competência gerou (faturas avulsas de outros testes podem existir sem cobrança no gateway)
+    const daCompetencia = (await invoices()).filter((i) => i.kind === 'monthly' && String(i.competence).startsWith(C1));
+    expect(daCompetencia.length).toBeGreaterThan(0);
+    expect(daCompetencia.every((i) => i.gateway_charge_id && Number.isInteger(i.amount_cents))).toBe(true);
   });
 
   it('webhook repetido e pagamento reenviado em outro evento não duplicam a baixa', async () => {

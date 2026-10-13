@@ -301,3 +301,11 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
 - **Limites:** "negativado" é um marcador manual (sem integração com bureau); CSV tem teto de 5.000 linhas por arquivo.
 - **Próxima ação:** C8–C10 (fidelidade com multa, aditivos e mudança agendada, descontos), F5/F7, R1–R4, P3 (campos personalizados) e o modelo canônico ampliado de importação.
 
+### 13/10/2026 — fidelidade com multa, mudança agendada, aditivos, desconto e indicação
+
+- **Entregue (testado, 118 testes da API passando):** carência e multa por plano e por contrato com cotação de encerramento e decisão obrigatória; mudança agendada aplicada pela
+  rotina periódica; aditivos; desconto temporário na mensalidade (mês gratuito não gera fatura); indicação com relatório. Migração 031.
+- **Mudança de teste:** `financeiro.test.ts` passou a conferir a cobrança no gateway só das faturas da competência que a recorrência gerou (a checagem anterior olhava todas as faturas do provedor).
+- **Limites:** combos de produtos não existem; aditivo não tem assinatura; multa é cobrada como fatura avulsa (sem cálculo proporcional por dia).
+- **Próxima ação:** F5/F7 (kit/auxiliares e comissão), R1–R4 (parâmetros de rede por plano, NAS, CGNAT, disponibilidade), P3 (campos personalizados) e o modelo canônico ampliado de importação.
+

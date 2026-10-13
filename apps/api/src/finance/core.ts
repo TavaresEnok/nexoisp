@@ -2,6 +2,7 @@ import { HttpError } from '../auth.js';
 import { noScope, withScope, type Tx } from '../db.js';
 import { requestOperation } from '../network/engine.js';
 import { runNotices } from '../notices.js';
+import { applyScheduledChanges } from '../scheduled.js';
 import { runSla } from '../sla.js';
 import { emitEvent } from '../webhooks.js';
 import { getGateway, type GatewayEvent, type GatewayPayment } from './gateway.js';
@@ -23,23 +24,34 @@ const sysAudit = (c: Tx, tenantId: string, action: string, entity: string, id: s
  *  Com `prorate_first_month`, o primeiro mês de um contrato que começou depois do dia 1º é cobrado pelos dias de uso. */
 export async function generateMonthly(c: Tx, tenantId: string, competence: string) {
   const prorate = !!(await getSettings(c, tenantId)).prorate_first_month;
+  // valor = base do plano (ou proporcional) − descontos vigentes; mês totalmente descontado não gera fatura
   const created = (await c.query(
     `insert into invoices (tenant_id, contract_id, subscriber_id, kind, competence, due_date, amount_cents)
      select k.tenant_id, k.id, k.subscriber_id, 'monthly', $2::date, $2::date + (k.due_day - 1),
-            case when $3::boolean and k.start_date > $2::date
-                 then greatest(1, round(pv.price_cents::numeric * (($2::date + interval '1 month')::date - k.start_date) / (($2::date + interval '1 month')::date - $2::date))::int)
-                 else pv.price_cents end
+            b.base - contract_discount_cents(k.id, $2::date, b.base)
      from contracts k join plan_versions pv on pv.id = k.plan_version_id
+     cross join lateral (select contract_base_cents(k.id, $2::date, $3::boolean) as base) b
      where k.tenant_id = $1 and k.status = 'active' and k.start_date < ($2::date + interval '1 month') and pv.price_cents > 0
+       and b.base - contract_discount_cents(k.id, $2::date, b.base) > 0
      on conflict (tenant_id, contract_id, competence, kind) where competence is not null do nothing
      returning id, contract_id, amount_cents`, [tenantId, competence, prorate])).rows;
-  for (const i of created)
+  for (const i of created) {
+    const base = (await c.query('select contract_base_cents($1, $2::date, $3::boolean) as v', [i.contract_id, competence, prorate])).rows[0].v as number;
     await c.query(
       `insert into invoice_items (tenant_id, invoice_id, description, amount_cents)
        select $1, $2, 'Mensalidade ' || p.name || ' — ' || to_char($4::date, 'MM/YYYY')
                        || case when $3 < pv.price_cents then ' (proporcional ao período de uso)' else '' end, $3
        from contracts k join plan_versions pv on pv.id = k.plan_version_id join plans p on p.id = pv.plan_id where k.id = $5`,
-      [tenantId, i.id, i.amount_cents, competence, i.contract_id]);
+      [tenantId, i.id, base, competence, i.contract_id]);
+    const disc = base - i.amount_cents;
+    if (disc > 0)
+      await c.query(
+        `insert into invoice_items (tenant_id, invoice_id, description, amount_cents)
+         select $1, $2, 'Desconto: ' || coalesce(string_agg(d.reason, '; '), 'promocional'), -$3::int
+         from contract_discounts d where d.contract_id = $4 and d.canceled_at is null and d.from_competence <= $5::date
+           and (d.months is null or $5::date < (d.from_competence + make_interval(months => d.months))::date)`,
+        [tenantId, i.id, disc, i.contract_id, competence]);
+  }
   return created.length;
 }
 
@@ -307,6 +319,7 @@ export async function runWorkerOnce(log: (m: string) => void = () => {}, opts: {
       }
       if (opts.reconcile && t.gateway !== 'none') await reconcile(t.tenant_id);
       await runNotices(t.tenant_id).then((r) => { if (r.sent || r.failed) log(`avisos ao assinante: ${r.sent} enviado(s), ${r.failed} falha(s) para ${t.tenant_id}`); });
+      await applyScheduledChanges(t.tenant_id).then((r) => { if (r.applied || r.failed) log(`mudanças agendadas: ${r.applied} aplicada(s), ${r.failed} com falha para ${t.tenant_id}`); });
       await runSla(t.tenant_id).then((r) => { if (r.tickets || r.work_orders) log(`SLA vencido: ${r.tickets} atendimento(s), ${r.work_orders} OS para ${t.tenant_id}`); });
       await withScope(SYS(t.tenant_id), (c) => c.query(`update trust_releases set status = 'expired', closed_at = now() where status = 'active' and expires_at <= now()`));
       if (t.auto_suspend) {

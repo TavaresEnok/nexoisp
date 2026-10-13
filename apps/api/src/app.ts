@@ -9,6 +9,7 @@ import { cadastroRoutes } from './routes/cadastro.js';
 import { atendimentoRoutes } from './routes/atendimento.js';
 import { avisosAssinanteRoutes } from './routes/avisos-assinante.js';
 import { csvExport } from './csv.js';
+import { condicoesRoutes } from './routes/condicoes.js';
 import { estadosRoutes } from './routes/estados.js';
 import { fluxoOsRoutes } from './routes/fluxo-os.js';
 import { integracoesRoutes } from './routes/integracoes.js';
@@ -62,6 +63,7 @@ export async function buildApp(opts: { logger?: boolean } = {}) {
   await app.register(avisosAssinanteRoutes);
   await app.register(fluxoOsRoutes);
   await app.register(estadosRoutes);
+  await app.register(condicoesRoutes);
   await app.register(integracoesRoutes);
   await app.register(publicApiRoutes);
   await app.register(networkRoutes);

@@ -4,6 +4,26 @@ import { can, useMe } from '../App';
 import { ActionButton, Badge, Field, Form, Modal, Page, State } from '../ui';
 import { DunningBadge, DunningForm } from './Cobranca';
 
+/** Fidelidade padrão do plano: vale para contratos novos; os existentes mantêm o que contrataram. */
+function LoyaltyForm({ plan, onDone, onCancel }: { plan: any; onDone: () => void; onCancel: () => void }) {
+  const [f, setF] = useState({ months: plan.loyalty_months ? String(plan.loyalty_months) : '', model: plan.penalty_model ?? 'fixed',
+    value: plan.penalty_cents != null ? (plan.penalty_cents / 100).toFixed(2).replace('.', ',') : '' });
+  return (
+    <Form submit="Salvar" onCancel={onCancel} onSubmit={async () => {
+      await api(`/plans/${plan.id}/loyalty`, { method: 'PUT', body: f.months === '' ? { months: null }
+        : { months: Number(f.months), penalty_model: f.model, penalty_cents: Math.round(Number(f.value.replace(',', '.')) * 100) } });
+      onDone();
+    }}>
+      <p className="small muted">Vale para contratos novos deste plano. Deixe os meses vazios para não ter fidelidade.</p>
+      <div className="cols3">
+        <Field label="Meses de carência"><input type="number" min="1" max="60" value={f.months} onChange={(e) => setF({ ...f, months: e.target.value })} /></Field>
+        <Field label="Modelo da multa"><select value={f.model} onChange={(e) => setF({ ...f, model: e.target.value })}><option value="fixed">Valor único</option><option value="monthly">Por mês restante</option></select></Field>
+        <Field label="Valor (R$)"><input inputMode="decimal" value={f.value} onChange={(e) => setF({ ...f, value: e.target.value })} required={f.months !== ''} /></Field>
+      </div>
+    </Form>
+  );
+}
+
 function PlanForm({ plan, onDone, onCancel }: { plan?: any; onDone: () => void; onCancel: () => void }) {
   const [name, setName] = useState(plan?.name ?? '');
   const [price, setPrice] = useState(plan ? (plan.price_cents / 100).toFixed(2).replace('.', ',') : '');
@@ -51,7 +71,7 @@ function Versions({ plan, onClose }: { plan: any; onClose: () => void }) {
 export function Plans() {
   const { me } = useMe();
   const { data, loading, error, reload } = useLoad<any[]>('/plans');
-  const [modal, setModal] = useState<{ kind: 'new' | 'version' | 'history' | 'dunning'; plan?: any } | null>(null);
+  const [modal, setModal] = useState<{ kind: 'new' | 'version' | 'history' | 'dunning' | 'loyalty'; plan?: any } | null>(null);
   const w = can(me, 'plans:write');
   return (
     <Page title="Planos" actions={w && <button className="primary" onClick={() => setModal({ kind: 'new' })}>Novo plano</button>}>
@@ -72,6 +92,7 @@ export function Plans() {
                   <button className="sm" onClick={() => setModal({ kind: 'history', plan: p })}>Histórico</button>
                   {w && <button className="sm" onClick={() => setModal({ kind: 'version', plan: p })}>Alterar preço/velocidade</button>}
                   {w && <button className="sm" onClick={() => setModal({ kind: 'dunning', plan: p })}>Degraus de cobrança</button>}
+                  {w && <button className="sm" onClick={() => setModal({ kind: 'loyalty', plan: p })}>Fidelidade{p.loyalty_months ? ` (${p.loyalty_months} m)` : ''}</button>}
                   {w && <ActionButton className="sm" onClick={async () => { await api(`/plans/${p.id}`, { method: 'PATCH', body: { active: !p.active } }); reload(); }}>{p.active ? 'Desativar' : 'Ativar'}</ActionButton>}
                 </div></td>
               </tr>
@@ -81,6 +102,7 @@ export function Plans() {
       </State>
       {modal?.kind === 'new' && <Modal title="Novo plano" onClose={() => setModal(null)}><PlanForm onCancel={() => setModal(null)} onDone={() => { setModal(null); reload(); }} /></Modal>}
       {modal?.kind === 'version' && <Modal title={`Nova versão — ${modal.plan.name}`} onClose={() => setModal(null)}><PlanForm plan={modal.plan} onCancel={() => setModal(null)} onDone={() => { setModal(null); reload(); }} /></Modal>}
+      {modal?.kind === 'loyalty' && <Modal title={`Fidelidade — ${modal.plan.name}`} onClose={() => setModal(null)}><LoyaltyForm plan={modal.plan} onCancel={() => setModal(null)} onDone={() => { setModal(null); reload(); }} /></Modal>}
       {modal?.kind === 'dunning' && <Modal title={`Degraus de cobrança — ${modal.plan.name}`} onClose={() => setModal(null)}><DunningForm plan={modal.plan} onCancel={() => setModal(null)} onDone={() => { setModal(null); reload(); }} /></Modal>}
       {modal?.kind === 'history' && <Versions plan={modal.plan} onClose={() => setModal(null)} />}
     </Page>

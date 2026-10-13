@@ -71,6 +71,13 @@ registrado mas o agente ainda não confirmou. Ao encerrar, escolha o motivo (cad
 informativa. Anotações com "alertar ao abrir" aparecem em destaque na ficha do assinante. **Exportar CSV** (assinantes, contratos, faturas, OS) respeita o filtro da
 tela e fica na auditoria.
 
+### Fidelidade, descontos e mudanças agendadas
+
+Em Planos → **Fidelidade** o provedor define carência e multa padrão (vale para contratos novos). Na aba **Condições** do contrato ficam fidelidade, descontos,
+mudanças agendadas e aditivos. Ao **encerrar** dentro da carência o painel mostra a multa e pede para cobrar ou dispensar (com motivo). Mudanças agendadas rodam
+na rotina periódica, no dia (fuso do provedor); se falharem, a lista mostra o motivo. Desconto lançado sem data vale da próxima mensalidade a gerar; faturas
+já emitidas não são alteradas.
+
 ### Conferência antes de entrar em produção
 
 ```bash

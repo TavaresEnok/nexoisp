@@ -6,7 +6,7 @@ import { paged, withScope, type Tx } from '../db.js';
 import { encryptSecret, signingPublicKey } from '../network/crypto.js';
 import { OPEN, requestOperation, sweep, type Action } from '../network/engine.js';
 import { zPage, zUuid } from '../validators.js';
-import { contractChangeHooks } from './cadastro.js';
+import { contractChangeHooks } from '../hooks.js';
 
 export const AGENT_OFFLINE_S = 30;
 export const RESOURCE_SELECT = `
@@ -25,7 +25,8 @@ contractChangeHooks.push(async (c: Tx, ctx, contractId) => {
     `select r.id, r.desired_policy, r.desired_profile, k.status, pv.profile_name from service_resources r
      join contracts k on k.id = r.contract_id join plan_versions pv on pv.id = k.plan_version_id where r.contract_id = $1`, [contractId])).rows[0];
   if (!r) return;
-  const authz = { type: 'user' as const, id: ctx.userId };
+  // mudança agendada roda sem usuário: a autoria é do sistema
+  const authz = ctx.userId ? { type: 'user' as const, id: ctx.userId as string } : { type: 'system' as const, id: 'mudanca-agendada' };
   if (r.status === 'ended' && r.desired_policy !== 'suspended')
     await requestOperation(c, ctx.tenantId, r.id, 'subscriber.suspend', { ...authz, reason: 'contrato encerrado' });
   else if (r.status === 'active' && r.profile_name !== r.desired_profile) {

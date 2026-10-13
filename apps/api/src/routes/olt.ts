@@ -4,7 +4,7 @@ import { audit, guard, HttpError } from '../auth.js';
 import { withScope } from '../db.js';
 import { requestOnuOperation, sweep, type OnuAction } from '../network/engine.js';
 import { zUuid } from '../validators.js';
-import { contractChangeHooks } from './cadastro.js';
+import { contractChangeHooks } from '../hooks.js';
 import { AGENT_OFFLINE_S } from './network.js';
 
 /** Expansão OLT/ONU: descoberta, autorização e leitura de estado. Reaproveita fila, agente, evidências e auditoria do MVP. */
@@ -25,7 +25,8 @@ contractChangeHooks.push(async (c, ctx, contractId) => {
     `select n.id, d.agent_id from onus n join contracts k on k.id = n.contract_id join devices d on d.id = n.device_id
      join tenant_settings ts on ts.tenant_id = n.tenant_id
      where n.contract_id = $1 and k.status = 'ended' and n.desired_state = 'authorized' and n.desired_version > 0 and ts.onu_remove_on_contract_end`, [contractId])).rows[0];
-  if (n?.agent_id) await requestOnuOperation(c, ctx.tenantId, n.id, 'onu.deauthorize', { type: 'user', id: ctx.userId, reason: 'contrato encerrado' });
+  if (n?.agent_id) await requestOnuOperation(c, ctx.tenantId, n.id, 'onu.deauthorize',
+    ctx.userId ? { type: 'user', id: ctx.userId, reason: 'contrato encerrado' } : { type: 'system', id: 'mudanca-agendada', reason: 'contrato encerrado' });
 });
 
 export async function oltRoutes(app: FastifyInstance) {

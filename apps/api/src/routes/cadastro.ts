@@ -1,7 +1,9 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { audit, guard, HttpError } from '../auth.js';
-import { paged, withScope } from '../db.js';
+import { paged, withScope, type Tx } from '../db.js';
+import { ensureCharges } from '../finance/core.js';
+import { contractChangeHooks } from '../hooks.js';
 import { assertCatalog } from '../sla.js';
 import { zDate, zPage, zSubscriber, zUuid } from '../validators.js';
 
@@ -16,6 +18,93 @@ export const CONTRACT_SELECT = `
   join subscribers s on s.id = c.subscriber_id
   join plan_versions pv on pv.id = c.plan_version_id
   join plans p on p.id = pv.plan_id`;
+
+export async function currentVersion(c: any, planId: string) {
+  const v = (await c.query(
+    `select v.id, v.version, p.active, p.name from plans p join plan_versions v on v.plan_id = p.id where p.id = $1 order by v.version desc limit 1`, [planId])).rows[0];
+  if (!v) throw new HttpError(400, 'plano não encontrado');
+  if (!v.active) throw new HttpError(400, 'plano inativo não aceita novos contratos');
+  return v;
+}
+
+export const zContractChange = z.object({
+  plan_id: zUuid.optional(), due_day: z.number().int().min(1).max(28).optional(),
+  notes: z.string().trim().max(2000).nullish(), end: z.boolean().optional(),
+  end_reason_id: zUuid.nullish(), end_note: z.string().trim().max(300).nullish(),
+  penalty: z.enum(['charge', 'waive']).optional(), penalty_waive_reason: z.string().trim().min(5).max(200).optional(), penalty_due_days: z.number().int().min(0).max(60).default(10),
+});
+export type ContractChange = z.infer<typeof zContractChange>;
+
+/** Cotação de encerramento: dentro da carência há multa (valor único ou por mês restante). Só leitura. */
+export async function terminationQuote(c: Tx, contractId: string, onDate?: string) {
+  const k = (await c.query(
+    `select k.status, k.loyalty_until, k.penalty_model, k.penalty_cents,
+            greatest(0, (extract(year from age(k.loyalty_until, $2::date)) * 12 + extract(month from age(k.loyalty_until, $2::date))
+                         + case when extract(day from age(k.loyalty_until, $2::date)) > 0 then 1 else 0 end))::int as remaining_months,
+            (k.loyalty_until is not null and k.loyalty_until > $2::date) as within_loyalty,
+            (select coalesce(sum(i.amount_cents), 0)::int from invoices i where i.contract_id = k.id and i.status = 'open') as open_cents,
+            (select count(*)::int from invoices i where i.contract_id = k.id and i.status = 'open') as open_count
+     from contracts k where k.id = $1`, [contractId, onDate ?? new Date().toISOString().slice(0, 10)])).rows[0];
+  if (!k) throw new HttpError(404, 'contrato não encontrado');
+  const penalty = k.within_loyalty ? (k.penalty_model === 'monthly' ? k.penalty_cents * k.remaining_months : k.penalty_cents) : 0;
+  return {
+    status: k.status as string, loyalty_until: k.loyalty_until as string | null, within_loyalty: !!k.within_loyalty, remaining_months: k.within_loyalty ? (k.remaining_months as number) : 0,
+    penalty_model: k.penalty_model as string | null, penalty_unit_cents: k.penalty_cents as number | null, penalty_cents: penalty as number,
+    open_invoices: k.open_count as number, open_invoices_cents: k.open_cents as number, total_cents: penalty + (k.open_cents as number),
+  };
+}
+
+type ChangeCtx = { tenantId: string | null; userId: string | null };
+
+/**
+ * Troca de plano, vencimento, observação e encerramento (com motivo e decisão sobre a multa de fidelidade), na transação do chamador.
+ * Usada pelo painel e pelas mudanças agendadas. Os módulos de rede reagem pelos `contractChangeHooks`.
+ */
+export async function changeContract(c: Tx, ctx: ChangeCtx, id: string, b: ContractChange, actorLabel = 'contract') {
+  const cur = (await c.query(`${CONTRACT_SELECT} where c.id = $1 for update of c`, [id])).rows[0];
+  if (!cur) throw new HttpError(404, 'contrato não encontrado');
+  if (cur.status === 'ended') throw new HttpError(400, 'contrato encerrado não pode ser alterado');
+  const hist = async (event: string, detail: object) =>
+    c.query(`insert into contract_history (tenant_id, contract_id, actor_id, event, detail) values ($1,$2,$3,$4,$5)`, [ctx.tenantId, id, ctx.userId, event, JSON.stringify(detail)]);
+  if (b.plan_id) {
+    const v = await currentVersion(c, b.plan_id);
+    if (v.id !== cur.plan_version_id) {
+      await c.query('update contracts set plan_version_id = $2, updated_at = now() where id = $1', [id, v.id]);
+      await hist('plan_changed', { from: `${cur.plan_name} v${cur.plan_version}`, to: `${v.name} v${v.version}` });
+    }
+  }
+  if (b.due_day && b.due_day !== cur.due_day) {
+    await c.query('update contracts set due_day = $2, updated_at = now() where id = $1', [id, b.due_day]);
+    await hist('due_day_changed', { from: cur.due_day, to: b.due_day });
+  }
+  if (b.notes !== undefined) await c.query('update contracts set notes = $2 where id = $1', [id, b.notes || null]);
+  if (b.end) {
+    await assertCatalog(c, b.end_reason_id, 'end_reason', 'motivo de encerramento');
+    const q = await terminationQuote(c, id);
+    if (q.within_loyalty && q.penalty_cents > 0) {
+      if (!b.penalty) throw new HttpError(409, `contrato em fidelidade até ${String(q.loyalty_until).slice(0, 10)}: escolha cobrar ou dispensar a multa de ${(q.penalty_cents / 100).toFixed(2).replace('.', ',')}`, 'penalty_decision_required');
+      if (b.penalty === 'waive') {
+        if (!b.penalty_waive_reason) throw new HttpError(400, 'informe o motivo para dispensar a multa');
+        await hist('penalty_waived', { amount_cents: q.penalty_cents, reason: b.penalty_waive_reason });
+      } else {
+        const due = new Date(Date.now() + b.penalty_due_days * 86_400_000).toISOString().slice(0, 10);
+        const inv = (await c.query(
+          `insert into invoices (tenant_id, contract_id, subscriber_id, kind, due_date, amount_cents) values ($1,$2,$3,'manual',$4,$5) returning id`,
+          [ctx.tenantId, id, cur.subscriber_id, due, q.penalty_cents])).rows[0];
+        await c.query('insert into invoice_items (tenant_id, invoice_id, description, amount_cents) values ($1,$2,$3,$4)',
+          [ctx.tenantId, inv.id, `Multa rescisória — fidelidade até ${String(q.loyalty_until).slice(0, 10).split('-').reverse().join('/')}`, q.penalty_cents]);
+        await hist('penalty_charged', { amount_cents: q.penalty_cents, invoice_id: inv.id });
+        await ensureCharges(c, ctx.tenantId!);       // cobrança no gateway, como em qualquer fatura avulsa
+      }
+    }
+    await c.query(`update contracts set status = 'ended', end_date = current_date, end_reason_id = $2, end_note = $3, updated_at = now() where id = $1`,
+      [id, b.end_reason_id ?? null, b.end_note || null]);
+    await hist('ended', { reason_id: b.end_reason_id ?? null, note: b.end_note ?? null });
+  }
+  await audit(c, ctx.userId ? ctx as any : null, b.end ? 'contract.end' : 'contract.update', 'contract', id, { ...b, via: actorLabel },
+    'ok', ctx.userId ? undefined : { type: 'system', id: actorLabel, tenantId: ctx.tenantId! });
+  for (const h of contractChangeHooks) await h(c, ctx, id);
+}
 
 export async function cadastroRoutes(app: FastifyInstance) {
   // ---- Assinantes ----
@@ -169,14 +258,6 @@ export async function cadastroRoutes(app: FastifyInstance) {
     });
   });
 
-  async function currentVersion(c: any, planId: string) {
-    const v = (await c.query(
-      `select v.id, v.version, p.active, p.name from plans p join plan_versions v on v.plan_id = p.id where p.id = $1 order by v.version desc limit 1`, [planId])).rows[0];
-    if (!v) throw new HttpError(400, 'plano não encontrado');
-    if (!v.active) throw new HttpError(400, 'plano inativo não aceita novos contratos');
-    return v;
-  }
-
   app.post('/api/contracts', { preHandler: guard('contracts:write') }, async (req) => {
     const b = z.object({
       subscriber_id: zUuid, plan_id: zUuid, due_day: z.number().int().min(1).max(28),
@@ -187,10 +268,12 @@ export async function cadastroRoutes(app: FastifyInstance) {
       if (!sub) throw new HttpError(400, 'assinante não encontrado');
       if (sub.status !== 'active') throw new HttpError(400, 'assinante inativo');
       const v = await currentVersion(c, b.plan_id);
+      const lp = (await c.query('select loyalty_months, penalty_model, penalty_cents from plans where id = $1', [b.plan_id])).rows[0];   // carência padrão do plano
       const k = (await c.query(
-        `insert into contracts (tenant_id, subscriber_id, plan_version_id, due_day, start_date, notes)
-         values ($1,$2,$3,$4,coalesce($5::date, current_date),$6) returning *`,
-        [req.ctx.tenantId, b.subscriber_id, v.id, b.due_day, b.start_date ?? null, b.notes || null])).rows[0];
+        `insert into contracts (tenant_id, subscriber_id, plan_version_id, due_day, start_date, notes, loyalty_until, penalty_model, penalty_cents)
+         values ($1,$2,$3,$4,coalesce($5::date, current_date),$6,
+                 case when $7::int is null then null else coalesce($5::date, current_date) + make_interval(months => $7::int) end, $8, $9) returning *`,
+        [req.ctx.tenantId, b.subscriber_id, v.id, b.due_day, b.start_date ?? null, b.notes || null, lp?.loyalty_months ?? null, lp?.penalty_model ?? null, lp?.penalty_cents ?? null])).rows[0];
       await c.query(`insert into contract_history (tenant_id, contract_id, actor_id, event, detail) values ($1,$2,$3,'created',$4)`,
         [req.ctx.tenantId, k.id, req.ctx.userId, JSON.stringify({ plan: v.name, plan_version: v.version, due_day: b.due_day })]);
       await audit(c, req.ctx, 'contract.create', 'contract', k.id);
@@ -200,39 +283,10 @@ export async function cadastroRoutes(app: FastifyInstance) {
 
   app.patch('/api/contracts/:id', { preHandler: guard('contracts:write') }, async (req) => {
     const id = zUuid.parse((req.params as any).id);
-    const b = z.object({
-      plan_id: zUuid.optional(), due_day: z.number().int().min(1).max(28).optional(),
-      notes: z.string().trim().max(2000).nullish(), end: z.boolean().optional(),
-      end_reason_id: zUuid.nullish(), end_note: z.string().trim().max(300).nullish(),
-    }).parse(req.body);
-    if ((b.end_reason_id || b.end_note) && !b.end) throw new HttpError(400, 'motivo de encerramento só vale junto com o encerramento');
+    const b = zContractChange.parse(req.body);
+    if ((b.end_reason_id || b.end_note || b.penalty) && !b.end) throw new HttpError(400, 'motivo e multa só valem junto com o encerramento');
     return withScope(req.ctx.scope, async (c) => {
-      const cur = (await c.query(`${CONTRACT_SELECT} where c.id = $1 for update of c`, [id])).rows[0];
-      if (!cur) throw new HttpError(404, 'contrato não encontrado');
-      if (cur.status === 'ended') throw new HttpError(400, 'contrato encerrado não pode ser alterado');
-      const hist = async (event: string, detail: object) =>
-        c.query(`insert into contract_history (tenant_id, contract_id, actor_id, event, detail) values ($1,$2,$3,$4,$5)`,
-          [req.ctx.tenantId, id, req.ctx.userId, event, JSON.stringify(detail)]);
-      if (b.plan_id) {
-        const v = await currentVersion(c, b.plan_id);
-        if (v.id !== cur.plan_version_id) {
-          await c.query('update contracts set plan_version_id = $2, updated_at = now() where id = $1', [id, v.id]);
-          await hist('plan_changed', { from: `${cur.plan_name} v${cur.plan_version}`, to: `${v.name} v${v.version}` });
-        }
-      }
-      if (b.due_day && b.due_day !== cur.due_day) {
-        await c.query('update contracts set due_day = $2, updated_at = now() where id = $1', [id, b.due_day]);
-        await hist('due_day_changed', { from: cur.due_day, to: b.due_day });
-      }
-      if (b.notes !== undefined) await c.query('update contracts set notes = $2 where id = $1', [id, b.notes || null]);
-      if (b.end) {
-        await assertCatalog(c, b.end_reason_id, 'end_reason', 'motivo de encerramento');
-        await c.query(`update contracts set status = 'ended', end_date = current_date, end_reason_id = $2, end_note = $3, updated_at = now() where id = $1`,
-          [id, b.end_reason_id ?? null, b.end_note || null]);
-        await hist('ended', { reason_id: b.end_reason_id ?? null, note: b.end_note ?? null });
-      }
-      await audit(c, req.ctx, b.end ? 'contract.end' : 'contract.update', 'contract', id, b);
-      for (const h of contractChangeHooks) await h(c, req.ctx, id);
+      await changeContract(c, req.ctx, id, b);
       return (await c.query(`${CONTRACT_SELECT} where c.id = $1`, [id])).rows[0];
     });
   });
@@ -246,5 +300,4 @@ export async function cadastroRoutes(app: FastifyInstance) {
                 (select coalesce(sum(pv.price_cents),0) from contracts c join plan_versions pv on pv.id = c.plan_version_id where c.status = 'active') as mrr_cents`)).rows[0]));
 }
 
-/** Módulos posteriores (rede) reagem a mudanças de contrato na mesma transação. */
-export const contractChangeHooks: Array<(c: any, ctx: any, contractId: string) => Promise<void>> = [];
+export { contractChangeHooks };
