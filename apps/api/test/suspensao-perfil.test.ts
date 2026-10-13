@@ -51,8 +51,18 @@ describe('suspensão por perfil de bloqueio', () => {
   it('com agente 0.4.0 o envelope traz o perfil; contrato encerrado continua sendo rejeitado', async () => {
     await hello('0.4.0');
     const a = await provision();
+    // com IP fixo: ativo leva o endereço; suspenso por perfil não (precisa cair no endereço de bloqueio)
+    const octet = 100 + Math.floor(Math.random() * 100);
+    const pool = (await call(admin, 'POST', '/api/ipam/pools', { name: `ip-fixo-${Date.now()}`, cidr: `10.${octet}.${Math.floor(Math.random() * 200)}.0/24`, kind: 'cgnat' })).body;
+    const alloc = await call(admin, 'POST', `/api/ipam/pools/${pool.id}/allocations`, { contract_id: a.contractId });
+    expect(alloc.status).toBe(200);
+    expect((await lastEnvelope(a.contractId)).params.framed_ip).toBe(alloc.body.address);
     expect((await call(admin, 'POST', `/api/resources/${a.resourceId}/suspend`, { reason: 'teste' })).status).toBe(200);
-    expect((await lastEnvelope(a.contractId)).params.suspension).toEqual({ mode: 'profile', profile: 'nexo-bloqueado', session: 'disconnect' });
+    const susp = (await lastEnvelope(a.contractId)).params;
+    expect(susp.suspension).toEqual({ mode: 'profile', profile: 'nexo-bloqueado', session: 'disconnect' });
+    expect(susp.framed_ip).toBeUndefined();
+    await call(admin, 'POST', `/api/resources/${a.resourceId}/resume`, { reason: 'teste' });
+    expect((await lastEnvelope(a.contractId)).params.framed_ip).toBe(alloc.body.address);
 
     const b = await provision();
     expect((await call(admin, 'PATCH', `/api/contracts/${b.contractId}`, { end: true })).status).toBe(200);

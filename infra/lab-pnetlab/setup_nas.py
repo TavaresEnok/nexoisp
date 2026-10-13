@@ -29,6 +29,11 @@ if sys.argv[1] == "up":
         if not ids(P("ppp", "profile"), name=name):
             P("ppp", "profile").add(name=name, comment=TAG, **{"local-address": E["NAS_LOCAL_ADDRESS"], "remote-address": E["NAS_REMOTE_POOL"],
                                                               "rate-limit": rate, "change-tcp-mss": "yes"})
+    # perfil de bloqueio (suspensão por perfil): conecta, mas com velocidade mínima e endereços de um pool próprio
+    if not ids(P("ip", "pool"), name="nexo-bloqueados"):
+        P("ip", "pool").add(name="nexo-bloqueados", ranges="10.254.0.2-10.254.0.254", comment=TAG)
+    if not ids(P("ppp", "profile"), name="nexo-bloqueado"):
+        P("ppp", "profile").add(name="nexo-bloqueado", comment=TAG, **{"local-address": "10.254.0.1", "remote-address": "nexo-bloqueados", "rate-limit": "1k/1k"})
     for r in ids(P("radius"), comment=TAG):
         P("radius").remove(r)
     P("radius").add(service="ppp", address=E["HOST_IP"], secret=E["RADIUS_NAS_SECRET"], timeout="3s", comment=TAG, **{"src-address": E["NAS_IP"]})
@@ -67,6 +72,8 @@ else:
             P("certificate").remove(r)
     for r in ids(P("ppp", "profile"), comment=TAG):
         P("ppp", "profile").remove(r)
+    for r in ids(P("ip", "pool"), comment=TAG):
+        P("ip", "pool").remove(r)
     for r in [r[".id"] for r in P("file") if r["name"].startswith("nexo-lab-ca")]:
         P("file").remove(r)
     print("removido do concentrador: RADIUS, usuário, certificado e perfis nexo-lab; use-radius=no")
