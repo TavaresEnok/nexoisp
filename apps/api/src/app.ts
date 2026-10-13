@@ -6,6 +6,7 @@ import { ZodError } from 'zod';
 import { HttpError } from './auth.js';
 import { pool } from './db.js';
 import { cadastroRoutes } from './routes/cadastro.js';
+import { extraRoutes } from './routes/extras.js';
 import { financeRoutes } from './routes/finance.js';
 import { identityRoutes } from './routes/identity.js';
 import { importRoutes } from './routes/import.js';
@@ -46,6 +47,7 @@ export async function buildApp(opts: { logger?: boolean } = {}) {
   });
   await app.register(identityRoutes);
   await app.register(cadastroRoutes);
+  await app.register(extraRoutes);
   await app.register(networkRoutes);
   await app.register(oltRoutes);
   await app.register(ipamRoutes);

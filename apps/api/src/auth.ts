@@ -30,7 +30,7 @@ export type Module = (typeof MODULES)[number];
 const MODULE_ROUTES: [Module, RegExp][] = [
   ['olt', /^\/api\/(olt\/|onus(\/|$)|contracts\/[^/]+\/onu$)/],
   ['ipam', /^\/api\/(ipam\/|cgnat\/|contracts\/[^/]+\/(ips|ipv6)$)/],
-  ['field', /^\/api\/(work-orders(\/|$)|stock\/)/],
+  ['field', /^\/api\/(work-orders(\/|$)|stock\/|contracts\/[^/]+\/equipment$)/],
   ['ftth', /^\/api\/(ftth\/|contracts\/[^/]+\/ftth$)/],
   ['crm', /^\/api\/(leads(\/|$)|tickets(\/|$)|crm\/|portal\/tickets(\/|$))/],
   ['noc', /^\/api\/(noc\/|contracts\/[^/]+\/diagnosis$)/],

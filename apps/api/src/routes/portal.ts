@@ -49,7 +49,15 @@ export async function portalRoutes(app: FastifyInstance) {
         const ts = await trustState(c, req.ctx.tenantId!, k.id);
         (k as any).trust_release = { enabled: ts.enabled, eligible: ts.eligible, reason: ts.reason, max_days: ts.max_days, active_until: ts.active?.expires_at ?? null };
       }
-      return { subscriber, contracts, invoices };
+      // manutenções em curso ou previstas para os próximos dias que atingem o assinante (todos, ou o equipamento do acesso dele)
+      const notices = (await c.query(
+        `select m.id, m.title, m.message, m.severity, m.starts_at, m.ends_at, (now() >= m.starts_at) as active
+         from maintenance_notices m
+         where m.canceled_at is null and m.ends_at > now() and m.starts_at < now() + interval '7 days'
+           and (m.device_id is null or exists (select 1 from service_resources r join contracts k on k.id = r.contract_id
+                                               where k.subscriber_id = $1 and r.device_id = m.device_id))
+         order by m.starts_at`, [sid])).rows;
+      return { subscriber, contracts, invoices, notices };
     });
   });
 

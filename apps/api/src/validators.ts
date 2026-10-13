@@ -38,6 +38,9 @@ export const zSubscriber = z.object({
   address_street: optText(), address_number: optText(20), address_district: optText(),
   address_city: optText(), address_state: optText(2), address_zip: optText(12),
   notes: optText(2000),
+  birth_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'data de nascimento inválida').nullish().or(z.literal('')).transform((v) => v || null),
+  rg: z.string().trim().regex(/^[0-9A-Za-z.\- /]{3,20}$/, 'RG inválido').nullish().or(z.literal('')).transform((v) => v || null),
+  rg_issuer: optText(20), mother_name: optText(200), trade_name: optText(200),
   status: z.enum(['active', 'inactive']).default('active'),
 });
 export const zUuid = z.string().uuid();

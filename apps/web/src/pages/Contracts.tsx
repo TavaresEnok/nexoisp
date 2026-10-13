@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { api, d, doc, dt, money, speed, useLoad, usePaged } from '../api';
 import { can, has, useMe } from '../App';
 import { ActionButton, Badge, Card, Field, Form, KV, Modal, Page, Pager, State, Tabs } from '../ui';
+import { ContractEquipment, ContractTags } from './Extras';
 import { ContractFinance } from './Finance';
 import { OnuPanel } from './Olt';
 import { WorkOrderList } from './Field';
@@ -57,7 +58,7 @@ export function Contracts() {
             {data?.map((c) => (
               <tr key={c.id}>
                 <td><Link to={`/assinantes/${c.subscriber_id}`}>{c.subscriber_name}</Link></td>
-                <td>{c.plan_name} <span className="muted small">v{c.plan_version}</span></td>
+                <td>{c.plan_name} <span className="muted small">v{c.plan_version}</span>{(c.tags ?? []).map((t: any) => <> <Badge key={t.id}>{t.name}</Badge></>)}</td>
                 <td>{speed(c.down_kbps)} / {speed(c.up_kbps)}</td>
                 <td className="num">{money(c.price_cents)}</td>
                 <td>dia {c.due_day}</td>
@@ -108,6 +109,8 @@ export function ContractDetail() {
                 ['Situação', c.status === 'active' ? <Badge tone="green">Vigente</Badge> : <Badge>Encerrado em {d(c.end_date)}</Badge>],
               ]} />
             </Card>
+            <Card title="Etiquetas"><ContractTags contract={c} onChange={reload} /></Card>
+            {has(me, 'field') && can(me, 'stock:read') && <ContractEquipment contractId={c.id} />}
             {!net && <ContractFinance contractId={c.id}>{(fin) => <Card title="Financeiro">{fin}</Card>}</ContractFinance>}
           </>)}
           {cur === 'os' && <WorkOrderList subscriberId={c.subscriber_id} contractId={c.id} />}

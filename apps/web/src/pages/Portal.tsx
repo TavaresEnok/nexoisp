@@ -34,6 +34,13 @@ export function Portal() {
       <State loading={loading} error={error}>
         {data && (<>
           <div className="hello"><h1>Olá, {first}</h1></div>
+          {data.notices?.map((n: any) => (
+            <div key={n.id} className={`state ${n.severity === 'info' ? '' : 'err'}`} style={{ marginBottom: 10 }} role="status">
+              <b>{n.active ? 'Manutenção em andamento' : 'Manutenção programada'}: {n.title}</b>
+              <div className="small">{n.message}</div>
+              <div className="small muted">{dt(n.starts_at)} até {dt(n.ends_at)}</div>
+            </div>
+          ))}
           <div className="grid2">
             <Card>
               <div className={`status ${suspended ? 'bad' : installing ? 'warn' : ''}`} style={{ paddingLeft: 14 }}>

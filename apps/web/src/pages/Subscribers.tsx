@@ -8,7 +8,8 @@ import { TicketList } from './Crm';
 import { WorkOrderList } from './Field';
 
 const EMPTY = { name: '', document: '', email: '', phone: '', address_street: '', address_number: '', address_district: '',
-  address_city: '', address_state: '', address_zip: '', notes: '', status: 'active' };
+  address_city: '', address_state: '', address_zip: '', notes: '', status: 'active',
+  birth_date: '', rg: '', rg_issuer: '', mother_name: '', trade_name: '' };
 
 export function SubscriberForm({ initial, onDone, onCancel }: { initial?: any; onDone: (s: any) => void; onCancel: () => void }) {
   const [f, setF] = useState<any>({ ...EMPTY, ...Object.fromEntries(Object.entries(initial ?? {}).map(([k, v]) => [k, v ?? ''])) });
@@ -24,6 +25,15 @@ export function SubscriberForm({ initial, onDone, onCancel }: { initial?: any; o
         <Field label="Telefone">{inp('phone')}</Field>
       </div>
       <Field label="E-mail">{inp('email', { type: 'email' })}</Field>
+      <div className="cols3">
+        <Field label="Nascimento / abertura">{inp('birth_date', { type: 'date' })}</Field>
+        <Field label="RG">{inp('rg')}</Field>
+        <Field label="Órgão emissor">{inp('rg_issuer', { maxLength: 20 })}</Field>
+      </div>
+      <div className="cols3">
+        <Field label="Nome da mãe">{inp('mother_name')}</Field>
+        <Field label="Nome fantasia (pessoa jurídica)">{inp('trade_name')}</Field>
+      </div>
       <div className="cols3">
         <Field label="Logradouro">{inp('address_street')}</Field>
         <Field label="Número">{inp('address_number')}</Field>
@@ -106,6 +116,8 @@ export function SubscriberDetail() {
               ['Cidade/UF', [s.address_city, s.address_state].filter(Boolean).join('/') || '—'], ['CEP', s.address_zip],
               ['Situação', s.status === 'active' ? <Badge tone="green">Ativo</Badge> : <Badge>Inativo</Badge>], ['Cadastrado em', d(s.created_at)],
               ['Portal do assinante', portal.data ? <>{portal.data.email} <Badge tone="green">ativo</Badge></> : 'sem acesso'],
+              ['Nascimento', s.birth_date ? d(s.birth_date) : '—'], ['RG', [s.rg, s.rg_issuer].filter(Boolean).join(' · ') || '—'],
+              ['Nome da mãe', s.mother_name || '—'], ['Nome fantasia', s.trade_name || '—'],
               ['Observações', s.notes],
             ]} />
           </Card>

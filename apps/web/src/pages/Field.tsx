@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { api, dt, useLoad, usePaged } from '../api';
 import { can, useMe } from '../App';
 import { ActionButton, Badge, Card, dialog, Field, Form, KV, Meter, Modal, Page, Pager, State, toastError } from '../ui';
+import { WorkOrderChecklist } from './Extras';
 
 export const WO_KIND: Record<string, string> = { install: 'Instalação', repair: 'Reparo', address_change: 'Mudança de endereço', removal: 'Retirada', other: 'Outro' };
 const WO_STATUS: Record<string, [string, 'gray' | 'green' | 'red' | 'amber' | 'blue']> = {
@@ -91,6 +92,7 @@ export function WorkOrderDetail({ id, onClose }: { id: string; onClose: () => vo
               <ActionButton className="danger" disabled={!res.trim()} confirm="Cancelar esta ordem de serviço?" onClick={status('canceled', res)}>Cancelar OS</ActionButton>
             </div>
           )}
+          <WorkOrderChecklist workOrder={w} writable={!!write && !['done', 'canceled'].includes(w.status)} onChange={() => reload()} />
           <div className="grid2">
             <Card title="Material utilizado">
               <State empty={w.materials.length === 0}>

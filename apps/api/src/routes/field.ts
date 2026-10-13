@@ -84,6 +84,9 @@ export async function fieldRoutes(app: FastifyInstance) {
       const w = (await c.query(`${WO_SELECT} where w.id = $1`, [id])).rows[0];
       if (!w) throw new HttpError(404, 'ordem de serviço não encontrada');
       w.events = (await c.query(`select e.at, e.event, e.detail, u.name as actor_name from work_order_events e left join users u on u.id = e.actor_id where e.work_order_id = $1 order by e.id desc`, [id])).rows;
+      w.checklist = (await c.query(
+        `select k.id, k.position, k.label, k.done, k.done_at, u.name as done_by_name
+         from work_order_checklist k left join users u on u.id = k.done_by where k.work_order_id = $1 order by k.position`, [id])).rows;
       w.materials = (await c.query(
         `select m.id, m.item_id, i.name as item_name, i.unit, -m.qty as qty, m.created_at, u.name as created_by_name
          from stock_movements m join stock_items i on i.id = m.item_id left join users u on u.id = m.created_by where m.work_order_id = $1 order by m.id`, [id])).rows;
@@ -303,7 +306,7 @@ export async function fieldRoutes(app: FastifyInstance) {
       const u = await lockUnit(c, id);
       if (!['in_stock', 'with_tech'].includes(u.status)) throw new HttpError(400, 'só unidades em estoque ou com técnico podem ser transferidas');
       const h = b.holder_id ? await staff(c, b.holder_id) : null;
-      await c.query(`update stock_units set status = $2, holder_id = $3, updated_at = now() where id = $1`, [id, h ? 'with_tech' : 'in_stock', b.holder_id]);
+      await c.query(`update stock_units set status = $2, holder_id = $3, contract_mode = null, updated_at = now() where id = $1`, [id, h ? 'with_tech' : 'in_stock', b.holder_id]);
       await unitEvent(c, req.ctx, id, h ? 'to_tech' : 'to_stock', h ? { to: h.name } : {});
       return { ok: true };
     });
@@ -321,17 +324,60 @@ export async function fieldRoutes(app: FastifyInstance) {
       const wasOut = u.status === 'installed';                    // instalada já tinha saído do saldo
       if (wasOut && b.status !== 'written_off') await stockMove(c, req.ctx, u.item_id, 1, 'in', `retirada do assinante: ${u.serial}`, null, true);
       if (!wasOut && b.status === 'written_off') await stockMove(c, req.ctx, u.item_id, -1, 'adjust', `baixa ${u.serial}: ${b.note}`, null, true);
-      await c.query(`update stock_units set status = $2, holder_id = null, contract_id = null, work_order_id = null, updated_at = now() where id = $1`, [id, b.status]);
+      await c.query(`update stock_units set status = $2, holder_id = null, contract_id = null, work_order_id = null, contract_mode = null, updated_at = now() where id = $1`, [id, b.status]);
       await unitEvent(c, req.ctx, id, wasOut && b.status === 'in_stock' ? 'returned' : b.status === 'in_stock' ? 'to_stock' : b.status, { note: b.note ?? undefined, from: u.status });
       await audit(c, req.ctx, `stock.unit_${b.status}`, 'stock_unit', id, { serial: u.serial });
       return { ok: true };
     });
   });
 
+  // ---- Checklist da OS: itens em ordem; o técnico marca o que fez ----
+  app.post('/api/work-orders/:id/checklist', { preHandler: guard('os:write') }, async (req) => {
+    const id = zUuid.parse((req.params as any).id);
+    const b = z.object({ items: z.array(z.string().trim().min(2).max(160)).min(1).max(30) }).parse(req.body);
+    return withScope(req.ctx.scope, async (c) => {
+      const w = (await c.query('select status, number from work_orders where id = $1 for update', [id])).rows[0];
+      if (!w) throw new HttpError(404, 'ordem de serviço não encontrada');
+      if (FINAL.includes(w.status)) throw new HttpError(400, 'ordem de serviço encerrada não aceita alterações');
+      const start = (await c.query('select coalesce(max(position), 0)::int as p from work_order_checklist where work_order_id = $1', [id])).rows[0].p;
+      for (const [n, label] of b.items.entries())
+        await c.query('insert into work_order_checklist (tenant_id, work_order_id, position, label) values ($1,$2,$3,$4)', [req.ctx.tenantId, id, start + n + 1, label]);
+      await woEvent(c, req.ctx, id, 'checklist', { added: b.items.length });
+      return { ok: true };
+    });
+  });
+
+  app.post('/api/work-orders/:id/checklist/:itemId', { preHandler: guard('os:write') }, async (req) => {
+    const p = z.object({ id: zUuid, itemId: zUuid }).parse(req.params);
+    const b = z.object({ done: z.boolean() }).parse(req.body);
+    return withScope(req.ctx.scope, async (c) => {
+      const w = (await c.query('select status from work_orders where id = $1 for update', [p.id])).rows[0];
+      if (!w) throw new HttpError(404, 'ordem de serviço não encontrada');
+      if (FINAL.includes(w.status)) throw new HttpError(400, 'ordem de serviço encerrada não aceita alterações');
+      const r = await c.query(
+        `update work_order_checklist set done = $3, done_by = case when $3 then $4::uuid end, done_at = case when $3 then now() end
+         where id = $1 and work_order_id = $2 returning label`, [p.itemId, p.id, b.done, req.ctx.userId]);
+      if (!r.rowCount) throw new HttpError(404, 'item não encontrado');
+      await woEvent(c, req.ctx, p.id, b.done ? 'checklist_done' : 'checklist_undone', { item: r.rows[0].label });
+      return { ok: true };
+    });
+  });
+
+  // ---- Equipamentos do contrato (comodato continua sendo do provedor; venda não volta) ----
+  app.get('/api/contracts/:id/equipment', { preHandler: guard('stock:read') }, async (req) =>
+    withScope(req.ctx.scope, async (c) => {
+      const id = zUuid.parse((req.params as any).id);
+      const k = (await c.query('select status from contracts where id = $1', [id])).rows[0];
+      if (!k) throw new HttpError(404, 'contrato não encontrado');
+      const units = (await c.query(`${UNIT_SELECT} where u.contract_id = $1 and u.status = 'installed' order by u.updated_at desc`, [id])).rows;
+      // contrato encerrado com equipamento em comodato instalado: falta recolher
+      return { units, to_recover: k.status === 'ended' ? units.filter((u) => u.contract_mode === 'comodato') : [] };
+    }));
+
   // Instalação pela OS: a unidade sai do saldo e fica vinculada ao contrato da ordem de serviço.
   app.post('/api/work-orders/:id/units', { preHandler: guard('os:write') }, async (req) => {
     const id = zUuid.parse((req.params as any).id);
-    const b = z.object({ unit_id: zUuid }).parse(req.body);
+    const b = z.object({ unit_id: zUuid, mode: z.enum(['comodato', 'sale']).default('comodato') }).parse(req.body);
     return withScope(req.ctx.scope, async (c) => {
       const w = (await c.query('select status, number, contract_id from work_orders where id = $1 for update', [id])).rows[0];
       if (!w) throw new HttpError(404, 'ordem de serviço não encontrada');
@@ -340,8 +386,8 @@ export async function fieldRoutes(app: FastifyInstance) {
       const u = await lockUnit(c, b.unit_id);
       if (!['in_stock', 'with_tech'].includes(u.status)) throw new HttpError(409, 'a unidade não está disponível (já instalada, com defeito ou baixada)');
       const m = await stockMove(c, req.ctx, u.item_id, -1, 'out', `OS ${w.number}: ${u.serial}`, id, true);
-      await c.query(`update stock_units set status = 'installed', holder_id = null, contract_id = $2, work_order_id = $3, updated_at = now() where id = $1`, [b.unit_id, w.contract_id, id]);
-      await unitEvent(c, req.ctx, b.unit_id, 'installed', { work_order: w.number });
+      await c.query(`update stock_units set status = 'installed', holder_id = null, contract_id = $2, work_order_id = $3, contract_mode = $4, updated_at = now() where id = $1`, [b.unit_id, w.contract_id, id, b.mode]);
+      await unitEvent(c, req.ctx, b.unit_id, 'installed', { work_order: w.number, mode: b.mode });
       await woEvent(c, req.ctx, id, 'material', { item: m.item_name, qty: 1, serial: u.serial });
       return { ok: true, balance: m.balance };
     });

@@ -11,6 +11,7 @@ import { FinanceSettings, Invoices, Reconciliation } from './pages/Finance';
 import { Import } from './pages/Import';
 import { Ipam } from './pages/Ipam';
 import { Login } from './pages/Login';
+import { Maintenance } from './pages/Extras';
 import { Network, Operations } from './pages/Network';
 import { Noc } from './pages/Noc';
 import { Notices } from './pages/Notices';
@@ -52,7 +53,8 @@ const NAV: { id: string; label: string; items: { to: string; label: string; icon
   { id: 'rede', label: 'Rede', items: [
     { to: '/noc', label: 'NOC', icon: 'pulse', perm: 'network:read', mod: 'noc' }, { to: '/rede', label: 'Agentes e equipamentos', icon: 'server', perm: 'network:read' },
     { to: '/onus', label: 'ONUs', icon: 'onu', perm: 'network:read', mod: 'olt' }, { to: '/ftth', label: 'Rede óptica', icon: 'fiber', perm: 'network:read', mod: 'ftth' },
-    { to: '/ipam', label: 'Endereços IP e CGNAT', icon: 'ip', perm: 'network:read', mod: 'ipam' }, { to: '/operacoes', label: 'Operações', icon: 'list', perm: 'network:read' }] },
+    { to: '/ipam', label: 'Endereços IP e CGNAT', icon: 'ip', perm: 'network:read', mod: 'ipam' }, { to: '/operacoes', label: 'Operações', icon: 'list', perm: 'network:read' },
+    { to: '/manutencoes', label: 'Manutenções', icon: 'bell', perm: 'network:read' }] },
   { id: 'admin', label: 'Administração', items: [
     { to: '/usuarios', label: 'Usuários', icon: 'user', perm: 'users:manage' }, { to: '/avisos', label: 'Avisos', icon: 'bell', perm: 'settings:manage', mod: 'notices' },
     { to: '/importacao', label: 'Importação', icon: 'upload', perm: 'import:run' }, { to: '/auditoria', label: 'Auditoria', icon: 'shield', perm: 'audit:read' }] },
@@ -147,6 +149,7 @@ export function App() {
               <Route path="/rede" element={<Network />} />
               <Route path="/onus" element={<Onus />} />
               <Route path="/operacoes" element={<Operations />} />
+              <Route path="/manutencoes" element={<Maintenance />} />
               <Route path="/noc" element={<Noc />} />
               <Route path="/ftth" element={<Ftth />} />
               <Route path="/ipam" element={<Ipam />} />
