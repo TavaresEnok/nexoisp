@@ -13,6 +13,7 @@ import { Ipam } from './pages/Ipam';
 import { Login } from './pages/Login';
 import { Busca, Online, Pops, SearchBox } from './pages/Atendimento';
 import { Agenda } from './pages/Agenda';
+import { Integracoes } from './pages/Integracoes';
 import { AvisosAssinante } from './pages/AvisosAssinante';
 import { Qualidade } from './pages/Qualidade';
 import { Reports } from './pages/Cobranca';
@@ -66,6 +67,7 @@ const NAV: { id: string; label: string; items: { to: string; label: string; icon
   { id: 'admin', label: 'Administração', items: [
     { to: '/usuarios', label: 'Usuários', icon: 'user', perm: 'users:manage' }, { to: '/avisos', label: 'Avisos', icon: 'bell', perm: 'settings:manage', mod: 'notices' },
     { to: '/avisos-assinante', label: 'Avisos ao assinante', icon: 'bell', perm: 'settings:manage', mod: 'messages' },
+    { to: '/integracoes', label: 'Integrações', icon: 'plug', perm: 'settings:manage', mod: 'api' },
     { to: '/qualidade', label: 'Catálogos e SLA', icon: 'list', perm: 'settings:manage', mod: 'crm|field' },
     { to: '/importacao', label: 'Importação', icon: 'upload', perm: 'import:run' }, { to: '/auditoria', label: 'Auditoria', icon: 'shield', perm: 'audit:read' }] },
 ];
@@ -165,6 +167,7 @@ export function App() {
               <Route path="/relatorios-cobranca" element={<Reports />} />
               <Route path="/avisos-assinante" element={<AvisosAssinante />} />
               <Route path="/agenda" element={<Agenda />} />
+              <Route path="/integracoes" element={<Integracoes />} />
               <Route path="/qualidade" element={<Qualidade />} />
               <Route path="/online" element={<Online />} />
               <Route path="/pops" element={<Pops />} />

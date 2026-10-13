@@ -1,6 +1,7 @@
 import { HttpError } from './auth.js';
 import { withScope, type Tx } from './db.js';
 import { queueNotice } from './notify.js';
+import { emitEvent } from './webhooks.js';
 
 /** Estados de uma OS que ainda não foi encerrada. */
 export const OPEN_WO = ['open', 'analysis', 'awaiting_schedule', 'scheduled', 'en_route', 'in_progress'] as const;
@@ -59,6 +60,7 @@ export async function runSla(tenantId: string): Promise<{ tickets: number; work_
       }
       await c.query(`insert into ticket_messages (tenant_id, ticket_id, author_kind, body, internal) values ($1,$2,'staff',$3,true)`, [tenantId, t.id, note]);
       await queueNotice(c, tenantId, 'sla.breached', `SLA vencido no atendimento ${t.number}: ${t.subject}`, { ticket_id: t.id, number: t.number });
+      await emitEvent(c, tenantId, 'sla.breached', { entity: 'ticket', id: t.id, number: t.number });
     }
     const wo = (await c.query(
       `update work_orders w set sla_breached_at = now()
@@ -74,6 +76,7 @@ export async function runSla(tenantId: string): Promise<{ tickets: number; work_
       }
       await c.query(`insert into work_order_events (tenant_id, work_order_id, event, detail) values ($1,$2,'sla_breached',$3)`, [tenantId, w.id, JSON.stringify(detail)]);
       await queueNotice(c, tenantId, 'sla.breached', `SLA vencido na OS ${w.number}`, { work_order_id: w.id, number: w.number });
+      await emitEvent(c, tenantId, 'sla.breached', { entity: 'work_order', id: w.id, number: w.number });
     }
     return out;
   });

@@ -3,6 +3,7 @@ import { noScope, withScope, type Tx } from '../db.js';
 import { requestOperation } from '../network/engine.js';
 import { runNotices } from '../notices.js';
 import { runSla } from '../sla.js';
+import { emitEvent } from '../webhooks.js';
 import { getGateway, type GatewayEvent, type GatewayPayment } from './gateway.js';
 
 export const NONPAYMENT = 'inadimplência';
@@ -164,6 +165,8 @@ export async function reversePayment(c: Tx, invoiceId: string, paymentId: string
  */
 export async function onInvoicePaid(c: Tx, inv: { tenant_id: string; contract_id: string; id: string }) {
   const s = await getSettings(c, inv.tenant_id);
+  const paid = (await c.query('select subscriber_id, amount_cents, paid_at from invoices where id = $1', [inv.id])).rows[0];
+  await emitEvent(c, inv.tenant_id, 'invoice.paid', { invoice_id: inv.id, contract_id: inv.contract_id, subscriber_id: paid?.subscriber_id ?? null, amount_cents: paid?.amount_cents ?? null, paid_at: paid?.paid_at ?? null });
   // pagamento que zera o atraso encerra a liberação por confiança em curso
   const left = (await c.query(
     `select 1 from invoices where contract_id = $1 and status = 'open' and id <> $2 and due_date + coalesce($3::int, 0) < (now() at time zone $4)::date limit 1`,

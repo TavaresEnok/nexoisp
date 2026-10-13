@@ -100,9 +100,9 @@ Entregue = implementado e coberto por teste automatizado. Nada aqui foi homologa
 
 | Situação | Itens |
 |---|---|
-| ✅ Entregue | D1, D2, D3, D9, D12, C1, C2, C3, C4, C6, C7, F1, F2, F3, F4, F6, P2 |
+| ✅ Entregue | D1, D2, D3, D9, D12, C1, C2, C3, C4, C6, C7, F1, F2, F3, F4, F6, P1, P2 |
 | 🟡 Parcial | D10 (lista online e exportação; falta a desconexão em lote, que exige operação nova do agente), C1 (só canal por HTTP genérico e de saída; sem SMS/WhatsApp nativo, ver abaixo) |
-| ⏳ Pendente | D4–D8, D11, C5, C8–C10, F5, F7, P1, P3–P5, R1–R4 |
+| ⏳ Pendente | D4–D8, D11, C5, C8–C10, F5, F7, P3–P5, R1–R4 |
 
 **Lote 4 em detalhe (sem chat; tudo por ocorrência e OS):**
 - **F1 fluxo da OS:** aberta → em análise → aguardando agendamento (com motivo) → agendada → **em deslocamento** (exige técnico; grava a hora da saída) → em execução (grava o início) → concluída/cancelada. "Atribuída" é o responsável preenchido, não um estado.
@@ -111,6 +111,11 @@ Entregue = implementado e coberto por teste automatizado. Nada aqui foi homologa
 - **F4 agenda:** por técnico e dia (1 a 14 dias), com sobreposição apontada, fila "aguardando agendamento" e janelas livres no expediente.
 - **F6 endereço:** instalação por contrato e OS com origem registrada (cadastro, contrato ou informado); a OS guarda o endereço, então mudar o cadastro depois não a altera.
 - **C7 satisfação:** nasce ao concluir a OS, vale 30 dias, é respondida **no portal** (1 a 5 e comentário); a equipe vê média e respostas. Não há envio automático do convite: a régua de avisos hoje é por vencimento de fatura.
+
+**P1 em detalhe (API pública e webhooks):** módulo `api`; token por aplicação com escopo e limite por minuto (no banco), repetição segura por `Idempotency-Key`,
+revogação imediata; leitura de assinantes/contratos/faturas e **abertura** de atendimento e OS (sem escolher responsável); webhooks assinados com HMAC-SHA256 e
+timestamp, 6 tentativas com espera crescente, reenvio manual. Eventos: fatura paga, acesso suspenso/reativado, atendimento e OS criados, mudança de estado da OS,
+SLA vencido, pesquisa respondida. Documentação em `docs/api-publica.md`. **Não** é camada de compatibilidade com a API de outro sistema.
 
 **C1 em detalhe (avisos ao assinante, somente de saída):** o provedor cadastra um *canal* (endereço HTTPS do serviço de envio que ele contratou, com cabeçalho secreto cifrado),
 *modelos* (variáveis `{nome}`, `{valor}`, `{vencimento}`, `{plano}`, `{link}`) e *regras* (dias em relação ao vencimento, plano/POP/etiqueta, janela de horas e dias da semana,

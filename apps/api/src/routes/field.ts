@@ -4,6 +4,7 @@ import { audit, guard, HttpError, type Ctx } from '../auth.js';
 import { nextNumber, paged, withScope, type Tx } from '../db.js';
 import { queueNotice } from '../notify.js';
 import { applySla, assertCatalog, OPEN_WO_SQL } from '../sla.js';
+import { emitEvent } from '../webhooks.js';
 import { zPage, zUuid } from '../validators.js';
 
 /** Expansão 3: ordens de serviço, estoque (razão de movimentos) e inventário FTTH (caixas e portas). */
@@ -44,7 +45,7 @@ const DROP_SELECT = `
   from ftth_drops x join ftth_boxes b on b.id = x.box_id left join devices d on d.id = b.device_id
   left join contracts k on k.id = x.contract_id left join subscribers s on s.id = k.subscriber_id`;
 
-async function woEvent(c: Tx, ctx: Ctx, id: string, event: string, detail: object = {}) {
+async function woEvent(c: Tx, ctx: { tenantId: string | null; userId: string | null }, id: string, event: string, detail: object = {}) {
   await c.query(`insert into work_order_events (tenant_id, work_order_id, actor_id, event, detail) values ($1,$2,$3,$4,$5)`,
     [ctx.tenantId, id, ctx.userId, event, JSON.stringify(detail)]);
 }
@@ -67,6 +68,51 @@ export async function stockMove(c: Tx, ctx: Ctx, itemId: string, qty: number, ki
     `insert into stock_movements (tenant_id, item_id, qty, kind, work_order_id, note, created_by) values ($1,$2,$3,$4,$5,$6,$7) returning id`,
     [ctx.tenantId, itemId, qty, kind, workOrderId, note, ctx.userId])).rows[0];
   return { id: m.id, item_name: item.name as string, balance: balance + qty };
+}
+
+export const zWorkOrderCreate = z.object({
+  kind: z.enum(['install', 'repair', 'address_change', 'removal', 'other']), subscriber_id: zUuid, contract_id: zUuid.nullish(),
+  description: zText(2000), assignee_id: zUuid.nullish(), scheduled_for: zWhen.nullish(), ticket_id: zUuid.nullish(),
+  reason_id: zUuid.nullish(), estimated_minutes: z.number().int().min(5).max(1440).default(60),
+  address_origin: z.enum(['subscriber', 'contract', 'manual']).default('subscriber'), address_text: z.string().trim().min(5).max(300).nullish(),
+});
+type WorkOrderInput = z.input<typeof zWorkOrderCreate> & { estimated_minutes: number; address_origin: 'subscriber' | 'contract' | 'manual' };
+
+/** Abre a OS na transação do chamador (painel e API pública compartilham a regra). A auditoria fica com quem chama. */
+export async function createWorkOrder(c: Tx, ctx: { tenantId: string | null; userId: string | null }, b: WorkOrderInput) {
+  if (!(await c.query('select 1 from subscribers where id = $1', [b.subscriber_id])).rowCount) throw new HttpError(400, 'assinante não encontrado');
+  if (b.contract_id && !(await c.query('select 1 from contracts where id = $1 and subscriber_id = $2', [b.contract_id, b.subscriber_id])).rowCount)
+    throw new HttpError(400, 'o contrato não pertence a este assinante');
+  if (b.ticket_id && !(await c.query('select 1 from tickets where id = $1 and subscriber_id = $2', [b.ticket_id, b.subscriber_id])).rowCount)
+    throw new HttpError(400, 'o atendimento não pertence a este assinante');
+  if (b.assignee_id) await staff(c, b.assignee_id);
+  await assertCatalog(c, b.reason_id, 'os_reason', 'motivo da OS');
+  // O endereço da OS é registrado com a origem; trocar o cadastro depois não muda uma OS já aberta.
+  let addressText: string | null = null;
+  if (b.address_origin === 'manual') {
+    if (!b.address_text) throw new HttpError(400, 'informe o endereço da OS');
+    addressText = b.address_text;
+  } else if (b.address_origin === 'contract') {
+    if (!b.contract_id) throw new HttpError(400, 'escolha o contrato para usar o endereço de instalação dele');
+    const k = (await c.query(
+      `select concat_ws(', ', install_street, install_number, install_district, install_city) as a, install_street, install_city from contracts where id = $1`, [b.contract_id])).rows[0];
+    if (!k.install_street || !k.install_city) throw new HttpError(400, 'o contrato não tem endereço de instalação cadastrado');
+    addressText = k.a;
+  }
+  const number = await nextNumber(c, ctx.tenantId!, 'work_order');
+  const w = (await c.query(
+    `insert into work_orders (tenant_id, number, kind, status, subscriber_id, contract_id, assignee_id, scheduled_for, description, created_by, ticket_id,
+                              reason_id, estimated_minutes, address_origin, address_text)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) returning *`,
+    [ctx.tenantId, number, b.kind, b.scheduled_for ? 'scheduled' : 'open', b.subscriber_id, b.contract_id ?? null, b.assignee_id ?? null,
+      b.scheduled_for ?? null, b.description, ctx.userId, b.ticket_id ?? null, b.reason_id ?? null, b.estimated_minutes, b.address_origin, addressText])).rows[0];
+  await applySla(c, 'work_order', w.id);
+  Object.assign(w, (await c.query('select sla_policy_id, sla_due_at from work_orders where id = $1', [w.id])).rows[0]);
+  await woEvent(c, ctx, w.id, 'created', { kind: b.kind });
+  const sn = (await c.query('select name from subscribers where id = $1', [b.subscriber_id])).rows[0].name;
+  await queueNotice(c, ctx.tenantId!, 'work_order.created', `OS ${number} aberta (${b.kind}) para ${sn}${b.scheduled_for ? `, agendada para ${b.scheduled_for}` : ''}`, { work_order_id: w.id, number });
+  await emitEvent(c, ctx.tenantId!, 'work_order.created', { work_order_id: w.id, number, kind: b.kind, subscriber_id: b.subscriber_id, contract_id: b.contract_id ?? null });
+  return w;
 }
 
 export async function fieldRoutes(app: FastifyInstance) {
@@ -106,45 +152,10 @@ export async function fieldRoutes(app: FastifyInstance) {
   });
 
   app.post('/api/work-orders', { preHandler: guard('os:write') }, async (req) => {
-    const b = z.object({
-      kind: z.enum(['install', 'repair', 'address_change', 'removal', 'other']), subscriber_id: zUuid, contract_id: zUuid.nullish(),
-      description: zText(2000), assignee_id: zUuid.nullish(), scheduled_for: zWhen.nullish(), ticket_id: zUuid.nullish(),
-      reason_id: zUuid.nullish(), estimated_minutes: z.number().int().min(5).max(1440).default(60),
-      address_origin: z.enum(['subscriber', 'contract', 'manual']).default('subscriber'), address_text: z.string().trim().min(5).max(300).nullish(),
-    }).parse(req.body);
+    const b = zWorkOrderCreate.parse(req.body);
     return withScope(req.ctx.scope, async (c) => {
-      if (!(await c.query('select 1 from subscribers where id = $1', [b.subscriber_id])).rowCount) throw new HttpError(400, 'assinante não encontrado');
-      if (b.contract_id && !(await c.query('select 1 from contracts where id = $1 and subscriber_id = $2', [b.contract_id, b.subscriber_id])).rowCount)
-        throw new HttpError(400, 'o contrato não pertence a este assinante');
-      if (b.ticket_id && !(await c.query('select 1 from tickets where id = $1 and subscriber_id = $2', [b.ticket_id, b.subscriber_id])).rowCount)
-        throw new HttpError(400, 'o atendimento não pertence a este assinante');
-      if (b.assignee_id) await staff(c, b.assignee_id);
-      await assertCatalog(c, b.reason_id, 'os_reason', 'motivo da OS');
-      // O endereço da OS é registrado com a origem; trocar o cadastro depois não muda uma OS já aberta.
-      let addressText: string | null = null;
-      if (b.address_origin === 'manual') {
-        if (!b.address_text) throw new HttpError(400, 'informe o endereço da OS');
-        addressText = b.address_text;
-      } else if (b.address_origin === 'contract') {
-        if (!b.contract_id) throw new HttpError(400, 'escolha o contrato para usar o endereço de instalação dele');
-        const k = (await c.query(
-          `select concat_ws(', ', install_street, install_number, install_district, install_city) as a, install_street, install_city from contracts where id = $1`, [b.contract_id])).rows[0];
-        if (!k.install_street || !k.install_city) throw new HttpError(400, 'o contrato não tem endereço de instalação cadastrado');
-        addressText = k.a;
-      }
-      const number = await nextNumber(c, req.ctx.tenantId!, 'work_order');
-      const w = (await c.query(
-        `insert into work_orders (tenant_id, number, kind, status, subscriber_id, contract_id, assignee_id, scheduled_for, description, created_by, ticket_id,
-                                  reason_id, estimated_minutes, address_origin, address_text)
-         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) returning *`,
-        [req.ctx.tenantId, number, b.kind, b.scheduled_for ? 'scheduled' : 'open', b.subscriber_id, b.contract_id ?? null, b.assignee_id ?? null,
-          b.scheduled_for ?? null, b.description, req.ctx.userId, b.ticket_id ?? null, b.reason_id ?? null, b.estimated_minutes, b.address_origin, addressText])).rows[0];
-      await applySla(c, 'work_order', w.id);
-      Object.assign(w, (await c.query('select sla_policy_id, sla_due_at from work_orders where id = $1', [w.id])).rows[0]);
-      await woEvent(c, req.ctx, w.id, 'created', { kind: b.kind });
-      const sn = (await c.query('select name from subscribers where id = $1', [b.subscriber_id])).rows[0].name;
-      await queueNotice(c, req.ctx.tenantId!, 'work_order.created', `OS ${number} aberta (${b.kind}) para ${sn}${b.scheduled_for ? `, agendada para ${b.scheduled_for}` : ''}`, { work_order_id: w.id, number });
-      await audit(c, req.ctx, 'work_order.create', 'work_order', w.id, { number, kind: b.kind });
+      const w = await createWorkOrder(c, req.ctx, b);
+      await audit(c, req.ctx, 'work_order.create', 'work_order', w.id, { number: w.number, kind: b.kind });
       return w;
     });
   });
@@ -202,6 +213,7 @@ export async function fieldRoutes(app: FastifyInstance) {
          on conflict (work_order_id) do nothing`, [req.ctx.tenantId, id, cur.number, cur.kind, cur.subscriber_id]);
       }
       await woEvent(c, req.ctx, id, 'status', { from: cur.status, to: b.status, resolution: b.resolution ?? undefined, reason: b.reason ?? undefined });
+      await emitEvent(c, req.ctx.tenantId!, 'work_order.status_changed', { work_order_id: id, number: cur.number, from: cur.status, to: b.status, subscriber_id: cur.subscriber_id });
       await audit(c, req.ctx, `work_order.${b.status}`, 'work_order', id);
       return w;
     });

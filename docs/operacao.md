@@ -58,6 +58,12 @@ definido. **Aguardando agendamento** limpa a data e guarda o motivo; a OS aparec
 causas-raiz, origens e motivos, e as políticas de prazo (minutos corridos, sem calendário de expediente). A rotina periódica marca o prazo vencido uma vez, avisa o webhook
 da equipe e, se a política tiver responsável de escalonamento, passa a ocorrência a ele. A pesquisa de satisfação nasce ao concluir a OS e é respondida no portal do assinante.
 
+### API pública e webhooks (módulo `api`)
+
+Em Integrações: **Tokens** (um por aplicação, com o menor escopo possível; o valor aparece uma vez) e **Webhooks** (endereço HTTPS, eventos e segredo de
+assinatura, que também aparece uma vez). Revogar token ou pausar endpoint vale na hora. Entregas que esgotam as 6 tentativas ficam como "falhou" e são
+reenviadas pela tela Entregas. Contrato completo, eventos e verificação de assinatura: `docs/api-publica.md`.
+
 ### Conferência antes de entrar em produção
 
 ```bash

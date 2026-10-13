@@ -4,6 +4,7 @@ import { audit, guard, HttpError, type Ctx } from '../auth.js';
 import { nextNumber, paged, withScope, type Tx } from '../db.js';
 import { assertSafeWebhookUrl, deliverNotifications, queueNotice, sendTestNotice } from '../notify.js';
 import { applySla, assertCatalog } from '../sla.js';
+import { emitEvent } from '../webhooks.js';
 import { zDate, zDocument, zPage, zSubscriber, zUuid } from '../validators.js';
 
 /** Expansão 4: CRM — prospectos (funil) e atendimentos (protocolos), inclusive abertos pelo assinante no portal. */
@@ -35,7 +36,7 @@ async function staff(c: Tx, id: string | null) {
 const leadEvent = (c: Tx, ctx: Ctx, id: string, event: string, detail: object = {}) =>
   c.query(`insert into lead_events (tenant_id, lead_id, actor_id, event, detail) values ($1,$2,$3,$4,$5)`, [ctx.tenantId, id, ctx.userId, event, JSON.stringify(detail)]);
 
-async function openTicket(c: Tx, ctx: Ctx, t: { subscriber_id: string; contract_id: string | null; subject: string; category: string; priority: string; body: string; origin: 'staff' | 'portal';
+export async function openTicket(c: Tx, ctx: { tenantId: string | null; userId: string | null }, t: { subscriber_id: string; contract_id: string | null; subject: string; category: string; priority: string; body: string; origin: 'staff' | 'portal' | 'api';
   type_id?: string | null; classification_id?: string | null; origin_id?: string | null }) {
   const number = await nextNumber(c, ctx.tenantId!, 'ticket');
   const row = (await c.query(
@@ -46,6 +47,7 @@ async function openTicket(c: Tx, ctx: Ctx, t: { subscriber_id: string; contract_
   Object.assign(row, (await c.query('select sla_policy_id, sla_due_at from tickets where id = $1', [row.id])).rows[0]);
   await c.query(`insert into ticket_messages (tenant_id, ticket_id, author_id, author_kind, body) values ($1,$2,$3,$4,$5)`,
     [ctx.tenantId, row.id, ctx.userId, t.origin === 'portal' ? 'subscriber' : 'staff', t.body]);
+  await emitEvent(c, ctx.tenantId!, 'ticket.created', { ticket_id: row.id, number: row.number, subscriber_id: t.subscriber_id, category: t.category, priority: t.priority, origin: t.origin });
   return row;
 }
 

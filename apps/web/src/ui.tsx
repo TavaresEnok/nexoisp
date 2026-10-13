@@ -11,6 +11,7 @@ const ICONS: Record<string, string> = {
   phone: 'M8 3h8v18H8zM11 18h2',
   wrench: 'M14.5 6.5a4 4 0 0 0 5 5L11 20a2.1 2.1 0 0 1-3-3zM6 8l-3-3 2-2 3 3',
   calendar: 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',
+  plug: 'M9 3v5M15 3v5M6 8h12v4a6 6 0 0 1-12 0zM12 18v3',
   box: 'M3 8l9-5 9 5v8l-9 5-9-5zM3 8l9 5 9-5M12 13v8',
   chart: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
   receipt: 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6',

@@ -285,3 +285,12 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
 - **Limites:** SLA em minutos corridos (sem expediente nem pausa); o convite da pesquisa não é enviado automaticamente (o assinante vê no portal); sem check-in com localização.
 - **Próxima ação:** P1 (API pública com token por aplicação e webhooks de saída), depois F5/F7 (kit/auxiliares e comissão), C8–C10 (fidelidade, aditivos, descontos).
 
+### 13/10/2026 — API pública com token e webhooks de saída assinados
+
+- **Entregue (testado, 107 testes da API passando):** módulo `api`; tokens por aplicação (escopo, limite por minuto, expiração, revogação, hash no banco);
+  rotas `GET` de assinantes/contratos/faturas e `POST` de atendimento e OS com `Idempotency-Key`; webhooks de saída (HMAC-SHA256 + timestamp, 6 tentativas, reenvio);
+  auditoria com o token como ator. Migração 029; tela Integrações; `docs/api-publica.md`.
+- **Limites:** entrega de webhook é "pelo menos uma vez" e sem ordem garantida; eventos de acesso refletem a intenção, não a confirmação do equipamento; o destino do
+  webhook é validado contra endereços internos a cada entrega, mas ainda não houve teste contra um integrador real.
+- **Próxima ação:** F5/F7 (kit/auxiliares e comissão), C8–C10 (fidelidade, aditivos, descontos), D4–D8 (extrato e estados do contrato), R1–R4.
+

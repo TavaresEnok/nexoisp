@@ -4,6 +4,7 @@ import { audit, guard, HttpError } from '../auth.js';
 import { paged, withScope } from '../db.js';
 import { getSettings } from '../finance/core.js';
 import { OPEN_WO_SQL } from '../sla.js';
+import { emitEvent } from '../webhooks.js';
 import { zPage, zUuid } from '../validators.js';
 
 /**
@@ -241,6 +242,7 @@ export async function fluxoOsRoutes(app: FastifyInstance) {
          where id = $1 and subscriber_id = $2 and answered_at is null and expires_at > now() returning id, score`, [id, sid, b.score, b.comment])).rows[0];
       if (!r) throw new HttpError(409, 'pesquisa não encontrada, já respondida ou expirada');
       await audit(c, req.ctx, 'survey.answer', 'satisfaction_survey', id, { score: b.score });
+      await emitEvent(c, req.ctx.tenantId!, 'survey.answered', { survey_id: id, score: b.score });
       return r;
     });
   });

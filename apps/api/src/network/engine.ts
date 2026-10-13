@@ -1,5 +1,6 @@
 import { HttpError } from '../auth.js';
 import type { Tx } from '../db.js';
+import { emitEvent } from '../webhooks.js';
 import { decryptSecret, signEnvelope } from './crypto.js';
 
 export type Action = 'subscriber.provision' | 'subscriber.suspend' | 'subscriber.resume';
@@ -88,11 +89,16 @@ export async function requestOperation(c: Tx, tenantId: string, resourceId: stri
     operation_id: id, tenant_id: tenantId, resource_id: resourceId, device_id: r.device_id, agent_id: r.agent_id,
     action, schema_version: 1, desired_version: version, parameters, idempotency_key: key, valid_until: validUntil, authorization,
   });
-  return (await c.query(
+  const op = (await c.query(
     `insert into operations (id, tenant_id, resource_id, device_id, agent_id, action, desired_version, parameters, idempotency_key, valid_until, authorization_ref, envelope, signature, reason)
      values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) returning *`,
     [id, tenantId, resourceId, r.device_id, r.agent_id, action, version, JSON.stringify(parameters), key, validUntil,
       JSON.stringify(authorization), envelope, signEnvelope(envelope), authz.reason ?? null])).rows[0];
+  // Evento de saída: é a intenção registrada (o efeito no equipamento é confirmado pelo agente, não por este evento).
+  if (action === 'subscriber.suspend' || action === 'subscriber.resume')
+    await emitEvent(c, tenantId, action === 'subscriber.suspend' ? 'access.suspended' : 'access.resumed',
+      { contract_id: r.contract_id, stage: policy === 'suspended' ? (opts.stage ?? 'blocked') : null, reason: authz.reason ?? null });
+  return op;
 }
 
 /** Posse expirada: reservada sem iniciar volta à fila; iniciada vira UNCERTAIN (efeito pode ter ocorrido). */

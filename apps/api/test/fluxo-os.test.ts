@@ -13,7 +13,11 @@ beforeAll(async () => {
   admin = await login('admin@alfa.demo');
   beta = await login('admin@beta.demo');
   tenantId = (await call(admin, 'GET', '/api/me')).body.tenant.id;
-  contract = (await call(admin, 'GET', '/api/contracts?status=active')).body[0];
+  // cliente próprio: outros arquivos usam o primeiro assinante e contam os atendimentos dele
+  const plan = (await call(admin, 'POST', '/api/plans', { name: `Plano fluxo ${tag}`, price_cents: 7990, down_kbps: 100000, up_kbps: 50000, profile_name: `fl${tag}` })).body;
+  const sub = (await call(admin, 'POST', '/api/subscribers', { name: `Cliente fluxo ${tag}` })).body;
+  const k = (await call(admin, 'POST', '/api/contracts', { subscriber_id: sub.id, plan_id: plan.id, due_day: 10 })).body;
+  contract = { ...k, subscriber_id: sub.id };
   const staff = (await call(admin, 'GET', '/api/staff')).body;
   tech = staff.find((s: any) => s.role === 'noc') ?? staff[0];
   other = staff.find((s: any) => s.id !== tech.id);
@@ -196,9 +200,8 @@ describe('agenda e endereço', () => {
 
 describe('pesquisa de satisfação pelo portal', () => {
   it('o assinante responde uma vez; não vê nem responde a de outro; a equipe vê a nota', async () => {
-    const k = (await call(admin, 'GET', '/api/contracts?status=active')).body.find((c: any) => c.id === contract.id);
     const email = `pesq-${tag}@teste.local`;
-    expect((await call(admin, 'POST', `/api/subscribers/${k.subscriber_id}/portal-access`, { email, password: 'demo1234' })).status).toBe(200);
+    expect((await call(admin, 'POST', `/api/subscribers/${contract.subscriber_id}/portal-access`, { email, password: 'demo1234' })).status).toBe(200);
     const sub = await login(email);
     const w = await newOs();
     await status(w.id, { status: 'in_progress' });

@@ -25,7 +25,7 @@ export const PERMISSIONS: Record<Role, string[]> = {
  * Módulos adicionais, liberados por provedor pelo operador do SaaS. A rota decide o módulo; sem ele, o servidor recusa
  * (não basta esconder o menu). O núcleo da operação não aparece aqui: está sempre disponível.
  */
-export const MODULES = ['olt', 'ipam', 'field', 'ftth', 'crm', 'noc', 'notices', 'messages'] as const;
+export const MODULES = ['olt', 'ipam', 'field', 'ftth', 'crm', 'noc', 'notices', 'messages', 'api'] as const;
 export type Module = (typeof MODULES)[number];
 const MODULE_ROUTES: [Module | Module[], RegExp][] = [
   ['olt', /^\/api\/(olt\/|onus(\/|$)|contracts\/[^/]+\/onu$)/],
@@ -37,6 +37,7 @@ const MODULE_ROUTES: [Module | Module[], RegExp][] = [
   ['noc', /^\/api\/(noc\/|contracts\/[^/]+\/diagnosis$)/],
   ['notices', /^\/api\/notifications(\/|$)/],
   ['messages', /^\/api\/(notice-(channels|templates|rules|log)(\/|$))/],
+  ['api', /^\/api\/(api-tokens|webhook-endpoints|webhook-deliveries|integrations)(\/|$)/],
 ];
 /** Módulos que liberam a rota (qualquer um basta). */
 export const moduleOf = (url: string): Module[] | null => {
@@ -151,7 +152,7 @@ export async function audit(
   c: Tx | null, ctx: Pick<Ctx, 'userId' | 'tenantId' | 'scope' | 'support'> | null,
   action: string, entityType: string | null, entityId: string | null,
   detail: Record<string, unknown> = {}, result = 'ok',
-  actor?: { type: 'agent' | 'system'; id: string; tenantId: string },
+  actor?: { type: 'agent' | 'system' | 'api'; id: string; tenantId: string },
 ) {
   const q = `insert into audit_events (tenant_id, actor_type, actor_id, action, entity_type, entity_id, result, detail)
              values ($1,$2,$3,$4,$5,$6,$7,$8)`;
