@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { audit, guard, hashPassword, HttpError } from '../auth.js';
 import { withScope } from '../db.js';
+import { grantTrustRelease, trustState } from '../finance/advanced.js';
 import { zUuid } from '../validators.js';
 
 export async function portalRoutes(app: FastifyInstance) {
@@ -43,7 +44,29 @@ export async function portalRoutes(app: FastifyInstance) {
                 (i.status = 'open' and i.due_date < (now() at time zone coalesce(ts.timezone, 'America/Sao_Paulo'))::date) as overdue
          from invoices i left join tenant_settings ts on ts.tenant_id = i.tenant_id
          where i.subscriber_id = $1 and i.status <> 'canceled' order by i.due_date desc limit 36`, [sid])).rows;
+      // liberação por confiança por contrato (só aparece o que o assinante pode fazer agora)
+      for (const k of contracts) {
+        const ts = await trustState(c, req.ctx.tenantId!, k.id);
+        (k as any).trust_release = { enabled: ts.enabled, eligible: ts.eligible, reason: ts.reason, max_days: ts.max_days, active_until: ts.active?.expires_at ?? null };
+      }
       return { subscriber, contracts, invoices };
+    });
+  });
+
+  /** O assinante pede a liberação por confiança do próprio contrato; mesmas regras da equipe, só o prazo padrão. */
+  app.post('/api/portal/trust-release', { preHandler: guard('portal:self') }, async (req) => {
+    const sid = req.ctx.subscriberId;
+    if (!sid) throw new HttpError(403, 'sessão sem assinante');
+    const b = z.object({ contract_id: zUuid }).parse(req.body);
+    // A posse do contrato é conferida com o escopo do assinante. A escrita na rede sai pelo escopo do provedor: o assinante
+    // não tem (e não deve ter) permissão de linha sobre contas PPPoE e operações.
+    const own = await withScope(req.ctx.scope, async (c) =>
+      (await c.query('select 1 from contracts where id = $1 and subscriber_id = $2', [b.contract_id, sid])).rowCount);
+    if (!own) throw new HttpError(404, 'contrato não encontrado');
+    return withScope({ tenantId: req.ctx.tenantId!, operator: false }, async (c) => {
+      const r = await grantTrustRelease(c, { tenantId: req.ctx.tenantId!, userId: req.ctx.userId }, b.contract_id, { source: 'portal', reason: 'pedido pelo portal do assinante' });
+      await audit(c, req.ctx, 'contract.trust_release', 'contract', b.contract_id, { days: r.days, source: 'portal', operation_id: r.operation_id });
+      return { expires_at: r.expires_at, days: r.days };
     });
   });
 }

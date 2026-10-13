@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import { api, d, doc, money, speed, useLoad } from '../api';
+import { api, d, doc, dt, money, speed, useLoad } from '../api';
 import { has, useMe } from '../App';
-import { Badge, Brand, Card, Icon, KV, Modal, State } from '../ui';
+import { ActionButton, Badge, Brand, Card, Icon, KV, Modal, State } from '../ui';
 import { PortalTickets } from './Crm';
 import { InvoiceBadge } from './Finance';
 
 /** Portal do assinante: somente os próprios contratos, situação e faturas. */
 export function Portal() {
   const { me } = useMe();
-  const { data, loading, error } = useLoad<any>('/portal/overview', 15000);
+  const { data, loading, error, reload } = useLoad<any>('/portal/overview', 15000);
+  const [trustErr, setTrustErr] = useState<string | null>(null);
   const [inv, setInv] = useState<any>(null);
   const logout = async () => { await api('/auth/logout', { method: 'POST' }).catch(() => {}); window.location.href = '/login'; };
   const service = (c: any) => {
@@ -47,6 +48,20 @@ export function Portal() {
               </div>
             </Card>
           </div>
+          {active.filter((c: any) => c.trust_release?.eligible || c.trust_release?.active_until).map((c: any) => (
+            <Card key={c.id} title="Religar minha internet por alguns dias">
+              {c.trust_release.active_until
+                ? <p style={{ margin: 0 }}>Liberação em curso até <b>{dt(c.trust_release.active_until)}</b>. Regularize a fatura em aberto até lá para não ser suspenso de novo.</p>
+                : (<>
+                  <p style={{ marginTop: 0 }}>Se você ainda não conseguiu pagar, o provedor permite religar o acesso por até <b>{c.trust_release.max_days} dia(s)</b>. Depois desse prazo, sem o pagamento, a suspensão volta. Só é possível pedir uma vez por período.</p>
+                  <ActionButton confirm={`Religar o acesso do plano ${c.plan_name} por ${c.trust_release.max_days} dia(s)?`} onClick={async () => {
+                    setTrustErr(null);
+                    try { await api('/portal/trust-release', { body: { contract_id: c.id } }); reload(); } catch (e: any) { setTrustErr(e.message ?? 'não foi possível liberar'); }
+                  }}>Religar por {c.trust_release.max_days} dia(s)</ActionButton>
+                  {trustErr && <div className="state err" style={{ marginTop: 8 }}>{trustErr}</div>}
+                </>)}
+            </Card>
+          ))}
           <Card title="Meus planos">
             <State empty={data.contracts.length === 0}>
               <table>

@@ -3,14 +3,15 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { audit, guard, HttpError } from '../auth.js';
 import { paged, withScope } from '../db.js';
-import { autoSuspend, currentCompetence, ensureCharges, generateMonthly, getSettings, manualPayment, processGatewayEvent, reconcile } from '../finance/core.js';
+import { createAgreement, grantTrustRelease, trustState } from '../finance/advanced.js';
+import { autoSuspend, currentCompetence, dueBreakdown, ensureCharges, generateMonthly, getSettings, manualPayment, processGatewayEvent, reconcile, reversePayment } from '../finance/core.js';
 import { demoSign, getGateway } from '../finance/gateway.js';
 import { zDate, zPage, zUuid } from '../validators.js';
 
 const INVOICE_SELECT = `
   select i.*, s.name as subscriber_name, p.name as plan_name,
          (i.status = 'open' and i.due_date < (now() at time zone coalesce(ts.timezone, 'America/Sao_Paulo'))::date) as overdue,
-         (select coalesce(sum(amount_cents),0)::int from payments x where x.invoice_id = i.id) as paid_cents
+         (select coalesce(sum(signed_cents),0)::int from payments x where x.invoice_id = i.id) as paid_cents
   from invoices i join subscribers s on s.id = i.subscriber_id join contracts k on k.id = i.contract_id
   join plan_versions pv on pv.id = k.plan_version_id join plans p on p.id = pv.plan_id
   left join tenant_settings ts on ts.tenant_id = i.tenant_id`;
@@ -31,6 +32,10 @@ export async function financeRoutes(app: FastifyInstance) {
       gateway: z.enum(['none', 'demo']), billing_auto: z.boolean(), auto_suspend: z.boolean(),
       suspend_after_days: z.number().int().min(0).max(365).nullable(), auto_resume_on_payment: z.boolean(),
       suspension_mode: z.enum(['reject', 'profile']).optional(),
+      trust_release_enabled: z.boolean().optional(), trust_release_days: z.number().int().min(1).max(30).optional(),
+      trust_release_gap_days: z.number().int().min(0).max(365).optional(),
+      late_fee_percent: z.number().min(0).max(20).optional(), interest_monthly_percent: z.number().min(0).max(20).optional(),
+      prorate_first_month: z.boolean().optional(),
       suspension_profile: z.string().trim().regex(/^[A-Za-z0-9_.-]{1,60}$/, 'perfil: letras, números, _ . - (até 60)').nullish(),
     }).parse(req.body);
     if (b.gateway === 'demo' && !getGateway('demo')) throw new HttpError(400, 'gateway de demonstração não é permitido fora do modo demonstração');
@@ -41,12 +46,17 @@ export async function financeRoutes(app: FastifyInstance) {
       const profile = b.suspension_profile !== undefined ? b.suspension_profile || null : cur.suspension_profile;
       if (mode === 'profile' && !profile) throw new HttpError(400, 'informe o nome do perfil de bloqueio que existe no NAS');
       const s = (await c.query(
-        `insert into tenant_settings (tenant_id, gateway, billing_auto, auto_suspend, suspend_after_days, auto_resume_on_payment, suspension_mode, suspension_profile, updated_by)
-         values ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+        `insert into tenant_settings (tenant_id, gateway, billing_auto, auto_suspend, suspend_after_days, auto_resume_on_payment, suspension_mode, suspension_profile, updated_by,
+           trust_release_enabled, trust_release_days, trust_release_gap_days, late_fee_percent, interest_monthly_percent, prorate_first_month)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
          on conflict (tenant_id) do update set gateway = excluded.gateway, billing_auto = excluded.billing_auto, auto_suspend = excluded.auto_suspend,
            suspend_after_days = excluded.suspend_after_days, auto_resume_on_payment = excluded.auto_resume_on_payment,
-           suspension_mode = excluded.suspension_mode, suspension_profile = excluded.suspension_profile, updated_by = excluded.updated_by, updated_at = now()
-         returning *`, [req.ctx.tenantId, b.gateway, b.billing_auto, b.auto_suspend, b.suspend_after_days, b.auto_resume_on_payment, mode, mode === 'profile' ? profile : null, req.ctx.userId])).rows[0];
+           suspension_mode = excluded.suspension_mode, suspension_profile = excluded.suspension_profile, updated_by = excluded.updated_by, updated_at = now(),
+           trust_release_enabled = excluded.trust_release_enabled, trust_release_days = excluded.trust_release_days, trust_release_gap_days = excluded.trust_release_gap_days,
+           late_fee_percent = excluded.late_fee_percent, interest_monthly_percent = excluded.interest_monthly_percent, prorate_first_month = excluded.prorate_first_month
+         returning *`, [req.ctx.tenantId, b.gateway, b.billing_auto, b.auto_suspend, b.suspend_after_days, b.auto_resume_on_payment, mode, mode === 'profile' ? profile : null, req.ctx.userId,
+          b.trust_release_enabled ?? cur.trust_release_enabled, b.trust_release_days ?? cur.trust_release_days, b.trust_release_gap_days ?? cur.trust_release_gap_days,
+          b.late_fee_percent ?? cur.late_fee_percent, b.interest_monthly_percent ?? cur.interest_monthly_percent, b.prorate_first_month ?? cur.prorate_first_month])).rows[0];
       await audit(c, req.ctx, 'finance.settings_update', 'tenant_settings', req.ctx.tenantId, b);
       return s;
     });
@@ -83,7 +93,7 @@ export async function financeRoutes(app: FastifyInstance) {
       if (!i) throw new HttpError(404, 'fatura não encontrada');
       i.items = (await c.query('select description, amount_cents from invoice_items where invoice_id = $1 order by id', [id])).rows;
       i.payments = (await c.query(
-        `select p.id, p.amount_cents, p.paid_at, p.method, p.source, p.gateway_payment_id, p.note, u.name as created_by_name
+        `select p.id, p.amount_cents, p.signed_cents, p.kind, p.reversal_of, p.paid_at, p.method, p.source, p.gateway_payment_id, p.note, u.name as created_by_name
          from payments p left join users u on u.id = p.created_by where p.invoice_id = $1 order by p.created_at`, [id])).rows;
       i.events = i.gateway_charge_id
         ? (await c.query('select id, event_id, type, status, note, received_at from gateway_events where gateway = $1 and charge_id = $2 order by id', [i.gateway, i.gateway_charge_id])).rows : [];
@@ -119,11 +129,58 @@ export async function financeRoutes(app: FastifyInstance) {
 
   app.post('/api/invoices/:id/manual-payment', { preHandler: guard('finance:write') }, async (req) => {
     const id = zUuid.parse((req.params as any).id);
-    const b = z.object({ amount_cents: z.number().int().positive(), paid_at: zDate, method: z.string().trim().max(40).nullish(), note: z.string().trim().min(3, 'informe uma observação') }).parse(req.body);
+    const b = z.object({
+      amount_cents: z.number().int().positive(), paid_at: zDate, method: z.string().trim().max(40).nullish(), note: z.string().trim().min(3, 'informe uma observação'),
+      apply_fees: z.boolean().optional(), partial: z.boolean().optional(),
+      discount_cents: z.number().int().positive().optional(), discount_reason: z.string().trim().min(3).max(200).optional(),
+    }).parse(req.body);
     return withScope(req.ctx.scope, async (c) => {
       const status = await manualPayment(c, id, req.ctx.userId, { ...b, paid_at: `${b.paid_at}T12:00:00Z` });
-      await audit(c, req.ctx, 'invoice.manual_payment', 'invoice', id, { amount_cents: b.amount_cents, status });
+      await audit(c, req.ctx, 'invoice.manual_payment', 'invoice', id, { amount_cents: b.amount_cents, status, apply_fees: !!b.apply_fees, partial: !!b.partial, discount_cents: b.discount_cents ?? 0 });
       return { status };
+    });
+  });
+
+  /** Quanto falta pagar hoje, e o que multa e juros somariam pela política do provedor. */
+  app.get('/api/invoices/:id/due', { preHandler: guard('finance:read') }, async (req) =>
+    withScope(req.ctx.scope, (c) => dueBreakdown(c, zUuid.parse((req.params as any).id))));
+
+  app.post('/api/invoices/:id/payments/:paymentId/reverse', { preHandler: guard('finance:write') }, async (req) => {
+    const p = z.object({ id: zUuid, paymentId: zUuid }).parse(req.params);
+    const b = z.object({ reason: z.string().trim().min(5, 'descreva o motivo do estorno').max(200) }).parse(req.body);
+    return withScope(req.ctx.scope, async (c) => {
+      const r = await reversePayment(c, p.id, p.paymentId, req.ctx.userId, b.reason);
+      await audit(c, req.ctx, 'invoice.payment_reverse', 'invoice', p.id, { payment_id: p.paymentId, reason: b.reason });
+      return r;
+    });
+  });
+
+  // ---- Acordo de pagamento ----
+  app.post('/api/contracts/:id/agreement', { preHandler: guard('finance:write') }, async (req) => {
+    const id = zUuid.parse((req.params as any).id);
+    const b = z.object({
+      invoice_ids: z.array(zUuid).min(1).max(24), installments: z.number().int().min(1).max(24), first_due_date: zDate,
+      discount_cents: z.number().int().min(0).optional(), reason: z.string().trim().min(5, 'descreva o acordo').max(200),
+      apply_fees: z.boolean().optional(), release_service: z.boolean().optional(),
+    }).parse(req.body);
+    return withScope(req.ctx.scope, async (c) => {
+      const r = await createAgreement(c, { tenantId: req.ctx.tenantId!, userId: req.ctx.userId }, id, b);
+      await audit(c, req.ctx, 'contract.agreement', 'contract', id, { agreement_id: r.id, total_cents: r.total_cents, installments: b.installments, invoices: b.invoice_ids.length });
+      return r;
+    });
+  });
+
+  // ---- Liberação por confiança (promessa de pagamento) ----
+  app.get('/api/contracts/:id/trust-release', { preHandler: guard('contracts:read') }, async (req) =>
+    withScope(req.ctx.scope, (c) => trustState(c, req.ctx.tenantId!, zUuid.parse((req.params as any).id))));
+
+  app.post('/api/contracts/:id/trust-release', { preHandler: guard('trust:grant') }, async (req) => {
+    const id = zUuid.parse((req.params as any).id);
+    const b = z.object({ days: z.number().int().min(1).max(30).optional(), reason: z.string().trim().min(3, 'informe o motivo').max(200) }).parse(req.body);
+    return withScope(req.ctx.scope, async (c) => {
+      const r = await grantTrustRelease(c, { tenantId: req.ctx.tenantId!, userId: req.ctx.userId }, id, { ...b, source: 'operator' });
+      await audit(c, req.ctx, 'contract.trust_release', 'contract', id, { days: r.days, reason: b.reason, operation_id: r.operation_id });
+      return r;
     });
   });
 
@@ -158,7 +215,7 @@ export async function financeRoutes(app: FastifyInstance) {
         `select count(*) filter (where status = 'open') as open, coalesce(sum(amount_cents) filter (where status = 'open'),0)::int as open_cents,
                 count(*) filter (where overdue) as overdue, coalesce(sum(amount_cents) filter (where overdue),0)::int as overdue_cents,
                 count(*) filter (where status = 'reconciling') as reconciling,
-                (select coalesce(sum(amount_cents),0)::int from payments where paid_at >= date_trunc('month', now())) as received_month_cents
+                (select coalesce(sum(signed_cents),0)::int from payments where paid_at >= date_trunc('month', now())) as received_month_cents
          from (${INVOICE_SELECT}) x`)).rows[0]));
 
   /** Exportação para a contabilidade (CSV): recebimentos por data de pagamento ou faturas por vencimento. Não é documento fiscal. */
@@ -170,12 +227,12 @@ export async function financeRoutes(app: FastifyInstance) {
       await audit(c, req.ctx, 'finance.export', 'finance', null, q);
       return (await c.query(q.kind === 'payments'
         ? `select to_char(p.paid_at at time zone $3, 'YYYY-MM-DD') as data_pagamento, s.name as assinante, s.document as cpf_cnpj, i.kind as tipo,
-                  to_char(i.competence, 'YYYY-MM') as competencia, i.due_date as vencimento, i.amount_cents as valor_fatura, p.amount_cents as valor_pago,
-                  p.method as meio, p.source as origem, coalesce(p.gateway, '') as gateway, coalesce(p.gateway_payment_id, '') as id_pagamento, i.id as fatura
+                  to_char(i.competence, 'YYYY-MM') as competencia, i.due_date as vencimento, i.amount_cents as valor_fatura, p.signed_cents as valor_pago,
+                  p.method as meio, case when p.kind = 'reversal' then 'estorno' else p.source end as origem, coalesce(p.gateway, '') as gateway, coalesce(p.gateway_payment_id, '') as id_pagamento, i.id as fatura
            from payments p join invoices i on i.id = p.invoice_id join subscribers s on s.id = i.subscriber_id
            where (p.paid_at at time zone $3)::date between $1::date and $2::date order by p.paid_at, p.id`
         : `select i.due_date as vencimento, s.name as assinante, s.document as cpf_cnpj, i.kind as tipo, to_char(i.competence, 'YYYY-MM') as competencia,
-                  i.amount_cents as valor_fatura, (select coalesce(sum(x.amount_cents),0)::int from payments x where x.invoice_id = i.id) as valor_pago,
+                  i.amount_cents as valor_fatura, (select coalesce(sum(x.signed_cents),0)::int from payments x where x.invoice_id = i.id) as valor_pago,
                   i.status as situacao, to_char(i.paid_at at time zone $3, 'YYYY-MM-DD') as data_pagamento, i.id as fatura
            from invoices i join subscribers s on s.id = i.subscriber_id
            where i.due_date between $1::date and $2::date order by i.due_date, i.id`, [q.from, q.to, tz])).rows;
@@ -201,7 +258,7 @@ export async function financeRoutes(app: FastifyInstance) {
       const tz = (await getSettings(c, req.ctx.tenantId!)).timezone;
       return (await c.query(
         `select to_char(m, 'YYYY-MM') as month,
-                coalesce((select sum(p.amount_cents) from payments p where date_trunc('month', p.paid_at at time zone $1) = m), 0)::int as received_cents
+                coalesce((select sum(p.signed_cents) from payments p where date_trunc('month', p.paid_at at time zone $1) = m), 0)::int as received_cents
          from generate_series(date_trunc('month', now() at time zone $1) - interval '5 months', date_trunc('month', now() at time zone $1), interval '1 month') m order by m`, [tz])).rows;
     }));
 
@@ -222,8 +279,9 @@ export async function financeRoutes(app: FastifyInstance) {
   });
 
   app.post('/api/finance/run-auto-suspend', { preHandler: guard('settings:manage') }, async (req) => {
-    const n = await autoSuspend(req.ctx.tenantId!);
-    await audit(null, req.ctx, 'finance.run_auto_suspend', null, null, { requested: n });
+    const b = z.object({ contract_id: zUuid.optional() }).parse(req.body ?? {});
+    const n = await autoSuspend(req.ctx.tenantId!, b.contract_id);
+    await audit(null, req.ctx, 'finance.run_auto_suspend', null, null, { requested: n, contract_id: b.contract_id ?? null });
     return { requested: n };
   });
 
