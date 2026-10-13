@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { api, d, doc, money, speed, useLoad, usePaged } from '../api';
 import { can, has, useMe } from '../App';
 import { Badge, Card, Field, Form, KV, Modal, Page, Pager, State } from '../ui';
+import { Contacts, Timeline } from './Atendimento';
 import { ContractForm } from './Contracts';
 import { TicketList } from './Crm';
 import { WorkOrderList } from './Field';
@@ -140,6 +141,8 @@ export function SubscriberDetail() {
               </table>
             </State>
           </Card>
+          <Contacts subscriberId={s.id} />
+          <Timeline subscriberId={s.id} />
           {can(me, 'crm:read') && has(me, 'crm') && <TicketList subscriberId={s.id} />}
           {can(me, 'os:read') && has(me, 'field') && <WorkOrderList subscriberId={s.id} />}
           {modal === 'edit' && (

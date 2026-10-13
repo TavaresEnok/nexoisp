@@ -1,5 +1,9 @@
 # NexoISP — o que já dá para fazer e o que falta para atender quem sai do SGP e do IXC
 
+> **Decisão de produto (13/10/2026): o NexoISP não é um sistema de chat.** Não há atendimento por conversa. O atendimento é feito por **ocorrência e ordem de serviço**
+> (abertura, acompanhamento, SLA, agenda, execução). Mensagens ao assinante existem **só de saída** (cobrança, manutenção, OS): sem caixa de entrada, sem respostas.
+> Onde este documento citar "chat", "URA" ou "WhatsApp" como origem de atendimento, leia como **integração externa que abre ocorrência por API**, nunca como canal nosso.
+
 **Criado em:** 13 de outubro de 2026
 **Base:** todo o material enviado: API e espelho da interface do SGP, 71 capturas de tela (44 SGP, 27 IXC; vi 24 delas, as demais por nome e menu), menu e seções da wiki
 da API do IXC, e o backup cifrado do SGP (**não foi aberto**). Sem dados de cliente neste documento.
@@ -133,8 +137,8 @@ O que um provedor precisa **no primeiro dia**, **na primeira semana** e **no pri
 
 | Integração | Situação no SGP/IXC | NexoISP | O que fazer |
 |---|---|---|---|
-| Chat/URA abrindo ocorrência e OS | Via API com token | ❌ | P1 e rotas de leitura/criação |
-| Automação de notificações (n8n etc.) | Via API | ❌ | P1 + webhooks |
+| Sistema externo (chat, URA) abrindo ocorrência e OS | Via API com token | ❌ | P1: rotas de criação de ocorrência/OS. **O NexoISP não tem chat próprio** |
+| Automação de notificações (n8n etc.) | Via API | ❌ | P1 + webhooks de saída |
 | Sistema externo de OS, monitor | Via API | ❌ | P1 |
 | Provedores de SMS/WhatsApp | 60+ no SGP | ❌ | C1 com um conector + conector HTTP genérico |
 | Assinatura eletrônica | Gateway | ❌ | Conector externo |

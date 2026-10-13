@@ -1,5 +1,9 @@
 # Matriz funcional SGP × IXC × NexoISP
 
+> **Decisão de produto (13/10/2026): o NexoISP não é um sistema de chat.** Não há atendimento por conversa. O atendimento é feito por **ocorrência e ordem de serviço**
+> (abertura, acompanhamento, SLA, agenda, execução). Mensagens ao assinante existem **só de saída** (cobrança, manutenção, OS): sem caixa de entrada, sem respostas.
+> Onde este documento citar "chat", "URA" ou "WhatsApp" como origem de atendimento, leia como **integração externa que abre ocorrência por API**, nunca como canal nosso.
+
 **Criado em:** 13 de outubro de 2026
 **Fontes:** (1) 71 capturas de tela (44 do SGP, 27 do IXC) de instâncias de provedores; (2) o espelho da interface do SGP (`docs/sgp_mirror.zip`); (3) a documentação da API do SGP;
 (4) o menu e as seções da wiki da API do IXC. Nada disso está no repositório, exceto este resumo.

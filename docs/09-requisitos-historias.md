@@ -1,5 +1,9 @@
 # NexoISP — requisitos em histórias (ondas 1 a 3 do roteiro)
 
+> **Decisão de produto (13/10/2026): o NexoISP não é um sistema de chat.** Não há atendimento por conversa. O atendimento é feito por **ocorrência e ordem de serviço**
+> (abertura, acompanhamento, SLA, agenda, execução). Mensagens ao assinante existem **só de saída** (cobrança, manutenção, OS): sem caixa de entrada, sem respostas.
+> Onde este documento citar "chat", "URA" ou "WhatsApp" como origem de atendimento, leia como **integração externa que abre ocorrência por API**, nunca como canal nosso.
+
 **Criado em:** 13 de outubro de 2026
 **Origem:** `docs/08-roadmap-crm-completo.md`. Escrito com a linguagem do NexoISP e do setor; nenhum texto, tela ou desenho do SGP foi reaproveitado.
 **Regra:** nada aqui entra antes do piloto sem decisão do proprietário. Cada história diz o que a **fecha** (critério de aceite) e o que fica **de fora**.

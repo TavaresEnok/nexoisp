@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { api, d, doc, dt, money, speed, useLoad, usePaged } from '../api';
 import { can, has, useMe } from '../App';
 import { ActionButton, Badge, Card, Field, Form, KV, Modal, Page, Pager, State, Tabs } from '../ui';
+import { ContractPop, ContractStates, Sessions } from './Atendimento';
 import { ContractEquipment, ContractTags, ContractUsage } from './Extras';
 import { ContractFinance } from './Finance';
 import { OnuPanel } from './Olt';
@@ -94,11 +95,13 @@ export function ContractDetail() {
       </>}>
       <State loading={loading} error={error}>
         {c && (<>
+          <ContractStates contract={c} />
           <Tabs tabs={tabs} value={cur} onChange={setTab} />
           {cur === 'acesso' && (<>
             <InfraPanel contractId={c.id} />
             <ContractFinance contractId={c.id}>{(fin, numbers) => <ServicePanel contract={c} financial={fin} fin={numbers} />}</ContractFinance>
             <ContractUsage contractId={c.id} />
+            <Sessions contractId={c.id} />
             {has(me, 'olt') && <OnuPanel contract={c} />}
           </>)}
           {cur === 'contrato' && (<>
@@ -111,6 +114,7 @@ export function ContractDetail() {
               ]} />
             </Card>
             <Card title="Etiquetas"><ContractTags contract={c} onChange={reload} /></Card>
+            <Card title="POP"><ContractPop contract={c} onChange={reload} /></Card>
             {has(me, 'field') && can(me, 'stock:read') && <ContractEquipment contractId={c.id} />}
             {!net && <ContractFinance contractId={c.id}>{(fin) => <Card title="Financeiro">{fin}</Card>}</ContractFinance>}
           </>)}

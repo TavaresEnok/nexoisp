@@ -1,5 +1,9 @@
 # NexoISP — o que falta para ser um CRM/ERP completo como o SGP
 
+> **Decisão de produto (13/10/2026): o NexoISP não é um sistema de chat.** Não há atendimento por conversa. O atendimento é feito por **ocorrência e ordem de serviço**
+> (abertura, acompanhamento, SLA, agenda, execução). Mensagens ao assinante existem **só de saída** (cobrança, manutenção, OS): sem caixa de entrada, sem respostas.
+> Onde este documento citar "chat", "URA" ou "WhatsApp" como origem de atendimento, leia como **integração externa que abre ocorrência por API**, nunca como canal nosso.
+
 **Criado em:** 13 de outubro de 2026
 **Fontes:** (1) espelho da interface administrativa de uma instância do SGP (`docs/sgp_mirror.zip`, 625 páginas salvas; **não versionado**, contém dados de clientes) e
 (2) a documentação da API (`docs/API-SGP-completa.txt`, não versionada). Este documento só resume **estrutura** (menus, telas, campos, modelos). Nada de assinante,

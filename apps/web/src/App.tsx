@@ -11,6 +11,7 @@ import { FinanceSettings, Invoices, Reconciliation } from './pages/Finance';
 import { Import } from './pages/Import';
 import { Ipam } from './pages/Ipam';
 import { Login } from './pages/Login';
+import { Busca, Online, Pops, SearchBox } from './pages/Atendimento';
 import { Maintenance } from './pages/Extras';
 import { Network, Operations } from './pages/Network';
 import { Noc } from './pages/Noc';
@@ -54,7 +55,8 @@ const NAV: { id: string; label: string; items: { to: string; label: string; icon
     { to: '/noc', label: 'NOC', icon: 'pulse', perm: 'network:read', mod: 'noc' }, { to: '/rede', label: 'Agentes e equipamentos', icon: 'server', perm: 'network:read' },
     { to: '/onus', label: 'ONUs', icon: 'onu', perm: 'network:read', mod: 'olt' }, { to: '/ftth', label: 'Rede óptica', icon: 'fiber', perm: 'network:read', mod: 'ftth' },
     { to: '/ipam', label: 'Endereços IP e CGNAT', icon: 'ip', perm: 'network:read', mod: 'ipam' }, { to: '/operacoes', label: 'Operações', icon: 'list', perm: 'network:read' },
-    { to: '/manutencoes', label: 'Manutenções', icon: 'bell', perm: 'network:read' }] },
+    { to: '/manutencoes', label: 'Manutenções', icon: 'bell', perm: 'network:read' },
+    { to: '/online', label: 'Online agora', icon: 'pulse', perm: 'network:read' }, { to: '/pops', label: 'POPs', icon: 'building', perm: 'contracts:read' }] },
   { id: 'admin', label: 'Administração', items: [
     { to: '/usuarios', label: 'Usuários', icon: 'user', perm: 'users:manage' }, { to: '/avisos', label: 'Avisos', icon: 'bell', perm: 'settings:manage', mod: 'notices' },
     { to: '/importacao', label: 'Importação', icon: 'upload', perm: 'import:run' }, { to: '/auditoria', label: 'Auditoria', icon: 'shield', perm: 'audit:read' }] },
@@ -107,6 +109,7 @@ export function App() {
           <div className="logo"><Brand /><button className="menu-btn" onClick={() => setMenu(!menu)} aria-expanded={menu}><Icon name="menu" /> Menu</button></div>
           {me.role === 'saas_operator' && !me.support && !me.mfa_pending && <NavLink className="nav" to="/provedores"><Icon name="building" />Provedores</NavLink>}
           {inTenant && (<>
+            <SearchBox />
             <div className="find"><Icon name="search" /><input value={find} onChange={(e) => setFind(e.target.value)} placeholder="Ir para…" aria-label="Filtrar o menu"
               onKeyDown={(e) => { if (e.key === 'Enter' && groups[0]) { nav(groups[0].items[0].to); setFind(''); setMenu(false); } }} /></div>
             {groups.map((g) => (
@@ -150,6 +153,9 @@ export function App() {
               <Route path="/onus" element={<Onus />} />
               <Route path="/operacoes" element={<Operations />} />
               <Route path="/manutencoes" element={<Maintenance />} />
+              <Route path="/busca" element={<Busca />} />
+              <Route path="/online" element={<Online />} />
+              <Route path="/pops" element={<Pops />} />
               <Route path="/noc" element={<Noc />} />
               <Route path="/ftth" element={<Ftth />} />
               <Route path="/ipam" element={<Ipam />} />

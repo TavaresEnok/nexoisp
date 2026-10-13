@@ -47,3 +47,6 @@ class CloudClient:
 
     def usage_report(self, device_id: str, items: list) -> dict:
         return self._post("/agent/v1/usage-report", {"device_id": device_id, "items": items})
+
+    def sessions_report(self, device_id: str, items: list) -> dict:
+        return self._post("/agent/v1/sessions-report", {"device_id": device_id, "items": items})

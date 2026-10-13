@@ -34,6 +34,7 @@ class Agent:
         self._obs_cache: dict = {}
         self._olt_last: dict = {}
         self._usage_last = 0.0
+        self._sess_last = 0.0
 
     def _build_driver(self, dev: dict):
         if dev["driver"] == "demo":
@@ -142,6 +143,34 @@ class Agent:
             except Exception as e:
                 log.warning("relato de consumo do equipamento %s falhou: %s", dev_id, e)
 
+    def _session_reports(self):
+        """Sessões do accounting local (com o motivo de encerramento). A primeira rodada traz 35 dias; depois só os últimos 3, que
+        cobrem sessões que ainda estavam abertas no relato anterior. Falha aqui nunca atrapalha as operações."""
+        now = time.time()
+        if now - self._sess_last < 900:
+            return
+        first = self._sess_last == 0.0
+        self._sess_last = now
+        since = now - (35 if first else 3) * 86400
+        by_dev: dict[str, dict] = {}
+        for r in self.store.resources():
+            by_dev.setdefault(r["device_id"], {})[r["username"]] = r["resource_id"]
+        for dev_id, accounts in by_dev.items():
+            drv = self.drivers.get(dev_id)
+            if drv is None or not hasattr(drv, "sessions"):
+                continue
+            try:
+                rows = drv.sessions(list(accounts), since)
+                iso = lambda e: datetime.fromtimestamp(e, timezone.utc).isoformat() if e is not None else None   # noqa: E731
+                items = [{"resource_id": accounts[s["username"]], "session_key": s["session_key"], "started_at": iso(s["started_at"]),
+                          "stopped_at": iso(s["stopped_at"]), "ip": s["ip"], "mac": s["mac"], "nas_ip": s["nas_ip"], "bytes_in": s["bytes_in"],
+                          "bytes_out": s["bytes_out"], "seconds": s["seconds"], "terminate_cause": s["terminate_cause"]}
+                         for s in rows if s["username"] in accounts]
+                for i in range(0, len(items), 1000):
+                    self.client.sessions_report(dev_id, items[i:i + 1000])
+            except Exception as e:
+                log.warning("relato de sessões do equipamento %s falhou: %s", dev_id, e)
+
     def connect_and_sync(self):
         h = self.client.hello(self.session_id, __version__, {"drivers": sorted({d for d in ("demo", "mikrotik_radius")})})
         pinned = self.store.get_kv("signing_public_key")
@@ -187,6 +216,7 @@ class Agent:
             self.client.observations(self._observe_all(full), self._checks())
             self._olt_reports()
             self._usage_reports()
+            self._session_reports()
             self._last_observe = time.time()
             if full:
                 self._last_full = self._last_observe

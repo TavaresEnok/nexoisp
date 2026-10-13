@@ -176,6 +176,33 @@ export function agentRoutes(app: FastifyInstance) {
     });
   });
 
+  /** Sessões do accounting local (início, fim, IP, MAC, volume, motivo de encerramento). Idempotente por (conta, sessão). */
+  app.post('/agent/v1/sessions-report', async (req) => {
+    const b = z.object({
+      device_id: z.string().uuid(),
+      items: z.array(z.object({
+        resource_id: z.string().uuid(), session_key: z.string().min(1).max(80), started_at: z.string().datetime({ offset: true }),
+        stopped_at: z.string().datetime({ offset: true }).nullish(), ip: z.string().max(45).nullish(), mac: z.string().max(40).nullish(), nas_ip: z.string().max(45).nullish(),
+        bytes_in: z.number().int().min(0), bytes_out: z.number().int().min(0), seconds: z.number().int().min(0), terminate_cause: z.string().max(60).nullish(),
+      })).max(5000),
+    }).parse(req.body);
+    return withScope(req.agent.scope, async (c) => {
+      if (!(await c.query('select 1 from devices where id = $1 and agent_id = $2', [b.device_id, req.agent.id])).rowCount) throw new HttpError(404, 'equipamento não pertence a este agente');
+      let n = 0;
+      for (const s of b.items) {
+        const r = await c.query(
+          `insert into service_sessions (tenant_id, resource_id, session_key, started_at, stopped_at, ip, mac, nas_ip, bytes_in, bytes_out, seconds, terminate_cause)
+           select $1, r.id, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12 from service_resources r where r.id = $2 and r.device_id = $13
+           on conflict (resource_id, session_key) do update set stopped_at = excluded.stopped_at, ip = excluded.ip, mac = excluded.mac, nas_ip = excluded.nas_ip,
+             bytes_in = excluded.bytes_in, bytes_out = excluded.bytes_out, seconds = excluded.seconds, terminate_cause = excluded.terminate_cause, reported_at = now()`,
+          [req.agent.tenantId, s.resource_id, s.session_key, s.started_at, s.stopped_at ?? null, s.ip ?? null, s.mac ?? null, s.nas_ip ?? null,
+            s.bytes_in, s.bytes_out, s.seconds, s.terminate_cause ?? null, b.device_id]);
+        n += r.rowCount ?? 0;
+      }
+      return { ok: true, accepted: n };
+    });
+  });
+
   /** Observações periódicas (sessões, política aplicada) e conectividade dos equipamentos. */
   app.post('/agent/v1/observations', async (req) => {
     const b = z.object({ items: z.array(zObs).max(20000), device_checks: zChecks }).parse(req.body);

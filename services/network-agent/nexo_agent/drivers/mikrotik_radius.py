@@ -129,6 +129,38 @@ class RadiusStore:
                 out.setdefault(r["username"], {})[r["month"]] = {"bytes_in": int(r["b_in"]), "bytes_out": int(r["b_out"]), "session_seconds": int(r["secs"]), "sessions": int(r["n"])}
         return out
 
+    def sessions(self, usernames: list[str], since_epoch: float, limit: int = 5000) -> list[dict]:
+        """Sessões do accounting local desde `since_epoch`, com o motivo de encerramento. Tolera banco com menos colunas."""
+        if not usernames:
+            return []
+        try:
+            have = {r["name"] for r in self._db.execute("pragma table_info(radacct)")}
+        except sqlite3.OperationalError:
+            return []
+        if "acctstarttime" not in have or "username" not in have:
+            return []
+        col = lambda c, alias=None: (f"{c}" if c in have else "null") + (f" as {alias or c}")   # noqa: E731
+        started = "case when typeof(acctstarttime) in ('integer','real') then acctstarttime else cast(strftime('%s', acctstarttime) as integer) end"
+        stopped = ("case when acctstoptime is null then null when typeof(acctstoptime) in ('integer','real') then acctstoptime "
+                   "else cast(strftime('%s', acctstoptime) as integer) end") if "acctstoptime" in have else "null"
+        key = "coalesce(nullif(acctuniqueid, ''), cast(radacctid as text))" if {"acctuniqueid", "radacctid"} <= have else \
+            ("cast(radacctid as text)" if "radacctid" in have else "cast(rowid as text)")
+        marks = ",".join("?" * len(usernames))
+        sql = (f"select username, {key} as skey, {started} as t0, {stopped} as t1, {col('framedipaddress', 'ip')}, {col('callingstationid', 'mac')}, "
+               f"{col('nasipaddress', 'nas')}, coalesce({'acctinputoctets' if 'acctinputoctets' in have else '0'}, 0) as b_in, "
+               f"coalesce({'acctoutputoctets' if 'acctoutputoctets' in have else '0'}, 0) as b_out, "
+               f"coalesce({'acctsessiontime' if 'acctsessiontime' in have else '0'}, 0) as secs, {col('acctterminatecause', 'cause')} "
+               f"from radacct where username in ({marks}) and {started} >= ? order by {started} desc limit ?")
+        out = []
+        for r in self._db.execute(sql, [*usernames, int(since_epoch), limit]).fetchall():
+            if r["t0"] is None:
+                continue
+            out.append({"username": r["username"], "session_key": str(r["skey"])[:80], "started_at": int(r["t0"]),
+                        "stopped_at": int(r["t1"]) if r["t1"] is not None else None, "ip": r["ip"] or None, "mac": r["mac"] or None,
+                        "nas_ip": r["nas"] or None, "bytes_in": int(r["b_in"]), "bytes_out": int(r["b_out"]), "seconds": int(r["secs"]),
+                        "terminate_cause": (r["cause"] or None)})
+        return out
+
     def cleanup(self, keep_days: int = 90) -> int:
         """Limpa accounting encerrado e registros de autenticação antigos (crescem sem limite no FreeRADIUS)."""
         n = 0
@@ -215,6 +247,9 @@ class MikrotikRadiusDriver:
 
     def usage(self, usernames: list[str], since_epoch: float) -> dict:
         return self.radius.usage(usernames, since_epoch)
+
+    def sessions(self, usernames: list[str], since_epoch: float, limit: int = 5000) -> list:
+        return self.radius.sessions(usernames, since_epoch, limit)
 
     def maintenance(self) -> dict:
         import os
