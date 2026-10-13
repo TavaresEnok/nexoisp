@@ -11,3 +11,7 @@ backups
 releases
 e2e/node_modules
 .nexo.local
+
+# material de terceiro com dados de clientes e configuração real (espelho do SGP): nunca versionar
+docs/sgp_mirror.zip
+docs/sgp_mirror/
