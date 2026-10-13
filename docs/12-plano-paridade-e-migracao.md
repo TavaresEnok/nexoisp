@@ -94,6 +94,21 @@ Cada item tem **ID**, o que entrega, de onde veio a necessidade e o **porte** re
 | R3 | **Consulta por IP público, porta e hora** (CGNAT) | SGP (IP público e faixa por sessão) | P |
 | R4 | **Disponibilidade por cliente** (tempo online/offline nos últimos 7 dias) | IXC | P |
 
+### 2.6 Situação das entregas (atualizada em 13/10/2026)
+
+Entregue = implementado e coberto por teste automatizado. Nada aqui foi homologado em equipamento físico nem com gateway/fiscal real.
+
+| Situação | Itens |
+|---|---|
+| ✅ Entregue | D1, D2, D3, D9, D12, C1, C2, C3, C4, C6, P2 |
+| 🟡 Parcial | D10 (lista online e exportação; falta a desconexão em lote, que exige operação nova do agente), C1 (só canal por HTTP genérico e de saída; sem SMS/WhatsApp nativo, ver abaixo) |
+| ⏳ Pendente | D4–D8, D11, C5, C7–C10, F1–F7, P1, P3–P5, R1–R4 |
+
+**C1 em detalhe (avisos ao assinante, somente de saída):** o provedor cadastra um *canal* (endereço HTTPS do serviço de envio que ele contratou, com cabeçalho secreto cifrado),
+*modelos* (variáveis `{nome}`, `{valor}`, `{vencimento}`, `{plano}`, `{link}`) e *regras* (dias em relação ao vencimento, plano/POP/etiqueta, janela de horas e dias da semana,
+intervalo). Só envia para contato com consentimento registrado; uma vez por título e regra; até 3 tentativas; tudo no histórico. **Não** recebe resposta. Módulo `messages`,
+liberado por provedor. O NexoISP não embute provedor de SMS/WhatsApp: a ponte é um POST JSON, validado contra endereços internos.
+
 ## 3. Lista de paridade para quem vem do SGP ou do IXC
 
 O que um provedor precisa **no primeiro dia**, **na primeira semana** e **no primeiro mês** para largar o sistema antigo. Marca: ✅ temos · 🟡 parcial · ❌ não temos.

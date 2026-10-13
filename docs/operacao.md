@@ -40,9 +40,16 @@ Guardar cópia de `.env` e de `infra/prod/certs` em cofre separado do backup do 
 ### Módulos por provedor
 
 Um provedor novo nasce só com o núcleo: cadastro, planos, contratos, acesso PPPoE, financeiro, portal, importação, auditoria e agentes.
-Atendimentos/prospectos, ordens de serviço e estoque, avisos, NOC, rede óptica, IP/CGNAT e OLT são **módulos** que o operador do SaaS libera em
+Atendimentos/prospectos, ordens de serviço e estoque, avisos, avisos ao assinante (mensagens só de saída), NOC, rede óptica, IP/CGNAT e OLT são **módulos** que o operador do SaaS libera em
 Provedores → Módulos. Sem o módulo, o item some do menu **e o servidor recusa a chamada** (`module_disabled`). O módulo de OLT libera um driver
 não homologado em equipamento real: a conferência de produção avisa quando ele está ligado.
+
+### Avisos ao assinante (módulo `messages`)
+
+Só de saída. Em Avisos ao assinante: (1) **Canal**: endereço HTTPS do serviço de envio do provedor e, se houver, o cabeçalho `Authorization` (guardado cifrado);
+use *Enviar teste* para um número seu; (2) **Modelo**: texto com `{nome}`, `{valor}`, `{vencimento}`, `{plano}`, `{link}`; (3) **Regra**: dias em relação ao vencimento,
+janela de horas e filtros. A rotina periódica envia **uma vez por título e regra**, só a contatos com consentimento (mobile/WhatsApp, finalidade cobrança ou geral),
+com até 3 tentativas. O histórico mostra enviado, falhou e sem consentimento. "Rodar agora" respeita as mesmas regras.
 
 ### Conferência antes de entrar em produção
 

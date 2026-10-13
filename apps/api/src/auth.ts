@@ -25,7 +25,7 @@ export const PERMISSIONS: Record<Role, string[]> = {
  * Módulos adicionais, liberados por provedor pelo operador do SaaS. A rota decide o módulo; sem ele, o servidor recusa
  * (não basta esconder o menu). O núcleo da operação não aparece aqui: está sempre disponível.
  */
-export const MODULES = ['olt', 'ipam', 'field', 'ftth', 'crm', 'noc', 'notices'] as const;
+export const MODULES = ['olt', 'ipam', 'field', 'ftth', 'crm', 'noc', 'notices', 'messages'] as const;
 export type Module = (typeof MODULES)[number];
 const MODULE_ROUTES: [Module, RegExp][] = [
   ['olt', /^\/api\/(olt\/|onus(\/|$)|contracts\/[^/]+\/onu$)/],
@@ -35,6 +35,7 @@ const MODULE_ROUTES: [Module, RegExp][] = [
   ['crm', /^\/api\/(leads(\/|$)|tickets(\/|$)|crm\/|portal\/tickets(\/|$))/],
   ['noc', /^\/api\/(noc\/|contracts\/[^/]+\/diagnosis$)/],
   ['notices', /^\/api\/notifications(\/|$)/],
+  ['messages', /^\/api\/(notice-(channels|templates|rules|log)(\/|$))/],
 ];
 export const moduleOf = (url: string): Module | null => MODULE_ROUTES.find(([, re]) => re.test(url.split('?')[0]))?.[0] ?? null;
 

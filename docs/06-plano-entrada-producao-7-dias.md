@@ -267,3 +267,13 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
 - **Pontos que continuam travados:** backup cifrado do SGP, formato de backup do IXC, respostas das APIs, gateway real, fiscal e equipamento físico.
 - **Próxima ação do proprietário:** escolher entre começar pelos itens D1 a D3 (busca, linha do tempo, sessões), que não dependem de ninguém, ou aguardar o material que
   destrava a migração.
+
+### 13/10/2026 — avisos ao assinante (somente de saída), degraus por plano, relatórios e painéis
+
+- **Entregue (testado, 93 testes da API passando):** busca única, linha do tempo, sessões com motivo de encerramento, lista de online, contatos com consentimento, POP,
+  degraus de inadimplência por plano, relatórios de cobrança, painéis, e o **motor de avisos ao assinante** (canal HTTPS, modelos, régua por dias relativos ao vencimento,
+  janela, consentimento, histórico, 3 tentativas). Módulo `messages`, por provedor. Migração 027.
+- **Decisão registrada:** o produto não tem chat nem caixa de entrada; atendimento é por ocorrência e OS. Mensagens existem só de saída.
+- **O que NÃO está validado:** envio por provedor real de SMS/WhatsApp (testado apenas contra servidor local de simulação); nada disso foi homologado em equipamento físico.
+- **Próxima ação:** F1 (fluxo de status da OS com deslocamento), F2/F3 (catálogos e SLA) e P1 (API pública com token e webhooks de saída); depende só de nós.
+

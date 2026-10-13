@@ -8,6 +8,7 @@ const MODULES: [string, string, string][] = [
   ['crm', 'Atendimentos e prospectos', 'Protocolos, funil comercial, relatórios e chamados pelo portal do assinante.'],
   ['field', 'Ordens de serviço e estoque', 'OS com material, estoque por série e tela de campo.'],
   ['notices', 'Avisos por webhook', 'Avisa o canal da equipe sobre chamados e ordens de serviço.'],
+  ['messages', 'Avisos ao assinante', 'Mensagens de saída ao assinante (cobrança, manutenção, OS) por um provedor de envio escolhido pelo provedor. Sem conversa.'],
   ['noc', 'NOC e diagnóstico', 'Painel de alertas e diagnóstico do contrato. Somente leitura.'],
   ['ftth', 'Rede óptica', 'Cadastro de caixas, portas e mapa esquemático.'],
   ['ipam', 'Endereços IP e CGNAT', 'IP fixo pelo RADIUS, plano de CGNAT e rastreio. CGNAT validado só em laboratório.'],

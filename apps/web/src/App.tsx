@@ -12,6 +12,7 @@ import { Import } from './pages/Import';
 import { Ipam } from './pages/Ipam';
 import { Login } from './pages/Login';
 import { Busca, Online, Pops, SearchBox } from './pages/Atendimento';
+import { AvisosAssinante } from './pages/AvisosAssinante';
 import { Reports } from './pages/Cobranca';
 import { Maintenance } from './pages/Extras';
 import { Network, Operations } from './pages/Network';
@@ -61,6 +62,7 @@ const NAV: { id: string; label: string; items: { to: string; label: string; icon
     { to: '/online', label: 'Online agora', icon: 'pulse', perm: 'network:read' }, { to: '/pops', label: 'POPs', icon: 'building', perm: 'contracts:read' }] },
   { id: 'admin', label: 'Administração', items: [
     { to: '/usuarios', label: 'Usuários', icon: 'user', perm: 'users:manage' }, { to: '/avisos', label: 'Avisos', icon: 'bell', perm: 'settings:manage', mod: 'notices' },
+    { to: '/avisos-assinante', label: 'Avisos ao assinante', icon: 'bell', perm: 'settings:manage', mod: 'messages' },
     { to: '/importacao', label: 'Importação', icon: 'upload', perm: 'import:run' }, { to: '/auditoria', label: 'Auditoria', icon: 'shield', perm: 'audit:read' }] },
 ];
 
@@ -157,6 +159,7 @@ export function App() {
               <Route path="/manutencoes" element={<Maintenance />} />
               <Route path="/busca" element={<Busca />} />
               <Route path="/relatorios-cobranca" element={<Reports />} />
+              <Route path="/avisos-assinante" element={<AvisosAssinante />} />
               <Route path="/online" element={<Online />} />
               <Route path="/pops" element={<Pops />} />
               <Route path="/noc" element={<Noc />} />
