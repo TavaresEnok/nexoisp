@@ -323,3 +323,10 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   sem fechamento de folha; campos personalizados não entram no CSV.
 - **Pendências que dependem de decisão ou de equipamento:** D11 (escopo por POP), C5 (página de aviso no NAS), P4 (documentos), R1/R2 (operações novas do agente), check-in com localização.
 
+### 13/10/2026 — agente 0.5.0 (desconexão, rede por plano e NAS), permissão por POP, página de aviso e documentos
+
+- **Entregue (testado: 134 testes da API, 50 do agente):** D10, R1, R2, D11, C5 e P4. Migrações 033 e 034. Agente passa a 0.5.0; a API recusa enviar os campos novos a agente mais antigo.
+- **Decisões tomadas por padrão (rever se quiser):** documentos ficam no banco, limite de 5 MB e 50 por assinante; a página de aviso não identifica o assinante; contrato sem POP é visível a todos os usuários restritos.
+- **Não validado:** desconexão, velocidade/pool e uso simultâneo no CHR do cenário e em equipamento físico; redirecionamento da página de aviso no concentrador.
+- **Continua dependendo de terceiros:** fiscal, gateway real, adaptadores SGP/IXC (backup cifrado, export do IXC), homologação física.
+

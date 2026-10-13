@@ -142,7 +142,7 @@ export function Panels() {
         <State empty={data.recent_operations.length === 0}>
           <table><tbody>{data.recent_operations.map((o: any, i: number) => (
             <tr key={i}><td><Link to={`/contratos/${o.contract_id}`}>{o.subscriber_name}</Link></td>
-              <td className="small">{({ 'subscriber.provision': 'provisionar', 'subscriber.suspend': 'suspender', 'subscriber.resume': 'reativar' } as any)[o.action] ?? o.action}</td>
+              <td className="small">{({ 'subscriber.provision': 'provisionar', 'subscriber.suspend': 'suspender', 'subscriber.resume': 'reativar', 'subscriber.disconnect': 'desconectar' } as any)[o.action] ?? o.action}</td>
               <td className="small muted">{o.status.toLowerCase()}</td></tr>
           ))}</tbody></table>
         </State>

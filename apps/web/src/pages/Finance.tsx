@@ -344,6 +344,7 @@ export function FinanceSettings() {
           </Card>
         )}
       </State>
+      {can(me, 'settings:manage') && <NoticePageCard />}
     </Page>
   );
 }
@@ -446,4 +447,32 @@ export function ContractFinance({ contractId, children }: { contractId: string; 
     {agreement && data && <AgreementModal contractId={contractId} invoices={data.invoices} onClose={() => { setAgreement(false); reload(); }} />}
     {open && <InvoiceModal id={open} onClose={() => { setOpen(null); reload(); }} />}
   </>);
+}
+
+/** Página pública para onde o concentrador manda quem está bloqueado ou com velocidade reduzida. Não mostra dado de assinante. */
+export function NoticePageCard() {
+  const { data, reload } = useLoad<any>('/notice-page');
+  const [f, setF] = useState<any>(null);
+  const blank = { title: 'Acesso suspenso', blocked_text: 'Identificamos uma pendência no seu cadastro. Entre no portal do assinante para ver suas faturas e regularizar.', reduced_text: '', phone: '', whatsapp: '', show_portal_link: true };
+  return (
+    <Card title="Página de aviso ao assinante bloqueado" actions={!f && <button className="sm" onClick={() => setF({ ...blank, ...(data?.page ?? {}), reduced_text: data?.page?.reduced_text ?? '', phone: data?.page?.phone ?? '', whatsapp: data?.page?.whatsapp ?? '' })}>{data?.page ? 'Editar' : 'Configurar'}</button>}>
+      {!f && (data?.page
+        ? <p>Ativa em <a href={data.path} target="_blank" rel="noreferrer" className="mono">{data.path}</a> <span className="muted small">(com <span className="mono">?m=reduzida</span> mostra o texto de velocidade reduzida)</span></p>
+        : <p className="muted">Não configurada. Sem ela, o assinante bloqueado só vê que a internet não abre.</p>)}
+      {!f && <p className="small muted">A página não identifica o assinante e não mostra valores: ele entra no portal para ver e resolver. O redirecionamento precisa ser configurado no concentrador (docs/operacao.md) e ainda não foi validado em equipamento.</p>}
+      {f && (
+        <Form submit="Salvar página" onCancel={() => setF(null)} onSubmit={async () => { await api('/notice-page', { method: 'PUT', body: { page: f } }); setF(null); reload(); }}>
+          <Field label="Título"><input value={f.title} minLength={3} maxLength={80} onChange={(e) => setF({ ...f, title: e.target.value })} required /></Field>
+          <Field label="Texto para acesso bloqueado"><textarea rows={3} value={f.blocked_text} minLength={10} maxLength={600} onChange={(e) => setF({ ...f, blocked_text: e.target.value })} required /></Field>
+          <Field label="Texto para velocidade reduzida (opcional)"><textarea rows={2} value={f.reduced_text} maxLength={600} onChange={(e) => setF({ ...f, reduced_text: e.target.value })} /></Field>
+          <div className="cols3">
+            <Field label="Telefone de atendimento"><input value={f.phone} maxLength={30} onChange={(e) => setF({ ...f, phone: e.target.value })} /></Field>
+            <Field label="WhatsApp (só números, com 55 e DDD)"><input value={f.whatsapp} pattern="\d{10,15}" onChange={(e) => setF({ ...f, whatsapp: e.target.value })} /></Field>
+            <label className="row small"><input type="checkbox" style={{ width: 'auto' }} checked={f.show_portal_link} onChange={(e) => setF({ ...f, show_portal_link: e.target.checked })} /> botão do portal</label>
+          </div>
+          {data?.page && <ActionButton className="danger" confirm="Desativar a página de aviso?" onClick={async () => { await api('/notice-page', { method: 'PUT', body: { page: null } }); setF(null); reload(); }}>Desativar página</ActionButton>}
+        </Form>
+      )}
+    </Card>
+  );
 }

@@ -40,10 +40,18 @@ def effective_profile(p) -> str:
     return block_profile(p) or p.profile
 
 
+def expected_attrs(p) -> dict:
+    """Atributos opcionais que devem estar gravados. Suspensa por perfil, velocidade e pool são os do perfil de bloqueio."""
+    blocked = block_profile(p) is not None
+    out = {"rate_limit": None if blocked else p.rate_limit, "address_pool": None if blocked else p.address_pool,
+           "simultaneous_use": p.simultaneous_use, "acct_interim": p.acct_interim}
+    return {k: v for k, v in out.items() if v is not None}
+
+
 def authorization_matches(st: AccountState, env: Envelope) -> bool:
     p = env.parameters
     return (st.exists and st.applied_version == env.desired_version and st.policy == p.policy and st.profile == effective_profile(p)
-            and st.framed_ip == p.framed_ip and st.mac == p.mac)
+            and st.framed_ip == p.framed_ip and st.mac == p.mac and st.attrs == expected_attrs(p))
 
 
 def needs_disconnect(st: AccountState, env: Envelope) -> bool:
@@ -51,6 +59,9 @@ def needs_disconnect(st: AccountState, env: Envelope) -> bool:
     if not st.session:
         return False
     p = env.parameters
+    if p.reconnect:
+        # desconexão pedida: só a sessão que já existia antes desta operação cai; a que reconectou depois é o resultado esperado
+        return bool(st.session.get("predates_authorization"))
     if p.policy == "suspended":
         if not (p.suspension and p.suspension.session == "disconnect"):
             return False
@@ -97,7 +108,7 @@ class PppoeFamily:
         else:
             try:
                 step("autorização local", "ok", driver.apply_authorization(p.username, secret=go.get("secret"), profile=p.profile, policy=p.policy, version=env.desired_version, framed_ip=p.framed_ip,
-                                                                       block_profile=block_profile(p), mac=p.mac))
+                                                                       block_profile=block_profile(p), mac=p.mac, extra=expected_attrs(p)))
             except AckLost as e:
                 step("autorização local", "incerto", f"{e}; será verificado por consulta")
         checkpoint("EXECUTING")

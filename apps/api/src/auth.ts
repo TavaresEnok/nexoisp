@@ -74,6 +74,8 @@ export interface Ctx {
   tenantId: string | null;
   support: boolean;
   subscriberId: string | null;
+  /** POPs a que o usuário está restrito (null = sem restrição) */
+  popIds: string[] | null;
   perms: string[];
   tokenHash: string;
   scope: DbScope;
@@ -118,14 +120,18 @@ export async function loadCtx(req: FastifyRequest): Promise<Ctx> {
   const modules: string[] = tenantId
     ? (await withScope({ tenantId, operator: false }, async (c) => (await c.query('select modules from tenants where id = $1', [tenantId])).rows[0]))?.modules ?? []
     : [];
+  // restrição por POP: vale para a equipe que não administra; admin e suporte veem o provedor inteiro
+  const popIds: string[] | null = tenantId && !support && s.role !== 'admin' && s.role !== 'subscriber' && s.role !== 'saas_operator'
+    ? (await withScope({ tenantId, operator: false }, async (c) => (await c.query('select pop_id from user_pops where user_id = $1', [s.user_id])).rows)).map((r) => r.pop_id)
+    : null;
   return {
-    modules,
+    modules, popIds: popIds?.length ? popIds : null,
     userId: s.user_id, name: s.name, email: s.email, role: s.role, tenantId, support,
     subscriberId: s.subscriber_id, tokenHash,
     mfaPending: mfaRequiredFor(s.role) && !s.mfa_enabled,
     // Em suporte explícito o operador age como admin daquele tenant (auditado), sem visão global.
     perms: support ? [...PERMISSIONS.admin, 'tenants:manage'] : PERMISSIONS[s.role as Role],
-    scope: { tenantId, operator: isOp && !support, subscriberId: s.role === 'subscriber' ? s.subscriber_id : null },
+    scope: { tenantId, operator: isOp && !support, subscriberId: s.role === 'subscriber' ? s.subscriber_id : null, popIds: popIds?.length ? popIds : null },
   };
 }
 

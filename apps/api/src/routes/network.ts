@@ -83,6 +83,8 @@ export async function networkRoutes(app: FastifyInstance) {
     api_port: z.number().int().min(1).max(65535).nullish(),
     credential_ref: z.string().trim().regex(/^[A-Za-z0-9_.-]{0,60}$/).nullish().transform((v) => v || null),
     agent_id: zUuid.nullish(),
+    simultaneous_use: z.number().int().min(1).max(10).nullish(),          // uso simultâneo por login (agente 0.5.0+)
+    acct_interim_seconds: z.number().int().min(60).max(3600).nullish(),   // intervalo de accounting
   });
   app.get('/api/devices', { preHandler: guard('network:read') }, async (req) =>
     withScope(req.ctx.scope, async (c) =>
@@ -98,8 +100,8 @@ export async function networkRoutes(app: FastifyInstance) {
     if (b.driver.startsWith('olt') && !req.ctx.modules.includes('olt')) throw new HttpError(403, 'a integração com OLT não está liberada para o provedor', 'module_disabled');
     return withScope(req.ctx.scope, async (c) => {
       const d = (await c.query(
-        `insert into devices (tenant_id, name, driver, host, api_port, credential_ref, agent_id) values ($1,$2,$3,$4,$5,$6,$7) returning *`,
-        [req.ctx.tenantId, b.name, b.driver, b.host, b.api_port ?? null, b.credential_ref, b.agent_id ?? null])).rows[0];
+        `insert into devices (tenant_id, name, driver, host, api_port, credential_ref, agent_id, simultaneous_use, acct_interim_seconds) values ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning *`,
+        [req.ctx.tenantId, b.name, b.driver, b.host, b.api_port ?? null, b.credential_ref, b.agent_id ?? null, b.simultaneous_use ?? null, b.acct_interim_seconds ?? null])).rows[0];
       await audit(c, req.ctx, 'device.create', 'device', d.id, { driver: b.driver });
       return d;
     });
@@ -115,8 +117,8 @@ export async function networkRoutes(app: FastifyInstance) {
       if (n.driver.endsWith('demo') && process.env.NEXO_DEMO_MODE !== '1') throw new HttpError(400, 'driver de demonstração só é permitido em ambiente de demonstração');
       if (n.driver.startsWith('olt') && !req.ctx.modules.includes('olt')) throw new HttpError(403, 'a integração com OLT não está liberada para o provedor', 'module_disabled');
       const d = (await c.query(
-        `update devices set name=$2, driver=$3, host=$4, api_port=$5, credential_ref=$6, agent_id=$7, maintenance=$8 where id=$1 returning *`,
-        [id, n.name, n.driver, n.host, n.api_port, n.credential_ref, n.agent_id, n.maintenance])).rows[0];
+        `update devices set name=$2, driver=$3, host=$4, api_port=$5, credential_ref=$6, agent_id=$7, maintenance=$8, simultaneous_use=$9, acct_interim_seconds=$10 where id=$1 returning *`,
+        [id, n.name, n.driver, n.host, n.api_port, n.credential_ref, n.agent_id, n.maintenance, n.simultaneous_use ?? null, n.acct_interim_seconds ?? null])).rows[0];
       await audit(c, req.ctx, 'device.update', 'device', id, b);
       return d;
     });
@@ -192,7 +194,7 @@ export async function networkRoutes(app: FastifyInstance) {
   });
 
   app.post('/api/resources/:id/:action', { preHandler: guard('network:operate') }, async (req) => {
-    const p = z.object({ id: zUuid, action: z.enum(['provision', 'suspend', 'resume']) }).parse(req.params);
+    const p = z.object({ id: zUuid, action: z.enum(['provision', 'suspend', 'resume', 'disconnect']) }).parse(req.params);
     const b = z.object({ reason: z.string().trim().max(200).optional() }).parse(req.body ?? {});
     const idem = req.headers['idempotency-key'];
     return withScope(req.ctx.scope, async (c) => {
@@ -201,6 +203,48 @@ export async function networkRoutes(app: FastifyInstance) {
       await audit(c, req.ctx, `service.${p.action}`, 'service_resource', p.id, { operation_id: op.id, reason: b.reason });
       return { operation_id: op.id, status: op.status, desired_version: op.desired_version };
     });
+  });
+
+  /** Parâmetros de rede do plano entregues pelo RADIUS (agente 0.5.0+). Vazio = vale o perfil configurado no NAS. */
+  app.put('/api/plans/:id/network', { preHandler: guard('network:write') }, async (req) => {
+    const id = zUuid.parse((req.params as any).id);
+    const b = z.object({
+      rate_limit: z.string().trim().regex(/^\d{1,7}[kKmM]?\/\d{1,7}[kKmM]?( \d{1,7}[kKmM]?\/\d{1,7}[kKmM]?){0,3}( [1-8]( \d{1,7}[kKmM]?\/\d{1,7}[kKmM]?)?)?$/,
+        'velocidade no formato do MikroTik: subida/descida [rajada limiar tempo prioridade mínimo], ex.: 50M/100M 60M/120M 40M/80M 10/10').nullable(),
+      address_pool: z.string().trim().regex(/^[A-Za-z0-9_.-]{1,60}$/, 'pool: letras, números, _ . - (até 60)').nullable(),
+    }).parse(req.body);
+    return withScope(req.ctx.scope, async (c) => {
+      const p = (await c.query('update plans set rate_limit = $2, address_pool = $3 where id = $1 returning id, name, rate_limit, address_pool', [id, b.rate_limit, b.address_pool])).rows[0];
+      if (!p) throw new HttpError(404, 'plano não encontrado');
+      const pending = (await c.query(
+        `select count(*)::int as n from service_resources r join contracts k on k.id = r.contract_id join plan_versions pv on pv.id = k.plan_version_id
+         where pv.plan_id = $1 and k.status = 'active' and r.desired_version > 0`, [id])).rows[0].n;
+      await audit(c, req.ctx, 'plan.network', 'plan', id, b);
+      return { ...p, accounts_to_reapply: pending };     // contas já provisionadas só mudam ao reaplicar
+    });
+  });
+
+  /** Reaplica a autorização das contas liberadas do plano (até 500 por chamada). As suspensas recebem os parâmetros ao serem reativadas. */
+  app.post('/api/plans/:id/reapply', { preHandler: guard('network:operate') }, async (req) => {
+    const id = zUuid.parse((req.params as any).id);
+    const rows = await withScope(req.ctx.scope, async (c) => (await c.query(
+      `select r.id from service_resources r join contracts k on k.id = r.contract_id join plan_versions pv on pv.id = k.plan_version_id
+       where pv.plan_id = $1 and k.status = 'active' and r.desired_version > 0 and r.desired_policy = 'active' and r.secret_enc is not null
+         and not exists (select 1 from operations o where o.resource_id = r.id and o.status in ('PENDING','RESERVED','EXECUTING','VERIFYING','UNCERTAIN'))
+       order by r.id limit 500`, [id])).rows);
+    let requested = 0;
+    const errors: string[] = [];
+    for (const r of rows) {
+      try {
+        await withScope(req.ctx.scope, (c) => requestOperation(c, req.ctx.tenantId!, r.id, 'subscriber.provision', { type: 'user', id: req.ctx.userId, reason: 'parâmetros de rede do plano' }));
+        requested++;
+      } catch (e) {
+        if (!(e instanceof HttpError)) throw e;
+        if (!errors.includes(e.message)) errors.push(e.message);
+      }
+    }
+    await audit(null, req.ctx, 'plan.reapply', 'plan', id, { requested, refused: rows.length - requested });
+    return { requested, refused: rows.length - requested, errors: errors.slice(0, 5) };
   });
 
   /** Vincula (ou desvincula) o MAC do equipamento do assinante à conta; reaplica a autorização na rede. */

@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { audit, guard, HttpError } from '../auth.js';
 import { withScope } from '../db.js';
+import { requestOperation } from '../network/engine.js';
 import { zUuid } from '../validators.js';
 
 const csvCell = (v: unknown) => {
@@ -199,7 +200,7 @@ export async function atendimentoRoutes(app: FastifyInstance) {
       const like = q.q ? `%${q.q.replace(/[%_\\]/g, '\\$&')}%` : null;
       const rows = (await c.query(
         `select s.name as subscriber_name, r.pppoe_username as login, r.observed_session->>'ip' as ip, r.observed_session->>'caller_id' as mac,
-                r.observed_session->>'uptime' as uptime, d.name as nas, po.name as pop, r.contract_id, r.desired_policy, r.observed_at
+                r.observed_session->>'uptime' as uptime, d.name as nas, po.name as pop, r.id as resource_id, r.contract_id, r.desired_policy, r.observed_at
          from service_resources r join contracts k on k.id = r.contract_id join subscribers s on s.id = k.subscriber_id
          join devices d on d.id = r.device_id left join pops po on po.id = k.pop_id
          where (r.observed_session->>'online')::boolean is true and ($1::text is null or s.name ilike $1 or r.pppoe_username ilike $1 or r.observed_session->>'ip' like $1)
@@ -211,6 +212,26 @@ export async function atendimentoRoutes(app: FastifyInstance) {
       }
       return { total: rows.length, rows };
     });
+  });
+
+  // Desconexão em lote: uma operação assinada por conta, com motivo obrigatório. Cada conta responde por si (agente antigo,
+  // equipamento sem agente etc. não impedem as demais). Não muda a autorização: o assinante reconecta em seguida.
+  app.post('/api/network/disconnect', { preHandler: guard('network:operate') }, async (req) => {
+    const b = z.object({ resource_ids: z.array(zUuid).min(1).max(200), reason: z.string().trim().min(5, 'informe o motivo').max(200) }).parse(req.body);
+    const ids = [...new Set(b.resource_ids)];
+    const results: { resource_id: string; ok: boolean; operation_id?: string; error?: string }[] = [];
+    for (const id of ids) {
+      try {
+        const op = await withScope(req.ctx.scope, (c) => requestOperation(c, req.ctx.tenantId!, id, 'subscriber.disconnect', { type: 'user', id: req.ctx.userId, reason: b.reason }));
+        results.push({ resource_id: id, ok: true, operation_id: op.id });
+      } catch (e) {
+        if (!(e instanceof HttpError)) throw e;
+        results.push({ resource_id: id, ok: false, error: e.message });
+      }
+    }
+    const requested = results.filter((r) => r.ok).length;
+    await audit(null, req.ctx, 'network.bulk_disconnect', 'network', null, { reason: b.reason, requested, refused: results.length - requested });
+    return { requested, refused: results.length - requested, results };
   });
 
   // ---------------------------------------------------------------- contatos

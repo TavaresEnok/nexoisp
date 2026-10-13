@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { api, d, doc, download, money, speed, useLoad, usePaged } from '../api';
 import { can, has, useMe } from '../App';
 import { ActionButton, Badge, Card, Field, Form, KV, Modal, Page, Pager, State } from '../ui';
-import { Contacts, CustomValues, SubscriberNotes, Timeline } from './Atendimento';
+import { Contacts, CustomValues, SubscriberDocuments, SubscriberNotes, Timeline } from './Atendimento';
 import { ContractForm } from './Contracts';
 import { TicketList } from './Crm';
 import { WorkOrderList } from './Field';
@@ -145,6 +145,7 @@ export function SubscriberDetail() {
           <CustomValues entity="subscriber" id={s.id} values={s.custom} onChange={reload} />
           <SubscriberNotes subscriberId={s.id} />
           <Contacts subscriberId={s.id} />
+          <SubscriberDocuments subscriberId={s.id} />
           <Timeline subscriberId={s.id} />
           {can(me, 'crm:read') && has(me, 'crm') && <TicketList subscriberId={s.id} />}
           {can(me, 'os:read') && has(me, 'field') && <WorkOrderList subscriberId={s.id} />}

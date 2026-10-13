@@ -18,6 +18,8 @@ export interface DbScope {
   operator: boolean;
   /** sessão do portal: restringe as linhas ao próprio assinante (políticas restritivas) */
   subscriberId?: string | null;
+  /** usuário restrito a POPs: só contratos desses POPs (e os sem POP) e o que depende deles */
+  popIds?: string[] | null;
 }
 export type Tx = pg.PoolClient;
 
@@ -27,8 +29,8 @@ export async function withScope<T>(scope: DbScope, fn: (c: Tx) => Promise<T>): P
   try {
     await c.query('begin');
     await c.query(
-      `select set_config('app.tenant_id', $1, true), set_config('app.is_operator', $2, true), set_config('app.subscriber_id', $3, true)`,
-      [scope.tenantId ?? '', scope.operator ? 'on' : 'off', scope.subscriberId ?? '']);
+      `select set_config('app.tenant_id', $1, true), set_config('app.is_operator', $2, true), set_config('app.subscriber_id', $3, true), set_config('app.pop_ids', $4, true)`,
+      [scope.tenantId ?? '', scope.operator ? 'on' : 'off', scope.subscriberId ?? '', scope.popIds?.length ? scope.popIds.join(',') : '']);
     const r = await fn(c);
     await c.query('commit');
     return r;

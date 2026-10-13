@@ -3,7 +3,7 @@ import type { Tx } from '../db.js';
 import { emitEvent } from '../webhooks.js';
 import { decryptSecret, signEnvelope } from './crypto.js';
 
-export type Action = 'subscriber.provision' | 'subscriber.suspend' | 'subscriber.resume';
+export type Action = 'subscriber.provision' | 'subscriber.suspend' | 'subscriber.resume' | 'subscriber.disconnect';
 export type OnuAction = 'onu.authorize' | 'onu.deauthorize';
 export const OPEN = ['PENDING', 'RESERVED', 'EXECUTING', 'VERIFYING', 'UNCERTAIN'];
 const RESERVE_LEASE_S = 45; // tempo para o agente chamar begin
@@ -15,6 +15,8 @@ export const REJECT_SUSPENSION = { mode: 'reject', session: 'disconnect' } as co
 export const DEMO_SUSPENSION = REJECT_SUSPENSION; // nome anterior
 /** Versão mínima do agente que entende a suspensão por perfil (o envelope com campo desconhecido é recusado por agentes antigos). */
 export const PROFILE_SUSPENSION_MIN_AGENT = '0.4.0';
+/** Desconexão pedida e atributos de rede por plano/NAS (velocidade, pool, uso simultâneo, intervalo de accounting). */
+export const NETWORK_PARAMS_MIN_AGENT = '0.5.0';
 const semver = (v: string | null) => (v ?? '0').split('.').map((x) => parseInt(x, 10) || 0);
 export function agentAtLeast(version: string | null, min: string): boolean {
   const a = semver(version), b = semver(min);
@@ -31,7 +33,8 @@ export interface Authz { type: 'user' | 'system'; id: string; reason?: string }
 export async function requestOperation(c: Tx, tenantId: string, resourceId: string, action: Action, authz: Authz, idempotencyKey?: string,
   opts: { stage?: 'reduced' | 'blocked' } = {}) {
   const r = (await c.query(
-    `select r.*, k.status as contract_status, pv.profile_name, pl.reduced_profile, d.agent_id, d.name as device_name, ag.version as agent_version
+    `select r.*, k.status as contract_status, pv.profile_name, pl.reduced_profile, pl.rate_limit, pl.address_pool, d.simultaneous_use, d.acct_interim_seconds,
+            d.agent_id, d.name as device_name, ag.version as agent_version
      from service_resources r join contracts k on k.id = r.contract_id join plan_versions pv on pv.id = k.plan_version_id join plans pl on pl.id = pv.plan_id
      join devices d on d.id = r.device_id left join agents ag on ag.id = d.agent_id where r.id = $1 for update of r`, [resourceId])).rows[0];
   if (!r) throw new HttpError(404, 'conta PPPoE não encontrada');
@@ -40,14 +43,19 @@ export async function requestOperation(c: Tx, tenantId: string, resourceId: stri
     if (dup) return dup;
   }
   if (!r.agent_id) throw new HttpError(400, `equipamento "${r.device_name}" não tem agente associado`);
-  if (action !== 'subscriber.suspend' && r.contract_status !== 'active') throw new HttpError(400, 'contrato encerrado não pode ser provisionado ou reativado');
+  const disconnect = action === 'subscriber.disconnect';
+  if (action !== 'subscriber.suspend' && !disconnect && r.contract_status !== 'active') throw new HttpError(400, 'contrato encerrado não pode ser provisionado ou reativado');
+  if (disconnect && r.desired_version === 0) throw new HttpError(400, 'a conta ainda não foi provisionada: não há sessão a derrubar');
+  // desconectar não muda a intenção: mantém política, degrau, motivo e data
+  const stage = disconnect ? (r.desired_stage ?? undefined) : opts.stage;
   if (action === 'subscriber.provision' && !r.secret_enc) throw new HttpError(400, 'credencial PPPoE indisponível: defina a senha antes de provisionar');
 
   const policy = action === 'subscriber.suspend' ? 'suspended' : action === 'subscriber.resume' ? 'active' : r.desired_policy;
   const version = r.desired_version + 1;
   await c.query(
-    `update service_resources set desired_version = $2, desired_policy = $3, desired_profile = $4, desired_reason = $5, desired_at = now(), desired_stage = $6 where id = $1`,
-    [resourceId, version, policy, r.profile_name, authz.reason ?? null, policy === 'suspended' ? (opts.stage ?? 'blocked') : null]);
+    `update service_resources set desired_version = $2, desired_policy = $3, desired_profile = $4, desired_reason = $5,
+            desired_at = case when $7 then desired_at else now() end, desired_stage = $6 where id = $1`,
+    [resourceId, version, policy, r.profile_name, disconnect ? r.desired_reason : authz.reason ?? null, policy === 'suspended' ? (stage ?? 'blocked') : null, disconnect]);
   await c.query(
     `update operations set status = 'SUPERSEDED', finished_at = now(), updated_at = now(), note = 'substituída pela versão ' || $2 || ' antes de iniciar'
      where resource_id = $1 and status = 'PENDING'`, [resourceId, version]);
@@ -61,7 +69,7 @@ export async function requestOperation(c: Tx, tenantId: string, resourceId: stri
   if (policy === 'suspended') {
     suspension = { ...REJECT_SUSPENSION };
     const s = (await c.query('select suspension_mode, suspension_profile from tenant_settings where tenant_id = $1', [tenantId])).rows[0];
-    if (opts.stage === 'reduced' && r.contract_status === 'active') {
+    if (stage === 'reduced' && r.contract_status === 'active') {
       // degrau de velocidade reduzida: a conta continua autenticando, com o perfil reduzido do plano
       if (!r.reduced_profile) throw new HttpError(400, 'o plano não tem perfil de velocidade reduzida configurado');
       if (!agentAtLeast(r.agent_version, PROFILE_SUSPENSION_MIN_AGENT))
@@ -80,7 +88,15 @@ export async function requestOperation(c: Tx, tenantId: string, resourceId: stri
     // suspenso por perfil o assinante precisa cair no endereço do bloqueio (é por ele que o aviso é entregue): sem IP fixo
     ...(fixed && suspension?.mode !== 'profile' ? { framed_ip: fixed.ip as string } : {}),
     ...(r.mac ? { mac: r.mac as string } : {}),   // idem: só quando existe; agentes anteriores à 0.4.0 recusam o campo
+    // 0.5.0: só entram quando definidos (agente anterior recusa campo desconhecido)
+    ...(disconnect ? { reconnect: true } : {}),
+    ...(r.rate_limit ? { rate_limit: r.rate_limit as string } : {}),
+    ...(r.address_pool ? { address_pool: r.address_pool as string } : {}),
+    ...(r.simultaneous_use ? { simultaneous_use: r.simultaneous_use as number } : {}),
+    ...(r.acct_interim_seconds ? { acct_interim: r.acct_interim_seconds as number } : {}),
   };
+  if ((disconnect || r.rate_limit || r.address_pool || r.simultaneous_use || r.acct_interim_seconds) && !agentAtLeast(r.agent_version, NETWORK_PARAMS_MIN_AGENT))
+    throw new HttpError(409, `o agente do equipamento "${r.device_name}" (versão ${r.agent_version ?? 'desconhecida'}) não suporta ${disconnect ? 'desconexão pedida' : 'os parâmetros de rede do plano/NAS'}; atualize para ${NETWORK_PARAMS_MIN_AGENT}`);
   if (r.mac && !agentAtLeast(r.agent_version, PROFILE_SUSPENSION_MIN_AGENT))
     throw new HttpError(409, `o agente do equipamento "${r.device_name}" (versão ${r.agent_version ?? 'desconhecida'}) não suporta vínculo de MAC; atualize para ${PROFILE_SUSPENSION_MIN_AGENT} ou remova o MAC`);
   const key = idempotencyKey ?? `${resourceId}:v${version}`;

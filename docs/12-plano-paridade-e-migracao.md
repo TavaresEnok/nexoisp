@@ -100,17 +100,18 @@ Entregue = implementado e coberto por teste automatizado. Nada aqui foi homologa
 
 | Situação | Itens |
 |---|---|
-| ✅ Entregue | D1, D2, D3, D4, D6, D7, D8, D9, D12, C1, C2, C3, C4, C6, C7, C8, C9, F1, F2, F3, F4, F6, F7, P1, P2, P3, P5, R3, R4 |
-| 🟡 Parcial | F5 (kit de instalação e técnicos auxiliares prontos; **check-in/out com localização** não: dado pessoal do técnico, exige decisão de LGPD; hora de saída e de início já são registradas), C10 (desconto temporário e indicação prontos; **combos** de produtos não: exigem catálogo além do plano de internet), D5 (consumo por dia; faltam hora, semana e ano), D10 (lista online e exportação; falta a desconexão em lote, que exige operação nova do agente), C1 (só canal por HTTP genérico e de saída; sem SMS/WhatsApp nativo, ver abaixo) |
-| ⏳ Pendente | D11 (permissão por POP: exige filtrar todas as consultas por escopo), C5 (página de aviso: exige redirecionamento no NAS, a validar em equipamento), P4 (documentos: decisão de armazenamento e LGPD), R1 e R2 (parâmetros de rede por plano e do NAS: exigem operação nova do agente) |
+| ✅ Entregue | D1, D2, D3, D4, D6, D7, D8, D9, D10, D11, D12, C1, C2, C3, C4, C5, C6, C7, C8, C9, F1, F2, F3, F4, F6, F7, P1, P2, P3, P4, P5, R1, R2, R3, R4 |
+| 🟡 Parcial | F5 (kit e auxiliares prontos; check-in com localização não: dado pessoal do técnico), C10 (desconto e indicação prontos; combos de produtos não), D5 (consumo por dia; faltam hora, semana e ano), C1 (canal HTTP genérico; sem operadora real testada) |
+| ⏳ Pendente | nada que dependa só de nós nesta lista; ver seção 4 (terceiros e equipamento) |
 
-**Lote 4 em detalhe (sem chat; tudo por ocorrência e OS):**
-- **F1 fluxo da OS:** aberta → em análise → aguardando agendamento (com motivo) → agendada → **em deslocamento** (exige técnico; grava a hora da saída) → em execução (grava o início) → concluída/cancelada. "Atribuída" é o responsável preenchido, não um estado.
-- **F2 catálogos:** tipo de ocorrência, classificação, causa-raiz, origem e motivo de OS, por provedor; vínculo conferido pelo tipo e item inativo não é aceito.
-- **F3 SLA:** política por prioridade e tipo (atendimentos) ou natureza (OS); a mais específica vale; prazo em **minutos corridos** (sem calendário de expediente nem pausa durante "aguardando o assinante": limite conhecido); vencimento é marcado uma vez, avisa o webhook da equipe e escalona se a política mandar; relatório de cumprimento.
-- **F4 agenda:** por técnico e dia (1 a 14 dias), com sobreposição apontada, fila "aguardando agendamento" e janelas livres no expediente.
-- **F6 endereço:** instalação por contrato e OS com origem registrada (cadastro, contrato ou informado); a OS guarda o endereço, então mudar o cadastro depois não a altera.
-- **C7 satisfação:** nasce ao concluir a OS, vale 30 dias, é respondida **no portal** (1 a 5 e comentário); a equipe vê média e respostas. Não há envio automático do convite: a régua de avisos hoje é por vencimento de fatura.
+**Lote 9 em detalhe (agente 0.5.0, escopo, aviso e documentos):**
+- **D10 desconexão:** ação assinada `subscriber.disconnect` (individual na ficha e em lote em "Online agora", até 200, com motivo). Não muda a autorização, o motivo nem a data da situação; só cai a sessão que existia antes do pedido. Exige agente 0.5.0.
+- **R1 rede por plano:** velocidade no formato MikroTik (com rajada) e pool de endereços enviados pelo RADIUS, opcionais, além do perfil do NAS; "reaplicar" explícito para as contas já provisionadas. Suspensa por perfil, valem a velocidade e o pool do perfil de bloqueio.
+- **R2 NAS:** uso simultâneo por login e intervalo de accounting por equipamento. O uso simultâneo depende da seção `session` do FreeRADIUS consultando o accounting.
+- **D11 permissão por POP:** usuário (não administrador) restrito a POPs vê só contratos desses POPs e os sem POP, com assinantes, faturas, contas de acesso, OS, atendimentos e documentos. A regra está no **banco** (políticas restritivas), então busca, relatórios, exportação e rotas novas já saem filtrados. Limite: tabelas sem vínculo direto com contrato/assinante (estoque, catálogos, POPs, equipamentos) continuam comuns.
+- **C5 página de aviso:** página pública por provedor (`/aviso/<provedor>`, `?m=reduzida`), configurável, **sem identificar o assinante nem mostrar valores**; leva ao portal. O redirecionamento no concentrador está descrito em `docs/operacao.md` e **não foi validado em equipamento**.
+- **P4 documentos:** PDF/JPEG/PNG/WebP até 5 MB, tipo conferido pelo conteúdo, guardados no banco (entram no backup e no isolamento por provedor); listar com leitura do cadastro, **baixar só com edição** e com auditoria; excluir apaga o conteúdo e mantém o registro.
+- **Validação:** 134 testes da API e 50 do agente. Nada disso foi exercitado no CHR do cenário nem em equipamento físico.
 
 **Lote 8 em detalhe:**
 - **P3 campos personalizados:** definidos por provedor para assinante e contrato (texto, número, data, sim/não, seleção; obrigatório opcional); valor guardado na ficha com validação por tipo; campo não se apaga, desativa-se. Não entram no CSV de importação.

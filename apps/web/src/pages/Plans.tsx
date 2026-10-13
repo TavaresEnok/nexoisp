@@ -24,6 +24,29 @@ function LoyaltyForm({ plan, onDone, onCancel }: { plan: any; onDone: () => void
   );
 }
 
+/** Velocidade (com rajada) e pool entregues pelo RADIUS. Vazio = vale o perfil configurado no concentrador. */
+function NetworkForm({ plan, onDone, onCancel }: { plan: any; onDone: () => void; onCancel: () => void }) {
+  const [f, setF] = useState({ rate_limit: plan.rate_limit ?? '', address_pool: plan.address_pool ?? '' });
+  const [saved, setSaved] = useState<any>(null);
+  if (saved) return (
+    <div>
+      <p>Salvo. {saved.accounts_to_reapply} conta(s) já provisionada(s) só passam a usar os parâmetros novos ao reaplicar.</p>
+      <div className="row">
+        <ActionButton className="primary" confirm="Reaplicar a autorização das contas liberadas deste plano (até 500 por vez)?" onClick={async () => { const r = await api<any>(`/plans/${plan.id}/reapply`, { method: 'POST' }); setSaved({ ...saved, done: r }); }}>Reaplicar agora</ActionButton>
+        <button onClick={onDone}>Fechar</button>
+      </div>
+      {saved.done && <p className="small">{saved.done.requested} operação(ões) solicitada(s){saved.done.refused ? `, ${saved.done.refused} recusada(s): ${saved.done.errors.join('; ')}` : ''}.</p>}
+    </div>
+  );
+  return (
+    <Form submit="Salvar" onCancel={onCancel} onSubmit={async () => { setSaved(await api(`/plans/${plan.id}/network`, { method: 'PUT', body: { rate_limit: f.rate_limit || null, address_pool: f.address_pool || null } })); }}>
+      <p className="small muted">O perfil do concentrador ({plan.profile_name}) continua sendo enviado. Estes campos são opcionais e exigem agente 0.5.0 ou mais novo.</p>
+      <Field label="Velocidade (formato MikroTik)" hint="subida/descida [rajada limiar tempo prioridade mínimo]. Ex.: 50M/100M 60M/120M 40M/80M 10/10"><input className="mono" value={f.rate_limit} onChange={(e) => setF({ ...f, rate_limit: e.target.value })} /></Field>
+      <Field label="Pool de endereços" hint="Nome do pool que existe no concentrador."><input className="mono" value={f.address_pool} onChange={(e) => setF({ ...f, address_pool: e.target.value })} /></Field>
+    </Form>
+  );
+}
+
 function PlanForm({ plan, onDone, onCancel }: { plan?: any; onDone: () => void; onCancel: () => void }) {
   const [name, setName] = useState(plan?.name ?? '');
   const [price, setPrice] = useState(plan ? (plan.price_cents / 100).toFixed(2).replace('.', ',') : '');
@@ -71,7 +94,7 @@ function Versions({ plan, onClose }: { plan: any; onClose: () => void }) {
 export function Plans() {
   const { me } = useMe();
   const { data, loading, error, reload } = useLoad<any[]>('/plans');
-  const [modal, setModal] = useState<{ kind: 'new' | 'version' | 'history' | 'dunning' | 'loyalty'; plan?: any } | null>(null);
+  const [modal, setModal] = useState<{ kind: 'new' | 'version' | 'history' | 'dunning' | 'loyalty' | 'network'; plan?: any } | null>(null);
   const w = can(me, 'plans:write');
   return (
     <Page title="Planos" actions={w && <button className="primary" onClick={() => setModal({ kind: 'new' })}>Novo plano</button>}>
@@ -92,6 +115,7 @@ export function Plans() {
                   <button className="sm" onClick={() => setModal({ kind: 'history', plan: p })}>Histórico</button>
                   {w && <button className="sm" onClick={() => setModal({ kind: 'version', plan: p })}>Alterar preço/velocidade</button>}
                   {w && <button className="sm" onClick={() => setModal({ kind: 'dunning', plan: p })}>Degraus de cobrança</button>}
+                  {can(me, 'network:write') && <button className="sm" onClick={() => setModal({ kind: 'network', plan: p })}>Rede{p.rate_limit || p.address_pool ? ' ✓' : ''}</button>}
                   {w && <button className="sm" onClick={() => setModal({ kind: 'loyalty', plan: p })}>Fidelidade{p.loyalty_months ? ` (${p.loyalty_months} m)` : ''}</button>}
                   {w && <ActionButton className="sm" onClick={async () => { await api(`/plans/${p.id}`, { method: 'PATCH', body: { active: !p.active } }); reload(); }}>{p.active ? 'Desativar' : 'Ativar'}</ActionButton>}
                 </div></td>
@@ -102,6 +126,7 @@ export function Plans() {
       </State>
       {modal?.kind === 'new' && <Modal title="Novo plano" onClose={() => setModal(null)}><PlanForm onCancel={() => setModal(null)} onDone={() => { setModal(null); reload(); }} /></Modal>}
       {modal?.kind === 'version' && <Modal title={`Nova versão — ${modal.plan.name}`} onClose={() => setModal(null)}><PlanForm plan={modal.plan} onCancel={() => setModal(null)} onDone={() => { setModal(null); reload(); }} /></Modal>}
+      {modal?.kind === 'network' && <Modal title={`Parâmetros de rede — ${modal.plan.name}`} onClose={() => { setModal(null); reload(); }}><NetworkForm plan={modal.plan} onCancel={() => setModal(null)} onDone={() => { setModal(null); reload(); }} /></Modal>}
       {modal?.kind === 'loyalty' && <Modal title={`Fidelidade — ${modal.plan.name}`} onClose={() => setModal(null)}><LoyaltyForm plan={modal.plan} onCancel={() => setModal(null)} onDone={() => { setModal(null); reload(); }} /></Modal>}
       {modal?.kind === 'dunning' && <Modal title={`Degraus de cobrança — ${modal.plan.name}`} onClose={() => setModal(null)}><DunningForm plan={modal.plan} onCancel={() => setModal(null)} onDone={() => { setModal(null); reload(); }} /></Modal>}
       {modal?.kind === 'history' && <Versions plan={modal.plan} onClose={() => setModal(null)} />}

@@ -31,6 +31,7 @@ export function Network() {
   const [cred, setCred] = useState<any>(null);
   const [name, setName] = useState('');
   const blank = { name: '', driver: me.demo ? 'demo' : 'mikrotik_radius', host: '', api_port: '', credential_ref: '', agent_id: '' };
+  const [radius, setRadius] = useState<any>(null);
   const [f, setF] = useState<any>(blank);
   return (
     <Page title="Rede">
@@ -78,6 +79,7 @@ export function Network() {
                 <td>{w && <div className="row" style={{ justifyContent: 'flex-end' }}>
                   {d.accounts > 0 && <ActionButton className="sm" confirm={`Reenviar ao equipamento a intenção atual de todas as contas (${d.accounts})? Use após reinstalar o site ou perder o RADIUS local.`}
                     onClick={async () => { const r = await api(`/devices/${d.id}/reapply`, { method: 'POST' }); toast(`${r.requested} operação(ões) solicitada(s).`); }}>Reaplicar todas as contas</ActionButton>}
+                  {!d.driver.startsWith('olt') && <button className="sm" onClick={() => setRadius({ id: d.id, name: d.name, simultaneous_use: d.simultaneous_use ?? '', acct_interim_seconds: d.acct_interim_seconds ?? '' })}>Parâmetros RADIUS</button>}
                   <ActionButton className="sm" confirm={d.maintenance ? undefined : 'Em manutenção o ERP para de enviar escritas a este equipamento. Continuar?'}
                   onClick={async () => { await api(`/devices/${d.id}`, { method: 'PATCH', body: { maintenance: !d.maintenance } }); devices.reload(); }}>
                   {d.maintenance ? 'Encerrar manutenção' : 'Modo manutenção'}</ActionButton></div>}</td>
@@ -90,6 +92,19 @@ export function Network() {
         <Modal title="Novo agente" onClose={() => setModal(null)}>
           <Form submit="Criar agente" onCancel={() => setModal(null)} onSubmit={async () => { setCred(await api('/agents', { body: { name } })); setModal(null); agents.reload(); }}>
             <Field label="Nome do agente" hint="Ex.: nome do site ou do servidor onde será instalado."><input value={name} onChange={(e) => setName(e.target.value)} required autoFocus /></Field>
+          </Form>
+        </Modal>
+      )}
+      {radius && (
+        <Modal title={`Parâmetros RADIUS — ${radius.name}`} onClose={() => setRadius(null)}>
+          <Form submit="Salvar" onCancel={() => setRadius(null)} onSubmit={async () => {
+            await api(`/devices/${radius.id}`, { method: 'PATCH', body: { simultaneous_use: radius.simultaneous_use === '' ? null : Number(radius.simultaneous_use),
+              acct_interim_seconds: radius.acct_interim_seconds === '' ? null : Number(radius.acct_interim_seconds) } });
+            setRadius(null); devices.reload();
+          }}>
+            <p className="small muted">Valem para as contas deste equipamento na próxima autorização (use "Reaplicar todas as contas"). Exigem agente 0.5.0 ou mais novo. Vazio = não enviar.</p>
+            <Field label="Uso simultâneo por login" hint="1 impede duas sessões com o mesmo login. Depende da seção session do FreeRADIUS."><input type="number" min="1" max="10" value={radius.simultaneous_use} onChange={(e) => setRadius({ ...radius, simultaneous_use: e.target.value })} /></Field>
+            <Field label="Intervalo de accounting (segundos)" hint="De 60 a 3600. Menor = consumo e sessões mais atuais, mais carga."><input type="number" min="60" max="3600" value={radius.acct_interim_seconds} onChange={(e) => setRadius({ ...radius, acct_interim_seconds: e.target.value })} /></Field>
           </Form>
         </Modal>
       )}

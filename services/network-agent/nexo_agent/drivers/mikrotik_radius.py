@@ -20,6 +20,10 @@ create table if not exists nexo_accounts (
 """
 # colunas acrescentadas depois da primeira versão do banco (agente 0.4.0); o ALTER é repetível
 EXTRA_COLUMNS = (("by_profile", "integer not null default 0"),)
+# Atributos opcionais (agente 0.5.0). Resposta: velocidade com rajada, pool de endereços e intervalo de accounting.
+# Conferência: Simultaneous-Use (exige a seção "session" do FreeRADIUS consultando o accounting).
+REPLY_ATTRS = {"rate_limit": "Mikrotik-Rate-Limit", "address_pool": "Framed-Pool", "acct_interim": "Acct-Interim-Interval"}
+CHECK_ATTRS = {"simultaneous_use": "Simultaneous-Use"}
 _UPTIME = re.compile(r"(?:(\d+)w)?(?:(\d+)d)?(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$")
 
 
@@ -53,7 +57,7 @@ class RadiusStore:
                 self._db.execute(f"alter table nexo_accounts add column {col} {ddl}")
 
     def apply(self, username: str, secret: Optional[str], profile: str, policy: str, version: int, framed_ip: Optional[str] = None,
-              block_profile: Optional[str] = None, mac: Optional[str] = None):
+              block_profile: Optional[str] = None, mac: Optional[str] = None, extra: Optional[dict] = None):
         """block_profile: suspensão por perfil. A conta continua autenticando e recebe o perfil de bloqueio (sem Auth-Type Reject).
         `profile` é sempre o perfil do plano; o que o RADIUS entrega é o de bloqueio enquanto durar a suspensão."""
         by_profile = policy == "suspended" and block_profile is not None
@@ -83,6 +87,15 @@ class RadiusStore:
             db.execute("delete from radreply where username = ? and attribute = 'Framed-IP-Address'", (username,))
             if framed_ip:  # IP fixo: o NAS usa este endereço em vez do pool dinâmico do perfil
                 db.execute("insert into radreply (username, attribute, op, value) values (?, 'Framed-IP-Address', ':=', ?)", (username, framed_ip))
+            extra = extra or {}
+            for key, attr in REPLY_ATTRS.items():
+                db.execute("delete from radreply where username = ? and attribute = ?", (username, attr))
+                if extra.get(key) is not None:
+                    db.execute("insert into radreply (username, attribute, op, value) values (?, ?, ':=', ?)", (username, attr, str(extra[key])))
+            for key, attr in CHECK_ATTRS.items():
+                db.execute("delete from radcheck where username = ? and attribute = ?", (username, attr))
+                if extra.get(key) is not None:
+                    db.execute("insert into radcheck (username, attribute, op, value) values (?, ?, ':=', ?)", (username, attr, str(extra[key])))
             prev = cur["profile"] if cur and cur["profile"] != effective else None
             db.execute("insert or replace into nexo_accounts (username, policy, profile, prev_profile, applied_version, updated_at, by_profile) values (?,?,?,?,?,?,?)",
                        (username, policy, effective, prev, version, time.time(), 1 if by_profile else 0))
@@ -102,8 +115,14 @@ class RadiusStore:
         acc = self._db.execute("select * from nexo_accounts where username = ?", (username,)).fetchone()
         # suspensa = rejeitada OU entregando o perfil de bloqueio que este agente gravou (se alguém trocar o perfil à mão, volta a "ativa")
         by_profile = bool(acc and acc["by_profile"] and rep and rep["value"] == acc["profile"])
+        reply = {r["attribute"]: r["value"] for r in self._db.execute("select attribute, value from radreply where username = ?", (username,))}
+        attrs = {k: reply[a] for k, a in REPLY_ATTRS.items() if a in reply}
+        attrs.update({k: chk[a] for k, a in CHECK_ATTRS.items() if a in chk})
+        for k in ("simultaneous_use", "acct_interim"):
+            if k in attrs and str(attrs[k]).isdigit():
+                attrs[k] = int(attrs[k])
         return {"policy": "suspended" if chk.get("Auth-Type") == "Reject" or by_profile else "active", "profile": rep["value"] if rep else None,
-                "framed_ip": ip["value"] if ip else None, "mac": bound,
+                "framed_ip": ip["value"] if ip else None, "mac": bound, "attrs": attrs,
                 "applied_version": acc["applied_version"] if acc else None, "prev_profile": acc["prev_profile"] if acc else None,
                 "updated_at": acc["updated_at"] if acc else None}
 
@@ -284,14 +303,14 @@ class MikrotikRadiusDriver:
                            "profile": (a["prev_profile"] or a["profile"]) if stale else a["profile"], "predates_authorization": stale}
         except Exception as e:  # sem acesso ao NAS: autorização local conhecida, sessão desconhecida
             session = {"online": None, "unknown": True, "error": str(e)[:200]}
-        return AccountState(True, a["policy"], a["profile"], a["applied_version"], session, framed_ip=a["framed_ip"], mac=a["mac"])
+        return AccountState(True, a["policy"], a["profile"], a["applied_version"], session, framed_ip=a["framed_ip"], mac=a["mac"], attrs=a["attrs"])
 
     def apply_authorization(self, username: str, *, secret: Optional[str], profile: str, policy: str, version: int, framed_ip: Optional[str] = None,
-                            block_profile: Optional[str] = None, mac: Optional[str] = None) -> dict:
-        self.radius.apply(username, secret, profile, policy, version, framed_ip, block_profile, mac)
+                            block_profile: Optional[str] = None, mac: Optional[str] = None, extra: Optional[dict] = None) -> dict:
+        self.radius.apply(username, secret, profile, policy, version, framed_ip, block_profile, mac, extra)
         return {"radius": "radcheck/radreply atualizados", "policy": policy, "profile": block_profile or profile,
                 **({"suspension": "perfil de bloqueio"} if block_profile and policy == "suspended" else {}),
-                **({"framed_ip": framed_ip} if framed_ip else {}), **({"mac": mac} if mac else {})}
+                **({"framed_ip": framed_ip} if framed_ip else {}), **({"mac": mac} if mac else {}), **({"attrs": extra} if extra else {})}
 
     def disconnect(self, username: str) -> dict:
         return {"sessions_removed": self.sessions.remove(username)}

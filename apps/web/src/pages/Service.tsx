@@ -9,7 +9,7 @@ export const OP_STATUS: Record<string, [string, 'gray' | 'green' | 'red' | 'ambe
   UNCERTAIN: ['Incerta — verificar antes de repetir', 'amber'], SUCCEEDED: ['Concluída', 'green'], SUPERSEDED: ['Substituída', 'gray'],
   CANCELED: ['Cancelada', 'gray'], EXPIRED: ['Expirada', 'red'], FAILED: ['Falhou', 'red'],
 };
-export const ACTION: Record<string, string> = { 'subscriber.provision': 'Provisionar', 'subscriber.suspend': 'Suspender', 'subscriber.resume': 'Reativar',
+export const ACTION: Record<string, string> = { 'subscriber.provision': 'Provisionar', 'subscriber.suspend': 'Suspender', 'subscriber.resume': 'Reativar', 'subscriber.disconnect': 'Desconectar',
   'onu.authorize': 'Autorizar ONU', 'onu.deauthorize': 'Desautorizar ONU' };
 const POLICY: Record<string, [string, 'green' | 'red' | 'gray']> = { active: ['Liberado', 'green'], suspended: ['Suspenso', 'red'], absent: ['Sem autorização local', 'gray'] };
 const STALE_S = 600; // o agente reenvia tudo a cada 5 min (e mudanças na hora)
@@ -118,6 +118,7 @@ export function ServicePanel({ contract, financial, fin }: { contract: any; fina
       {r.desired_policy === 'active'
         ? <ActionButton className="danger" confirm="Suspender o acesso deste contrato?" onClick={act('suspend', 'suspensão manual')}>Suspender</ActionButton>
         : <ActionButton className="primary" disabled={contract.status !== 'active'} onClick={act('resume', 'reativação manual')}>Reativar</ActionButton>}
+      {r.desired_version > 0 && <ActionButton title="Derruba a sessão atual; o assinante reconecta em seguida" confirm="Desconectar a sessão deste assinante? Ele reconecta sozinho em seguida." onClick={act('disconnect', 'desconexão manual')}>Desconectar</ActionButton>}
       <ActionButton className={r.desired_version === 0 ? 'primary' : ''} title="Cria nova operação com a intenção atual" disabled={contract.status !== 'active' || r.desired_policy !== 'active' || !r.has_secret}
         onClick={act('provision', r.desired_version === 0 ? 'provisionamento de conta importada' : 'reaplicar intenção')}>{r.desired_version === 0 ? 'Provisionar' : 'Reaplicar'}</ActionButton>
       <button onClick={() => setNewPw('')}>Trocar senha</button>

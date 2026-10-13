@@ -40,6 +40,12 @@ class Parameters(BaseModel):
     framed_ip: Optional[str] = Field(default=None, pattern=r"^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$")
     # MAC vinculado à conta (agente 0.4.0+): o RADIUS só autentica a conta vinda desse equipamento. Ausente = sem vínculo.
     mac: Optional[str] = Field(default=None, pattern=r"^([0-9A-F]{2}:){5}[0-9A-F]{2}$")
+    # Agente 0.5.0+. Todos opcionais; ausente = não gravar o atributo (vale o que o perfil do NAS define).
+    reconnect: Optional[bool] = None          # derrubar a sessão atual mesmo sem mudança de autorização (subscriber.disconnect)
+    rate_limit: Optional[str] = Field(default=None, pattern=r"^\d{1,7}[kKmM]?/\d{1,7}[kKmM]?( \d{1,7}[kKmM]?/\d{1,7}[kKmM]?){0,3}( [1-8]( \d{1,7}[kKmM]?/\d{1,7}[kKmM]?)?)?$")
+    address_pool: Optional[str] = Field(default=None, pattern=r"^[A-Za-z0-9_.-]{1,60}$")
+    simultaneous_use: Optional[int] = Field(default=None, ge=1, le=10)
+    acct_interim: Optional[int] = Field(default=None, ge=60, le=3600)
 
 
 class OnuParameters(BaseModel):
@@ -68,7 +74,7 @@ class Envelope(BaseModel):
     resource_id: str
     device_id: str
     agent_id: str
-    action: Literal["subscriber.provision", "subscriber.suspend", "subscriber.resume", "onu.authorize", "onu.deauthorize"]
+    action: Literal["subscriber.provision", "subscriber.suspend", "subscriber.resume", "subscriber.disconnect", "onu.authorize", "onu.deauthorize"]
     schema_version: int
     desired_version: int = Field(gt=0)
     parameters: Union[Parameters, OnuParameters]
@@ -104,6 +110,8 @@ def verify_envelope(raw: str, signature_b64: str, public_key_b64: str, *, agent_
         expected = {"subscriber.suspend": "suspended", "subscriber.resume": "active"}.get(env.action)
         if expected and env.parameters.policy != expected:
             raise EnvelopeError("política incompatível com a ação")
+        if (env.action == "subscriber.disconnect") != bool(env.parameters.reconnect):
+            raise EnvelopeError("reconnect só vale (e é obrigatório) em subscriber.disconnect")
     if env.valid_until <= (now or datetime.now(timezone.utc)):
         raise EnvelopeError("envelope vencido")
     return env

@@ -1,6 +1,7 @@
 """DRIVER DE DEMONSTRAÇÃO — simula RADIUS + NAS em um arquivo SQLite local.
 Não fala com nenhum equipamento. Serve ao desenvolvimento; NÃO comprova compatibilidade (ADR-012)."""
 import hashlib
+import json
 import sqlite3
 import time
 from typing import Optional
@@ -15,6 +16,7 @@ create table if not exists writes (id integer primary key autoincrement, device_
 create table if not exists faults (name text primary key, remaining integer);
 create table if not exists account_ips (device_id text, username text, framed_ip text, primary key (device_id, username));
 create table if not exists account_macs (device_id text, username text, mac text, primary key (device_id, username));
+create table if not exists account_attrs (device_id text, username text, attrs text, primary key (device_id, username));
 """
 
 
@@ -65,11 +67,14 @@ class DemoDriver:
             ip = fixed or "100.64.%d.%d" % (int(hashlib.sha1(username.encode()).hexdigest(), 16) % 250, 1 + a["applied_version"] % 250)
             self._db.execute("insert or replace into sessions values (?,?,?,?,?)", (self.device_id, username, ip, a["profile"], time.time()))
             s = self._db.execute("select * from sessions where device_id = ? and username = ?", (self.device_id, username)).fetchone()
-        session = {"online": True, "ip": s["ip"], "profile": s["profile"], "since": s["since"], "simulated": True} if s else None
-        return AccountState(True, a["policy"], a["profile"], a["applied_version"], session, {"simulated": True}, framed_ip=fixed, mac=bound["mac"] if bound else None)
+        session = {"online": True, "ip": s["ip"], "profile": s["profile"], "since": s["since"], "simulated": True,
+                   "predates_authorization": s["since"] < a["updated_at"]} if s else None
+        extra = self._db.execute("select attrs from account_attrs where device_id = ? and username = ?", (self.device_id, username)).fetchone()
+        return AccountState(True, a["policy"], a["profile"], a["applied_version"], session, {"simulated": True}, framed_ip=fixed, mac=bound["mac"] if bound else None,
+                            attrs=json.loads(extra["attrs"]) if extra else {})
 
     def apply_authorization(self, username: str, *, secret: Optional[str], profile: str, policy: str, version: int, framed_ip: Optional[str] = None,
-                            block_profile: Optional[str] = None, mac: Optional[str] = None) -> dict:
+                            block_profile: Optional[str] = None, mac: Optional[str] = None, extra: Optional[dict] = None) -> dict:
         if self._fault("fail_before_write"):
             raise ConnectionError("falha simulada antes da escrita")
         cur = self._db.execute("select secret_fp from accounts where device_id = ? and username = ?", (self.device_id, username)).fetchone()
@@ -85,6 +90,7 @@ class DemoDriver:
         self._db.execute("delete from account_macs where device_id = ? and username = ?", (self.device_id, username))
         if mac:
             self._db.execute("insert into account_macs values (?,?,?)", (self.device_id, username, mac))
+        self._db.execute("insert or replace into account_attrs values (?,?,?)", (self.device_id, username, json.dumps(extra or {})))
         self._db.execute("insert into writes (device_id, username, command, at) values (?,?,?,?)", (self.device_id, username, "authorization", time.time()))
         if self._fault("lose_ack"):
             raise AckLost("confirmação perdida (simulada) após aplicar a autorização")

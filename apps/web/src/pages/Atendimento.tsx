@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api, d, dt, download, money, useLoad } from '../api';
 import { can, useMe } from '../App';
-import { ActionButton, Badge, Card, Field, Form, KV, Page, State } from '../ui';
+import { ActionButton, Badge, Card, dialog, Field, Form, KV, Page, State, toastError } from '../ui';
 
 const fmtBytes = (n: number) => {
   const u = ['B', 'KB', 'MB', 'GB', 'TB']; let i = 0; let v = n;
@@ -165,19 +165,35 @@ export function Sessions({ contractId }: { contractId: string }) {
 
 // ---------------------------------------------------------------- online agora
 export function Online() {
+  const { me } = useMe();
+  const operate = can(me, 'network:operate');
   const [q, setQ] = useState('');
-  const { data, loading, error } = useLoad<any>(`/network/online${q ? `?q=${encodeURIComponent(q)}` : ''}`, 15000);
+  const [sel, setSel] = useState<Set<string>>(new Set());
+  const [result, setResult] = useState<any>(null);
+  const { data, loading, error, reload } = useLoad<any>(`/network/online${q ? `?q=${encodeURIComponent(q)}` : ''}`, 15000);
+  const toggle = (id: string) => { const n = new Set(sel); if (n.has(id)) n.delete(id); else n.add(id); setSel(n); };
+  const all = (data?.rows ?? []).slice(0, 200).map((r: any) => r.resource_id);
+  const disconnect = async () => {
+    const reason = await dialog.prompt(`Desconectar ${sel.size} sessão(ões)? Cada assinante reconecta sozinho em seguida. Fica registrado na auditoria.`, { label: 'Motivo', action: 'Desconectar' });
+    if (!reason) return;
+    setResult(await api('/network/disconnect', { body: { resource_ids: [...sel], reason } }));
+    setSel(new Set()); reload();
+  };
   return (
     <Page title="Online agora" actions={<>
       <input className="search" placeholder="Filtrar por nome, login ou IP…" value={q} onChange={(e) => setQ(e.target.value)} />
+      {operate && <button className="danger" disabled={sel.size === 0} onClick={() => disconnect().catch(toastError)}>Desconectar selecionados{sel.size ? ` (${sel.size})` : ''}</button>}
       <ActionButton onClick={() => download(`/network/online?format=csv${q ? `&q=${encodeURIComponent(q)}` : ''}`, 'usuarios-online.csv')}>Exportar CSV</ActionButton>
     </>}>
-      <p className="muted small">Última leitura do concentrador pelo agente; não é tempo real. {data && <b>{data.total} online.</b>}</p>
+      <p className="muted small">Última leitura do concentrador pelo agente; não é tempo real. {data && <b>{data.total} online.</b>} Desconexão em lote: até 200 por vez.</p>
+      {result && <div className="state" style={{ textAlign: 'left' }}>{result.requested} desconexão(ões) solicitada(s){result.refused ? `, ${result.refused} recusada(s): ${[...new Set(result.results.filter((x: any) => !x.ok).map((x: any) => x.error))].join('; ')}` : ''}. Acompanhe em Operações.</div>}
       <State loading={loading && !data} error={error} empty={data?.rows.length === 0}>
         <table>
-          <thead><tr><th>Cliente</th><th>Login</th><th>IP</th><th>MAC</th><th>Tempo</th><th>Concentrador</th><th>POP</th></tr></thead>
+          <thead><tr>{operate && <th><input type="checkbox" aria-label="Selecionar todos" style={{ width: 'auto' }} checked={all.length > 0 && all.every((id: string) => sel.has(id))}
+            onChange={(e) => setSel(e.target.checked ? new Set(all) : new Set())} /></th>}<th>Cliente</th><th>Login</th><th>IP</th><th>MAC</th><th>Tempo</th><th>Concentrador</th><th>POP</th></tr></thead>
           <tbody>{data?.rows.map((r: any) => (
-            <tr key={r.login}><td><Link to={`/contratos/${r.contract_id}`}>{r.subscriber_name}</Link>{r.desired_policy === 'suspended' && <> <Badge tone="red">suspenso</Badge></>}</td>
+            <tr key={r.login}>{operate && <td><input type="checkbox" aria-label={`Selecionar ${r.login}`} style={{ width: 'auto' }} checked={sel.has(r.resource_id)} onChange={() => toggle(r.resource_id)} /></td>}
+              <td><Link to={`/contratos/${r.contract_id}`}>{r.subscriber_name}</Link>{r.desired_policy === 'suspended' && <> <Badge tone="red">suspenso</Badge></>}</td>
               <td className="mono">{r.login}</td><td className="mono">{r.ip}</td><td className="mono small">{r.mac ?? '—'}</td><td className="small">{r.uptime ?? '—'}</td><td>{r.nas}</td><td>{r.pop ?? '—'}</td></tr>
           ))}</tbody>
         </table>
@@ -262,6 +278,50 @@ export function ContractStates({ contract }: { contract: any }) {
     </div>
   );
 }
+const DOC_KIND: Record<string, string> = { identity: 'Documento de identidade', address_proof: 'Comprovante de endereço', contract: 'Contrato assinado', photo: 'Foto', other: 'Outro' };
+
+/** Documentos do assinante: PDF ou imagem até 5 MB. Baixar exige permissão de edição do cadastro e fica na auditoria. */
+export function SubscriberDocuments({ subscriberId }: { subscriberId: string }) {
+  const { me } = useMe();
+  const w = can(me, 'subscribers:write');
+  const docs = useLoad<any[]>(`/subscribers/${subscriberId}/documents`);
+  const [kind, setKind] = useState('identity');
+  const [busy, setBusy] = useState(false);
+  const upload = async (file: File | undefined) => {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toastError(new Error('Arquivo acima de 5 MB.')); return; }
+    setBusy(true);
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      let bin = '';
+      for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+      await api(`/subscribers/${subscriberId}/documents`, { body: { kind, name: file.name.slice(0, 120), content_base64: btoa(bin) } });
+      docs.reload();
+    } catch (e) { toastError(e); } finally { setBusy(false); }
+  };
+  const kb = (n: number) => (n >= 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
+  return (
+    <Card title="Documentos">
+      {w && (
+        <div className="row" style={{ marginBottom: 8, flexWrap: 'wrap' }}>
+          <select aria-label="Tipo do documento" value={kind} onChange={(e) => setKind(e.target.value)} style={{ width: 230 }}>{Object.entries(DOC_KIND).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
+          <input type="file" aria-label="Arquivo" accept="application/pdf,image/jpeg,image/png,image/webp" disabled={busy} onChange={(e) => { upload(e.target.files?.[0]); e.target.value = ''; }} style={{ width: 'auto' }} />
+          <span className="small muted">{busy ? 'Enviando…' : 'PDF, JPEG, PNG ou WebP, até 5 MB.'}</span>
+        </div>
+      )}
+      <State loading={docs.loading && !docs.data} error={docs.error} empty={docs.data?.length === 0} emptyText="Nenhum documento.">
+        <table><tbody>{docs.data?.map((x) => (
+          <tr key={x.id}><td>{x.name} <Badge>{DOC_KIND[x.kind]}</Badge><div className="small muted">{kb(x.size_bytes)} · {dt(x.created_at)} · {x.created_by_name ?? 'sistema'}</div></td>
+            <td>{w && <div className="row" style={{ justifyContent: 'flex-end' }}>
+              <ActionButton className="sm" onClick={() => download(`/documents/${x.id}/download`, x.name)}>Baixar</ActionButton>
+              <ActionButton className="sm danger" confirm="Excluir este documento? O arquivo é apagado; fica só o registro de que existiu." onClick={async () => { await api(`/documents/${x.id}`, { method: 'DELETE' }); docs.reload(); }}>Excluir</ActionButton>
+            </div>}</td></tr>
+        ))}</tbody></table>
+      </State>
+    </Card>
+  );
+}
+
 /** Campos personalizados da ficha (definidos pelo provedor em Catálogos e SLA). Some se não houver campo ativo. */
 export function CustomValues({ entity, id, values, onChange }: { entity: 'subscriber' | 'contract'; id: string; values: Record<string, any> | null; onChange: () => void }) {
   const { me } = useMe();

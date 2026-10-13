@@ -84,6 +84,25 @@ Em Catálogos e SLA ficam as abas **Campos personalizados** (dados extras do ass
 sem série lançados de uma vez na OS) e **Comissões** (valor por OS concluída, para responsável e auxiliar, e por prospecto ganho; a apuração é por pessoa e período).
 Na OS, o botão **Aplicar kit** baixa o estoque inteiro ou nada. A **disponibilidade** do cliente (aba Acesso do contrato) vem das sessões relatadas pelo agente.
 
+### Desconexão, rede por plano, POPs por usuário, página de aviso e documentos
+
+- **Desconectar:** na ficha do contrato (Acesso PPPoE) ou em Rede → Online agora (seleção em lote, com motivo). O assinante reconecta sozinho. Exige agente 0.5.0.
+- **Rede do plano:** Planos → Rede. Velocidade no formato MikroTik (`subida/descida [rajada limiar tempo prioridade mínimo]`) e pool. Depois de salvar, use "Reaplicar agora".
+- **Parâmetros RADIUS do equipamento:** Rede → Agentes e equipamentos → Parâmetros RADIUS (uso simultâneo e intervalo de accounting).
+- **POPs por usuário:** Administração → Usuários → POPs → definir. Sem POP marcado a pessoa vê tudo. Administrador nunca é restrito.
+- **Documentos:** na ficha do assinante. Baixar fica na auditoria.
+- **Página de aviso:** Financeiro → Política de cobrança → Página de aviso. Endereço `/aviso/<provedor>`. Para o assinante bloqueado chegar nela, o concentrador precisa
+  redirecionar o HTTP dele (exemplo RouterOS, **não validado em equipamento**; HTTPS não é redirecionável sem erro de certificado):
+
+```
+/ip firewall address-list add list=nexo-portal address=<IP do NexoISP>
+/ip firewall nat add chain=dstnat src-address-list=nexo-bloqueados protocol=tcp dst-port=80 dst-address-list=!nexo-portal action=dst-nat to-addresses=<IP do NexoISP> to-ports=80
+/ip firewall filter add chain=forward src-address-list=nexo-bloqueados dst-address-list=nexo-portal action=accept
+/ip firewall filter add chain=forward src-address-list=nexo-bloqueados protocol=udp dst-port=53 action=accept
+/ip firewall filter add chain=forward src-address-list=nexo-bloqueados action=drop
+```
+  O perfil PPP de bloqueio deve colocar o assinante na lista `nexo-bloqueados` (campo address-list do perfil).
+
 ### Conferência antes de entrar em produção
 
 ```bash

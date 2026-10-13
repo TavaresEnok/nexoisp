@@ -64,7 +64,7 @@ export async function identityRoutes(app: FastifyInstance) {
       ? await withScope(x.scope, async (c) => (await c.query('select id, name, slug from tenants where id = $1', [x.tenantId])).rows[0])
       : null;
     const self = await withScope(noScope, async (c) => (await c.query('select mfa_enabled from user_self_get($1)', [x.userId])).rows[0]);
-    return { id: x.userId, name: x.name, email: x.email, role: x.role, perms: x.perms, support: x.support, tenant, modules: x.modules,
+    return { id: x.userId, name: x.name, email: x.email, role: x.role, perms: x.perms, support: x.support, tenant, modules: x.modules, pop_restricted: !!x.popIds,
       demo: process.env.NEXO_DEMO_MODE === '1', mfa_enabled: self.mfa_enabled, mfa_pending: x.mfaPending };
   });
 
@@ -183,7 +183,9 @@ export async function identityRoutes(app: FastifyInstance) {
   const zRole = z.enum(['admin', 'attendant', 'finance', 'noc']);
   app.get('/api/users', { preHandler: guard('users:manage') }, async (req) =>
     withScope(req.ctx.scope, async (c) =>
-      (await c.query(`select id, name, email, role, active, mfa_enabled, created_at from users where tenant_id = $1 and role <> 'subscriber' order by name`, [req.ctx.tenantId])).rows));
+      (await c.query(`select u.id, u.name, u.email, u.role, u.active, u.mfa_enabled, u.created_at,
+                coalesce((select json_agg(json_build_object('id', p.id, 'name', p.name) order by p.name) from user_pops x join pops p on p.id = x.pop_id where x.user_id = u.id), '[]') as pops
+         from users u where u.tenant_id = $1 and u.role <> 'subscriber' order by u.name`, [req.ctx.tenantId])).rows));
 
   app.post('/api/users', { preHandler: guard('users:manage') }, async (req) => {
     const b = z.object({ name: z.string().trim().min(2), email: z.string().email(), role: zRole, password: zPassword }).parse(req.body);
