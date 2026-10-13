@@ -210,3 +210,11 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   com as regras colocadas antes do NAT que o nó já tinha e removidas ao final). CGNAT continua fora do escopo desta semana (item 2); o teste só atualiza o item 1.2 do doc 05.
 - **Próxima ação:** repetir o roteiro no equipamento físico quando chegar; decidir `require_message_authenticator` no RADIUS conforme a versão do RouterOS do piloto.
 - **Impedimentos externos:** os mesmos da tabela de 10/10 (provedor piloto, gateway, MK-Auth, servidor de produção, política de cobrança e fiscal). Data-alvo inalterada e condicionada a eles.
+
+### 13/10/2026 — comparativo com o SGP
+
+- **Entregue:** `docs/07-comparativo-sgp.md`, a partir da documentação de API do SGP (cópia local, não versionada). Cruzamento com o código do `main`, por área.
+- **Achados que afetam o plano:** (1) dois dos três provedores do cenário são atendidos por SGP, então a origem da migração provável é o SGP, não o MK-Auth; falta confirmar com
+  amostra se a senha PPPoE sai da exportação. (2) O SGP suspende por perfil de bloqueio (cliente conecta, cai em endereço de aviso), não por rejeição, que é a única modalidade nossa.
+- **Próxima ação:** proprietário decide se a suspensão por perfil de bloqueio entra no núcleo desta semana (proposta: sim, é pequena) e fornece uma exportação do SGP.
+- **Data-alvo e situação:** inalteradas (pronta para homologação, não para corte).
