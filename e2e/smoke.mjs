@@ -72,10 +72,16 @@ await step('confirmação é do sistema, não do navegador', async () => {
   await admin.goto(`${BASE}/contratos`);
   await admin.click('tbody tr a:has-text("abrir") >> nth=0');
   await admin.click('button:has-text("Encerrar contrato")');
-  await admin.waitForSelector('.modal.dialog');
+  await admin.waitForSelector('.modal:has-text("Motivo")');                      // pede o motivo antes de qualquer coisa
+  await admin.click('.modal button:has-text("Cancelar")');
+  await admin.waitForSelector('.modal', { state: 'detached' });
+  await admin.waitForSelector('button:has-text("Encerrar contrato")');          // nada foi encerrado
+  await admin.click('button:has-text("Encerrar contrato")');
+  await admin.click('.modal button.primary:has-text("Encerrar contrato"), .modal button[type="submit"]');
+  await admin.waitForSelector('.modal.dialog');                                  // a confirmação é do sistema, não do navegador
   await admin.click('.modal.dialog button:has-text("Cancelar")');
   await admin.waitForSelector('.modal.dialog', { state: 'detached' });
-  await admin.waitForSelector('button:has-text("Encerrar contrato")');          // nada foi encerrado
+  await admin.keyboard.press('Escape');
 });
 await step('NOC e operações abrem', async () => {
   for (const [path, texto] of [['/noc', 'Portas PON'], ['/operacoes', 'Operações']]) { await admin.goto(`${BASE}${path}`); await admin.waitForSelector(`text=${texto}`); }

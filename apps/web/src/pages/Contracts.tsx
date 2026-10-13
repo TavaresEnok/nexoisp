@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api, d, doc, download, dt, money, speed, useLoad, usePaged } from '../api';
 import { can, has, useMe } from '../App';
-import { ActionButton, Badge, Card, Field, Form, KV, Modal, Page, Pager, State, Tabs } from '../ui';
+import { ActionButton, Badge, Card, dialog, Field, Form, KV, Modal, Page, Pager, State, Tabs } from '../ui';
 import { Availability, ContractPop, ContractStates, CustomValues, Sessions } from './Atendimento';
 import { ContractEquipment, ContractTags, ContractUsage } from './Extras';
 import { ContractConditions, useQuote } from './Condicoes';
@@ -143,6 +143,7 @@ export function ContractDetail() {
           {ending && (
             <Modal title="Encerrar contrato" onClose={() => setEnding(null)}>
               <Form submit="Encerrar contrato" onCancel={() => setEnding(null)} onSubmit={async () => {
+                if (!(await dialog.confirm('Encerrar este contrato? A ação não pode ser desfeita.', { action: 'Encerrar contrato', danger: true }))) return;
                 const fine = quote.data?.within_loyalty && quote.data.penalty_cents > 0;
                 await api(`/contracts/${id}`, { method: 'PATCH', body: { end: true, end_reason_id: ending.reason_id || null, end_note: ending.note || null,
                   ...(fine ? { penalty: ending.penalty, penalty_waive_reason: ending.penalty === 'waive' ? ending.waive : undefined } : {}) } });
