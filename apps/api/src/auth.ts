@@ -31,7 +31,7 @@ const MODULE_ROUTES: [Module | Module[], RegExp][] = [
   ['olt', /^\/api\/(olt\/|onus(\/|$)|contracts\/[^/]+\/onu$)/],
   ['ipam', /^\/api\/(ipam\/|cgnat\/|contracts\/[^/]+\/(ips|ipv6)$)/],
   ['field', /^\/api\/(work-orders(\/|$)|stock\/|contracts\/[^/]+\/equipment$|agenda(\/|$)|surveys(\/|$)|portal\/surveys(\/|$))/],
-  [['crm', 'field'], /^\/api\/(catalogs(\/|$)|sla-policies(\/|$)|reports\/sla$)/],
+  [['crm', 'field'], /^\/api\/(sla-policies(\/|$)|reports\/sla$)/],
   ['ftth', /^\/api\/(ftth\/|contracts\/[^/]+\/ftth$)/],
   ['crm', /^\/api\/(leads(\/|$)|tickets(\/|$)|crm\/|portal\/tickets(\/|$))/],
   ['noc', /^\/api\/(noc\/|contracts\/[^/]+\/diagnosis$)/],

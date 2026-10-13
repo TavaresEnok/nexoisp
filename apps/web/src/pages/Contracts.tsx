@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { api, d, doc, dt, money, speed, useLoad, usePaged } from '../api';
+import { api, d, doc, download, dt, money, speed, useLoad, usePaged } from '../api';
 import { can, has, useMe } from '../App';
 import { ActionButton, Badge, Card, Field, Form, KV, Modal, Page, Pager, State, Tabs } from '../ui';
 import { ContractPop, ContractStates, Sessions } from './Atendimento';
@@ -11,7 +11,7 @@ import { WorkOrderList } from './Field';
 import { InfraPanel } from './Noc';
 import { ServicePanel } from './Service';
 
-const EVENT: Record<string, string> = { created: 'Contrato criado', plan_changed: 'Troca de plano', ended: 'Contrato encerrado', due_day_changed: 'Vencimento alterado' };
+const EVENT: Record<string, string> = { created: 'Contrato criado', plan_changed: 'Troca de plano', ended: 'Contrato encerrado', due_day_changed: 'Vencimento alterado', credit_restricted: 'Restrição de crédito', credit_released: 'Restrição de crédito retirada' };
 
 export function ContractForm({ subscriberId, contract, onDone, onCancel }: { subscriberId?: string; contract?: any; onDone: () => void; onCancel: () => void }) {
   const plans = useLoad<any[]>('/plans');
@@ -50,6 +50,7 @@ export function Contracts() {
       <select aria-label="Filtrar por situação" style={{ width: 150 }} value={status} onChange={(e) => setStatus(e.target.value)}>
         <option value="active">Vigentes</option><option value="ended">Encerrados</option><option value="">Todos</option>
       </select>
+      <ActionButton onClick={() => download(`/contracts?q=${encodeURIComponent(q)}${status ? `&status=${status}` : ''}&format=csv&limit=5000`, 'contratos.csv')}>Exportar CSV</ActionButton>
     </>}>
       <p className="muted small">Novos contratos são criados a partir da ficha do assinante.</p>
       <State loading={loading && !data} error={error} empty={data?.length === 0}>
@@ -80,6 +81,9 @@ export function ContractDetail() {
   const { me } = useMe();
   const { data: c, loading, error, reload } = useLoad<any>(`/contracts/${id}`);
   const [editing, setEditing] = useState(false);
+  const [ending, setEnding] = useState<{ reason_id: string; note: string } | null>(null);
+  const [credit, setCredit] = useState<{ restricted: boolean; note: string } | null>(null);
+  const reasons = useLoad<any[]>(ending ? '/catalogs?kind=end_reason' : null);
   const [tab, setTab] = useState('acesso');
   const w = can(me, 'contracts:write') && c?.status === 'active';
   const net = can(me, 'network:read');
@@ -90,8 +94,8 @@ export function ContractDetail() {
       sub={c && <span className="row">{c.plan_name}, {speed(c.down_kbps)}, {money(c.price_cents)} por mês {c.status === 'active' ? <Badge tone="green">Vigente</Badge> : <Badge>Encerrado em {d(c.end_date)}</Badge>}</span>}
       actions={w && <>
         <button onClick={() => setEditing(true)}>Trocar plano ou vencimento</button>
-        <ActionButton className="danger" confirm="Encerrar este contrato? A ação não pode ser desfeita."
-          onClick={async () => { await api(`/contracts/${id}`, { method: 'PATCH', body: { end: true } }); reload(); }}>Encerrar contrato</ActionButton>
+        {can(me, 'finance:write') && <button onClick={() => setCredit({ restricted: !c?.credit_restricted_at, note: '' })}>{c?.credit_restricted_at ? 'Retirar restrição de crédito' : 'Restrição de crédito'}</button>}
+        <button className="danger" onClick={() => setEnding({ reason_id: '', note: '' })}>Encerrar contrato</button>
       </>}>
       <State loading={loading} error={error}>
         {c && (<>
@@ -130,6 +134,30 @@ export function ContractDetail() {
                 ))}</tbody>
               </table>
             </Card>
+          )}
+          {ending && (
+            <Modal title="Encerrar contrato" onClose={() => setEnding(null)}>
+              <Form submit="Encerrar contrato" onCancel={() => setEnding(null)} onSubmit={async () => {
+                await api(`/contracts/${id}`, { method: 'PATCH', body: { end: true, end_reason_id: ending.reason_id || null, end_note: ending.note || null } });
+                setEnding(null); reload();
+              }}>
+                <p className="small muted">A ação não pode ser desfeita. O acesso deixa de ser autorizado.</p>
+                <Field label="Motivo" hint="Cadastre os motivos em Catálogos e SLA."><select value={ending.reason_id} onChange={(e) => setEnding({ ...ending, reason_id: e.target.value })}>
+                  <option value="">— não informar —</option>{reasons.data?.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}</select></Field>
+                <Field label="Observação (opcional)"><input value={ending.note} maxLength={300} onChange={(e) => setEnding({ ...ending, note: e.target.value })} /></Field>
+              </Form>
+            </Modal>
+          )}
+          {credit && (
+            <Modal title={credit.restricted ? 'Restrição de crédito' : 'Retirar restrição de crédito'} onClose={() => setCredit(null)}>
+              <Form submit="Confirmar" onCancel={() => setCredit(null)} onSubmit={async () => {
+                await api(`/contracts/${id}/credit-restriction`, { method: 'PUT', body: credit });
+                setCredit(null); reload();
+              }}>
+                <p className="small muted">É uma informação comercial: não bloqueia o acesso por si.</p>
+                <Field label="Motivo"><input value={credit.note} minLength={3} maxLength={300} required onChange={(e) => setCredit({ ...credit, note: e.target.value })} /></Field>
+              </Form>
+            </Modal>
           )}
           {editing && (
             <Modal title="Alterar contrato" onClose={() => setEditing(false)}>

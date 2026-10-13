@@ -64,6 +64,13 @@ Em Integrações: **Tokens** (um por aplicação, com o menor escopo possível; 
 assinatura, que também aparece uma vez). Revogar token ou pausar endpoint vale na hora. Entregas que esgotam as 6 tentativas ficam como "falhou" e são
 reenviadas pela tela Entregas. Contrato completo, eventos e verificação de assinatura: `docs/api-publica.md`.
 
+### Estados do contrato, anotações e exportação
+
+A ficha do contrato mostra a situação em três eixos: **comercial**, **acesso** e **velocidade**. "Aguardando confirmação do equipamento" significa que o pedido foi
+registrado mas o agente ainda não confirmou. Ao encerrar, escolha o motivo (cadastre em Catálogos e SLA → Motivo de encerramento). A restrição de crédito é só
+informativa. Anotações com "alertar ao abrir" aparecem em destaque na ficha do assinante. **Exportar CSV** (assinantes, contratos, faturas, OS) respeita o filtro da
+tela e fica na auditoria.
+
 ### Conferência antes de entrar em produção
 
 ```bash

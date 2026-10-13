@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { audit, guard, HttpError } from '../auth.js';
 import { paged, withScope } from '../db.js';
+import { assertCatalog } from '../sla.js';
 import { zDate, zPage, zSubscriber, zUuid } from '../validators.js';
 
 const SUB_COLS = ['name', 'document', 'email', 'phone', 'address_street', 'address_number', 'address_district',
@@ -202,7 +203,9 @@ export async function cadastroRoutes(app: FastifyInstance) {
     const b = z.object({
       plan_id: zUuid.optional(), due_day: z.number().int().min(1).max(28).optional(),
       notes: z.string().trim().max(2000).nullish(), end: z.boolean().optional(),
+      end_reason_id: zUuid.nullish(), end_note: z.string().trim().max(300).nullish(),
     }).parse(req.body);
+    if ((b.end_reason_id || b.end_note) && !b.end) throw new HttpError(400, 'motivo de encerramento só vale junto com o encerramento');
     return withScope(req.ctx.scope, async (c) => {
       const cur = (await c.query(`${CONTRACT_SELECT} where c.id = $1 for update of c`, [id])).rows[0];
       if (!cur) throw new HttpError(404, 'contrato não encontrado');
@@ -223,8 +226,10 @@ export async function cadastroRoutes(app: FastifyInstance) {
       }
       if (b.notes !== undefined) await c.query('update contracts set notes = $2 where id = $1', [id, b.notes || null]);
       if (b.end) {
-        await c.query(`update contracts set status = 'ended', end_date = current_date, updated_at = now() where id = $1`, [id]);
-        await hist('ended', {});
+        await assertCatalog(c, b.end_reason_id, 'end_reason', 'motivo de encerramento');
+        await c.query(`update contracts set status = 'ended', end_date = current_date, end_reason_id = $2, end_note = $3, updated_at = now() where id = $1`,
+          [id, b.end_reason_id ?? null, b.end_note || null]);
+        await hist('ended', { reason_id: b.end_reason_id ?? null, note: b.end_note ?? null });
       }
       await audit(c, req.ctx, b.end ? 'contract.end' : 'contract.update', 'contract', id, b);
       for (const h of contractChangeHooks) await h(c, req.ctx, id);

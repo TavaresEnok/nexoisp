@@ -11,7 +11,7 @@ import { zPage, zUuid } from '../validators.js';
  * Lote 4 de paridade: catálogos (F2), SLA (F3), agenda (F4), endereço de instalação por serviço (F6) e pesquisa
  * de satisfação (C7). Atendimento é por ocorrência e OS; nenhuma rota aqui recebe mensagem do assinante.
  */
-const KINDS = ['ticket_type', 'classification', 'root_cause', 'origin', 'os_reason'] as const;
+const KINDS = ['ticket_type', 'classification', 'root_cause', 'origin', 'os_reason', 'end_reason', 'note_type'] as const;
 const zName = z.string().trim().min(2).max(80);
 const zDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'use AAAA-MM-DD');
 

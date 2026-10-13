@@ -294,3 +294,10 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   webhook é validado contra endereços internos a cada entrega, mas ainda não houve teste contra um integrador real.
 - **Próxima ação:** F5/F7 (kit/auxiliares e comissão), C8–C10 (fidelidade, aditivos, descontos), D4–D8 (extrato e estados do contrato), R1–R4.
 
+### 13/10/2026 — estados do contrato com motivo, anotações com alerta e exportação CSV
+
+- **Entregue (testado, 112 testes da API passando):** situação do contrato em três eixos (comercial × acesso × velocidade) com motivo, modo e confirmação do equipamento;
+  motivo de encerramento por catálogo; restrição de crédito; anotações estruturadas com alerta; `?format=csv` nas listas principais com auditoria. Migração 030.
+- **Limites:** "negativado" é um marcador manual (sem integração com bureau); CSV tem teto de 5.000 linhas por arquivo.
+- **Próxima ação:** C8–C10 (fidelidade com multa, aditivos e mudança agendada, descontos), F5/F7, R1–R4, P3 (campos personalizados) e o modelo canônico ampliado de importação.
+

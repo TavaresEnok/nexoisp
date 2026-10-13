@@ -100,9 +100,9 @@ Entregue = implementado e coberto por teste automatizado. Nada aqui foi homologa
 
 | Situação | Itens |
 |---|---|
-| ✅ Entregue | D1, D2, D3, D9, D12, C1, C2, C3, C4, C6, C7, F1, F2, F3, F4, F6, P1, P2 |
-| 🟡 Parcial | D10 (lista online e exportação; falta a desconexão em lote, que exige operação nova do agente), C1 (só canal por HTTP genérico e de saída; sem SMS/WhatsApp nativo, ver abaixo) |
-| ⏳ Pendente | D4–D8, D11, C5, C8–C10, F5, F7, P3–P5, R1–R4 |
+| ✅ Entregue | D1, D2, D3, D4, D6, D7, D8, D9, D12, C1, C2, C3, C4, C6, C7, F1, F2, F3, F4, F6, P1, P2, P5 |
+| 🟡 Parcial | D5 (consumo por dia; faltam hora, semana e ano), D10 (lista online e exportação; falta a desconexão em lote, que exige operação nova do agente), C1 (só canal por HTTP genérico e de saída; sem SMS/WhatsApp nativo, ver abaixo) |
+| ⏳ Pendente | D11, C5, C8–C10, F5, F7, P3, P4, R1–R4 |
 
 **Lote 4 em detalhe (sem chat; tudo por ocorrência e OS):**
 - **F1 fluxo da OS:** aberta → em análise → aguardando agendamento (com motivo) → agendada → **em deslocamento** (exige técnico; grava a hora da saída) → em execução (grava o início) → concluída/cancelada. "Atribuída" é o responsável preenchido, não um estado.
@@ -111,6 +111,11 @@ Entregue = implementado e coberto por teste automatizado. Nada aqui foi homologa
 - **F4 agenda:** por técnico e dia (1 a 14 dias), com sobreposição apontada, fila "aguardando agendamento" e janelas livres no expediente.
 - **F6 endereço:** instalação por contrato e OS com origem registrada (cadastro, contrato ou informado); a OS guarda o endereço, então mudar o cadastro depois não a altera.
 - **C7 satisfação:** nasce ao concluir a OS, vale 30 dias, é respondida **no portal** (1 a 5 e comentário); a equipe vê média e respostas. Não há envio automático do convite: a régua de avisos hoje é por vencimento de fatura.
+
+**Lote 6 em detalhe:**
+- **D6/D7 estados:** três eixos separados na ficha do contrato — *comercial* (vigente, restrição de crédito, encerrado, com motivo do catálogo e observação), *acesso* (liberado, bloqueado, não provisionado; modo manual/automático, motivo, data e se o equipamento já confirmou) e *velocidade* (normal, reduzida). Restrição de crédito (negativado) é informação comercial e não bloqueia o acesso.
+- **D8 anotações:** tipo do catálogo, vínculo opcional a contrato, **alerta** em destaque ao abrir a ficha, arquivamento, e aparecem na linha do tempo.
+- **P5 exportação:** `?format=csv` nas listas de assinantes, contratos, faturas, OS, atendimentos, prospectos, estoque e auditoria, com a mesma permissão e filtro da tela; até 5.000 linhas por arquivo; texto que começaria fórmula é neutralizado; cada exportação vai para a auditoria.
 
 **P1 em detalhe (API pública e webhooks):** módulo `api`; token por aplicação com escopo e limite por minuto (no banco), repetição segura por `Idempotency-Key`,
 revogação imediata; leitura de assinantes/contratos/faturas e **abertura** de atendimento e OS (sem escolher responsável); webhooks assinados com HMAC-SHA256 e

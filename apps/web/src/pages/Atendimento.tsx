@@ -238,18 +238,61 @@ export function ContractPop({ contract, onChange }: { contract: any; onChange: (
 }
 
 /** Três situações separadas do contrato (comercial, acesso, velocidade): é o que o atendente precisa ver de relance. */
+/** Três eixos separados (comercial × acesso × velocidade), com motivo, modo e confirmação do equipamento. */
 export function ContractStates({ contract }: { contract: any }) {
+  const { data } = useLoad<any>(`/contracts/${contract.id}/states`, 10000);
+  if (!data) return <div className="row" style={{ gap: 6 }}><Badge>Carregando situação…</Badge></div>;
+  const { commercial: cm, access: ac, speed: sp } = data;
+  const MODE: Record<string, string> = { manual: 'manual', automatic: 'automático' };
+  const com = cm.state === 'ended' ? <Badge>Contrato encerrado</Badge> : cm.state === 'credit_restricted' ? <Badge tone="amber">Contrato vigente · restrição de crédito</Badge> : <Badge tone="green">Contrato vigente</Badge>;
+  const acc = ac.state === 'no_account' ? <Badge>Acesso não provisionado</Badge>
+    : ac.state === 'blocked' ? <Badge tone="red">Acesso bloqueado{ac.mode ? ` (${MODE[ac.mode]})` : ''}</Badge> : <Badge tone="green">Acesso liberado</Badge>;
+  return (
+    <div>
+      <div className="row" style={{ gap: 6 }}>
+        {com}{acc}
+        {ac.state !== 'no_account' && (sp.state === 'reduced' ? <Badge tone="amber">Velocidade reduzida{ac.cause === 'financial' ? ' por inadimplência' : ''}</Badge> : <Badge>Velocidade normal</Badge>)}
+      </div>
+      <div className="small muted" style={{ marginTop: 4 }}>
+        {cm.state === 'ended' && <>Encerrado em {d(cm.end_date)}{cm.end_reason ? ` · motivo: ${cm.end_reason}` : ''}{cm.end_note ? ` · ${cm.end_note}` : ''}. </>}
+        {cm.state === 'credit_restricted' && <>Restrição desde {dt(cm.credit_restricted_at)}. </>}
+        {ac.since && ac.state !== 'no_account' && (ac.state === 'blocked' || sp.state === 'reduced') && cm.state !== 'ended' &&
+          <>Desde {dt(ac.since)}{ac.reason ? ` · ${ac.reason}` : ''}{ac.applied === false ? ' · aguardando confirmação do equipamento' : ''}.</>}
+      </div>
+    </div>
+  );
+}
+/** Anotações estruturadas: as com alerta aparecem em destaque ao abrir a ficha. */
+export function SubscriberNotes({ subscriberId }: { subscriberId: string }) {
   const { me } = useMe();
-  const net = can(me, 'network:read');
-  const { data } = useLoad<any>(net ? `/contracts/${contract.id}/service` : null, 10000);
-  const r = data?.resource;
-  const commercial = contract.status === 'active' ? <Badge tone="green">Contrato vigente</Badge> : <Badge>Contrato encerrado</Badge>;
-  if (!net) return <div className="row" style={{ gap: 6 }}>{commercial}</div>;
-  const reduced = r?.desired_policy === 'suspended' && r?.desired_stage === 'reduced';
-  const access = !data ? <Badge>Acesso: carregando…</Badge> : !r || r.desired_version === 0 ? <Badge>Acesso não provisionado</Badge>
-    : reduced ? <Badge tone="green">Acesso liberado</Badge>
-    : r.desired_policy === 'suspended' ? <Badge tone="red">Acesso bloqueado</Badge> : <Badge tone="green">Acesso liberado</Badge>;
-  return <div className="row" style={{ gap: 6 }}>{commercial}{access}
-    {r && r.desired_version > 0 && (reduced ? <Badge tone="amber">Velocidade reduzida por inadimplência</Badge> : <Badge>Velocidade normal</Badge>)}</div>;
+  const w = can(me, 'subscribers:write');
+  const notes = useLoad<any[]>(`/subscribers/${subscriberId}/notes`);
+  const types = useLoad<any[]>(w ? '/catalogs?kind=note_type' : null);
+  const [f, setF] = useState({ body: '', alert: false, type_id: '' });
+  const alerts = notes.data?.filter((n) => n.alert) ?? [];
+  return (<>
+    {alerts.length > 0 && (
+      <div className="state" style={{ textAlign: 'left', borderColor: 'var(--amber, #b7791f)' }} role="alert">
+        <b>Atenção:</b> {alerts.map((n) => n.body).join(' · ')}
+      </div>
+    )}
+    <Card title="Anotações">
+      {w && (
+        <div className="row" style={{ marginBottom: 8, flexWrap: 'wrap' }}>
+          <input aria-label="Anotação" style={{ flex: 1, minWidth: 220 }} placeholder="Nova anotação…" value={f.body} maxLength={2000} onChange={(e) => setF({ ...f, body: e.target.value })} />
+          {types.data && types.data.length > 0 && <select aria-label="Tipo" style={{ width: 160 }} value={f.type_id} onChange={(e) => setF({ ...f, type_id: e.target.value })}><option value="">Sem tipo</option>{types.data.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select>}
+          <label className="row small"><input type="checkbox" style={{ width: 'auto' }} checked={f.alert} onChange={(e) => setF({ ...f, alert: e.target.checked })} /> alertar ao abrir</label>
+          <ActionButton className="primary" disabled={!f.body.trim()} onClick={async () => { await api(`/subscribers/${subscriberId}/notes`, { body: { body: f.body, alert: f.alert, type_id: f.type_id || null } }); setF({ body: '', alert: false, type_id: '' }); notes.reload(); }}>Anotar</ActionButton>
+        </div>
+      )}
+      <State empty={notes.data?.length === 0} emptyText="Sem anotações.">
+        <table><tbody>{notes.data?.map((n) => (
+          <tr key={n.id}><td style={{ whiteSpace: 'pre-wrap' }}>{n.alert && <Badge tone="amber">alerta</Badge>} {n.type_name && <Badge>{n.type_name}</Badge>} {n.body}
+            <div className="small muted">{dt(n.created_at)} · {n.created_by_name ?? 'sistema'}</div></td>
+            <td>{w && <ActionButton className="sm" onClick={async () => { await api(`/notes/${n.id}`, { method: 'PATCH', body: { archived: true } }); notes.reload(); }}>Arquivar</ActionButton>}</td></tr>
+        ))}</tbody></table>
+      </State>
+    </Card>
+  </>);
 }
 export { money, d };

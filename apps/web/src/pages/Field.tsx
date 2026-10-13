@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api, dt, useLoad, usePaged } from '../api';
+import { api, download, dt, useLoad, usePaged } from '../api';
 import { can, useMe } from '../App';
 import { ActionButton, Badge, Card, dialog, Field, Form, KV, Meter, Modal, Page, Pager, State, toastError } from '../ui';
 import { WorkOrderChecklist } from './Extras';
@@ -200,6 +200,7 @@ export function WorkOrderList({ subscriberId, contractId }: { subscriberId?: str
           <option value="pending">Em aberto</option><option value="">Todas</option>{Object.entries(WO_STATUS).map(([k, v]) => <option key={k} value={k}>{v[0]}</option>)}
         </select>
         <label className="row small"><input type="checkbox" style={{ width: 'auto' }} checked={mine} onChange={(e) => setMine(e.target.checked)} /> só as minhas</label>
+        <ActionButton className="sm" onClick={() => download(`/work-orders?${p}&format=csv&limit=5000`, 'ordens-de-servico.csv')}>Exportar CSV</ActionButton>
       </div>
       {table}{modals}
     </Page>

@@ -80,7 +80,7 @@ export async function atendimentoRoutes(app: FastifyInstance) {
         `select h.at, h.event, h.detail, h.contract_id, u.name as by from contract_history h join contracts k on k.id = h.contract_id left join users u on u.id = h.actor_id
          where k.subscriber_id = $1 order by h.at desc limit $2`, [id, lim])).rows,
       (r) => ({ at: r.at, kind: 'contract', contract_id: r.contract_id, by: r.by,
-        title: ({ created: 'Contrato criado', plan_changed: 'Troca de plano', ended: 'Contrato encerrado', due_day_changed: 'Vencimento alterado' } as any)[r.event] ?? r.event,
+        title: ({ created: 'Contrato criado', plan_changed: 'Troca de plano', ended: 'Contrato encerrado', due_day_changed: 'Vencimento alterado', credit_restricted: 'Restrição de crédito', credit_released: 'Restrição de crédito retirada' } as any)[r.event] ?? r.event,
         detail: r.detail?.from !== undefined ? `${r.detail.from} → ${r.detail.to}` : (r.detail?.plan ?? null) }));
       if (finance) {
         push((await c.query(
@@ -121,6 +121,10 @@ export async function atendimentoRoutes(app: FastifyInstance) {
         push((await c.query(
           `select t.id, t.number, t.subject, t.status, t.created_at, t.contract_id from tickets t where t.subscriber_id = $1 order by t.created_at desc limit $2`, [id, lim])).rows,
         (r) => ({ at: r.created_at, kind: 'ticket', contract_id: r.contract_id, ref: r.id, title: `Atendimento ${r.number}: ${r.subject}`, detail: r.status }));
+      push((await c.query(
+        `select n.id, n.created_at, n.body, n.alert, n.contract_id, u.name as by from subscriber_notes n left join users u on u.id = n.created_by
+         where n.subscriber_id = $1 order by n.created_at desc limit $2`, [id, lim])).rows,
+      (r) => ({ at: r.created_at, kind: 'note', contract_id: r.contract_id, by: r.by, ref: r.id, title: r.alert ? 'Anotação com alerta' : 'Anotação', detail: String(r.body).slice(0, 200) }));
       ev.sort((a, b) => +new Date(b.at) - +new Date(a.at));
       return ev.slice(0, lim);
     });

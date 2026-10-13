@@ -4,6 +4,7 @@ import { ActionButton, Badge, Card, Field, Form, Page, State } from '../ui';
 
 const KIND: Record<string, string> = {
   ticket_type: 'Tipo de ocorrência', classification: 'Classificação', root_cause: 'Causa-raiz', origin: 'Origem', os_reason: 'Motivo de OS',
+  end_reason: 'Motivo de encerramento de contrato', note_type: 'Tipo de anotação',
 };
 const WO_KIND: Record<string, string> = { install: 'Instalação', repair: 'Reparo', address_change: 'Mudança de endereço', removal: 'Retirada', other: 'Outro' };
 const PRIO: Record<string, string> = { low: 'baixa', normal: 'normal', high: 'alta' };

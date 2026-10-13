@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { api, d, doc, money, speed, useLoad, usePaged } from '../api';
+import { api, d, doc, download, money, speed, useLoad, usePaged } from '../api';
 import { can, has, useMe } from '../App';
-import { Badge, Card, Field, Form, KV, Modal, Page, Pager, State } from '../ui';
-import { Contacts, Timeline } from './Atendimento';
+import { ActionButton, Badge, Card, Field, Form, KV, Modal, Page, Pager, State } from '../ui';
+import { Contacts, SubscriberNotes, Timeline } from './Atendimento';
 import { ContractForm } from './Contracts';
 import { TicketList } from './Crm';
 import { WorkOrderList } from './Field';
@@ -66,6 +66,7 @@ export function Subscribers() {
   return (
     <Page title="Assinantes" actions={<>
       <input className="search" placeholder="Buscar por nome, documento, e-mail…" value={q} onChange={(e) => setQ(e.target.value)} />
+      <ActionButton onClick={() => download(`/subscribers?q=${encodeURIComponent(q)}&format=csv&limit=5000`, 'assinantes.csv')}>Exportar CSV</ActionButton>
       {can(me, 'subscribers:write') && <button className="primary" onClick={() => setCreating(true)}>Novo assinante</button>}
     </>}>
       <State loading={loading && !data} error={error} empty={data?.length === 0}>
@@ -141,6 +142,7 @@ export function SubscriberDetail() {
               </table>
             </State>
           </Card>
+          <SubscriberNotes subscriberId={s.id} />
           <Contacts subscriberId={s.id} />
           <Timeline subscriberId={s.id} />
           {can(me, 'crm:read') && has(me, 'crm') && <TicketList subscriberId={s.id} />}

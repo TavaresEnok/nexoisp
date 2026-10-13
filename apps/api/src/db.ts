@@ -43,7 +43,9 @@ export const noScope: DbScope = { tenantId: null, operator: false };
 
 /** Paginação opcional: ?limit=&offset=. O total vai no cabeçalho X-Total-Count; o corpo continua sendo a lista. */
 export async function paged(c: Tx, reply: { header: (k: string, v: string) => unknown }, sql: string, params: unknown[], q: { limit?: number; offset?: number }, max = 500) {
-  const limit = Math.min(q.limit ?? max, max), offset = q.offset ?? 0;
+  // exportação CSV aceita páginas maiores; a tela fica limitada a `max`
+  const cap = (reply as any).request?.query?.format === 'csv' ? 5000 : max;
+  const limit = Math.min(q.limit ?? cap, cap), offset = q.offset ?? 0;
   const rows = (await c.query(`select x.*, count(*) over() as _total from (${sql}) x limit ${limit} offset ${offset}`, params)).rows;
   let total = rows[0]?._total ?? 0;
   if (!rows.length && offset > 0) total = (await c.query(`select count(*) as n from (${sql}) x`, params)).rows[0].n;

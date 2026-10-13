@@ -205,6 +205,7 @@ export function Invoices() {
         <option value="">Todas</option><option value="open">Em aberto</option><option value="overdue">Vencidas</option>
         <option value="paid">Pagas</option><option value="reconciling">Em conciliação</option><option value="canceled">Canceladas</option>
       </select>
+      <ActionButton onClick={() => download(`/invoices?q=${encodeURIComponent(q)}${status ? `&status=${status}` : ''}&format=csv&limit=5000`, 'faturas.csv')}>Exportar CSV</ActionButton>
     </>}>
       {sum.data && (
         <div className="grid">
