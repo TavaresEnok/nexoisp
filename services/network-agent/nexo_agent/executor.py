@@ -30,9 +30,19 @@ def observation(st: AccountState) -> dict:
     return {"policy": st.policy if st.exists else "absent", "profile": st.profile, "session": st.session, "at": _now()}
 
 
+def block_profile(p) -> Optional[str]:
+    """Perfil de bloqueio quando a suspensão é por perfil; None na suspensão por rejeição e na conta ativa."""
+    return p.suspension.profile if p.policy == "suspended" and p.suspension and p.suspension.mode == "profile" else None
+
+
+def effective_profile(p) -> str:
+    """Perfil que o RADIUS deve entregar: o do plano, ou o de bloqueio durante a suspensão por perfil."""
+    return block_profile(p) or p.profile
+
+
 def authorization_matches(st: AccountState, env: Envelope) -> bool:
     p = env.parameters
-    return (st.exists and st.applied_version == env.desired_version and st.policy == p.policy and st.profile == p.profile
+    return (st.exists and st.applied_version == env.desired_version and st.policy == p.policy and st.profile == effective_profile(p)
             and st.framed_ip == p.framed_ip)
 
 
@@ -42,7 +52,11 @@ def needs_disconnect(st: AccountState, env: Envelope) -> bool:
         return False
     p = env.parameters
     if p.policy == "suspended":
-        return bool(p.suspension and p.suspension.session == "disconnect")
+        if not (p.suspension and p.suspension.session == "disconnect"):
+            return False
+        bp = block_profile(p)
+        # por perfil: a sessão só precisa cair se ainda usa o perfil de antes; reconectada no perfil de bloqueio, é o estado desejado
+        return st.session.get("profile") not in (None, bp) if bp else True
     if p.framed_ip and st.session.get("ip") not in (None, p.framed_ip):
         return True   # IP fixo novo só vale na próxima conexão: a sessão atual ainda usa o endereço antigo
     return st.session.get("profile") not in (None, p.profile)
@@ -82,7 +96,8 @@ class PppoeFamily:
             step("autorização local", "ok", "já aplicada nesta versão")
         else:
             try:
-                step("autorização local", "ok", driver.apply_authorization(p.username, secret=go.get("secret"), profile=p.profile, policy=p.policy, version=env.desired_version, framed_ip=p.framed_ip))
+                step("autorização local", "ok", driver.apply_authorization(p.username, secret=go.get("secret"), profile=p.profile, policy=p.policy, version=env.desired_version, framed_ip=p.framed_ip,
+                                                                       block_profile=block_profile(p)))
             except AckLost as e:
                 step("autorização local", "incerto", f"{e}; será verificado por consulta")
         checkpoint("EXECUTING")

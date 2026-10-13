@@ -238,7 +238,7 @@ export function FinanceSettings() {
   const [f, setF] = useState<any>(null);
   const [saved, setSaved] = useState(false);
   const [run, setRun] = useState<any>(null);
-  useEffect(() => { if (data) setF({ gateway: data.gateway, billing_auto: data.billing_auto, auto_suspend: data.auto_suspend, suspend_after_days: data.suspend_after_days ?? '', auto_resume_on_payment: data.auto_resume_on_payment }); }, [data]);
+  useEffect(() => { if (data) setF({ gateway: data.gateway, billing_auto: data.billing_auto, auto_suspend: data.auto_suspend, suspend_after_days: data.suspend_after_days ?? '', auto_resume_on_payment: data.auto_resume_on_payment, suspension_mode: data.suspension_mode ?? 'reject', suspension_profile: data.suspension_profile ?? '' }); }, [data]);
   const w = can(me, 'settings:manage');
   const chk = (k: string, label: string) => (
     <label className="row" style={{ marginBottom: 8 }}><input type="checkbox" style={{ width: 'auto' }} disabled={!w} checked={f[k]} onChange={(e) => setF({ ...f, [k]: e.target.checked })} /> {label}</label>
@@ -249,7 +249,7 @@ export function FinanceSettings() {
         {f && (
           <Card>
             <Form submit="Salvar política" onSubmit={async () => {
-              await api('/finance/settings', { method: 'PUT', body: { ...f, suspend_after_days: f.suspend_after_days === '' ? null : Number(f.suspend_after_days) } });
+              await api('/finance/settings', { method: 'PUT', body: { ...f, suspend_after_days: f.suspend_after_days === '' ? null : Number(f.suspend_after_days), suspension_profile: f.suspension_mode === 'profile' ? f.suspension_profile : null } });
               setSaved(true); reload();
             }}>
               <Field label="Gateway de pagamento" hint="Integração com gateway real ainda não homologada: depende da escolha do gateway e de credenciais de sandbox.">
@@ -260,12 +260,23 @@ export function FinanceSettings() {
               </Field>
               {chk('billing_auto', 'Gerar mensalidades automaticamente a cada mês')}
               <h3 style={{ margin: '14px 0 6px' }}>Suspensão por inadimplência</h3>
-              <p className="small muted" style={{ marginTop: 0 }}>Desativada por padrão. Só passa a agir depois de configurada aqui pelo provedor. Modalidade disponível: negar autenticação e encerrar a sessão.</p>
+              <p className="small muted" style={{ marginTop: 0 }}>Desativada por padrão. Só passa a agir depois de configurada aqui pelo provedor.</p>
               {chk('auto_suspend', 'Suspender automaticamente contratos com fatura vencida')}
               <Field label="Dias de atraso até a suspensão">
                 <input type="number" min="0" max="365" style={{ maxWidth: 160 }} disabled={!w || !f.auto_suspend} value={f.suspend_after_days} onChange={(e) => setF({ ...f, suspend_after_days: e.target.value })} required={f.auto_suspend} />
               </Field>
               {chk('auto_resume_on_payment', 'Reativar automaticamente quando o pagamento for confirmado')}
+              <Field label="Modalidade da suspensão" hint="Vale para suspensão manual e automática. Contrato encerrado sempre tem o acesso negado.">
+                <select disabled={!w} value={f.suspension_mode} onChange={(e) => setF({ ...f, suspension_mode: e.target.value })}>
+                  <option value="reject">Negar a autenticação e encerrar a sessão</option>
+                  <option value="profile">Manter conectado com o perfil de bloqueio do concentrador (aviso)</option>
+                </select>
+              </Field>
+              {f.suspension_mode === 'profile' && (
+                <Field label="Perfil de bloqueio no concentrador" hint="Nome exato do perfil PPP que já existe no concentrador (ex.: velocidade mínima e faixa de endereços de aviso). Exige agente 0.4.0 ou superior.">
+                  <input disabled={!w} value={f.suspension_profile} onChange={(e) => setF({ ...f, suspension_profile: e.target.value })} required pattern="[A-Za-z0-9_.\-]{1,60}" />
+                </Field>
+              )}
               {saved && <div className="small" style={{ color: 'var(--green)' }}>Política salva.</div>}
             </Form>
             {w && data.auto_suspend && (

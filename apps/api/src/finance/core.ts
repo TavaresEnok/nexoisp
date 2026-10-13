@@ -8,7 +8,8 @@ const SYS = (tenantId: string) => ({ tenantId, operator: false });
 
 export async function getSettings(c: Tx, tenantId: string) {
   return (await c.query('select * from tenant_settings where tenant_id = $1', [tenantId])).rows[0] ??
-    { tenant_id: tenantId, timezone: 'America/Sao_Paulo', gateway: 'none', billing_auto: false, auto_suspend: false, suspend_after_days: null, auto_resume_on_payment: false };
+    { tenant_id: tenantId, timezone: 'America/Sao_Paulo', gateway: 'none', billing_auto: false, auto_suspend: false, suspend_after_days: null, auto_resume_on_payment: false,
+      suspension_mode: 'reject', suspension_profile: null };
 }
 const sysAudit = (c: Tx, tenantId: string, action: string, entity: string, id: string | null, detail: object = {}, result = 'ok') =>
   c.query(`insert into audit_events (tenant_id, actor_type, actor_id, action, entity_type, entity_id, result, detail) values ($1,'system','billing',$2,$3,$4,$5,$6)`,

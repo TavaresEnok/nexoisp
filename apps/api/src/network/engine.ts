@@ -9,8 +9,17 @@ const RESERVE_LEASE_S = 45; // tempo para o agente chamar begin
 const EXEC_LEASE_S = 120; // tempo de execução sem sinal antes de considerar incerto
 const VALID_HOURS = 24;
 const MAX_ATTEMPTS = 5;
-/** Modalidade de suspensão de DEMONSTRAÇÃO (negar autenticação + derrubar sessão). A política comercial real é pendência do piloto. */
-export const DEMO_SUSPENSION = { mode: 'reject', session: 'disconnect' } as const;
+/** Modalidade padrão de suspensão: negar autenticação + derrubar sessão. */
+export const REJECT_SUSPENSION = { mode: 'reject', session: 'disconnect' } as const;
+export const DEMO_SUSPENSION = REJECT_SUSPENSION; // nome anterior
+/** Versão mínima do agente que entende a suspensão por perfil (o envelope com campo desconhecido é recusado por agentes antigos). */
+export const PROFILE_SUSPENSION_MIN_AGENT = '0.4.0';
+const semver = (v: string | null) => (v ?? '0').split('.').map((x) => parseInt(x, 10) || 0);
+export function agentAtLeast(version: string | null, min: string): boolean {
+  const a = semver(version), b = semver(min);
+  for (let i = 0; i < 3; i++) { if ((a[i] ?? 0) !== (b[i] ?? 0)) return (a[i] ?? 0) > (b[i] ?? 0); }
+  return true;
+}
 
 export interface Authz { type: 'user' | 'system'; id: string; reason?: string }
 
@@ -20,9 +29,9 @@ export interface Authz { type: 'user' | 'system'; id: string; reason?: string }
  */
 export async function requestOperation(c: Tx, tenantId: string, resourceId: string, action: Action, authz: Authz, idempotencyKey?: string) {
   const r = (await c.query(
-    `select r.*, k.status as contract_status, pv.profile_name, d.agent_id, d.name as device_name
+    `select r.*, k.status as contract_status, pv.profile_name, d.agent_id, d.name as device_name, ag.version as agent_version
      from service_resources r join contracts k on k.id = r.contract_id join plan_versions pv on pv.id = k.plan_version_id
-     join devices d on d.id = r.device_id where r.id = $1 for update of r`, [resourceId])).rows[0];
+     join devices d on d.id = r.device_id left join agents ag on ag.id = d.agent_id where r.id = $1 for update of r`, [resourceId])).rows[0];
   if (!r) throw new HttpError(404, 'conta PPPoE não encontrada');
   if (idempotencyKey) {
     const dup = (await c.query('select * from operations where idempotency_key = $1', [idempotencyKey])).rows[0];
@@ -45,10 +54,21 @@ export async function requestOperation(c: Tx, tenantId: string, resourceId: stri
   const validUntil = new Date(Date.now() + VALID_HOURS * 3600_000).toISOString();
   // IP fixo do contrato (IPAM). A chave só entra no envelope quando existe: agentes anteriores à 0.3.0 recusam campo desconhecido.
   const fixed = (await c.query(`select host(address) as ip from ip_allocations where contract_id = $1 and family(address) = 4 order by address limit 1`, [r.contract_id])).rows[0];
+  // Modalidade da suspensão: conta encerrada sempre nega o acesso; contrato ativo segue a política do provedor.
+  let suspension: Record<string, string> | null = null;
+  if (policy === 'suspended') {
+    suspension = { ...REJECT_SUSPENSION };
+    const s = (await c.query('select suspension_mode, suspension_profile from tenant_settings where tenant_id = $1', [tenantId])).rows[0];
+    if (s?.suspension_mode === 'profile' && r.contract_status === 'active') {
+      if (!agentAtLeast(r.agent_version, PROFILE_SUSPENSION_MIN_AGENT))
+        throw new HttpError(409, `o agente do equipamento "${r.device_name}" (versão ${r.agent_version ?? 'desconhecida'}) não suporta suspensão por perfil; atualize para ${PROFILE_SUSPENSION_MIN_AGENT} ou use a modalidade de rejeição`);
+      suspension = { mode: 'profile', profile: s.suspension_profile, session: 'disconnect' };
+    }
+  }
   const parameters = {
     username: r.pppoe_username, profile: r.profile_name, policy,
     secret_ref: action === 'subscriber.provision' ? `resource:${resourceId}` : null, // segredo nunca vai no envelope
-    suspension: policy === 'suspended' ? DEMO_SUSPENSION : null,
+    suspension: policy === 'suspended' ? suspension : null,
     ...(fixed ? { framed_ip: fixed.ip as string } : {}),
   };
   const key = idempotencyKey ?? `${resourceId}:v${version}`;

@@ -26,6 +26,8 @@ class DemoDriver:
         self._db = sqlite3.connect(path, isolation_level=None, check_same_thread=False)
         self._db.row_factory = sqlite3.Row
         self._db.executescript(SCHEMA)
+        if "by_profile" not in {r["name"] for r in self._db.execute("pragma table_info(accounts)")}:
+            self._db.execute("alter table accounts add column by_profile integer not null default 0")  # suspensão por perfil (0.4.0)
 
     # --- injeção de falhas para os cenários de recuperação ---
     def inject(self, name: str, times: int = 1):
@@ -56,28 +58,32 @@ class DemoDriver:
         fixed = self._db.execute("select framed_ip from account_ips where device_id = ? and username = ?", (self.device_id, username)).fetchone()
         fixed = fixed["framed_ip"] if fixed else None
         # CPE simulado: reconecta sozinho alguns segundos depois de autorizado
-        if not s and a["policy"] == "active" and time.time() - a["updated_at"] >= self.reconnect_after_s:
+        # suspensa por perfil de bloqueio a conta continua autenticando: o CPE reconecta já no perfil de bloqueio
+        if not s and (a["policy"] == "active" or a["by_profile"]) and time.time() - a["updated_at"] >= self.reconnect_after_s:
             ip = fixed or "100.64.%d.%d" % (int(hashlib.sha1(username.encode()).hexdigest(), 16) % 250, 1 + a["applied_version"] % 250)
             self._db.execute("insert or replace into sessions values (?,?,?,?,?)", (self.device_id, username, ip, a["profile"], time.time()))
             s = self._db.execute("select * from sessions where device_id = ? and username = ?", (self.device_id, username)).fetchone()
         session = {"online": True, "ip": s["ip"], "profile": s["profile"], "since": s["since"], "simulated": True} if s else None
         return AccountState(True, a["policy"], a["profile"], a["applied_version"], session, {"simulated": True}, framed_ip=fixed)
 
-    def apply_authorization(self, username: str, *, secret: Optional[str], profile: str, policy: str, version: int, framed_ip: Optional[str] = None) -> dict:
+    def apply_authorization(self, username: str, *, secret: Optional[str], profile: str, policy: str, version: int, framed_ip: Optional[str] = None,
+                            block_profile: Optional[str] = None) -> dict:
         if self._fault("fail_before_write"):
             raise ConnectionError("falha simulada antes da escrita")
         cur = self._db.execute("select secret_fp from accounts where device_id = ? and username = ?", (self.device_id, username)).fetchone()
         if secret is None and cur is None:
             raise ValueError("conta inexistente e segredo não fornecido")
         fp = hashlib.sha256(secret.encode()).hexdigest()[:12] if secret is not None else cur["secret_fp"]
-        self._db.execute("insert or replace into accounts values (?,?,?,?,?,?,?)", (self.device_id, username, fp, profile, policy, version, time.time()))
+        by_profile = policy == "suspended" and block_profile is not None
+        self._db.execute("insert or replace into accounts (device_id, username, secret_fp, profile, policy, applied_version, updated_at, by_profile) values (?,?,?,?,?,?,?,?)",
+                         (self.device_id, username, fp, block_profile if by_profile else profile, policy, version, time.time(), 1 if by_profile else 0))
         self._db.execute("delete from account_ips where device_id = ? and username = ?", (self.device_id, username))
         if framed_ip:
             self._db.execute("insert into account_ips values (?,?,?)", (self.device_id, username, framed_ip))
         self._db.execute("insert into writes (device_id, username, command, at) values (?,?,?,?)", (self.device_id, username, "authorization", time.time()))
         if self._fault("lose_ack"):
             raise AckLost("confirmação perdida (simulada) após aplicar a autorização")
-        return {"simulated": True, "policy": policy, "profile": profile}
+        return {"simulated": True, "policy": policy, "profile": block_profile if by_profile else profile}
 
     def disconnect(self, username: str) -> dict:
         n = self._db.execute("delete from sessions where device_id = ? and username = ?", (self.device_id, username)).rowcount

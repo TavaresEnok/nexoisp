@@ -30,16 +30,23 @@ export async function financeRoutes(app: FastifyInstance) {
     const b = z.object({
       gateway: z.enum(['none', 'demo']), billing_auto: z.boolean(), auto_suspend: z.boolean(),
       suspend_after_days: z.number().int().min(0).max(365).nullable(), auto_resume_on_payment: z.boolean(),
+      suspension_mode: z.enum(['reject', 'profile']).optional(),
+      suspension_profile: z.string().trim().regex(/^[A-Za-z0-9_.-]{1,60}$/, 'perfil: letras, números, _ . - (até 60)').nullish(),
     }).parse(req.body);
     if (b.gateway === 'demo' && !getGateway('demo')) throw new HttpError(400, 'gateway de demonstração não é permitido fora do modo demonstração');
     if (b.auto_suspend && b.suspend_after_days == null) throw new HttpError(400, 'informe após quantos dias de atraso a suspensão ocorre');
     return withScope(req.ctx.scope, async (c) => {
+      const cur = await getSettings(c, req.ctx.tenantId!);
+      const mode = b.suspension_mode ?? cur.suspension_mode;
+      const profile = b.suspension_profile !== undefined ? b.suspension_profile || null : cur.suspension_profile;
+      if (mode === 'profile' && !profile) throw new HttpError(400, 'informe o nome do perfil de bloqueio que existe no NAS');
       const s = (await c.query(
-        `insert into tenant_settings (tenant_id, gateway, billing_auto, auto_suspend, suspend_after_days, auto_resume_on_payment, updated_by)
-         values ($1,$2,$3,$4,$5,$6,$7)
+        `insert into tenant_settings (tenant_id, gateway, billing_auto, auto_suspend, suspend_after_days, auto_resume_on_payment, suspension_mode, suspension_profile, updated_by)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9)
          on conflict (tenant_id) do update set gateway = excluded.gateway, billing_auto = excluded.billing_auto, auto_suspend = excluded.auto_suspend,
-           suspend_after_days = excluded.suspend_after_days, auto_resume_on_payment = excluded.auto_resume_on_payment, updated_by = excluded.updated_by, updated_at = now()
-         returning *`, [req.ctx.tenantId, b.gateway, b.billing_auto, b.auto_suspend, b.suspend_after_days, b.auto_resume_on_payment, req.ctx.userId])).rows[0];
+           suspend_after_days = excluded.suspend_after_days, auto_resume_on_payment = excluded.auto_resume_on_payment,
+           suspension_mode = excluded.suspension_mode, suspension_profile = excluded.suspension_profile, updated_by = excluded.updated_by, updated_at = now()
+         returning *`, [req.ctx.tenantId, b.gateway, b.billing_auto, b.auto_suspend, b.suspend_after_days, b.auto_resume_on_payment, mode, mode === 'profile' ? profile : null, req.ctx.userId])).rows[0];
       await audit(c, req.ctx, 'finance.settings_update', 'tenant_settings', req.ctx.tenantId, b);
       return s;
     });

@@ -18,6 +18,8 @@ create table if not exists nexo_accounts (
   username text primary key, policy text not null, profile text not null, prev_profile text,
   applied_version integer not null, updated_at real not null);
 """
+# colunas acrescentadas depois da primeira versão do banco (agente 0.4.0); o ALTER é repetível
+EXTRA_COLUMNS = (("by_profile", "integer not null default 0"),)
 _UPTIME = re.compile(r"(?:(\d+)w)?(?:(\d+)d)?(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$")
 
 
@@ -45,8 +47,17 @@ class RadiusStore:
         if not self._db.execute("select 1 from sqlite_master where name = 'radcheck'").fetchone():
             raise RuntimeError(f"banco do RADIUS local não inicializado em {path} (suba o serviço radius primeiro)")
         self._db.executescript(SCHEMA)
+        have = {r["name"] for r in self._db.execute("pragma table_info(nexo_accounts)")}
+        for col, ddl in EXTRA_COLUMNS:
+            if col not in have:
+                self._db.execute(f"alter table nexo_accounts add column {col} {ddl}")
 
-    def apply(self, username: str, secret: Optional[str], profile: str, policy: str, version: int, framed_ip: Optional[str] = None):
+    def apply(self, username: str, secret: Optional[str], profile: str, policy: str, version: int, framed_ip: Optional[str] = None,
+              block_profile: Optional[str] = None):
+        """block_profile: suspensão por perfil. A conta continua autenticando e recebe o perfil de bloqueio (sem Auth-Type Reject).
+        `profile` é sempre o perfil do plano; o que o RADIUS entrega é o de bloqueio enquanto durar a suspensão."""
+        by_profile = policy == "suspended" and block_profile is not None
+        effective = block_profile if by_profile else profile
         db = self._db
         db.execute("begin immediate")
         try:
@@ -61,15 +72,16 @@ class RadiusStore:
             elif not db.execute("select 1 from radcheck where username = ? and attribute in ('Cleartext-Password','NT-Password')", (username,)).fetchone():
                 raise ValueError("conta sem credencial local e segredo não fornecido")
             db.execute("delete from radcheck where username = ? and attribute = 'Auth-Type'", (username,))
-            if policy == "suspended":  # modalidade 'reject': nega novas autenticações
+            if policy == "suspended" and not by_profile:  # modalidade 'reject': nega novas autenticações
                 db.execute("insert into radcheck (username, attribute, op, value) values (?, 'Auth-Type', ':=', 'Reject')", (username,))
             db.execute("delete from radreply where username = ? and attribute = 'Mikrotik-Group'", (username,))
-            db.execute("insert into radreply (username, attribute, op, value) values (?, 'Mikrotik-Group', ':=', ?)", (username, profile))
+            db.execute("insert into radreply (username, attribute, op, value) values (?, 'Mikrotik-Group', ':=', ?)", (username, effective))
             db.execute("delete from radreply where username = ? and attribute = 'Framed-IP-Address'", (username,))
             if framed_ip:  # IP fixo: o NAS usa este endereço em vez do pool dinâmico do perfil
                 db.execute("insert into radreply (username, attribute, op, value) values (?, 'Framed-IP-Address', ':=', ?)", (username, framed_ip))
-            prev = cur["profile"] if cur and cur["profile"] != profile else None
-            db.execute("insert or replace into nexo_accounts values (?,?,?,?,?,?)", (username, policy, profile, prev, version, time.time()))
+            prev = cur["profile"] if cur and cur["profile"] != effective else None
+            db.execute("insert or replace into nexo_accounts (username, policy, profile, prev_profile, applied_version, updated_at, by_profile) values (?,?,?,?,?,?,?)",
+                       (username, policy, effective, prev, version, time.time(), 1 if by_profile else 0))
             db.execute("commit")
         except Exception:
             db.execute("rollback")
@@ -83,7 +95,9 @@ class RadiusStore:
         rep = self._db.execute("select value from radreply where username = ? and attribute = 'Mikrotik-Group'", (username,)).fetchone()
         ip = self._db.execute("select value from radreply where username = ? and attribute = 'Framed-IP-Address'", (username,)).fetchone()
         acc = self._db.execute("select * from nexo_accounts where username = ?", (username,)).fetchone()
-        return {"policy": "suspended" if chk.get("Auth-Type") == "Reject" else "active", "profile": rep["value"] if rep else None,
+        # suspensa = rejeitada OU entregando o perfil de bloqueio que este agente gravou (se alguém trocar o perfil à mão, volta a "ativa")
+        by_profile = bool(acc and acc["by_profile"] and rep and rep["value"] == acc["profile"])
+        return {"policy": "suspended" if chk.get("Auth-Type") == "Reject" or by_profile else "active", "profile": rep["value"] if rep else None,
                 "framed_ip": ip["value"] if ip else None,
                 "applied_version": acc["applied_version"] if acc else None, "prev_profile": acc["prev_profile"] if acc else None,
                 "updated_at": acc["updated_at"] if acc else None}
@@ -208,9 +222,12 @@ class MikrotikRadiusDriver:
             session = {"online": None, "unknown": True, "error": str(e)[:200]}
         return AccountState(True, a["policy"], a["profile"], a["applied_version"], session, framed_ip=a["framed_ip"])
 
-    def apply_authorization(self, username: str, *, secret: Optional[str], profile: str, policy: str, version: int, framed_ip: Optional[str] = None) -> dict:
-        self.radius.apply(username, secret, profile, policy, version, framed_ip)
-        return {"radius": "radcheck/radreply atualizados", "policy": policy, "profile": profile, **({"framed_ip": framed_ip} if framed_ip else {})}
+    def apply_authorization(self, username: str, *, secret: Optional[str], profile: str, policy: str, version: int, framed_ip: Optional[str] = None,
+                            block_profile: Optional[str] = None) -> dict:
+        self.radius.apply(username, secret, profile, policy, version, framed_ip, block_profile)
+        return {"radius": "radcheck/radreply atualizados", "policy": policy, "profile": block_profile or profile,
+                **({"suspension": "perfil de bloqueio"} if block_profile and policy == "suspended" else {}),
+                **({"framed_ip": framed_ip} if framed_ip else {})}
 
     def disconnect(self, username: str) -> dict:
         return {"sessions_removed": self.sessions.remove(username)}

@@ -6,7 +6,7 @@ from typing import Literal, Optional, Union
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 SCHEMA_VERSION = 1
 
@@ -16,9 +16,17 @@ class EnvelopeError(Exception):
 
 
 class Suspension(BaseModel):
+    """reject: nega a autenticação. profile: a conta autentica com o perfil de bloqueio do NAS (agente 0.4.0+)."""
     model_config = ConfigDict(extra="forbid")
-    mode: Literal["reject"]
+    mode: Literal["reject", "profile"]
     session: Literal["disconnect", "keep"]
+    profile: Optional[str] = Field(default=None, pattern=r"^[A-Za-z0-9_.-]{1,60}$")
+
+    @model_validator(mode="after")
+    def _profile_iff_mode(self):
+        if (self.mode == "profile") != (self.profile is not None):
+            raise ValueError("suspension.profile é obrigatório no modo 'profile' e proibido no modo 'reject'")
+        return self
 
 
 class Parameters(BaseModel):
