@@ -249,3 +249,11 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   não está no pacote; (4) a **conferência de comportamento** exige a instância de homologação do provedor.
 - **Próxima ação do proprietário:** rodar `amostrar_formato.py` com um token de leitura criado só para isso (ou me enviar uma exportação/esquema em claro) e revogar os 7 tokens
   do README do espelho.
+
+### 13/10/2026 — capturas de tela do SGP e do IXC
+
+- **Entregue:** `docs/11-matriz-funcional-sgp-ixc.md`: matriz SGP × IXC × NexoISP por domínio, com o que as capturas mostraram do uso real e a prioridade atualizada.
+  Só estrutura; nenhum dado de cliente, login, IP ou equipamento das capturas foi copiado (conferido por busca). As capturas foram apagadas da pasta temporária.
+- **Limite:** do IXC chegaram 27 telas e o menu da wiki; as páginas "Recursos da API" e "Gerar token" não foram lidas (a wiki carrega por JavaScript).
+- **Próxima ação:** receber o texto dessas duas páginas, mais telas de financeiro/fiscal/contratos do IXC e como o IXC exporta dados; depois, o proprietário escolhe o primeiro
+  item da seção 5 da matriz (proposta: busca única com contexto e histórico de sessões com motivo de encerramento, que não dependem de terceiro).
