@@ -238,3 +238,14 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
 - **Conclusão:** o que mais separa o NexoISP do SGP **para o operador** é comunicação de cobrança, degraus de inadimplência por plano, SLA/catálogos de atendimento,
   agenda de OS e relatórios; **para o negócio**, gateway real, fiscal, homologação em equipamento e migração. Nenhum item novo entra antes do piloto.
 - **Próxima ação:** o proprietário escolhe a primeira onda (proposta: motor de avisos ao assinante). Pendências externas inalteradas.
+
+### 13/10/2026 — aproveitamento do material do SGP (autorizado: "pode fazer tudo")
+
+- **Entregue:** `docs/09-requisitos-historias.md` (histórias e critérios de aceite das ondas 1 a 3), `docs/10-migracao-sgp.md` (roteiro de migração, plano da camada de
+  compatibilidade e protocolo de conferência de comportamento) e `tools/sgp-migracao/` (cliente **somente leitura**, amostrador de formato e exportador para o CSV intermediário;
+  testados só contra servidor falso com dados sintéticos; rodam no CI).
+- **Não feito, e por quê:** (1) o **mapeamento real** e (2) a **camada de compatibilidade**, porque a documentação da API do SGP não traz o formato das respostas e adivinhar
+  geraria um importador que parece funcionar e grava errado; (3) o **backup cifrado** não foi aberto: a chave tem 256 bytes aleatórios (compatível com RSA-2048) e a chave privada
+  não está no pacote; (4) a **conferência de comportamento** exige a instância de homologação do provedor.
+- **Próxima ação do proprietário:** rodar `amostrar_formato.py` com um token de leitura criado só para isso (ou me enviar uma exportação/esquema em claro) e revogar os 7 tokens
+  do README do espelho.

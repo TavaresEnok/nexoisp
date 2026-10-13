@@ -54,6 +54,8 @@ jobs:
       - name: Testes do agente
         working-directory: services/network-agent
         run: python -m unittest discover -s tests -t .
+      - name: Ferramentas de migração do SGP (servidor falso, dados sintéticos)
+        run: python -I tools/sgp-migracao/tests/test_ferramentas.py
 
   interface:
     runs-on: ubuntu-24.04

@@ -1,0 +1,44 @@
+{
+  "_leia_me": "Valores '?' são NÃO CONFIRMADOS: preencha com os caminhos que o amostrar_formato.py mostrar. Caminho = chaves separadas por ponto; lista = índice (ex.: contratos.0.login). Nenhum nome de campo abaixo foi confirmado contra o SGP real.",
+  "assinantes": {
+    "endpoint": "/api/ura/clientes/",
+    "parametros": {},
+    "lista": "?",
+    "paginacao": {"tamanho": 100, "parametro_offset": "offset", "parametro_limite": "limit"},
+    "colunas": {
+      "id_externo": "?",
+      "nome": "?",
+      "cpf_cnpj": "?",
+      "email": "?",
+      "telefone": "?",
+      "logradouro": "?",
+      "numero": "?",
+      "bairro": "?",
+      "cidade": "?",
+      "uf": "?",
+      "cep": "?",
+      "situacao": "?",
+      "plano": "?",
+      "vencimento_dia": "?",
+      "pppoe_usuario": "?",
+      "pppoe_senha": "?"
+    },
+    "transformacoes": {
+      "situacao": {"1": "ativo", "7": "ativo", "*": "inativo"}
+    },
+    "avisar_se_lista_maior": {"contratos": 1}
+  },
+  "titulos": {
+    "endpoint": "/api/ura/titulos/",
+    "parametros": {"status": "abertos"},
+    "lista": "?",
+    "paginacao": {"tamanho": 100, "parametro_offset": "offset", "parametro_limite": "limit"},
+    "colunas": {
+      "id_externo": "?",
+      "id_externo_assinante": "?",
+      "vencimento": "?",
+      "valor": "?",
+      "descricao": "?"
+    }
+  }
+}
