@@ -11,7 +11,7 @@ import { contractChangeHooks } from './cadastro.js';
 export const AGENT_OFFLINE_S = 30;
 export const RESOURCE_SELECT = `
   select r.id, r.contract_id, r.device_id, r.pppoe_username, (r.secret_enc is not null) as has_secret,
-         r.desired_version, r.desired_policy, r.desired_profile, r.desired_reason, r.desired_at,
+         r.desired_version, r.desired_policy, r.desired_stage, r.desired_profile, r.desired_reason, r.desired_at,
          r.observed_policy, r.observed_profile, r.observed_session, r.observed_version, r.observed_at, r.mac,
          d.name as device_name, d.driver, d.maintenance, a.id as agent_id, a.name as agent_name, a.last_seen_at as agent_last_seen,
          (a.last_seen_at is not null and a.last_seen_at > now() - interval '${AGENT_OFFLINE_S} seconds') as agent_online,

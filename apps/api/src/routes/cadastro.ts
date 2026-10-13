@@ -113,6 +113,26 @@ export async function cadastroRoutes(app: FastifyInstance) {
     });
   });
 
+  /** Degraus de inadimplência do plano (não versionados: política de cobrança, não preço). Vazio = vale a política do provedor. */
+  app.put('/api/plans/:id/dunning', { preHandler: guard('plans:write') }, async (req) => {
+    const id = zUuid.parse((req.params as any).id);
+    const d = z.number().int().min(0).max(365).nullable();
+    const b = z.object({ warn_after_days: d, reduce_after_days: d, block_after_days: d,
+      reduced_profile: z.string().trim().regex(/^[A-Za-z0-9_.-]{1,60}$/, 'perfil: letras, números, _ . - (até 60)').nullable() }).parse(req.body);
+    const [w, r, bl] = [b.warn_after_days, b.reduce_after_days, b.block_after_days];
+    if ((w != null && r != null && w > r) || (r != null && bl != null && r > bl) || (w != null && bl != null && w > bl))
+      throw new HttpError(400, 'os dias devem crescer: aviso ≤ redução ≤ bloqueio');
+    if (r != null && !b.reduced_profile) throw new HttpError(400, 'informe o perfil de velocidade reduzida que existe no concentrador');
+    return withScope(req.ctx.scope, async (c) => {
+      const p = (await c.query(
+        `update plans set warn_after_days = $2, reduce_after_days = $3, block_after_days = $4, reduced_profile = $5 where id = $1 returning id, name, warn_after_days, reduce_after_days, block_after_days, reduced_profile`,
+        [id, w, r, bl, r != null ? b.reduced_profile : (b.reduced_profile || null)])).rows[0];
+      if (!p) throw new HttpError(404, 'plano não encontrado');
+      await audit(c, req.ctx, 'plan.dunning', 'plan', id, b);
+      return p;
+    });
+  });
+
   app.patch('/api/plans/:id', { preHandler: guard('plans:write') }, async (req) => {
     const id = zUuid.parse((req.params as any).id);
     const b = z.object({ name: z.string().trim().min(2).max(100).optional(), active: z.boolean().optional() }).parse(req.body);

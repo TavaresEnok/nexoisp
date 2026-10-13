@@ -1,11 +1,14 @@
 import { Link } from 'react-router-dom';
 import { money, useLoad } from '../api';
+import { can, useMe } from '../App';
 import { Card, Page, State } from '../ui';
+import { Panels } from './Cobranca';
 
 
 /** Início: primeiro o que pede ação de quem entrou; depois os números do provedor. */
 export function Dashboard() {
   const today = useLoad<any>('/today', 30000);
+  const { me } = useMe();
   const { data, loading, error } = useLoad('/dashboard');
   const first = today.data?.name?.split(' ')[0];
   const hour = new Date().getHours();
@@ -35,6 +38,7 @@ export function Dashboard() {
           </div>
         )}
       </State>
+      {can(me, 'network:read') && <Panels />}
     </Page>
   );
 }

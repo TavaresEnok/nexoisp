@@ -27,10 +27,11 @@ export interface Authz { type: 'user' | 'system'; id: string; reason?: string }
  * Grava a nova intenção (versão crescente) e a tarefa correspondente na MESMA transação.
  * Tarefas ainda não iniciadas da intenção anterior são marcadas SUPERSEDED.
  */
-export async function requestOperation(c: Tx, tenantId: string, resourceId: string, action: Action, authz: Authz, idempotencyKey?: string) {
+export async function requestOperation(c: Tx, tenantId: string, resourceId: string, action: Action, authz: Authz, idempotencyKey?: string,
+  opts: { stage?: 'reduced' | 'blocked' } = {}) {
   const r = (await c.query(
-    `select r.*, k.status as contract_status, pv.profile_name, d.agent_id, d.name as device_name, ag.version as agent_version
-     from service_resources r join contracts k on k.id = r.contract_id join plan_versions pv on pv.id = k.plan_version_id
+    `select r.*, k.status as contract_status, pv.profile_name, pl.reduced_profile, d.agent_id, d.name as device_name, ag.version as agent_version
+     from service_resources r join contracts k on k.id = r.contract_id join plan_versions pv on pv.id = k.plan_version_id join plans pl on pl.id = pv.plan_id
      join devices d on d.id = r.device_id left join agents ag on ag.id = d.agent_id where r.id = $1 for update of r`, [resourceId])).rows[0];
   if (!r) throw new HttpError(404, 'conta PPPoE não encontrada');
   if (idempotencyKey) {
@@ -44,8 +45,8 @@ export async function requestOperation(c: Tx, tenantId: string, resourceId: stri
   const policy = action === 'subscriber.suspend' ? 'suspended' : action === 'subscriber.resume' ? 'active' : r.desired_policy;
   const version = r.desired_version + 1;
   await c.query(
-    `update service_resources set desired_version = $2, desired_policy = $3, desired_profile = $4, desired_reason = $5, desired_at = now() where id = $1`,
-    [resourceId, version, policy, r.profile_name, authz.reason ?? null]);
+    `update service_resources set desired_version = $2, desired_policy = $3, desired_profile = $4, desired_reason = $5, desired_at = now(), desired_stage = $6 where id = $1`,
+    [resourceId, version, policy, r.profile_name, authz.reason ?? null, policy === 'suspended' ? (opts.stage ?? 'blocked') : null]);
   await c.query(
     `update operations set status = 'SUPERSEDED', finished_at = now(), updated_at = now(), note = 'substituída pela versão ' || $2 || ' antes de iniciar'
      where resource_id = $1 and status = 'PENDING'`, [resourceId, version]);
@@ -59,7 +60,13 @@ export async function requestOperation(c: Tx, tenantId: string, resourceId: stri
   if (policy === 'suspended') {
     suspension = { ...REJECT_SUSPENSION };
     const s = (await c.query('select suspension_mode, suspension_profile from tenant_settings where tenant_id = $1', [tenantId])).rows[0];
-    if (s?.suspension_mode === 'profile' && r.contract_status === 'active') {
+    if (opts.stage === 'reduced' && r.contract_status === 'active') {
+      // degrau de velocidade reduzida: a conta continua autenticando, com o perfil reduzido do plano
+      if (!r.reduced_profile) throw new HttpError(400, 'o plano não tem perfil de velocidade reduzida configurado');
+      if (!agentAtLeast(r.agent_version, PROFILE_SUSPENSION_MIN_AGENT))
+        throw new HttpError(409, `o agente do equipamento "${r.device_name}" (versão ${r.agent_version ?? 'desconhecida'}) não suporta velocidade reduzida; atualize para ${PROFILE_SUSPENSION_MIN_AGENT}`);
+      suspension = { mode: 'profile', profile: r.reduced_profile, session: 'disconnect' };
+    } else if (s?.suspension_mode === 'profile' && r.contract_status === 'active') {
       if (!agentAtLeast(r.agent_version, PROFILE_SUSPENSION_MIN_AGENT))
         throw new HttpError(409, `o agente do equipamento "${r.device_name}" (versão ${r.agent_version ?? 'desconhecida'}) não suporta suspensão por perfil; atualize para ${PROFILE_SUSPENSION_MIN_AGENT} ou use a modalidade de rejeição`);
       suspension = { mode: 'profile', profile: s.suspension_profile, session: 'disconnect' };

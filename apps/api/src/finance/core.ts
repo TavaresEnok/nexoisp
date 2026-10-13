@@ -179,33 +179,54 @@ export async function onInvoicePaid(c: Tx, inv: { tenant_id: string; contract_id
   await sysAudit(c, inv.tenant_id, 'service.auto_resume', 'service_resource', r.id, { invoice_id: inv.id, operation_id: op.id });
 }
 
-/** Suspensão automática: SOMENTE com política explicitamente configurada pelo provedor. */
+/**
+ * Degraus de inadimplência: SOMENTE com política explicitamente configurada pelo provedor.
+ * Por contrato: dias em atraso contra os limites do plano (reduzir, bloquear); sem limite no plano vale o do provedor.
+ * Só escala (normal → reduzida → bloqueada). A volta ao normal é pelo pagamento ou pela reativação.
+ */
 export async function autoSuspend(tenantId: string, contractId?: string): Promise<number> {
   return withScope(SYS(tenantId), async (c) => {
     const s = await getSettings(c, tenantId);
     if (!s.auto_suspend || s.suspend_after_days == null) return 0;
     const cands = (await c.query(
-      `select r.id as resource_id, min(i.due_date) as due, min(i.id::text) as invoice_id
+      `select r.id as resource_id, r.desired_policy, min(i.due_date) as due, min(i.id::text) as invoice_id,
+              ((now() at time zone $2)::date - min(i.due_date))::int as days_late,
+              pl.reduce_after_days, coalesce(pl.block_after_days, $1::int) as block_days
        from invoices i join service_resources r on r.contract_id = i.contract_id join contracts k on k.id = i.contract_id
-       where i.status = 'open' and i.due_date + $1::int < (now() at time zone $2)::date and r.desired_policy = 'active' and r.desired_version > 0 and k.status = 'active'
+       join plan_versions pv on pv.id = k.plan_version_id join plans pl on pl.id = pv.plan_id
+       where i.status = 'open' and i.due_date < (now() at time zone $2)::date and r.desired_version > 0 and k.status = 'active'
+         and (r.desired_policy = 'active' or (r.desired_policy = 'suspended' and r.desired_stage = 'reduced'))
          and not exists (select 1 from trust_releases t where t.contract_id = i.contract_id and t.status = 'active' and t.expires_at > now())
          and ($3::uuid is null or i.contract_id = $3)
-       group by r.id`, [s.suspend_after_days, s.timezone, contractId ?? null])).rows;
+       group by r.id, pl.id`, [s.suspend_after_days, s.timezone, contractId ?? null])).rows;
     let n = 0;
     for (const k of cands) {
+      const target: 'reduced' | 'blocked' | null = k.days_late > k.block_days ? 'blocked'
+        : (k.reduce_after_days != null && k.days_late > k.reduce_after_days ? 'reduced' : null);
+      if (!target) continue;
+      if (target === 'reduced' && k.desired_policy === 'suspended') continue;   // já está reduzida: nada a pedir de novo
       // revalida sob lock: a fatura pode ter sido paga entre a consulta e agora
       const inv = (await c.query(`select id, gateway, gateway_charge_id from invoices where id = $1 and status = 'open' for update`, [k.invoice_id])).rows[0];
       if (!inv) continue;
-      // antes de suspender, consulta o gateway: o evento de pagamento pode ter se perdido
+      // antes de agir, consulta o gateway: o evento de pagamento pode ter se perdido
       const gw = inv.gateway ? getGateway(inv.gateway) : null;
       if (gw && inv.gateway_charge_id) {
         for (const p of (await gw.getCharge(c, inv.gateway_charge_id))?.payments ?? []) await applyGatewayPayment(c, inv.id, inv.gateway, p, 'reconciliation');
         if ((await c.query('select status from invoices where id = $1', [inv.id])).rows[0].status !== 'open') continue;
       }
-      const op = await requestOperation(c, tenantId, k.resource_id, 'subscriber.suspend',
-        { type: 'system', id: 'billing.auto_suspend', reason: `${NONPAYMENT}: fatura vencida em ${String(k.due).split('-').reverse().join('/')}` });
-      await sysAudit(c, tenantId, 'service.auto_suspend', 'service_resource', k.resource_id, { invoice_id: k.invoice_id, operation_id: op.id, after_days: s.suspend_after_days });
-      n++;
+      const when = String(k.due).split('-').reverse().join('/');
+      try {
+        const op = await requestOperation(c, tenantId, k.resource_id, 'subscriber.suspend',
+          { type: 'system', id: target === 'reduced' ? 'billing.auto_reduce' : 'billing.auto_suspend',
+            reason: target === 'reduced' ? `${NONPAYMENT}: velocidade reduzida (fatura vencida em ${when})` : `${NONPAYMENT}: fatura vencida em ${when}` },
+          undefined, { stage: target });
+        await sysAudit(c, tenantId, target === 'reduced' ? 'service.auto_reduce' : 'service.auto_suspend', 'service_resource', k.resource_id,
+          { invoice_id: k.invoice_id, operation_id: op.id, after_days: target === 'reduced' ? k.reduce_after_days : k.block_days, days_late: k.days_late });
+        n++;
+      } catch (e) {
+        // plano sem perfil reduzido ou agente antigo: registra e segue com os demais contratos
+        await sysAudit(c, tenantId, 'service.auto_stage_skipped', 'service_resource', k.resource_id, { target, error: (e as Error).message }, 'error');
+      }
     }
     return n;
   });

@@ -7,6 +7,7 @@ import { HttpError } from './auth.js';
 import { pool } from './db.js';
 import { cadastroRoutes } from './routes/cadastro.js';
 import { atendimentoRoutes } from './routes/atendimento.js';
+import { relatoriosRoutes } from './routes/relatorios.js';
 import { extraRoutes } from './routes/extras.js';
 import { financeRoutes } from './routes/finance.js';
 import { identityRoutes } from './routes/identity.js';
@@ -50,6 +51,7 @@ export async function buildApp(opts: { logger?: boolean } = {}) {
   await app.register(cadastroRoutes);
   await app.register(extraRoutes);
   await app.register(atendimentoRoutes);
+  await app.register(relatoriosRoutes);
   await app.register(networkRoutes);
   await app.register(oltRoutes);
   await app.register(ipamRoutes);

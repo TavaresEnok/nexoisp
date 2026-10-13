@@ -245,8 +245,11 @@ export function ContractStates({ contract }: { contract: any }) {
   const r = data?.resource;
   const commercial = contract.status === 'active' ? <Badge tone="green">Contrato vigente</Badge> : <Badge>Contrato encerrado</Badge>;
   if (!net) return <div className="row" style={{ gap: 6 }}>{commercial}</div>;
+  const reduced = r?.desired_policy === 'suspended' && r?.desired_stage === 'reduced';
   const access = !data ? <Badge>Acesso: carregando…</Badge> : !r || r.desired_version === 0 ? <Badge>Acesso não provisionado</Badge>
-    : r.desired_policy === 'suspended' ? <Badge tone="red">Acesso suspenso</Badge> : <Badge tone="green">Acesso liberado</Badge>;
-  return <div className="row" style={{ gap: 6 }}>{commercial}{access}{r && r.desired_version > 0 && <Badge>Velocidade normal</Badge>}</div>;
+    : reduced ? <Badge tone="green">Acesso liberado</Badge>
+    : r.desired_policy === 'suspended' ? <Badge tone="red">Acesso bloqueado</Badge> : <Badge tone="green">Acesso liberado</Badge>;
+  return <div className="row" style={{ gap: 6 }}>{commercial}{access}
+    {r && r.desired_version > 0 && (reduced ? <Badge tone="amber">Velocidade reduzida por inadimplência</Badge> : <Badge>Velocidade normal</Badge>)}</div>;
 }
 export { money, d };

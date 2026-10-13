@@ -12,6 +12,7 @@ import { Import } from './pages/Import';
 import { Ipam } from './pages/Ipam';
 import { Login } from './pages/Login';
 import { Busca, Online, Pops, SearchBox } from './pages/Atendimento';
+import { Reports } from './pages/Cobranca';
 import { Maintenance } from './pages/Extras';
 import { Network, Operations } from './pages/Network';
 import { Noc } from './pages/Noc';
@@ -50,7 +51,8 @@ const NAV: { id: string; label: string; items: { to: string; label: string; icon
     { to: '/estoque', label: 'Estoque', icon: 'box', perm: 'stock:read', mod: 'field' }, { to: '/relatorios-atendimento', label: 'Relatórios', icon: 'chart', perm: 'crm:read', mod: 'crm' }] },
   { id: 'financeiro', label: 'Financeiro', items: [
     { to: '/faturas', label: 'Faturas', icon: 'receipt', perm: 'finance:read' }, { to: '/conciliacao', label: 'Conciliação', icon: 'scale', perm: 'finance:read' },
-    { to: '/politica-cobranca', label: 'Política de cobrança', icon: 'sliders', perm: 'finance:read' }] },
+    { to: '/politica-cobranca', label: 'Política de cobrança', icon: 'sliders', perm: 'finance:read' },
+    { to: '/relatorios-cobranca', label: 'Relatórios de cobrança', icon: 'chart', perm: 'finance:read' }] },
   { id: 'rede', label: 'Rede', items: [
     { to: '/noc', label: 'NOC', icon: 'pulse', perm: 'network:read', mod: 'noc' }, { to: '/rede', label: 'Agentes e equipamentos', icon: 'server', perm: 'network:read' },
     { to: '/onus', label: 'ONUs', icon: 'onu', perm: 'network:read', mod: 'olt' }, { to: '/ftth', label: 'Rede óptica', icon: 'fiber', perm: 'network:read', mod: 'ftth' },
@@ -154,6 +156,7 @@ export function App() {
               <Route path="/operacoes" element={<Operations />} />
               <Route path="/manutencoes" element={<Maintenance />} />
               <Route path="/busca" element={<Busca />} />
+              <Route path="/relatorios-cobranca" element={<Reports />} />
               <Route path="/online" element={<Online />} />
               <Route path="/pops" element={<Pops />} />
               <Route path="/noc" element={<Noc />} />

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { api, d, money, speed, useLoad } from '../api';
 import { can, useMe } from '../App';
 import { ActionButton, Badge, Field, Form, Modal, Page, State } from '../ui';
+import { DunningBadge, DunningForm } from './Cobranca';
 
 function PlanForm({ plan, onDone, onCancel }: { plan?: any; onDone: () => void; onCancel: () => void }) {
   const [name, setName] = useState(plan?.name ?? '');
@@ -50,13 +51,13 @@ function Versions({ plan, onClose }: { plan: any; onClose: () => void }) {
 export function Plans() {
   const { me } = useMe();
   const { data, loading, error, reload } = useLoad<any[]>('/plans');
-  const [modal, setModal] = useState<{ kind: 'new' | 'version' | 'history'; plan?: any } | null>(null);
+  const [modal, setModal] = useState<{ kind: 'new' | 'version' | 'history' | 'dunning'; plan?: any } | null>(null);
   const w = can(me, 'plans:write');
   return (
     <Page title="Planos" actions={w && <button className="primary" onClick={() => setModal({ kind: 'new' })}>Novo plano</button>}>
       <State loading={loading} error={error} empty={data?.length === 0}>
         <table>
-          <thead><tr><th>Plano</th><th className="num">Mensalidade</th><th>Velocidade</th><th>Perfil</th><th className="num">Contratos ativos</th><th>Situação</th><th></th></tr></thead>
+          <thead><tr><th>Plano</th><th className="num">Mensalidade</th><th>Velocidade</th><th>Perfil</th><th>Inadimplência</th><th className="num">Contratos ativos</th><th>Situação</th><th></th></tr></thead>
           <tbody>
             {data?.map((p) => (
               <tr key={p.id}>
@@ -64,11 +65,13 @@ export function Plans() {
                 <td className="num">{money(p.price_cents)}</td>
                 <td>{speed(p.down_kbps)} / {speed(p.up_kbps)}</td>
                 <td className="mono">{p.profile_name}</td>
+                <td><DunningBadge plan={p} /></td>
                 <td className="num">{p.active_contracts}</td>
                 <td>{p.active ? <Badge tone="green">Ativo</Badge> : <Badge>Inativo</Badge>}</td>
                 <td><div className="row" style={{ justifyContent: 'flex-end' }}>
                   <button className="sm" onClick={() => setModal({ kind: 'history', plan: p })}>Histórico</button>
                   {w && <button className="sm" onClick={() => setModal({ kind: 'version', plan: p })}>Alterar preço/velocidade</button>}
+                  {w && <button className="sm" onClick={() => setModal({ kind: 'dunning', plan: p })}>Degraus de cobrança</button>}
                   {w && <ActionButton className="sm" onClick={async () => { await api(`/plans/${p.id}`, { method: 'PATCH', body: { active: !p.active } }); reload(); }}>{p.active ? 'Desativar' : 'Ativar'}</ActionButton>}
                 </div></td>
               </tr>
@@ -78,6 +81,7 @@ export function Plans() {
       </State>
       {modal?.kind === 'new' && <Modal title="Novo plano" onClose={() => setModal(null)}><PlanForm onCancel={() => setModal(null)} onDone={() => { setModal(null); reload(); }} /></Modal>}
       {modal?.kind === 'version' && <Modal title={`Nova versão — ${modal.plan.name}`} onClose={() => setModal(null)}><PlanForm plan={modal.plan} onCancel={() => setModal(null)} onDone={() => { setModal(null); reload(); }} /></Modal>}
+      {modal?.kind === 'dunning' && <Modal title={`Degraus de cobrança — ${modal.plan.name}`} onClose={() => setModal(null)}><DunningForm plan={modal.plan} onCancel={() => setModal(null)} onDone={() => { setModal(null); reload(); }} /></Modal>}
       {modal?.kind === 'history' && <Versions plan={modal.plan} onClose={() => setModal(null)} />}
     </Page>
   );
