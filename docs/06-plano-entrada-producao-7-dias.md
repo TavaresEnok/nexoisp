@@ -257,3 +257,13 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
 - **Limite:** do IXC chegaram 27 telas e o menu da wiki; as páginas "Recursos da API" e "Gerar token" não foram lidas (a wiki carrega por JavaScript).
 - **Próxima ação:** receber o texto dessas duas páginas, mais telas de financeiro/fiscal/contratos do IXC e como o IXC exporta dados; depois, o proprietário escolhe o primeiro
   item da seção 5 da matriz (proposta: busca única com contexto e histórico de sessões com motivo de encerramento, que não dependem de terceiro).
+
+### 13/10/2026 — lista consolidada de paridade e migração
+
+- **Entregue:** `docs/12-plano-paridade-e-migracao.md`: o que já temos, o que dá para fazer **agora** sem terceiro (45 itens com ID e porte), a lista de paridade para quem sai
+  do SGP ou do IXC (dados, operação, integrações, migração), os bloqueios e a ordem. Base: todo o material enviado (capturas, espelho, APIs, backup).
+- **Achado nas últimas capturas:** o IXC separa **situação do contrato × situação de acesso × velocidade**; o SGP mostra **comandos de ONU** na ficha do serviço
+  (editar, histórico, reset, wifi, acesso externo, remover/reautorizar), gráficos de consumo por hora a ano e extrato de tráfego por período.
+- **Pontos que continuam travados:** backup cifrado do SGP, formato de backup do IXC, respostas das APIs, gateway real, fiscal e equipamento físico.
+- **Próxima ação do proprietário:** escolher entre começar pelos itens D1 a D3 (busca, linha do tempo, sessões), que não dependem de ninguém, ou aguardar o material que
+  destrava a migração.
