@@ -7,10 +7,11 @@ import { WorkOrderChecklist } from './Extras';
 
 export const WO_KIND: Record<string, string> = { install: 'Instalação', repair: 'Reparo', address_change: 'Mudança de endereço', removal: 'Retirada', other: 'Outro' };
 const WO_STATUS: Record<string, [string, 'gray' | 'green' | 'red' | 'amber' | 'blue']> = {
-  open: ['Aberta', 'amber'], scheduled: ['Agendada', 'blue'], in_progress: ['Em execução', 'blue'], done: ['Concluída', 'green'], canceled: ['Cancelada', 'gray'],
+  open: ['Aberta', 'amber'], analysis: ['Em análise', 'amber'], awaiting_schedule: ['Aguardando agendamento', 'amber'], scheduled: ['Agendada', 'blue'],
+  en_route: ['Em deslocamento', 'blue'], in_progress: ['Em execução', 'blue'], done: ['Concluída', 'green'], canceled: ['Cancelada', 'gray'],
 };
 export const WoBadge = ({ status }: { status: string }) => <Badge tone={WO_STATUS[status]?.[1]}>{WO_STATUS[status]?.[0] ?? status}</Badge>;
-const WO_EVENT: Record<string, string> = { created: 'Aberta', status: 'Situação', assigned: 'Responsável', scheduled: 'Agendamento', note: 'Anotação', material: 'Material' };
+const WO_EVENT: Record<string, string> = { created: 'Aberta', status: 'Situação', assigned: 'Responsável', scheduled: 'Agendamento', note: 'Anotação', material: 'Material', sla_breached: 'SLA vencido' };
 const toLocal = (s?: string | null) => { if (!s) return ''; const x = new Date(s); return new Date(x.getTime() - x.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
 const toIso = (s: string) => (s ? new Date(s).toISOString() : null);
 
@@ -41,10 +42,12 @@ export function SubscriberPick({ value, onChange }: { value: { subscriber_id: st
 export function WorkOrderForm({ subscriberId, contractId, ticketId, onDone, onCancel }: { subscriberId?: string; contractId?: string; ticketId?: string; onDone: (w: any) => void; onCancel: () => void }) {
   const staff = useLoad<any[]>('/staff');
   const [who, setWho] = useState({ subscriber_id: subscriberId ?? '', contract_id: contractId ?? '' });
-  const [f, setF] = useState({ kind: 'repair', description: '', assignee_id: '', scheduled_for: '' });
+  const [f, setF] = useState({ kind: 'repair', description: '', assignee_id: '', scheduled_for: '', reason_id: '', address_origin: 'subscriber', address_text: '', estimated_minutes: '60' });
+  const reasons = useLoad<any[]>('/catalogs?kind=os_reason');
   return (
     <Form submit="Abrir ordem de serviço" onCancel={onCancel} onSubmit={async () => {
-      onDone(await api('/work-orders', { body: { ...f, ...who, contract_id: who.contract_id || null, assignee_id: f.assignee_id || null, scheduled_for: toIso(f.scheduled_for), ticket_id: ticketId ?? null } }));
+      onDone(await api('/work-orders', { body: { ...f, ...who, contract_id: who.contract_id || null, assignee_id: f.assignee_id || null, scheduled_for: toIso(f.scheduled_for), ticket_id: ticketId ?? null,
+        reason_id: f.reason_id || null, estimated_minutes: Number(f.estimated_minutes) || 60, address_text: f.address_origin === 'manual' ? f.address_text : null } }));
     }}>
       {!subscriberId && <SubscriberPick value={who} onChange={setWho} />}
       <div className="cols3">
@@ -52,6 +55,13 @@ export function WorkOrderForm({ subscriberId, contractId, ticketId, onDone, onCa
         <Field label="Responsável"><select value={f.assignee_id} onChange={(e) => setF({ ...f, assignee_id: e.target.value })}><option value="">— a definir —</option>{staff.data?.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}</select></Field>
         <Field label="Agendar para"><input type="datetime-local" value={f.scheduled_for} onChange={(e) => setF({ ...f, scheduled_for: e.target.value })} /></Field>
       </div>
+      <div className="cols3">
+        <Field label="Motivo (catálogo)"><select value={f.reason_id} onChange={(e) => setF({ ...f, reason_id: e.target.value })}><option value="">—</option>{reasons.data?.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}</select></Field>
+        <Field label="Endereço do serviço"><select value={f.address_origin} onChange={(e) => setF({ ...f, address_origin: e.target.value })}>
+          <option value="subscriber">Endereço do cadastro</option><option value="contract" disabled={!who.contract_id}>Instalação do contrato</option><option value="manual">Informar outro</option></select></Field>
+        <Field label="Duração estimada (min)"><input type="number" min="5" max="1440" value={f.estimated_minutes} onChange={(e) => setF({ ...f, estimated_minutes: e.target.value })} /></Field>
+      </div>
+      {f.address_origin === 'manual' && <Field label="Endereço completo"><input value={f.address_text} onChange={(e) => setF({ ...f, address_text: e.target.value })} required minLength={5} maxLength={300} /></Field>}
       <Field label="O que precisa ser feito"><textarea rows={3} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} required /></Field>
     </Form>
   );
@@ -68,7 +78,7 @@ export function WorkOrderDetail({ id, onClose }: { id: string; onClose: () => vo
   const [sn, setSn] = useState('');
   const found = useLoad<any[]>(can(me, 'stock:read') && sn.trim().length >= 3 ? `/stock/units?serial=${encodeURIComponent(sn.trim())}` : null);
   const write = can(me, 'os:write') && w && !['done', 'canceled'].includes(w.status);
-  const status = (s: string, resolution?: string) => async () => { await api(`/work-orders/${id}/status`, { body: { status: s, resolution } }); setRes(''); await reload(); };
+  const status = (s: string, resolution?: string, reason?: string) => async () => { await api(`/work-orders/${id}/status`, { body: { status: s, resolution, reason } }); setRes(''); await reload(); };
   const patch = async (body: any) => { await api(`/work-orders/${id}`, { method: 'PATCH', body }); await reload(); };
   return (
     <Modal title={w ? `OS ${w.number} — ${WO_KIND[w.kind]}` : 'Ordem de serviço'} onClose={onClose} wide>
@@ -76,16 +86,26 @@ export function WorkOrderDetail({ id, onClose }: { id: string; onClose: () => vo
         {w && (<>
           <KV items={[
             ['Situação', <WoBadge status={w.status} />], ['Assinante', <Link to={`/assinantes/${w.subscriber_id}`}>{w.subscriber_name}</Link>], ['Telefone', w.subscriber_phone],
-            ['Endereço', w.subscriber_address || '—'], ['Contrato', w.contract_id ? <Link to={`/contratos/${w.contract_id}`}>abrir</Link> : '—'],
+            ['Endereço', <>{w.service_address || '—'}{w.address_origin !== 'subscriber' && <span className="muted small"> ({w.address_origin === 'contract' ? 'instalação do contrato' : 'informado na OS'})</span>}</>], ['Contrato', w.contract_id ? <Link to={`/contratos/${w.contract_id}`}>abrir</Link> : '—'],
             ['Aberta', <>{dt(w.created_at)} <span className="muted small">por {w.created_by_name ?? 'sistema'}</span></>],
             ['Responsável', write ? <select aria-label="Responsável" value={w.assignee_id ?? ''} onChange={(e) => patch({ assignee_id: e.target.value || null }).catch((x) => toastError(x))}><option value="">— a definir —</option>{staff.data?.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}</select> : w.assignee_name],
             ['Agendada para', write ? <input aria-label="Agendada para" type="datetime-local" defaultValue={toLocal(w.scheduled_for)} onBlur={(e) => { if (e.target.value !== toLocal(w.scheduled_for)) patch({ scheduled_for: toIso(e.target.value) }).catch((x) => toastError(x)); }} /> : dt(w.scheduled_for)],
           ]} />
+          {(w.en_route_at || w.started_at || w.awaiting_reason || w.sla_due_at) && (
+            <p className="small muted">
+              {w.awaiting_reason && <>Aguardando: {w.awaiting_reason}. </>}
+              {w.en_route_at && <>Saiu para o local {dt(w.en_route_at)}. </>}{w.started_at && <>Execução iniciada {dt(w.started_at)}. </>}
+              {w.sla_due_at && <>Prazo (SLA): {dt(w.sla_due_at)}{w.sla_breached && <> <Badge tone="red">vencido</Badge></>}</>}
+            </p>
+          )}
           <p style={{ whiteSpace: 'pre-wrap' }}>{w.description}</p>
           {w.resolution && <div className="state" style={{ textAlign: 'left' }}><b>{w.status === 'canceled' ? 'Motivo do cancelamento' : 'O que foi feito'}:</b> {w.resolution}</div>}
           {write && (
             <div className="row" style={{ margin: '10px 0' }}>
-              {w.status !== 'in_progress' && <ActionButton className="primary" onClick={status('in_progress')}>Iniciar execução</ActionButton>}
+              {w.status === 'open' && <ActionButton onClick={status('analysis')}>Em análise</ActionButton>}
+              {['open', 'analysis', 'scheduled'].includes(w.status) && <ActionButton onClick={status('awaiting_schedule', undefined, res || undefined)}>Aguardando agendamento</ActionButton>}
+              {['open', 'analysis', 'scheduled'].includes(w.status) && <ActionButton disabled={!w.assignee_id} title={w.assignee_id ? '' : 'Defina o responsável antes'} onClick={status('en_route')}>Saí para o local</ActionButton>}
+              {w.status !== 'in_progress' && w.status !== 'awaiting_schedule' && <ActionButton className="primary" onClick={status('in_progress')}>Iniciar execução</ActionButton>}
               {w.status === 'in_progress' && <ActionButton onClick={status('open')}>Devolver para a fila</ActionButton>}
               <input style={{ flex: 1, minWidth: 220 }} value={res} onChange={(e) => setRes(e.target.value)} placeholder={w.status === 'in_progress' ? 'O que foi feito (para concluir) ou motivo (para cancelar)' : 'Motivo do cancelamento'} />
               {w.status === 'in_progress' && <ActionButton className="primary" disabled={!res.trim()} onClick={status('done', res)}>Concluir</ActionButton>}
@@ -159,7 +179,7 @@ export function WorkOrderList({ subscriberId, contractId }: { subscriberId?: str
         <tbody>{list.data?.map((o) => (
           <tr key={o.id}><td className="mono">{o.number}</td><td>{WO_KIND[o.kind]}</td>{!subscriberId && <td><Link to={`/assinantes/${o.subscriber_id}`}>{o.subscriber_name}</Link></td>}
             <td><WoBadge status={o.status} /></td>
-            <td className="small">{o.scheduled_for ? <>{dt(o.scheduled_for)} {['open', 'scheduled'].includes(o.status) && new Date(o.scheduled_for) < new Date() && <Badge tone="red">vencida</Badge>}</> : '—'}</td>
+            <td className="small">{o.scheduled_for ? <>{dt(o.scheduled_for)} {['open', 'analysis', 'scheduled', 'en_route'].includes(o.status) && new Date(o.scheduled_for) < new Date() && <Badge tone="red">vencida</Badge>}</> : '—'}</td>
             <td className="small">{o.assignee_name ?? '—'}</td><td className="small" style={{ maxWidth: 320 }}>{o.description.slice(0, 90)}</td>
             <td><button className="sm" onClick={() => setOpen(o.id)}>abrir</button></td></tr>
         ))}</tbody>
@@ -202,7 +222,7 @@ export function MyWork() {
             <div style={{ fontSize: 16 }}><b>{o.subscriber_name}</b></div>
             {o.subscriber_address && <div>{o.subscriber_address} · <a href={map(o)} target="_blank" rel="noreferrer">mapa</a></div>}
             {o.subscriber_phone && <div><a href={`tel:${o.subscriber_phone}`}>{o.subscriber_phone}</a></div>}
-            {o.scheduled_for && <div className="small">Agendada: {dt(o.scheduled_for)} {['open', 'scheduled'].includes(o.status) && new Date(o.scheduled_for) < new Date() && <Badge tone="red">vencida</Badge>}</div>}
+            {o.scheduled_for && <div className="small">Agendada: {dt(o.scheduled_for)} {['open', 'analysis', 'scheduled', 'en_route'].includes(o.status) && new Date(o.scheduled_for) < new Date() && <Badge tone="red">vencida</Badge>}</div>}
             <p style={{ whiteSpace: 'pre-wrap', margin: '8px 0' }}>{o.description}</p>
             <button className="primary big" onClick={() => setOpen(o.id)}>{o.status === 'in_progress' ? 'Continuar atendimento' : 'Abrir'}</button>
           </section>

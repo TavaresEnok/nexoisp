@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { audit, guard, HttpError, type Ctx } from '../auth.js';
 import { nextNumber, paged, withScope, type Tx } from '../db.js';
 import { assertSafeWebhookUrl, deliverNotifications, queueNotice, sendTestNotice } from '../notify.js';
+import { applySla, assertCatalog } from '../sla.js';
 import { zDate, zDocument, zPage, zSubscriber, zUuid } from '../validators.js';
 
 /** Expansão 4: CRM — prospectos (funil) e atendimentos (protocolos), inclusive abertos pelo assinante no portal. */
@@ -34,11 +35,15 @@ async function staff(c: Tx, id: string | null) {
 const leadEvent = (c: Tx, ctx: Ctx, id: string, event: string, detail: object = {}) =>
   c.query(`insert into lead_events (tenant_id, lead_id, actor_id, event, detail) values ($1,$2,$3,$4,$5)`, [ctx.tenantId, id, ctx.userId, event, JSON.stringify(detail)]);
 
-async function openTicket(c: Tx, ctx: Ctx, t: { subscriber_id: string; contract_id: string | null; subject: string; category: string; priority: string; body: string; origin: 'staff' | 'portal' }) {
+async function openTicket(c: Tx, ctx: Ctx, t: { subscriber_id: string; contract_id: string | null; subject: string; category: string; priority: string; body: string; origin: 'staff' | 'portal';
+  type_id?: string | null; classification_id?: string | null; origin_id?: string | null }) {
   const number = await nextNumber(c, ctx.tenantId!, 'ticket');
   const row = (await c.query(
-    `insert into tickets (tenant_id, number, subscriber_id, contract_id, subject, category, priority, origin, created_by) values ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning *`,
-    [ctx.tenantId, number, t.subscriber_id, t.contract_id, t.subject, t.category, t.priority, t.origin, ctx.userId])).rows[0];
+    `insert into tickets (tenant_id, number, subscriber_id, contract_id, subject, category, priority, origin, created_by, type_id, classification_id, origin_id)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) returning *`,
+    [ctx.tenantId, number, t.subscriber_id, t.contract_id, t.subject, t.category, t.priority, t.origin, ctx.userId, t.type_id ?? null, t.classification_id ?? null, t.origin_id ?? null])).rows[0];
+  await applySla(c, 'ticket', row.id);
+  Object.assign(row, (await c.query('select sla_policy_id, sla_due_at from tickets where id = $1', [row.id])).rows[0]);
   await c.query(`insert into ticket_messages (tenant_id, ticket_id, author_id, author_kind, body) values ($1,$2,$3,$4,$5)`,
     [ctx.tenantId, row.id, ctx.userId, t.origin === 'portal' ? 'subscriber' : 'staff', t.body]);
   return row;
@@ -178,8 +183,12 @@ export async function crmRoutes(app: FastifyInstance) {
 
   app.post('/api/tickets', { preHandler: guard('crm:write') }, async (req) => {
     const b = z.object({ subscriber_id: zUuid, contract_id: zUuid.nullish(), subject: zText(200), category: zCategory,
-      priority: z.enum(['low', 'normal', 'high']).default('normal'), body: zText(4000) }).parse(req.body);
+      priority: z.enum(['low', 'normal', 'high']).default('normal'), body: zText(4000),
+      type_id: zUuid.nullish(), classification_id: zUuid.nullish(), origin_id: zUuid.nullish() }).parse(req.body);
     return withScope(req.ctx.scope, async (c) => {
+      await assertCatalog(c, b.type_id, 'ticket_type', 'tipo');
+      await assertCatalog(c, b.classification_id, 'classification', 'classificação');
+      await assertCatalog(c, b.origin_id, 'origin', 'origem');
       if (!(await c.query('select 1 from subscribers where id = $1', [b.subscriber_id])).rowCount) throw new HttpError(400, 'assinante não encontrado');
       if (b.contract_id && !(await c.query('select 1 from contracts where id = $1 and subscriber_id = $2', [b.contract_id, b.subscriber_id])).rowCount)
         throw new HttpError(400, 'o contrato não pertence a este assinante');
@@ -191,13 +200,24 @@ export async function crmRoutes(app: FastifyInstance) {
 
   app.patch('/api/tickets/:id', { preHandler: guard('crm:write') }, async (req) => {
     const id = zUuid.parse((req.params as any).id);
-    const b = z.object({ assignee_id: zUuid.nullish(), priority: z.enum(['low', 'normal', 'high']).optional(), category: zCategory.optional() }).parse(req.body);
+    const b = z.object({ assignee_id: zUuid.nullish(), priority: z.enum(['low', 'normal', 'high']).optional(), category: zCategory.optional(),
+      type_id: zUuid.nullish(), classification_id: zUuid.nullish(), root_cause_id: zUuid.nullish() }).parse(req.body);
     return withScope(req.ctx.scope, async (c) => {
       if (b.assignee_id) await staff(c, b.assignee_id);
+      await assertCatalog(c, b.type_id, 'ticket_type', 'tipo');
+      await assertCatalog(c, b.classification_id, 'classification', 'classificação');
+      await assertCatalog(c, b.root_cause_id, 'root_cause', 'causa-raiz');
       const t = (await c.query(
-        `update tickets set assignee_id = case when $2 then $3 else assignee_id end, priority = coalesce($4, priority), category = coalesce($5, category), updated_at = now() where id = $1 returning *`,
-        [id, b.assignee_id !== undefined, b.assignee_id ?? null, b.priority ?? null, b.category ?? null])).rows[0];
+        `update tickets set assignee_id = case when $2 then $3 else assignee_id end, priority = coalesce($4, priority), category = coalesce($5, category),
+           type_id = case when $6 then $7 else type_id end, classification_id = case when $8 then $9 else classification_id end,
+           root_cause_id = case when $10 then $11 else root_cause_id end, updated_at = now() where id = $1 returning *`,
+        [id, b.assignee_id !== undefined, b.assignee_id ?? null, b.priority ?? null, b.category ?? null,
+          b.type_id !== undefined, b.type_id ?? null, b.classification_id !== undefined, b.classification_id ?? null, b.root_cause_id !== undefined, b.root_cause_id ?? null])).rows[0];
       if (!t) throw new HttpError(404, 'atendimento não encontrado');
+      if (b.priority !== undefined || b.type_id !== undefined) {
+        await applySla(c, 'ticket', id);
+        Object.assign(t, (await c.query('select sla_policy_id, sla_due_at, sla_breached_at from tickets where id = $1', [id])).rows[0]);
+      }
       await audit(c, req.ctx, 'ticket.update', 'ticket', id, b);
       return t;
     });

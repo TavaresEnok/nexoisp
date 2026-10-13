@@ -8,6 +8,7 @@ import { pool } from './db.js';
 import { cadastroRoutes } from './routes/cadastro.js';
 import { atendimentoRoutes } from './routes/atendimento.js';
 import { avisosAssinanteRoutes } from './routes/avisos-assinante.js';
+import { fluxoOsRoutes } from './routes/fluxo-os.js';
 import { relatoriosRoutes } from './routes/relatorios.js';
 import { extraRoutes } from './routes/extras.js';
 import { financeRoutes } from './routes/finance.js';
@@ -54,6 +55,7 @@ export async function buildApp(opts: { logger?: boolean } = {}) {
   await app.register(atendimentoRoutes);
   await app.register(relatoriosRoutes);
   await app.register(avisosAssinanteRoutes);
+  await app.register(fluxoOsRoutes);
   await app.register(networkRoutes);
   await app.register(oltRoutes);
   await app.register(ipamRoutes);

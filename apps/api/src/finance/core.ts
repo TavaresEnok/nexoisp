@@ -2,6 +2,7 @@ import { HttpError } from '../auth.js';
 import { noScope, withScope, type Tx } from '../db.js';
 import { requestOperation } from '../network/engine.js';
 import { runNotices } from '../notices.js';
+import { runSla } from '../sla.js';
 import { getGateway, type GatewayEvent, type GatewayPayment } from './gateway.js';
 
 export const NONPAYMENT = 'inadimplência';
@@ -303,6 +304,7 @@ export async function runWorkerOnce(log: (m: string) => void = () => {}, opts: {
       }
       if (opts.reconcile && t.gateway !== 'none') await reconcile(t.tenant_id);
       await runNotices(t.tenant_id).then((r) => { if (r.sent || r.failed) log(`avisos ao assinante: ${r.sent} enviado(s), ${r.failed} falha(s) para ${t.tenant_id}`); });
+      await runSla(t.tenant_id).then((r) => { if (r.tickets || r.work_orders) log(`SLA vencido: ${r.tickets} atendimento(s), ${r.work_orders} OS para ${t.tenant_id}`); });
       await withScope(SYS(t.tenant_id), (c) => c.query(`update trust_releases set status = 'expired', closed_at = now() where status = 'active' and expires_at <= now()`));
       if (t.auto_suspend) {
         const n = await autoSuspend(t.tenant_id);

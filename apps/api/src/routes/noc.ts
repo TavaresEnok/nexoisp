@@ -82,7 +82,7 @@ export async function nocRoutes(app: FastifyInstance) {
                 (select count(*) from service_resources where desired_version > 0)::int as accounts,
                 (select count(*) from service_resources where desired_policy = 'suspended')::int as suspended,
                 (select count(*) from service_resources where (observed_session->>'online')::boolean is true)::int as sessions,
-                (select count(*) from work_orders where status in ('open','scheduled','in_progress'))::int as work_orders,
+                (select count(*) from work_orders where status in ('open','analysis','awaiting_schedule','scheduled','en_route','in_progress'))::int as work_orders,
                 (select count(*) from work_orders where status in ('open','scheduled') and scheduled_for < now())::int as work_orders_late,
                 (select count(*) from tickets where status <> 'closed' and category = 'technical')::int as tickets_technical`)).rows[0];
 
@@ -140,7 +140,7 @@ export async function nocRoutes(app: FastifyInstance) {
       }
       if (has('os:read', 'field')) {
         const r = await one(`select count(*) filter (where status in ('open','scheduled') and scheduled_for < now())::int as late,
-                                    count(*) filter (where status in ('open','scheduled','in_progress') and assignee_id = $1)::int as mine,
+                                    count(*) filter (where status in ('open','analysis','awaiting_schedule','scheduled','en_route','in_progress') and assignee_id = $1)::int as mine,
                                     count(*) filter (where status = 'open' and assignee_id is null)::int as unassigned from work_orders`, [req.ctx.userId]);
         add(r.late, 'warning', 'ordem de serviço com agendamento vencido', 'ordens de serviço com agendamento vencido', '/ordens-servico');
         add(r.mine, 'info', 'ordem de serviço em aberto com você', 'ordens de serviço em aberto com você', '/meu-trabalho');
@@ -186,7 +186,7 @@ export async function nocRoutes(app: FastifyInstance) {
                 min(i.due_date) filter (where i.status = 'open') as oldest_due
          from invoices i left join tenant_settings ts on ts.tenant_id = i.tenant_id where i.contract_id = $1`, [id])).rows[0] : null;
       const open = (await c.query(
-        `select (select count(*) from work_orders where contract_id = $1 and status in ('open','scheduled','in_progress'))::int as work_orders,
+        `select (select count(*) from work_orders where contract_id = $1 and status in ('open','analysis','awaiting_schedule','scheduled','en_route','in_progress'))::int as work_orders,
                 (select count(*) from tickets t join contracts k2 on k2.subscriber_id = t.subscriber_id where k2.id = $1 and t.status <> 'closed')::int as tickets`, [id])).rows[0];
 
       const f: Finding[] = [];

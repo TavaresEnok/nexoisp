@@ -3,19 +3,30 @@ import { z } from 'zod';
 import { audit, guard, HttpError, type Ctx } from '../auth.js';
 import { nextNumber, paged, withScope, type Tx } from '../db.js';
 import { queueNotice } from '../notify.js';
+import { applySla, assertCatalog, OPEN_WO_SQL } from '../sla.js';
 import { zPage, zUuid } from '../validators.js';
 
 /** Expansão 3: ordens de serviço, estoque (razão de movimentos) e inventário FTTH (caixas e portas). */
 const WO_SELECT = `
   select w.*, s.name as subscriber_name, s.phone as subscriber_phone,
          concat_ws(', ', s.address_street, s.address_number, s.address_district, s.address_city) as subscriber_address,
-         a.name as assignee_name, cb.name as created_by_name
-  from work_orders w join subscribers s on s.id = w.subscriber_id left join users a on a.id = w.assignee_id left join users cb on cb.id = w.created_by`;
+         a.name as assignee_name, cb.name as created_by_name,
+         coalesce(w.address_text, concat_ws(', ', s.address_street, s.address_number, s.address_district, s.address_city)) as service_address,
+         r.name as reason_name, (w.sla_due_at is not null and w.sla_breached_at is not null) as sla_breached
+  from work_orders w left join catalog_items r on r.id = w.reason_id join subscribers s on s.id = w.subscriber_id left join users a on a.id = w.assignee_id left join users cb on cb.id = w.created_by`;
 const FINAL = ['done', 'canceled'];
 // de -> para
+// Fluxo da OS (inspirado no do IXC): análise, aguardando agendamento, agendada, deslocamento, execução, finalizada.
 const TRANSITIONS: Record<string, string[]> = {
-  open: ['scheduled', 'in_progress', 'canceled'], scheduled: ['open', 'in_progress', 'canceled'], in_progress: ['open', 'done', 'canceled'], done: [], canceled: [],
+  open: ['analysis', 'awaiting_schedule', 'scheduled', 'en_route', 'in_progress', 'canceled'],
+  analysis: ['open', 'awaiting_schedule', 'scheduled', 'en_route', 'in_progress', 'canceled'],
+  awaiting_schedule: ['open', 'scheduled', 'canceled'],
+  scheduled: ['open', 'awaiting_schedule', 'en_route', 'in_progress', 'canceled'],
+  en_route: ['open', 'scheduled', 'in_progress', 'canceled'],
+  in_progress: ['open', 'awaiting_schedule', 'done', 'canceled'],
+  done: [], canceled: [],
 };
+const WO_STATUS = ['open', 'analysis', 'awaiting_schedule', 'scheduled', 'en_route', 'in_progress', 'done', 'canceled'] as const;
 const zWhen = z.string().datetime({ offset: true });
 const zText = (max: number) => z.string().trim().min(1).max(max);
 
@@ -65,13 +76,13 @@ export async function fieldRoutes(app: FastifyInstance) {
 
   app.get('/api/work-orders', { preHandler: guard('os:read') }, async (req, reply) => {
     const q = z.object({
-      status: z.enum(['open', 'scheduled', 'in_progress', 'done', 'canceled', 'pending']).optional(), q: z.string().trim().max(100).optional(),
+      status: z.enum([...WO_STATUS, 'pending']).optional(), q: z.string().trim().max(100).optional(),
       mine: z.enum(['1']).optional(), subscriber_id: zUuid.optional(), contract_id: zUuid.optional(), ...zPage,
     }).parse(req.query);
     return withScope(req.ctx.scope, async (c) =>
       paged(c, reply,
         `${WO_SELECT}
-         where ($1::text is null or (case when $1 = 'pending' then w.status in ('open','scheduled','in_progress') else w.status = $1 end))
+         where ($1::text is null or (case when $1 = 'pending' then w.status in (${OPEN_WO_SQL}) else w.status = $1 end))
            and ($2::text is null or s.name ilike '%'||$2||'%' or w.description ilike '%'||$2||'%' or w.number::text = $2)
            and ($3::uuid is null or w.assignee_id = $3) and ($4::uuid is null or w.subscriber_id = $4) and ($5::uuid is null or w.contract_id = $5)
          order by (w.status in ('done','canceled')), w.scheduled_for nulls last, w.created_at desc, w.id`,
@@ -98,6 +109,8 @@ export async function fieldRoutes(app: FastifyInstance) {
     const b = z.object({
       kind: z.enum(['install', 'repair', 'address_change', 'removal', 'other']), subscriber_id: zUuid, contract_id: zUuid.nullish(),
       description: zText(2000), assignee_id: zUuid.nullish(), scheduled_for: zWhen.nullish(), ticket_id: zUuid.nullish(),
+      reason_id: zUuid.nullish(), estimated_minutes: z.number().int().min(5).max(1440).default(60),
+      address_origin: z.enum(['subscriber', 'contract', 'manual']).default('subscriber'), address_text: z.string().trim().min(5).max(300).nullish(),
     }).parse(req.body);
     return withScope(req.ctx.scope, async (c) => {
       if (!(await c.query('select 1 from subscribers where id = $1', [b.subscriber_id])).rowCount) throw new HttpError(400, 'assinante não encontrado');
@@ -106,12 +119,28 @@ export async function fieldRoutes(app: FastifyInstance) {
       if (b.ticket_id && !(await c.query('select 1 from tickets where id = $1 and subscriber_id = $2', [b.ticket_id, b.subscriber_id])).rowCount)
         throw new HttpError(400, 'o atendimento não pertence a este assinante');
       if (b.assignee_id) await staff(c, b.assignee_id);
+      await assertCatalog(c, b.reason_id, 'os_reason', 'motivo da OS');
+      // O endereço da OS é registrado com a origem; trocar o cadastro depois não muda uma OS já aberta.
+      let addressText: string | null = null;
+      if (b.address_origin === 'manual') {
+        if (!b.address_text) throw new HttpError(400, 'informe o endereço da OS');
+        addressText = b.address_text;
+      } else if (b.address_origin === 'contract') {
+        if (!b.contract_id) throw new HttpError(400, 'escolha o contrato para usar o endereço de instalação dele');
+        const k = (await c.query(
+          `select concat_ws(', ', install_street, install_number, install_district, install_city) as a, install_street, install_city from contracts where id = $1`, [b.contract_id])).rows[0];
+        if (!k.install_street || !k.install_city) throw new HttpError(400, 'o contrato não tem endereço de instalação cadastrado');
+        addressText = k.a;
+      }
       const number = await nextNumber(c, req.ctx.tenantId!, 'work_order');
       const w = (await c.query(
-        `insert into work_orders (tenant_id, number, kind, status, subscriber_id, contract_id, assignee_id, scheduled_for, description, created_by, ticket_id)
-         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) returning *`,
+        `insert into work_orders (tenant_id, number, kind, status, subscriber_id, contract_id, assignee_id, scheduled_for, description, created_by, ticket_id,
+                                  reason_id, estimated_minutes, address_origin, address_text)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) returning *`,
         [req.ctx.tenantId, number, b.kind, b.scheduled_for ? 'scheduled' : 'open', b.subscriber_id, b.contract_id ?? null, b.assignee_id ?? null,
-          b.scheduled_for ?? null, b.description, req.ctx.userId, b.ticket_id ?? null])).rows[0];
+          b.scheduled_for ?? null, b.description, req.ctx.userId, b.ticket_id ?? null, b.reason_id ?? null, b.estimated_minutes, b.address_origin, addressText])).rows[0];
+      await applySla(c, 'work_order', w.id);
+      Object.assign(w, (await c.query('select sla_policy_id, sla_due_at from work_orders where id = $1', [w.id])).rows[0]);
       await woEvent(c, req.ctx, w.id, 'created', { kind: b.kind });
       const sn = (await c.query('select name from subscribers where id = $1', [b.subscriber_id])).rows[0].name;
       await queueNotice(c, req.ctx.tenantId!, 'work_order.created', `OS ${number} aberta (${b.kind}) para ${sn}${b.scheduled_for ? `, agendada para ${b.scheduled_for}` : ''}`, { work_order_id: w.id, number });
@@ -123,7 +152,7 @@ export async function fieldRoutes(app: FastifyInstance) {
   // Responsável, agendamento e descrição. Agendar/desagendar ajusta a situação enquanto o serviço não começou.
   app.patch('/api/work-orders/:id', { preHandler: guard('os:write') }, async (req) => {
     const id = zUuid.parse((req.params as any).id);
-    const b = z.object({ assignee_id: zUuid.nullish(), scheduled_for: zWhen.nullish(), description: zText(2000).optional() }).parse(req.body);
+    const b = z.object({ assignee_id: zUuid.nullish(), scheduled_for: zWhen.nullish(), description: zText(2000).optional(), estimated_minutes: z.number().int().min(5).max(1440).optional() }).parse(req.body);
     return withScope(req.ctx.scope, async (c) => {
       const cur = (await c.query('select * from work_orders where id = $1 for update', [id])).rows[0];
       if (!cur) throw new HttpError(404, 'ordem de serviço não encontrada');
@@ -137,12 +166,12 @@ export async function fieldRoutes(app: FastifyInstance) {
       }
       if (b.scheduled_for !== undefined) {
         n.scheduled_for = b.scheduled_for ?? null;
-        if (cur.status === 'open' || cur.status === 'scheduled') n.status = n.scheduled_for ? 'scheduled' : 'open';
+        if (['open', 'scheduled', 'awaiting_schedule'].includes(cur.status)) n.status = n.scheduled_for ? 'scheduled' : cur.status === 'awaiting_schedule' ? 'awaiting_schedule' : 'open';
         await woEvent(c, req.ctx, id, 'scheduled', { for: n.scheduled_for });
       }
       if (b.description) n.description = b.description;
-      const w = (await c.query(`update work_orders set assignee_id = $2, scheduled_for = $3, status = $4, description = $5, updated_at = now() where id = $1 returning *`,
-        [id, n.assignee_id, n.scheduled_for, n.status, n.description])).rows[0];
+      const w = (await c.query(`update work_orders set assignee_id = $2, scheduled_for = $3, status = $4, description = $5, estimated_minutes = $6, updated_at = now() where id = $1 returning *`,
+        [id, n.assignee_id, n.scheduled_for, n.status, n.description, b.estimated_minutes ?? cur.estimated_minutes])).rows[0];
       await audit(c, req.ctx, 'work_order.update', 'work_order', id, b);
       return w;
     });
@@ -150,17 +179,29 @@ export async function fieldRoutes(app: FastifyInstance) {
 
   app.post('/api/work-orders/:id/status', { preHandler: guard('os:write') }, async (req) => {
     const id = zUuid.parse((req.params as any).id);
-    const b = z.object({ status: z.enum(['open', 'scheduled', 'in_progress', 'done', 'canceled']), resolution: zText(2000).nullish() }).parse(req.body);
+    const b = z.object({ status: z.enum(WO_STATUS), resolution: zText(2000).nullish(), reason: zText(300).nullish(), root_cause_id: zUuid.nullish() }).parse(req.body);
     return withScope(req.ctx.scope, async (c) => {
       const cur = (await c.query('select * from work_orders where id = $1 for update', [id])).rows[0];
       if (!cur) throw new HttpError(404, 'ordem de serviço não encontrada');
       if (!TRANSITIONS[cur.status].includes(b.status)) throw new HttpError(400, `não é possível passar de “${cur.status}” para “${b.status}”`);
       if (b.status === 'scheduled' && !cur.scheduled_for) throw new HttpError(400, 'defina a data do agendamento antes');
+      if (b.status === 'en_route' && !cur.assignee_id) throw new HttpError(400, 'defina o técnico antes de registrar o deslocamento');
       if (FINAL.includes(b.status) && !b.resolution) throw new HttpError(400, b.status === 'done' ? 'descreva o que foi feito para concluir' : 'informe o motivo do cancelamento');
+      await assertCatalog(c, b.root_cause_id, 'root_cause', 'causa-raiz');
+      // aguardando agendamento: a data anterior deixa de valer; o motivo da espera fica registrado
       const w = (await c.query(
-        `update work_orders set status = $2, resolution = coalesce($3, resolution), finished_at = case when $4 then now() end, updated_at = now() where id = $1 returning *`,
-        [id, b.status, b.resolution ?? null, FINAL.includes(b.status)])).rows[0];
-      await woEvent(c, req.ctx, id, 'status', { from: cur.status, to: b.status, resolution: b.resolution ?? undefined });
+        `update work_orders set status = $2, resolution = coalesce($3, resolution), finished_at = case when $4 then now() end,
+                en_route_at = case when $2 = 'en_route' then now() else en_route_at end,
+                started_at = case when $2 = 'in_progress' then coalesce(started_at, now()) else started_at end,
+                awaiting_reason = case when $2 = 'awaiting_schedule' then $5 else null end,
+                scheduled_for = case when $2 = 'awaiting_schedule' then null else scheduled_for end,
+                root_cause_id = coalesce($6, root_cause_id), updated_at = now() where id = $1 returning *`,
+        [id, b.status, b.resolution ?? null, FINAL.includes(b.status), b.reason ?? null, b.root_cause_id ?? null])).rows[0];
+      if (b.status === 'done') {   // pesquisa de satisfação: uma por OS, respondida pelo portal
+        await c.query(`insert into satisfaction_surveys (tenant_id, work_order_id, work_order_number, kind, subscriber_id) values ($1,$2,$3,$4,$5)
+         on conflict (work_order_id) do nothing`, [req.ctx.tenantId, id, cur.number, cur.kind, cur.subscriber_id]);
+      }
+      await woEvent(c, req.ctx, id, 'status', { from: cur.status, to: b.status, resolution: b.resolution ?? undefined, reason: b.reason ?? undefined });
       await audit(c, req.ctx, `work_order.${b.status}`, 'work_order', id);
       return w;
     });

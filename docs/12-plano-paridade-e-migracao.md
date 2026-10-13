@@ -100,9 +100,17 @@ Entregue = implementado e coberto por teste automatizado. Nada aqui foi homologa
 
 | Situação | Itens |
 |---|---|
-| ✅ Entregue | D1, D2, D3, D9, D12, C1, C2, C3, C4, C6, P2 |
+| ✅ Entregue | D1, D2, D3, D9, D12, C1, C2, C3, C4, C6, C7, F1, F2, F3, F4, F6, P2 |
 | 🟡 Parcial | D10 (lista online e exportação; falta a desconexão em lote, que exige operação nova do agente), C1 (só canal por HTTP genérico e de saída; sem SMS/WhatsApp nativo, ver abaixo) |
-| ⏳ Pendente | D4–D8, D11, C5, C7–C10, F1–F7, P1, P3–P5, R1–R4 |
+| ⏳ Pendente | D4–D8, D11, C5, C8–C10, F5, F7, P1, P3–P5, R1–R4 |
+
+**Lote 4 em detalhe (sem chat; tudo por ocorrência e OS):**
+- **F1 fluxo da OS:** aberta → em análise → aguardando agendamento (com motivo) → agendada → **em deslocamento** (exige técnico; grava a hora da saída) → em execução (grava o início) → concluída/cancelada. "Atribuída" é o responsável preenchido, não um estado.
+- **F2 catálogos:** tipo de ocorrência, classificação, causa-raiz, origem e motivo de OS, por provedor; vínculo conferido pelo tipo e item inativo não é aceito.
+- **F3 SLA:** política por prioridade e tipo (atendimentos) ou natureza (OS); a mais específica vale; prazo em **minutos corridos** (sem calendário de expediente nem pausa durante "aguardando o assinante": limite conhecido); vencimento é marcado uma vez, avisa o webhook da equipe e escalona se a política mandar; relatório de cumprimento.
+- **F4 agenda:** por técnico e dia (1 a 14 dias), com sobreposição apontada, fila "aguardando agendamento" e janelas livres no expediente.
+- **F6 endereço:** instalação por contrato e OS com origem registrada (cadastro, contrato ou informado); a OS guarda o endereço, então mudar o cadastro depois não a altera.
+- **C7 satisfação:** nasce ao concluir a OS, vale 30 dias, é respondida **no portal** (1 a 5 e comentário); a equipe vê média e respostas. Não há envio automático do convite: a régua de avisos hoje é por vencimento de fatura.
 
 **C1 em detalhe (avisos ao assinante, somente de saída):** o provedor cadastra um *canal* (endereço HTTPS do serviço de envio que ele contratou, com cabeçalho secreto cifrado),
 *modelos* (variáveis `{nome}`, `{valor}`, `{vencimento}`, `{plano}`, `{link}`) e *regras* (dias em relação ao vencimento, plano/POP/etiqueta, janela de horas e dias da semana,

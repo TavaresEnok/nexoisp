@@ -27,17 +27,22 @@ export const PERMISSIONS: Record<Role, string[]> = {
  */
 export const MODULES = ['olt', 'ipam', 'field', 'ftth', 'crm', 'noc', 'notices', 'messages'] as const;
 export type Module = (typeof MODULES)[number];
-const MODULE_ROUTES: [Module, RegExp][] = [
+const MODULE_ROUTES: [Module | Module[], RegExp][] = [
   ['olt', /^\/api\/(olt\/|onus(\/|$)|contracts\/[^/]+\/onu$)/],
   ['ipam', /^\/api\/(ipam\/|cgnat\/|contracts\/[^/]+\/(ips|ipv6)$)/],
-  ['field', /^\/api\/(work-orders(\/|$)|stock\/|contracts\/[^/]+\/equipment$)/],
+  ['field', /^\/api\/(work-orders(\/|$)|stock\/|contracts\/[^/]+\/equipment$|agenda(\/|$)|surveys(\/|$)|portal\/surveys(\/|$))/],
+  [['crm', 'field'], /^\/api\/(catalogs(\/|$)|sla-policies(\/|$)|reports\/sla$)/],
   ['ftth', /^\/api\/(ftth\/|contracts\/[^/]+\/ftth$)/],
   ['crm', /^\/api\/(leads(\/|$)|tickets(\/|$)|crm\/|portal\/tickets(\/|$))/],
   ['noc', /^\/api\/(noc\/|contracts\/[^/]+\/diagnosis$)/],
   ['notices', /^\/api\/notifications(\/|$)/],
   ['messages', /^\/api\/(notice-(channels|templates|rules|log)(\/|$))/],
 ];
-export const moduleOf = (url: string): Module | null => MODULE_ROUTES.find(([, re]) => re.test(url.split('?')[0]))?.[0] ?? null;
+/** Módulos que liberam a rota (qualquer um basta). */
+export const moduleOf = (url: string): Module[] | null => {
+  const m = MODULE_ROUTES.find(([, re]) => re.test(url.split('?')[0]))?.[0];
+  return m ? (Array.isArray(m) ? m : [m]) : null;
+};
 
 export class HttpError extends Error {
   constructor(public status: number, message: string, public code?: string) {
@@ -138,7 +143,7 @@ export function guard(perm?: string, opts: { allowMfaPending?: boolean } = {}) {
     if (perm && perm !== 'tenants:manage' && perm !== 'portal:self' && !req.ctx.tenantId)
       throw new HttpError(403, 'selecione um provedor (acesso de suporte) para esta ação');
     const mod = moduleOf(req.url);
-    if (mod && !req.ctx.modules.includes(mod)) throw new HttpError(403, 'este recurso não está liberado para o provedor', 'module_disabled');
+    if (mod && !mod.some((m) => req.ctx.modules.includes(m))) throw new HttpError(403, 'este recurso não está liberado para o provedor', 'module_disabled');
   };
 }
 

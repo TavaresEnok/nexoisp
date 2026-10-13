@@ -51,6 +51,13 @@ use *Enviar teste* para um número seu; (2) **Modelo**: texto com `{nome}`, `{va
 janela de horas e filtros. A rotina periódica envia **uma vez por título e regra**, só a contatos com consentimento (mobile/WhatsApp, finalidade cobrança ou geral),
 com até 3 tentativas. O histórico mostra enviado, falhou e sem consentimento. "Rodar agora" respeita as mesmas regras.
 
+### Fluxo da OS, SLA e agenda
+
+Estados da OS: aberta → em análise → aguardando agendamento → agendada → em deslocamento → em execução → concluída (ou cancelada). **Em deslocamento** exige o técnico
+definido. **Aguardando agendamento** limpa a data e guarda o motivo; a OS aparece na fila da Agenda. Em Catálogos e SLA o provedor cadastra tipos, classificações,
+causas-raiz, origens e motivos, e as políticas de prazo (minutos corridos, sem calendário de expediente). A rotina periódica marca o prazo vencido uma vez, avisa o webhook
+da equipe e, se a política tiver responsável de escalonamento, passa a ocorrência a ele. A pesquisa de satisfação nasce ao concluir a OS e é respondida no portal do assinante.
+
 ### Conferência antes de entrar em produção
 
 ```bash

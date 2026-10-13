@@ -277,3 +277,11 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
 - **O que NÃO está validado:** envio por provedor real de SMS/WhatsApp (testado apenas contra servidor local de simulação); nada disso foi homologado em equipamento físico.
 - **Próxima ação:** F1 (fluxo de status da OS com deslocamento), F2/F3 (catálogos e SLA) e P1 (API pública com token e webhooks de saída); depende só de nós.
 
+### 13/10/2026 — fluxo da OS com deslocamento, catálogos, SLA, agenda, endereço por serviço e satisfação
+
+- **Entregue (testado, 101 testes da API passando):** estados novos da OS (análise, aguardando agendamento, deslocamento) com marcas de tempo; catálogos; política de SLA com
+  escalonamento e relatório; agenda por técnico com sobreposição e horários livres; endereço de instalação por contrato e origem do endereço na OS; pesquisa de satisfação
+  respondida no portal. Migração 028; telas Agenda e Catálogos/SLA/Satisfação; pesquisa no portal.
+- **Limites:** SLA em minutos corridos (sem expediente nem pausa); o convite da pesquisa não é enviado automaticamente (o assinante vê no portal); sem check-in com localização.
+- **Próxima ação:** P1 (API pública com token por aplicação e webhooks de saída), depois F5/F7 (kit/auxiliares e comissão), C8–C10 (fidelidade, aditivos, descontos).
+

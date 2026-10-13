@@ -93,6 +93,7 @@ export function Portal() {
             </State>
           </Card>
           {has(me, 'crm') && <PortalTickets />}
+          {has(me, 'field') && <PortalSurveys />}
           <Card title="Meus dados">
             <KV items={[['Nome', data.subscriber.name], ['CPF/CNPJ', doc(data.subscriber.document)], ['E-mail', data.subscriber.email], ['Telefone', data.subscriber.phone],
               ['Endereço', [data.subscriber.address_street, data.subscriber.address_number, data.subscriber.address_city].filter(Boolean).join(', ') || '—']]} />
@@ -115,5 +116,27 @@ export function Portal() {
         </Modal>
       )}
     </div>
+  );
+}
+
+/** Pesquisa de satisfação das ordens de serviço concluídas. Só aparece se houver uma pendente. */
+function PortalSurveys() {
+  const sv = useLoad<any[]>('/portal/surveys');
+  const [score, setScore] = useState<Record<string, number>>({});
+  const [comment, setComment] = useState<Record<string, string>>({});
+  if (!sv.data?.length) return null;
+  return (
+    <Card title="Como foi o atendimento?">
+      {sv.data.map((s) => (
+        <div key={s.id} style={{ marginBottom: 12 }}>
+          <div>Ordem de serviço #{s.work_order_number}: de 1 a 5, como você avalia o serviço?</div>
+          <div className="row" style={{ margin: '6px 0' }}>
+            {[1, 2, 3, 4, 5].map((n) => <button key={n} className={score[s.id] === n ? 'primary' : ''} aria-pressed={score[s.id] === n} onClick={() => setScore({ ...score, [s.id]: n })}>{n}</button>)}
+          </div>
+          <input aria-label="Comentário (opcional)" placeholder="Comentário (opcional)" maxLength={500} value={comment[s.id] ?? ''} onChange={(e) => setComment({ ...comment, [s.id]: e.target.value })} />
+          <ActionButton className="primary" disabled={!score[s.id]} onClick={async () => { await api(`/portal/surveys/${s.id}`, { body: { score: score[s.id], comment: comment[s.id] || null } }); sv.reload(); }}>Enviar avaliação</ActionButton>
+        </div>
+      ))}
+    </Card>
   );
 }

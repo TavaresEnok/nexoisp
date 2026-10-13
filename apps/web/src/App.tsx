@@ -12,7 +12,9 @@ import { Import } from './pages/Import';
 import { Ipam } from './pages/Ipam';
 import { Login } from './pages/Login';
 import { Busca, Online, Pops, SearchBox } from './pages/Atendimento';
+import { Agenda } from './pages/Agenda';
 import { AvisosAssinante } from './pages/AvisosAssinante';
+import { Qualidade } from './pages/Qualidade';
 import { Reports } from './pages/Cobranca';
 import { Maintenance } from './pages/Extras';
 import { Network, Operations } from './pages/Network';
@@ -49,6 +51,7 @@ const NAV: { id: string; label: string; items: { to: string; label: string; icon
   { id: 'atendimento', label: 'Atendimento', items: [
     { to: '/atendimentos', label: 'Atendimentos', icon: 'chat', perm: 'crm:read', mod: 'crm' }, { to: '/prospectos', label: 'Prospectos', icon: 'funnel', perm: 'crm:read', mod: 'crm' },
     { to: '/meu-trabalho', label: 'Meu trabalho', icon: 'phone', perm: 'os:write', mod: 'field' }, { to: '/ordens-servico', label: 'Ordens de serviço', icon: 'wrench', perm: 'os:read', mod: 'field' },
+    { to: '/agenda', label: 'Agenda', icon: 'calendar', perm: 'os:read', mod: 'field' },
     { to: '/estoque', label: 'Estoque', icon: 'box', perm: 'stock:read', mod: 'field' }, { to: '/relatorios-atendimento', label: 'Relatórios', icon: 'chart', perm: 'crm:read', mod: 'crm' }] },
   { id: 'financeiro', label: 'Financeiro', items: [
     { to: '/faturas', label: 'Faturas', icon: 'receipt', perm: 'finance:read' }, { to: '/conciliacao', label: 'Conciliação', icon: 'scale', perm: 'finance:read' },
@@ -63,6 +66,7 @@ const NAV: { id: string; label: string; items: { to: string; label: string; icon
   { id: 'admin', label: 'Administração', items: [
     { to: '/usuarios', label: 'Usuários', icon: 'user', perm: 'users:manage' }, { to: '/avisos', label: 'Avisos', icon: 'bell', perm: 'settings:manage', mod: 'notices' },
     { to: '/avisos-assinante', label: 'Avisos ao assinante', icon: 'bell', perm: 'settings:manage', mod: 'messages' },
+    { to: '/qualidade', label: 'Catálogos e SLA', icon: 'list', perm: 'settings:manage', mod: 'crm|field' },
     { to: '/importacao', label: 'Importação', icon: 'upload', perm: 'import:run' }, { to: '/auditoria', label: 'Auditoria', icon: 'shield', perm: 'audit:read' }] },
 ];
 
@@ -100,7 +104,7 @@ export function App() {
   };
   if (me.role === 'subscriber') return <MeCtx.Provider value={{ me, reload }}><Portal /></MeCtx.Provider>;
   const inTenant = !!me.tenant && !me.mfa_pending;
-  const groups = NAV.map((g) => ({ ...g, items: g.items.filter((i) => can(me, i.perm) && (!i.mod || has(me, i.mod)) && (!find || i.label.toLowerCase().includes(find.toLowerCase()))) })).filter((g) => g.items.length);
+  const groups = NAV.map((g) => ({ ...g, items: g.items.filter((i) => can(me, i.perm) && (!i.mod || i.mod.split('|').some((m) => has(me, m))) && (!find || i.label.toLowerCase().includes(find.toLowerCase()))) })).filter((g) => g.items.length);
   const area = NAV.find((g) => g.items.some((i) => (i.to === '/' ? loc.pathname === '/' : loc.pathname.startsWith(i.to))))?.id
     ?? (loc.pathname.startsWith('/contratos') || loc.pathname.startsWith('/assinantes') ? 'cadastro' : 'admin');
   const toggle = (id: string) => { const n = { ...closed, [id]: !closed[id] }; setClosed(n); localStorage.setItem('nexo_nav', JSON.stringify(n)); };
@@ -160,6 +164,8 @@ export function App() {
               <Route path="/busca" element={<Busca />} />
               <Route path="/relatorios-cobranca" element={<Reports />} />
               <Route path="/avisos-assinante" element={<AvisosAssinante />} />
+              <Route path="/agenda" element={<Agenda />} />
+              <Route path="/qualidade" element={<Qualidade />} />
               <Route path="/online" element={<Online />} />
               <Route path="/pops" element={<Pops />} />
               <Route path="/noc" element={<Noc />} />
