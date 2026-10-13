@@ -32,9 +32,9 @@ export async function trustState(c: Tx, tenantId: string, contractId: string): P
   let reason: string | null = null;
   if (!s.trust_release_enabled) reason = 'a liberação por confiança não está habilitada para este provedor';
   else if (k.status !== 'active') reason = 'contrato encerrado';
+  else if (active) reason = 'já existe uma liberação em curso';
   else if (!k.desired_policy) reason = 'o contrato não tem acesso provisionado';
   else if (k.desired_policy !== 'suspended') reason = 'o acesso não está suspenso';
-  else if (active) reason = 'já existe uma liberação em curso';
   else if (nextAllowed && nextAllowed > new Date()) reason = `nova liberação a partir de ${fmtDate(nextAllowed)}`;
   return {
     enabled: !!s.trust_release_enabled, eligible: reason === null, reason, max_days: s.trust_release_days, active: active

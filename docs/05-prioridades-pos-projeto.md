@@ -54,7 +54,7 @@ Não depende de ninguém. Foi adiado para não arriscar o que já estava validad
 |---|---|---|---|
 | 2.1 | Enviar o repositório para um servidor remoto (GitHub, GitLab ou próprio) | O `git init` e o primeiro commit foram feitos em 10/10/2026, mas o histórico só existe nesta máquina | Minutos |
 | 2.3 | Redundância do RADIUS **entre hosts** | Já existe uma segunda instância opcional no mesmo host (cobre queda do processo; provada no laboratório). Perda do host ou do disco continua derrubando a autenticação: exige replicar o banco local para outro servidor | Médio |
-| 2.4 | Juros, multa, proporcionalidade, pagamento parcial, estorno | O código é nosso, mas as regras são do provedor (0.5) e parte depende do gateway (0.2) | Médio |
+| 2.4 | ~~Juros, multa, proporcionalidade, pagamento parcial, estorno~~ **Feito em 13/10/2026** (baixa manual, acordo e primeiro mês proporcional; opt-in). Continua pendente: aplicar multa/juros em cobrança emitida pelo gateway, e estorno de baixa do gateway | Depende do gateway (0.2) | Médio |
 | 2.5 | Mensagens **ao assinante** (e-mail, WhatsApp, SMS) para chamados, OS e cobrança | Os avisos **ao provedor** por webhook já existem. Falar com o assinante precisa de um serviço de envio (terceiro) e de modelos de mensagem aprovados | Médio |
 | 2.7 | Criar perfis de linha, VLANs e `service-port` na OLT | Depende do fabricante e do desenho de rede; hoje são digitados | Médio, por fabricante |
 | 2.10 | Uso em campo sem sinal | A tela “Meu trabalho” funciona no celular, mas precisa de conexão; trabalhar sem internet e sincronizar depois não existe | Médio |
@@ -94,3 +94,11 @@ tema escuro. Ficou de fora: a marca do provedor no portal (logotipo e cor), test
 6. **1.1** e **1.2** quando houver acesso aos equipamentos.
 7. **P2** conforme a dor aparecer no piloto; **2.3** (redundância entre hosts) é o candidato natural.
 8. **P3** só com a decisão tomada.
+
+## Atualização de 13/10/2026
+
+Implementado a partir do comparativo com o SGP (`docs/07-comparativo-sgp.md`): suspensão por perfil de bloqueio, vínculo de MAC, consumo mensal, liberação por confiança,
+baixa parcial/desconto/estorno/multa e juros, acordo de pagamento, primeiro mês proporcional, dados da pessoa, etiquetas, aviso de manutenção no portal, checklist da OS e
+comodato. Nada disso foi homologado em equipamento físico; a parte de rede foi repetida no CHR 7.17 do cenário do PNETLab (`docs/lab-pppoe.md`, seção 5).
+Novas pendências: o perfil de bloqueio e o redirecionamento para a página de aviso precisam ser configurados no concentrador do provedor; o relato de consumo exige o
+accounting ligado no NAS; a migração a partir do SGP depende de uma exportação real (ver 2.1 do comparativo).

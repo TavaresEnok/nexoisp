@@ -73,6 +73,14 @@ Ver `docs/lab-pppoe.md` (passos 1 e 2). Resumo: `infra/site/` com `.env`, `certs
 - **Revogação:** Painel → Rede → Revogar (bloqueia token e identidade imediatamente).
 - **Senha PPPoE no site:** em `config/credentials.json`, `"password_storage": "nt_hash"` grava só o hash NT no RADIUS local (sem senha em claro no disco). Exige o PPPoE server do NAS apenas com `authentication=mschap2`. Sem a opção, o padrão é texto claro (necessário para CHAP).
 - **IP fixo:** o endereço alocado ao contrato em Endereços IP é entregue pelo RADIUS local (`Framed-IP-Address`). Exige agente **0.3.0 ou superior**: um agente anterior recusa a operação (“envelope fora do schema”) em vez de ignorar o endereço. Use endereços fora da faixa dinâmica do NAS.
+- **Suspensão por perfil de bloqueio (agente 0.4.0+):** em Política de cobrança, a modalidade "Manter conectado com o perfil de bloqueio" faz a suspensão entregar ao
+  assinante o perfil PPP informado (`Mikrotik-Group`), em vez de negar a autenticação. **O perfil e o que ele faz (velocidade mínima, pool de endereços de aviso,
+  redirecionamento para a página de aviso) precisam existir no concentrador: o NexoISP não os cria.** Conta encerrada sempre é rejeitada. Sem IP fixo durante a
+  suspensão (o assinante precisa cair no endereço do bloqueio). A API recusa a suspensão se o agente do equipamento for anterior à 0.4.0.
+- **Vínculo de MAC (agente 0.4.0+):** Contrato → Acesso → "Vincular" grava `Calling-Station-Id == <MAC>` no RADIUS local; o equipamento com outro MAC não autentica.
+  Formato canônico: maiúsculas com dois-pontos, como o RouterOS envia. Troque o MAC antes de trocar o equipamento do assinante.
+- **Consumo mensal (agente 0.4.0+):** lido do accounting do RADIUS local (`radacct`) a cada 15 min, mês corrente e anterior, em UTC. Exige o accounting ligado no NAS
+  (`/ppp aaa set accounting=yes`) e o NAS apontando para este RADIUS. Aparece no contrato e no portal do assinante.
 - **Limpeza automática:** o agente remove accounting encerrado e registros de autenticação com mais de `NEXO_RADIUS_KEEP_DAYS` (padrão 90) a cada 6 h.
 - O agente só abre conexões de saída (8443). O NAS fala com o RADIUS local (UDP 1812/1813); restrinja por firewall ao IP do NAS.
 
@@ -136,6 +144,24 @@ Exercício feito em 10/10/2026 (ambiente local): backup → criação de um regi
 | Troca do host do agente | Nunca dois agentes com a mesma identidade: parar e **revogar** o antigo, criar agente novo, associar o equipamento, instalar | Operações em execução no antigo ficam "Incertas" e são verificadas pelo novo antes de repetir |
 | Operação incerta | Bloqueia novas escritas no equipamento até ser verificada pelo agente | Se o agente não voltar: decidir manualmente e usar "Reaplicar" depois |
 | Alteração manual no RADIUS/NAS | Painel mostra divergência; nada é corrigido sozinho | "Reaplicar" ou ajustar a intenção |
+
+### Cobrança avançada (opcional; com os padrões nada muda)
+
+Todos os recursos abaixo ficam desligados até o provedor configurá-los em Política de cobrança.
+
+- **Liberação por confiança (promessa de pagamento):** religa um acesso suspenso por até N dias, pela equipe (Contrato → Acesso) ou pelo assinante (portal).
+  Intervalo mínimo entre liberações configurável. Enquanto vale, a suspensão automática não age; ao vencer sem pagamento volta a valer a política. Sem política
+  de suspensão automática configurada, a liberação apenas vence: nada é suspenso sozinho.
+- **Multa e juros:** percentuais configurados pelo provedor; entram só na baixa manual (a equipe escolhe cobrá-los) e no acordo. Juros: ao mês, pro rata por dia
+  de atraso. **Cobranças já emitidas no gateway não mudam de valor.**
+- **Baixa parcial e desconto:** a baixa manual pode ser parcial (a fatura continua em aberto com o saldo) e aceitar desconto com motivo. Valor diferente do devido,
+  sem marcar como parcial, continua indo para a conciliação.
+- **Estorno:** só de baixa manual. Grava uma linha de estorno (o histórico de pagamentos nunca é alterado) e reabre a fatura. **Não desfaz o que a baixa causou na
+  rede** (reativação): quem suspende de novo é a política. Baixa vinda do gateway só volta pelo gateway.
+- **Acordo de pagamento:** reúne faturas em aberto do contrato, cancela as originais e gera as parcelas. O que já foi pago parcialmente é descontado. As parcelas
+  nascem com cobrança no gateway, se houver. Pagamentos que cheguem para as faturas canceladas vão para a conciliação.
+- **Primeiro mês proporcional:** opcional; vale para contratos que começam depois do dia 1º.
+- **Aviso de manutenção:** Rede → Manutenções. Aparece no portal do assinante atingido; **não envia SMS nem e-mail**.
 
 ## 6. Medição curta (volume sintético)
 

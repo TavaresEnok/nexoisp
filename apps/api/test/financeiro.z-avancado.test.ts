@@ -162,7 +162,7 @@ describe('liberação por confiança', () => {
     expect((await call(admin, 'GET', `/api/contracts/${kc.id}/service`)).body.resource.desired_policy).toBe('active');
     const st = (await call(admin, 'GET', `/api/contracts/${kc.id}/trust-release`)).body;
     expect(st.active).toBeTruthy();
-    expect(st.eligible).toBe(false);
+    expect(st).toMatchObject({ eligible: false, reason: 'já existe uma liberação em curso' });
 
     // com liberação vigente e fatura vencida, a suspensão automática NÃO age
     await settings({ trust_release_enabled: true, auto_suspend: true, suspend_after_days: 0 });

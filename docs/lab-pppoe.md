@@ -120,6 +120,20 @@ As contas locais do cenário continuaram autenticando sem o RADIUS; a senha do `
 | + | Segunda instância do RADIUS (`trio.sh radius-ha`) | ✅ Segunda instância sobre o mesmo banco (porta 1822) cadastrada no nó; principal parada; sessão derrubada; cliente reautenticou em menos de 25 s |
 | + | CGNAT determinístico (`trio.sh cgnat 2 3 4 5`) | ✅ 517 regras geradas pelo painel aplicadas pela API **antes** do NAT que o nó já tinha (a configuração do provedor tem CGNAT próprio para o mesmo bloco); 4 clientes com IP fixo, TCP e UDP: 19 traduções conferidas, 0 divergente; regras removidas ao final (NAT do nó voltou às 524 regras) |
 
+Segunda rodada no mesmo cenário (agente 0.4.0, 13/10/2026), para os recursos acrescentados a partir do comparativo com o SGP (`docs/07-comparativo-sgp.md`):
+
+| Caso | Como foi feito | Resultado no cenário |
+|---|---|---|
+| Suspensão por perfil de bloqueio | Política em "perfil de bloqueio" (`nexo-bloqueado`: 1k/1k, pool próprio 10.254.0.0/24 criado no nó); cliente online com IP fixo 100.64.0.1 → Suspender | ✅ Autorização sem `Auth-Type Reject`; `Mikrotik-Group = nexo-bloqueado`; sessão derrubada e cliente **reconectou sozinho** em 10.254.0.2 com fila 1k/1k; painel: "suspensa", perfil observado `nexo-bloqueado`, sem divergência; demais clientes intactos |
+| Reativação depois do bloqueio | Reativar | ✅ Sessão derrubada e reconexão com `plano-500m` e o IP fixo 100.64.0.1 de volta (fila 250M/500M) |
+| IP fixo durante o bloqueio | primeira tentativa, antes da correção | ⚠️ O cliente continuou em 100.64.0.1 (fora do pool de bloqueio): o envelope levava o IP fixo. Corrigido: suspenso por perfil o envelope não leva IP fixo |
+| Vínculo de MAC | MAC errado (`02:4E:58:00:00:99`) → redisca; depois o MAC real do cliente | ✅ `Calling-Station-Id == 02:4E:58:00:00:99` gravado; o concentrador registra `authentication failed` e não há sessão; com o MAC certo (`02-4e-58-00-00-03` normalizado) autenticou |
+| Consumo mensal | Agente 0.4.0 relatando o `radacct` | ✅ Valores batem com a soma do accounting do RADIUS local (conferência na seção seguinte) |
+
+**Não validado em rede:** o redirecionamento do assinante bloqueado para uma página de aviso (exige regra de NAT/firewall e um servidor web no provedor, que o cenário não tem);
+a liberação por confiança, o acordo, o estorno, a baixa parcial e a multa/juros (financeiros: cobertos por testes da API e nada têm de específico de rede além das operações
+`resume`/`suspend` já exercitadas acima).
+
 Diferenças em relação à seção 3, para não ler mais do que foi feito:
 
 - **Casos 9 a 11:** o concentrador ficou inacessível soltando a placa dele da ponte no servidor, não pausando a VM (os nós do cenário não podem ser parados).

@@ -218,3 +218,15 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   amostra se a senha PPPoE sai da exportação. (2) O SGP suspende por perfil de bloqueio (cliente conecta, cai em endereço de aviso), não por rejeição, que é a única modalidade nossa.
 - **Próxima ação:** proprietário decide se a suspensão por perfil de bloqueio entra no núcleo desta semana (proposta: sim, é pequena) e fornece uma exportação do SGP.
 - **Data-alvo e situação:** inalteradas (pronta para homologação, não para corte).
+
+### 13/10/2026 — implementação a partir do comparativo com o SGP
+
+- **Autorizado pelo proprietário** ("pode implementar tudo"). Implementado e testado (79 testes de API, 40 do agente): suspensão por perfil de bloqueio, vínculo de MAC,
+  consumo mensal, liberação por confiança (equipe e portal), baixa parcial, desconto, estorno, multa e juros, acordo, primeiro mês proporcional, dados da pessoa,
+  etiquetas, aviso de manutenção, checklist da OS e comodato. Detalhe e classificação em `docs/07-comparativo-sgp.md`, seção 7.
+- **Validado no cenário do PNETLab** (CHR 7.17): suspensão por perfil (reconexão no pool de bloqueio com 1k/1k, volta ao plano e ao IP fixo), vínculo de MAC
+  (MAC errado recusado) e consumo mensal conferido com o accounting. **Não** é homologação em equipamento físico.
+- **Regras mantidas:** tudo novo é opt-in por provedor; com os padrões, o comportamento anterior não muda. Suspensão automática continua desligada sem política.
+- **Atenção ao implantar:** agente **0.4.0** no site antes de ligar suspensão por perfil, MAC ou consumo (a API recusa emitir para agente antigo). Migrações 020 a 024.
+- **Fora, e por quê:** contas a pagar/caixa (outro produto), fiscal, TR-069, IPoE/hotspot, 2º fabricante de OLT, CNAB, API pública, SMS/URA, cartão, fotos da OS.
+- **Situação:** pronta para homologação, não para corte. Impedimentos externos inalterados.

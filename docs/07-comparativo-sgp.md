@@ -13,7 +13,7 @@ Marcas usadas na coluna "NexoISP":
 
 | Marca | Significado |
 |---|---|
-| ✅ | Existe e está testado (no nível de maturidade de `docs/05`: simulado ou validado em cenário virtual) |
+| ✅ | Existe e está testado (no nível de maturidade de `docs/05`: simulado ou validado em cenário virtual). **Novo** marca o que foi implementado depois deste comparativo (13/10/2026), ver a seção 7 |
 | 🟡 | Existe em parte; a coluna "Lacuna" diz o que falta |
 | ❌ | Não existe |
 
@@ -43,15 +43,15 @@ e vê uma página de aviso (a captura é feita no roteador). Nosso motor só imp
 
 | Função do SGP | NexoISP | Lacuna |
 |---|---|---|
-| Cliente PF, PJ e estrangeiro; RG, nascimento, estado civil, filiação, profissão | 🟡 | Só nome, documento, contato e endereço |
+| Cliente PF, PJ e estrangeiro; RG, nascimento, estado civil, filiação, profissão | 🟡 **Novo** | RG, órgão emissor, nascimento, nome da mãe e nome fantasia. Faltam estado civil, profissão e estrangeiro |
 | Pré-cadastro (PF/PJ) com plano, vencimento, vendedor, instalação, fidelidade | 🟡 | CRM tem prospecto e conversão, sem vendedor, fidelidade nem parcelas de instalação |
 | Documentos anexos do cliente | ❌ | |
 | Observações de cliente e de contrato; anotações com histórico | 🟡 | Há notas em OS e chamado, não no cadastro |
-| Etiquetas (tags) no contrato | ❌ | |
+| Etiquetas (tags) no contrato | ✅ **Novo** | Cadastro, edição no contrato e filtro na lista |
 | Contratos unificados (vários contratos num cliente/título) | ❌ | |
 | Status do contrato: Ativo, Inativo, Cancelado, Suspenso, Inviabilidade técnica, Novo, Ativo V. Reduzida, com **motivo** | 🟡 | Só `active`/`ended`; suspensão é política de acesso, sem motivo cadastrado |
 | Vários serviços por contrato: Internet, TV, Telefonia, Multimídia, Genérico | 🟡 | Um acesso PPPoE por contrato |
-| Alterar MAC, login, senha, endereço, serial e CPE do serviço | 🟡 | Senha e IP fixo sim; MAC e login não |
+| Alterar MAC, login, senha, endereço, serial e CPE do serviço | 🟡 **Novo** | Senha, IP fixo e **MAC (vínculo no RADIUS)**. Login, serial e CPE não |
 | POP, NAS, AP, Fonte, Switch como inventário | 🟡 | Só equipamentos de rede; sem POP |
 | Condomínio no endereço; latitude/longitude | ❌ | |
 | Termo de aceite do contrato (exibir e aceitar) e impressão do contrato | ❌ | |
@@ -63,15 +63,15 @@ e vê uma página de aviso (a captura é feita no roteador). Nosso motor só imp
 | Função do SGP | NexoISP | Lacuna |
 |---|---|---|
 | Gerar mensalidade (por contrato, ano e mês) e título avulso | ✅ | |
-| Mensalidade proporcional no primeiro mês | ❌ | |
+| Mensalidade proporcional no primeiro mês | ✅ **Novo** | Opcional por provedor |
 | Listar título com filtros por vencimento, pagamento, cancelamento, acordo | 🟡 | Filtros menores; sem data de acordo |
 | Cancelar e **descancelar** título | 🟡 | Cancela; não reabre |
-| Liquidar manualmente, com forma de pagamento, tarifa e ponto de recebimento | 🟡 | Baixa manual existe, sem tarifa nem caixa |
-| **Liquidação parcial** com desconto e motivo | ❌ | Item 2.4 de `docs/05` |
-| **Estorno** de baixa | ❌ | Item 2.4 de `docs/05` |
-| **Acordo de pagamento** (renegociação em parcelas, com entrada) | ❌ | |
-| **Liberação por confiança / promessa de pagamento** | ❌ | Religa por prazo sem pagamento; também é autoatendimento na central |
-| Juros e multa por atraso | ❌ | Item 2.4 de `docs/05` |
+| Liquidar manualmente, com forma de pagamento, tarifa e ponto de recebimento | 🟡 | Baixa manual com meio de pagamento, desconto e multa/juros. Sem tarifa nem caixa |
+| **Liquidação parcial** com desconto e motivo | ✅ **Novo** | |
+| **Estorno** de baixa | ✅ **Novo** | Só de baixa manual; a do gateway volta pelo gateway |
+| **Acordo de pagamento** (renegociação em parcelas, com entrada) | 🟡 **Novo** | Parcelas e desconto; sem entrada separada |
+| **Liberação por confiança / promessa de pagamento** | ✅ **Novo** | Equipe e portal; prazo e intervalo por provedor |
+| Juros e multa por atraso | 🟡 **Novo** | Só na baixa manual e no acordo; cobrança do gateway não muda de valor |
 | Forma de cobrança do contrato: boleto, débito, carnê, recorrente, PIX | 🟡 | Depende do gateway (pendente, 0.2) |
 | Portador (conta bancária emissora), remessa e retorno CNAB240/400 | ❌ | Só se o provedor emitir boleto próprio; com gateway não é necessário |
 | PIX por fatura; envio da fatura | 🟡 | Via gateway de demonstração |
@@ -89,12 +89,12 @@ e vê uma página de aviso (a captura é feita no roteador). Nosso motor só imp
 | Autenticação PPPoE por RADIUS | ✅ | FreeRADIUS local, validado em CHR |
 | Outros tipos de conexão: IPoE, DHCP, Hotspot MikroTik, IP estático, switch | ❌ | Só PPPoE |
 | Suspender negando acesso | ✅ | |
-| **Suspender por perfil de bloqueio / velocidade reduzida** | ❌ | Ver 2.2 |
+| **Suspender por perfil de bloqueio / velocidade reduzida** | ✅ **Novo** | Validado no CHR do cenário; a página de aviso e o redirecionamento são do concentrador |
 | IP fixo | ✅ | |
 | Sessões online, última sessão, filtros por NAS, POP, OLT, PON | 🟡 | Sessão por contrato e NOC; sem filtro por POP/PON |
-| Tráfego e **extrato de uso** por mês, na central | ❌ | Exige ler o *accounting* do RADIUS (`radacct`) |
+| Tráfego e **extrato de uso** por mês, na central | ✅ **Novo** | Totais mensais do accounting local; sem consulta por período e sem gráfico |
 | Consulta de respostas do RADIUS e log | ❌ | |
-| **Manutenção programada** com mensagem ao assinante (central, URA, SMS) por POP, NAS, OLT, PON ou CTO | ❌ | Há só o modo manutenção do equipamento, sem aviso ao assinante |
+| **Manutenção programada** com mensagem ao assinante (central, URA, SMS) por POP, NAS, OLT, PON ou CTO | 🟡 **Novo** | Aviso no portal, para todos ou por NAS. Sem SMS/URA, sem POP/PON/CTO |
 | Mais de um NAS e de um RADIUS | 🟡 | Modelo permite; só exercitado com um NAS |
 | IPAM e CGNAT | ✅ | Gera script; não aplica |
 
@@ -117,11 +117,11 @@ e vê uma página de aviso (a captura é feita no roteador). Nosso motor só imp
 | Chamados e ocorrências com tipo, método, setor, classificação | 🟡 | Chamado e atendimento existem; sem catálogo de tipos, métodos e setores |
 | Chamado com anexo e áudio | ❌ | |
 | Ordem de serviço: status, técnico, anotações e comentários | ✅ | |
-| OS com **checklist**, **imagens** (com descrição) e botão **"a caminho"** | ❌ | |
+| OS com **checklist**, **imagens** (com descrição) e botão **"a caminho"** | 🟡 **Novo** | Só o checklist. Fotos exigem armazenamento de arquivos e decisão de LGPD; "a caminho" depende de mensagem ao assinante |
 | Técnicos e agenda | 🟡 | Equipe existe; sem agenda |
 | Estoque: produto, categoria, fabricante, NCM, saldo por local, lançamento, estorno | 🟡 | Item, movimento, série e técnico; sem NCM nem fabricante |
 | Fornecedor, **compra** e **importação de NF-e de compra** | ❌ | |
-| **Comodato** (equipamento emprestado ao cliente) e venda de equipamento | ❌ | Controle de série existe, sem vínculo de comodato com o cliente |
+| **Comodato** (equipamento emprestado ao cliente) e venda de equipamento | ✅ **Novo** | Modalidade na instalação pela OS e lista de recolhimento no contrato encerrado |
 | Kit de instalação (produtos que saem juntos na OS) | ❌ | |
 | Transferência entre locais | ✅ | Almoxarifado e técnico |
 
@@ -130,7 +130,7 @@ e vê uma página de aviso (a captura é feita no roteador). Nosso motor só imp
 | Função do SGP | NexoISP | Lacuna |
 |---|---|---|
 | Central do Assinante: contratos, faturas, 2ª via, PIX, chamado | ✅ | Portal do assinante |
-| Central: promessa de pagamento, extrato de uso, cartão, termo de aceite | ❌ | Ver 3.2 e 3.3 |
+| Central: promessa de pagamento, extrato de uso, cartão, termo de aceite | 🟡 **Novo** | Promessa e extrato sim; cartão e termo de aceite não |
 | SMS (vários gateways) e envio por contrato | ❌ | Item 2.5 de `docs/05`; hoje só aviso ao provedor por webhook |
 | URA telefônica (consulta, 2ª via, chamado, áudio) | ❌ | |
 | **API pública** com token por aplicação, ou usuário e senha | ❌ | A API é interna, de sessão por cookie |
@@ -146,7 +146,7 @@ Sem afirmar que o SGP não tenha: a documentação de API não expõe nada equiv
 - Isolamento por provedor garantido no banco, auditoria e módulos liberados por provedor.
 - Diagnóstico do NOC por regras com evidência.
 
-## 5. O que fazer com isto
+## 5. O que fazer com isto (proposta de 13/10/2026; o que foi feito está na seção 7)
 
 Mantendo a regra do plano de sete dias (fechar o núcleo, sem módulo novo), a proposta é separar assim.
 
@@ -184,3 +184,30 @@ Todos dependem de regra comercial do provedor, não de técnica nova:
 
 - O arquivo do SGP está em `docs/API-SGP-completa.txt` **sem commit**, por ser material de terceiro e o repositório ser público. Este comparativo só o resume.
 - Nomes de perfis e de parâmetros citados aqui são os genéricos do produto; nada de assinantes, endereços, tokens ou configuração de provedor entra neste documento.
+
+## 7. O que foi implementado depois deste comparativo (13/10/2026)
+
+Classificação: **implementado** (código e testes automáticos), **validado no cenário** (repetido no CHR 7.17 do PNETLab) e **homologado em equipamento físico** (nenhum).
+
+| Recurso | Implementado | Validado no cenário | Observação |
+|---|---|---|---|
+| Suspensão por perfil de bloqueio | sim | sim (rede real: reconexão no pool de bloqueio, fila 1k/1k) | Agente 0.4.0. Redirecionamento para a página de aviso não foi exercitado |
+| Vínculo de MAC | sim | sim (MAC errado recusado, certo autenticado) | Agente 0.4.0 |
+| Consumo mensal | sim | sim (valores conferidos com o `radacct`) | Agente 0.4.0; mês em UTC |
+| Liberação por confiança (equipe e portal) | sim | só as operações de rede por baixo (suspender/reativar) | |
+| Baixa parcial, desconto, estorno, multa e juros | sim | não se aplica (financeiro) | Só baixa manual; gateway real continua pendente |
+| Acordo de pagamento | sim | não se aplica | Sem entrada separada |
+| Primeiro mês proporcional | sim | não se aplica | |
+| Dados da pessoa, etiquetas | sim | não se aplica | |
+| Aviso de manutenção no portal | sim | não se aplica | Não envia SMS/e-mail |
+| Checklist da OS, comodato | sim | não se aplica | |
+
+**Ficou de fora, por decisão de escopo ou por depender de terceiro** (nada disso foi simulado):
+
+- **Contas a pagar, plano de contas e caixa:** é outro produto (back-office); o escopo é a cobrança do assinante.
+- **Emissão fiscal (NFCom, NFS-e, SCM):** depende do emissor e do município do provedor.
+- **TR-069 / CPE Manager, outros tipos de conexão (IPoE, hotspot, DHCP), segundo fabricante de OLT, remessa/retorno CNAB:** exigem equipamento ou serviço de terceiro para homologar; ver a seção 5.3.
+- **API pública com token, SMS e URA:** superfície nova de segurança e serviço de envio de terceiro.
+- **Cartão de crédito, proteção de crédito (Serasa), termo de aceite, viabilidade técnica, feriados, documentos anexos, contratos unificados, vários serviços por contrato:**
+  não implementados nesta rodada.
+- **Fotos na OS:** exigem armazenamento de arquivos e decisão de LGPD.
