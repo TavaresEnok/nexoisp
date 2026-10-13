@@ -13,8 +13,11 @@ import { withScope } from '../db.js';
  */
 export const FIELDS = {
   subscribers: ['id_externo', 'nome', 'cpf_cnpj', 'email', 'telefone', 'logradouro', 'numero', 'bairro', 'cidade', 'uf', 'cep', 'observacoes',
-    'situacao', 'plano', 'vencimento_dia', 'pppoe_usuario', 'pppoe_senha'],
-  invoices: ['id_externo', 'id_externo_assinante', 'vencimento', 'valor', 'competencia', 'descricao'],
+    'situacao', 'plano', 'vencimento_dia', 'pppoe_usuario', 'pppoe_senha',
+    // modelo v2 (opcionais): só atuam quando a coluna existe no arquivo; arquivo sem elas nunca apaga o que já está no sistema
+    'nascimento', 'rg', 'nome_mae', 'nome_fantasia', 'celular', 'whatsapp', 'aceita_avisos', 'inicio_contrato', 'mac', 'etiquetas', 'pop',
+    'fidelidade_ate', 'multa_valor', 'multa_modelo', 'indicado_por'],
+  invoices: ['id_externo', 'id_externo_assinante', 'vencimento', 'valor', 'competencia', 'descricao', 'situacao', 'pago_em', 'valor_pago', 'forma_pagamento'],
 } as const;
 const REQUIRED = { subscribers: ['id_externo', 'nome'], invoices: ['id_externo', 'id_externo_assinante', 'vencimento', 'valor'] } as const;
 
@@ -71,7 +74,10 @@ type Body = z.infer<typeof zBody>;
 interface RowResult { row: number; external_id: string | null; status: 'created' | 'updated' | 'unchanged' | 'error'; messages: string[]; entity_id?: string }
 class RowError extends Error {}
 
-async function importSubscriberRow(c: Tx, tenantId: string, b: Body, r: Record<string, string>, plans: Map<string, any>, totals: any): Promise<Omit<RowResult, 'row'>> {
+const YES = new Set(['sim', 's', 'yes', 'y', '1', 'true', 'verdadeiro']);
+const NO = new Set(['nao', 'não', 'n', 'no', '0', 'false', 'falso', '']);
+
+async function importSubscriberRow(c: Tx, tenantId: string, b: Body, r: Record<string, string>, plans: Map<string, any>, totals: any, mapped: Set<string>): Promise<Omit<RowResult, 'row'>> {
   const msgs: string[] = [];
   const ext = r.id_externo;
   if (!ext) throw new RowError('id_externo ausente');
@@ -84,6 +90,18 @@ async function importSubscriberRow(c: Tx, tenantId: string, b: Body, r: Record<s
   const vals = [r.nome, doc, r.email || null, r.telefone || null, r.logradouro || null, r.numero || null, r.bairro || null, r.cidade || null,
     (r.uf || '').toUpperCase().slice(0, 2) || null, r.cep || null, r.observacoes || null, sit === 'ativo' ? 'active' : 'inactive'];
   const cols = ['name', 'document', 'email', 'phone', 'address_street', 'address_number', 'address_district', 'address_city', 'address_state', 'address_zip', 'notes', 'status'];
+  // dados da pessoa (v2): só entram quando a coluna veio no arquivo
+  if (mapped.has('nascimento')) {
+    const bd = r.nascimento ? parseDate(r.nascimento) : null;
+    if (r.nascimento && !bd) throw new RowError(`nascimento inválido: "${r.nascimento}" (use AAAA-MM-DD ou DD/MM/AAAA)`);
+    cols.push('birth_date'); vals.push(bd);
+  }
+  if (mapped.has('rg')) {
+    if (r.rg && !/^[0-9A-Za-z.\- /]{3,20}$/.test(r.rg)) throw new RowError(`RG inválido: "${r.rg}"`);
+    cols.push('rg'); vals.push(r.rg || null);
+  }
+  if (mapped.has('nome_mae')) { if (r.nome_mae.length > 200) throw new RowError('nome da mãe acima de 200 caracteres'); cols.push('mother_name'); vals.push(r.nome_mae || null); }
+  if (mapped.has('nome_fantasia')) { if (r.nome_fantasia.length > 200) throw new RowError('nome fantasia acima de 200 caracteres'); cols.push('trade_name'); vals.push(r.nome_fantasia || null); }
 
   let status: RowResult['status'];
   let sub = (await c.query('select * from subscribers where external_source = $1 and external_id = $2', [b.source, ext])).rows[0];
@@ -97,9 +115,25 @@ async function importSubscriberRow(c: Tx, tenantId: string, b: Body, r: Record<s
       if (clash) throw new RowError(`documento já cadastrado para "${clash.name}" sem vínculo com esta origem; confira antes de importar`);
     }
     sub = (await c.query(
-      `insert into subscribers (tenant_id, ${cols.join(', ')}, external_source, external_id) values ($1, ${cols.map((_, i) => `$${i + 2}`).join(', ')}, $14, $15) returning *`,
+      `insert into subscribers (tenant_id, ${cols.join(', ')}, external_source, external_id) values ($1, ${cols.map((_, i) => `$${i + 2}`).join(', ')}, $${cols.length + 2}, $${cols.length + 3}) returning *`,
       [tenantId, ...vals, b.source, ext])).rows[0];
     status = 'created';
+  }
+
+  // contatos com consentimento explícito para avisos (padrão: sem consentimento)
+  const consent = mapped.has('aceita_avisos') ? r.aceita_avisos.trim().toLowerCase() : '';
+  if (mapped.has('aceita_avisos') && !YES.has(consent) && !NO.has(consent)) throw new RowError(`aceita_avisos inválido: "${r.aceita_avisos}" (use sim ou não)`);
+  for (const [col, kind] of [['celular', 'mobile'], ['whatsapp', 'whatsapp']] as const) {
+    if (!mapped.has(col) || !r[col]) continue;
+    const val = r[col].trim();
+    if (val.length < 3 || val.length > 200) throw new RowError(`${col} inválido: "${r[col]}"`);
+    const has = (await c.query('select 1 from subscriber_contacts where subscriber_id = $1 and kind = $2 and value = $3', [sub.id, kind, val])).rowCount;
+    if (!has) {
+      await c.query(`insert into subscriber_contacts (tenant_id, subscriber_id, kind, value, purpose, allow_notices) values ($1,$2,$3,$4,'general',$5)`,
+        [tenantId, sub.id, kind, val, YES.has(consent)]);
+      totals.contacts_created++;
+      if (status === 'unchanged') status = 'updated';
+    }
   }
 
   if (r.plano) {
@@ -112,9 +146,12 @@ async function importSubscriberRow(c: Tx, tenantId: string, b: Body, r: Record<s
     else {
       const due = Number(r.vencimento_dia);
       if (!Number.isInteger(due) || due < 1 || due > 28) throw new RowError(`vencimento_dia inválido: "${r.vencimento_dia}" (aceito: 1 a 28; ajuste na origem ou no arquivo)`);
+      const start = mapped.has('inicio_contrato') && r.inicio_contrato ? parseDate(r.inicio_contrato) : null;
+      if (mapped.has('inicio_contrato') && r.inicio_contrato && !start) throw new RowError(`inicio_contrato inválido: "${r.inicio_contrato}" (use AAAA-MM-DD ou DD/MM/AAAA)`);
       k = (await c.query(
-        `insert into contracts (tenant_id, subscriber_id, plan_version_id, due_day, external_source, external_id) values ($1,$2,$3,$4,$5,$6) returning id`,
-        [tenantId, sub.id, plan.version_id, due, b.source, ext])).rows[0];
+        `insert into contracts (tenant_id, subscriber_id, plan_version_id, due_day, start_date, external_source, external_id)
+         values ($1,$2,$3,$4,coalesce($5::date, current_date),$6,$7) returning id`,
+        [tenantId, sub.id, plan.version_id, due, start, b.source, ext])).rows[0];
       await c.query(`insert into contract_history (tenant_id, contract_id, event, detail) values ($1,$2,'created',$3)`, [tenantId, k.id, JSON.stringify({ import: b.source, plan: plan.name, plan_version: plan.version })]);
       totals.contracts_created++;
       if (status === 'unchanged') status = 'updated';
@@ -125,22 +162,76 @@ async function importSubscriberRow(c: Tx, tenantId: string, b: Body, r: Record<s
         if (!b.device_id) msgs.push('conta PPPoE não criada: selecione o equipamento (NAS) de destino');
         else {
           if (!/^[A-Za-z0-9_.@-]{3,64}$/.test(r.pppoe_usuario)) throw new RowError(`usuário PPPoE inválido: "${r.pppoe_usuario}"`);
+          let mac: string | null = null;
+          if (mapped.has('mac') && r.mac) {
+            mac = r.mac.trim().toUpperCase().replace(/[-.]/g, ':');
+            if (/^[0-9A-F]{12}$/.test(mac.replace(/:/g, ''))) mac = mac.replace(/:/g, '').match(/.{2}/g)!.join(':');
+            if (!/^([0-9A-F]{2}:){5}[0-9A-F]{2}$/.test(mac)) throw new RowError(`MAC inválido: "${r.mac}"`);
+          }
           // credencial ausente NÃO vira senha inventada: a conta fica sem segredo até ser informada
           await c.query(
-            `insert into service_resources (tenant_id, contract_id, device_id, pppoe_username, secret_enc, desired_profile, external_source, external_id) values ($1,$2,$3,$4,$5,$6,$7,$8)`,
-            [tenantId, k.id, b.device_id, r.pppoe_usuario, r.pppoe_senha ? encryptSecret(r.pppoe_senha) : null, plan.profile_name, b.source, ext]);
+            `insert into service_resources (tenant_id, contract_id, device_id, pppoe_username, secret_enc, desired_profile, mac, external_source, external_id) values ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+            [tenantId, k.id, b.device_id, r.pppoe_usuario, r.pppoe_senha ? encryptSecret(r.pppoe_senha) : null, plan.profile_name, mac, b.source, ext]);
           totals.accounts_created++;
           if (!r.pppoe_senha) { totals.accounts_without_secret++; msgs.push('sem senha PPPoE no arquivo: credencial indisponível, conta não poderá ser provisionada até informar a senha'); }
           if (status === 'unchanged') status = 'updated';
         }
       }
     }
+    if (k) {
+      const extras = await applyContractExtras(c, tenantId, b, k.id, r, mapped, totals, msgs);
+      if (extras && status === 'unchanged') status = 'updated';
+    }
   } else if (r.pppoe_usuario) msgs.push('pppoe_usuario ignorado: linha sem plano/contrato');
   return { external_id: ext, status, messages: msgs, entity_id: sub.id };
 }
 
+
+/**
+ * Etiquetas, POP, fidelidade e indicação do contrato. Não destrutivo: preenche o que está vazio e acrescenta etiquetas;
+ * nunca troca POP, fidelidade ou indicador que já existam (isso é decisão de quem opera, pelo painel).
+ */
+async function applyContractExtras(c: Tx, tenantId: string, b: Body, contractId: string, r: Record<string, string>, mapped: Set<string>, totals: any, msgs: string[]): Promise<boolean> {
+  let changed = false;
+  if (mapped.has('etiquetas') && r.etiquetas) {
+    for (const name of r.etiquetas.split('|').map((s) => s.trim()).filter(Boolean)) {
+      if (name.length < 2 || name.length > 40) throw new RowError(`etiqueta inválida: "${name}" (2 a 40 caracteres)`);
+      const tag = (await c.query(
+        `insert into tags (tenant_id, name) values ($1,$2) on conflict (tenant_id, name) do update set name = excluded.name returning id`, [tenantId, name])).rows[0];
+      const ins = await c.query(`insert into contract_tags (tenant_id, contract_id, tag_id) values ($1,$2,$3) on conflict do nothing`, [tenantId, contractId, tag.id]);
+      if (ins.rowCount) { totals.tags_applied++; changed = true; }
+    }
+  }
+  if (mapped.has('pop') && r.pop) {
+    const pop = (await c.query('select id from pops where lower(name) = lower($1) and active', [r.pop])).rows[0];
+    if (!pop) { totals.pops_unmatched.add(r.pop); msgs.push(`POP "${r.pop}" não existe: cadastre-o e reimporte para vincular`); }
+    else if ((await c.query('update contracts set pop_id = $2 where id = $1 and pop_id is null', [contractId, pop.id])).rowCount) changed = true;
+  }
+  if (mapped.has('fidelidade_ate') && r.fidelidade_ate) {
+    const until = parseDate(r.fidelidade_ate);
+    if (!until) throw new RowError(`fidelidade_ate inválida: "${r.fidelidade_ate}" (use AAAA-MM-DD ou DD/MM/AAAA)`);
+    const fee = parseCents(r.multa_valor ?? '');
+    if (fee === null) throw new RowError(`multa_valor inválido ou ausente: "${r.multa_valor}" (obrigatório com fidelidade_ate)`);
+    const model = (r.multa_modelo || 'fixo').toLowerCase();
+    if (!['fixo', 'mensal'].includes(model)) throw new RowError(`multa_modelo desconhecido: "${r.multa_modelo}" (use fixo ou mensal)`);
+    if ((await c.query(
+      `update contracts set loyalty_until = $2, penalty_model = $3, penalty_cents = $4 where id = $1 and loyalty_until is null`,
+      [contractId, until, model === 'mensal' ? 'monthly' : 'fixed', fee])).rowCount) { totals.loyalty_set++; changed = true; }
+  }
+  if (mapped.has('indicado_por') && r.indicado_por) {
+    const ref = (await c.query('select id from subscribers where external_source = $1 and external_id = $2', [b.source, r.indicado_por])).rows[0];
+    if (!ref) msgs.push(`indicador "${r.indicado_por}" não encontrado nesta origem: importe-o antes e reimporte`);
+    else if ((await c.query(
+      `update contracts set referred_by_subscriber_id = $2 where id = $1 and referred_by_subscriber_id is null and subscriber_id <> $2`, [contractId, ref.id])).rowCount) changed = true;
+  }
+  return changed;
+}
+
 async function importInvoiceRow(c: Tx, tenantId: string, b: Body, r: Record<string, string>, totals: any): Promise<Omit<RowResult, 'row'>> {
   const ext = r.id_externo;
+  // situação do título na origem: aberto (padrão), pago, cancelado. Histórico pago/cancelado não vira cobrança.
+  const sit = (r.situacao || 'aberto').toLowerCase();
+  if (!['aberto', 'pago', 'cancelado'].includes(sit)) throw new RowError(`situação do título desconhecida: "${r.situacao}" (use aberto, pago ou cancelado)`);
   if (!ext) throw new RowError('id_externo ausente');
   const cents = parseCents(r.valor ?? '');
   if (cents === null || cents <= 0) throw new RowError(`valor inválido: "${r.valor}"`);
@@ -160,12 +251,31 @@ async function importInvoiceRow(c: Tx, tenantId: string, b: Body, r: Record<stri
   }
   if (comp && (await c.query(`select 1 from invoices where contract_id = $1 and competence = $2 and kind = 'monthly'`, [k.id, comp])).rowCount)
     throw new RowError(`já existe mensalidade da competência ${r.competencia} para este contrato; título não importado para evitar cobrança em dobro`);
+  let paidAt: string | null = null, paidCents = 0;
+  if (sit === 'pago') {
+    paidAt = parseDate(r.pago_em ?? '');
+    if (!paidAt) throw new RowError(`pago_em inválido ou ausente: "${r.pago_em}" (obrigatório para título pago)`);
+    paidCents = r.valor_pago ? (parseCents(r.valor_pago) ?? -1) : cents;
+    if (paidCents <= 0) throw new RowError(`valor_pago inválido: "${r.valor_pago}"`);
+    if (paidCents > cents * 2) throw new RowError(`valor_pago (${r.valor_pago}) muito acima do valor do título; confira o arquivo`);
+  }
+  const full = sit === 'pago' && paidCents >= cents;      // pagamento a menor deixa o título em aberto com o que já foi pago
+  const status = sit === 'cancelado' ? 'canceled' : full ? 'paid' : 'open';
   const i = (await c.query(
-    `insert into invoices (tenant_id, contract_id, subscriber_id, kind, competence, due_date, amount_cents, external_source, external_id)
-     values ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning id`, [tenantId, k.id, k.subscriber_id, comp ? 'monthly' : 'manual', comp, due, cents, b.source, ext])).rows[0];
+    `insert into invoices (tenant_id, contract_id, subscriber_id, kind, competence, due_date, amount_cents, status, paid_at, canceled_at, status_note, external_source, external_id)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) returning id`,
+    [tenantId, k.id, k.subscriber_id, comp ? 'monthly' : 'manual', comp, due, cents, status, full ? paidAt : null, status === 'canceled' ? new Date() : null,
+      status === 'canceled' ? `cancelado na origem (${b.source})` : null, b.source, ext])).rows[0];
   await c.query('insert into invoice_items (tenant_id, invoice_id, description, amount_cents) values ($1,$2,$3,$4)', [tenantId, i.id, r.descricao || `Título importado (${b.source} ${ext})`, cents]);
-  totals.amount_cents_total += cents;
-  return { external_id: ext, status: 'created', messages: [], entity_id: i.id };
+  const msgs: string[] = [];
+  if (sit === 'pago') {
+    await c.query(`insert into payments (tenant_id, invoice_id, amount_cents, paid_at, method, source, note) values ($1,$2,$3,$4,$5,'manual',$6)`,
+      [tenantId, i.id, paidCents, paidAt, r.forma_pagamento || null, `Importado de ${b.source} (id ${ext})`]);
+    totals.paid_cents_total += paidCents;
+    if (full) totals.invoices_paid++; else { totals.invoices_partial++; msgs.push(`pagamento parcial (${(paidCents / 100).toFixed(2).replace('.', ',')} de ${(cents / 100).toFixed(2).replace('.', ',')}): título segue em aberto pelo saldo`); }
+  } else if (sit === 'cancelado') totals.invoices_canceled++;
+  if (status === 'open') totals.amount_cents_total += cents - paidCents;
+  return { external_id: ext, status: 'created', messages: msgs, entity_id: i.id };
 }
 
 /** Prévia e aplicação usam o MESMO código; a prévia executa tudo e desfaz (rollback). */
@@ -181,8 +291,10 @@ async function runImport(ctx: { tenantId: string; userId: string }, b: Body, app
     mapping[f] = want !== undefined ? (headers.includes(want) ? want : null) : headers.find((h) => norm(h) === f) ?? null;
   }
   const missing = REQUIRED[b.kind].filter((f) => !mapping[f]);
+  const mapped = new Set(Object.entries(mapping).filter(([, v]) => v).map(([k]) => k));   // colunas que existem no arquivo
   const rows: RowResult[] = [];
-  const totals: any = { rows: table.length - 1, created: 0, updated: 0, unchanged: 0, error: 0, contracts_created: 0, accounts_created: 0, accounts_without_secret: 0, amount_cents_total: 0, plans_unmatched: new Set<string>() };
+  const totals: any = { rows: table.length - 1, created: 0, updated: 0, unchanged: 0, error: 0, contracts_created: 0, accounts_created: 0, accounts_without_secret: 0, amount_cents_total: 0, plans_unmatched: new Set<string>(),
+    contacts_created: 0, tags_applied: 0, loyalty_set: 0, pops_unmatched: new Set<string>(), invoices_paid: 0, invoices_partial: 0, invoices_canceled: 0, paid_cents_total: 0 };
   let batchId: string | null = null;
 
   const c = await pool().connect();
@@ -203,7 +315,7 @@ async function runImport(ctx: { tenantId: string; userId: string }, b: Body, app
         try {
           if (rec.id_externo && seen.has(rec.id_externo)) throw new RowError(`id_externo "${rec.id_externo}" repetido no arquivo`);
           seen.add(rec.id_externo);
-          res = { row: n + 1, ...(b.kind === 'subscribers' ? await importSubscriberRow(c, ctx.tenantId, b, rec, plans, totals) : await importInvoiceRow(c, ctx.tenantId, b, rec, totals)) };
+          res = { row: n + 1, ...(b.kind === 'subscribers' ? await importSubscriberRow(c, ctx.tenantId, b, rec, plans, totals, mapped) : await importInvoiceRow(c, ctx.tenantId, b, rec, totals)) };
           await c.query('release savepoint r');
         } catch (e: any) {
           await c.query('rollback to savepoint r');
@@ -216,6 +328,7 @@ async function runImport(ctx: { tenantId: string; userId: string }, b: Body, app
       }
     }
     totals.plans_unmatched = [...totals.plans_unmatched];
+    totals.pops_unmatched = [...totals.pops_unmatched];
     if (apply && missing.length === 0) {
       batchId = (await c.query('insert into import_batches (tenant_id, source, kind, filename, totals, created_by) values ($1,$2,$3,$4,$5,$6) returning id',
         [ctx.tenantId, b.source, b.kind, b.filename ?? null, JSON.stringify(totals), ctx.userId])).rows[0].id;

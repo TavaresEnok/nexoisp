@@ -309,3 +309,10 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
 - **Limites:** combos de produtos não existem; aditivo não tem assinatura; multa é cobrada como fatura avulsa (sem cálculo proporcional por dia).
 - **Próxima ação:** F5/F7 (kit/auxiliares e comissão), R1–R4 (parâmetros de rede por plano, NAS, CGNAT, disponibilidade), P3 (campos personalizados) e o modelo canônico ampliado de importação.
 
+### 13/10/2026 — modelo canônico de importação v2
+
+- **Entregue (testado):** colunas opcionais no CSV de assinantes (dados da pessoa, celular/WhatsApp com **consentimento só quando o arquivo diz sim**, início do contrato, MAC,
+  etiquetas, POP, fidelidade e multa, indicação) e no CSV de títulos (situação aberto/pago/cancelado, data e valor pago, forma). Arquivo sem as colunas novas não apaga dados;
+  reimportar não duplica; pagamento parcial vira título em aberto pelo saldo; histórico nunca vai ao gateway. Documentado em `docs/importacao-csv.md`.
+- **Limites:** IP fixo, mais de um serviço por assinante, documentos e histórico de sessões não entram no CSV. Adaptadores por origem (SGP, IXC) continuam dependendo de um export real.
+

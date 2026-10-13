@@ -21,6 +21,26 @@ Separador `;` ou `,` (detectado), UTF-8, primeira linha com os nomes das colunas
 | `pppoe_usuario` | não | Cria a conta PPPoE (não provisionada) no equipamento escolhido |
 | `pppoe_senha` | não | Ausente: conta fica **sem credencial** e não pode ser provisionada até alguém informar a senha |
 
+### Colunas opcionais do modelo v2 (assinantes)
+
+Só atuam quando a coluna existe no arquivo. **Um arquivo sem elas nunca apaga o que já está no sistema.** Reimportar não duplica contato, etiqueta, fidelidade nem indicação,
+e nunca troca POP, fidelidade ou indicador que já estejam preenchidos (isso é decisão de quem opera, pelo painel).
+
+| Coluna | Regra |
+|---|---|
+| `nascimento` | `AAAA-MM-DD` ou `DD/MM/AAAA`; inválida rejeita a linha |
+| `rg`, `nome_mae`, `nome_fantasia` | Texto; `rg` de 3 a 20 caracteres (letras, números, `.`, `-`, `/`) |
+| `celular`, `whatsapp` | Cria contato do tipo celular/WhatsApp. **Sem consentimento por padrão** |
+| `aceita_avisos` | `sim` ou `não`. Só `sim` marca o contato como autorizado a receber avisos de saída (cobrança, manutenção, OS). Informe `sim` apenas se o consentimento existir na origem |
+| `inicio_contrato` | Data de início do contrato (padrão: hoje). Importante para o primeiro mês proporcional |
+| `mac` | MAC do equipamento do assinante (`AA:BB:CC:DD:EE:FF`, aceita `-` e sem separador); vincula à conta PPPoE |
+| `etiquetas` | Lista separada por `|` (ex.: `vip|fibra`); cria as que não existem |
+| `pop` | Nome de um POP já cadastrado. Inexistente vira **aviso** (a linha entra); cadastre o POP e reimporte |
+| `fidelidade_ate`, `multa_valor`, `multa_modelo` | Fim da carência, valor da multa e `fixo` (padrão) ou `mensal` (por mês restante). `multa_valor` é obrigatório com `fidelidade_ate` |
+| `indicado_por` | `id_externo` do assinante que indicou (da mesma origem; importe-o antes) |
+
+**Não entram no CSV:** IP fixo (depende de pool no IPAM), documentos anexos, mais de um serviço por assinante e histórico de sessões.
+
 ## 2. Títulos em aberto (`titulos.csv`) — importar depois dos assinantes
 
 | Coluna | Obrigatória | Regra |
@@ -32,7 +52,19 @@ Separador `;` ou `,` (detectado), UTF-8, primeira linha com os nomes das colunas
 | `competencia` | não | `AAAA-MM`. Marca como mensalidade e impede cobrança em dobro com a recorrência |
 | `descricao` | não | |
 
-Títulos importados entram como "em aberto" e **não geram cobrança automática no gateway**.
+### Histórico financeiro (colunas opcionais)
+
+| Coluna | Regra |
+|---|---|
+| `situacao` | `aberto` (padrão), `pago` ou `cancelado`. Outro valor rejeita a linha |
+| `pago_em` | Obrigatória para `pago` |
+| `valor_pago` | Padrão: o valor do título. **Menor que o valor** deixa o título em aberto com o saldo (pagamento parcial) e avisa na linha |
+| `forma_pagamento` | Texto livre (pix, boleto…) |
+
+Título `pago` entra como pago com a baixa registrada (origem "manual", observação com a origem e o id); `cancelado` entra cancelado. Nenhum deles vai ao gateway.
+Com `competencia`, o título histórico também impede que a recorrência gere a mensalidade do mesmo mês em dobro.
+
+Títulos em aberto importados entram como "em aberto" e **não geram cobrança automática no gateway**.
 
 ## Fluxo
 

@@ -140,13 +140,13 @@ O que um provedor precisa **no primeiro dia**, **na primeira semana** e **no pri
 
 | Dado | Origem | NexoISP | O que fazer |
 |---|---|---|---|
-| Assinantes (PF/PJ, contatos, endereço) | SGP, IXC | ✅ (CSV) | Adaptador por origem; ampliar contatos (D9) |
+| Assinantes (PF/PJ, contatos, endereço) | SGP, IXC | ✅ (CSV v2: pessoa, celular/WhatsApp com consentimento, POP, fidelidade, indicação) | Adaptador por origem (depende do formato real) |
 | Contratos e serviços (mais de um por cliente) | SGP, IXC | 🟡 (um por linha) | Modelo canônico com N serviços por contrato |
 | Planos com política de rede | SGP, IXC | 🟡 | R1 e C3/C4 |
 | Login PPPoE e **senha** | SGP, IXC | 🟡 (CSV tem senha) | **Confirmar que a origem entrega a senha** (ver seção 4) |
-| IP fixo, MAC, etiquetas | SGP, IXC | ✅ no destino, ❌ no CSV | Acrescentar ao CSV canônico |
-| Títulos em aberto | SGP, IXC | ✅ (CSV) | Tratar parcialmente pagos e de acordo |
-| **Histórico financeiro** (pagos, cancelados) | SGP, IXC | ❌ | Importar como histórico somente leitura |
+| IP fixo, MAC, etiquetas | SGP, IXC | ✅ no destino; ✅ MAC e etiquetas no CSV v2; ❌ IP fixo | IP fixo depende de pool no IPAM |
+| Títulos em aberto | SGP, IXC | ✅ (CSV; parcialmente pagos ficam em aberto pelo saldo) | Acordos: importar as parcelas como títulos |
+| **Histórico financeiro** (pagos, cancelados) | SGP, IXC | ✅ (CSV v2: situação, pago_em, valor_pago, forma) | Gerar o CSV a partir do backup quando o formato for conhecido |
 | Equipamento em comodato por cliente | SGP, IXC | 🟡 | Vincular série ao contrato na importação |
 | NAS, pools, VLAN, OLT, PON, CTO, ONU | SGP, IXC | 🟡 | Importar o inventário (hoje cadastro manual) |
 | Ocorrências, OS, anotações (histórico) | SGP, IXC | ❌ | Importar como linha do tempo (D2) |
