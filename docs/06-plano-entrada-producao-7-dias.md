@@ -230,3 +230,11 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
 - **Atenção ao implantar:** agente **0.4.0** no site antes de ligar suspensão por perfil, MAC ou consumo (a API recusa emitir para agente antigo). Migrações 020 a 024.
 - **Fora, e por quê:** contas a pagar/caixa (outro produto), fiscal, TR-069, IPoE/hotspot, 2º fabricante de OLT, CNAB, API pública, SMS/URA, cartão, fotos da OS.
 - **Situação:** pronta para homologação, não para corte. Impedimentos externos inalterados.
+
+### 13/10/2026 — análise do espelho da interface do SGP
+
+- **Entregue:** `docs/08-roadmap-crm-completo.md`, a partir do espelho da interface do SGP (`docs/sgp_mirror.zip`, não versionado: contém dados de clientes) e da API.
+  Só estrutura (menus, telas, campos, modelos); nenhum dado do espelho foi copiado.
+- **Conclusão:** o que mais separa o NexoISP do SGP **para o operador** é comunicação de cobrança, degraus de inadimplência por plano, SLA/catálogos de atendimento,
+  agenda de OS e relatórios; **para o negócio**, gateway real, fiscal, homologação em equipamento e migração. Nenhum item novo entra antes do piloto.
+- **Próxima ação:** o proprietário escolhe a primeira onda (proposta: motor de avisos ao assinante). Pendências externas inalteradas.
