@@ -15,6 +15,28 @@ const WO_EVENT: Record<string, string> = { created: 'Aberta', status: 'Situaçã
 const toLocal = (s?: string | null) => { if (!s) return ''; const x = new Date(s); return new Date(x.getTime() - x.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
 const toIso = (s: string) => (s ? new Date(s).toISOString() : null);
 
+/** Aplicar kit de instalação e escolher técnicos auxiliares da OS. */
+function KitAndHelpers({ workOrder, staff, onChange }: { workOrder: any; staff: any[]; onChange: () => void }) {
+  const kits = useLoad<any[]>('/install-kits');
+  const [kit, setKit] = useState('');
+  const [helper, setHelper] = useState('');
+  const active = kits.data?.filter((k) => k.active) ?? [];
+  return (
+    <div className="row" style={{ margin: '8px 0', flexWrap: 'wrap' }}>
+      {active.length > 0 && (<>
+        <select aria-label="Kit de instalação" value={kit} onChange={(e) => setKit(e.target.value)} style={{ width: 220 }}><option value="">Kit de instalação…</option>{active.map((k) => <option key={k.id} value={k.id}>{k.name}</option>)}</select>
+        <ActionButton disabled={!kit} confirm="Baixar do estoque todos os itens do kit nesta OS?" onClick={async () => { await api(`/work-orders/${workOrder.id}/kit`, { body: { kit_id: kit } }); setKit(''); onChange(); }}>Aplicar kit</ActionButton>
+      </>)}
+      <select aria-label="Técnico auxiliar" value={helper} onChange={(e) => setHelper(e.target.value)} style={{ width: 200 }}><option value="">Auxiliar…</option>
+        {staff.filter((u) => u.id !== workOrder.assignee_id && !workOrder.helpers?.some((h: any) => h.user_id === u.id)).map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}</select>
+      <ActionButton disabled={!helper} onClick={async () => { await api(`/work-orders/${workOrder.id}/helpers`, { body: { user_id: helper } }); setHelper(''); onChange(); }}>Adicionar auxiliar</ActionButton>
+      {workOrder.helpers?.map((h: any) => (
+        <Badge key={h.user_id}>{h.name} <button className="sm" aria-label={`Remover ${h.name}`} onClick={async () => { await api(`/work-orders/${workOrder.id}/helpers/${h.user_id}`, { method: 'DELETE' }); onChange(); }}>×</button></Badge>
+      ))}
+    </div>
+  );
+}
+
 /** Busca de assinante + contrato, usada ao abrir OS e atendimento fora da ficha do assinante. */
 export function SubscriberPick({ value, onChange }: { value: { subscriber_id: string; contract_id: string }; onChange: (v: { subscriber_id: string; contract_id: string }) => void }) {
   const [q, setQ] = useState('');
@@ -112,6 +134,8 @@ export function WorkOrderDetail({ id, onClose }: { id: string; onClose: () => vo
               <ActionButton className="danger" disabled={!res.trim()} confirm="Cancelar esta ordem de serviço?" onClick={status('canceled', res)}>Cancelar OS</ActionButton>
             </div>
           )}
+          {write && <KitAndHelpers workOrder={w} staff={staff.data ?? []} onChange={reload} />}
+          {!write && w.helpers?.length > 0 && <p className="small muted">Auxiliares: {w.helpers.map((h: any) => h.name).join(', ')}</p>}
           <WorkOrderChecklist workOrder={w} writable={!!write && !['done', 'canceled'].includes(w.status)} onChange={() => reload()} />
           <div className="grid2">
             <Card title="Material utilizado">

@@ -310,9 +310,16 @@ export async function ipamRoutes(app: FastifyInstance) {
           `select r.pppoe_username, r.observed_at, r.contract_id, s.id as subscriber_id, s.name as subscriber_name
            from service_resources r join contracts k on k.id = r.contract_id join subscribers s on s.id = k.subscriber_id
            where r.observed_session->>'ip' = $1 and (r.observed_session->>'online')::boolean is true`, [b.private_ip])).rows[0] ?? null;
-        return { found: true, at, plan: { id: g.id, name: g.name, retired_at: g.retired_at }, ...b, fixed_allocation: fixed, current_session: session,
+        // titular NA DATA: sessões que o agente relatou com esse IP privado cobrindo o horário consultado (accounting sincronizado)
+        const holders = (await c.query(
+          `select s.started_at, s.stopped_at, s.mac, r.pppoe_username, r.contract_id, sub.id as subscriber_id, sub.name as subscriber_name
+           from service_sessions s join service_resources r on r.id = s.resource_id join contracts k on k.id = r.contract_id join subscribers sub on sub.id = k.subscriber_id
+           where s.ip = $1 and s.started_at <= $2::timestamptz and (s.stopped_at is null or s.stopped_at >= $2::timestamptz)
+           order by s.started_at desc limit 5`, [b.private_ip, at])).rows;
+        return { found: true, at, plan: { id: g.id, name: g.name, retired_at: g.retired_at }, ...b, fixed_allocation: fixed, current_session: session, holders_at: holders,
           note: fixed ? 'Endereço privado fixo de um contrato.'
-            : 'Endereço privado dinâmico: o titular na data consultada está no accounting do RADIUS local do provedor (tabela radacct: framedipaddress + horário). A sessão atual, se exibida, não comprova o uso no passado.' };
+            : holders.length ? 'Endereço privado dinâmico: o titular na data consultada vem das sessões relatadas pelo agente (accounting do RADIUS local). Confira no RADIUS do provedor se o caso for formal.'
+              : 'Endereço privado dinâmico sem sessão relatada para esse horário: o titular está no accounting do RADIUS local (radacct: framedipaddress + horário). A sessão atual, se exibida, não comprova o uso no passado.' };
       }
       return { found: false, at, note: plans.length ? 'A porta não pertence a nenhum bloco do plano vigente na data.' : 'Nenhum plano de CGNAT do provedor cobria esse IP público na data informada.' };
     });

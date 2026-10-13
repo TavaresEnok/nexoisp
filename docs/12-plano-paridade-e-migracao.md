@@ -100,9 +100,9 @@ Entregue = implementado e coberto por teste automatizado. Nada aqui foi homologa
 
 | Situação | Itens |
 |---|---|
-| ✅ Entregue | D1, D2, D3, D4, D6, D7, D8, D9, D12, C1, C2, C3, C4, C6, C7, C8, C9, F1, F2, F3, F4, F6, P1, P2, P5 |
-| 🟡 Parcial | C10 (desconto temporário e indicação prontos; **combos** de produtos não: exigem catálogo além do plano de internet), D5 (consumo por dia; faltam hora, semana e ano), D10 (lista online e exportação; falta a desconexão em lote, que exige operação nova do agente), C1 (só canal por HTTP genérico e de saída; sem SMS/WhatsApp nativo, ver abaixo) |
-| ⏳ Pendente | D11, C5, F5, F7, P3, P4, R1–R4 |
+| ✅ Entregue | D1, D2, D3, D4, D6, D7, D8, D9, D12, C1, C2, C3, C4, C6, C7, C8, C9, F1, F2, F3, F4, F6, F7, P1, P2, P3, P5, R3, R4 |
+| 🟡 Parcial | F5 (kit de instalação e técnicos auxiliares prontos; **check-in/out com localização** não: dado pessoal do técnico, exige decisão de LGPD; hora de saída e de início já são registradas), C10 (desconto temporário e indicação prontos; **combos** de produtos não: exigem catálogo além do plano de internet), D5 (consumo por dia; faltam hora, semana e ano), D10 (lista online e exportação; falta a desconexão em lote, que exige operação nova do agente), C1 (só canal por HTTP genérico e de saída; sem SMS/WhatsApp nativo, ver abaixo) |
+| ⏳ Pendente | D11 (permissão por POP: exige filtrar todas as consultas por escopo), C5 (página de aviso: exige redirecionamento no NAS, a validar em equipamento), P4 (documentos: decisão de armazenamento e LGPD), R1 e R2 (parâmetros de rede por plano e do NAS: exigem operação nova do agente) |
 
 **Lote 4 em detalhe (sem chat; tudo por ocorrência e OS):**
 - **F1 fluxo da OS:** aberta → em análise → aguardando agendamento (com motivo) → agendada → **em deslocamento** (exige técnico; grava a hora da saída) → em execução (grava o início) → concluída/cancelada. "Atribuída" é o responsável preenchido, não um estado.
@@ -111,6 +111,13 @@ Entregue = implementado e coberto por teste automatizado. Nada aqui foi homologa
 - **F4 agenda:** por técnico e dia (1 a 14 dias), com sobreposição apontada, fila "aguardando agendamento" e janelas livres no expediente.
 - **F6 endereço:** instalação por contrato e OS com origem registrada (cadastro, contrato ou informado); a OS guarda o endereço, então mudar o cadastro depois não a altera.
 - **C7 satisfação:** nasce ao concluir a OS, vale 30 dias, é respondida **no portal** (1 a 5 e comentário); a equipe vê média e respostas. Não há envio automático do convite: a régua de avisos hoje é por vencimento de fatura.
+
+**Lote 8 em detalhe:**
+- **P3 campos personalizados:** definidos por provedor para assinante e contrato (texto, número, data, sim/não, seleção; obrigatório opcional); valor guardado na ficha com validação por tipo; campo não se apaga, desativa-se. Não entram no CSV de importação.
+- **F5:** *kit de instalação* (itens de estoque sem série, aplicados de uma vez na OS; sem saldo desfaz tudo) e *técnicos auxiliares* por OS.
+- **F7 comissão:** regra por natureza de OS (responsável e auxiliar) e por venda (prospecto ganho); apuração por pessoa e período.
+- **R3:** o rastreio por IP público + porta + horário agora devolve o **titular na data** a partir das sessões relatadas pelo agente (antes só a sessão atual).
+- **R4:** disponibilidade por dia e total (7, 15 ou 30 dias), a partir das sessões; dias anteriores à conta não contam.
 
 **Lote 7 em detalhe (condições do contrato):**
 - **C8 fidelidade:** o plano define a carência e a multa (valor único ou por mês restante) e o contrato copia ao ser criado; dá para ajustar por contrato. A **cotação de encerramento** mostra multa e faturas em aberto; encerrar dentro da carência **exige decidir**: cobrar (gera fatura avulsa e cobrança no gateway) ou dispensar com motivo (fica na história).

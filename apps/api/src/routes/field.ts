@@ -15,7 +15,7 @@ const WO_SELECT = `
          coalesce(w.address_text, concat_ws(', ', s.address_street, s.address_number, s.address_district, s.address_city)) as service_address,
          r.name as reason_name, (w.sla_due_at is not null and w.sla_breached_at is not null) as sla_breached
   from work_orders w left join catalog_items r on r.id = w.reason_id join subscribers s on s.id = w.subscriber_id left join users a on a.id = w.assignee_id left join users cb on cb.id = w.created_by`;
-const FINAL = ['done', 'canceled'];
+export const FINAL = ['done', 'canceled'];
 // de -> para
 // Fluxo da OS (inspirado no do IXC): análise, aguardando agendamento, agendada, deslocamento, execução, finalizada.
 const TRANSITIONS: Record<string, string[]> = {
@@ -141,6 +141,7 @@ export async function fieldRoutes(app: FastifyInstance) {
       const w = (await c.query(`${WO_SELECT} where w.id = $1`, [id])).rows[0];
       if (!w) throw new HttpError(404, 'ordem de serviço não encontrada');
       w.events = (await c.query(`select e.at, e.event, e.detail, u.name as actor_name from work_order_events e left join users u on u.id = e.actor_id where e.work_order_id = $1 order by e.id desc`, [id])).rows;
+      w.helpers = (await c.query(`select h.user_id, u.name from work_order_helpers h join users u on u.id = h.user_id where h.work_order_id = $1 order by u.name`, [id])).rows;
       w.checklist = (await c.query(
         `select k.id, k.position, k.label, k.done, k.done_at, u.name as done_by_name
          from work_order_checklist k left join users u on u.id = k.done_by where k.work_order_id = $1 order by k.position`, [id])).rows;

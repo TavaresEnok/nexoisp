@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { api, useLoad } from '../api';
+import { api, money, useLoad } from '../api';
 import { ActionButton, Badge, Card, Field, Form, Page, State } from '../ui';
 
 const KIND: Record<string, string> = {
@@ -12,8 +12,8 @@ const fmtMin = (m: number) => (m >= 1440 ? `${(m / 1440).toFixed(m % 1440 ? 1 : 
 
 /** Catálogos de ocorrência, políticas de SLA e pesquisa de satisfação. */
 export function Qualidade() {
-  const [tab, setTab] = useState<'catalogos' | 'sla' | 'satisfacao'>('catalogos');
-  const tabs: [typeof tab, string][] = [['catalogos', 'Catálogos'], ['sla', 'SLA'], ['satisfacao', 'Satisfação']];
+  const [tab, setTab] = useState<'catalogos' | 'sla' | 'satisfacao' | 'campos' | 'kits' | 'comissao'>('catalogos');
+  const tabs: [typeof tab, string][] = [['catalogos', 'Catálogos'], ['sla', 'SLA'], ['satisfacao', 'Satisfação'], ['campos', 'Campos personalizados'], ['kits', 'Kits de instalação'], ['comissao', 'Comissões']];
   return (
     <Page title="Catálogos, SLA e satisfação">
       <div className="row" role="tablist" style={{ marginBottom: 10 }}>
@@ -22,6 +22,9 @@ export function Qualidade() {
       {tab === 'catalogos' && <Catalogos />}
       {tab === 'sla' && <Sla />}
       {tab === 'satisfacao' && <Satisfacao />}
+      {tab === 'campos' && <Campos />}
+      {tab === 'kits' && <Kits />}
+      {tab === 'comissao' && <Comissoes />}
     </Page>
   );
 }
@@ -136,4 +139,126 @@ function Satisfacao() {
       </State>
     </State>
   );
+}
+
+const FTYPE: Record<string, string> = { text: 'Texto', number: 'Número', date: 'Data', boolean: 'Sim/não', select: 'Seleção' };
+
+function Campos() {
+  const list = useLoad<any[]>('/custom-fields?all=1');
+  const [f, setF] = useState<any>(null);
+  return (<>
+    <div className="row" style={{ marginBottom: 8 }}><button className="primary" onClick={() => setF({ entity: 'subscriber', key: '', label: '', type: 'text', options: '', required: false })}>Novo campo</button></div>
+    {f && (
+      <Card title="Novo campo">
+        <Form submit="Criar campo" onCancel={() => setF(null)} onSubmit={async () => {
+          await api('/custom-fields', { body: { entity: f.entity, key: f.key, label: f.label, type: f.type, required: f.required,
+            options: f.type === 'select' ? f.options.split(',').map((s: string) => s.trim()).filter(Boolean) : undefined } });
+          setF(null); list.reload();
+        }}>
+          <div className="cols3">
+            <Field label="Onde"><select value={f.entity} onChange={(e) => setF({ ...f, entity: e.target.value })}><option value="subscriber">Assinante</option><option value="contract">Contrato</option></select></Field>
+            <Field label="Nome do campo"><input value={f.label} minLength={2} maxLength={60} onChange={(e) => setF({ ...f, label: e.target.value })} required /></Field>
+            <Field label="Identificador" hint="Minúsculas, números e _. Não muda depois."><input value={f.key} pattern="[a-z][a-z0-9_]{1,29}" onChange={(e) => setF({ ...f, key: e.target.value })} required /></Field>
+          </div>
+          <div className="cols3">
+            <Field label="Tipo"><select value={f.type} onChange={(e) => setF({ ...f, type: e.target.value })}>{Object.entries(FTYPE).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></Field>
+            {f.type === 'select' && <Field label="Opções (separadas por vírgula)"><input value={f.options} onChange={(e) => setF({ ...f, options: e.target.value })} required /></Field>}
+            <label className="row small"><input type="checkbox" style={{ width: 'auto' }} checked={f.required} onChange={(e) => setF({ ...f, required: e.target.checked })} /> obrigatório</label>
+          </div>
+        </Form>
+      </Card>
+    )}
+    <State loading={list.loading && !list.data} error={list.error} empty={list.data?.length === 0} emptyText="Nenhum campo personalizado.">
+      <table><thead><tr><th>Campo</th><th>Onde</th><th>Tipo</th><th></th></tr></thead>
+        <tbody>{list.data?.map((x) => (
+          <tr key={x.id}><td>{x.label} <span className="small muted mono">{x.key}</span> {x.required && <Badge tone="amber">obrigatório</Badge>} {!x.active && <Badge>inativo</Badge>}</td>
+            <td>{x.entity === 'subscriber' ? 'Assinante' : 'Contrato'}</td><td className="small">{FTYPE[x.type]}{x.options ? `: ${x.options.join(', ')}` : ''}</td>
+            <td><ActionButton className="sm" onClick={async () => { await api(`/custom-fields/${x.id}`, { method: 'PATCH', body: { active: !x.active } }); list.reload(); }}>{x.active ? 'Desativar' : 'Ativar'}</ActionButton></td></tr>
+        ))}</tbody></table>
+    </State>
+  </>);
+}
+
+function Kits() {
+  const kits = useLoad<any[]>('/install-kits');
+  const items = useLoad<any[]>('/stock/items');
+  const [f, setF] = useState<any>(null);
+  return (<>
+    <div className="row" style={{ marginBottom: 8 }}><button className="primary" onClick={() => setF({ name: '', rows: [{ item_id: '', qty: '1' }] })}>Novo kit</button></div>
+    {f && (
+      <Card title="Novo kit">
+        <Form submit="Criar kit" onCancel={() => setF(null)} onSubmit={async () => {
+          await api('/install-kits', { body: { name: f.name, items: f.rows.filter((r: any) => r.item_id).map((r: any) => ({ item_id: r.item_id, qty: Number(r.qty) })) } });
+          setF(null); kits.reload();
+        }}>
+          <Field label="Nome"><input value={f.name} minLength={2} maxLength={60} onChange={(e) => setF({ ...f, name: e.target.value })} required /></Field>
+          {f.rows.map((r: any, i: number) => (
+            <div className="row" key={i}>
+              <select aria-label="Item" style={{ flex: 1 }} value={r.item_id} onChange={(e) => setF({ ...f, rows: f.rows.map((x: any, j: number) => (j === i ? { ...x, item_id: e.target.value } : x)) })}>
+                <option value="">Item do estoque…</option>{items.data?.filter((x) => x.active && !x.serialized).map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select>
+              <input aria-label="Quantidade" type="number" min="1" style={{ width: 90 }} value={r.qty} onChange={(e) => setF({ ...f, rows: f.rows.map((x: any, j: number) => (j === i ? { ...x, qty: e.target.value } : x)) })} />
+            </div>
+          ))}
+          <button type="button" className="sm" onClick={() => setF({ ...f, rows: [...f.rows, { item_id: '', qty: '1' }] })}>Mais um item</button>
+          <p className="small muted">Itens controlados por número de série não entram em kit.</p>
+        </Form>
+      </Card>
+    )}
+    <State loading={kits.loading && !kits.data} error={kits.error} empty={kits.data?.length === 0} emptyText="Nenhum kit.">
+      <table><tbody>{kits.data?.map((k) => (
+        <tr key={k.id}><td><b>{k.name}</b> {!k.active && <Badge>inativo</Badge>}<div className="small muted">{k.items.map((i: any) => `${i.qty} ${i.unit} ${i.name}`).join(' · ')}</div></td>
+          <td><ActionButton className="sm" onClick={async () => { await api(`/install-kits/${k.id}`, { method: 'PATCH', body: { active: !k.active } }); kits.reload(); }}>{k.active ? 'Desativar' : 'Ativar'}</ActionButton></td></tr>
+      ))}</tbody></table>
+    </State>
+  </>);
+}
+
+function Comissoes() {
+  const rules = useLoad<any[]>('/commission-rules');
+  const first = new Date(); first.setDate(1);
+  const [range, setRange] = useState({ from: first.toISOString().slice(0, 10), to: new Date().toISOString().slice(0, 10) });
+  const rep = useLoad<any>(`/reports/commissions?from=${range.from}&to=${range.to}`);
+  const [f, setF] = useState<any>(null);
+  const cents = (v: string) => Math.round(Number(String(v).replace(',', '.')) * 100);
+  return (<>
+    <div className="row" style={{ marginBottom: 8 }}><button className="primary" onClick={() => setF({ subject: 'work_order', os_kind: '', a: '', h: '0' })}>Nova regra</button></div>
+    {f && (
+      <Card title="Regra de comissão">
+        <Form submit="Salvar regra" onCancel={() => setF(null)} onSubmit={async () => {
+          await api('/commission-rules', { body: { subject: f.subject, os_kind: f.subject === 'work_order' && f.os_kind ? f.os_kind : null, assignee_cents: cents(f.a), helper_cents: f.subject === 'work_order' ? cents(f.h) : 0 } });
+          setF(null); rules.reload(); rep.reload();
+        }}>
+          <div className="cols3">
+            <Field label="Vale para"><select value={f.subject} onChange={(e) => setF({ ...f, subject: e.target.value })}><option value="work_order">OS concluída</option><option value="sale">Prospecto ganho (venda)</option></select></Field>
+            {f.subject === 'work_order' && <Field label="Natureza da OS"><select value={f.os_kind} onChange={(e) => setF({ ...f, os_kind: e.target.value })}><option value="">Qualquer</option>
+              {Object.entries(WO_KIND).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></Field>}
+          </div>
+          <div className="cols3">
+            <Field label={f.subject === 'sale' ? 'Valor por venda (R$)' : 'Responsável (R$)'}><input inputMode="decimal" value={f.a} onChange={(e) => setF({ ...f, a: e.target.value })} required /></Field>
+            {f.subject === 'work_order' && <Field label="Cada auxiliar (R$)"><input inputMode="decimal" value={f.h} onChange={(e) => setF({ ...f, h: e.target.value })} /></Field>}
+          </div>
+          <p className="small muted">A nova regra substitui a vigente do mesmo tipo.</p>
+        </Form>
+      </Card>
+    )}
+    <State empty={rules.data?.length === 0} emptyText="Nenhuma regra.">
+      <table><tbody>{rules.data?.map((r) => (
+        <tr key={r.id}><td>{r.subject === 'sale' ? 'Venda (prospecto ganho)' : `OS ${r.os_kind ? WO_KIND[r.os_kind] : '(qualquer natureza)'}`}</td>
+          <td className="num">{money(r.assignee_cents)}</td><td className="small muted">{r.subject === 'work_order' ? `auxiliar ${money(r.helper_cents)}` : ''}</td></tr>
+      ))}</tbody></table>
+    </State>
+    <Card title="Apuração do período">
+      <div className="row" style={{ marginBottom: 8 }}>
+        <input type="date" aria-label="De" value={range.from} onChange={(e) => setRange({ ...range, from: e.target.value })} style={{ width: 160 }} />
+        <input type="date" aria-label="Até" value={range.to} onChange={(e) => setRange({ ...range, to: e.target.value })} style={{ width: 160 }} />
+      </div>
+      <State loading={rep.loading && !rep.data} error={rep.error} empty={rep.data?.rows.length === 0} emptyText="Nada a apurar no período.">
+        <table><thead><tr><th>Pessoa</th><th className="num">OS (resp.)</th><th className="num">OS (aux.)</th><th className="num">Vendas</th><th className="num">Total</th></tr></thead>
+          <tbody>{rep.data?.rows.map((r: any) => (
+            <tr key={r.user_id}><td>{r.name}</td><td className="num">{r.os_assignee}</td><td className="num">{r.os_helper}</td><td className="num">{r.sales}</td><td className="num"><b>{money(r.total_cents)}</b></td></tr>
+          ))}</tbody></table>
+        {rep.data && <p className="small muted">Total {money(rep.data.total_cents)}. {rep.data.note}</p>}
+      </State>
+    </Card>
+  </>);
 }

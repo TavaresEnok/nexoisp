@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { api, d, doc, download, dt, money, speed, useLoad, usePaged } from '../api';
 import { can, has, useMe } from '../App';
 import { ActionButton, Badge, Card, Field, Form, KV, Modal, Page, Pager, State, Tabs } from '../ui';
-import { ContractPop, ContractStates, Sessions } from './Atendimento';
+import { Availability, ContractPop, ContractStates, CustomValues, Sessions } from './Atendimento';
 import { ContractEquipment, ContractTags, ContractUsage } from './Extras';
 import { ContractConditions, useQuote } from './Condicoes';
 import { ContractFinance } from './Finance';
@@ -107,6 +107,7 @@ export function ContractDetail() {
             <InfraPanel contractId={c.id} />
             <ContractFinance contractId={c.id}>{(fin, numbers) => <ServicePanel contract={c} financial={fin} fin={numbers} />}</ContractFinance>
             <ContractUsage contractId={c.id} />
+            <Availability contractId={c.id} />
             <Sessions contractId={c.id} />
             {has(me, 'olt') && <OnuPanel contract={c} />}
           </>)}
@@ -119,6 +120,7 @@ export function ContractDetail() {
                 ['Situação', c.status === 'active' ? <Badge tone="green">Vigente</Badge> : <Badge>Encerrado em {d(c.end_date)}</Badge>],
               ]} />
             </Card>
+            <CustomValues entity="contract" id={c.id} values={c.custom} onChange={reload} />
             <Card title="Etiquetas"><ContractTags contract={c} onChange={reload} /></Card>
             <Card title="POP"><ContractPop contract={c} onChange={reload} /></Card>
             {has(me, 'field') && can(me, 'stock:read') && <ContractEquipment contractId={c.id} />}

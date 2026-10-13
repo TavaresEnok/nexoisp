@@ -13,6 +13,7 @@ import { condicoesRoutes } from './routes/condicoes.js';
 import { estadosRoutes } from './routes/estados.js';
 import { fluxoOsRoutes } from './routes/fluxo-os.js';
 import { integracoesRoutes } from './routes/integracoes.js';
+import { produtividadeRoutes } from './routes/produtividade.js';
 import { publicApiRoutes } from './routes/public-api.js';
 import { relatoriosRoutes } from './routes/relatorios.js';
 import { extraRoutes } from './routes/extras.js';
@@ -64,6 +65,7 @@ export async function buildApp(opts: { logger?: boolean } = {}) {
   await app.register(fluxoOsRoutes);
   await app.register(estadosRoutes);
   await app.register(condicoesRoutes);
+  await app.register(produtividadeRoutes);
   await app.register(integracoesRoutes);
   await app.register(publicApiRoutes);
   await app.register(networkRoutes);

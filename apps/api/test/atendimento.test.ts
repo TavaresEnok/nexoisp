@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-import { agentCall, call, freeContract, login } from './helpers.js';
+import { agentCall, call, freeContract, login, testAgent } from './helpers.js';
 
 // Atendimento no dia a dia: busca única, linha do tempo, sessões com motivo de encerramento, online, contatos e POP.
 let admin: string, beta: string, fin: string, agentToken: string, deviceId: string, contract: any, resourceId: string, username: string;
@@ -112,5 +112,37 @@ describe('contatos, POP e online', () => {
     expect(Array.isArray(on.body.rows)).toBe(true);
     expect((await call(admin, 'GET', '/api/network/online?format=csv')).status).toBe(200);
     expect((await call(beta, 'GET', '/api/network/online')).body.rows.some((r: any) => r.login === username)).toBe(false);
+  });
+});
+
+describe('disponibilidade por cliente (R4)', () => {
+  it('soma o tempo com sessão aberta por dia, limita a 100% e ignora o que veio antes da conta', async () => {
+    const admin = await login('admin@alfa.demo');
+    const tenantId = (await call(admin, 'GET', '/api/me')).body.tenant.id;
+    const ag = await testAgent(admin, `disp-${Date.now()}`);
+    const tag = String(Date.now()).slice(-6);
+    const plan = (await call(admin, 'POST', '/api/plans', { name: `Plano disp ${tag}`, price_cents: 5000, down_kbps: 1000, up_kbps: 1000, profile_name: `dp${tag}` })).body.id;
+    const sub = (await call(admin, 'POST', '/api/subscribers', { name: `Disp ${tag}` })).body;
+    const ct = (await call(admin, 'POST', '/api/contracts', { subscriber_id: sub.id, plan_id: plan, due_day: 10 })).body.id;
+    expect((await call(admin, 'GET', `/api/contracts/${ct}/availability`)).body.days).toEqual([]);      // sem conta
+    const resId = (await call(admin, 'POST', `/api/contracts/${ct}/service`, { device_id: ag.deviceId, pppoe_username: `dp${tag}` })).body.resource_id;
+    // a conta existe desde 3 dias atrás; uma sessão de 2 h ontem e uma aberta há 30 min
+    const h = (n: number) => new Date(Date.now() - n * 3_600_000).toISOString();
+    const { withScope } = await import('../src/db.js');
+    await withScope({ tenantId, operator: false }, async (c) => {
+      await c.query(`update service_resources set created_at = now() - interval '3 days' where id = $1`, [resId]);
+      await c.query(`insert into service_sessions (tenant_id, resource_id, session_key, started_at, stopped_at, ip) values ($1,$2,'d1',$3,$4,'10.0.0.1')`, [tenantId, resId, h(36), h(34)]);
+      await c.query(`insert into service_sessions (tenant_id, resource_id, session_key, started_at, stopped_at, ip) values ($1,$2,'d2',$3,null,'10.0.0.1')`, [tenantId, resId, h(0.5)]);
+    });
+    const r = (await call(admin, 'GET', `/api/contracts/${ct}/availability?days=7`)).body;
+    expect(r.days).toHaveLength(7);
+    const total = r.days.reduce((a: number, d: any) => a + d.online_seconds, 0);
+    expect(total).toBeGreaterThanOrEqual(2 * 3600 + 29 * 60);          // 2 h + ~30 min
+    expect(total).toBeLessThanOrEqual(2 * 3600 + 32 * 60);
+    expect(r.total.availability_pct).toBeGreaterThan(0);
+    expect(r.total.availability_pct).toBeLessThan(10);
+    // os dias antes da existência da conta não entram na janela
+    expect(r.total.window_seconds).toBeLessThan(4 * 86_400 + 60);
+    expect((await call(await login('admin@beta.demo'), 'GET', `/api/contracts/${ct}/availability`)).body.days).toEqual([]);
   });
 });

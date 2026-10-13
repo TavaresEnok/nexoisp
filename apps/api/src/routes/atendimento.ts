@@ -160,6 +160,38 @@ export async function atendimentoRoutes(app: FastifyInstance) {
     });
   });
 
+  // Disponibilidade por dia (R4): tempo com sessão aberta, a partir do accounting que o agente relata. Dia vazio antes da
+  // conta existir não conta como indisponibilidade; sobreposição de sessões não passa de 100%.
+  app.get('/api/contracts/:id/availability', { preHandler: guard('network:read') }, async (req) => {
+    const id = zUuid.parse((req.params as any).id);
+    const q = z.object({ days: z.coerce.number().int().min(1).max(31).default(7) }).parse(req.query);
+    return withScope(req.ctx.scope, async (c) => {
+      const tz = (await c.query(`select coalesce((select timezone from tenant_settings where tenant_id = $1), 'America/Sao_Paulo') as tz`, [req.ctx.tenantId])).rows[0].tz;
+      const res = (await c.query('select id, created_at from service_resources where contract_id = $1', [id])).rows[0];
+      if (!res) return { timezone: tz, days: [], total: null, note: 'Contrato sem conta de acesso.' };
+      const days = (await c.query(
+        `with d as (
+           select (generate_series((now() at time zone $2)::date - ($3::int - 1), (now() at time zone $2)::date, interval '1 day'))::date as day),
+         b as (select day, (day::timestamp at time zone $2) as t0, ((day + 1)::timestamp at time zone $2) as t1 from d)
+         select to_char(b.day, 'YYYY-MM-DD') as day,
+                greatest(0, extract(epoch from least(b.t1, now()) - greatest(b.t0, $4::timestamptz)))::float as window_seconds,
+                least(coalesce(sum(greatest(0, extract(epoch from least(coalesce(s.stopped_at, now()), b.t1, now()) - greatest(s.started_at, b.t0)))) filter (where s.session_key is not null), 0),
+                      greatest(0, extract(epoch from least(b.t1, now()) - b.t0)))::float as online_seconds,
+                count(s.session_key)::int as sessions
+         from b left join service_sessions s on s.resource_id = $1 and s.started_at < b.t1 and coalesce(s.stopped_at, now()) > b.t0
+         group by b.day, b.t0, b.t1 order by b.day`, [res.id, tz, q.days, res.created_at])).rows;
+      let win = 0, on = 0;
+      const out = days.map((r) => {
+        const w = Math.min(r.window_seconds, Math.max(r.window_seconds, 0));
+        win += w; on += Math.min(r.online_seconds, w || r.online_seconds);
+        return { day: r.day, online_seconds: Math.round(r.online_seconds), offline_seconds: Math.max(0, Math.round(w - r.online_seconds)),
+                 availability_pct: w > 0 ? Math.round(Math.min(100, (r.online_seconds / w) * 1000)) / 10 : null, sessions: r.sessions };
+      });
+      return { timezone: tz, days: out, total: { online_seconds: Math.round(on), window_seconds: Math.round(win), availability_pct: win > 0 ? Math.round(Math.min(100, (on / win) * 1000)) / 10 : null },
+        note: 'Calculado com as sessões que o agente relatou; falha de sincronização aparece como indisponibilidade.' };
+    });
+  });
+
   // ---------------------------------------------------------------- usuários online
   app.get('/api/network/online', { preHandler: guard('network:read') }, async (req, reply) => {
     const q = z.object({ q: z.string().trim().max(80).optional(), format: z.enum(['json', 'csv']).default('json') }).parse(req.query);

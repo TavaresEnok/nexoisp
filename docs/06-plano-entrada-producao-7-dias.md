@@ -316,3 +316,10 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   reimportar não duplica; pagamento parcial vira título em aberto pelo saldo; histórico nunca vai ao gateway. Documentado em `docs/importacao-csv.md`.
 - **Limites:** IP fixo, mais de um serviço por assinante, documentos e histórico de sessões não entram no CSV. Adaptadores por origem (SGP, IXC) continuam dependendo de um export real.
 
+### 13/10/2026 — campos personalizados, kit e auxiliares, comissão, titular na data e disponibilidade
+
+- **Entregue (testado, 129 testes da API passando):** P3, F5 (kit e auxiliares), F7, R3 (titular na data) e R4. Migração 032.
+- **Limites:** disponibilidade e titular na data dependem de o agente relatar as sessões (falha de sincronização aparece como queda); comissão é apurada pelas regras vigentes,
+  sem fechamento de folha; campos personalizados não entram no CSV.
+- **Pendências que dependem de decisão ou de equipamento:** D11 (escopo por POP), C5 (página de aviso no NAS), P4 (documentos), R1/R2 (operações novas do agente), check-in com localização.
+

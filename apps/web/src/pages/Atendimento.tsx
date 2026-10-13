@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api, d, dt, download, money, useLoad } from '../api';
 import { can, useMe } from '../App';
-import { ActionButton, Badge, Card, Field, Form, Page, State } from '../ui';
+import { ActionButton, Badge, Card, Field, Form, KV, Page, State } from '../ui';
 
 const fmtBytes = (n: number) => {
   const u = ['B', 'KB', 'MB', 'GB', 'TB']; let i = 0; let v = n;
@@ -262,6 +262,65 @@ export function ContractStates({ contract }: { contract: any }) {
     </div>
   );
 }
+/** Campos personalizados da ficha (definidos pelo provedor em Catálogos e SLA). Some se não houver campo ativo. */
+export function CustomValues({ entity, id, values, onChange }: { entity: 'subscriber' | 'contract'; id: string; values: Record<string, any> | null; onChange: () => void }) {
+  const { me } = useMe();
+  const defs = useLoad<any[]>(`/custom-fields?entity=${entity}`);
+  const [edit, setEdit] = useState<Record<string, any> | null>(null);
+  const w = can(me, entity === 'subscriber' ? 'subscribers:write' : 'contracts:write');
+  if (!defs.data?.length) return null;
+  const cur = values ?? {};
+  const show = (v: any) => (v === undefined || v === null || v === '' ? '—' : typeof v === 'boolean' ? (v ? 'Sim' : 'Não') : String(v));
+  return (
+    <Card title="Campos personalizados" actions={w && !edit && <button className="sm" onClick={() => setEdit({ ...cur })}>Editar</button>}>
+      {edit ? (
+        <Form submit="Salvar" onCancel={() => setEdit(null)} onSubmit={async () => {
+          const changed: Record<string, any> = {};
+          for (const dfn of defs.data!) {
+            const nv = edit[dfn.key] === '' || edit[dfn.key] === undefined ? null : edit[dfn.key];
+            if ((cur[dfn.key] ?? null) !== nv) changed[dfn.key] = nv;
+          }
+          if (Object.keys(changed).length) await api(`/${entity === 'subscriber' ? 'subscribers' : 'contracts'}/${id}/custom`, { method: 'PUT', body: { values: changed } });
+          setEdit(null); onChange();
+        }}>
+          <div className="cols3">
+            {defs.data!.map((dfn) => (
+              <Field key={dfn.key} label={`${dfn.label}${dfn.required ? ' *' : ''}`}>
+                {dfn.type === 'select' ? <select value={edit[dfn.key] ?? ''} onChange={(e) => setEdit({ ...edit, [dfn.key]: e.target.value })}><option value="">—</option>{dfn.options.map((o: string) => <option key={o} value={o}>{o}</option>)}</select>
+                  : dfn.type === 'boolean' ? <select value={edit[dfn.key] === undefined || edit[dfn.key] === null ? '' : String(edit[dfn.key])} onChange={(e) => setEdit({ ...edit, [dfn.key]: e.target.value === '' ? null : e.target.value === 'true' })}><option value="">—</option><option value="true">Sim</option><option value="false">Não</option></select>
+                  : <input type={dfn.type === 'number' ? 'number' : dfn.type === 'date' ? 'date' : 'text'} value={edit[dfn.key] ?? ''} required={dfn.required}
+                      onChange={(e) => setEdit({ ...edit, [dfn.key]: dfn.type === 'number' ? (e.target.value === '' ? null : Number(e.target.value)) : e.target.value })} />}
+              </Field>
+            ))}
+          </div>
+        </Form>
+      ) : (
+        <KV items={defs.data.map((dfn) => [dfn.label, show(cur[dfn.key])] as [string, any])} />
+      )}
+    </Card>
+  );
+}
+
+/** Disponibilidade dos últimos dias a partir das sessões relatadas pelo agente. */
+export function Availability({ contractId }: { contractId: string }) {
+  const [days, setDays] = useState(7);
+  const { data, loading, error } = useLoad<any>(`/contracts/${contractId}/availability?days=${days}`);
+  const hm = (s: number) => `${Math.floor(s / 3600)}h${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}`;
+  return (
+    <Card title="Disponibilidade" actions={<select aria-label="Período" value={days} onChange={(e) => setDays(Number(e.target.value))} style={{ width: 110 }}>
+      <option value={7}>7 dias</option><option value={15}>15 dias</option><option value={30}>30 dias</option></select>}>
+      <State loading={loading && !data} error={error} empty={data && data.days.length === 0} emptyText="Sem conta de acesso para medir.">
+        {data?.total && <p><b>{data.total.availability_pct ?? '—'}%</b> no período <span className="muted small">({hm(data.total.online_seconds)} conectado)</span></p>}
+        <table><thead><tr><th>Dia</th><th className="num">Conectado</th><th className="num">Sem sessão</th><th className="num">%</th><th className="num">Sessões</th></tr></thead>
+          <tbody>{data?.days.map((x: any) => (
+            <tr key={x.day}><td>{d(x.day)}</td><td className="num">{hm(x.online_seconds)}</td><td className="num">{hm(x.offline_seconds)}</td><td className="num">{x.availability_pct ?? '—'}</td><td className="num">{x.sessions}</td></tr>
+          ))}</tbody></table>
+        <p className="small muted">{data?.note}</p>
+      </State>
+    </Card>
+  );
+}
+
 /** Anotações estruturadas: as com alerta aparecem em destaque ao abrir a ficha. */
 export function SubscriberNotes({ subscriberId }: { subscriberId: string }) {
   const { me } = useMe();

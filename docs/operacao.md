@@ -78,6 +78,12 @@ mudanças agendadas e aditivos. Ao **encerrar** dentro da carência o painel mos
 na rotina periódica, no dia (fuso do provedor); se falharem, a lista mostra o motivo. Desconto lançado sem data vale da próxima mensalidade a gerar; faturas
 já emitidas não são alteradas.
 
+### Campos personalizados, kits e comissões
+
+Em Catálogos e SLA ficam as abas **Campos personalizados** (dados extras do assinante e do contrato, que aparecem na ficha), **Kits de instalação** (itens de estoque
+sem série lançados de uma vez na OS) e **Comissões** (valor por OS concluída, para responsável e auxiliar, e por prospecto ganho; a apuração é por pessoa e período).
+Na OS, o botão **Aplicar kit** baixa o estoque inteiro ou nada. A **disponibilidade** do cliente (aba Acesso do contrato) vem das sessões relatadas pelo agente.
+
 ### Conferência antes de entrar em produção
 
 ```bash
