@@ -327,6 +327,7 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
 
 - **Entregue (testado: 134 testes da API, 50 do agente):** D10, R1, R2, D11, C5 e P4. Migrações 033 e 034. Agente passa a 0.5.0; a API recusa enviar os campos novos a agente mais antigo.
 - **Decisões tomadas por padrão (rever se quiser):** documentos ficam no banco, limite de 5 MB e 50 por assinante; a página de aviso não identifica o assinante; contrato sem POP é visível a todos os usuários restritos.
-- **Não validado:** desconexão, velocidade/pool e uso simultâneo no CHR do cenário e em equipamento físico; redirecionamento da página de aviso no concentrador.
+- **Validado no cenário PNETLab (CHR 7.17, contas `nexo-w2`, `w3` e `w5`; desfeito ao final):** desconexão em lote (sessões caíram e reconectaram, as outras não foram tocadas) e velocidade por plano com rajada (fila dinâmica 100M/200M → 10M/20M, rajada 12M/24M, e de volta). Agente do cenário e o de demonstração atualizados para 0.5.0.
+- **Não validado:** pool por plano, uso simultâneo (depende da seção `session` do FreeRADIUS), redirecionamento da página de aviso; nada em equipamento físico.
 - **Continua dependendo de terceiros:** fiscal, gateway real, adaptadores SGP/IXC (backup cifrado, export do IXC), homologação física.
 
