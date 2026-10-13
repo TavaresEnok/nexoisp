@@ -38,14 +38,14 @@ class FakeCloud:
         return {"ack": True}
 
 
-def delivery(action="subscriber.provision", policy="active", version=1, op=None, recover=False, valid_min=60, agent=AGENT, framed_ip=None, block_profile=None):
+def delivery(action="subscriber.provision", policy="active", version=1, op=None, recover=False, valid_min=60, agent=AGENT, framed_ip=None, block_profile=None, mac=None):
     env = json.dumps({
         "operation_id": op or str(uuid.uuid4()), "tenant_id": TENANT, "resource_id": "res-1", "device_id": DEVICE, "agent_id": agent,
         "action": action, "schema_version": 1, "desired_version": version,
         "parameters": {"username": "cliente01", "profile": "plano-200m", "policy": policy, "secret_ref": None,
                        "suspension": ({"mode": "profile", "session": "disconnect", "profile": block_profile} if block_profile
                                       else {"mode": "reject", "session": "disconnect"}) if policy == "suspended" else None,
-                       **({"framed_ip": framed_ip} if framed_ip else {})},
+                       **({"framed_ip": framed_ip} if framed_ip else {}), **({"mac": mac} if mac else {})},
         "idempotency_key": "k", "valid_until": (datetime.now(timezone.utc) + timedelta(minutes=valid_min)).isoformat(),
         "authorization": {"type": "user", "id": "u1"}})
     return {"attempt_id": str(uuid.uuid4()), "recover": recover, "envelope": env, "signature": base64.b64encode(KEY.sign(env.encode())).decode()}

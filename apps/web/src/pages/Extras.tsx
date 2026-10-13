@@ -149,3 +149,53 @@ export function WorkOrderChecklist({ workOrder, writable, onChange }: { workOrde
     </Card>
   );
 }
+
+const fmtBytes = (n: number) => {
+  const u = ['B', 'KB', 'MB', 'GB', 'TB']; let i = 0; let v = n;
+  while (v >= 1024 && i < u.length - 1) { v /= 1024; i++; }
+  return `${v.toFixed(i === 0 ? 0 : 1).replace('.', ',')} ${u[i]}`;
+};
+const fmtHours = (s: number) => `${Math.floor(s / 3600)} h ${Math.floor((s % 3600) / 60)} min`;
+
+/** Consumo mensal lido do accounting do RADIUS local (depende do agente 0.4.0+ e do accounting ligado no NAS). */
+export function UsageTable({ rows, empty }: { rows: any[]; empty?: string }) {
+  return (
+    <State empty={rows.length === 0}>
+      <table>
+        <thead><tr><th>Mês</th><th className="num">Download</th><th className="num">Upload</th>{rows[0]?.session_seconds !== undefined && <th className="num">Tempo conectado</th>}<th className="num">Sessões</th></tr></thead>
+        <tbody>{rows.map((u) => (
+          <tr key={u.month}><td>{u.month.split('-').reverse().join('/')}</td><td className="num">{fmtBytes(u.bytes_out)}</td><td className="num">{fmtBytes(u.bytes_in)}</td>
+            {u.session_seconds !== undefined && <td className="num">{fmtHours(u.session_seconds)}</td>}<td className="num">{u.sessions}</td></tr>))}</tbody>
+      </table>
+      {empty && <p className="small muted" style={{ marginBottom: 0 }}>{empty}</p>}
+    </State>
+  );
+}
+
+export function ContractUsage({ contractId }: { contractId: string }) {
+  const { data } = useLoad<any[]>(`/contracts/${contractId}/usage`);
+  if (!data || data.length === 0) return null;
+  return <Card title="Consumo mensal"><UsageTable rows={data} empty="Calculado a partir do accounting do RADIUS local; o mês corrente é atualizado a cada 15 minutos." /></Card>;
+}
+
+/** MAC vinculado à conta: só o equipamento com este MAC autentica. */
+export function MacBinding({ resource, onChange }: { resource: any; onChange: () => void }) {
+  const { me } = useMe();
+  const operate = can(me, 'network:operate');
+  const [v, setV] = useState<string | null>(null);
+  const save = async (mac: string | null) => { await api(`/resources/${resource.id}/mac`, { method: 'PATCH', body: { mac } }); setV(null); onChange(); };
+  return (
+    <div className="small" style={{ margin: '6px 0' }}>
+      MAC vinculado: {resource.mac ? <b className="mono">{resource.mac}</b> : <span className="muted">nenhum (qualquer equipamento autentica)</span>}
+      {operate && v === null && <> <button className="sm" onClick={() => setV(resource.mac ?? '')}>{resource.mac ? 'Alterar' : 'Vincular'}</button></>}
+      {operate && v !== null && (
+        <span className="row" style={{ display: 'inline-flex', marginLeft: 8 }}>
+          <input style={{ width: 180 }} className="mono" placeholder="02:4E:58:00:00:02" value={v} onChange={(e) => setV(e.target.value)} />
+          <ActionButton className="sm primary" disabled={v.trim().length < 12} onClick={() => save(v.trim())}>Salvar</ActionButton>
+          {resource.mac && <ActionButton className="sm danger" confirm="Remover o vínculo? Qualquer equipamento com a senha passa a autenticar." onClick={() => save(null)}>Remover</ActionButton>}
+          <button className="sm" onClick={() => setV(null)}>Cancelar</button>
+        </span>
+      )}
+    </div>
+  );
+}

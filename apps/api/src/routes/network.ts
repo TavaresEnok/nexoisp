@@ -12,7 +12,7 @@ export const AGENT_OFFLINE_S = 30;
 export const RESOURCE_SELECT = `
   select r.id, r.contract_id, r.device_id, r.pppoe_username, (r.secret_enc is not null) as has_secret,
          r.desired_version, r.desired_policy, r.desired_profile, r.desired_reason, r.desired_at,
-         r.observed_policy, r.observed_profile, r.observed_session, r.observed_version, r.observed_at,
+         r.observed_policy, r.observed_profile, r.observed_session, r.observed_version, r.observed_at, r.mac,
          d.name as device_name, d.driver, d.maintenance, a.id as agent_id, a.name as agent_name, a.last_seen_at as agent_last_seen,
          (a.last_seen_at is not null and a.last_seen_at > now() - interval '${AGENT_OFFLINE_S} seconds') as agent_online,
          (r.observed_at is not null and (r.observed_policy <> r.desired_policy or (r.observed_policy = 'active' and r.observed_profile is distinct from r.desired_profile))
@@ -157,6 +157,15 @@ export async function networkRoutes(app: FastifyInstance) {
     });
   });
 
+  /** Consumo mensal do contrato (a leitura é do accounting do RADIUS local; depende do agente 0.4.0+). */
+  app.get('/api/contracts/:id/usage', { preHandler: guard('network:read') }, async (req) =>
+    withScope(req.ctx.scope, async (c) => {
+      const id = zUuid.parse((req.params as any).id);
+      return (await c.query(
+        `select to_char(u.month, 'YYYY-MM') as month, u.bytes_in::float as bytes_in, u.bytes_out::float as bytes_out, u.session_seconds::float as session_seconds, u.sessions, u.reported_at
+         from usage_monthly u join service_resources r on r.id = u.resource_id where r.contract_id = $1 order by u.month desc limit 12`, [id])).rows;
+    }));
+
   app.post('/api/contracts/:id/service', { preHandler: guard('network:operate') }, async (req) => {
     const id = zUuid.parse((req.params as any).id);
     const b = z.object({
@@ -190,6 +199,27 @@ export async function networkRoutes(app: FastifyInstance) {
         { type: 'user', id: req.ctx.userId, reason: b.reason || 'solicitação manual' }, typeof idem === 'string' && idem ? `user:${idem}` : undefined);
       await audit(c, req.ctx, `service.${p.action}`, 'service_resource', p.id, { operation_id: op.id, reason: b.reason });
       return { operation_id: op.id, status: op.status, desired_version: op.desired_version };
+    });
+  });
+
+  /** Vincula (ou desvincula) o MAC do equipamento do assinante à conta; reaplica a autorização na rede. */
+  app.patch('/api/resources/:id/mac', { preHandler: guard('network:operate') }, async (req) => {
+    const id = zUuid.parse((req.params as any).id);
+    const b = z.object({
+      mac: z.string().trim().transform((v) => v.toUpperCase().replace(/[-.]/g, ':')).pipe(z.string().regex(/^([0-9A-F]{2}:){5}[0-9A-F]{2}$/, 'MAC inválido (ex.: 02:4E:58:00:00:02)')).nullable(),
+    }).parse(req.body);
+    return withScope(req.ctx.scope, async (c) => {
+      const r = (await c.query('select desired_version, desired_policy, mac from service_resources where id = $1 for update', [id])).rows[0];
+      if (!r) throw new HttpError(404, 'conta PPPoE não encontrada');
+      if ((r.mac ?? null) === b.mac) return { operation_id: null, changed: false };
+      await c.query('update service_resources set mac = $2 where id = $1', [id, b.mac]);
+      // conta já provisionada: a nova autorização segue pela fila, com a política em vigor
+      const op = r.desired_version > 0
+        ? await requestOperation(c, req.ctx.tenantId!, id, r.desired_policy === 'suspended' ? 'subscriber.suspend' : 'subscriber.provision',
+          { type: 'user', id: req.ctx.userId, reason: b.mac ? `vínculo do MAC ${b.mac}` : 'MAC desvinculado' })
+        : null;
+      await audit(c, req.ctx, 'service.mac_change', 'service_resource', id, { mac: b.mac, previous: r.mac, operation_id: op?.id ?? null });
+      return { operation_id: op?.id ?? null, changed: true };
     });
   });
 

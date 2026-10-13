@@ -57,7 +57,11 @@ export async function portalRoutes(app: FastifyInstance) {
            and (m.device_id is null or exists (select 1 from service_resources r join contracts k on k.id = r.contract_id
                                                where k.subscriber_id = $1 and r.device_id = m.device_id))
          order by m.starts_at`, [sid])).rows;
-      return { subscriber, contracts, invoices, notices };
+      const usage = (await c.query(
+        `select k.id as contract_id, to_char(u.month, 'YYYY-MM') as month, u.bytes_in::float as bytes_in, u.bytes_out::float as bytes_out, u.sessions
+         from usage_monthly u join service_resources r on r.id = u.resource_id join contracts k on k.id = r.contract_id
+         where k.subscriber_id = $1 order by u.month desc limit 12`, [sid])).rows;
+      return { subscriber, contracts, invoices, notices, usage };
     });
   });
 

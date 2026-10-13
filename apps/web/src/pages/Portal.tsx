@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { api, d, doc, dt, money, speed, useLoad } from '../api';
 import { has, useMe } from '../App';
 import { ActionButton, Badge, Brand, Card, Icon, KV, Modal, State } from '../ui';
+import { UsageTable } from './Extras';
 import { PortalTickets } from './Crm';
 import { InvoiceBadge } from './Finance';
 
@@ -79,6 +80,7 @@ export function Portal() {
               </table>
             </State>
           </Card>
+          {data.usage?.length > 0 && <Card title="Meu consumo"><UsageTable rows={data.usage} /></Card>}
           <Card title="Minhas faturas">
             <State empty={data.invoices.length === 0}>
               <table>

@@ -53,7 +53,7 @@ class RadiusStore:
                 self._db.execute(f"alter table nexo_accounts add column {col} {ddl}")
 
     def apply(self, username: str, secret: Optional[str], profile: str, policy: str, version: int, framed_ip: Optional[str] = None,
-              block_profile: Optional[str] = None):
+              block_profile: Optional[str] = None, mac: Optional[str] = None):
         """block_profile: suspensão por perfil. A conta continua autenticando e recebe o perfil de bloqueio (sem Auth-Type Reject).
         `profile` é sempre o perfil do plano; o que o RADIUS entrega é o de bloqueio enquanto durar a suspensão."""
         by_profile = policy == "suspended" and block_profile is not None
@@ -72,6 +72,10 @@ class RadiusStore:
             elif not db.execute("select 1 from radcheck where username = ? and attribute in ('Cleartext-Password','NT-Password')", (username,)).fetchone():
                 raise ValueError("conta sem credencial local e segredo não fornecido")
             db.execute("delete from radcheck where username = ? and attribute = 'Auth-Type'", (username,))
+            # vínculo de MAC: comparação no próprio RADIUS ('=='); outro equipamento com a mesma senha não autentica
+            db.execute("delete from radcheck where username = ? and attribute = 'Calling-Station-Id'", (username,))
+            if mac:
+                db.execute("insert into radcheck (username, attribute, op, value) values (?, 'Calling-Station-Id', '==', ?)", (username, mac))
             if policy == "suspended" and not by_profile:  # modalidade 'reject': nega novas autenticações
                 db.execute("insert into radcheck (username, attribute, op, value) values (?, 'Auth-Type', ':=', 'Reject')", (username,))
             db.execute("delete from radreply where username = ? and attribute = 'Mikrotik-Group'", (username,))
@@ -94,14 +98,36 @@ class RadiusStore:
             return None
         rep = self._db.execute("select value from radreply where username = ? and attribute = 'Mikrotik-Group'", (username,)).fetchone()
         ip = self._db.execute("select value from radreply where username = ? and attribute = 'Framed-IP-Address'", (username,)).fetchone()
+        bound = chk.get("Calling-Station-Id")
         acc = self._db.execute("select * from nexo_accounts where username = ?", (username,)).fetchone()
         # suspensa = rejeitada OU entregando o perfil de bloqueio que este agente gravou (se alguém trocar o perfil à mão, volta a "ativa")
         by_profile = bool(acc and acc["by_profile"] and rep and rep["value"] == acc["profile"])
         return {"policy": "suspended" if chk.get("Auth-Type") == "Reject" or by_profile else "active", "profile": rep["value"] if rep else None,
-                "framed_ip": ip["value"] if ip else None,
+                "framed_ip": ip["value"] if ip else None, "mac": bound,
                 "applied_version": acc["applied_version"] if acc else None, "prev_profile": acc["prev_profile"] if acc else None,
                 "updated_at": acc["updated_at"] if acc else None}
 
+
+    def usage(self, usernames: list[str], since_epoch: float) -> dict[str, dict[str, dict]]:
+        """Consumo por conta e por mês (UTC) a partir do accounting local: {usuário: {"AAAA-MM": {...}}}.
+        acctinputoctets = recebido do assinante (upload); acctoutputoctets = enviado a ele (download)."""
+        if not usernames:
+            return {}
+        out: dict[str, dict[str, dict]] = {}
+        marks = ",".join("?" * len(usernames))
+        # acctstarttime pode estar como época (padrão do FreeRADIUS 3.2/SQLite) ou como texto
+        started = "case when typeof(acctstarttime) in ('integer','real') then acctstarttime else cast(strftime('%s', acctstarttime) as integer) end"
+        try:
+            rows = self._db.execute(
+                f"select username, strftime('%Y-%m', {started}, 'unixepoch') as month, coalesce(sum(acctinputoctets),0) as b_in, coalesce(sum(acctoutputoctets),0) as b_out, "
+                f"coalesce(sum(acctsessiontime),0) as secs, count(*) as n from radacct where username in ({marks}) and {started} >= ? group by username, month",
+                [*usernames, int(since_epoch)]).fetchall()
+        except sqlite3.OperationalError:
+            return {}   # banco mínimo sem accounting
+        for r in rows:
+            if r["month"]:
+                out.setdefault(r["username"], {})[r["month"]] = {"bytes_in": int(r["b_in"]), "bytes_out": int(r["b_out"]), "session_seconds": int(r["secs"]), "sessions": int(r["n"])}
+        return out
 
     def cleanup(self, keep_days: int = 90) -> int:
         """Limpa accounting encerrado e registros de autenticação antigos (crescem sem limite no FreeRADIUS)."""
@@ -187,6 +213,9 @@ class MikrotikRadiusDriver:
         radius_db = os.environ.get("NEXO_RADIUS_DB", os.path.join(data_dir, "radius", "radius.sqlite"))
         return cls(RadiusStore(radius_db, cred.get("password_storage", "cleartext")), MikrotikSessions(dev["host"], dev.get("api_port"), cred))
 
+    def usage(self, usernames: list[str], since_epoch: float) -> dict:
+        return self.radius.usage(usernames, since_epoch)
+
     def maintenance(self) -> dict:
         import os
         return {"radius_rows_removed": self.radius.cleanup(int(os.environ.get("NEXO_RADIUS_KEEP_DAYS", "90")))}
@@ -220,14 +249,14 @@ class MikrotikRadiusDriver:
                            "profile": (a["prev_profile"] or a["profile"]) if stale else a["profile"], "predates_authorization": stale}
         except Exception as e:  # sem acesso ao NAS: autorização local conhecida, sessão desconhecida
             session = {"online": None, "unknown": True, "error": str(e)[:200]}
-        return AccountState(True, a["policy"], a["profile"], a["applied_version"], session, framed_ip=a["framed_ip"])
+        return AccountState(True, a["policy"], a["profile"], a["applied_version"], session, framed_ip=a["framed_ip"], mac=a["mac"])
 
     def apply_authorization(self, username: str, *, secret: Optional[str], profile: str, policy: str, version: int, framed_ip: Optional[str] = None,
-                            block_profile: Optional[str] = None) -> dict:
-        self.radius.apply(username, secret, profile, policy, version, framed_ip, block_profile)
+                            block_profile: Optional[str] = None, mac: Optional[str] = None) -> dict:
+        self.radius.apply(username, secret, profile, policy, version, framed_ip, block_profile, mac)
         return {"radius": "radcheck/radreply atualizados", "policy": policy, "profile": block_profile or profile,
                 **({"suspension": "perfil de bloqueio"} if block_profile and policy == "suspended" else {}),
-                **({"framed_ip": framed_ip} if framed_ip else {})}
+                **({"framed_ip": framed_ip} if framed_ip else {}), **({"mac": mac} if mac else {})}
 
     def disconnect(self, username: str) -> dict:
         return {"sessions_removed": self.sessions.remove(username)}

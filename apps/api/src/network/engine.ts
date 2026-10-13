@@ -70,7 +70,10 @@ export async function requestOperation(c: Tx, tenantId: string, resourceId: stri
     secret_ref: action === 'subscriber.provision' ? `resource:${resourceId}` : null, // segredo nunca vai no envelope
     suspension: policy === 'suspended' ? suspension : null,
     ...(fixed ? { framed_ip: fixed.ip as string } : {}),
+    ...(r.mac ? { mac: r.mac as string } : {}),   // idem: só quando existe; agentes anteriores à 0.4.0 recusam o campo
   };
+  if (r.mac && !agentAtLeast(r.agent_version, PROFILE_SUSPENSION_MIN_AGENT))
+    throw new HttpError(409, `o agente do equipamento "${r.device_name}" (versão ${r.agent_version ?? 'desconhecida'}) não suporta vínculo de MAC; atualize para ${PROFILE_SUSPENSION_MIN_AGENT} ou remova o MAC`);
   const key = idempotencyKey ?? `${resourceId}:v${version}`;
   const authorization = { type: authz.type, id: authz.id };
   const envelope = JSON.stringify({

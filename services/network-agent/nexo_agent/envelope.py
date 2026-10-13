@@ -38,6 +38,8 @@ class Parameters(BaseModel):
     suspension: Optional[Suspension] = None
     # IP fixo do contrato (IPAM). Ausente = endereço dinâmico do NAS. Agentes anteriores à 0.3.0 recusam o envelope que o traz.
     framed_ip: Optional[str] = Field(default=None, pattern=r"^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$")
+    # MAC vinculado à conta (agente 0.4.0+): o RADIUS só autentica a conta vinda desse equipamento. Ausente = sem vínculo.
+    mac: Optional[str] = Field(default=None, pattern=r"^([0-9A-F]{2}:){5}[0-9A-F]{2}$")
 
 
 class OnuParameters(BaseModel):

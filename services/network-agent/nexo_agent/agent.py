@@ -5,7 +5,7 @@ import os
 import signal
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from . import __version__
 from .client import CloudClient
@@ -33,6 +33,7 @@ class Agent:
         self._last_maint = time.time()
         self._obs_cache: dict = {}
         self._olt_last: dict = {}
+        self._usage_last = 0.0
 
     def _build_driver(self, dev: dict):
         if dev["driver"] == "demo":
@@ -117,6 +118,30 @@ class Agent:
                     log.warning("leitura da ONU %s falhou: %s", o["serial"], e)
             self.client.olt_report(dev_id, unauthorized, states, complete=True)
 
+    def _usage_reports(self):
+        """Consumo do mês corrente e do anterior, do accounting local. Espaçado (15 min); falha aqui nunca atrapalha as operações."""
+        now = time.time()
+        if now - self._usage_last < 900:
+            return
+        self._usage_last = now
+        t = datetime.now(timezone.utc)
+        first = t.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        prev = (first - timedelta(days=1)).replace(day=1)
+        by_dev: dict[str, dict] = {}
+        for r in self.store.resources():
+            by_dev.setdefault(r["device_id"], {})[r["username"]] = r["resource_id"]
+        for dev_id, accounts in by_dev.items():
+            drv = self.drivers.get(dev_id)
+            if drv is None or not hasattr(drv, "usage"):
+                continue
+            try:
+                found = drv.usage(list(accounts), prev.timestamp())
+                items = [{"resource_id": accounts[u], "month": m, **v} for u, months in found.items() for m, v in months.items()]
+                if items:
+                    self.client.usage_report(dev_id, items)
+            except Exception as e:
+                log.warning("relato de consumo do equipamento %s falhou: %s", dev_id, e)
+
     def connect_and_sync(self):
         h = self.client.hello(self.session_id, __version__, {"drivers": sorted({d for d in ("demo", "mikrotik_radius")})})
         pinned = self.store.get_kv("signing_public_key")
@@ -161,6 +186,7 @@ class Agent:
             full = time.time() - self._last_full >= 300
             self.client.observations(self._observe_all(full), self._checks())
             self._olt_reports()
+            self._usage_reports()
             self._last_observe = time.time()
             if full:
                 self._last_full = self._last_observe

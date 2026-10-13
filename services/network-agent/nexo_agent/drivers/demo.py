@@ -14,6 +14,7 @@ create table if not exists sessions (device_id text, username text, ip text, pro
 create table if not exists writes (id integer primary key autoincrement, device_id text, username text, command text, at real);
 create table if not exists faults (name text primary key, remaining integer);
 create table if not exists account_ips (device_id text, username text, framed_ip text, primary key (device_id, username));
+create table if not exists account_macs (device_id text, username text, mac text, primary key (device_id, username));
 """
 
 
@@ -57,6 +58,7 @@ class DemoDriver:
         s = self._db.execute("select * from sessions where device_id = ? and username = ?", (self.device_id, username)).fetchone()
         fixed = self._db.execute("select framed_ip from account_ips where device_id = ? and username = ?", (self.device_id, username)).fetchone()
         fixed = fixed["framed_ip"] if fixed else None
+        bound = self._db.execute("select mac from account_macs where device_id = ? and username = ?", (self.device_id, username)).fetchone()
         # CPE simulado: reconecta sozinho alguns segundos depois de autorizado
         # suspensa por perfil de bloqueio a conta continua autenticando: o CPE reconecta já no perfil de bloqueio
         if not s and (a["policy"] == "active" or a["by_profile"]) and time.time() - a["updated_at"] >= self.reconnect_after_s:
@@ -64,10 +66,10 @@ class DemoDriver:
             self._db.execute("insert or replace into sessions values (?,?,?,?,?)", (self.device_id, username, ip, a["profile"], time.time()))
             s = self._db.execute("select * from sessions where device_id = ? and username = ?", (self.device_id, username)).fetchone()
         session = {"online": True, "ip": s["ip"], "profile": s["profile"], "since": s["since"], "simulated": True} if s else None
-        return AccountState(True, a["policy"], a["profile"], a["applied_version"], session, {"simulated": True}, framed_ip=fixed)
+        return AccountState(True, a["policy"], a["profile"], a["applied_version"], session, {"simulated": True}, framed_ip=fixed, mac=bound["mac"] if bound else None)
 
     def apply_authorization(self, username: str, *, secret: Optional[str], profile: str, policy: str, version: int, framed_ip: Optional[str] = None,
-                            block_profile: Optional[str] = None) -> dict:
+                            block_profile: Optional[str] = None, mac: Optional[str] = None) -> dict:
         if self._fault("fail_before_write"):
             raise ConnectionError("falha simulada antes da escrita")
         cur = self._db.execute("select secret_fp from accounts where device_id = ? and username = ?", (self.device_id, username)).fetchone()
@@ -80,6 +82,9 @@ class DemoDriver:
         self._db.execute("delete from account_ips where device_id = ? and username = ?", (self.device_id, username))
         if framed_ip:
             self._db.execute("insert into account_ips values (?,?,?)", (self.device_id, username, framed_ip))
+        self._db.execute("delete from account_macs where device_id = ? and username = ?", (self.device_id, username))
+        if mac:
+            self._db.execute("insert into account_macs values (?,?,?)", (self.device_id, username, mac))
         self._db.execute("insert into writes (device_id, username, command, at) values (?,?,?,?)", (self.device_id, username, "authorization", time.time()))
         if self._fault("lose_ack"):
             raise AckLost("confirmação perdida (simulada) após aplicar a autorização")

@@ -151,6 +151,31 @@ export function agentRoutes(app: FastifyInstance) {
     });
   });
 
+  /** Consumo mensal por conta (accounting do RADIUS local). Total do mês: o relato novo substitui o anterior. */
+  app.post('/agent/v1/usage-report', async (req) => {
+    const b = z.object({
+      device_id: z.string().uuid(),
+      items: z.array(z.object({
+        resource_id: z.string().uuid(), month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/),
+        bytes_in: z.number().int().min(0), bytes_out: z.number().int().min(0), session_seconds: z.number().int().min(0), sessions: z.number().int().min(0),
+      })).max(20000),
+    }).parse(req.body);
+    return withScope(req.agent.scope, async (c) => {
+      if (!(await c.query('select 1 from devices where id = $1 and agent_id = $2', [b.device_id, req.agent.id])).rowCount) throw new HttpError(404, 'equipamento não pertence a este agente');
+      let n = 0;
+      for (const u of b.items) {
+        const r = await c.query(
+          `insert into usage_monthly (tenant_id, resource_id, month, bytes_in, bytes_out, session_seconds, sessions)
+           select $1, r.id, ($3 || '-01')::date, $4, $5, $6, $7 from service_resources r where r.id = $2 and r.device_id = $8
+           on conflict (resource_id, month) do update set bytes_in = excluded.bytes_in, bytes_out = excluded.bytes_out,
+             session_seconds = excluded.session_seconds, sessions = excluded.sessions, reported_at = now()`,
+          [req.agent.tenantId, u.resource_id, u.month, u.bytes_in, u.bytes_out, u.session_seconds, u.sessions, b.device_id]);
+        n += r.rowCount ?? 0;
+      }
+      return { ok: true, accepted: n };
+    });
+  });
+
   /** Observações periódicas (sessões, política aplicada) e conectividade dos equipamentos. */
   app.post('/agent/v1/observations', async (req) => {
     const b = z.object({ items: z.array(zObs).max(20000), device_checks: zChecks }).parse(req.body);

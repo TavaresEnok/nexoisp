@@ -44,3 +44,6 @@ class CloudClient:
 
     def olt_report(self, device_id: str, unauthorized: list, states: list, complete: bool = True) -> dict:
         return self._post("/agent/v1/olt-report", {"device_id": device_id, "complete": complete, "unauthorized": unauthorized, "states": states})
+
+    def usage_report(self, device_id: str, items: list) -> dict:
+        return self._post("/agent/v1/usage-report", {"device_id": device_id, "items": items})

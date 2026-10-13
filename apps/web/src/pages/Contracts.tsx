@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { api, d, doc, dt, money, speed, useLoad, usePaged } from '../api';
 import { can, has, useMe } from '../App';
 import { ActionButton, Badge, Card, Field, Form, KV, Modal, Page, Pager, State, Tabs } from '../ui';
-import { ContractEquipment, ContractTags } from './Extras';
+import { ContractEquipment, ContractTags, ContractUsage } from './Extras';
 import { ContractFinance } from './Finance';
 import { OnuPanel } from './Olt';
 import { WorkOrderList } from './Field';
@@ -98,6 +98,7 @@ export function ContractDetail() {
           {cur === 'acesso' && (<>
             <InfraPanel contractId={c.id} />
             <ContractFinance contractId={c.id}>{(fin, numbers) => <ServicePanel contract={c} financial={fin} fin={numbers} />}</ContractFinance>
+            <ContractUsage contractId={c.id} />
             {has(me, 'olt') && <OnuPanel contract={c} />}
           </>)}
           {cur === 'contrato' && (<>

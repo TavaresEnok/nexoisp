@@ -43,7 +43,7 @@ def effective_profile(p) -> str:
 def authorization_matches(st: AccountState, env: Envelope) -> bool:
     p = env.parameters
     return (st.exists and st.applied_version == env.desired_version and st.policy == p.policy and st.profile == effective_profile(p)
-            and st.framed_ip == p.framed_ip)
+            and st.framed_ip == p.framed_ip and st.mac == p.mac)
 
 
 def needs_disconnect(st: AccountState, env: Envelope) -> bool:
@@ -97,7 +97,7 @@ class PppoeFamily:
         else:
             try:
                 step("autorização local", "ok", driver.apply_authorization(p.username, secret=go.get("secret"), profile=p.profile, policy=p.policy, version=env.desired_version, framed_ip=p.framed_ip,
-                                                                       block_profile=block_profile(p)))
+                                                                       block_profile=block_profile(p), mac=p.mac))
             except AckLost as e:
                 step("autorização local", "incerto", f"{e}; será verificado por consulta")
         checkpoint("EXECUTING")

@@ -1,3 +1,4 @@
+import { MacBinding } from './Extras';
 import { useState, type ReactNode } from 'react';
 import { ago, api, dt, useLoad } from '../api';
 import { can, useMe } from '../App';
@@ -171,6 +172,7 @@ export function ServicePanel({ contract, financial, fin }: { contract: any; fina
           <div className="small muted" style={{ margin: '10px 0 6px' }}>
             Usuário PPPoE <b className="mono">{r.pppoe_username}</b> · equipamento {r.device_name} · agente {r.agent_name ?? '—'} {r.agent_online ? <Badge tone="green">online</Badge> : <Badge tone="red">offline</Badge>}
           </div>
+          <MacBinding resource={r} onChange={reload} />
           <table>
             <thead><tr><th>Solicitada</th><th>Ação</th><th>Versão</th><th>Situação</th><th>Motivo / nota</th><th>Por</th><th></th></tr></thead>
             <tbody>{data.operations.map((o: any) => (
