@@ -128,6 +128,16 @@ O servidor de autenticação sobe junto com o sistema (`radius` no compose). O p
 - No servidor ficam carregados sob demanda os módulos `esp4`, `ppp_generic` e `ppp_async` (o kernel carrega sozinho quando o serviço usa).
 - A chave IPsec é da instalação; trocá-la exige reconfigurar todos os concentradores L2TP. Usuário e senha são por concentrador ("Refazer túnel" gera outros).
 
+### Gerência de roteadores do cliente — TR-069 (perfil `acs`)
+
+- Suba com `--profile acs` e defina `NEXO_ACS_URL=http://acs:7557` (API interna, não publicada) e `NEXO_ACS_PUBLIC_URL=http://<endereço público>:7547/`
+  (o que se configura no roteador do cliente como "URL do ACS"). Só a porta 7547 é publicada (`NEXO_ACS_BIND`); a interface própria do servidor de gerência não é.
+- No contrato (aba Acesso): procurar o roteador (pela conta PPPoE que ele informa ou pelo número de série da etiqueta), vincular, ver estado, trocar nome/senha
+  do Wi-Fi, reiniciar e reler. O assinante troca o próprio Wi-Fi no portal. Um roteador só pode estar vinculado a um contrato em toda a plataforma.
+- Respostas: "aplicado agora", "na fila" (o roteador não atendeu; vale no próximo contato) ou "o roteador recusou: <motivo>" (a tarefa é removida).
+- Segurança: qualquer roteador que conheça o endereço pode se registrar no servidor de gerência, mas só aparece para um provedor depois de vinculado com prova de
+  posse. Para restringir o registro, use autenticação CWMP (usuário/senha) no servidor de gerência e no roteador — não automatizado pelo painel.
+
 ### Réplica do banco (perfil `ha`)
 
 - Defina `NEXO_REPLICA_PASSWORD` e suba com `--profile ha`: o serviço `db-replica` copia o primário na primeira vez (com slot de replicação próprio, para não

@@ -567,3 +567,19 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   primário foi recriado para ler o novo `pg_hba` (cópia de segurança `pg_dump` feita antes).
 - **Limites:** promoção manual (sem eleição automática nem troca de endereço automática); réplica na mesma máquina do primário neste servidor (protege contra
   perda do disco/volume do banco, não contra perda da máquina); o RADIUS continua dependendo do primário para gravar accounting e tentativas.
+
+### 14/10/2026 — TR-069 integrado (roteador do cliente)
+
+- **Entregue (testado: 4 testes com servidor de gerência falso):** serviço de gerência TR-069 no compose (perfil `acs`; só a porta CWMP 7547 publicada, a API
+  interna e a interface própria não). No contrato, "Roteador do cliente": achar o roteador pela conta PPPoE que ele informa ou pelo número de série, **vincular
+  com prova de posse** (um roteador só pode estar em um contrato da plataforma; outro provedor não o enxerga nem vincula), ver fabricante, modelo, série,
+  firmware, último contato, tempo ligado, WAN e redes Wi-Fi; trocar nome e senha do Wi-Fi (TR-098 e TR-181, caminho certo de cada modelo), reiniciar, reler.
+  O assinante troca o próprio Wi-Fi pelo portal. Tudo auditado, sem a senha. Migração 052.
+- **Validado neste servidor contra o servidor de gerência real com um roteador simulado** (simulador oficial `genieacs-sim`, modelo Huawei BM632w, TR-098):
+  o roteador contatou o servidor; o NexoISP o achou pela série, vinculou, leu firmware/WAN/Wi-Fi; a troca de nome e senha do Wi-Fi foi aplicada na hora e
+  conferida no roteador; reler funcionou.
+- **Achado e corrigido:** o simulador recusa "reiniciar" (falha CWMP 9000, "Method not supported") e a primeira versão mostrava isso como "na fila"; agora a
+  recusa aparece com o motivo e a tarefa é removida (não fica repetindo).
+- **Não validado:** roteador físico de nenhum fabricante (o simulador não reinicia e não tem PPPoE: o casamento pela conta PPPoE só foi testado com o servidor
+  falso); TR-181 só no teste automatizado; firmware (atualização) e restauração de fábrica não foram feitos; a busca pela conta PPPoE olha a primeira
+  conexão WAN (índice 1). Neste Docker do PNETLab, o servidor de gerência e o banco dele precisam do mesmo ajuste de seccomp do RADIUS.
