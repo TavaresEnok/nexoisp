@@ -3,7 +3,7 @@ import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { withScope } from '../src/db.js';
 import { buildDisconnect, parseReply, sendDisconnect, type DisconnectResult } from '../src/radius/coa.js';
-import { runHostedOnce, syncAccounting } from '../src/radius/executor.js';
+import { purgeRadius, runHostedOnce, syncAccounting } from '../src/radius/executor.js';
 import { checkRows, replyRows, setupCommands } from '../src/radius/vendor.js';
 import { newPeerKeys, renderServerConf } from '../src/radius/vpn-shared.js';
 import { noScope } from '../src/db.js';
@@ -258,6 +258,32 @@ describe('concentrador no RADIUS integrado', () => {
     expect(log.rows.map((r: any) => r.reply)).toEqual(['Access-Reject', 'Access-Accept']);
     expect((await call(beta, 'GET', `/api/contracts/${a.contractId}/radius-log`)).body.rows).toEqual([]);
     expect((await call(admin, 'GET', '/api/devices')).body.find((x: any) => x.id === d.id).last_check.ok).toBe(true);
+  });
+
+  it('sincronização incremental: só regrava a conta que teve accounting; limpeza apaga só o que passou do prazo', async () => {
+    const d = await device('mikrotik');
+    const a = await account(d.id, 'i1');
+    const b = await account(d.id, 'i2');
+    await run();
+    await new Promise((r) => setTimeout(r, 5300));                       // a marca tem 5 s de folga: o que mudou há menos que isso é relido
+    await syncAccounting(tenantId, { full: true });
+    expect(await syncAccounting(tenantId)).toMatchObject({ accounts: 0, sessions: 0, full: false });
+    await openSession(a.username, 3, '100.64.8.8');                       // chega accounting só da primeira conta
+    await new Promise((r) => setTimeout(r, 300));
+    const r = await syncAccounting(tenantId);
+    expect(r).toMatchObject({ accounts: 1, sessions: 1, full: false });
+    expect((await call(admin, 'GET', `/api/network/online?q=${a.username}`)).body.rows).toHaveLength(1);
+    expect((await call(admin, 'GET', `/api/network/online?q=${b.username}`)).body.rows).toHaveLength(0);
+
+    // limpeza: tentativa de 40 dias sai (prazo 30), a de ontem fica; sessão encerrada há 500 dias sai (prazo 400), a aberta nunca
+    await owner.query(`insert into radius_postauth (tenant_id, username, reply, at) values ($1,$2,'Access-Accept', now() - interval '40 days'), ($1,$2,'Access-Accept', now() - interval '1 day')`, [tenantId, a.username]);
+    await owner.query(`insert into radius_acct (tenant_id, unique_id, session_id, username, started_at, updated_at, stopped_at) values ($1,$2,'velha',$3, now() - interval '501 days', now() - interval '500 days', now() - interval '500 days')`, [tenantId, `velha-${tag}`, a.username]);
+    const p = await purgeRadius(tenantId);
+    expect(p.postauth).toBeGreaterThanOrEqual(1);
+    expect(p.acct).toBeGreaterThanOrEqual(1);
+    expect((await sql(`select count(*)::int as n from radius_postauth where username = $1`, [a.username]))[0].n).toBe(1);
+    expect((await sql(`select count(*)::int as n from radius_acct where username = $1 and stopped_at is null`, [a.username]))[0].n).toBe(1);
+    expect((await sql(`select count(*)::int as n from radius_acct where unique_id = $1`, [`velha-${tag}`]))[0].n).toBe(0);
   });
 
   it('equipamento que usava agente local passa ao RADIUS integrado levando as contas', async () => {

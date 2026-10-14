@@ -166,45 +166,71 @@ async function executeOne(tenantId: string, agentId: string, d: { attempt_id: st
 }
 
 // ---------------------------------------------------------------- sincronização do que o RADIUS observou
-/** Leva sessões, consumo e estado "online" das tabelas do RADIUS para as mesmas tabelas que o agente local alimenta. */
-export async function syncAccounting(tenantId: string) {
-  await withScope(SYS(tenantId), async (c) => {
-    await c.query(
+const watermark = new Map<string, Date>();     // por provedor: até onde já copiamos. Vazio (processo recém-iniciado) = passada completa.
+
+/**
+ * Leva sessões, consumo e estado "online" das tabelas do RADIUS para as mesmas tabelas que o agente local alimenta.
+ * INCREMENTAL: depois da primeira passada só toca nas contas que tiveram accounting ou mudança de autorização desde a última vez.
+ * (Regravar todas as contas a cada ciclo, como na primeira versão, vira escrita constante com dezenas de milhares de assinantes.)
+ */
+export async function syncAccounting(tenantId: string, opts: { full?: boolean } = {}): Promise<{ accounts: number; sessions: number; full: boolean }> {
+  const since = opts.full ? null : watermark.get(tenantId) ?? null;
+  return withScope(SYS(tenantId), async (c) => {
+    const next = (await c.query(`select now() - interval '5 seconds' as t`)).rows[0].t as Date;     // folga para o que está sendo gravado agora
+    const changed = `(select username from radius_account where $1::timestamptz is null or updated_at > $1
+                      union select username from radius_acct where $1::timestamptz is not null and seen_at > $1)`;
+    const acc = await c.query(
       `update service_resources r set observed_policy = a.policy, observed_profile = a.profile, observed_at = now(),
-              observed_session = (select jsonb_build_object('online', true, 'ip', x.framed_ip, 'caller_id', x.calling_station, 'since', x.started_at,
-                                   'uptime', regexp_replace(to_char(justify_hours(now() - x.started_at), 'FMDD"d"FMHH24"h"FMMI"m"FMSS"s"'), '^(0d)?(0h)?(0m)?', ''), 'profile', a.profile)
+              observed_session = (select jsonb_build_object('online', true, 'ip', x.framed_ip, 'caller_id', x.calling_station, 'since', x.started_at, 'profile', a.profile)
                                   from radius_acct x where x.tenant_id = r.tenant_id and x.username = r.pppoe_username and x.stopped_at is null order by x.started_at desc limit 1)
        from radius_account a, devices d
-       where a.tenant_id = r.tenant_id and a.username = r.pppoe_username and d.id = r.device_id and d.driver = 'radius' and r.desired_version > 0`);
-    await c.query(
+       where a.tenant_id = r.tenant_id and a.username = r.pppoe_username and d.id = r.device_id and d.driver = 'radius' and r.desired_version > 0
+         and r.pppoe_username in ${changed}`, [since]);
+    const ses = await c.query(
       `insert into service_sessions (tenant_id, resource_id, session_key, started_at, stopped_at, ip, mac, nas_ip, bytes_in, bytes_out, seconds, terminate_cause)
-       select x.tenant_id, r.id, left(x.unique_id, 80), x.started_at, x.stopped_at, x.framed_ip, x.calling_station, host(x.nas_ip), x.bytes_in, x.bytes_out,
-              case when x.stopped_at is null then greatest(x.session_seconds, extract(epoch from now() - x.started_at)::bigint) else x.session_seconds end, x.terminate_cause
+       select x.tenant_id, r.id, left(x.unique_id, 80), x.started_at, x.stopped_at, x.framed_ip, x.calling_station, host(x.nas_ip), x.bytes_in, x.bytes_out, x.session_seconds, x.terminate_cause
        from radius_acct x join service_resources r on r.tenant_id = x.tenant_id and r.pppoe_username = x.username
        join devices d on d.id = r.device_id and d.driver = 'radius'
-       where x.updated_at > now() - interval '20 minutes' or x.stopped_at is null
+       where ($1::timestamptz is null and (x.stopped_at is null or x.updated_at > now() - interval '2 days')) or x.seen_at > $1
        on conflict (resource_id, session_key) do update set stopped_at = excluded.stopped_at, ip = excluded.ip, mac = excluded.mac, nas_ip = excluded.nas_ip,
-         bytes_in = excluded.bytes_in, bytes_out = excluded.bytes_out, seconds = excluded.seconds, terminate_cause = excluded.terminate_cause, reported_at = now()`);
+         bytes_in = excluded.bytes_in, bytes_out = excluded.bytes_out, seconds = excluded.seconds, terminate_cause = excluded.terminate_cause, reported_at = now()`, [since]);
     await c.query(
       `insert into usage_monthly (tenant_id, resource_id, month, bytes_in, bytes_out, session_seconds, sessions)
        select x.tenant_id, r.id, date_trunc('month', x.started_at at time zone 'UTC')::date, sum(x.bytes_in), sum(x.bytes_out), sum(x.session_seconds), count(*)
        from radius_acct x join service_resources r on r.tenant_id = x.tenant_id and r.pppoe_username = x.username
        join devices d on d.id = r.device_id and d.driver = 'radius'
        where x.started_at >= date_trunc('month', now() at time zone 'UTC') - interval '1 month'
+         and ($1::timestamptz is null or x.username in (select username from radius_acct where seen_at > $1))
        group by 1, 2, 3
        on conflict (resource_id, month) do update set bytes_in = excluded.bytes_in, bytes_out = excluded.bytes_out,
-         session_seconds = excluded.session_seconds, sessions = excluded.sessions, reported_at = now()`);
+         session_seconds = excluded.session_seconds, sessions = excluded.sessions, reported_at = now()`, [since]);
     // "verificação" do equipamento = último pacote que ele nos mandou
     await c.query(
       `update radius_nas n set last_packet_at = greatest(n.last_packet_at, v.last)
-       from (select nas_ip, max(at) as last from (select nas_ip, updated_at as at from radius_acct where updated_at > now() - interval '1 day'
-                                                  union all select nas_ip, at from radius_postauth where at > now() - interval '1 day') z group by nas_ip) v
-       where v.nas_ip = n.nas_ip`);
+       from (select nas_ip, max(at) as last from (select nas_ip, seen_at as at from radius_acct where seen_at > coalesce($1, now() - interval '1 day')
+                                                  union all select nas_ip, at from radius_postauth where at > coalesce($1, now() - interval '1 day')) z group by nas_ip) v
+       where v.nas_ip = n.nas_ip`, [since]);
     await c.query(
       `update devices d set last_check_at = now(), last_check = jsonb_build_object('ok', n.last_packet_at > now() - interval '15 minutes',
               'detail', case when n.last_packet_at is null then 'nenhum pacote recebido deste concentrador ainda'
                              else 'último pacote recebido em ' || to_char(n.last_packet_at at time zone 'UTC', 'DD/MM HH24:MI') || ' UTC' end)
        from radius_nas n where n.device_id = d.id`);
+    watermark.set(tenantId, next);
+    return { accounts: acc.rowCount ?? 0, sessions: ses.rowCount ?? 0, full: since === null };
+  });
+}
+
+/**
+ * Limpeza em lotes do que só cresce: tentativas de autenticação e sessões encerradas antigas. Os prazos vêm do ambiente;
+ * o de sessões fica acima de 1 ano por padrão (guarda do registro de conexão exigida do provedor).
+ */
+export async function purgeRadius(tenantId: string, batch = 5000): Promise<{ postauth: number; acct: number; sessions: number }> {
+  const days = (name: string, def: number, min: number) => Math.max(min, Number(process.env[name]) || def);
+  const logDays = days('NEXO_RADIUS_LOG_DAYS', 30, 1), keepDays = days('NEXO_SESSION_KEEP_DAYS', 400, 30);
+  return withScope(SYS(tenantId), async (c) => {
+    const del = async (table: string, col: string, d: number) => (await c.query(
+      `delete from ${table} where ctid in (select ctid from ${table} where tenant_id = $1 and ${col} < now() - make_interval(days => $2::int) limit $3)`, [tenantId, d, batch])).rowCount ?? 0;
+    return { postauth: await del('radius_postauth', 'at', logDays), acct: await del('radius_acct', 'stopped_at', keepDays), sessions: await del('service_sessions', 'stopped_at', keepDays) };
   });
 }
 

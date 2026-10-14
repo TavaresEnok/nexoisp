@@ -2,6 +2,7 @@ import { HttpError } from '../auth.js';
 import { noScope, withScope, type Tx } from '../db.js';
 import { requestOperation } from '../network/engine.js';
 import { runNotices } from '../notices.js';
+import { purgeRadius } from '../radius/executor.js';
 import { applyScheduledChanges } from '../scheduled.js';
 import { runSla } from '../sla.js';
 import { emitEvent } from '../webhooks.js';
@@ -320,6 +321,7 @@ export async function runWorkerOnce(log: (m: string) => void = () => {}, opts: {
       if (opts.reconcile && t.gateway !== 'none') await reconcile(t.tenant_id);
       await runNotices(t.tenant_id).then((r) => { if (r.sent || r.failed) log(`avisos ao assinante: ${r.sent} enviado(s), ${r.failed} falha(s) para ${t.tenant_id}`); });
       await applyScheduledChanges(t.tenant_id).then((r) => { if (r.applied || r.failed) log(`mudanças agendadas: ${r.applied} aplicada(s), ${r.failed} com falha para ${t.tenant_id}`); });
+      await purgeRadius(t.tenant_id).then((r) => { if (r.postauth || r.acct || r.sessions) log(`limpeza do RADIUS: ${r.postauth} tentativa(s), ${r.acct + r.sessions} sessão(ões) antigas para ${t.tenant_id}`); });
       await runSla(t.tenant_id).then((r) => { if (r.tickets || r.work_orders) log(`SLA vencido: ${r.tickets} atendimento(s), ${r.work_orders} OS para ${t.tenant_id}`); });
       await withScope(SYS(t.tenant_id), (c) => c.query(`update trust_releases set status = 'expired', closed_at = now() where status = 'active' and expires_at <= now()`));
       if (t.auto_suspend) {

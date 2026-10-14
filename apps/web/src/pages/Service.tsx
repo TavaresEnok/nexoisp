@@ -110,7 +110,8 @@ export function ServicePanel({ contract, financial, fin }: { contract: any; fina
   const r = data?.resource;
   const last = data?.operations?.[0];
   const act = (action: string, reason?: string) => async () => { await api(`/resources/${r.id}/${action}`, { body: { reason } }); await reload(); };
-  const stale = r?.observed_at && (Date.now() - new Date(r.observed_at).getTime()) / 1000 > STALE_S;
+  // na autenticação integrada a leitura só é regravada quando algo muda; "antiga" não é sinal de problema
+  const stale = r?.driver !== 'radius' && r?.observed_at && (Date.now() - new Date(r.observed_at).getTime()) / 1000 > STALE_S;
   const sim = r?.driver === 'demo';
 
   return (

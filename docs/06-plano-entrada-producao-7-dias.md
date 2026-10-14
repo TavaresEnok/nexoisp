@@ -381,3 +381,14 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
 - **Observado:** a implantação recriou o serviço do túnel; o primeiro pedido de desconexão ficou sem resposta e a nova tentativa automática (11 s depois) concluiu.
 - **Não validado:** RouterOS 6, Huawei e Cisco (sem WireGuard: acesso direto); vários concentradores simultâneos no túnel; túnel atravessando a internet e NAT de verdade.
 
+### 14/10/2026 — ajustes de escala do RADIUS integrado e medição com 100 mil contas
+
+- **Sincronização incremental:** a rotina que leva sessões, consumo e "online" para o painel passou a tocar só nas contas que tiveram accounting ou mudança de
+  autorização desde o ciclo anterior (marca `seen_at`, gravada pelo relógio do banco). Migração 038.
+- **Limpeza:** tentativas de autenticação com mais de 30 dias (`NEXO_RADIUS_LOG_DAYS`) e sessões encerradas há mais de 400 dias (`NEXO_SESSION_KEEP_DAYS`), em lotes,
+  na rotina periódica. O padrão das sessões fica acima de 1 ano por causa da guarda do registro de conexão exigida do provedor (Marco Civil, art. 13); **confirmar o prazo com o jurídico**.
+- **Medido com 100.000 contas online** (banco de teste, este servidor, `NEXO_LOAD=radius`): passada completa 21 s (só ao iniciar o processo); ciclo sem mudança 0,15 s;
+  ciclo com 5% das contas atualizando (o esperado entre dois ciclos de 15 s com accounting a cada 5 min) 1,0 s; lista de online no painel 1,9 s.
+  Antes do ajuste, todo ciclo era uma passada completa: 21 s de escrita a cada 15 s.
+- **Não medido:** autenticação com 100 mil contas (medida com 20 mil), painel e faturamento nesse tamanho, concentradores reais, banco em disco lento.
+
