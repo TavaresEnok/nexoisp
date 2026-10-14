@@ -19,6 +19,8 @@ services:
   # DIRETO ao RADIUS não identifica o concentrador aqui. Pelo túnel funciona normalmente (o endereço é o de dentro do túnel).
   radius:
     security_opt: ["seccomp=unconfined"]
+  radius2:
+    security_opt: ["seccomp=unconfined"]
   olt-huawei-emu:
     build: { network: host }
     security_opt: ["seccomp=unconfined"]
