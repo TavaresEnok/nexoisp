@@ -538,3 +538,12 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
 - **Atenção:** o leiaute segue o arquivo de acessos SCM conhecido em 2026 e **não foi conferido com uma submissão real**: confira os nomes e códigos aceitos no
   Sistema de Coleta de Dados da ANATEL antes de enviar. O sistema não envia nada à ANATEL. Não há tabela oficial do IBGE embutida (o provedor informa o código dos
   municípios que atende). Fora do escopo: SeAC/STFC, indicadores de qualidade e outros formulários da ANATEL.
+
+### 14/10/2026 — importação do histórico do sistema anterior
+
+- **Entregue (testado: 2 testes):** Importação → "Histórico: atendimentos, OS e anotações" (`docs/importacao-csv.md` seção 3). Cada linha vira atendimento
+  (com a descrição e a solução como mensagens), ordem de serviço (tipo, situação, solução) ou anotação do assinante, **com a data original**, sem prazo de SLA,
+  sem webhook e sem aviso ao assinante; o responsável de lá vira texto. Prévia sem gravar, erro por linha, lote auditado; reimportar não duplica (origem + id).
+  Migração 050.
+- **Limites:** o arquivo precisa estar no formato intermediário (os adaptadores diretos do SGP/IXC continuam dependendo de exportação real); anexos não entram;
+  usuários do sistema anterior não são criados.

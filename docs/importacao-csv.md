@@ -66,6 +66,26 @@ Com `competencia`, o título histórico também impede que a recorrência gere a
 
 Títulos em aberto importados entram como "em aberto" e **não geram cobrança automática no gateway**.
 
+## 3. Histórico do sistema anterior (`historico.csv`) — importar depois dos assinantes
+
+Uma linha por atendimento, ordem de serviço ou anotação. Entra como registro **já ocorrido**: guarda a data original, não abre prazo de SLA, não dispara
+webhook nem aviso ao assinante. Reimportar o mesmo arquivo (mesma origem) não duplica.
+
+| Coluna | Obrigatória | Conteúdo |
+|---|---|---|
+| `id_externo` | sim | id do registro no sistema anterior (único por tipo) |
+| `id_externo_assinante` | sim | o mesmo `id_externo` usado em `assinantes.csv` |
+| `tipo` | sim | `atendimento` (ou `ocorrência`), `os`, `anotação` |
+| `data` | sim | `AAAA-MM-DD [HH:MM]` ou `DD/MM/AAAA [HH:MM]`, horário de Brasília |
+| `descricao` | sim | texto (até 8000 caracteres) |
+| `assunto` | não | título do atendimento/OS |
+| `situacao` | não | `aberto`, `fechado` (padrão) ou `cancelado` |
+| `encerrado_em` | não | data de encerramento |
+| `solucao` | não | o que foi feito |
+| `responsavel` | não | nome de quem atendeu lá (vira texto: os usuários de lá não existem aqui) |
+| `categoria` | não | atendimento: `técnico`, `financeiro`, `comercial` (outros → "outro") |
+| `tipo_os` | não | OS: `instalação`, `reparo`, `mudança de endereço`, `retirada` (outros → "outro") |
+
 ## Fluxo
 
 1. **Prévia**: executa a importação inteira e desfaz. Mostra criados/atualizados/sem alteração/erros, soma dos valores e planos sem correspondência.

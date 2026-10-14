@@ -10,6 +10,7 @@ function Totals({ t, kind }: { t: any; kind: string }) {
       <span><b>{t.rows}</b> linha(s)</span><span><Badge tone="green">{t.created} novo(s)</Badge></span><span><Badge tone="blue">{t.updated} atualizado(s)</Badge></span>
       <span><Badge>{t.unchanged} sem alteração</Badge></span><span><Badge tone={t.error ? 'red' : 'gray'}>{t.error} com erro</Badge></span>
       {kind === 'subscribers' ? <span>{t.contracts_created} contrato(s) · {t.accounts_created} conta(s) PPPoE{t.accounts_without_secret > 0 && <b style={{ color: 'var(--red)' }}> · {t.accounts_without_secret} sem senha</b>}</span>
+        : kind === 'history' ? <span>{t.history_tickets ?? 0} atendimento(s) · {t.history_work_orders ?? 0} OS · {t.history_notes ?? 0} anotação(ões)</span>
         : <span>soma dos novos títulos: <b>{money(t.amount_cents_total)}</b></span>}
     </div>
   );
@@ -56,6 +57,7 @@ export function Import() {
           <Field label="Conteúdo">
             <select value={kind} onChange={(e) => { setKind(e.target.value); reset(); }}>
               <option value="subscribers">Assinantes, contratos e contas PPPoE</option><option value="invoices">Títulos em aberto</option>
+              <option value="history">Histórico: atendimentos, OS e anotações</option>
             </select>
           </Field>
           <Field label="Arquivo CSV">
@@ -119,7 +121,7 @@ export function Import() {
             <thead><tr><th>Quando</th><th>Arquivo</th><th>Conteúdo</th><th>Resultado</th><th>Por</th><th></th></tr></thead>
             <tbody>{batches.data?.map((b) => (
               <tr key={b.id}>
-                <td>{dt(b.created_at)}</td><td>{b.filename ?? '—'} <span className="muted small mono">{b.source}</span></td><td>{b.kind === 'subscribers' ? 'Assinantes' : 'Títulos'}</td>
+                <td>{dt(b.created_at)}</td><td>{b.filename ?? '—'} <span className="muted small mono">{b.source}</span></td><td>{b.kind === 'subscribers' ? 'Assinantes' : b.kind === 'history' ? 'Histórico' : 'Títulos'}</td>
                 <td className="small">{b.totals.created} novos · {b.totals.updated} atualizados · {b.totals.unchanged} iguais · {b.totals.error} erros</td><td>{b.created_by_name}</td>
                 <td><div className="row" style={{ justifyContent: 'flex-end' }}>
                   <button className="sm" onClick={async () => setDetail({ batch: b, rows: await api(`/import/batches/${b.id}`) })}>erros e avisos</button>

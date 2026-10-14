@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { audit, guard, HttpError } from '../auth.js';
-import { pool, type Tx } from '../db.js';
+import { nextNumber, pool, type Tx } from '../db.js';
 import { encryptSecret } from '../network/crypto.js';
 import { requestOperation } from '../network/engine.js';
 import { onlyDigits, validDocument, zUuid } from '../validators.js';
@@ -18,8 +18,11 @@ export const FIELDS = {
     'nascimento', 'rg', 'nome_mae', 'nome_fantasia', 'celular', 'whatsapp', 'aceita_avisos', 'inicio_contrato', 'mac', 'etiquetas', 'pop',
     'fidelidade_ate', 'multa_valor', 'multa_modelo', 'indicado_por'],
   invoices: ['id_externo', 'id_externo_assinante', 'vencimento', 'valor', 'competencia', 'descricao', 'situacao', 'pago_em', 'valor_pago', 'forma_pagamento'],
+  // histórico do sistema anterior: uma linha por atendimento, ordem de serviço ou anotação
+  history: ['id_externo', 'id_externo_assinante', 'tipo', 'data', 'assunto', 'descricao', 'situacao', 'encerrado_em', 'solucao', 'responsavel', 'categoria', 'tipo_os'],
 } as const;
-const REQUIRED = { subscribers: ['id_externo', 'nome'], invoices: ['id_externo', 'id_externo_assinante', 'vencimento', 'valor'] } as const;
+const REQUIRED = { subscribers: ['id_externo', 'nome'], invoices: ['id_externo', 'id_externo_assinante', 'vencimento', 'valor'],
+  history: ['id_externo', 'id_externo_assinante', 'tipo', 'data', 'descricao'] } as const;
 
 export function parseCsv(text: string): string[][] {
   const src = text.replace(/^﻿/, '');
@@ -61,8 +64,19 @@ function parseDate(v: string): string | null {
   return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === iso ? iso : null;
 }
 
+/** Data com hora opcional ("AAAA-MM-DD HH:MM" ou "DD/MM/AAAA HH:MM"), no fuso informado (padrão: Brasília). */
+function parseDateTime(v: string, offset = '-03:00'): string | null {
+  const m = v.trim().match(/^(\S+)(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+  if (!m) return null;
+  const d = parseDate(m[1]);
+  if (!d) return null;
+  const hh = Number(m[2] ?? 12), mm = Number(m[3] ?? 0);
+  if (hh > 23 || mm > 59) return null;
+  return new Date(`${d}T${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:${m[4] ?? '00'}${offset}`).toISOString();
+}
+
 const zBody = z.object({
-  kind: z.enum(['subscribers', 'invoices']),
+  kind: z.enum(['subscribers', 'invoices', 'history']),
   source: z.string().regex(/^[a-z0-9-]{2,40}$/, 'origem: minúsculas, números e hífen').default('csv-intermediario'),
   filename: z.string().max(200).optional(),
   csv: z.string().min(1).max(15 * 1024 * 1024),
@@ -279,6 +293,67 @@ async function importInvoiceRow(c: Tx, tenantId: string, b: Body, r: Record<stri
 }
 
 /** Prévia e aplicação usam o MESMO código; a prévia executa tudo e desfaz (rollback). */
+const TICKET_CAT: Record<string, string> = { tecnico: 'technical', técnico: 'technical', suporte: 'technical', financeiro: 'financial', cobranca: 'financial', cobrança: 'financial',
+  comercial: 'commercial', vendas: 'commercial' };
+const WO_KIND: Record<string, string> = { instalacao: 'install', instalação: 'install', reparo: 'repair', manutencao: 'repair', manutenção: 'repair', suporte: 'repair',
+  mudanca: 'address_change', mudança: 'address_change', 'mudanca de endereco': 'address_change', 'mudança de endereço': 'address_change', retirada: 'removal', recolhimento: 'removal' };
+
+/**
+ * Uma linha de histórico. Entra como registro já ocorrido: não abre prazo de SLA, não dispara webhook nem aviso, e guarda a data original.
+ * O responsável de lá vira texto (os usuários do sistema anterior não existem aqui).
+ */
+async function importHistoryRow(c: Tx, tenantId: string, b: Body, r: Record<string, string>, totals: any): Promise<Omit<RowResult, 'row'>> {
+  const ext = r.id_externo, tipo = r.tipo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (!ext) throw new RowError('id_externo ausente');
+  if (!['atendimento', 'ocorrencia', 'os', 'ordem de servico', 'anotacao', 'observacao'].includes(tipo)) throw new RowError(`tipo desconhecido: "${r.tipo}" (use atendimento, os ou anotacao)`);
+  const at = parseDateTime(r.data);
+  if (!at) throw new RowError(`data inválida: "${r.data}" (use AAAA-MM-DD [HH:MM] ou DD/MM/AAAA [HH:MM])`);
+  if (!r.descricao) throw new RowError('descricao ausente');
+  if (r.descricao.length > 8000) throw new RowError('descricao acima de 8000 caracteres');
+  const sub = (await c.query('select id from subscribers where external_source = $1 and external_id = $2', [b.source, r.id_externo_assinante])).rows[0];
+  if (!sub) throw new RowError(`assinante "${r.id_externo_assinante}" não encontrado nesta origem; importe os assinantes antes`);
+  const k = (await c.query('select id from contracts where subscriber_id = $1 order by created_at limit 1', [sub.id])).rows[0];
+  const closedRaw = r.situacao.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const closed = !closedRaw || ['fechado', 'fechada', 'encerrado', 'encerrada', 'concluido', 'concluida', 'resolvido', 'finalizado', 'finalizada'].includes(closedRaw);
+  const canceled = ['cancelado', 'cancelada'].includes(closedRaw);
+  if (!closed && !canceled && !['aberto', 'aberta', 'pendente', 'em andamento'].includes(closedRaw)) throw new RowError(`situação desconhecida: "${r.situacao}" (use aberto, fechado ou cancelado)`);
+  const end = r.encerrado_em ? parseDateTime(r.encerrado_em) : at;
+  if (r.encerrado_em && !end) throw new RowError(`encerrado_em inválido: "${r.encerrado_em}"`);
+  const who = r.responsavel ? ` (responsável no sistema anterior: ${r.responsavel.slice(0, 80)})` : '';
+  const table = tipo.startsWith('anot') || tipo === 'observacao' ? 'subscriber_notes' : tipo === 'os' || tipo.startsWith('ordem') ? 'work_orders' : 'tickets';
+  const existing = (await c.query(`select id from ${table} where external_source = $1 and external_id = $2`, [b.source, ext])).rows[0];
+  if (existing) return { external_id: ext, status: 'unchanged', messages: [], entity_id: existing.id };
+  let id: string;
+  if (table === 'subscriber_notes') {
+    id = (await c.query(
+      `insert into subscriber_notes (tenant_id, subscriber_id, contract_id, body, created_at, external_source, external_id) values ($1,$2,$3,$4,$5,$6,$7) returning id`,
+      [tenantId, sub.id, k?.id ?? null, (r.descricao + who).slice(0, 2000), at, b.source, ext])).rows[0].id;
+    totals.history_notes = (totals.history_notes ?? 0) + 1;
+  } else if (table === 'tickets') {
+    const cat = TICKET_CAT[(r.categoria || '').toLowerCase()] ?? 'other';
+    const number = await nextNumber(c, tenantId, 'ticket');
+    id = (await c.query(
+      `insert into tickets (tenant_id, number, subscriber_id, contract_id, subject, category, priority, status, origin, created_at, updated_at, closed_at, external_source, external_id)
+       values ($1,$2,$3,$4,$5,$6,'normal',$7,'staff',$8,$9,$10,$11,$12) returning id`,
+      [tenantId, number, sub.id, k?.id ?? null, (r.assunto || r.descricao).slice(0, 200), cat, closed || canceled ? 'closed' : 'open', at, end ?? at,
+        closed || canceled ? end ?? at : null, b.source, ext])).rows[0].id;
+    await c.query(`insert into ticket_messages (tenant_id, ticket_id, at, author_kind, body, internal) values ($1,$2,$3,'staff',$4,false)`, [tenantId, id, at, r.descricao + who]);
+    if (r.solucao) await c.query(`insert into ticket_messages (tenant_id, ticket_id, at, author_kind, body, internal) values ($1,$2,$3,'staff',$4,false)`, [tenantId, id, end ?? at, `Solução: ${r.solucao}`]);
+    totals.history_tickets = (totals.history_tickets ?? 0) + 1;
+  } else {
+    const kind = WO_KIND[(r.tipo_os || '').toLowerCase()] ?? 'other';
+    const status = canceled ? 'canceled' : closed ? 'done' : 'open';
+    const number = await nextNumber(c, tenantId, 'work_order');
+    id = (await c.query(
+      `insert into work_orders (tenant_id, number, kind, status, subscriber_id, contract_id, description, resolution, created_at, updated_at, finished_at, external_source, external_id)
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) returning id`,
+      [tenantId, number, kind, status, sub.id, k?.id ?? null, ((r.assunto ? `${r.assunto}: ` : '') + r.descricao + who).slice(0, 4000),
+        status === 'done' ? (r.solucao || 'concluída no sistema anterior') : r.solucao || null, at, end ?? at, status === 'open' ? null : end ?? at, b.source, ext])).rows[0].id;
+    totals.history_work_orders = (totals.history_work_orders ?? 0) + 1;
+  }
+  return { external_id: ext, status: 'created', messages: [], entity_id: id };
+}
+
 async function runImport(ctx: { tenantId: string; userId: string }, b: Body, apply: boolean) {
   const table = parseCsv(b.csv);
   if (table.length < 2) throw new HttpError(400, 'arquivo sem linhas de dados');
@@ -315,7 +390,8 @@ async function runImport(ctx: { tenantId: string; userId: string }, b: Body, app
         try {
           if (rec.id_externo && seen.has(rec.id_externo)) throw new RowError(`id_externo "${rec.id_externo}" repetido no arquivo`);
           seen.add(rec.id_externo);
-          res = { row: n + 1, ...(b.kind === 'subscribers' ? await importSubscriberRow(c, ctx.tenantId, b, rec, plans, totals, mapped) : await importInvoiceRow(c, ctx.tenantId, b, rec, totals)) };
+          res = { row: n + 1, ...(b.kind === 'subscribers' ? await importSubscriberRow(c, ctx.tenantId, b, rec, plans, totals, mapped)
+            : b.kind === 'history' ? await importHistoryRow(c, ctx.tenantId, b, rec, totals) : await importInvoiceRow(c, ctx.tenantId, b, rec, totals)) };
           await c.query('release savepoint r');
         } catch (e: any) {
           await c.query('rollback to savepoint r');
