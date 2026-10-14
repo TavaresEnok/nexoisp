@@ -291,6 +291,42 @@ describe('concentrador no RADIUS integrado', () => {
     expect((await sql(`select count(*)::int as n from radius_acct where unique_id = $1`, [`velha-${tag}`]))[0].n).toBe(0);
   });
 
+  it('consumo diário: soma só a diferença entre leituras, agrega por semana e ano; outro provedor não vê', async () => {
+    const d = await device('mikrotik');
+    const a = await account(d.id, 'cd');
+    await run();
+    const s = await openSession(a.username, 30, '100.64.6.6');            // 1000 enviados, 5000 recebidos
+    await syncAccounting(tenantId);
+    let day = (await call(admin, 'GET', `/api/contracts/${a.contractId}/usage-series?by=day`)).body;
+    expect(day).toHaveLength(1);
+    expect(day[0]).toMatchObject({ bytes_in: 1000, bytes_out: 5000 });
+    // a mesma leitura de novo não soma outra vez
+    await owner.query(`update radius_acct set updated_at = now() where id = $1`, [s.id]);
+    await new Promise((r) => setTimeout(r, 300));
+    await syncAccounting(tenantId);
+    day = (await call(admin, 'GET', `/api/contracts/${a.contractId}/usage-series?by=day`)).body;
+    expect(day[0]).toMatchObject({ bytes_in: 1000, bytes_out: 5000 });
+    // o contador cresce: entra só a diferença (2000 / 4000)
+    await owner.query(`update radius_acct set bytes_in = 3000, bytes_out = 9000, updated_at = now() where id = $1`, [s.id]);
+    await new Promise((r) => setTimeout(r, 300));
+    await syncAccounting(tenantId);
+    day = (await call(admin, 'GET', `/api/contracts/${a.contractId}/usage-series?by=day`)).body;
+    expect(day[0]).toMatchObject({ bytes_in: 3000, bytes_out: 9000 });
+    // dias anteriores entram na semana e no ano
+    await sql(`insert into usage_daily (tenant_id, resource_id, day, bytes_in, bytes_out)
+               select tenant_id, id, current_date - 400, 1, 2 from service_resources where id = $1`, [a.resourceId]);
+    await sql(`insert into usage_daily (tenant_id, resource_id, day, bytes_in, bytes_out)
+               select tenant_id, id, current_date - 3, 10, 20 from service_resources where id = $1`, [a.resourceId]);
+    const week = (await call(admin, 'GET', `/api/contracts/${a.contractId}/usage-series?by=week`)).body;
+    const total = (rows: any[]) => rows.reduce((s, r) => s + r.bytes_out, 0);
+    expect(total(week)).toBe(9020);                                        // hoje + há 3 dias; o de 400 dias fica fora das 26 semanas
+    expect(week.every((r: any) => new Date(`${r.period}T00:00:00Z`).getUTCDay() === 1)).toBe(true);   // semana começa na segunda
+    const year = (await call(admin, 'GET', `/api/contracts/${a.contractId}/usage-series?by=year`)).body;
+    expect(year.every((r: any) => r.period.endsWith('-01-01'))).toBe(true);
+    expect(total(year)).toBeLessThanOrEqual(9022);
+    expect((await call(beta, 'GET', `/api/contracts/${a.contractId}/usage-series`)).body).toEqual([]);   // outro provedor não vê
+  });
+
   it('equipamento que usava agente local passa ao RADIUS integrado levando as contas', async () => {
     const ag = (await call(admin, 'POST', '/api/agents', { name: `agente-conv-${tag}` })).body;
     const old = (await call(admin, 'POST', '/api/devices', { name: `nas-conv-${tag}`, driver: 'demo', agent_id: ag.id })).body;

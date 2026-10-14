@@ -172,10 +172,48 @@ export function UsageTable({ rows, empty }: { rows: any[]; empty?: string }) {
   );
 }
 
+/** Consumo por dia, semana ou ano (a partir do diário do RADIUS integrado). `path` devolve [{ period, bytes_in, bytes_out }]. */
+export function UsageSeries({ path }: { path: (by: string) => string }) {
+  const [by, setBy] = useState('day');
+  const { data } = useLoad<any[]>(path(by));
+  const max = Math.max(1, ...(data ?? []).map((r) => r.bytes_out));
+  const label = (p: string) => {
+    const [y, m, dd] = p.split('-');
+    return by === 'year' ? y : by === 'week' ? `semana de ${dd}/${m}` : `${dd}/${m}/${y}`;
+  };
+  return (
+    <div>
+      <div className="row" style={{ marginBottom: 8 }}>
+        <select aria-label="Período do consumo" value={by} onChange={(e) => setBy(e.target.value)} style={{ width: 200 }}>
+          <option value="day">Por dia (30 dias)</option><option value="week">Por semana (26 semanas)</option><option value="year">Por ano (3 anos)</option>
+        </select>
+      </div>
+      <State empty={data?.length === 0} emptyText="Sem consumo registrado neste período.">
+        <table>
+          <thead><tr><th>Período</th><th className="num">Download</th><th className="num">Upload</th><th style={{ width: '30%' }} /></tr></thead>
+          <tbody>{data?.map((r) => (
+            <tr key={r.period}><td>{label(r.period)}</td><td className="num">{fmtBytes(r.bytes_out)}</td><td className="num">{fmtBytes(r.bytes_in)}</td>
+              <td><div style={{ height: 8, borderRadius: 4, background: 'var(--brand)', width: `${Math.max(2, (r.bytes_out / max) * 100)}%` }} aria-hidden /></td></tr>))}</tbody>
+        </table>
+      </State>
+      <p className="small muted" style={{ marginBottom: 0 }}>Soma das atualizações recebidas do concentrador (precisão do intervalo entre elas), no fuso do provedor. Começa a contar na ativação do RADIUS integrado.</p>
+    </div>
+  );
+}
+
 export function ContractUsage({ contractId }: { contractId: string }) {
   const { data } = useLoad<any[]>(`/contracts/${contractId}/usage`);
+  const [view, setView] = useState<'month' | 'series'>('month');
   if (!data || data.length === 0) return null;
-  return <Card title="Consumo mensal"><UsageTable rows={data} empty="Calculado a partir do accounting do RADIUS local; o mês corrente é atualizado a cada 15 minutos." /></Card>;
+  return (
+    <Card title="Consumo" actions={<div className="row">
+      <button className={`sm ${view === 'month' ? 'primary' : ''}`} onClick={() => setView('month')}>Mensal</button>
+      <button className={`sm ${view === 'series' ? 'primary' : ''}`} onClick={() => setView('series')}>Dia, semana, ano</button></div>}>
+      {view === 'month'
+        ? <UsageTable rows={data} empty="Calculado a partir do accounting do RADIUS local; o mês corrente é atualizado a cada 15 minutos." />
+        : <UsageSeries path={(by) => `/contracts/${contractId}/usage-series?by=${by}`} />}
+    </Card>
+  );
 }
 
 /** MAC vinculado à conta: só o equipamento com este MAC autentica. */

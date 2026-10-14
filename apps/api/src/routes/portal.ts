@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { audit, guard, hashPassword, HttpError } from '../auth.js';
 import { withScope } from '../db.js';
 import { grantTrustRelease, trustState } from '../finance/advanced.js';
+import { usageSeries } from './network.js';
 import { zUuid } from '../validators.js';
 
 export async function portalRoutes(app: FastifyInstance) {
@@ -62,6 +63,15 @@ export async function portalRoutes(app: FastifyInstance) {
          from usage_monthly u join service_resources r on r.id = u.resource_id join contracts k on k.id = r.contract_id
          where k.subscriber_id = $1 order by u.month desc limit 12`, [sid])).rows;
       return { subscriber, contracts, invoices, notices, usage };
+    });
+  });
+
+  /** Consumo por dia, semana ou ano de um contrato do próprio assinante (a política do banco já limita o que ele enxerga). */
+  app.get('/api/portal/usage-series', { preHandler: guard('portal:self') }, async (req) => {
+    const q = z.object({ contract_id: zUuid, by: z.enum(['day', 'week', 'year']).default('day') }).parse(req.query);
+    return withScope(req.ctx.scope, async (c) => {
+      if (!(await c.query('select 1 from contracts where id = $1 and subscriber_id = $2', [q.contract_id, req.ctx.subscriberId])).rowCount) throw new HttpError(404, 'contrato não encontrado');
+      return usageSeries(c, { contractId: q.contract_id }, q.by);
     });
   });
 
