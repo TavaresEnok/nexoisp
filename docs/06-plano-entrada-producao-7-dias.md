@@ -418,3 +418,20 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   **faturamento mensal de 100.006 contratos 35 s** (era 7 min antes da reescrita em lote) e repetição idempotente 0,6 s; régua de cobrança (enfileirar) 5 s.
 - **Ainda lentos / pendentes:** painéis agregados (3,8 s), contratos a cancelar e busca única (≈2 s) — aceitáveis, mas candidatos a visão materializada ou cache.
   A régua de teste não tem canal real: os avisos "falhos" da medição são esperados (sem gateway); o envio real não foi medido.
+
+### 14/10/2026 — revisão de segurança (parte 1) e mapa geográfico
+
+- **Revisão de segurança, o que foi verificado:** autorização por rota (as rotas sem sessão são só login, webhook do gateway com assinatura, página de aviso e o
+  índice da API pública); SQL montado por texto (só com constantes e listas fixas; nenhuma entrada do usuário); limite de tentativas de login por e-mail e por
+  endereço (já existia, no banco); cookie de sessão HttpOnly, SameSite=Strict e Secure atrás do proxy; chaves de integração só no servidor.
+- **Corrigido:** (1) o painel e a API não enviavam cabeçalhos de segurança — passam a enviar `X-Content-Type-Options`, `X-Frame-Options: DENY`,
+  `Referrer-Policy`, `Permissions-Policy`, HSTS (quando por HTTPS) e uma política de conteúdo (CSP) que só aceita scripts, estilos e conexões da própria origem;
+  (2) token da API pública inválido em sequência não tinha limite — 30 tokens inválidos em 10 minutos bloqueiam o endereço de origem (tabela do limite de login).
+- **Ainda não feito na revisão:** teste de invasão por terceiros; exportação/eliminação de dados do titular (LGPD) sob demanda; política de retenção por tipo
+  de dado; revisão das dependências (auditoria de pacotes); limite de requisições por endereço nas rotas autenticadas do painel.
+- **Mapa geográfico (testado: 5 testes novos):** Rede → Mapa. Contratos (local de instalação), caixas ópticas e POPs num mapa de blocos do OpenStreetMap, só na área
+  visível (até 3.000 contratos por vez), filtro por situação (ativo, suspenso, encerrado), cobertura (quantos já têm localização) e posicionamento clicando no mapa.
+  Coordenadas informadas pelo operador; **o sistema não procura endereço em serviço externo** (sem geocodificação). Migração 040. Respeita o recorte por POP do usuário.
+  Os blocos do mapa são pedidos pelo navegador de quem abre a tela ao servidor do OpenStreetMap (ele vê a região consultada); os dados dos assinantes não saem.
+- **Verificado só por tipo e API:** a tela do mapa passou na checagem de tipos e a API na implantação; a interação (arrastar, aproximar, posicionar) não foi
+  exercitada num navegador nesta rodada.
