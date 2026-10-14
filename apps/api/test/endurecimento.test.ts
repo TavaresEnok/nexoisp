@@ -92,4 +92,23 @@ describe('rotinas periódicas com mais de uma réplica', () => {
     // a aplicação não lê nem escreve a tabela direto
     await expect(withScope(noScope, (c) => c.query('select * from login_throttle'))).rejects.toThrow();
   });
+  it('cabeçalhos de segurança em toda resposta e CSP no painel', async () => {
+    const app = await getApp();
+    const r = await app.inject({ method: 'GET', url: '/api/health' });
+    expect(r.headers['x-content-type-options']).toBe('nosniff');
+    expect(r.headers['x-frame-options']).toBe('DENY');
+    expect(r.headers['referrer-policy']).toBe('same-origin');
+    expect(r.headers['strict-transport-security']).toBeUndefined();         // só quando a requisição chegou por HTTPS
+    const s = await app.inject({ method: 'GET', url: '/api/health', headers: { 'x-forwarded-proto': 'https' } });
+    expect(String(s.headers['strict-transport-security'])).toMatch(/max-age=/);
+  });
+
+  it('token da API pública inválido em sequência bloqueia o endereço de origem', async () => {
+    const app = await getApp();
+    const ataque = (n: number) => app.inject({ method: 'GET', url: '/public/v1/subscribers', headers: { authorization: `Bearer nxk_${'x'.repeat(30)}${n}`, 'x-forwarded-for': '10.98.0.1' }, remoteAddress: '10.98.0.1' });
+    for (let i = 0; i < 30; i++) expect((await ataque(i)).statusCode).toBe(401);
+    expect((await ataque(99)).statusCode).toBe(429);
+    const outro = await app.inject({ method: 'GET', url: '/public/v1/subscribers', headers: { authorization: 'Bearer nxk_zzz' }, remoteAddress: '10.98.0.2' });
+    expect(outro.statusCode).toBe(401);                                      // outro endereço segue normal
+  });
 });

@@ -25,13 +25,20 @@ const apiScope = (a: ApiCtx) => ({ tenantId: a.tenantId, operator: false });
 /** Contexto mínimo para as funções compartilhadas com o painel: sem usuário (autoria registrada como o token). */
 const apiCtx = (a: ApiCtx) => ({ tenantId: a.tenantId, userId: null as string | null, scope: apiScope(a), support: false });
 
+const API_BAD_TOKENS = 30;   // tokens inválidos por endereço de origem em 10 minutos
+
 function guardApi(scope: Scope) {
   return async (req: FastifyRequest, reply: FastifyReply) => {
     const h = req.headers.authorization;
     const raw = h?.startsWith('Bearer ') ? h.slice(7) : (req.headers['x-api-key'] as string | undefined);
-    if (!raw || !raw.startsWith('nxk_')) throw new HttpError(401, 'token ausente ou inválido');
+    // Quem erra o token em sequência é barrado por endereço de origem (mesma tabela do limite de login, no banco).
+    const key = `apikey:ip:${req.ip}`;
+    const wait = await withScope(noScope, async (c) => (await c.query('select login_throttle_blocked($1,$2) as s', [key, API_BAD_TOKENS])).rows[0].s as number);
+    if (wait > 0) { reply.header('retry-after', String(wait)); throw new HttpError(429, 'muitas tentativas com token inválido; aguarde', 'rate_limited'); }
+    const bad = async () => { await withScope(noScope, (c) => c.query('select login_throttle_fail($1,$2)', [key, 600])); };
+    if (!raw || !raw.startsWith('nxk_')) { await bad(); throw new HttpError(401, 'token ausente ou inválido'); }
     const t = await withScope(noScope, async (c) => (await c.query('select * from api_token_get($1)', [sha256(raw)])).rows[0]);
-    if (!t) throw new HttpError(401, 'token ausente, inválido, expirado ou revogado');
+    if (!t) { await bad(); throw new HttpError(401, 'token ausente, inválido, expirado ou revogado'); }
     if (!t.modules.includes('api')) throw new HttpError(403, 'a API pública não está liberada para o provedor', 'module_disabled');
     if (!t.scopes.includes(scope)) throw new HttpError(403, `o token não tem o escopo ${scope}`, 'scope_missing');
     // limite por minuto, no banco

@@ -37,6 +37,20 @@ export async function buildApp(opts: { logger?: boolean } = {}) {
   app.decorateRequest('ctx', null as any);
   csvExport(app);
 
+  // Cabeçalhos de segurança em toda resposta (o painel e a API). Páginas que definem a própria política (aviso, documentos) são preservadas.
+  // O painel não carrega nada de fora: scripts, estilos e conexões só da própria origem; imagens também de blocos de mapa do OpenStreetMap.
+  const PANEL_CSP = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.tile.openstreetmap.org; connect-src 'self'; "
+    + "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
+  app.addHook('onSend', async (req, reply, payload) => {
+    reply.header('x-content-type-options', 'nosniff');
+    if (!reply.hasHeader('x-frame-options')) reply.header('x-frame-options', 'DENY');
+    reply.header('referrer-policy', 'same-origin');
+    reply.header('permissions-policy', 'camera=(), microphone=(), geolocation=(self), payment=()');
+    if (process.env.NEXO_COOKIE_SECURE === '1' || req.headers['x-forwarded-proto'] === 'https') reply.header('strict-transport-security', 'max-age=31536000');
+    if (!reply.hasHeader('content-security-policy') && String(reply.getHeader('content-type') ?? '').startsWith('text/html')) reply.header('content-security-policy', PANEL_CSP);
+    return payload;
+  });
+
   app.setErrorHandler((err: any, _req, reply) => {
     if (err instanceof ZodError)
       return reply.status(400).send({ error: err.issues.map((i) => `${i.path.join('.') || 'dados'}: ${i.message}`).join('; ') });
