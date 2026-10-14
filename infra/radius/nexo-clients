@@ -2,6 +2,18 @@
 # é ele que restringe todas as consultas (queries.conf) às contas daquele provedor.
 server nexo_clients {
 	authorize {
+		# já sabemos que este endereço não é concentrador (nos últimos 60 s): descarta sem consultar o banco
+		update control {
+			&Cache-Status-Only := yes
+		}
+		nexo_desconhecidos
+		if (ok) {
+			ok
+			return
+		}
+		update control {
+			&Cache-Status-Only !* ANY
+		}
 		if ("%{sql:SELECT host(nas_ip) FROM radius_nas WHERE nas_ip = '%{Packet-Src-IP-Address}'}") {
 			update control {
 				&FreeRADIUS-Client-IP-Address = "%{Packet-Src-IP-Address}"
@@ -10,6 +22,9 @@ server nexo_clients {
 				&FreeRADIUS-Client-NAS-Type = "other"
 				&FreeRADIUS-Client-Virtual-Server = "default"
 			}
+		}
+		else {
+			nexo_desconhecidos
 		}
 		ok
 	}

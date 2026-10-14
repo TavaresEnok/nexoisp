@@ -5,6 +5,7 @@ COPY sql /etc/raddb/mods-available/sql
 COPY queries.conf /etc/raddb/mods-config/sql/main/postgresql/queries.conf
 COPY clients.conf /etc/raddb/clients.conf
 COPY nexo-clients /etc/raddb/sites-available/nexo-clients
+COPY nexo-cache-desconhecidos /etc/raddb/mods-enabled/nexo-cache-desconhecidos
 COPY entrypoint.sh /nexo-entrypoint.sh
 # Uso simultâneo por login: a seção "session" consulta o accounting (vem comentada na configuração padrão)
 RUN sed -i '/Simultaneous Use Checking Queries/{n;s/^#[[:space:]]*sql$/sql/}' /etc/raddb/sites-available/default \

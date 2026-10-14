@@ -1,0 +1,11 @@
+# Endereços que mandaram pacote e NÃO são concentrador cadastrado: lembrados por 60 s, para uma enxurrada de pacotes de origem
+# desconhecida não virar uma consulta ao banco por pacote. Concentrador recém-cadastrado que já tinha mandado pacote espera até 60 s.
+cache nexo_desconhecidos {
+	driver = "rlm_cache_rbtree"
+	key = "%{Packet-Src-IP-Address}"
+	ttl = 60
+	max_entries = 100000
+	update control {
+		&Tmp-String-1 := "desconhecido"
+	}
+}
