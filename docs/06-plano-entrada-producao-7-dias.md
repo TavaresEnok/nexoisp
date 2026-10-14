@@ -601,3 +601,12 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   (login de hotspot aceito pelo CHR logo depois).
 - **Efeito colateral aceito:** concentrador cadastrado agora, que tenha mandado pacote nos 60 s anteriores ao cadastro, espera até 60 s para ser reconhecido.
   **Não resolve** enxurrada vinda de muitos endereços diferentes (cada endereço novo ainda faz uma consulta); para isso, firewall na borda.
+
+### 14/10/2026 — auditoria de pacotes (revisão de segurança, parte 3)
+
+- **`npm audit`:** dependências de produção — **0 vulnerabilidades**. Ferramentas de desenvolvimento tinham 6 (2 críticas: Vitest/tinypool; 1 alta: Vite; esbuild),
+  que afetam só a máquina de quem desenvolve (servidor de desenvolvimento e interface do Vitest), não a imagem de produção. Atualizadas: Vitest 2 → 5.0.4,
+  Vite 6.0 → 6.4.4 e esbuild corrigido: **0 no total**. Suíte inteira (41 arquivos, 190 testes), tipos, build do painel e fumaça da interface (13/13) passaram
+  com as versões novas; implantado neste servidor.
+- **Ainda não feito na revisão:** teste de invasão por terceiros; limite de requisições por endereço nas rotas autenticadas do painel; política de retenção
+  configurável por tipo de dado.
