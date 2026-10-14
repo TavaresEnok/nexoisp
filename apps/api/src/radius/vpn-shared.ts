@@ -38,7 +38,8 @@ export function renderIpsecConf(): string {
     '  left=%any', '  leftprotoport=17/1701', '  right=%any', '  rightprotoport=17/%any', '  auto=add',
     // RouterOS 6/7, Huawei e Cisco negociam ao menos uma destas; 3DES/MODP1024 só para equipamentos antigos
     '  ike=aes256-sha256-modp2048,aes256-sha1-modp2048,aes128-sha1-modp2048,aes256-sha1-modp1024,aes128-sha1-modp1024,3des-sha1-modp1024!',
-    '  esp=aes256-sha256,aes256-sha1,aes128-sha1,3des-sha1!',
+    // fase 2: com e sem PFS (o RouterOS pede PFS com MODP1024 por padrão — medido com o 7.17; sem o grupo na lista, NO_PROPOSAL_CHOSEN)
+    '  esp=aes256-sha256-modp2048,aes256-sha1-modp2048,aes256-sha1-modp1024,aes192-sha1-modp1024,aes128-sha1-modp1024,aes256-sha256,aes256-sha1,aes128-sha1,3des-sha1!',
     '  dpddelay=30s', '  dpdtimeout=120s', '  dpdaction=clear', '  rekey=no', '  ikelifetime=8h', '  lifetime=1h', '',
   ].join('\n');
 }
