@@ -455,3 +455,18 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   avançada nem qualificada (ICP-Brasil, certificado). A força de prova em disputa depende do caso; **validar o uso com o jurídico do provedor**.
 - **Limites:** exige que o assinante tenha acesso ao portal; sem verificação em segundo fator no ato do aceite (a senha do portal é o único fator); sem envio
   automático de lembrete ao assinante (a equipe avisa pelos meios que já usa); sem assinatura da empresa no documento; sem PDF (impressão do comprovante pela tela).
+
+### 14/10/2026 — consumo por dia/semana/ano e produtos adicionais (combo)
+
+- **Consumo por dia, semana e ano (testado):** o RADIUS integrado passou a gravar o consumo por dia (fuso do provedor) somando a **diferença** entre uma leitura do
+  accounting e a anterior; semana (segunda a domingo) e ano são somas do diário. Aparece no contrato (Consumo → Dia, semana, ano) e no portal do assinante.
+  Guarda 800 dias (`NEXO_USAGE_DAILY_DAYS`). Migração 043. Antes, uma sessão longa caía inteira no mês em que começou.
+- **Limites do consumo:** só contas do RADIUS integrado (as do agente local continuam só mensais); precisão = intervalo entre as atualizações do concentrador (5 min
+  no padrão); **não há consumo por hora** (exigiria guardar uma linha por conta por hora — não foi feito); começa a contar na ativação, sem reconstruir o passado.
+- **Escala (medido, 100 mil contas online, mesmo servidor):** passada completa 27,7 s (antes 21 s); ciclo sem mudança 0,16 s; ciclo com 5% das contas 1,3 s (antes 1,0 s).
+  Uma primeira versão da consulta (CTE com junção sobre ela mesma) passou de 15 min na passada completa e foi refeita em duas instruções simples.
+- **Produtos adicionais / combo (testado):** Cadastro → Produtos adicionais (TV, telefonia, IP fixo…). No contrato, "Produtos adicionais": quantidade, preço
+  congelado na contratação, início no mês seguinte e encerramento por competência. A mensalidade soma plano + adicionais em linhas separadas; o desconto do
+  contrato vale só sobre o plano. Migração 044.
+- **Limites dos adicionais:** sem proporcional no primeiro mês; sem modelo de "combo" pronto (o combo é o plano mais os adicionais de cada contrato); sem
+  integração com TV/telefonia (é só cobrança); adicional contratado depois de gerada a fatura do mês entra no mês seguinte.

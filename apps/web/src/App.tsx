@@ -16,6 +16,7 @@ import { Agenda } from './pages/Agenda';
 import { ConsultaIp } from './pages/ConsultaIp';
 import { Mapa } from './pages/Mapa';
 import { Empresas } from './pages/Empresas';
+import { Adicionais } from './pages/Adicionais';
 import { Integracoes } from './pages/Integracoes';
 import { AvisosAssinante } from './pages/AvisosAssinante';
 import { Qualidade } from './pages/Qualidade';
@@ -50,7 +51,7 @@ const ROLE_LABEL: Record<string, string> = {
 const NAV: { id: string; label: string; items: { to: string; label: string; icon: string; perm: string; mod?: string }[] }[] = [
   { id: 'inicio', label: '', items: [{ to: '/', label: 'Início', icon: 'home', perm: 'subscribers:read' }] },
   { id: 'cadastro', label: 'Cadastro', items: [
-    { to: '/assinantes', label: 'Assinantes', icon: 'users', perm: 'subscribers:read' }, { to: '/planos', label: 'Planos', icon: 'gauge', perm: 'plans:read' },
+    { to: '/assinantes', label: 'Assinantes', icon: 'users', perm: 'subscribers:read' }, { to: '/planos', label: 'Planos', icon: 'gauge', perm: 'plans:read' }, { to: '/adicionais', label: 'Produtos adicionais', icon: 'box', perm: 'plans:read' },
     { to: '/contratos', label: 'Contratos', icon: 'doc', perm: 'contracts:read' }] },
   { id: 'atendimento', label: 'Atendimento', items: [
     { to: '/atendimentos', label: 'Atendimentos', icon: 'chat', perm: 'crm:read', mod: 'crm' }, { to: '/prospectos', label: 'Prospectos', icon: 'funnel', perm: 'crm:read', mod: 'crm' },
@@ -173,6 +174,7 @@ export function App() {
               <Route path="/consulta-ip" element={<ConsultaIp />} />
               <Route path="/mapa" element={<Mapa />} />
               <Route path="/empresas" element={<Empresas />} />
+              <Route path="/adicionais" element={<Adicionais />} />
               <Route path="/integracoes" element={<Integracoes />} />
               <Route path="/qualidade" element={<Qualidade />} />
               <Route path="/online" element={<Online />} />

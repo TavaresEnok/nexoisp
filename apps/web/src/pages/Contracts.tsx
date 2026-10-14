@@ -9,6 +9,7 @@ import { AuthLog } from './Concentradores';
 import { ContractConditions, useQuote } from './Condicoes';
 import { ContractFinance } from './Finance';
 import { ContractCompany } from './Empresas';
+import { ContractAddons } from './Adicionais';
 import { OnuPanel } from './Olt';
 import { WorkOrderList } from './Field';
 import { InfraPanel } from './Noc';
@@ -127,6 +128,7 @@ export function ContractDetail() {
             <Card title="Etiquetas"><ContractTags contract={c} onChange={reload} /></Card>
             <Card title="POP"><ContractPop contract={c} onChange={reload} /></Card>
             <ContractCompany contract={c} onChange={reload} />
+            <ContractAddons contract={c} />
             {has(me, 'field') && can(me, 'stock:read') && <ContractEquipment contractId={c.id} />}
             {!net && <ContractFinance contractId={c.id}>{(fin) => <Card title="Financeiro">{fin}</Card>}</ContractFinance>}
           </>)}

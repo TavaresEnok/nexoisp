@@ -186,35 +186,30 @@ export async function syncAccounting(tenantId: string, opts: { full?: boolean } 
        from radius_account a, devices d
        where a.tenant_id = r.tenant_id and a.username = r.pppoe_username and d.id = r.device_id and d.driver = 'radius' and r.desired_version > 0
          and r.pppoe_username in ${changed}`, [since]);
-    // Sessões e consumo diário na mesma passada: a diferença entre o contador novo e o que já estava gravado vai para o dia (fuso do provedor)
-    // em que ela apareceu. Sessão nova entra no dia da última atualização, para a primeira passada não jogar o histórico em "hoje".
+    // Consumo diário: a diferença entre o contador novo e o que já estava gravado em service_sessions vai para o dia (fuso do provedor)
+    // em que ela apareceu. Roda ANTES de atualizar as sessões. Sessão nova entra no dia da última atualização, para a primeira passada
+    // não jogar o histórico em "hoje". Duas instruções simples, com junção pelo índice única (resource_id, session_key).
+    const tzSql = `coalesce((select timezone from tenant_settings where tenant_id = $2), 'America/Sao_Paulo')`;
+    const fresh = `(($1::timestamptz is null and (x.stopped_at is null or x.updated_at > now() - interval '2 days')) or x.seen_at > $1)`;
+    await c.query(
+      `insert into usage_daily (tenant_id, resource_id, day, bytes_in, bytes_out)
+       select x.tenant_id, r.id,
+              (case when s.session_key is null then least(x.updated_at, now()) else now() end at time zone ${tzSql})::date,
+              sum(greatest(0, x.bytes_in - coalesce(s.bytes_in, 0))), sum(greatest(0, x.bytes_out - coalesce(s.bytes_out, 0)))
+       from radius_acct x join service_resources r on r.tenant_id = x.tenant_id and r.pppoe_username = x.username
+       join devices d on d.id = r.device_id and d.driver = 'radius'
+       left join service_sessions s on s.resource_id = r.id and s.session_key = left(x.unique_id, 80)
+       where ${fresh} and (x.bytes_in > coalesce(s.bytes_in, 0) or x.bytes_out > coalesce(s.bytes_out, 0))
+       group by 1, 2, 3
+       on conflict (resource_id, day) do update set bytes_in = usage_daily.bytes_in + excluded.bytes_in, bytes_out = usage_daily.bytes_out + excluded.bytes_out`, [since, tenantId]);
     const ses = await c.query(
-      `with src as (
-         select x.tenant_id, r.id as resource_id, left(x.unique_id, 80) as session_key, x.started_at, x.stopped_at, x.framed_ip, x.calling_station, host(x.nas_ip) as nas_ip,
-                x.bytes_in, x.bytes_out, x.session_seconds, x.terminate_cause, least(x.updated_at, now()) as at
-         from radius_acct x join service_resources r on r.tenant_id = x.tenant_id and r.pppoe_username = x.username
-         join devices d on d.id = r.device_id and d.driver = 'radius'
-         where ($1::timestamptz is null and (x.stopped_at is null or x.updated_at > now() - interval '2 days')) or x.seen_at > $1),
-       old as (select s.resource_id, s.session_key, s.bytes_in, s.bytes_out from service_sessions s join src on src.resource_id = s.resource_id and src.session_key = s.session_key),
-       up as (
-         insert into service_sessions (tenant_id, resource_id, session_key, started_at, stopped_at, ip, mac, nas_ip, bytes_in, bytes_out, seconds, terminate_cause)
-         select tenant_id, resource_id, session_key, started_at, stopped_at, framed_ip, calling_station, nas_ip, bytes_in, bytes_out, session_seconds, terminate_cause from src
-         on conflict (resource_id, session_key) do update set stopped_at = excluded.stopped_at, ip = excluded.ip, mac = excluded.mac, nas_ip = excluded.nas_ip,
-           bytes_in = excluded.bytes_in, bytes_out = excluded.bytes_out, seconds = excluded.seconds, terminate_cause = excluded.terminate_cause, reported_at = now()
-         returning resource_id, session_key),
-       delta as (
-         select src.tenant_id, src.resource_id,
-                case when old.session_key is null then (src.at at time zone tz.z)::date else (now() at time zone tz.z)::date end as day,
-                sum(greatest(0, src.bytes_in - coalesce(old.bytes_in, 0))) as bytes_in, sum(greatest(0, src.bytes_out - coalesce(old.bytes_out, 0))) as bytes_out
-         from src join up on up.resource_id = src.resource_id and up.session_key = src.session_key
-         left join old on old.resource_id = src.resource_id and old.session_key = src.session_key
-         cross join (select coalesce((select timezone from tenant_settings where tenant_id = $2), 'America/Sao_Paulo') as z) tz
-         group by 1, 2, 3 having sum(greatest(0, src.bytes_in - coalesce(old.bytes_in, 0)) + greatest(0, src.bytes_out - coalesce(old.bytes_out, 0))) > 0),
-       dd as (
-         insert into usage_daily (tenant_id, resource_id, day, bytes_in, bytes_out) select tenant_id, resource_id, day, bytes_in, bytes_out from delta
-         on conflict (resource_id, day) do update set bytes_in = usage_daily.bytes_in + excluded.bytes_in, bytes_out = usage_daily.bytes_out + excluded.bytes_out
-         returning 1)
-       select (select count(*) from up)::int as n`, [since, tenantId]);
+      `insert into service_sessions (tenant_id, resource_id, session_key, started_at, stopped_at, ip, mac, nas_ip, bytes_in, bytes_out, seconds, terminate_cause)
+       select x.tenant_id, r.id, left(x.unique_id, 80), x.started_at, x.stopped_at, x.framed_ip, x.calling_station, host(x.nas_ip), x.bytes_in, x.bytes_out, x.session_seconds, x.terminate_cause
+       from radius_acct x join service_resources r on r.tenant_id = x.tenant_id and r.pppoe_username = x.username
+       join devices d on d.id = r.device_id and d.driver = 'radius'
+       where ${fresh}
+       on conflict (resource_id, session_key) do update set stopped_at = excluded.stopped_at, ip = excluded.ip, mac = excluded.mac, nas_ip = excluded.nas_ip,
+         bytes_in = excluded.bytes_in, bytes_out = excluded.bytes_out, seconds = excluded.seconds, terminate_cause = excluded.terminate_cause, reported_at = now()`, [since]);
     await c.query(
       `insert into usage_monthly (tenant_id, resource_id, month, bytes_in, bytes_out, session_seconds, sessions)
        select x.tenant_id, r.id, date_trunc('month', x.started_at at time zone 'UTC')::date, sum(x.bytes_in), sum(x.bytes_out), sum(x.session_seconds), count(*)
@@ -237,7 +232,7 @@ export async function syncAccounting(tenantId: string, opts: { full?: boolean } 
                              else 'último pacote recebido em ' || to_char(n.last_packet_at at time zone 'UTC', 'DD/MM HH24:MI') || ' UTC' end)
        from radius_nas n where n.device_id = d.id`);
     watermark.set(tenantId, next);
-    return { accounts: acc.rowCount ?? 0, sessions: ses.rows[0]?.n ?? 0, full: since === null };
+    return { accounts: acc.rowCount ?? 0, sessions: ses.rowCount ?? 0, full: since === null };
   });
 }
 
