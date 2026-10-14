@@ -57,7 +57,7 @@ services:
     build: ../radius
     restart: unless-stopped
     network_mode: "service:vpn"        # recebe os pacotes que chegam pelo túnel e pelas portas publicadas no serviço vpn
-    depends_on: { db: { condition: service_healthy }, api: { condition: service_started }, vpn: { condition: service_started } }
+    depends_on: { db: { condition: service_healthy }, api: { condition: service_started }, vpn: { condition: service_started, restart: true } }
     environment:
       RADIUS_DB_HOST: db
       RADIUS_DB_PORT: "5432"
@@ -71,7 +71,7 @@ services:
     profiles: [ha]
     restart: unless-stopped
     network_mode: "service:vpn"
-    depends_on: { db: { condition: service_healthy }, vpn: { condition: service_started } }
+    depends_on: { db: { condition: service_healthy }, vpn: { condition: service_started, restart: true } }
     environment:
       RADIUS_DB_HOST: db
       RADIUS_DB_PORT: "5432"
