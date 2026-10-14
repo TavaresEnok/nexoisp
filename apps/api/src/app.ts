@@ -16,6 +16,7 @@ import { fluxoOsRoutes } from './routes/fluxo-os.js';
 import { integracoesRoutes } from './routes/integracoes.js';
 import { produtividadeRoutes } from './routes/produtividade.js';
 import { publicApiRoutes } from './routes/public-api.js';
+import { radiusRoutes } from './routes/radius.js';
 import { relatoriosRoutes } from './routes/relatorios.js';
 import { extraRoutes } from './routes/extras.js';
 import { financeRoutes } from './routes/finance.js';
@@ -68,6 +69,7 @@ export async function buildApp(opts: { logger?: boolean } = {}) {
   await app.register(escopoDocsRoutes);
   await app.register(condicoesRoutes);
   await app.register(produtividadeRoutes);
+  await app.register(radiusRoutes);
   await app.register(integracoesRoutes);
   await app.register(publicApiRoutes);
   await app.register(networkRoutes);

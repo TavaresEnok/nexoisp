@@ -1,0 +1,16 @@
+# Cliente (concentrador) reconhecido pelo endereço de origem. O "shortname" carrega o provedor dono do concentrador:
+# é ele que restringe todas as consultas (queries.conf) às contas daquele provedor.
+server nexo_clients {
+	authorize {
+		if ("%{sql:SELECT host(nas_ip) FROM radius_nas WHERE nas_ip = '%{Packet-Src-IP-Address}'}") {
+			update control {
+				&FreeRADIUS-Client-IP-Address = "%{Packet-Src-IP-Address}"
+				&FreeRADIUS-Client-Shortname = "%{sql:SELECT tenant_id::text FROM radius_nas WHERE nas_ip = '%{Packet-Src-IP-Address}'}"
+				&FreeRADIUS-Client-Secret = "%{sql:SELECT secret FROM radius_nas WHERE nas_ip = '%{Packet-Src-IP-Address}'}"
+				&FreeRADIUS-Client-NAS-Type = "other"
+				&FreeRADIUS-Client-Virtual-Server = "default"
+			}
+		}
+		ok
+	}
+}

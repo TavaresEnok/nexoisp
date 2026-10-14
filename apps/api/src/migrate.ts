@@ -14,6 +14,12 @@ export async function migrate(log: (m: string) => void = console.log) {
     await c.query(
       `${role.rowCount ? 'alter' : 'create'} role nexo_app login nosuperuser nobypassrls nocreatedb nocreaterole password '${pw}'`,
     );
+    // papel do servidor RADIUS integrado: só alcança as tabelas radius_* (concedido na migration). Sem senha definida, fica sem login.
+    const rpw = process.env.NEXO_RADIUS_DB_PASSWORD?.replace(/'/g, "''");
+    const rrole = await c.query(`select 1 from pg_roles where rolname = 'nexo_radius'`);
+    // sem a variável, um papel já existente não é tocado (o mesmo servidor de banco pode atender outra instância que o usa)
+    if (!rrole.rowCount) await c.query('create role nexo_radius nologin nosuperuser nobypassrls nocreatedb nocreaterole');
+    if (rpw) await c.query(`alter role nexo_radius login password '${rpw}'`);
     await c.query(`create table if not exists schema_migrations (name text primary key, applied_at timestamptz not null default now())`);
     const dir = fileURLToPath(new URL('../migrations', import.meta.url));
     const done = new Set((await c.query('select name from schema_migrations')).rows.map((r) => r.name));

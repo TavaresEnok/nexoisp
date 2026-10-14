@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ago, api, dt, useLoad, usePaged } from '../api';
 import { can, useMe } from '../App';
 import { ActionButton, Badge, Card, Field, Form, Modal, Page, Pager, State, toast } from '../ui';
+import { Concentradores } from './Concentradores';
 import { ACTION, OpBadge, OperationModal, SimBadge } from './Service';
 
 export function HealthCards() {
@@ -36,11 +37,12 @@ export function Network() {
   return (
     <Page title="Rede">
       <HealthCards />
-      <Card title="Agentes locais" actions={w && <button className="primary" onClick={() => { setName(''); setModal('agent'); }}>Novo agente</button>}>
+      <Concentradores devices={devices.data ?? []} reload={devices.reload} canWrite={!!w} />
+      <Card title="Agentes locais (opcional)" actions={w && <button className="primary" onClick={() => { setName(''); setModal('agent'); }}>Novo agente</button>}>
         <State loading={agents.loading} error={agents.error} empty={agents.data?.length === 0}>
           <table>
             <thead><tr><th>Agente</th><th>Conexão</th><th>Último contato</th><th>Última sincronização</th><th>Versão</th><th className="num">Equip.</th><th className="num">Fila</th><th></th></tr></thead>
-            <tbody>{agents.data?.map((a) => (
+            <tbody>{agents.data?.filter((a) => !a.internal).map((a) => (
               <tr key={a.id}>
                 <td>{a.name}<div className="small muted mono">{a.id}</div>
                   <div className="small muted">{a.cert_fingerprint ? <>certificado fixado <span className="mono">{a.cert_fingerprint.slice(0, 17)}…</span></> : 'certificado ainda não apresentado'}</div></td>
@@ -64,11 +66,11 @@ export function Network() {
           </table>
         </State>
       </Card>
-      <Card title="Equipamentos (NAS)" actions={w && <button className="primary" onClick={() => { setF(blank); setModal('device'); }}>Novo equipamento</button>}>
+      <Card title="Equipamentos com agente local e OLTs" actions={w && <button className="primary" onClick={() => { setF(blank); setModal('device'); }}>Novo equipamento</button>}>
         <State loading={devices.loading} error={devices.error} empty={devices.data?.length === 0}>
           <table>
             <thead><tr><th>Equipamento</th><th>Integração</th><th>Endereço</th><th>Agente</th><th>Conectividade</th><th className="num">Contas / ONUs</th><th></th></tr></thead>
-            <tbody>{devices.data?.map((d) => (
+            <tbody>{devices.data?.filter((d) => d.driver !== 'radius').map((d) => (
               <tr key={d.id}>
                 <td>{d.name} {d.maintenance && <Badge tone="amber">manutenção</Badge>}</td>
                 <td>{d.driver === 'demo' ? <>Concentrador PPPoE <SimBadge /></> : d.driver === 'olt_demo' ? <>OLT <SimBadge /></> : d.driver === 'olt_huawei' ? <>OLT Huawei SmartAX <Badge tone="red">não homologado em equipamento real</Badge></> : <>MikroTik + RADIUS <Badge tone="blue">validado em laboratório (CHR 7.24.5)</Badge></>}</td>
@@ -103,7 +105,7 @@ export function Network() {
             setRadius(null); devices.reload();
           }}>
             <p className="small muted">Valem para as contas deste equipamento na próxima autorização (use "Reaplicar todas as contas"). Exigem agente 0.5.0 ou mais novo. Vazio = não enviar.</p>
-            <Field label="Uso simultâneo por login" hint="1 impede duas sessões com o mesmo login. Depende da seção session do FreeRADIUS."><input type="number" min="1" max="10" value={radius.simultaneous_use} onChange={(e) => setRadius({ ...radius, simultaneous_use: e.target.value })} /></Field>
+            <Field label="Uso simultâneo por login" hint="1 impede duas sessões com o mesmo login."><input type="number" min="1" max="10" value={radius.simultaneous_use} onChange={(e) => setRadius({ ...radius, simultaneous_use: e.target.value })} /></Field>
             <Field label="Intervalo de accounting (segundos)" hint="De 60 a 3600. Menor = consumo e sessões mais atuais, mais carga."><input type="number" min="60" max="3600" value={radius.acct_interim_seconds} onChange={(e) => setRadius({ ...radius, acct_interim_seconds: e.target.value })} /></Field>
           </Form>
         </Modal>

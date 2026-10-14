@@ -5,6 +5,7 @@ import { can, has, useMe } from '../App';
 import { ActionButton, Badge, Card, dialog, Field, Form, KV, Modal, Page, Pager, State, Tabs } from '../ui';
 import { Availability, ContractPop, ContractStates, CustomValues, Sessions } from './Atendimento';
 import { ContractEquipment, ContractTags, ContractUsage } from './Extras';
+import { AuthLog } from './Concentradores';
 import { ContractConditions, useQuote } from './Condicoes';
 import { ContractFinance } from './Finance';
 import { OnuPanel } from './Olt';
@@ -107,6 +108,7 @@ export function ContractDetail() {
             <InfraPanel contractId={c.id} />
             <ContractFinance contractId={c.id}>{(fin, numbers) => <ServicePanel contract={c} financial={fin} fin={numbers} />}</ContractFinance>
             <ContractUsage contractId={c.id} />
+            <AuthLog contractId={c.id} />
             <Availability contractId={c.id} />
             <Sessions contractId={c.id} />
             {has(me, 'olt') && <OnuPanel contract={c} />}

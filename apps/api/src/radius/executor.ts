@@ -1,0 +1,231 @@
+import { randomBytes } from 'node:crypto';
+import { HttpError, sha256 } from '../auth.js';
+import { noScope, withScope, type Tx } from '../db.js';
+import { begin, progress, reserve, result } from '../network/engine.js';
+import { SESSION_NOT_FOUND, sendDisconnect, type DisconnectResult } from './coa.js';
+import { checkRows, effectiveProfile, replyRows, type Row, type Vendor, type Wanted } from './vendor.js';
+
+/**
+ * RADIUS integrado: o NexoISP executa as operações de rede por conta própria, gravando no banco que o servidor RADIUS lê e
+ * pedindo a desconexão ao concentrador pelo próprio protocolo. Usa a MESMA fila e as mesmas regras do agente local
+ * (reserva, posse, versão da intenção, evidências), só que quem "é o agente" é este processo.
+ */
+export const INTERNAL_AGENT_VERSION = '99.0.0';        // entende todos os campos do envelope
+export const INTERNAL_AGENT_NAME = 'RADIUS integrado';
+const SYS = (tenantId: string) => ({ tenantId, operator: false });
+const now = () => new Date().toISOString();
+
+/** Chave que cifra as senhas PPPoE no banco. A mesma precisa estar no servidor RADIUS, que é o único que as lê. */
+export function radiusKey(): string {
+  const k = process.env.NEXO_RADIUS_KEY ?? '';
+  if (!/^[A-Za-z0-9_-]{24,}$/.test(k)) throw new HttpError(503, 'o RADIUS integrado não está configurado neste servidor (NEXO_RADIUS_KEY ausente ou curta)', 'radius_unconfigured');
+  return k;
+}
+export const radiusConfigured = () => /^[A-Za-z0-9_-]{24,}$/.test(process.env.NEXO_RADIUS_KEY ?? '');
+
+/** Um executor interno por provedor, criado na primeira vez que ele cadastra um concentrador no RADIUS integrado. */
+export async function ensureInternalAgent(c: Tx, tenantId: string): Promise<string> {
+  const a = (await c.query('select id from agents where tenant_id = $1 and internal', [tenantId])).rows[0];
+  if (a) return a.id;
+  return (await c.query(
+    `insert into agents (tenant_id, name, token_hash, version, internal, last_seen_at, sync_session_id, last_sync_at)
+     values ($1,$2,$3,$4,true,now(),'interno',now()) returning id`,
+    [tenantId, INTERNAL_AGENT_NAME, sha256(randomBytes(32).toString('hex')), INTERNAL_AGENT_VERSION])).rows[0].id;   // token aleatório descartado: ninguém se conecta como este agente
+}
+
+// ---------------------------------------------------------------- estado gravado
+interface Account { policy: string; profile: string; prev_profile: string | null; by_profile: boolean; applied_version: number; updated_at: Date }
+const readAccount = async (c: Tx, tenantId: string, username: string): Promise<Account | null> =>
+  (await c.query('select policy, profile, prev_profile, by_profile, applied_version, updated_at from radius_account where tenant_id = $1 and username = $2', [tenantId, username])).rows[0] ?? null;
+
+/** Conta + atributos na mesma transação: o servidor RADIUS nunca lê meia mudança. */
+async function applyAccount(c: Tx, tenantId: string, username: string, w: Wanted, version: number, secret: string | undefined, check: Row[], reply: Row[]) {
+  const cur = await readAccount(c, tenantId, username);
+  const profile = effectiveProfile(w);
+  if (!cur && secret === undefined) throw new Error('conta sem credencial no RADIUS e senha não fornecida');
+  if (secret !== undefined) {
+    await c.query(
+      `insert into radius_account (tenant_id, username, secret_enc, policy, profile, prev_profile, by_profile, applied_version, updated_at)
+       values ($1,$2,pgp_sym_encrypt($3,$4),$5,$6,null,$7,$8,now())
+       on conflict (tenant_id, username) do update set secret_enc = excluded.secret_enc, policy = excluded.policy, by_profile = excluded.by_profile,
+         prev_profile = case when radius_account.profile <> excluded.profile then radius_account.profile end,
+         profile = excluded.profile, applied_version = excluded.applied_version, updated_at = now()`,
+      [tenantId, username, secret, radiusKey(), w.policy, profile, w.policy === 'suspended' && !!w.blockProfile, version]);
+  } else {
+    await c.query(
+      `update radius_account set policy = $3, by_profile = $5, prev_profile = case when profile <> $4 then profile end, profile = $4, applied_version = $6, updated_at = now()
+       where tenant_id = $1 and username = $2`, [tenantId, username, w.policy, profile, w.policy === 'suspended' && !!w.blockProfile, version]);
+  }
+  for (const [table, rows] of [['radius_check', check], ['radius_reply', reply]] as const) {
+    await c.query(`delete from ${table} where tenant_id = $1 and username = $2`, [tenantId, username]);
+    for (const r of rows) await c.query(`insert into ${table} (tenant_id, username, attribute, op, value) values ($1,$2,$3,$4,$5)`, [tenantId, username, r.attribute, r.op, r.value]);
+  }
+}
+
+interface OpenSession { id: number; session_id: string; framed_ip: string | null; started_at: Date; calling_station: string | null }
+const openSessions = async (c: Tx, tenantId: string, username: string): Promise<OpenSession[]> =>
+  (await c.query('select id, session_id, framed_ip, started_at, calling_station from radius_acct where tenant_id = $1 and username = $2 and stopped_at is null order by started_at', [tenantId, username])).rows;
+
+/** A sessão em uso precisa cair para a intenção valer? Mesma regra do agente local. */
+function mustDrop(p: any, acc: Account, s: OpenSession): boolean {
+  const predates = new Date(s.started_at).getTime() < new Date(acc.updated_at).getTime();
+  const sessionProfile = predates ? (acc.prev_profile ?? acc.profile) : acc.profile;      // negociado quando a sessão começou
+  if (p.reconnect) return predates;
+  if (p.policy === 'suspended') {
+    if (p.suspension?.session !== 'disconnect') return false;
+    const bp = p.suspension?.mode === 'profile' ? p.suspension.profile : null;
+    return bp ? sessionProfile !== bp : true;
+  }
+  if (p.framed_ip && s.framed_ip && s.framed_ip !== p.framed_ip) return true;
+  return sessionProfile !== p.profile;
+}
+
+const uptime = (from: Date) => {
+  let s = Math.max(0, Math.floor((Date.now() - new Date(from).getTime()) / 1000));
+  const d = Math.floor(s / 86400); s -= d * 86400; const h = Math.floor(s / 3600); s -= h * 3600; const m = Math.floor(s / 60); s -= m * 60;
+  return `${d ? `${d}d` : ''}${h ? `${h}h` : ''}${m ? `${m}m` : ''}${s}s`;
+};
+const sessionView = (s: OpenSession | undefined, profile: string) =>
+  s ? { online: true, ip: s.framed_ip, caller_id: s.calling_station, uptime: uptime(s.started_at), since: new Date(s.started_at).toISOString(), profile } : null;
+
+// ---------------------------------------------------------------- execução de uma operação
+async function executeOne(tenantId: string, agentId: string, d: { attempt_id: string; envelope: string }, drop: typeof sendDisconnect) {
+  const env = JSON.parse(d.envelope);
+  const p = env.parameters;
+  const b = await withScope(SYS(tenantId), (c) => begin(c, agentId, d.attempt_id));
+  if (!b.go) return;
+  const steps: { name: string; status: string; at: string; detail?: unknown }[] = [];
+  const step = (name: string, status: string, detail?: unknown) => steps.push({ name, status, at: now(), ...(detail !== undefined ? { detail } : {}) });
+  const finish = (outcome: 'SUCCEEDED' | 'FAILED', observed: any, error?: string) =>
+    withScope(SYS(tenantId), async (c) => {
+      const r = await result(c, agentId, d.attempt_id, { outcome, steps, observed, ...(error ? { error } : {}) });
+      await c.query(
+        `insert into audit_events (tenant_id, actor_type, actor_id, action, entity_type, entity_id, result, detail) values ($1,'system','radius-integrado','operation.result','operation_attempt',$2,$3,$4)`,
+        [tenantId, d.attempt_id, outcome === 'SUCCEEDED' ? 'ok' : 'failed', JSON.stringify({ status: r.status })]);
+    });
+  try {
+    // 1. autorização (o que o RADIUS vai responder)
+    const ctx = await withScope(SYS(tenantId), async (c) => {
+      const dev = (await c.query(
+        `select d.vendor, n.nas_ip::text as nas_ip, host(n.nas_ip) as nas_host, n.secret, n.coa_host, n.coa_port, pv.down_kbps, pv.up_kbps
+         from devices d join radius_nas n on n.device_id = d.id join service_resources r on r.device_id = d.id
+         join contracts k on k.id = r.contract_id join plan_versions pv on pv.id = k.plan_version_id where r.id = $1`, [env.resource_id])).rows[0];
+      if (!dev) throw new Error('concentrador sem cadastro no RADIUS integrado');
+      const w: Wanted = {
+        policy: p.policy, profile: p.profile, blockProfile: p.policy === 'suspended' && p.suspension?.mode === 'profile' ? p.suspension.profile : null,
+        rateLimit: p.rate_limit ?? null, addressPool: p.address_pool ?? null, framedIp: p.framed_ip ?? null, acctInterim: p.acct_interim ?? null,
+        simultaneousUse: p.simultaneous_use ?? null, mac: p.mac ?? null, downKbps: dev.down_kbps, upKbps: dev.up_kbps,
+      };
+      const before = await readAccount(c, tenantId, p.username);
+      if (before && before.applied_version === env.desired_version && before.policy === p.policy) step('autorização no RADIUS', 'ok', 'já aplicada nesta versão');
+      else {
+        const reply = replyRows(dev.vendor as Vendor, w);
+        await applyAccount(c, tenantId, p.username, w, env.desired_version, b.secret, checkRows(w), reply);
+        step('autorização no RADIUS', 'ok', { policy: p.policy, profile: effectiveProfile(w), atributos: reply.map((r) => r.attribute) });
+      }
+      return { dev, acc: (await readAccount(c, tenantId, p.username))!, sessions: await openSessions(c, tenantId, p.username), fresh: !before };
+    });
+    await withScope(SYS(tenantId), (c) => progress(c, agentId, d.attempt_id, 'EXECUTING', steps));
+
+    // 2. sessão em uso: pedir a desconexão ao concentrador (fora de transação)
+    const targets = ctx.fresh ? [] : ctx.sessions.filter((s) => mustDrop(p, ctx.acc, s));
+    const pending: OpenSession[] = [];
+    for (const s of targets) {
+      const r: DisconnectResult = await drop({ host: ctx.dev.coa_host || ctx.dev.nas_host, port: ctx.dev.coa_port, secret: ctx.dev.secret, username: p.username, sessionId: s.session_id, framedIp: s.framed_ip });
+      if (r.outcome === 'ack') step('desconexão da sessão', 'ok', { sessao: s.session_id, resposta: 'aceita pelo concentrador' });
+      else if (r.outcome === 'nak' && r.errorCause === SESSION_NOT_FOUND) {
+        // o concentrador não tem mais essa sessão: o fim dela não chegou até nós; fecha o registro
+        await withScope(SYS(tenantId), (c) => c.query(`update radius_acct set stopped_at = now(), updated_at = now(), terminate_cause = 'Lost-Service' where id = $1 and stopped_at is null`, [s.id]));
+        step('desconexão da sessão', 'ok', { sessao: s.session_id, resposta: 'o concentrador não tem mais essa sessão' });
+      } else { pending.push(s); step('desconexão da sessão', 'incerto', { sessao: s.session_id, resposta: r.outcome === 'nak' ? `recusada (causa ${r.errorCause ?? '?'})` : 'sem resposta do concentrador' }); }
+    }
+    if (!targets.length) step('desconexão da sessão', 'ok', 'nenhuma sessão a tratar');
+    await withScope(SYS(tenantId), (c) => progress(c, agentId, d.attempt_id, 'VERIFYING', steps));
+
+    // 3. verificação: conta na versão pedida e nenhuma sessão antiga sem desfecho
+    const after = await withScope(SYS(tenantId), async (c) => ({ acc: (await readAccount(c, tenantId, p.username))!, sessions: await openSessions(c, tenantId, p.username) }));
+    const still = after.sessions.filter((s) => !targets.some((t) => t.id === s.id));      // as que acabamos de derrubar podem levar um instante para registrar o fim
+    const ok = after.acc.applied_version === env.desired_version && after.acc.policy === p.policy && pending.length === 0;
+    step('verificação', ok ? 'ok' : 'falha', { policy: after.acc.policy, profile: after.acc.profile, applied_version: after.acc.applied_version, sessoes_sem_desfecho: pending.length });
+    const observed = { policy: after.acc.policy as 'active' | 'suspended', profile: after.acc.profile, session: sessionView(still[still.length - 1], after.acc.profile), at: now() };
+    await finish(ok ? 'SUCCEEDED' : 'FAILED', observed, ok ? undefined : 'o concentrador não confirmou a desconexão da sessão');
+  } catch (e) {
+    step('execução', 'falha', String((e as Error).message).slice(0, 300));
+    await finish('FAILED', undefined, String((e as Error).message).slice(0, 300)).catch(() => {});
+  }
+}
+
+// ---------------------------------------------------------------- sincronização do que o RADIUS observou
+/** Leva sessões, consumo e estado "online" das tabelas do RADIUS para as mesmas tabelas que o agente local alimenta. */
+export async function syncAccounting(tenantId: string) {
+  await withScope(SYS(tenantId), async (c) => {
+    await c.query(
+      `update service_resources r set observed_policy = a.policy, observed_profile = a.profile, observed_at = now(),
+              observed_session = (select jsonb_build_object('online', true, 'ip', x.framed_ip, 'caller_id', x.calling_station, 'since', x.started_at,
+                                   'uptime', to_char(justify_hours(now() - x.started_at), 'FMDD"d"FMHH24"h"FMMI"m"FMSS"s"'), 'profile', a.profile)
+                                  from radius_acct x where x.tenant_id = r.tenant_id and x.username = r.pppoe_username and x.stopped_at is null order by x.started_at desc limit 1)
+       from radius_account a, devices d
+       where a.tenant_id = r.tenant_id and a.username = r.pppoe_username and d.id = r.device_id and d.driver = 'radius' and r.desired_version > 0`);
+    await c.query(
+      `insert into service_sessions (tenant_id, resource_id, session_key, started_at, stopped_at, ip, mac, nas_ip, bytes_in, bytes_out, seconds, terminate_cause)
+       select x.tenant_id, r.id, left(x.unique_id, 80), x.started_at, x.stopped_at, x.framed_ip, x.calling_station, host(x.nas_ip), x.bytes_in, x.bytes_out,
+              case when x.stopped_at is null then greatest(x.session_seconds, extract(epoch from now() - x.started_at)::bigint) else x.session_seconds end, x.terminate_cause
+       from radius_acct x join service_resources r on r.tenant_id = x.tenant_id and r.pppoe_username = x.username
+       join devices d on d.id = r.device_id and d.driver = 'radius'
+       where x.updated_at > now() - interval '20 minutes' or x.stopped_at is null
+       on conflict (resource_id, session_key) do update set stopped_at = excluded.stopped_at, ip = excluded.ip, mac = excluded.mac, nas_ip = excluded.nas_ip,
+         bytes_in = excluded.bytes_in, bytes_out = excluded.bytes_out, seconds = excluded.seconds, terminate_cause = excluded.terminate_cause, reported_at = now()`);
+    await c.query(
+      `insert into usage_monthly (tenant_id, resource_id, month, bytes_in, bytes_out, session_seconds, sessions)
+       select x.tenant_id, r.id, date_trunc('month', x.started_at at time zone 'UTC')::date, sum(x.bytes_in), sum(x.bytes_out), sum(x.session_seconds), count(*)
+       from radius_acct x join service_resources r on r.tenant_id = x.tenant_id and r.pppoe_username = x.username
+       join devices d on d.id = r.device_id and d.driver = 'radius'
+       where x.started_at >= date_trunc('month', now() at time zone 'UTC') - interval '1 month'
+       group by 1, 2, 3
+       on conflict (resource_id, month) do update set bytes_in = excluded.bytes_in, bytes_out = excluded.bytes_out,
+         session_seconds = excluded.session_seconds, sessions = excluded.sessions, reported_at = now()`);
+    // "verificação" do equipamento = último pacote que ele nos mandou
+    await c.query(
+      `update radius_nas n set last_packet_at = greatest(n.last_packet_at, v.last)
+       from (select nas_ip, max(at) as last from (select nas_ip, updated_at as at from radius_acct where updated_at > now() - interval '1 day'
+                                                  union all select nas_ip, at from radius_postauth where at > now() - interval '1 day') z group by nas_ip) v
+       where v.nas_ip = n.nas_ip`);
+    await c.query(
+      `update devices d set last_check_at = now(), last_check = jsonb_build_object('ok', n.last_packet_at > now() - interval '15 minutes',
+              'detail', case when n.last_packet_at is null then 'nenhum pacote recebido deste concentrador ainda'
+                             else 'último pacote recebido em ' || to_char(n.last_packet_at at time zone 'UTC', 'DD/MM HH24:MI') || ' UTC' end)
+       from radius_nas n where n.device_id = d.id`);
+  });
+}
+
+// ---------------------------------------------------------------- laço
+/** Executa o que estiver na fila dos provedores com RADIUS integrado. Seguro com mais de uma réplica (a reserva usa SKIP LOCKED). */
+export async function runHostedOnce(opts: { tenantId?: string; drop?: typeof sendDisconnect; sync?: boolean } = {}): Promise<number> {
+  if (!radiusConfigured()) return 0;
+  const all = (await withScope(noScope, async (c) => (await c.query('select tenant_id, agent_id from radius_internal_agents()')).rows));
+  let n = 0;
+  for (const a of all.filter((x) => !opts.tenantId || x.tenant_id === opts.tenantId)) {
+    await withScope(SYS(a.tenant_id), (c) => c.query('update agents set last_seen_at = now() where id = $1', [a.agent_id]));
+    for (let i = 0; i < 200; i++) {
+      const d = await withScope(SYS(a.tenant_id), (c) => reserve(c, a.agent_id));
+      if (!d) break;
+      await executeOne(a.tenant_id, a.agent_id, d, opts.drop ?? sendDisconnect);
+      n++;
+    }
+    if (opts.sync) await syncAccounting(a.tenant_id);
+  }
+  return n;
+}
+
+/** Laço em segundo plano: operações a cada 2 s; sessões, consumo e estado online a cada 15 s. */
+export function startHostedRadius(log: (m: string) => void) {
+  if (!radiusConfigured()) { log('RADIUS integrado desligado: defina NEXO_RADIUS_KEY para habilitar'); return () => {}; }
+  let busy = false, tick = 0;
+  const t = setInterval(async () => {
+    if (busy) return;
+    busy = true;
+    try { await runHostedOnce({ sync: tick++ % 7 === 0 }); } catch (e) { log(`RADIUS integrado: ${(e as Error).message}`); } finally { busy = false; }
+  }, 2000);
+  t.unref();
+  return () => clearInterval(t);
+}

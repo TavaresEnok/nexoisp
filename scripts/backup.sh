@@ -14,7 +14,7 @@ TABLES="tenants users subscribers contracts plan_versions service_resources oper
 counts() { for t in $TABLES; do printf "%s=%s " "$t" "$(psqlc -d "$1" -Atc "select count(*) from $t")"; done; }
 verify() { [ -f "$1.sha256" ] && (cd "$(dirname "$1")" && sha256sum -c --quiet "$(basename "$1").sha256") || { echo "ERRO: soma de verificação ausente ou inválida para $1"; exit 1; }; }
 load() { # banco arquivo
-  psqlc -d postgres -c "do \$\$ begin if not exists (select 1 from pg_roles where rolname = 'nexo_app') then create role nexo_app nologin; end if; end \$\$"
+  psqlc -d postgres -c "do \$\$ begin if not exists (select 1 from pg_roles where rolname = 'nexo_app') then create role nexo_app nologin; end if; if not exists (select 1 from pg_roles where rolname = 'nexo_radius') then create role nexo_radius nologin; end if; end \$\$"
   psqlc -d postgres -c "drop database if exists $1 with (force)" -c "create database $1"
   docker exec -i "$DBC" pg_restore -U nexo_owner -d "$1" --no-owner --exit-on-error < "$2"
 }

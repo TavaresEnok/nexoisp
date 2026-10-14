@@ -40,7 +40,7 @@ export async function networkRoutes(app: FastifyInstance) {
   app.get('/api/agents', { preHandler: guard('network:read') }, async (req) =>
     withScope(req.ctx.scope, async (c) =>
       (await c.query(
-        `select a.id, a.name, a.status, a.version, a.last_seen_at, a.last_sync_at, a.info, a.created_at, a.cert_fingerprint, a.cert_pinned_at,
+        `select a.id, a.name, a.status, a.version, a.internal, a.last_seen_at, a.last_sync_at, a.info, a.created_at, a.cert_fingerprint, a.cert_pinned_at,
                 (a.last_seen_at is not null and a.last_seen_at > now() - interval '${AGENT_OFFLINE_S} seconds') as online,
                 (select count(*) from devices d where d.agent_id = a.id) as devices,
                 (select count(*) from operations o where o.agent_id = a.id and o.status in ('PENDING','RESERVED','EXECUTING','VERIFYING','UNCERTAIN')) as open_operations,
@@ -78,7 +78,7 @@ export async function networkRoutes(app: FastifyInstance) {
   // ---- Equipamentos (NAS) ----
   const zDevice = z.object({
     name: z.string().trim().min(2).max(80),
-    driver: z.enum(['demo', 'mikrotik_radius', 'olt_demo', 'olt_huawei']),
+    driver: z.enum(['demo', 'mikrotik_radius', 'olt_demo', 'olt_huawei', 'radius']),
     host: z.string().trim().max(200).nullish().transform((v) => v || null),
     api_port: z.number().int().min(1).max(65535).nullish(),
     credential_ref: z.string().trim().regex(/^[A-Za-z0-9_.-]{0,60}$/).nullish().transform((v) => v || null),
@@ -90,6 +90,7 @@ export async function networkRoutes(app: FastifyInstance) {
     withScope(req.ctx.scope, async (c) =>
       (await c.query(
         `select d.*, a.name as agent_name, (a.last_seen_at is not null and a.last_seen_at > now() - interval '${AGENT_OFFLINE_S} seconds') as agent_online,
+                (select host(n.nas_ip) from radius_nas n where n.device_id = d.id) as nas_ip,
                 (select count(*) from service_resources r where r.device_id = d.id) as accounts,
                 (select count(*) from onus n where n.device_id = d.id and n.desired_state = 'authorized') as onus
          from devices d left join agents a on a.id = d.agent_id order by d.name`)).rows));
@@ -99,6 +100,7 @@ export async function networkRoutes(app: FastifyInstance) {
     if (b.driver.endsWith('demo') && process.env.NEXO_DEMO_MODE !== '1') throw new HttpError(400, 'driver de demonstração só é permitido em ambiente de demonstração');
     if (b.driver.startsWith('olt') && !req.ctx.modules.includes('olt')) throw new HttpError(403, 'a integração com OLT não está liberada para o provedor', 'module_disabled');
     return withScope(req.ctx.scope, async (c) => {
+      if (b.driver === 'radius') throw new HttpError(400, 'concentrador do RADIUS integrado é cadastrado em /api/radius/devices');
       const d = (await c.query(
         `insert into devices (tenant_id, name, driver, host, api_port, credential_ref, agent_id, simultaneous_use, acct_interim_seconds) values ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning *`,
         [req.ctx.tenantId, b.name, b.driver, b.host, b.api_port ?? null, b.credential_ref, b.agent_id ?? null, b.simultaneous_use ?? null, b.acct_interim_seconds ?? null])).rows[0];
@@ -113,6 +115,8 @@ export async function networkRoutes(app: FastifyInstance) {
     return withScope(req.ctx.scope, async (c) => {
       const cur = (await c.query('select * from devices where id = $1 for update', [id])).rows[0];
       if (!cur) throw new HttpError(404, 'equipamento não encontrado');
+      if (b.driver !== undefined && b.driver !== cur.driver && (b.driver === 'radius' || cur.driver === 'radius')) throw new HttpError(400, 'para passar um equipamento ao RADIUS integrado use a conversão do equipamento');
+      if (cur.driver === 'radius' && b.agent_id !== undefined && b.agent_id !== cur.agent_id) throw new HttpError(400, 'o RADIUS integrado não usa agente local');
       const n = { ...cur, ...Object.fromEntries(Object.entries(b).filter(([, v]) => v !== undefined)) };
       if (n.driver.endsWith('demo') && process.env.NEXO_DEMO_MODE !== '1') throw new HttpError(400, 'driver de demonstração só é permitido em ambiente de demonstração');
       if (n.driver.startsWith('olt') && !req.ctx.modules.includes('olt')) throw new HttpError(403, 'a integração com OLT não está liberada para o provedor', 'module_disabled');

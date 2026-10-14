@@ -1,0 +1,34 @@
+# Módulo SQL: o servidor RADIUS lê e grava no banco do NexoISP com um papel próprio (nexo_radius), que só alcança as tabelas radius_*.
+sql {
+	dialect = "postgresql"
+	driver = "rlm_sql_${dialect}"
+	server = "$ENV{RADIUS_DB_HOST}"
+	port = $ENV{RADIUS_DB_PORT}
+	login = "nexo_radius"
+	password = "$ENV{RADIUS_DB_PASSWORD}"
+	radius_db = "dbname=$ENV{RADIUS_DB_NAME} host=$ENV{RADIUS_DB_HOST} port=$ENV{RADIUS_DB_PORT} user=nexo_radius password=$ENV{RADIUS_DB_PASSWORD} application_name=nexo-radius"
+	acct_table1 = "radius_acct"
+	acct_table2 = "radius_acct"
+	postauth_table = "radius_postauth"
+	authcheck_table = "radius_check"
+	groupcheck_table = "radius_check"
+	authreply_table = "radius_reply"
+	groupreply_table = "radius_reply"
+	usergroup_table = "radius_check"
+	client_table = "radius_nas"
+	read_groups = no
+	read_clients = no
+	delete_stale_sessions = yes
+	pool {
+		start = 2
+		min = 2
+		max = 16
+		spare = 2
+		uses = 0
+		lifetime = 0
+		idle_timeout = 120
+		retry_delay = 3
+	}
+	group_attribute = "SQL-Group"
+	$INCLUDE ${modconfdir}/${.:name}/main/${dialect}/queries.conf
+}

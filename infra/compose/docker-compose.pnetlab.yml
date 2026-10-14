@@ -13,6 +13,16 @@ services:
   agent-demo:
     build: { network: host }
     security_opt: ["seccomp=unconfined"]
+  # O Docker deste servidor roda com --iptables=false: uma porta publicada chegaria ao RADIUS com o endereço do proxy, e é pelo
+  # endereço de origem que o concentrador é reconhecido. Por isso aqui o RADIUS usa a rede do host. A 1812 já é do laboratório.
+  radius:
+    network_mode: host
+    ports: !reset []
+    security_opt: ["seccomp=unconfined"]
+    environment:
+      RADIUS_DB_HOST: 127.0.0.1
+      RADIUS_DB_PORT: "15432"
+      RADIUS_PORT: "${NEXO_RADIUS_PORT:-1812}"
   olt-huawei-emu:
     build: { network: host }
     security_opt: ["seccomp=unconfined"]
