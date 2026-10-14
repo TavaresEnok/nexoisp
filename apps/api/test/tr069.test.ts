@@ -9,7 +9,8 @@ const tag = String(Date.now()).slice(-6);
 const v = (x: unknown, w = true) => ({ _value: x, _writable: w });
 const devices: Record<string, any> = {};
 const tasks: { id: string; body: any }[] = [];
-let offline = false;
+let offline = false, refuse = false;
+const faults: any[] = [];
 const server = createServer((req, res) => {
   const u = new URL(req.url!, 'http://x');
   let body = ''; req.on('data', (d) => (body += d));
@@ -26,8 +27,21 @@ const server = createServer((req, res) => {
     if (req.method === 'POST' && m) {
       const id = decodeURIComponent(m[1]);
       if (!devices[id]) { res.writeHead(404).end(); return; }
+      const tid = `t${tasks.length}`;
       tasks.push({ id, body: JSON.parse(body) });
-      res.writeHead(offline ? 202 : 200, { 'content-type': 'application/json' }).end(body);
+      if (refuse) faults.push({ _id: `${id}:task_${tid}`, device: id, channel: `task_${tid}`, code: 'cwmp.9000', message: 'Method not supported', detail: { faultCode: '9000' } });
+      res.writeHead(offline || refuse ? 202 : 200, { 'content-type': 'application/json' }).end(JSON.stringify({ ...JSON.parse(body), _id: tid }));
+      return;
+    }
+    if (req.method === 'GET' && u.pathname === '/faults/') {
+      const q = JSON.parse(u.searchParams.get('query') ?? '{}');
+      res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify(faults.filter((f) => f.device === q.device && f.channel === q.channel)));
+      return;
+    }
+    if (req.method === 'DELETE' && (u.pathname.startsWith('/tasks/') || u.pathname.startsWith('/faults/'))) {
+      const fid = decodeURIComponent(u.pathname.split('/')[2]);
+      const i = faults.findIndex((f) => f._id === fid); if (i >= 0) faults.splice(i, 1);
+      res.writeHead(200).end();
       return;
     }
     res.writeHead(404).end();
@@ -93,6 +107,12 @@ describe('roteador do cliente (TR-069)', () => {
     expect((await call(atend, 'POST', `/api/contracts/${contractId}/cpe/reboot`)).body.result).toBe('queued');
     offline = false;
     expect(tasks.at(-1)!.body).toEqual({ name: 'reboot' });
+    refuse = true;                                                          // o roteador atende e recusa (como o simulador recusa reiniciar)
+    const recusa = await call(atend, 'POST', `/api/contracts/${contractId}/cpe/reboot`);
+    refuse = false;
+    expect(recusa.status).toBe(409);
+    expect(recusa.body.error).toMatch(/recusou: Method not supported \(código 9000\)/);
+    expect(faults).toHaveLength(0);                                         // falha e tarefa removidas
   });
 
   it('portal: o assinante vê e troca o próprio Wi-Fi', async () => {

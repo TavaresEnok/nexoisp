@@ -34,7 +34,20 @@ export async function task(id: string, body: object): Promise<'applied' | 'queue
     method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
   if (r.status === 404) throw new HttpError(404, 'roteador não encontrado no servidor de gerência');
   if (r.status !== 200 && r.status !== 202) throw new HttpError(502, `o servidor de gerência recusou a tarefa (${r.status})`);
-  return r.status === 200 ? 'applied' : 'queued';
+  if (r.status === 200) return 'applied';
+  // 202: ou o roteador não atendeu (fica na fila), ou atendeu e RECUSOU (falha registrada). Recusa não é "na fila": mostra o motivo
+  // e tira a tarefa, para ela não ficar sendo repetida a cada contato do roteador.
+  const taskId = r.body?._id;
+  if (taskId) {
+    const f = await call(`/faults/?query=${q({ device: id, channel: `task_${taskId}` })}`);
+    const fault = Array.isArray(f.body) ? f.body[0] : null;
+    if (fault) {
+      await call(`/tasks/${encodeURIComponent(taskId)}`, { method: 'DELETE' }).catch(() => null);
+      await call(`/faults/${encodeURIComponent(fault._id)}`, { method: 'DELETE' }).catch(() => null);
+      throw new HttpError(409, `o roteador recusou: ${fault.message ?? fault.code}${fault.detail?.faultCode ? ` (código ${fault.detail.faultCode})` : ''}`, 'cpe_fault');
+    }
+  }
+  return 'queued';
 }
 
 const val = (o: any, path: string) => path.split('.').reduce((a, k) => (a == null ? a : a[k]), o)?._value ?? null;
