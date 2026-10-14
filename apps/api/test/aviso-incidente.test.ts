@@ -37,8 +37,9 @@ afterAll(async () => {
 
 describe('aviso de incidente aos afetados', () => {
   it('sem o módulo de avisos é recusado', async () => {
-    const m = (await call(admin, 'POST', '/api/maintenance-notices', { title: `Sem módulo ${tag}`, message: 'x y z', starts_at: iso(-1), ends_at: iso(2), device_id: deviceId })).body;
-    expect((await call(noc, 'POST', `/api/maintenance-notices/${m.id}/notify`, { channel_id: '00000000-0000-4000-8000-000000000000' })).status).toBe(409);
+    const beta = await login('admin@beta.demo');                         // provedor sem o módulo (nenhum teste o liga)
+    const m = (await call(beta, 'POST', '/api/maintenance-notices', { title: `Sem módulo ${tag}`, message: 'x y z', starts_at: iso(-1), ends_at: iso(2) })).body;
+    expect((await call(beta, 'POST', `/api/maintenance-notices/${m.id}/notify`, { channel_id: '00000000-0000-4000-8000-000000000000' })).status).toBe(409);
   });
 
   it('só os afetados com consentimento; uma vez por fase; normalização depois do início', async () => {
@@ -55,13 +56,14 @@ describe('aviso de incidente aos afetados', () => {
     expect(r1).toMatchObject({ phase: 'start', queued: 1, skipped_no_consent: 1 });
     await runNotices(tenantId);
     const mine = () => got.filter((g) => String(g.texto).includes(tag));
+    const until = async (n: number) => { for (let i = 0; i < 50 && mine().length < n; i++) { await runNotices(tenantId); await new Promise((r) => setTimeout(r, 100)); } };
     expect(mine()).toHaveLength(1);
     expect(mine()[0].texto).toMatch(/Queda na fibra .*Equipe trabalhando/);
     const r2 = (await call(noc, 'POST', `/api/maintenance-notices/${m.id}/notify`, { channel_id: channelId })).body;
     expect(r2).toMatchObject({ queued: 0, skipped_no_consent: 0 });                      // repetir não manda de novo
     const r3 = (await call(noc, 'POST', `/api/maintenance-notices/${m.id}/notify`, { channel_id: channelId, phase: 'resolved', text: 'Olá {nome}, a internet voltou (ref ' + tag + ').' })).body;
     expect(r3).toMatchObject({ phase: 'resolved', queued: 1 });
-    await runNotices(tenantId);
+    await until(2);
     expect(mine()).toHaveLength(2);
     expect(mine()[1].texto).toBe(`Olá Afetado, a internet voltou (ref ${tag}).`);
     expect((await call(await login('financeiro@alfa.demo'), 'POST', `/api/maintenance-notices/${m.id}/notify`, { channel_id: channelId })).status).toBe(403);
