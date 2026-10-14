@@ -3,7 +3,7 @@ import { api, dt, useLoad } from '../api';
 import { ActionButton, Badge, Card, Field, Form, Page, State } from '../ui';
 
 const STATUS: Record<string, [string, 'green' | 'red' | 'amber' | undefined]> = {
-  sent: ['Enviado', 'green'], failed: ['Falhou', 'red'], skipped_no_consent: ['Sem consentimento', 'amber'], test: ['Teste', undefined],
+  sent: ['Enviado', 'green'], failed: ['Falhou', 'red'], skipped_no_consent: ['Sem consentimento', 'amber'], queued: ['Na fila', undefined], sending: ['Enviando', undefined], uncertain: ['Resultado desconhecido', 'amber'], test: ['Teste', undefined],
 };
 const REL = (n: number) => (n < 0 ? `${-n} dia(s) antes do vencimento` : n === 0 ? 'no dia do vencimento' : `${n} dia(s) depois do vencimento`);
 

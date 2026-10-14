@@ -6,7 +6,8 @@ import { call, login } from './helpers.js';
 // Lote 7: desconto na mensalidade, fidelidade com multa, mudança agendada, aditivos e indicação.
 let admin: string, noc: string, tenantId: string, planId: string, plan2Id: string;
 const tag = String(Date.now()).slice(-6);
-const day = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
+// data no fuso do provedor (à noite, o dia em UTC já é o seguinte)
+const day = (n: number) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date(Date.now() + n * 86_400_000));
 
 async function novoContrato(planoId = planId, nome = `Cond ${tag}-${Math.random().toString(36).slice(2, 6)}`) {
   const s = (await call(admin, 'POST', '/api/subscribers', { name: nome })).body;
@@ -152,7 +153,7 @@ describe('mudança agendada e aditivos', () => {
     const k = await novoContrato();                                           // plano com fidelidade de 12 meses (definida acima ou não)
     await call(admin, 'PUT', `/api/contracts/${k.id}/loyalty`, { months: 12, penalty_model: 'fixed', penalty_cents: 12345 });
     const s = (await call(admin, 'POST', `/api/contracts/${k.id}/scheduled-changes`, { kind: 'end', effective_date: day(2), penalty: 'charge', note: 'pedido por telefone' })).body;
-    await withScope({ tenantId, operator: false }, (c) => c.query(`update scheduled_changes set effective_date = current_date where id = $1`, [s.id]));
+    await withScope({ tenantId, operator: false }, (c) => c.query(`update scheduled_changes set effective_date = current_date - 1 where id = $1`, [s.id]));
     expect((await applyScheduledChanges(tenantId)).applied).toBeGreaterThanOrEqual(1);
     const c1 = (await call(admin, 'GET', `/api/contracts/${k.id}`)).body;
     expect(c1.status).toBe('ended');

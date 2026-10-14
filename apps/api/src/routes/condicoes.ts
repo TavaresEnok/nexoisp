@@ -146,9 +146,12 @@ export async function condicoesRoutes(app: FastifyInstance) {
       const k = (await c.query('select status from contracts where id = $1', [id])).rows[0];
       if (!k) throw new HttpError(404, 'contrato não encontrado');
       if (k.status !== 'active') throw new HttpError(400, 'contrato encerrado não aceita mudança agendada');
-      const today = new Date().toISOString().slice(0, 10);
-      if (b.effective_date <= today) throw new HttpError(400, 'a data precisa ser futura; para mudar agora use a alteração do contrato');
-      if (b.effective_date > new Date(Date.now() + 2 * 365 * 86_400_000).toISOString().slice(0, 10)) throw new HttpError(400, 'a data está muito distante (máximo de 2 anos)');
+      // "hoje" é o do fuso do provedor (o mesmo critério da rotina que aplica a mudança), não o do servidor
+      const d = (await c.query(
+        `select ($2::date > t.today) as future, ($2::date <= t.today + 730) as near
+         from (select (now() at time zone coalesce((select timezone from tenant_settings where tenant_id = $1), 'America/Sao_Paulo'))::date as today) t`, [req.ctx.tenantId, b.effective_date])).rows[0];
+      if (!d.future) throw new HttpError(400, 'a data precisa ser futura; para mudar agora use a alteração do contrato');
+      if (!d.near) throw new HttpError(400, 'a data está muito distante (máximo de 2 anos)');
       if (b.kind === 'plan_change') await currentVersion(c, b.plan_id!);         // plano existe e está ativo
       if (b.kind === 'end') await assertCatalog(c, b.end_reason_id, 'end_reason', 'motivo de encerramento');
       if ((await c.query(`select 1 from scheduled_changes where contract_id = $1 and kind = $2 and status = 'pending' and effective_date = $3`, [id, b.kind, b.effective_date])).rowCount)

@@ -14,8 +14,8 @@ NAS_LOCAL_ADDRESS=10.255.255.1; NAS_REMOTE_POOL="POOL REMOTO"
 B=http://localhost:18080/api; J='content-type: application/json'
 AGENT_NAME="Agente PNETLab (WorldFibra)"; DEVICE_NAME="WORLD-MK4011 CHR 7.17 (PNETLab)"; CRED=trio-world
 login() { curl -s $B/auth/login -H "$J" -d '{"email":"admin@alfa.demo","password":"demo1234"}' | jq -r .token; }
-nas() { python3 "$HERE/con.py" $NAS_CON "$@"; }
-cli() { python3 "$HERE/con.py" $CLI_CON "$@"; }
+nas() { python3 "$HERE/ros_console.py" $NAS_CON "$@"; }
+cli() { python3 "$HERE/ros_console.py" $CLI_CON "$@"; }
 py() { $D run --rm --network host --security-opt seccomp=unconfined -v "$STATE/config:/out" -v "$HERE/setup_nas.py:/setup_nas.py:ro" \
   -e NAS_IP="$NAS_IP" -e HOST_IP="$HOST_IP" -e RADIUS_NAS_SECRET="$RADIUS_NAS_SECRET" -e NAS_AGENT_PASSWORD="$NAS_AGENT_PASSWORD" \
   -e NAS_LOCAL_ADDRESS="$NAS_LOCAL_ADDRESS" -e NAS_REMOTE_POOL="$NAS_REMOTE_POOL" "$@"; }

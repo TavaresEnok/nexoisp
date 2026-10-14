@@ -6,7 +6,8 @@ import { agentCall, call, login } from './helpers.js';
 let admin: string, tenantId: string, before: any, agentToken: string, deviceId: string;
 let planId: string, contractId: string, resourceId: string;
 const tag = String(Date.now()).slice(-6);
-const day = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
+// data no fuso do provedor (à noite, o dia em UTC já é o seguinte)
+const day = (n: number) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date(Date.now() + n * 86_400_000));
 const settings = (extra: object) => call(admin, 'PUT', '/api/finance/settings', {
   gateway: 'none', billing_auto: false, auto_suspend: true, suspend_after_days: 30, auto_resume_on_payment: true, ...extra });
 const svc = async () => (await call(admin, 'GET', `/api/contracts/${contractId}/service`)).body;

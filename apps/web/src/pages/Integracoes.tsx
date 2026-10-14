@@ -7,7 +7,7 @@ const SCOPE_LABEL: Record<string, string> = {
   'tickets:write': 'Abrir atendimento', 'work_orders:read': 'Ler OS', 'work_orders:write': 'Abrir OS',
 };
 const EVENT_LABEL: Record<string, string> = {
-  'invoice.paid': 'Fatura paga', 'access.suspended': 'Acesso suspenso', 'access.resumed': 'Acesso reativado', 'ticket.created': 'Atendimento aberto',
+  'invoice.paid': 'Fatura paga', 'access.suspend_requested': 'Suspensão solicitada', 'access.resume_requested': 'Reativação solicitada', 'access.suspended': 'Acesso suspenso (confirmado)', 'access.resumed': 'Acesso reativado (confirmado)', 'access.change_failed': 'Suspensão/reativação falhou', 'ticket.created': 'Atendimento aberto',
   'work_order.created': 'OS aberta', 'work_order.status_changed': 'Situação da OS mudou', 'sla.breached': 'SLA vencido', 'survey.answered': 'Pesquisa respondida',
 };
 const DELIVERY: Record<string, [string, 'green' | 'red' | 'amber']> = { sent: ['Entregue', 'green'], failed: ['Falhou', 'red'], pending: ['Pendente', 'amber'] };

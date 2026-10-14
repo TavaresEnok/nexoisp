@@ -47,7 +47,9 @@ Cadastre um endereço **HTTPS** e escolha os eventos. Cada evento chega por `POS
 | Evento | `data` |
 |---|---|
 | `invoice.paid` | `invoice_id`, `contract_id`, `subscriber_id`, `amount_cents`, `paid_at` |
-| `access.suspended` / `access.resumed` | `contract_id`, `stage` (`reduced`/`blocked`), `reason` — é a **intenção** registrada; o efeito no equipamento é confirmado pelo agente |
+| `access.suspend_requested` / `access.resume_requested` | `contract_id`, `operation_id`, `stage` (`reduced`/`blocked`), `reason` — o **pedido** foi registrado; o agente pode estar fora do ar e nada mudou ainda no equipamento |
+| `access.suspended` / `access.resumed` | `contract_id`, `operation_id`, `stage` (só na suspensão) — o equipamento **confirmou** a mudança |
+| `access.change_failed` | `contract_id`, `operation_id`, `action` (`suspend`/`resume`), `error` — desistiu depois das tentativas |
 | `ticket.created` | `ticket_id`, `number`, `subscriber_id`, `category`, `priority`, `origin` |
 | `work_order.created` | `work_order_id`, `number`, `kind`, `subscriber_id`, `contract_id` |
 | `work_order.status_changed` | `work_order_id`, `number`, `from`, `to`, `subscriber_id` |

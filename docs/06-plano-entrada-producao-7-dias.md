@@ -331,3 +331,16 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
 - **Não validado:** pool por plano, uso simultâneo (depende da seção `session` do FreeRADIUS), redirecionamento da página de aviso; nada em equipamento físico.
 - **Continua dependendo de terceiros:** fiscal, gateway real, adaptadores SGP/IXC (backup cifrado, export do IXC), homologação física.
 
+### 14/10/2026 — correções da revisão externa (4 apontamentos, todos procedentes)
+
+- **Avisos ao assinante (alta):** o envio saía de dentro de uma transação que podia ficar aberta por centenas de chamadas externas. Agora há fila persistente: enfileira em
+  transação curta, envia **fora de transação** uma mensagem por vez e grava o desfecho em seguida. Envio interrompido fica "resultado desconhecido" e **não** é reenviado sozinho. Migração 035.
+- **Alerta operacional (alta):** o estado era dado como avisado antes do envio e resposta de erro não era conferida. Agora só é marcado depois de o destino aceitar (2xx); senão tenta no próximo ciclo.
+- **Eventos de acesso (média):** `access.suspended`/`access.resumed` passaram a sair só quando o equipamento **confirma**. O pedido sai como `access.suspend_requested`/`access.resume_requested`
+  e a desistência como `access.change_failed`. **Mudança de contrato para quem integra**: quem assinava os eventos antigos passa a recebê-los mais tarde (na confirmação).
+- **Clonagem no Windows (média):** `infra/lab-pnetlab/con.py` (nome reservado) virou `ros_console.py`; não há outro nome reservado no repositório.
+- **Achado ao testar à noite:** vários testes e três pontos do código usavam a data em UTC em vez do fuso do provedor (entre 21h e 0h de Brasília dá um dia de diferença).
+  Corrigidos: validação da data da mudança agendada, vencimento da multa rescisória e data padrão da cotação de encerramento. **Não revisado:** outros usos de `current_date` do banco
+  (início e fim de contrato, por exemplo) ainda seguem o relógio do servidor.
+- **Testado:** 137 testes da API. O teste ponta a ponta da interface continua sem rodar.
+

@@ -5,7 +5,9 @@ import { decryptSecret } from './network/crypto.js';
 
 /** Eventos que o provedor pode assinar. O nome e o formato do `data` são contrato com quem integra: não mudar sem versionar. */
 export const WEBHOOK_EVENTS = [
-  'invoice.paid', 'access.suspended', 'access.resumed', 'ticket.created',
+  'invoice.paid', 'ticket.created',
+  // acesso: *_requested = pedido registrado (o agente pode estar fora do ar); suspended/resumed = o equipamento CONFIRMOU; change_failed = desistiu após as tentativas
+  'access.suspend_requested', 'access.resume_requested', 'access.suspended', 'access.resumed', 'access.change_failed',
   'work_order.created', 'work_order.status_changed', 'sla.breached', 'survey.answered', 'contract.changed',
 ] as const;
 export type WebhookEvent = (typeof WEBHOOK_EVENTS)[number];

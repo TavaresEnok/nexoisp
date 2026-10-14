@@ -4,20 +4,24 @@ import { deliverNotifications } from './notify.js';
 import { deliverWebhooks } from './webhooks.js';
 
 let lastAlertKey = '';
+/** Só para testes: esquece o último conjunto avisado. */
+export const resetAlertState = () => { lastAlertKey = ''; };
 /** Alerta por webhook genérico (NEXO_ALERT_WEBHOOK_URL): envia só quando o conjunto de alertas muda, inclusive ao normalizar. */
 export async function notify(alerts: { tenant_id: string; agents_offline: number; uncertain: number }[], log: (m: string) => void) {
   const key = JSON.stringify(alerts);
   if (key === lastAlertKey) return;
-  lastAlertKey = key;
   const url = process.env.NEXO_ALERT_WEBHOOK_URL;
-  if (!url) return;
+  if (!url) { lastAlertKey = key; return; }
   const text = alerts.length
     ? `NexoISP: ${alerts.map((a) => `provedor ${a.tenant_id}: ${a.agents_offline} agente(s) offline, ${a.uncertain} operação(ões) incerta(s)`).join('; ')}`
     : 'NexoISP: alertas de rede normalizados';
+  // O estado só é dado como avisado DEPOIS de o destino aceitar (2xx). Erro de rede ou resposta de erro: tenta de novo no próximo ciclo.
   try {
-    await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text, alerts }), signal: AbortSignal.timeout(5000) });
+    const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text, alerts }), signal: AbortSignal.timeout(5000) });
+    if (!r.ok) throw new Error(`o destino respondeu ${r.status}`);
+    lastAlertKey = key;
   } catch (e) {
-    log(`falha ao enviar alerta ao webhook: ${(e as Error).message}`);
+    log(`falha ao enviar alerta ao webhook (nova tentativa no próximo ciclo): ${(e as Error).message}`);
   }
 }
 

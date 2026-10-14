@@ -19,7 +19,8 @@ const server = createServer((req, res) => {
     res.writeHead(200).end('ok');
   });
 });
-const day = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
+// data no fuso do provedor (entre 21h e 0h de Brasília o dia em UTC já é o seguinte)
+const day = (n: number) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date(Date.now() + n * 86_400_000));
 const made: string[] = [];
 
 async function cliente(nome: string, allow: boolean, due: number): Promise<{ contractId: string; subId: string; invoiceId: string }> {

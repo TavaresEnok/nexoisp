@@ -35,6 +35,12 @@ export const zContractChange = z.object({
 });
 export type ContractChange = z.infer<typeof zContractChange>;
 
+/** Data de hoje (+ dias) no fuso do provedor: à noite o dia do servidor (UTC) já é o seguinte. */
+async function localToday(c: Tx, plusDays: number): Promise<string> {
+  return (await c.query(
+    `select ((now() at time zone coalesce((select timezone from tenant_settings where tenant_id = app_tenant()), 'America/Sao_Paulo'))::date + $1::int)::text as d`, [plusDays])).rows[0].d;
+}
+
 /** Cotação de encerramento: dentro da carência há multa (valor único ou por mês restante). Só leitura. */
 export async function terminationQuote(c: Tx, contractId: string, onDate?: string) {
   const k = (await c.query(
@@ -44,7 +50,7 @@ export async function terminationQuote(c: Tx, contractId: string, onDate?: strin
             (k.loyalty_until is not null and k.loyalty_until > $2::date) as within_loyalty,
             (select coalesce(sum(i.amount_cents), 0)::int from invoices i where i.contract_id = k.id and i.status = 'open') as open_cents,
             (select count(*)::int from invoices i where i.contract_id = k.id and i.status = 'open') as open_count
-     from contracts k where k.id = $1`, [contractId, onDate ?? new Date().toISOString().slice(0, 10)])).rows[0];
+     from contracts k where k.id = $1`, [contractId, onDate ?? await localToday(c, 0)])).rows[0];
   if (!k) throw new HttpError(404, 'contrato não encontrado');
   const penalty = k.within_loyalty ? (k.penalty_model === 'monthly' ? k.penalty_cents * k.remaining_months : k.penalty_cents) : 0;
   return {
@@ -87,7 +93,7 @@ export async function changeContract(c: Tx, ctx: ChangeCtx, id: string, b: Contr
         if (!b.penalty_waive_reason) throw new HttpError(400, 'informe o motivo para dispensar a multa');
         await hist('penalty_waived', { amount_cents: q.penalty_cents, reason: b.penalty_waive_reason });
       } else {
-        const due = new Date(Date.now() + b.penalty_due_days * 86_400_000).toISOString().slice(0, 10);
+        const due = await localToday(c, b.penalty_due_days);
         const inv = (await c.query(
           `insert into invoices (tenant_id, contract_id, subscriber_id, kind, due_date, amount_cents) values ($1,$2,$3,'manual',$4,$5) returning id`,
           [ctx.tenantId, id, cur.subscriber_id, due, q.penalty_cents])).rows[0];

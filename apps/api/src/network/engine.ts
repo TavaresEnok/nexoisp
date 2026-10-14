@@ -110,10 +110,10 @@ export async function requestOperation(c: Tx, tenantId: string, resourceId: stri
      values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) returning *`,
     [id, tenantId, resourceId, r.device_id, r.agent_id, action, version, JSON.stringify(parameters), key, validUntil,
       JSON.stringify(authorization), envelope, signEnvelope(envelope), authz.reason ?? null])).rows[0];
-  // Evento de saída: é a intenção registrada (o efeito no equipamento é confirmado pelo agente, não por este evento).
+  // Evento de saída do PEDIDO. A confirmação (access.suspended / access.resumed) só sai quando o agente relata sucesso, em result().
   if (action === 'subscriber.suspend' || action === 'subscriber.resume')
-    await emitEvent(c, tenantId, action === 'subscriber.suspend' ? 'access.suspended' : 'access.resumed',
-      { contract_id: r.contract_id, stage: policy === 'suspended' ? (opts.stage ?? 'blocked') : null, reason: authz.reason ?? null });
+    await emitEvent(c, tenantId, action === 'subscriber.suspend' ? 'access.suspend_requested' : 'access.resume_requested',
+      { contract_id: r.contract_id, operation_id: id, stage: policy === 'suspended' ? (stage ?? 'blocked') : null, reason: authz.reason ?? null });
   return op;
 }
 
@@ -236,6 +236,7 @@ export async function result(c: Tx, agentId: string, attemptId: string, b: Resul
     await c.query(`update operations set status = 'SUCCEEDED', result = $2, finished_at = now(), updated_at = now(), lease_until = null,
                    note = $3 where id = $1`, [o.id, JSON.stringify(res), b.recovered ? 'efeito confirmado por consulta, sem repetir o comando' : null]);
     await finishAttempt(c, attemptId, 'SUCCEEDED', b.steps);
+    await accessEvent(c, o, 'confirmed');
     return { ack: true, status: 'SUCCEEDED' };
   }
   const current = (o.onu_id ? await c.query('select desired_version from onus where id = $1', [o.onu_id])
@@ -251,7 +252,19 @@ export async function result(c: Tx, agentId: string, attemptId: string, b: Resul
             finished_at = case when $2 = 'PENDING' then null else now() end where id = $1`,
     [o.id, status, note, JSON.stringify(res), b.outcome === 'FAILED']);
   await finishAttempt(c, attemptId, b.outcome, b.steps);
+  if (status === 'FAILED') await accessEvent(c, o, 'failed', note);
   return { ack: true, status };
+}
+
+/** Evento de saída do DESFECHO de uma suspensão/reativação: confirmado pelo equipamento ou abandonado após as tentativas. */
+async function accessEvent(c: Tx, o: any, outcome: 'confirmed' | 'failed', error?: string) {
+  if (!o.resource_id || (o.action !== 'subscriber.suspend' && o.action !== 'subscriber.resume')) return;
+  const r = (await c.query('select contract_id, desired_stage from service_resources where id = $1', [o.resource_id])).rows[0];
+  if (!r) return;
+  const base = { contract_id: r.contract_id, operation_id: o.id };
+  if (outcome === 'failed') await emitEvent(c, o.tenant_id, 'access.change_failed', { ...base, action: o.action === 'subscriber.suspend' ? 'suspend' : 'resume', error: error ?? null });
+  else if (o.action === 'subscriber.suspend') await emitEvent(c, o.tenant_id, 'access.suspended', { ...base, stage: r.desired_stage ?? 'blocked' });
+  else await emitEvent(c, o.tenant_id, 'access.resumed', base);
 }
 
 // ---------------------------------------------------------------- ONU (expansão OLT/ONU)

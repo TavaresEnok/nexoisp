@@ -4,7 +4,7 @@ import { call, login } from './helpers.js';
 // P3 campos personalizados, F5 kit de instalação e auxiliares, F7 comissão.
 let admin: string, beta: string, noc: string, subId: string, contractId: string, techId: string, otherId: string;
 const tag = String(Date.now()).slice(-6);
-const today = new Date().toISOString().slice(0, 10);
+const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());   // hoje no fuso do provedor
 
 beforeAll(async () => {
   admin = await login('admin@alfa.demo');

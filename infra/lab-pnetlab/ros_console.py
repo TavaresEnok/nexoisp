@@ -1,4 +1,4 @@
-"""Console telnet de um nó do PNETLab (RouterOS). Uso: con.py <porta> '<comando>' [...]
+"""Console telnet de um nó do PNETLab (RouterOS). Uso: ros_console.py <porta> '<comando>' [...]
 Entra como admin sem senha e NÃO define senha quando o RouterOS oferece trocar (Ctrl-C)."""
 import re
 import socket
