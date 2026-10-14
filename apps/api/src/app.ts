@@ -19,6 +19,7 @@ import { mapaRoutes } from './routes/mapa.js';
 import { empresasRoutes } from './routes/empresas.js';
 import { aceitesRoutes } from './routes/aceites.js';
 import { adicionaisRoutes } from './routes/adicionais.js';
+import { lgpdRoutes } from './routes/lgpd.js';
 import { produtividadeRoutes } from './routes/produtividade.js';
 import { publicApiRoutes } from './routes/public-api.js';
 import { radiusRoutes } from './routes/radius.js';
@@ -94,6 +95,7 @@ export async function buildApp(opts: { logger?: boolean } = {}) {
   await app.register(empresasRoutes);
   await app.register(aceitesRoutes);
   await app.register(adicionaisRoutes);
+  await app.register(lgpdRoutes);
   await app.register(integracoesRoutes);
   await app.register(publicApiRoutes);
   await app.register(networkRoutes);

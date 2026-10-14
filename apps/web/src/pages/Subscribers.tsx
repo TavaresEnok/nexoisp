@@ -147,6 +147,7 @@ export function SubscriberDetail() {
           <Contacts subscriberId={s.id} />
           <SubscriberDocuments subscriberId={s.id} />
           <Timeline subscriberId={s.id} />
+          {can(me, 'settings:manage') && <Privacy subscriber={s} onChange={reload} />}
           {can(me, 'crm:read') && has(me, 'crm') && <TicketList subscriberId={s.id} />}
           {can(me, 'os:read') && has(me, 'field') && <WorkOrderList subscriberId={s.id} />}
           {modal === 'edit' && (
@@ -171,5 +172,27 @@ export function SubscriberDetail() {
         </>)}
       </State>
     </Page>
+  );
+}
+
+/** LGPD: cópia dos dados do titular e anonimização (a fatura, o pagamento e o registro de conexão continuam pelo prazo legal). */
+function Privacy({ subscriber, onChange }: { subscriber: any; onChange: () => void }) {
+  const [f, setF] = useState<{ reason: string; confirm_name: string } | null>(null);
+  if (subscriber.anonymized_at) return <Card title="Privacidade (LGPD)"><Badge>Anonimizado em {d(subscriber.anonymized_at)}</Badge><div className="small muted">{subscriber.anonymized_reason}</div></Card>;
+  return (
+    <Card title="Privacidade (LGPD)" actions={<div className="row">
+      <ActionButton className="sm" onClick={() => download(`/subscribers/${subscriber.id}/lgpd-export`, `dados-do-titular-${String(subscriber.id).slice(0, 8)}.json`)}>Baixar cópia dos dados</ActionButton>
+      <button className="sm danger" onClick={() => setF({ reason: '', confirm_name: '' })}>Anonimizar titular</button></div>}>
+      <p className="small muted" style={{ margin: 0 }}>A cópia traz cadastro, contratos, faturas, atendimentos, anotações, aceites e registro de conexões. A anonimização é definitiva e só vale com contratos encerrados e sem faturas em aberto.</p>
+      {f && (
+        <Modal title="Anonimizar titular" onClose={() => setF(null)}>
+          <Form submit="Anonimizar definitivamente" onCancel={() => setF(null)} onSubmit={async () => { await api(`/subscribers/${subscriber.id}/anonymize`, { body: f }); setF(null); onChange(); }}>
+            <p className="small">Saem: nome, CPF/CNPJ, contatos, endereços, anotações, documentos, texto de atendimentos e acesso ao portal. Ficam: contratos, faturas e pagamentos, aceites e registros de conexão (guarda legal). Não há como desfazer.</p>
+            <Field label="Motivo e protocolo"><input value={f.reason} minLength={5} maxLength={300} required onChange={(e) => setF({ ...f, reason: e.target.value })} placeholder="Pedido do titular, protocolo 123" /></Field>
+            <Field label={`Digite o nome do assinante para confirmar: ${subscriber.name}`}><input value={f.confirm_name} required onChange={(e) => setF({ ...f, confirm_name: e.target.value })} /></Field>
+          </Form>
+        </Modal>
+      )}
+    </Card>
   );
 }

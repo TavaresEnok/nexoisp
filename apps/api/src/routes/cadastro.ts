@@ -153,9 +153,12 @@ export async function cadastroRoutes(app: FastifyInstance) {
     const b = zSubscriber.parse(req.body) as Record<string, unknown>;
     return withScope(req.ctx.scope, async (c) => {
       const s = (await c.query(
-        `update subscribers set ${SUB_COLS.map((k, i) => `${k} = $${i + 2}`).join(', ')}, updated_at = now() where id = $1 returning *`,
+        `update subscribers set ${SUB_COLS.map((k, i) => `${k} = $${i + 2}`).join(', ')}, updated_at = now() where id = $1 and anonymized_at is null returning *`,
         [id, ...SUB_COLS.map((k) => b[k])])).rows[0];
-      if (!s) throw new HttpError(404, 'assinante não encontrado');
+      if (!s) {
+        if ((await c.query('select 1 from subscribers where id = $1', [id])).rowCount) throw new HttpError(409, 'titular anonimizado: o cadastro não pode mais ser alterado');
+        throw new HttpError(404, 'assinante não encontrado');
+      }
       await audit(c, req.ctx, 'subscriber.update', 'subscriber', id);
       return s;
     });

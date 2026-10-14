@@ -470,3 +470,19 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   contrato vale só sobre o plano. Migração 044.
 - **Limites dos adicionais:** sem proporcional no primeiro mês; sem modelo de "combo" pronto (o combo é o plano mais os adicionais de cada contrato); sem
   integração com TV/telefonia (é só cobrança); adicional contratado depois de gerada a fatura do mês entra no mês seguinte.
+
+### 14/10/2026 — LGPD do titular (cópia dos dados e anonimização) e revisão de segurança (parte 2)
+
+- **Entregue (testado: 3 testes novos):** na ficha do assinante, "Privacidade (LGPD)", só para o administrador. **Cópia dos dados** (JSON): cadastro, contatos,
+  contratos com endereço de instalação, faturas, atendimentos (mensagens visíveis ao assinante), ordens de serviço, anotações, documentos (metadados), aceites,
+  registro de conexões e acesso ao portal; fica na auditoria. **Anonimização** (definitiva): exige contratos encerrados e nenhuma fatura em aberto/em conciliação,
+  motivo e o nome digitado. Sai: nome, CPF/CNPJ, e-mail, telefone, endereços, dados pessoais extras, contatos, texto de anotações e de atendimentos, documentos
+  anexados, endereço de instalação e coordenadas, ficha do prospecto, telefone nos registros de aviso e o acesso ao portal (desativado, sessões encerradas).
+  Fica: contratos, faturas e pagamentos, aceites assinados, registro de conexões (guarda legal). O cadastro anonimizado não pode mais ser alterado. Migração 045.
+- **Responsabilidade:** o provedor é o controlador; o sistema entrega a ferramenta. Prazos de atendimento ao titular e a base legal de cada retenção são do
+  provedor e do jurídico dele. **O que fica deve ser conferido com o jurídico** (fiscal, Marco Civil art. 13, ANATEL).
+- **Limites conhecidos:** o login PPPoE da conta continua (é identificador técnico da conexão e some quando o registro de sessões vence); campos digitados à mão
+  em "valores personalizados" saem, mas texto livre dentro de aditivos e aceites não é varrido; backups antigos continuam com os dados até vencerem na política de
+  backup do provedor; não há fluxo de pedido do titular pelo portal (o provedor registra o pedido e usa a ficha).
+- **Revisão de segurança, o que ainda não foi feito:** auditoria de pacotes (`npm audit`) — o ambiente de build deste servidor não alcança o registro de pacotes;
+  teste de invasão por terceiros; limite de requisições por endereço nas rotas autenticadas do painel; retenção por tipo de dado como política configurável.
