@@ -121,6 +121,13 @@ O servidor de autenticação sobe junto com o sistema (`radius` no compose). O p
 - **Fabricantes:** MikroTik validado em laboratório. Huawei e Cisco ainda não foram testados em equipamento.
 - **Chave:** perder `NEXO_RADIUS_KEY` não perde as senhas (elas continuam no cadastro), mas obriga a "Reaplicar contas" em todos os concentradores.
 
+### Consulta de IP para ofício
+
+Rede → **Consulta de IP (ofício)**. Preencha o IP, a **porta de origem** (quando o ofício trouxer; com CGNAT é ela que identifica um único assinante), o horário e
+o **fuso** em que o ofício informa o horário (muitos vêm em UTC/GMT). Sem porta, um IP de CGNAT aparece com todos os assinantes que o compartilharam. A margem em
+minutos cobre divergência de relógio. O relatório pode ser impresso ou exportado em CSV; cada consulta fica na auditoria com o número do ofício.
+A resposta depende do registro de sessões: mantenha o accounting ligado nos concentradores e a guarda de sessões (`NEXO_SESSION_KEEP_DAYS`) em pelo menos 1 ano.
+
 ### Conferência antes de entrar em produção
 
 ```bash

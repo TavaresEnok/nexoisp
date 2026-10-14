@@ -392,3 +392,13 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   Antes do ajuste, todo ciclo era uma passada completa: 21 s de escrita a cada 15 s.
 - **Não medido:** autenticação com 100 mil contas (medida com 20 mil), painel e faturamento nesse tamanho, concentradores reais, banco em disco lento.
 
+### 14/10/2026 — consulta de IP para ofício
+
+- **Entregue (testado: 154 testes da API):** página Rede → Consulta de IP (ofício). Informa IP, porta (opcional), período, fuso do horário do ofício, margem em minutos
+  e o número do ofício/processo (obrigatório). IP público de CGNAT com porta → o bloco determinístico aponta um único IP privado e a resposta traz quem o usava no período
+  (mesmo que o IP privado tenha sido reaproveitado); sem porta → todos os que compartilharam o IP público, com aviso; IP entregue direto ou privado → sessões com ele;
+  IPv6 → delegação de prefixo do contrato. Relatório para imprimir e CSV. Cada consulta fica na auditoria (quem, ofício, endereço, período, quantos assinantes) e aparece
+  no histórico da página. Permissão própria (`legal:query`): administrador e NOC.
+- **Limites:** a resposta vale pelo registro de sessões (accounting); antes do início dele, ou se o accounting falhar, não há como responder. IPv6 não tem histórico de
+  titulares anteriores do mesmo prefixo. Período máximo de 92 dias por consulta.
+

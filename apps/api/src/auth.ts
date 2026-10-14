@@ -9,6 +9,7 @@ const ALL_TENANT = [
   'contracts:read', 'contracts:write', 'network:read', 'network:write', 'network:operate',
   'finance:read', 'finance:write', 'audit:read', 'import:run', 'settings:manage',
   'os:read', 'os:write', 'stock:read', 'stock:write', 'crm:read', 'crm:write', 'trust:grant',
+  'legal:query',   // consulta de IP para ofício: devolve dados pessoais de quem usou o endereço
 ];
 export const PERMISSIONS: Record<Role, string[]> = {
   saas_operator: ['tenants:manage'],
@@ -17,7 +18,7 @@ export const PERMISSIONS: Record<Role, string[]> = {
     'os:read', 'os:write', 'stock:read', 'crm:read', 'crm:write', 'trust:grant'],
   finance: ['subscribers:read', 'plans:read', 'contracts:read', 'finance:read', 'finance:write', 'crm:read', 'crm:write', 'trust:grant'],
   noc: ['subscribers:read', 'plans:read', 'contracts:read', 'network:read', 'network:write', 'network:operate',
-    'os:read', 'os:write', 'stock:read', 'stock:write', 'crm:read', 'crm:write'],
+    'os:read', 'os:write', 'stock:read', 'stock:write', 'crm:read', 'crm:write', 'legal:query'],
   subscriber: ['portal:self'],
 };
 
