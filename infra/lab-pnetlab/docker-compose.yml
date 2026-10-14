@@ -32,3 +32,11 @@ services:
       NEXO_AGENT_DATA: /data
       NEXO_AGENT_CREDENTIALS: /config/credentials.json
     volumes: ["${STATE}/data:/data", "${STATE}/certs:/certs:ro", "${STATE}/config:/config:ro"]
+  # Só para o modo "RADIUS integrado" neste servidor (ver coa_relay.py): repassa a desconexão a partir do endereço do host.
+  coa-relay:
+    <<: *common
+    profiles: [integrado]
+    image: nexoisp-agent
+    entrypoint: ["python", "/coa_relay.py", "172.30.250.1", "13799", "${HOST_IP}", "${NAS_IP}", "3799"]
+    volumes: ["./coa_relay.py:/coa_relay.py:ro"]
+
