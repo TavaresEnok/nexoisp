@@ -123,7 +123,8 @@ async function executeOne(tenantId: string, agentId: string, d: { attempt_id: st
         await applyAccount(c, tenantId, p.username, w, env.desired_version, b.secret, checkRows(w), reply);
         step('autorização no RADIUS', 'ok', { policy: p.policy, profile: effectiveProfile(w), atributos: reply.map((r) => r.attribute) });
       }
-      return { dev, acc: (await readAccount(c, tenantId, p.username))!, sessions: await openSessions(c, tenantId, p.username), fresh: !before };
+      const everSeen = !!(await c.query('select 1 from radius_acct where tenant_id = $1 and username = $2 limit 1', [tenantId, p.username])).rowCount;
+      return { dev, acc: (await readAccount(c, tenantId, p.username))!, sessions: await openSessions(c, tenantId, p.username), fresh: !before, everSeen };
     });
     await withScope(SYS(tenantId), (c) => progress(c, agentId, d.attempt_id, 'EXECUTING', steps));
 
@@ -139,7 +140,15 @@ async function executeOne(tenantId: string, agentId: string, d: { attempt_id: st
         step('desconexão da sessão', 'ok', { sessao: s.session_id, resposta: 'o concentrador não tem mais essa sessão' });
       } else { pending.push(s); step('desconexão da sessão', 'incerto', { sessao: s.session_id, resposta: r.outcome === 'nak' ? `recusada (causa ${r.errorCause ?? '?'})` : 'sem resposta do concentrador' }); }
     }
-    if (!targets.length) step('desconexão da sessão', 'ok', 'nenhuma sessão a tratar');
+    // Conta de que nunca recebemos accounting (ex.: sessão anterior à passagem para o RADIUS integrado): não dá para saber se há
+    // sessão. Quando a intenção exige derrubar, pergunta-se ao concentrador pelo nome do usuário.
+    const wantsDrop = !!p.reconnect || (p.policy === 'suspended' && p.suspension?.session === 'disconnect');
+    if (!targets.length && wantsDrop && !ctx.fresh && !ctx.everSeen) {
+      const r: DisconnectResult = await drop({ host: ctx.dev.coa_host || ctx.dev.nas_host, port: ctx.dev.coa_port, secret: ctx.dev.secret, username: p.username });
+      if (r.outcome === 'ack') step('desconexão da sessão', 'ok', { resposta: 'aceita pelo concentrador (sessão sem registro de accounting)' });
+      else if (r.outcome === 'nak' && r.errorCause === SESSION_NOT_FOUND) step('desconexão da sessão', 'ok', 'o concentrador não tem sessão desta conta');
+      else { pending.push({ id: -1, session_id: '', framed_ip: null, started_at: new Date(), calling_station: null }); step('desconexão da sessão', 'incerto', { resposta: r.outcome === 'nak' ? `recusada (causa ${r.errorCause ?? '?'})` : 'sem resposta do concentrador' }); }
+    } else if (!targets.length) step('desconexão da sessão', 'ok', 'nenhuma sessão a tratar');
     await withScope(SYS(tenantId), (c) => progress(c, agentId, d.attempt_id, 'VERIFYING', steps));
 
     // 3. verificação: conta na versão pedida e nenhuma sessão antiga sem desfecho

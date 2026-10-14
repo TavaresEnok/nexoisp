@@ -202,6 +202,27 @@ describe('concentrador no RADIUS integrado', () => {
     dropAnswer = { outcome: 'ack' };
   });
 
+  it('conta de que nunca chegou accounting: a desconexão é pedida pelo nome do usuário', async () => {
+    const d = await device('mikrotik');
+    const a = await account(d.id, 'n');
+    await run();
+    drops.length = 0; dropAnswer = { outcome: 'ack' };
+    await call(admin, 'POST', `/api/resources/${a.resourceId}/disconnect`, { reason: 'sessão anterior à conversão' });
+    await run();
+    expect((await lastOp(a.contractId)).status).toBe('SUCCEEDED');
+    expect(drops).toHaveLength(1);
+    expect(drops[0]).toMatchObject({ username: a.username });
+    expect(drops[0].sessionId).toBeUndefined();
+    // depois que o accounting da conta existe (mesmo encerrado), vale o accounting: sem sessão aberta, nada é enviado
+    const s = await openSession(a.username, 5);
+    await owner.query(`update radius_acct set stopped_at = now() where id = $1`, [s.id]);
+    drops.length = 0;
+    await call(admin, 'POST', `/api/resources/${a.resourceId}/disconnect`, { reason: 'sem sessão' });
+    await run();
+    expect((await lastOp(a.contractId)).status).toBe('SUCCEEDED');
+    expect(drops).toHaveLength(0);
+  });
+
   it('sessões, consumo, online e log de autenticação vêm do accounting do próprio sistema', async () => {
     const d = await device('mikrotik');
     const a = await account(d.id, 'd');
