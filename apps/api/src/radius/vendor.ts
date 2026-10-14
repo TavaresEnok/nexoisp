@@ -63,10 +63,26 @@ export function replyRows(vendor: Vendor, w: Wanted): Row[] {
   return rows;
 }
 
-/** Comandos para o provedor colar no concentrador. `secret` só é conhecido na criação/troca; depois vai o marcador. */
-export function setupCommands(vendor: Vendor, o: { host: string; authPort: number; acctPort: number; coaPort: number; secret: string }): string {
+export interface Tunnel { privateKey: string; serverPublicKey: string; endpointHost: string; endpointPort: number; tunnelIp: string; serverIp: string }
+/** Fabricantes em que sabemos montar o túnel pelo painel. Huawei e Cisco não têm WireGuard: usam acesso direto. */
+export const TUNNEL_VENDORS: Vendor[] = ['mikrotik', 'generic'];
+
+/**
+ * Comandos para o provedor colar no concentrador. `secret` e a chave privada do túnel só são conhecidos na criação/troca;
+ * depois vão marcadores. Com túnel, o RADIUS é o endereço interno do servidor e os pacotes saem do endereço do túnel.
+ */
+export function setupCommands(vendor: Vendor, o: { host: string; authPort: number; acctPort: number; coaPort: number; secret: string; tunnel?: Tunnel | null }): string {
+  const tn = o.tunnel;
   if (vendor === 'mikrotik') return [
-    `/radius add service=ppp address=${o.host} secret="${o.secret}" authentication-port=${o.authPort} accounting-port=${o.acctPort} timeout=3s comment=nexoisp`,
+    ...(tn ? [
+      `# 1. túnel até o NexoISP (RouterOS 7 ou mais novo)`,
+      `/interface wireguard add name=nexoisp private-key="${tn.privateKey}" comment=nexoisp`,
+      `/interface wireguard peers add interface=nexoisp public-key="${tn.serverPublicKey}" endpoint-address=${tn.endpointHost} endpoint-port=${tn.endpointPort} allowed-address=${tn.serverIp}/32 persistent-keepalive=25s comment=nexoisp`,
+      `/ip address add address=${tn.tunnelIp}/32 network=${tn.serverIp} interface=nexoisp comment=nexoisp`,
+      `/ip firewall filter add chain=input in-interface=nexoisp protocol=udp dst-port=${o.coaPort} action=accept place-before=0 comment="nexoisp: desconexao de sessao"`,
+      `# 2. autenticação pelo túnel`,
+    ] : []),
+    `/radius add service=ppp address=${o.host} secret="${o.secret}" authentication-port=${o.authPort} accounting-port=${o.acctPort} timeout=3s${tn ? ` src-address=${tn.tunnelIp}` : ''} comment=nexoisp`,
     `/radius incoming set accept=yes port=${o.coaPort}`,
     `/ppp aaa set use-radius=yes accounting=yes interim-update=5m`,
   ].join('\n');
@@ -103,7 +119,15 @@ export function setupCommands(vendor: Vendor, o: { host: string; authPort: numbe
     ` port ${o.coaPort}`,
   ].join('\n');
   return [
-    `Servidor RADIUS: ${o.host}`,
+    ...(tn ? [
+      `Túnel WireGuard`,
+      `  chave privada deste equipamento: ${tn.privateKey}`,
+      `  endereço deste equipamento no túnel: ${tn.tunnelIp}/32`,
+      `  par (servidor): chave pública ${tn.serverPublicKey}`,
+      `  endereço do par: ${tn.endpointHost}:${tn.endpointPort}  |  redes permitidas: ${tn.serverIp}/32  |  keepalive: 25 s`,
+      ``,
+    ] : []),
+    `Servidor RADIUS: ${o.host}${tn ? ` (pelo túnel; origem ${tn.tunnelIp})` : ''}`,
     `Porta de autenticação: ${o.authPort}  |  Porta de accounting: ${o.acctPort}`,
     `Segredo compartilhado: ${o.secret}`,
     `Desconexão (RFC 5176): aceitar de ${o.host} na porta ${o.coaPort}`,

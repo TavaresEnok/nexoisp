@@ -5,6 +5,8 @@ import { withScope } from '../src/db.js';
 import { buildDisconnect, parseReply, sendDisconnect, type DisconnectResult } from '../src/radius/coa.js';
 import { runHostedOnce, syncAccounting } from '../src/radius/executor.js';
 import { checkRows, replyRows, setupCommands } from '../src/radius/vendor.js';
+import { newPeerKeys, renderServerConf } from '../src/radius/vpn-shared.js';
+import { noScope } from '../src/db.js';
 import { call, login } from './helpers.js';
 import { createHash } from 'node:crypto';
 
@@ -260,3 +262,71 @@ describe('concentrador no RADIUS integrado', () => {
     expect((await call(admin, 'POST', `/api/devices/${old.id}/convert-to-integrated`, { vendor: 'mikrotik', nas_ip: ip() })).status).toBe(400);   // já é integrado
   });
 });
+
+describe('túnel integrado', () => {
+  const SERVER_PUB = newPeerKeys().publicKey;
+  it('sem o serviço do túnel no ar o cadastro por túnel é recusado; com ele, o concentrador recebe endereço e chaves próprios', async () => {
+    await owner.query('delete from vpn_settings');
+    expect((await call(admin, 'GET', '/api/radius/status')).body.vpn.enabled).toBe(false);
+    expect((await call(admin, 'POST', '/api/radius/devices', { name: `tun0 ${tag}`, vendor: 'mikrotik', connection: 'vpn' })).status).toBe(503);
+    await withScope(noScope, (c) => c.query('select vpn_set_server_key($1)', [SERVER_PUB]));       // o que o serviço do túnel faz ao subir
+    expect((await call(admin, 'GET', '/api/radius/status')).body.vpn.enabled).toBe(true);
+    expect((await call(admin, 'POST', '/api/radius/devices', { name: `tun-direto ${tag}`, vendor: 'mikrotik', connection: 'direct' })).status).toBe(400);   // direto exige o endereço
+    expect((await call(admin, 'POST', '/api/radius/devices', { name: `tun-hw ${tag}`, vendor: 'huawei', connection: 'vpn' })).status).toBe(400);       // sem WireGuard
+
+    const d = (await call(admin, 'POST', '/api/radius/devices', { name: `tun1 ${tag}`, vendor: 'mikrotik', connection: 'vpn' })).body;
+    expect(d.nas_ip).toMatch(/^10\.250\.\d+\.\d+$/);
+    expect(d.setup).toMatchObject({ connection: 'vpn', server_host: '10.250.0.1', auth_port: 1812, acct_port: 1813 });
+    const cmd: string = d.setup.commands;
+    const priv = cmd.match(/private-key="([A-Za-z0-9+/]{43}=)"/)![1];
+    expect(cmd).toContain(`public-key="${SERVER_PUB}"`);
+    expect(cmd).toContain(`address=${d.nas_ip}/32 network=10.250.0.1`);
+    expect(cmd).toContain(`/radius add service=ppp address=10.250.0.1 secret="${d.secret}"`);
+    expect(cmd).toContain(`src-address=${d.nas_ip}`);
+    expect(cmd).toContain('allowed-address=10.250.0.1/32');
+    // a chave privada não fica no sistema: só a pública do par, e as instruções reexibidas trazem marcadores
+    const peer = (await sql('select public_key, host(tunnel_ip) as ip from vpn_peers where device_id = $1', [d.id]))[0];
+    expect(peer.ip).toBe(d.nas_ip);
+    expect(peer.public_key).not.toBe(priv);
+    const again = (await call(admin, 'GET', `/api/radius/devices/${d.id}/setup`)).body;
+    expect(JSON.stringify(again)).not.toContain(priv);
+    expect(again.setup.commands).toContain('<CHAVE PRIVADA DO TÚNEL>');
+    // o concentrador é reconhecido pelo endereço do túnel
+    expect((await sql('select host(nas_ip) as ip from radius_nas where device_id = $1', [d.id]))[0].ip).toBe(d.nas_ip);
+    expect((await call(admin, 'GET', '/api/devices')).body.find((x: any) => x.id === d.id).tunnel).toMatchObject({ ip: d.nas_ip, handshake_at: null });
+
+    // cada concentrador tem o seu endereço; um direto pode ser passado para o túnel depois
+    const d2 = (await call(admin, 'POST', '/api/radius/devices', { name: `tun2 ${tag}`, vendor: 'generic', connection: 'vpn' })).body;
+    expect(d2.nas_ip).not.toBe(d.nas_ip);
+    expect(d2.setup.commands).toContain('Túnel WireGuard');
+    const direto = await device('mikrotik');
+    const t = await call(admin, 'POST', `/api/radius/devices/${direto.id}/tunnel`);
+    expect(t.status).toBe(200);
+    expect(t.body.nas_ip).toMatch(/^10\.250\./);
+    expect((await sql('select host(nas_ip) as ip, coa_port from radius_nas where device_id = $1', [direto.id]))[0]).toEqual({ ip: t.body.nas_ip, coa_port: 3799 });
+    // o serviço do túnel enxerga os pares de todos os provedores só pela função própria; outro provedor não vê o par
+    const all = await withScope(noScope, async (c) => (await c.query('select * from vpn_peers_all()')).rows);
+    expect(all.some((p: any) => p.tunnel_ip === d.nas_ip)).toBe(true);
+    expect((await call(beta, 'GET', `/api/radius/devices/${d.id}/setup`)).status).toBe(404);
+    expect(renderServerConf('PRIV', [{ public_key: 'PUB1', tunnel_ip: '10.250.0.2' }])).toBe('[Interface]\nPrivateKey = PRIV\nListenPort = 51820\n\n[Peer]\nPublicKey = PUB1\nAllowedIPs = 10.250.0.2/32\n');
+  });
+
+  it('a desconexão sai pelo serviço do túnel quando ele está configurado', async () => {
+    const relay = createSocket('udp4');
+    const got: Buffer[] = [];
+    relay.on('message', (msg, r) => {
+      got.push(msg);
+      const req = msg.subarray(6);
+      const head = Buffer.from([41, req[1], 0, 20]);
+      relay.send(Buffer.concat([head, createHash('md5').update(Buffer.concat([head, req.subarray(4, 20), Buffer.from('seg-do-tunel')])).digest()]), r.port, r.address);
+    });
+    await new Promise<void>((r) => relay.bind(0, '127.0.0.1', r));
+    process.env.NEXO_RADIUS_COA_RELAY = `127.0.0.1:${relay.address().port}`;
+    try {
+      expect(await sendDisconnect({ host: '10.250.0.7', port: 3799, secret: 'seg-do-tunel', username: 'cliente01' }, 300, 2)).toEqual({ outcome: 'ack' });
+      expect([...got[0].subarray(0, 6)]).toEqual([10, 250, 0, 7, 0x0e, 0xd7]);       // destino real: 10.250.0.7:3799
+      expect(got[0][6]).toBe(40);                                                    // seguido do Disconnect-Request intacto
+    } finally { delete process.env.NEXO_RADIUS_COA_RELAY; relay.close(); }
+  });
+});
+

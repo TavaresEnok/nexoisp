@@ -44,11 +44,24 @@ export async function sendDisconnect(o: { host: string; port: number; secret: st
   timeoutMs = 2500, tries = 2): Promise<DisconnectResult> {
   const id = randomBytes(1)[0];
   const req = buildDisconnect(o.secret, id, o);
+  // Com o serviço do túnel, o pedido sai por ele (é de lá que o concentrador espera receber); senão vai direto.
+  const relay = process.env.NEXO_RADIUS_COA_RELAY?.match(/^([^:]+):(\d+)$/);
+  if (relay && isIP(o.host) === 4) {
+    const head = Buffer.alloc(6);
+    o.host.split('.').forEach((n, i) => { head[i] = Number(n); });
+    head.writeUInt16BE(o.port, 4);
+    return exchange(relay[1], Number(relay[2]), Buffer.concat([head, req]), o.secret, req, timeoutMs, tries);
+  }
+  return exchange(o.host, o.port, req, o.secret, req, timeoutMs, tries);
+}
+
+async function exchange(host: string, port: number, wire: Buffer, secret: string, req: Buffer, timeoutMs: number, tries: number): Promise<DisconnectResult> {
+  const o = { host, port, secret };
   const sock = createSocket(isIP(o.host) === 6 ? 'udp6' : 'udp4');
   try {
     return await new Promise<DisconnectResult>((resolve) => {
       let n = 0;
-      const send = () => { n++; sock.send(req, o.port, o.host, () => {}); };
+      const send = () => { n++; sock.send(wire, o.port, o.host, () => {}); };
       const timer = setInterval(() => { if (n >= tries) { clearInterval(timer); resolve({ outcome: 'timeout' }); } else send(); }, timeoutMs);
       sock.on('message', (msg) => { const r = parseReply(o.secret, req, msg); if (r) { clearInterval(timer); resolve(r); } });
       sock.on('error', () => { clearInterval(timer); resolve({ outcome: 'timeout' }); });
