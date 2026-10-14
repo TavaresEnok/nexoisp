@@ -358,3 +358,14 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   (agente + RADIUS local): rodá-lo de novo desfaz o apontamento do concentrador.
 - **Não validado:** Huawei e Cisco; segunda instância em outro servidor; túnel entre provedor e sistema (não existe); desempenho com muitos assinantes.
 
+### 14/10/2026 — medição de carga do RADIUS integrado (primeira, sintética)
+
+- **Ambiente:** este servidor (VM com 20 vCPU Xeon Gold 6138 a 2,0 GHz, 29 GB), banco e RADIUS na mesma máquina, 20.000 contas, cliente sintético (`radclient`) no próprio host.
+- **Defeito encontrado e corrigido:** com 16 conexões ao banco e 200 pedidos em paralelo, o servidor ficava sem conexão e **recusava assinante válido** (9% de recusas indevidas).
+  O conjunto de conexões passou a ter uma por linha de execução do servidor; repetido o teste, 0 recusa indevida e 0 pacote perdido.
+- **Medido depois da correção:** autenticação entre ~3.600/s (1.000 em paralelo) e ~7.700/s (200 em paralelo); início de sessão ~3.500/s; atualização de accounting ~10.900/s.
+  Abrir a senha cifrada custa ~0,4 ms por login.
+- **O que a medição NÃO cobre:** 100 mil contas de verdade, concentradores reais, banco em disco lento, e o restante do sistema (painel, faturamento, rotinas).
+  Pontos conhecidos que precisam de trabalho antes de um provedor grande: a rotina que copia sessões/online para o painel regrava todas as contas a cada ciclo;
+  não há limpeza do accounting e do log de autenticação antigos; um servidor só é ponto único de falha.
+

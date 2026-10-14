@@ -19,11 +19,13 @@ sql {
 	read_groups = no
 	read_clients = no
 	delete_stale_sessions = yes
+	# Uma conexão por linha de execução do servidor: com menos que isso, um pico de logins fica sem conexão e o servidor
+	# RECUSA assinante válido (medido em 14/10/2026: 9% de recusas indevidas com 16 conexões e 200 pedidos em paralelo).
 	pool {
-		start = 2
-		min = 2
-		max = 16
-		spare = 2
+		start = 4
+		min = 4
+		max = ${thread[pool].max_servers}
+		spare = 4
 		uses = 0
 		lifetime = 0
 		idle_timeout = 120
