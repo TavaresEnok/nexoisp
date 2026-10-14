@@ -93,6 +93,35 @@ await step('tema escuro alterna e persiste', async () => {
   await admin.click('button[aria-label="Usar tema claro"]');
 });
 
+await step('telas novas abrem sem erro (mapa, empresas, adicionais, ANATEL, consulta de IP, manutenções, importação)', async () => {
+  for (const [path, texto] of [['/mapa', 'Cobertura'], ['/empresas', 'Empresas'], ['/adicionais', 'Produtos adicionais'], ['/anatel', 'Coleta de acessos'],
+    ['/consulta-ip', 'Consulta de IP'], ['/manutencoes', 'Manutenções'], ['/importacao', 'Importação de dados']]) {
+    await admin.goto(`${BASE}${path}`); await admin.getByText(texto, { exact: false }).first().waitFor();
+  }
+  await admin.goto(`${BASE}/importacao`);
+  if (!(await admin.locator('option:has-text("Histórico")').count())) throw new Error('importação sem a opção de histórico');
+});
+await step('mapa: arrastar, aproximar e camadas', async () => {
+  await admin.goto(`${BASE}/mapa`);
+  const map = admin.locator('.map'); await map.waitFor();
+  const box = await map.boundingBox();
+  await admin.mouse.move(box.x + box.width / 2, box.y + box.height / 2); await admin.mouse.down();
+  await admin.mouse.move(box.x + box.width / 2 + 120, box.y + box.height / 2 + 60, { steps: 6 }); await admin.mouse.up();
+  await admin.click('button[aria-label="Aproximar"]');
+  if ((await admin.locator('.map img.tile').count()) === 0) throw new Error('mapa sem blocos');
+  await admin.uncheck('label:has-text("Caixas ópticas") input');
+  await admin.waitForTimeout(400);
+});
+await step('contrato: aceite eletrônico, área ANATEL e produtos adicionais', async () => {
+  await admin.goto(`${BASE}/contratos`);
+  await admin.click('tbody tr a:has-text("abrir") >> nth=0');
+  await admin.click('button[role=tab]:has-text("Condições")');
+  await admin.waitForSelector('text=Aceite eletrônico');
+  await admin.click('button[role=tab]:has-text("Contrato")');
+  await admin.waitForSelector('text=Área (coleta ANATEL)');
+  await admin.waitForSelector('text=Produtos adicionais (combo)');
+});
+
 const fin = await open('financeiro@alfa.demo');
 await step('financeiro não vê a rede (menu e servidor)', async () => {
   if (await fin.locator('a.nav:has-text("Agentes e equipamentos")').count()) throw new Error('menu mostra rede ao financeiro');

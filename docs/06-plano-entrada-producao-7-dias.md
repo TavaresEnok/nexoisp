@@ -583,3 +583,12 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
 - **Não validado:** roteador físico de nenhum fabricante (o simulador não reinicia e não tem PPPoE: o casamento pela conta PPPoE só foi testado com o servidor
   falso); TR-181 só no teste automatizado; firmware (atualização) e restauração de fábrica não foram feitos; a busca pela conta PPPoE olha a primeira
   conexão WAN (índice 1). Neste Docker do PNETLab, o servidor de gerência e o banco dele precisam do mesmo ajuste de seccomp do RADIUS.
+
+### 14/10/2026 — teste ponta a ponta da interface (navegador real)
+
+- **Rodado de novo (pendente havia várias entregas) e ampliado:** `./nexo e2e` (imagem oficial do Playwright, Chromium). Além das 10 etapas antigas, cobre as telas
+  novas (mapa com arrastar/aproximar/camadas, empresas, produtos adicionais, coleta ANATEL, consulta de IP, manutenções, importação com histórico) e os cartões
+  novos do contrato (aceite eletrônico, área ANATEL, produtos adicionais). **13 de 13 etapas certas no painel implantado neste servidor**, sem erro de página nem
+  chamada de API com erro — o que também confirma que a política de segurança de conteúdo (CSP) não quebrou nenhuma tela.
+- **Não coberto pelo teste:** o conteúdo dos blocos do mapa (servidor externo do OpenStreetMap; o teste só confere que os blocos são pedidos), o roteador do
+  cliente (depende do perfil `acs`) e o envio real de mensagens.

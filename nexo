@@ -30,6 +30,9 @@ init_env() {  # segredos e certificados de DESENVOLVIMENTO, gerados localmente (
 case "${1:-help}" in
   init)      init_env ;;
   agent-cert) scripts/dev-certs.sh agent "$2" "${3:-infra/certs/agent-$2}" ;;
+  e2e)  # fumaça da interface num navegador de verdade (imagem oficial do Playwright); BASE padrão: o painel local
+    docker run --rm --network host --ipc=host ${NEXO_E2E_DOCKER_OPTS:-} -v "$PWD/e2e:/e2e" -w /e2e mcr.microsoft.com/playwright:v1.49.1-jammy \
+      sh -c "npm install --no-audit --no-fund --silent playwright@1.49.1 >/dev/null && BASE=${BASE:-http://localhost:18080} node smoke.mjs" ;;
   agent-test) docker build -q $NEXO_BUILD_OPTS -t nexoisp-agent services/network-agent >/dev/null && docker run --rm $NEXO_RUN_OPTS nexoisp-agent python -m unittest discover -s tests -t . ;;
   backup)    scripts/backup.sh backup "${2:-backups}" ;;
   restore-check) scripts/backup.sh restore-check "$2" ;;
