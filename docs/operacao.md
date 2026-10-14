@@ -103,6 +103,20 @@ Na OS, o botão **Aplicar kit** baixa o estoque inteiro ou nada. A **disponibili
 ```
   O perfil PPP de bloqueio deve colocar o assinante na lista `nexo-bloqueados` (campo address-list do perfil).
 
+### Autenticação dos assinantes (RADIUS integrado)
+
+O servidor de autenticação sobe junto com o sistema (`radius` no compose). O provedor não instala nada.
+
+- **Na instalação:** defina `NEXO_RADIUS_KEY` e `NEXO_RADIUS_DB_PASSWORD` (o `./nexo init` gera) e `NEXO_RADIUS_PUBLIC_HOST` com o endereço pelo qual os concentradores
+  alcançam o servidor. Libere no firewall **UDP 1812 e 1813 só para os endereços dos concentradores**; a saída UDP 3799 até eles é usada para desconectar sessões.
+- **Cadastrar um concentrador:** Rede → Concentradores → Novo. Informe fabricante e o endereço de origem (o IP com que os pacotes dele chegam). O painel mostra o segredo
+  **uma vez** e os comandos para colar no equipamento.
+- **Trocar o segredo:** o servidor passa a aceitar o novo em até 2 minutos; troque no concentrador em seguida. Enquanto diferirem, ninguém autentica.
+- **Trazer um equipamento que usava agente local:** Rede → Concentradores → "Passar para cá". As contas são reenviadas; quem está conectado continua.
+- **Se o sistema cair:** quem está conectado continua navegando; reconexões e conexões novas falham até voltar. Configure um RADIUS secundário quando houver.
+- **Fabricantes:** MikroTik validado em laboratório. Huawei e Cisco ainda não foram testados em equipamento.
+- **Chave:** perder `NEXO_RADIUS_KEY` não perde as senhas (elas continuam no cadastro), mas obriga a "Reaplicar contas" em todos os concentradores.
+
 ### Conferência antes de entrar em produção
 
 ```bash

@@ -344,3 +344,17 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   (início e fim de contrato, por exemplo) ainda seguem o relógio do servidor.
 - **Testado:** 137 testes da API. O teste ponta a ponta da interface continua sem rodar.
 
+### 14/10/2026 — RADIUS integrado ao sistema (decisão do proprietário, ADR-016)
+
+- **Entregue (testado: 145 testes da API):** servidor de autenticação embutido no deploy, lendo o banco do NexoISP; cadastro do concentrador por fabricante com segredo gerado e
+  instruções prontas; senhas cifradas no banco; executor interno na mesma fila de operações; desconexão pelo protocolo; accounting, consumo, online e log de autenticação;
+  conversão de um equipamento com agente local para o modo integrado. Migração 036.
+- **Validado com o servidor real (sem equipamento):** senha certa aceita com os atributos do plano, senha errada e conta suspensa recusadas, concentrador com segredo errado
+  ignorado, conta de outro provedor não autentica pelo concentrador alheio, accounting (início, atualização com contador acima de 4 GB, fim) e uso simultâneo.
+- **Validado no cenário PNETLab (CHR 7.17, WORLD-MK4011):** o concentrador de teste foi convertido (4 contas) e apontado para o RADIUS integrado; desconexão aceita pelo
+  concentrador com reconexão pelo novo servidor e IP fixo mantido; suspensão (recusas registradas) e reativação; cliente aparece online no painel.
+- **Particular deste servidor:** o RADIUS integrado escuta em 2812/2813 (a 1812 é do laboratório antigo) e a desconexão passa por um repasse na rede do host
+  (`infra/lab-pnetlab/coa_relay.py`), porque o Docker daqui não faz NAT de saída. Em instalação normal nada disso é preciso. `./nexo trio up` ainda monta o modo antigo
+  (agente + RADIUS local): rodá-lo de novo desfaz o apontamento do concentrador.
+- **Não validado:** Huawei e Cisco; segunda instância em outro servidor; túnel entre provedor e sistema (não existe); desempenho com muitos assinantes.
+

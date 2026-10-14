@@ -194,3 +194,29 @@ Os responsáveis nominais e datas devem ser preenchidos com informações reais.
 - [MikroTik — RADIUS](https://manual.mikrotik.com/docs/authentication-authorization-accounting/radius/): autenticação, accounting, Disconnect e CoA.
 
 Consultadas na elaboração do planejamento em 9 de outubro de 2026. Confirmar a documentação aplicável às versões efetivamente adotadas ao implementar conectores.
+
+## ADR-016 — RADIUS integrado ao sistema (14/10/2026)
+
+**Decisão do proprietário:** o provedor não instala nem administra servidor de autenticação. O RADIUS sobe junto com o NexoISP, é configurado
+pelo painel e não aparece como produto separado. Isso **substitui, como padrão,** o desenho anterior (RADIUS e agente na rede do provedor, ADR-005),
+que continua existindo como opção para quem quer autenticar com o enlace até o sistema fora do ar.
+
+**Como ficou:**
+- Um serviço `radius` no mesmo `docker compose` da API, lendo e gravando no banco do NexoISP com um papel próprio (`nexo_radius`) que só alcança as tabelas `radius_*`.
+- O concentrador é cadastrado no painel (fabricante, endereço de origem) e **reconhecido pelo endereço de origem** dos pacotes; esse endereço define o provedor,
+  e todas as consultas do servidor ficam restritas às contas dele. O endereço é único em toda a plataforma.
+- A senha PPPoE fica **cifrada** no banco (`pgp_sym_encrypt`, chave `NEXO_RADIUS_KEY`) e só o servidor RADIUS a abre; a aplicação não tem permissão de decifrar por esse caminho.
+- As operações usam a **mesma fila e as mesmas regras** do agente (reserva, posse, versão da intenção, evidências). Quem executa é um executor interno da própria API.
+- Derrubar sessão é pelo protocolo (**Disconnect-Request, RFC 5176**), não por API de fabricante. O que muda por fabricante é só o conjunto de atributos (`radius/vendor.ts`).
+- Accounting, consumo, quem está online e o log de autenticação vêm direto do banco, sem sincronização por agente.
+
+**Consequências assumidas:**
+- Se o sistema (ou o caminho até ele) cair, quem está conectado continua; **reconexões e novas conexões falham** até voltar. Mitigação prevista: segunda instância do
+  serviço em outro endereço, configurada como RADIUS secundário no concentrador (ainda não exercitada entre servidores diferentes).
+- O RADIUS fica exposto em UDP 1812/1813 para os endereços dos concentradores. Pacote de origem desconhecida é descartado, mas custa uma consulta ao banco: falta limitar por firewall/taxa.
+- O concentrador precisa alcançar o servidor e aceitar dele a desconexão (UDP 3799). **Túnel (VPN) entre provedor e sistema ainda não é entregue pelo produto.**
+- Perder `NEXO_RADIUS_KEY` obriga a reprovisionar todas as contas (as senhas continuam no cadastro, cifradas com `NEXO_SECRET_KEY`).
+
+**Situação:** MikroTik validado no CHR 7.17 do cenário PNETLab (autenticação, IP fixo, accounting, desconexão, suspensão e reativação). Huawei e Cisco: atributos e comandos
+pela documentação dos fabricantes, **não exercitados em equipamento**.
+

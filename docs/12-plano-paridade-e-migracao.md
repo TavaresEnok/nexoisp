@@ -104,6 +104,9 @@ Entregue = implementado e coberto por teste automatizado. Nada aqui foi homologa
 | 🟡 Parcial | F5 (kit e auxiliares prontos; check-in com localização não: dado pessoal do técnico), C10 (desconto e indicação prontos; combos de produtos não), D5 (consumo por dia; faltam hora, semana e ano), C1 (canal HTTP genérico; sem operadora real testada) |
 | ⏳ Pendente | nada que dependa só de nós nesta lista; ver seção 4 (terceiros e equipamento) |
 
+**RADIUS integrado (14/10/2026, ADR-016):** a autenticação passou a ser do próprio sistema, sem instalação no provedor, como no SGP e no IXC. Concentrador por fabricante
+(MikroTik validado; Huawei e Cisco não exercitados), desconexão pelo protocolo, log de autenticação na ficha do contrato. Detalhes em `docs/03` e `docs/operacao.md`.
+
 **Lote 9 em detalhe (agente 0.5.0, escopo, aviso e documentos):**
 - **D10 desconexão:** ação assinada `subscriber.disconnect` (individual na ficha e em lote em "Online agora", até 200, com motivo). Não muda a autorização, o motivo nem a data da situação; só cai a sessão que existia antes do pedido. Exige agente 0.5.0.
 - **R1 rede por plano:** velocidade no formato MikroTik (com rajada) e pool de endereços enviados pelo RADIUS, opcionais, além do perfil do NAS; "reaplicar" explícito para as contas já provisionadas. Suspensa por perfil, valem a velocidade e o pool do perfil de bloqueio.
