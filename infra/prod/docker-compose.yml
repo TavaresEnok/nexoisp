@@ -52,7 +52,9 @@ services:
     environment:
       DATABASE_URL_APP: postgres://nexo_app:${NEXO_APP_DB_PASSWORD:?}@db:5432/nexo
     volumes: [vpnstate:/state]
-    ports: ["${NEXO_VPN_PORT:-51820}:51820/udp", "${NEXO_RADIUS_PORT:-1812}:1812/udp", "${NEXO_RADIUS_ACCT_PORT:-1813}:1813/udp"]
+    # Só o túnel (51820) fica exposto. A autenticação direta por IP só escuta na própria máquina, a menos que NEXO_RADIUS_DIRECT_BIND
+    # seja definido (ex.: 0.0.0.0) — e então libere 1812/1813 no firewall apenas para os endereços dos concentradores.
+    ports: ["${NEXO_VPN_PORT:-51820}:51820/udp", "${NEXO_RADIUS_DIRECT_BIND:-127.0.0.1}:${NEXO_RADIUS_PORT:-1812}:1812/udp", "${NEXO_RADIUS_DIRECT_BIND:-127.0.0.1}:${NEXO_RADIUS_ACCT_PORT:-1813}:1813/udp"]
   # RADIUS integrado: sobe junto com o sistema e lê o banco do NexoISP. O provedor não instala nada; só aponta o concentrador para cá.
   radius:
     build: ../radius

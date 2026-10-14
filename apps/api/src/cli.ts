@@ -55,6 +55,16 @@ if (cmd === 'migrate') {
   fail(e.NEXO_REQUIRE_ADMIN_MFA === '1', 'verificação em duas etapas obrigatória para administradores', 'defina NEXO_REQUIRE_ADMIN_MFA=1');
   fail(e.NEXO_COOKIE_SECURE === '1', 'cookie de sessão só por HTTPS', 'defina NEXO_COOKIE_SECURE=1');
   fail(!!e.NEXO_SECRET_KEY && !!e.NEXO_OP_SIGNING_KEY, 'chaves de cifra e de assinatura definidas', 'NEXO_SECRET_KEY e NEXO_OP_SIGNING_KEY são obrigatórias');
+  // autenticação integrada e túnel
+  fail(/^[A-Za-z0-9_-]{24,}$/.test(e.NEXO_RADIUS_KEY ?? ''), 'chave da autenticação integrada definida (24+ caracteres)', 'defina NEXO_RADIUS_KEY (openssl rand -hex 24); sem ela ninguém autentica pelo sistema');
+  fail(!!e.NEXO_RADIUS_DB_PASSWORD && e.NEXO_RADIUS_DB_PASSWORD.length >= 16, 'senha própria do servidor de autenticação no banco', 'defina NEXO_RADIUS_DB_PASSWORD (16+ caracteres)');
+  fail(!!(e.NEXO_VPN_PUBLIC_HOST || e.NEXO_RADIUS_PUBLIC_HOST), 'endereço público do túnel/autenticação informado', 'defina NEXO_VPN_PUBLIC_HOST: é o que aparece nos comandos entregues ao provedor');
+  warn(!!e.NEXO_BACKUP_COPY, 'cópia do backup fora deste servidor', 'defina NEXO_BACKUP_COPY: com o backup só aqui, perder o servidor perde tudo');
+  warn(Number(e.NEXO_SESSION_KEEP_DAYS ?? 400) >= 365, 'sessões guardadas por pelo menos 1 ano', 'NEXO_SESSION_KEEP_DAYS abaixo de 365: confirme com o jurídico (guarda do registro de conexão, Marco Civil art. 13)');
+  warn(await n(`select count(*) as n from radius_nas r join devices d on d.id = r.device_id where d.vendor not in ('mikrotik')`) === 0, 'concentradores só de fabricante validado', 'há concentrador Huawei/Cisco/genérico: atributos e comandos seguem a documentação, sem teste em equipamento');
+  warn(await n(`select count(*) as n from radius_nas where last_packet_at is null or last_packet_at < now() - interval '1 day'`) === 0, 'todo concentrador integrado enviou pacote nas últimas 24 h', 'há concentrador cadastrado que não está falando com o sistema');
+  warn(await n(`select count(*) as n from vpn_peers where last_handshake_at is null or last_handshake_at < now() - interval '1 day'`) === 0, 'todo túnel foi estabelecido nas últimas 24 h', 'há túnel cadastrado que nunca subiu ou caiu há mais de um dia');
+  warn(await n(`select count(*) as n from api_tokens where active and revoked_at is null and (expires_at is null)`) === 0, 'todo token de API tem validade', 'há token de API sem validade');
   warn(!e.NEXO_SECRET_KEY_PREVIOUS, 'nenhuma rotação de chave em andamento', 'NEXO_SECRET_KEY_PREVIOUS ainda definida: conclua a rotação');
   const tls = e.NEXO_AGENT_TLS_DIR ?? '';
   fail(!!tls && ['ca.crt', 'server.crt', 'server.key'].every((f) => existsSync(`${tls}/${f}`)), 'certificados da API de agentes presentes', `faltam ca.crt, server.crt ou server.key em ${tls || 'NEXO_AGENT_TLS_DIR'}`);

@@ -66,6 +66,16 @@ export async function radiusRoutes(app: FastifyInstance) {
       vpn: await withScope(noScope, async (c) => ({ enabled: !!(await c.query('select 1 from vpn_settings')).rowCount, endpoint: vpnEndpoint() })),
       vendors: VENDORS.map((v) => ({ id: v, validated: VENDOR_VALIDATED[v], tunnel: TUNNEL_VENDORS.includes(v) })) }));
 
+  // Para o provedor/operador montar a regra de firewall do acesso direto: só estes endereços precisam alcançar 1812/1813.
+  app.get('/api/radius/allowed-sources', { preHandler: guard('network:read') }, async (req) =>
+    withScope(req.ctx.scope, async (c) => {
+      const rows = (await c.query(
+        `select d.name, host(n.nas_ip) as ip, (p.device_id is not null) as via_tunnel from radius_nas n join devices d on d.id = n.device_id
+         left join vpn_peers p on p.device_id = n.device_id order by d.name`)).rows;
+      return { direct: rows.filter((r) => !r.via_tunnel), tunnel: rows.filter((r) => r.via_tunnel),
+        note: 'Concentradores por túnel não precisam de regra: chegam pelo túnel. Para os diretos, libere UDP 1812 e 1813 só destes endereços.' };
+    }));
+
   app.post('/api/radius/devices', { preHandler: guard('network:write') }, async (req) => {
     const b = z.object({
       name: z.string().trim().min(2).max(80), vendor: z.enum(VENDORS), connection: z.enum(['vpn', 'direct']).default('direct'), nas_ip: zIp.optional(),

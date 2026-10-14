@@ -22,10 +22,12 @@ export async function relatoriosRoutes(app: FastifyInstance) {
   app.get('/api/finance/reports/aging', { preHandler: guard('finance:read') }, async (req, reply) => {
     const q = z.object({ plan_id: zUuid.optional(), pop_id: zUuid.optional(), tag: zUuid.optional(), format: fmt }).parse(req.query);
     return withScope(req.ctx.scope, async (c) => {
+      // "hoje" do provedor uma vez só (e não por fatura)
+      const today = (await c.query(`select (now() at time zone coalesce((select timezone from tenant_settings where tenant_id = app_tenant()), 'America/Sao_Paulo'))::date as d`)).rows[0].d as string;
       const rows = (await c.query(
         `with base as (
            select i.amount_cents + i.fee_cents - i.discount_cents - coalesce((select sum(p.signed_cents) from payments p where p.invoice_id = i.id), 0) as due_cents,
-                  ((now() at time zone ${TZ})::date - i.due_date) as late
+                  ($4::date - i.due_date) as late
            from invoices i join contracts k on k.id = i.contract_id join plan_versions pv on pv.id = k.plan_version_id
            where i.status = 'open' and ($1::uuid is null or pv.plan_id = $1) and ($2::uuid is null or k.pop_id = $2)
              and ($3::uuid is null or exists (select 1 from contract_tags x where x.contract_id = k.id and x.tag_id = $3)))
@@ -33,7 +35,7 @@ export async function relatoriosRoutes(app: FastifyInstance) {
            select case when late <= 0 then 'A vencer' when late <= 30 then '1 a 30 dias' when late <= 60 then '31 a 60 dias'
                        when late <= 90 then '61 a 90 dias' else 'Mais de 90 dias' end as faixa,
                   case when late <= 0 then 1 when late <= 30 then 2 when late <= 60 then 3 when late <= 90 then 4 else 5 end as ordem, due_cents from base) x
-         group by faixa, ordem order by ordem`, [q.plan_id ?? null, q.pop_id ?? null, q.tag ?? null])).rows;
+         group by faixa, ordem order by ordem`, [q.plan_id ?? null, q.pop_id ?? null, q.tag ?? null, today])).rows;
       const total = rows.reduce((a, r) => ({ faturas: a.faturas + r.faturas, cents: a.cents + r.cents }), { faturas: 0, cents: 0 });
       if (q.format === 'csv') {
         await audit(c, req.ctx, 'finance.report_export', 'report', null, { name: 'aging' });
@@ -93,16 +95,17 @@ export async function relatoriosRoutes(app: FastifyInstance) {
   app.get('/api/finance/reports/to-cancel', { preHandler: guard('finance:read') }, async (req, reply) => {
     const q = z.object({ days: z.coerce.number().int().min(1).max(730).default(90), format: fmt }).parse(req.query);
     return withScope(req.ctx.scope, async (c) => {
+      const today = (await c.query(`select (now() at time zone coalesce((select timezone from tenant_settings where tenant_id = app_tenant()), 'America/Sao_Paulo'))::date as d`)).rows[0].d as string;
       const rows = (await c.query(
         `select k.id as contract_id, s.name as subscriber_name, pl.name as plan_name, count(i.id)::int as faturas,
                 coalesce(sum(i.amount_cents + i.fee_cents - i.discount_cents),0)::bigint::float as cents,
-                max((now() at time zone ${TZ})::date - i.due_date)::int as dias_atraso
+                max($2::date - i.due_date)::int as dias_atraso
          from contracts k join subscribers s on s.id = k.subscriber_id join plan_versions pv on pv.id = k.plan_version_id join plans pl on pl.id = pv.plan_id
          join invoices i on i.contract_id = k.id and i.status = 'open'
          where k.status = 'active'
          group by k.id, s.name, pl.name
-         having max((now() at time zone ${TZ.replace(/i\.tenant_id/, 'k.tenant_id')})::date - i.due_date) > $1
-         order by dias_atraso desc limit 1000`.replace(/\$\{TZ\}/g, TZ), [q.days])).rows;
+         having max($2::date - i.due_date) > $1
+         order by dias_atraso desc limit 1000`, [q.days, today])).rows;
       if (q.format === 'csv') {
         await audit(c, req.ctx, 'finance.report_export', 'report', null, { name: 'to-cancel', days: q.days });
         return reply.header('content-type', 'text/csv; charset=utf-8').header('content-disposition', 'attachment; filename="a-cancelar.csv"')
@@ -135,8 +138,8 @@ export async function relatoriosRoutes(app: FastifyInstance) {
            from onus where observed_state = 'authorized' and observed_rx_dbm is not null group by 1 order by min(observed_rx_dbm) desc`)).rows;
       const months = (await c.query(
         `select to_char(m, 'YYYY-MM') as month,
-                (select count(*) from contracts k where date_trunc('month', k.start_date) = m)::int as ativacoes,
-                (select count(*) from contracts k where k.status = 'ended' and date_trunc('month', k.end_date) = m)::int as encerramentos
+                (select count(*) from contracts k where k.start_date >= m and k.start_date < m + interval '1 month')::int as ativacoes,
+                (select count(*) from contracts k where k.status = 'ended' and k.end_date >= m and k.end_date < m + interval '1 month')::int as encerramentos
          from generate_series(date_trunc('month', (now() at time zone $1)::date) - interval '11 months', date_trunc('month', (now() at time zone $1)::date), interval '1 month') m order by m`, [tz])).rows;
       const out: any = { offline, signal, contracts_by_month: months };
       if (finance) {
@@ -146,7 +149,7 @@ export async function relatoriosRoutes(app: FastifyInstance) {
         out.without_invoice = (await c.query(
           `select count(*)::int as n from contracts k join plan_versions pv on pv.id = k.plan_version_id
            where k.status = 'active' and pv.price_cents > 0 and not exists (select 1 from invoices i where i.contract_id = k.id and i.status <> 'canceled'
-             and date_trunc('month', i.due_date) = date_trunc('month', (now() at time zone $1)::date))`, [tz])).rows[0].n;
+             and i.due_date >= date_trunc('month', (now() at time zone $1)::date) and i.due_date < date_trunc('month', (now() at time zone $1)::date) + interval '1 month')`, [tz])).rows[0].n;
       }
       out.recent_operations = (await c.query(
         `select o.created_at, o.action, o.status, o.reason, s.name as subscriber_name, k.id as contract_id

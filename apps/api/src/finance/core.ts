@@ -25,35 +25,35 @@ const sysAudit = (c: Tx, tenantId: string, action: string, entity: string, id: s
  *  Com `prorate_first_month`, o primeiro mês de um contrato que começou depois do dia 1º é cobrado pelos dias de uso. */
 export async function generateMonthly(c: Tx, tenantId: string, competence: string) {
   const prorate = !!(await getSettings(c, tenantId)).prorate_first_month;
-  // valor = base do plano (ou proporcional) − descontos vigentes; mês totalmente descontado não gera fatura
-  const created = (await c.query(
-    `insert into invoices (tenant_id, contract_id, subscriber_id, kind, competence, due_date, amount_cents)
-     select k.tenant_id, k.id, k.subscriber_id, 'monthly', $2::date, $2::date + (k.due_day - 1),
-            b.base - contract_discount_cents(k.id, $2::date, b.base)
-     from contracts k join plan_versions pv on pv.id = k.plan_version_id
-     cross join lateral (select contract_base_cents(k.id, $2::date, $3::boolean) as base) b
-     where k.tenant_id = $1 and k.status = 'active' and k.start_date < ($2::date + interval '1 month') and pv.price_cents > 0
-       and b.base - contract_discount_cents(k.id, $2::date, b.base) > 0
-     on conflict (tenant_id, contract_id, competence, kind) where competence is not null do nothing
-     returning id, contract_id, amount_cents`, [tenantId, competence, prorate])).rows;
-  for (const i of created) {
-    const base = (await c.query('select contract_base_cents($1, $2::date, $3::boolean) as v', [i.contract_id, competence, prorate])).rows[0].v as number;
-    await c.query(
-      `insert into invoice_items (tenant_id, invoice_id, description, amount_cents)
-       select $1, $2, 'Mensalidade ' || p.name || ' — ' || to_char($4::date, 'MM/YYYY')
-                       || case when $3 < pv.price_cents then ' (proporcional ao período de uso)' else '' end, $3
-       from contracts k join plan_versions pv on pv.id = k.plan_version_id join plans p on p.id = pv.plan_id where k.id = $5`,
-      [tenantId, i.id, base, competence, i.contract_id]);
-    const disc = base - i.amount_cents;
-    if (disc > 0)
-      await c.query(
-        `insert into invoice_items (tenant_id, invoice_id, description, amount_cents)
-         select $1, $2, 'Desconto: ' || coalesce(string_agg(d.reason, '; '), 'promocional'), -$3::int
-         from contract_discounts d where d.contract_id = $4 and d.canceled_at is null and d.from_competence <= $5::date
-           and (d.months is null or $5::date < (d.from_competence + make_interval(months => d.months))::date)`,
-        [tenantId, i.id, disc, i.contract_id, competence]);
-  }
-  return created.length;
+  // Uma instrução só, em lote: valor = base do plano (ou proporcional) − descontos vigentes; mês totalmente descontado não gera fatura.
+  // Contrato que já tem a mensalidade da competência nem entra na conta (reexecutar é barato). Itens (mensalidade e desconto) saem
+  // da mesma instrução, a partir das faturas efetivamente criadas.
+  const r = await c.query(
+    `with cand as (
+       select k.tenant_id, k.id as contract_id, k.subscriber_id, k.due_day, pl.name as plan_name, pv.price_cents,
+              contract_base_cents(k.id, $2::date, $3::boolean) as base
+       from contracts k join plan_versions pv on pv.id = k.plan_version_id join plans pl on pl.id = pv.plan_id
+       where k.tenant_id = $1 and k.status = 'active' and k.start_date < ($2::date + interval '1 month') and pv.price_cents > 0
+         and not exists (select 1 from invoices i where i.tenant_id = k.tenant_id and i.contract_id = k.id and i.competence = $2::date and i.kind = 'monthly')),
+     priced as (select cand.*, contract_discount_cents(contract_id, $2::date, base) as disc from cand),
+     ins as (
+       insert into invoices (tenant_id, contract_id, subscriber_id, kind, competence, due_date, amount_cents)
+       select tenant_id, contract_id, subscriber_id, 'monthly', $2::date, $2::date + (due_day - 1), base - disc from priced where base - disc > 0
+       on conflict (tenant_id, contract_id, competence, kind) where competence is not null do nothing
+       returning id, contract_id),
+     items as (
+       insert into invoice_items (tenant_id, invoice_id, description, amount_cents)
+       select $1, ins.id, 'Mensalidade ' || p.plan_name || ' — ' || to_char($2::date, 'MM/YYYY')
+                          || case when p.base < p.price_cents then ' (proporcional ao período de uso)' else '' end, p.base
+       from ins join priced p on p.contract_id = ins.contract_id
+       union all
+       select $1, ins.id, 'Desconto: ' || coalesce((select string_agg(d.reason, '; ') from contract_discounts d
+                                                      where d.contract_id = ins.contract_id and d.canceled_at is null and d.from_competence <= $2::date
+                                                        and (d.months is null or $2::date < (d.from_competence + make_interval(months => d.months))::date)), 'promocional'), -p.disc
+       from ins join priced p on p.contract_id = ins.contract_id where p.disc > 0
+       returning 1)
+     select (select count(*) from ins)::int as n, (select count(*) from items)::int as items`, [tenantId, competence, prorate]);
+  return r.rows[0].n as number;
 }
 
 /** Emite a cobrança no gateway para faturas ainda sem cobrança (repetível). Títulos importados NÃO são cobrados automaticamente. */

@@ -77,13 +77,29 @@ export async function financeRoutes(app: FastifyInstance) {
   });
 
   app.get('/api/invoices', { preHandler: guard('finance:read') }, async (req, reply) => {
-    const q = z.object({ q: z.string().trim().optional(), status: z.enum(['open', 'paid', 'reconciling', 'canceled', 'overdue']).optional(), contract_id: zUuid.optional(), ...zPage }).parse(req.query);
-    return withScope(req.ctx.scope, async (c) =>
-      paged(c, reply,
-        `select * from (${INVOICE_SELECT}) y
-         where ($1::text is null or y.subscriber_name ilike '%'||$1||'%') and ($3::uuid is null or y.contract_id = $3)
-           and ($2::text is null or ($2 = 'overdue' and y.overdue) or y.status = $2)
-         order by y.due_date desc, y.created_at desc, y.id`, [q.q || null, q.status ?? null, q.contract_id ?? null], q));
+    const q = z.object({ q: z.string().trim().optional(), status: z.enum(['open', 'paid', 'reconciling', 'canceled', 'overdue']).optional(), contract_id: zUuid.optional(), format: z.string().optional(), ...zPage }).parse(req.query);
+    const cap = q.format === 'csv' ? 5000 : 500;
+    const limit = Math.min(q.limit ?? cap, cap), offset = q.offset ?? 0;
+    return withScope(req.ctx.scope, async (c) => {
+      const today = (await c.query(
+        `select (now() at time zone coalesce((select timezone from tenant_settings where tenant_id = $1), 'America/Sao_Paulo'))::date as d`, [req.ctx.tenantId])).rows[0].d as string;
+      // filtros só sobre `invoices`: a página é escolhida pelo índice e só depois recebe nome do assinante, plano e saldo
+      const where = `($1::uuid is null or i.contract_id = $1)
+        and ($2::text is null or ($2 = 'overdue' and i.status = 'open' and i.due_date < $3::date) or ($2 <> 'overdue' and i.status = $2))
+        and ($4::text is null or i.subscriber_id in (select s.id from subscribers s where s.name ilike '%' || $4 || '%'))`;
+      const params = [q.contract_id ?? null, q.status ?? null, today, q.q || null];
+      const rows = (await c.query(
+        `select i.*, s.name as subscriber_name, p.name as plan_name, (i.status = 'open' and i.due_date < $3::date) as overdue,
+                (select coalesce(sum(x.signed_cents), 0)::int from payments x where x.invoice_id = i.id) as paid_cents
+         from (select * from invoices i where ${where} order by i.due_date desc, i.created_at desc, i.id limit ${limit} offset ${offset}) i
+         join subscribers s on s.id = i.subscriber_id join contracts k on k.id = i.contract_id
+         join plan_versions pv on pv.id = k.plan_version_id join plans p on p.id = pv.plan_id
+         order by i.due_date desc, i.created_at desc, i.id`, params)).rows;
+      // total: quando a página não está cheia e é a primeira, já se sabe; senão conta só a tabela de faturas
+      const total = offset === 0 && rows.length < limit ? rows.length : Number((await c.query(`select count(*) as n from invoices i where ${where}`, params)).rows[0].n);
+      reply.header('x-total-count', String(total));
+      return rows;
+    });
   });
 
   app.get('/api/invoices/:id', { preHandler: guard('finance:read') }, async (req) => {
@@ -216,7 +232,8 @@ export async function financeRoutes(app: FastifyInstance) {
                 count(*) filter (where overdue) as overdue, coalesce(sum(amount_cents) filter (where overdue),0)::int as overdue_cents,
                 count(*) filter (where status = 'reconciling') as reconciling,
                 (select coalesce(sum(signed_cents),0)::int from payments where paid_at >= date_trunc('month', now())) as received_month_cents
-         from (${INVOICE_SELECT}) x`)).rows[0]));
+         from (select i.*, (i.status = 'open' and i.due_date < today.d) as overdue from invoices i, (select (now() at time zone coalesce((select timezone from tenant_settings where tenant_id = app_tenant()), 'America/Sao_Paulo'))::date as d) today
+               where i.status in ('open', 'reconciling')) x`)).rows[0]));
 
   /** Exportação para a contabilidade (CSV): recebimentos por data de pagamento ou faturas por vencimento. Não é documento fiscal. */
   app.get('/api/finance/export', { preHandler: guard('finance:read') }, async (req, reply) => {

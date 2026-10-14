@@ -243,13 +243,27 @@ export async function cadastroRoutes(app: FastifyInstance) {
 
   // ---- Contratos ----
   app.get('/api/contracts', { preHandler: guard('contracts:read') }, async (req, reply) => {
-    const q = z.object({ q: z.string().trim().optional(), status: z.enum(['active', 'ended']).optional(), tag: zUuid.optional(), ...zPage }).parse(req.query);
-    return withScope(req.ctx.scope, async (c) =>
-      paged(c, reply,
-        `${CONTRACT_SELECT} where ($1::text is null or s.name ilike '%'||$1||'%' or p.name ilike '%'||$1||'%')
-           and ($2::text is null or c.status = $2)
-           and ($3::uuid is null or exists (select 1 from contract_tags x where x.contract_id = c.id and x.tag_id = $3))
-         order by c.created_at desc, c.id`, [q.q || null, q.status ?? null, q.tag ?? null], q));
+    const q = z.object({ q: z.string().trim().optional(), status: z.enum(['active', 'ended']).optional(), tag: zUuid.optional(), format: z.string().optional(), ...zPage }).parse(req.query);
+    const cap = q.format === 'csv' ? 5000 : 500;
+    const limit = Math.min(q.limit ?? cap, cap), offset = q.offset ?? 0;
+    return withScope(req.ctx.scope, async (c) => {
+      // filtros só sobre `contracts` (a página sai do índice); nome do assinante, plano e etiquetas entram depois, só para as linhas da página
+      const where = `($2::text is null or c.status = $2)
+        and ($3::uuid is null or exists (select 1 from contract_tags x where x.contract_id = c.id and x.tag_id = $3))
+        and ($1::text is null or c.subscriber_id in (select s.id from subscribers s where s.name ilike '%' || $1 || '%')
+             or c.plan_version_id in (select pv.id from plan_versions pv join plans p on p.id = pv.plan_id where p.name ilike '%' || $1 || '%'))`;
+      const params = [q.q || null, q.status ?? null, q.tag ?? null];
+      const rows = (await c.query(
+        `select c.*, s.name as subscriber_name, s.document as subscriber_document,
+                p.id as plan_id, p.name as plan_name, pv.version as plan_version, pv.price_cents, pv.down_kbps, pv.up_kbps, pv.profile_name,
+                coalesce((select json_agg(json_build_object('id', t.id, 'name', t.name) order by t.name) from contract_tags ct join tags t on t.id = ct.tag_id where ct.contract_id = c.id), '[]') as tags
+         from (select * from contracts c where ${where} order by c.created_at desc, c.id limit ${limit} offset ${offset}) c
+         join subscribers s on s.id = c.subscriber_id join plan_versions pv on pv.id = c.plan_version_id join plans p on p.id = pv.plan_id
+         order by c.created_at desc, c.id`, params)).rows;
+      const total = offset === 0 && rows.length < limit ? rows.length : Number((await c.query(`select count(*) as n from contracts c where ${where}`, params)).rows[0].n);
+      reply.header('x-total-count', String(total));
+      return rows;
+    });
   });
 
   app.get('/api/contracts/:id', { preHandler: guard('contracts:read') }, async (req) => {

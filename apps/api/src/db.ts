@@ -48,11 +48,11 @@ export async function paged(c: Tx, reply: { header: (k: string, v: string) => un
   // exportação CSV aceita páginas maiores; a tela fica limitada a `max`
   const cap = (reply as any).request?.query?.format === 'csv' ? 5000 : max;
   const limit = Math.min(q.limit ?? cap, cap), offset = q.offset ?? 0;
-  const rows = (await c.query(`select x.*, count(*) over() as _total from (${sql}) x limit ${limit} offset ${offset}`, params)).rows;
-  let total = rows[0]?._total ?? 0;
-  if (!rows.length && offset > 0) total = (await c.query(`select count(*) as n from (${sql}) x`, params)).rows[0].n;
+  // Página e total separados: com `count(*) over()` o banco precisa montar TODAS as linhas (com todas as colunas calculadas) antes
+  // de cortar a página. Assim a página sai do índice/ordenação parcial e o total conta sem as colunas que ninguém lê.
+  const rows = (await c.query(`select x.* from (${sql}) x limit ${limit} offset ${offset}`, params)).rows;
+  const total = offset === 0 && rows.length < limit ? rows.length : Number((await c.query(`select count(*) as n from (${sql}) x`, params)).rows[0].n);
   reply.header('x-total-count', String(total));
-  for (const r of rows) delete r._total;
   return rows;
 }
 
