@@ -15,6 +15,7 @@ import { escopoDocsRoutes } from './routes/escopo-docs.js';
 import { estadosRoutes } from './routes/estados.js';
 import { fluxoOsRoutes } from './routes/fluxo-os.js';
 import { integracoesRoutes } from './routes/integracoes.js';
+import { mapaRoutes } from './routes/mapa.js';
 import { produtividadeRoutes } from './routes/produtividade.js';
 import { publicApiRoutes } from './routes/public-api.js';
 import { radiusRoutes } from './routes/radius.js';
@@ -39,7 +40,7 @@ export async function buildApp(opts: { logger?: boolean } = {}) {
 
   // Cabeçalhos de segurança em toda resposta (o painel e a API). Páginas que definem a própria política (aviso, documentos) são preservadas.
   // O painel não carrega nada de fora: scripts, estilos e conexões só da própria origem; imagens também de blocos de mapa do OpenStreetMap.
-  const PANEL_CSP = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.tile.openstreetmap.org; connect-src 'self'; "
+  const PANEL_CSP = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tile.openstreetmap.org; connect-src 'self'; "
     + "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
   app.addHook('onSend', async (req, reply, payload) => {
     reply.header('x-content-type-options', 'nosniff');
@@ -86,6 +87,7 @@ export async function buildApp(opts: { logger?: boolean } = {}) {
   await app.register(produtividadeRoutes);
   await app.register(radiusRoutes);
   await app.register(consultaIpRoutes);
+  await app.register(mapaRoutes);
   await app.register(integracoesRoutes);
   await app.register(publicApiRoutes);
   await app.register(networkRoutes);

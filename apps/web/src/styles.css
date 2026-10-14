@@ -158,3 +158,19 @@ pre.ev { background: #0f1b1f; color: #d7e6e4; padding: 11px; border-radius: 8px;
   .login { grid-template-columns: 1fr; } .login .pitch { padding: 28px 22px 110px; gap: 28px; } .login .pitch .strands { height: 90px; } .login .pitch h1 { font-size: 28px; } .login .box { padding: 28px 22px; }
 }
 @media print { .side, .banner, .toasts { display: none; } .shell { display: block; } .main { border: 0; } }
+
+/* Mapa */
+.map-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
+@media (max-width: 900px) { .map-layout { grid-template-columns: 1fr; } }
+.map { position: relative; height: min(68vh, 640px); min-height: 360px; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: #dfe7ea; touch-action: none; cursor: grab; }
+.map.placing { cursor: crosshair; outline: 2px solid var(--accent); }
+.map .tile { position: absolute; width: 256px; height: 256px; user-select: none; pointer-events: none; }
+.map-dot { all: unset; position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.35); cursor: pointer; box-sizing: border-box; }
+.map-dot:focus-visible { outline: 3px solid var(--accent); }
+.map-dot.ct.active { background: var(--green); } .map-dot.ct.suspended { background: #d79a00; } .map-dot.ct.ended { background: #7b8589; }
+.map-dot.box { background: var(--blue); border-radius: 3px; width: 13px; height: 13px; }
+.map-dot.pop { background: var(--accent); border-radius: 2px; width: 16px; height: 16px; transform: rotate(45deg); }
+.map-zoom { position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column; gap: 4px; }
+.map-zoom button { width: 32px; height: 32px; padding: 0; font-size: 18px; }
+.map-attr { position: absolute; right: 0; bottom: 0; font-size: 11px; background: rgba(255,255,255,.8); color: #222; padding: 1px 6px; }
+.map-hint { position: absolute; left: 10px; top: 10px; background: var(--panel); border: 1px solid var(--accent); border-radius: 8px; padding: 6px 10px; font-size: 13px; }

@@ -18,6 +18,7 @@ const ICONS: Record<string, string> = {
   scale: 'M12 4v16M6 20h12M5 8h14M5 8l-3 6a3 3 0 0 0 6 0zM19 8l-3 6a3 3 0 0 0 6 0z',
   sliders: 'M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0M16 4v4M10 10v4M18 16v4',
   pulse: 'M3 12h4l2-6 4 12 2-6h6',
+  pin: 'M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11zM12 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4',
   server: 'M4 5h16v6H4zM4 13h16v6H4zM8 8h.01M8 16h.01',
   onu: 'M4 14h16v5H4zM8 16.5h.01M12 16.5h.01M7 14V9M12 14V6M17 14V9',
   fiber: 'M4 7h6l4 10h6M4 17h6l1.3-3.2M14 7h6',
