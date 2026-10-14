@@ -402,3 +402,19 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
 - **Limites:** a resposta vale pelo registro de sessões (accounting); antes do início dele, ou se o accounting falhar, não há como responder. IPv6 não tem histórico de
   titulares anteriores do mesmo prefixo. Período máximo de 92 dias por consulta.
 
+
+### 14/10/2026 — failover do RADIUS validado no laboratório e medição do sistema inteiro com 100 mil assinantes
+
+- **Segundo servidor de autenticação (perfil `ha`):** segunda instância do RADIUS (porta 1822/1823 no laboratório), lendo o mesmo banco, e entrada secundária
+  (`nexoisp-2`) gerada nos comandos do concentrador. Variáveis `NEXO_RADIUS_SECONDARY_HOST` / `NEXO_RADIUS_SECONDARY_PORT`.
+- **Validado no cenário PNETLab (CHR 7.17):** com a instância primária parada, a desconexão de uma conta de teste foi seguida de nova autenticação aceita pela
+  secundária (aceite registrado, sessão nova com accounting). A primária voltou sem intervenção. Também: o RADIUS reinicia junto com o serviço do túnel
+  (compartilha a rede dele; antes ficava preso a uma rede morta depois de recriar o túnel).
+- **Não validado:** failover com tráfego contínuo de autenticação; concentradores Huawei/Cisco; banco em alta disponibilidade (o banco continua único — se ele cair,
+  nenhum servidor de autenticação novo funciona; quem já está conectado segue de pé).
+- **Medição do sistema inteiro** (banco de teste neste servidor, 100.000 assinantes/contratos, `NEXO_LOAD=sistema`, 3ª rodada, depois dos índices da migração 039):
+  painel inicial 0,6 s; lista de assinantes 0,3 s; busca por nome/CPF 0,2 s; lista de contratos 0,14 s (com busca 0,3 s); faturas 1,1 s (em aberto/vencidas 0,45 s);
+  resumo de faturamento 0,8 s; aging 1,2 s; contratos a cancelar 2,3 s; busca única 2,2 s; painéis (conexões, caixa, ONUs) 3,8 s;
+  **faturamento mensal de 100.006 contratos 35 s** (era 7 min antes da reescrita em lote) e repetição idempotente 0,6 s; régua de cobrança (enfileirar) 5 s.
+- **Ainda lentos / pendentes:** painéis agregados (3,8 s), contratos a cancelar e busca única (≈2 s) — aceitáveis, mas candidatos a visão materializada ou cache.
+  A régua de teste não tem canal real: os avisos "falhos" da medição são esperados (sem gateway); o envio real não foi medido.
