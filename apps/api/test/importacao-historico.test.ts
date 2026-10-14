@@ -22,7 +22,8 @@ beforeAll(async () => {
   admin = await login('admin@alfa.demo'); atend = await login('atendimento@alfa.demo');
   const s = (await call(admin, 'POST', '/api/import/apply', { kind: 'subscribers', source: src, csv: subsCsv })).body;
   expect(s.totals.created).toBe(1);
-  subscriberId = (await call(admin, 'GET', `/api/subscribers?q=${encodeURIComponent(`Cliente Historico ${r}`)}`)).body[0].id;
+  subscriberId = s.sample[0].entity_id;                                    // o id que a importação devolveu (sem busca por nome)
+  expect(subscriberId).toBeTruthy();
 });
 
 describe('importação do histórico do sistema anterior', () => {
