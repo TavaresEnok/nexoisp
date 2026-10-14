@@ -247,9 +247,14 @@ describe('concentrador no RADIUS integrado', () => {
     await openSession(a.username, 90, '100.64.7.7');
     await owner.query(`insert into radius_postauth (tenant_id, username, reply, calling_station, nas_ip) values ($1,$2,'Access-Accept','02:4E:58:00:00:AA',$3), ($1,$2,'Access-Reject','02:4E:58:00:00:BB',$3)`, [tenantId, a.username, d.nas_ip]);
     await syncAccounting(tenantId);
+    // sessão relatada por agente local traz 'since' como número (época): a lista de online não pode quebrar por isso
+    await sql(`update service_resources set observed_session = '{"online": true, "ip": "100.64.1.1", "since": 1791910000.5, "uptime": "5m"}'::jsonb, observed_at = now() where id = $1`, [a.resourceId]);
+    expect((await call(admin, 'GET', `/api/network/online?q=${a.username}`)).body.rows[0]).toMatchObject({ uptime: '5m' });
+    await syncAccounting(tenantId, { full: true });
     const online = (await call(admin, 'GET', `/api/network/online?q=${a.username}`)).body.rows;
     expect(online).toHaveLength(1);
     expect(online[0]).toMatchObject({ login: a.username, ip: '100.64.7.7', mac: '02:4E:58:00:00:AA' });
+    expect(online[0].uptime).toMatch(/^1h30m\d+s$/);                       // calculado na leitura, a partir do início da sessão
     const ses = (await call(admin, 'GET', `/api/contracts/${a.contractId}/sessions`)).body;
     expect(ses.rows[0]).toMatchObject({ ip: '100.64.7.7', bytes_in: 1000, bytes_out: 5000 });
     expect((await call(admin, 'GET', `/api/contracts/${a.contractId}/usage`)).body.months?.[0] ?? (await call(admin, 'GET', `/api/contracts/${a.contractId}/usage`)).body[0]).toBeTruthy();
