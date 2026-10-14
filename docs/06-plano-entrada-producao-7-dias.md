@@ -526,3 +526,15 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   concentrador ainda precisa do próprio usuário e senha para subir o L2TP, e só recebe o endereço dele. RouterOS 6, Huawei e Cisco **não foram exercitados**:
   o RouterOS 6 usa o mesmo comando (`use-ipsec` existe desde a 6.16); para Huawei/Cisco o painel entrega os parâmetros, não comandos prontos. O L2TP roda em
   espaço de usuário (sem o módulo L2TP do kernel): adequado para dezenas de concentradores, não medido com centenas.
+
+### 14/10/2026 — coleta de acessos da ANATEL (DICI)
+
+- **Entregue (testado: 3 testes):** Administração → Coleta ANATEL (DICI). Conta os contratos em serviço no último dia da competência (encerrados depois dele
+  contam; antes, não) e agrupa por CNPJ (empresa do contrato ou a padrão — multiempresa), código IBGE do município, tipo de cliente (PJ quando o documento tem
+  14 dígitos), área (urbana/rural, no contrato), meio e tecnologia (do plano) e velocidade de descida em Mbps. Mostra o que impede um contrato de entrar no
+  arquivo (sem CNPJ, município sem código IBGE, plano sem tecnologia) e corrige ali mesmo. O município vem do endereço de instalação (ou do assinante) e casa sem
+  acento; o código IBGE é conferido com a UF. Arquivo CSV `CNPJ;ANO;MES;COD_IBGE;TIPO_CLIENTE;TIPO_ATENDIMENTO;TIPO_MEIO;TIPO_PRODUTO;TIPO_TECNOLOGIA;VELOCIDADE;ACESSOS`.
+  Migração 049.
+- **Atenção:** o leiaute segue o arquivo de acessos SCM conhecido em 2026 e **não foi conferido com uma submissão real**: confira os nomes e códigos aceitos no
+  Sistema de Coleta de Dados da ANATEL antes de enviar. O sistema não envia nada à ANATEL. Não há tabela oficial do IBGE embutida (o provedor informa o código dos
+  municípios que atende). Fora do escopo: SeAC/STFC, indicadores de qualidade e outros formulários da ANATEL.

@@ -10,6 +10,7 @@ import { ContractConditions, useQuote } from './Condicoes';
 import { ContractFinance } from './Finance';
 import { ContractCompany } from './Empresas';
 import { ContractAddons } from './Adicionais';
+import { ContractArea } from './Anatel';
 import { OnuPanel } from './Olt';
 import { WorkOrderList } from './Field';
 import { InfraPanel } from './Noc';
@@ -129,6 +130,7 @@ export function ContractDetail() {
             <Card title="POP"><ContractPop contract={c} onChange={reload} /></Card>
             <ContractCompany contract={c} onChange={reload} />
             <ContractAddons contract={c} />
+            <ContractArea contract={c} onChange={reload} />
             {has(me, 'field') && can(me, 'stock:read') && <ContractEquipment contractId={c.id} />}
             {!net && <ContractFinance contractId={c.id}>{(fin) => <Card title="Financeiro">{fin}</Card>}</ContractFinance>}
           </>)}
