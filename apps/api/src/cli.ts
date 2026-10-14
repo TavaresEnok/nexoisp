@@ -64,6 +64,11 @@ if (cmd === 'migrate') {
   warn(await n(`select count(*) as n from radius_nas r join devices d on d.id = r.device_id where d.vendor not in ('mikrotik')`) === 0, 'concentradores só de fabricante validado', 'há concentrador Huawei/Cisco/genérico: atributos e comandos seguem a documentação, sem teste em equipamento');
   warn(await n(`select count(*) as n from radius_nas where last_packet_at is null or last_packet_at < now() - interval '1 day'`) === 0, 'todo concentrador integrado enviou pacote nas últimas 24 h', 'há concentrador cadastrado que não está falando com o sistema');
   warn(await n(`select count(*) as n from vpn_peers where last_handshake_at is null or last_handshake_at < now() - interval '1 day'`) === 0, 'todo túnel foi estabelecido nas últimas 24 h', 'há túnel cadastrado que nunca subiu ou caiu há mais de um dia');
+  // réplica do banco (perfil ha): recebendo e com atraso pequeno
+  if (e.NEXO_REPLICA_PASSWORD) {
+    warn(await n(`select count(*) as n from pg_stat_replication where usename = 'nexo_replica' and state = 'streaming'`) > 0, 'réplica do banco recebendo do primário', 'NEXO_REPLICA_PASSWORD definida, mas nenhuma réplica conectada (perfil ha: serviço db-replica)');
+    warn(await n(`select count(*) as n from pg_stat_replication where usename = 'nexo_replica' and coalesce(replay_lag, interval '0') > interval '1 minute'`) === 0, 'réplica com menos de 1 minuto de atraso', 'a réplica está atrasada mais de 1 minuto');
+  } else warn(false, 'réplica do banco', 'sem réplica: perder o disco do banco perde o que aconteceu desde o último backup (defina NEXO_REPLICA_PASSWORD e suba o perfil ha)');
   warn(await n(`select count(*) as n from api_tokens where active and revoked_at is null and (expires_at is null)`) === 0, 'todo token de API tem validade', 'há token de API sem validade');
   warn(!e.NEXO_SECRET_KEY_PREVIOUS, 'nenhuma rotação de chave em andamento', 'NEXO_SECRET_KEY_PREVIOUS ainda definida: conclua a rotação');
   const tls = e.NEXO_AGENT_TLS_DIR ?? '';

@@ -20,6 +20,12 @@ export async function migrate(log: (m: string) => void = console.log) {
     // sem a variável, um papel já existente não é tocado (o mesmo servidor de banco pode atender outra instância que o usa)
     if (!rrole.rowCount) await c.query('create role nexo_radius nologin nosuperuser nobypassrls nocreatedb nocreaterole');
     if (rpw) await c.query(`alter role nexo_radius login password '${rpw}'`);
+    // réplica do banco (perfil "ha"): papel só de replicação, criado quando a instalação define a senha
+    const reppw = process.env.NEXO_REPLICA_PASSWORD?.replace(/'/g, "''");
+    if (reppw) {
+      const rep = await c.query(`select 1 from pg_roles where rolname = 'nexo_replica'`);
+      await c.query(`${rep.rowCount ? 'alter' : 'create'} role nexo_replica login replication nosuperuser nobypassrls nocreatedb nocreaterole password '${reppw}'`);
+    }
     await c.query(`create table if not exists schema_migrations (name text primary key, applied_at timestamptz not null default now())`);
     const dir = fileURLToPath(new URL('../migrations', import.meta.url));
     const done = new Set((await c.query('select name from schema_migrations')).rows.map((r) => r.name));
