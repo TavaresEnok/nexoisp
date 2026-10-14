@@ -50,26 +50,41 @@ export function OperationModal({ id, onClose }: { id: string; onClose: () => voi
   );
 }
 
+const ACCESS: Record<string, string> = { pppoe: 'PPPoE', ipoe: 'IPoE (DHCP pelo MAC)', hotspot: 'Hotspot' };
+
 function ProvisionForm({ contractId, onDone }: { contractId: string; onDone: (pw: string | null) => void }) {
   const devices = useLoad<any[]>('/devices');
-  const [f, setF] = useState({ device_id: '', pppoe_username: '', password: '' });
+  const [f, setF] = useState({ device_id: '', access_type: 'pppoe', pppoe_username: '', mac: '', password: '' });
+  const dev = devices.data?.find((d) => d.id === f.device_id);
+  const integrated = dev?.driver === 'radius';
+  const ipoe = f.access_type === 'ipoe';
   return (
     <Form submit="Provisionar acesso" onSubmit={async () => {
-      const r = await api(`/contracts/${contractId}/service`, { body: { device_id: f.device_id, pppoe_username: f.pppoe_username, ...(f.password ? { password: f.password } : {}) } });
+      const body = ipoe ? { device_id: f.device_id, access_type: 'ipoe', mac: f.mac }
+        : { device_id: f.device_id, access_type: f.access_type, pppoe_username: f.pppoe_username, ...(f.password ? { password: f.password } : {}) };
+      const r = await api(`/contracts/${contractId}/service`, { body });
       onDone(r.generated_password);
     }}>
       <State loading={devices.loading} error={devices.error}>
         {devices.data?.length === 0 && <div className="state">Cadastre um equipamento em Rede antes de provisionar.</div>}
         <div className="cols3">
           <Field label="Equipamento (NAS)">
-            <select required value={f.device_id} onChange={(e) => setF({ ...f, device_id: e.target.value })}>
+            <select required value={f.device_id} onChange={(e) => setF({ ...f, device_id: e.target.value, access_type: 'pppoe' })}>
               <option value="">Selecione…</option>
               {devices.data?.filter((d) => !d.driver.startsWith('olt')).map((d) => <option key={d.id} value={d.id}>{d.name}{d.driver === 'demo' ? ' — simulado' : ''}</option>)}
             </select>
           </Field>
-          <Field label="Usuário PPPoE"><input required value={f.pppoe_username} onChange={(e) => setF({ ...f, pppoe_username: e.target.value })} /></Field>
-          <Field label="Senha PPPoE" hint="Em branco: gerada automaticamente."><input value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} autoComplete="off" /></Field>
+          <Field label="Tipo de acesso" hint={integrated ? undefined : 'IPoE e hotspot só em concentrador no RADIUS integrado.'}>
+            <select value={f.access_type} onChange={(e) => setF({ ...f, access_type: e.target.value })}>
+              {Object.entries(ACCESS).filter(([k]) => k === 'pppoe' || integrated).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+            </select>
+          </Field>
+          {ipoe
+            ? <Field label="MAC do equipamento do assinante" hint="O MAC é a identidade do acesso; não há senha."><input required className="mono" value={f.mac} placeholder="02:4E:58:00:00:19" onChange={(e) => setF({ ...f, mac: e.target.value })} /></Field>
+            : <Field label="Usuário"><input required value={f.pppoe_username} onChange={(e) => setF({ ...f, pppoe_username: e.target.value })} /></Field>}
+          {!ipoe && <Field label="Senha" hint="Em branco: gerada automaticamente."><input value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} autoComplete="off" /></Field>}
         </div>
+        {ipoe && <p className="small muted">No IPoE a suspensão e a troca de plano valem na próxima renovação da concessão (até 10 min). O perfil do plano chega ao concentrador como lista de endereços.</p>}
       </State>
     </Form>
   );
@@ -172,7 +187,7 @@ export function ServicePanel({ contract, financial, fin }: { contract: any; fina
             </Card>
           </div>
           <div className="small muted" style={{ margin: '10px 0 6px' }}>
-            Usuário PPPoE <b className="mono">{r.pppoe_username}</b> · equipamento {r.device_name} · agente {r.agent_name ?? '—'} {r.agent_online ? <Badge tone="green">online</Badge> : <Badge tone="red">offline</Badge>}
+            {ACCESS[r.access_type ?? 'pppoe']} <b className="mono">{r.pppoe_username}</b> · equipamento {r.device_name} · agente {r.agent_name ?? '—'} {r.agent_online ? <Badge tone="green">online</Badge> : <Badge tone="red">offline</Badge>}
           </div>
           <MacBinding resource={r} onChange={reload} />
           <table>

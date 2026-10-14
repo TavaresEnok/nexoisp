@@ -486,3 +486,19 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   backup do provedor; não há fluxo de pedido do titular pelo portal (o provedor registra o pedido e usa a ficha).
 - **Revisão de segurança, o que ainda não foi feito:** auditoria de pacotes (`npm audit`) — o ambiente de build deste servidor não alcança o registro de pacotes;
   teste de invasão por terceiros; limite de requisições por endereço nas rotas autenticadas do painel; retenção por tipo de dado como política configurável.
+
+### 14/10/2026 — tipo de acesso: IPoE (DHCP pelo MAC) e hotspot no RADIUS integrado
+
+- **Entregue (testado):** a conta passa a ter tipo de acesso — PPPoE, **IPoE** (o concentrador pede autorização ao RADIUS na concessão DHCP; o usuário é o MAC do
+  equipamento do assinante, sem senha) ou **hotspot** (usuário e senha numa página de acesso; mesma autorização do PPPoE). Escolha na tela de provisionamento,
+  só para concentrador no RADIUS integrado (com agente local é recusado). Os comandos gerados para MikroTik passam a cadastrar o RADIUS para `ppp,hotspot,dhcp`,
+  com as linhas opcionais de DHCP e hotspot. Migração 046.
+- **Validado no cenário PNETLab (CHR 7.17, VLAN 309 `nexo-lab`, `trio.sh ipoe`):** cliente DHCP com MAC próprio recebeu concessão autorizada pelo RADIUS
+  (marcada "R" no concentrador), com o perfil do plano como lista de endereços (`address-lists=plano-200m`, entrada dinâmica no firewall) e prazo de 10 min vindo do
+  RADIUS; conta suspensa → "access rejected" e nenhuma concessão; reativada → aceita e concedida.
+- **Achados da validação e corrigidos:** (1) `use-radius=accounting` no RouterOS é só accounting — o certo é `yes`; (2) o RouterOS **não derruba concessão DHCP** pelo
+  protocolo de desconexão e responde "sessão inexistente" com a concessão ainda valendo — a primeira versão registrou isso como desconexão feita. Agora o IPoE não
+  pede desconexão: a mudança vale na próxima renovação, e o prazo da concessão vem do RADIUS (`NEXO_IPOE_LEASE_SECONDS`, padrão 600 s); (3) no DHCP o
+  `Calling-Station-Id` é o client-id, não o MAC — o vínculo de MAC não se aplica ao IPoE (o usuário já é o MAC).
+- **Não validado:** hotspot no laboratório (exige página de acesso e cliente HTTP; a autorização é a mesma do PPPoE, que está validada); IPoE em Huawei/Cisco
+  (DHCP com RADIUS tem configuração própria por fabricante; só MikroTik); IPoE por Option 82 (circuito da OLT) em vez de MAC.
