@@ -121,6 +121,17 @@ O servidor de autenticação sobe junto com o sistema (`radius` no compose). O p
 - **Fabricantes:** MikroTik validado em laboratório. Huawei e Cisco ainda não foram testados em equipamento.
 - **Chave:** perder `NEXO_RADIUS_KEY` não perde as senhas (elas continuam no cadastro), mas obriga a "Reaplicar contas" em todos os concentradores.
 
+### IPoE (DHCP) e hotspot
+
+- Tipo de acesso escolhido ao provisionar: PPPoE, IPoE (usuário = MAC do equipamento do assinante, sem senha) ou hotspot (usuário e senha na página de acesso).
+  Só para concentrador no RADIUS integrado.
+- MikroTik: o RADIUS precisa estar cadastrado com `service=ppp,hotspot,dhcp` (os comandos gerados já fazem isso). Para IPoE, no servidor DHCP: `use-radius=yes`
+  (atenção: `accounting` é só accounting). Para hotspot, no perfil: `use-radius=yes radius-accounting=yes`.
+- O perfil do plano chega como **lista de endereços** (`Mikrotik-Address-List`), não como grupo: o provedor usa as listas no firewall (inclusive a de bloqueio).
+  A velocidade vem do `rate_limit` do plano, se definido.
+- IPoE: o concentrador não derruba concessão pelo protocolo; suspensão e troca de plano valem na renovação. O prazo da concessão vem do RADIUS:
+  `NEXO_IPOE_LEASE_SECONDS` (padrão 600). Hotspot: a suspensão derruba a sessão na hora.
+
 ### Consulta de IP para ofício
 
 Rede → **Consulta de IP (ofício)**. Preencha o IP, a **porta de origem** (quando o ofício trouxer; com CGNAT é ela que identifica um único assinante), o horário e
