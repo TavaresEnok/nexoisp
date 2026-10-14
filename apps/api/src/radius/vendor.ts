@@ -23,6 +23,12 @@ export interface Wanted {
   upKbps: number;
 }
 
+/**
+ * Causas (Error-Cause) com que cada fabricante recusa a desconexão quando NÃO TEM a sessão pedida. O padrão é 503; o RouterOS
+ * responde 406 nesse caso (medido no CHR 7.17 em 14/10/2026: sessão, usuário ou IP que não batem com nenhuma sessão ativa).
+ */
+export const SESSION_GONE_CAUSES: Record<Vendor, number[]> = { mikrotik: [503, 406], huawei: [503], cisco: [503], generic: [503] };
+
 /** Perfil que vale agora: o de bloqueio durante a suspensão por perfil, senão o do plano. */
 export const effectiveProfile = (w: Wanted) => (w.policy === 'suspended' && w.blockProfile ? w.blockProfile : w.profile);
 const byProfile = (w: Wanted) => w.policy === 'suspended' && !!w.blockProfile;

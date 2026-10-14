@@ -204,6 +204,21 @@ describe('concentrador no RADIUS integrado', () => {
     dropAnswer = { outcome: 'ack' };
   });
 
+  it('a causa de "sessão inexistente" é a do fabricante: 406 vale para MikroTik, não para os outros', async () => {
+    for (const [vendor, concludes] of [['mikrotik', true], ['huawei', false]] as const) {
+      const d = await device(vendor);
+      const a = await account(d.id, vendor === 'mikrotik' ? 'm6' : 'h6');
+      await run();
+      const s = await openSession(a.username, 10);
+      dropAnswer = { outcome: 'nak', errorCause: 406 };
+      await call(admin, 'POST', `/api/resources/${a.resourceId}/disconnect`, { reason: 'teste da causa 406' });
+      await run();
+      expect((await lastOp(a.contractId)).status === 'SUCCEEDED').toBe(concludes);
+      expect(((await sql('select stopped_at from radius_acct where id = $1', [s.id]))[0].stopped_at !== null)).toBe(concludes);
+    }
+    dropAnswer = { outcome: 'ack' };
+  });
+
   it('conta de que nunca chegou accounting: a desconexão é pedida pelo nome do usuário', async () => {
     const d = await device('mikrotik');
     const a = await account(d.id, 'n');

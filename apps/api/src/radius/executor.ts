@@ -2,8 +2,8 @@ import { randomBytes } from 'node:crypto';
 import { HttpError, sha256 } from '../auth.js';
 import { noScope, withScope, type Tx } from '../db.js';
 import { begin, progress, reserve, result } from '../network/engine.js';
-import { SESSION_NOT_FOUND, sendDisconnect, type DisconnectResult } from './coa.js';
-import { checkRows, effectiveProfile, replyRows, type Row, type Vendor, type Wanted } from './vendor.js';
+import { sendDisconnect, type DisconnectResult } from './coa.js';
+import { checkRows, effectiveProfile, replyRows, SESSION_GONE_CAUSES, type Row, type Vendor, type Wanted } from './vendor.js';
 
 /**
  * RADIUS integrado: o NexoISP executa as operações de rede por conta própria, gravando no banco que o servidor RADIUS lê e
@@ -130,11 +130,12 @@ async function executeOne(tenantId: string, agentId: string, d: { attempt_id: st
 
     // 2. sessão em uso: pedir a desconexão ao concentrador (fora de transação)
     const targets = ctx.fresh ? [] : ctx.sessions.filter((s) => mustDrop(p, ctx.acc, s));
+    const gone = (cause: number | null) => cause !== null && SESSION_GONE_CAUSES[ctx.dev.vendor as Vendor].includes(cause);
     const pending: OpenSession[] = [];
     for (const s of targets) {
       const r: DisconnectResult = await drop({ host: ctx.dev.coa_host || ctx.dev.nas_host, port: ctx.dev.coa_port, secret: ctx.dev.secret, username: p.username, sessionId: s.session_id, framedIp: s.framed_ip });
       if (r.outcome === 'ack') step('desconexão da sessão', 'ok', { sessao: s.session_id, resposta: 'aceita pelo concentrador' });
-      else if (r.outcome === 'nak' && r.errorCause === SESSION_NOT_FOUND) {
+      else if (r.outcome === 'nak' && gone(r.errorCause)) {
         // o concentrador não tem mais essa sessão: o fim dela não chegou até nós; fecha o registro
         await withScope(SYS(tenantId), (c) => c.query(`update radius_acct set stopped_at = now(), updated_at = now(), terminate_cause = 'Lost-Service' where id = $1 and stopped_at is null`, [s.id]));
         step('desconexão da sessão', 'ok', { sessao: s.session_id, resposta: 'o concentrador não tem mais essa sessão' });
@@ -146,7 +147,7 @@ async function executeOne(tenantId: string, agentId: string, d: { attempt_id: st
     if (!targets.length && wantsDrop && !ctx.fresh && !ctx.everSeen) {
       const r: DisconnectResult = await drop({ host: ctx.dev.coa_host || ctx.dev.nas_host, port: ctx.dev.coa_port, secret: ctx.dev.secret, username: p.username });
       if (r.outcome === 'ack') step('desconexão da sessão', 'ok', { resposta: 'aceita pelo concentrador (sessão sem registro de accounting)' });
-      else if (r.outcome === 'nak' && r.errorCause === SESSION_NOT_FOUND) step('desconexão da sessão', 'ok', 'o concentrador não tem sessão desta conta');
+      else if (r.outcome === 'nak' && gone(r.errorCause)) step('desconexão da sessão', 'ok', 'o concentrador não tem sessão desta conta');
       else { pending.push({ id: -1, session_id: '', framed_ip: null, started_at: new Date(), calling_station: null }); step('desconexão da sessão', 'incerto', { resposta: r.outcome === 'nak' ? `recusada (causa ${r.errorCause ?? '?'})` : 'sem resposta do concentrador' }); }
     } else if (!targets.length) step('desconexão da sessão', 'ok', 'nenhuma sessão a tratar');
     await withScope(SYS(tenantId), (c) => progress(c, agentId, d.attempt_id, 'VERIFYING', steps));
