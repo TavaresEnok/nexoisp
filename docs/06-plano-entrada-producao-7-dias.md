@@ -369,3 +369,15 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   Pontos conhecidos que precisam de trabalho antes de um provedor grande: a rotina que copia sessões/online para o painel regrava todas as contas a cada ciclo;
   não há limpeza do accounting e do log de autenticação antigos; um servidor só é ponto único de falha.
 
+### 14/10/2026 — túnel integrado (WireGuard) e correções achadas na validação
+
+- **Entregue (testado: 148 testes da API):** serviço do túnel no deploy, par por concentrador com endereço e chaves gerados pelo painel, comandos prontos para MikroTik,
+  escolha entre túnel e acesso direto no cadastro e na conversão, estado do túnel na lista (conectado / caiu / aguardando). Migração 037.
+- **Validado no cenário PNETLab (CHR 7.17):** o concentrador de teste passou do acesso direto para o túnel; aperto de mão e ping por dentro do túnel; autenticações
+  chegando com o endereço do túnel; desconexão, suspensão (recusas registradas) e reativação.
+- **Defeitos achados na validação e corrigidos:** (1) ao mudar o endereço do concentrador, a sessão em curso ficava registrada como aberta para sempre (o identificador
+  único do accounting depende do endereço) — atualização e fim de sessão passaram a casar também por usuário + sessão; (2) o RouterOS recusa a desconexão de sessão
+  inexistente com a causa 406, não 503 — tratada como "sessão inexistente" só para MikroTik.
+- **Observado:** a implantação recriou o serviço do túnel; o primeiro pedido de desconexão ficou sem resposta e a nova tentativa automática (11 s depois) concluiu.
+- **Não validado:** RouterOS 6, Huawei e Cisco (sem WireGuard: acesso direto); vários concentradores simultâneos no túnel; túnel atravessando a internet e NAT de verdade.
+

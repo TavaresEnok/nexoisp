@@ -107,8 +107,12 @@ Na OS, o botão **Aplicar kit** baixa o estoque inteiro ou nada. A **disponibili
 
 O servidor de autenticação sobe junto com o sistema (`radius` no compose). O provedor não instala nada.
 
-- **Na instalação:** defina `NEXO_RADIUS_KEY` e `NEXO_RADIUS_DB_PASSWORD` (o `./nexo init` gera) e `NEXO_RADIUS_PUBLIC_HOST` com o endereço pelo qual os concentradores
-  alcançam o servidor. Libere no firewall **UDP 1812 e 1813 só para os endereços dos concentradores**; a saída UDP 3799 até eles é usada para desconectar sessões.
+- **Na instalação:** defina `NEXO_RADIUS_KEY` e `NEXO_RADIUS_DB_PASSWORD` (o `./nexo init` gera) e `NEXO_VPN_PUBLIC_HOST` com o endereço pelo qual os concentradores
+  alcançam o servidor. Libere no firewall a **UDP 51820** (túnel). O host precisa do módulo `wireguard` (`modprobe wireguard`).
+- **Túnel (recomendado):** o concentrador disca para o sistema e autentica por dentro do túnel; não precisa de IP público nem de porta de entrada no provedor.
+  Disponível para MikroTik com RouterOS 7 e equipamentos com WireGuard. Reiniciar o serviço `vpn` derruba os túneis por ~25 s (quem está conectado continua).
+- **Acesso direto (sem túnel):** para RouterOS 6, Huawei e Cisco. Defina `NEXO_RADIUS_PUBLIC_HOST` e libere **UDP 1812 e 1813 só para os endereços dos concentradores**;
+  a saída UDP 3799 até eles é usada para desconectar sessões.
 - **Cadastrar um concentrador:** Rede → Concentradores → Novo. Informe fabricante e o endereço de origem (o IP com que os pacotes dele chegam). O painel mostra o segredo
   **uma vez** e os comandos para colar no equipamento.
 - **Trocar o segredo:** o servidor passa a aceitar o novo em até 2 minutos; troque no concentrador em seguida. Enquanto diferirem, ninguém autentica.

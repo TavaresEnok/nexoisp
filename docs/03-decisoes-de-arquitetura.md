@@ -220,3 +220,20 @@ que continua existindo como opção para quem quer autenticar com o enlace até 
 **Situação:** MikroTik validado no CHR 7.17 do cenário PNETLab (autenticação, IP fixo, accounting, desconexão, suspensão e reativação). Huawei e Cisco: atributos e comandos
 pela documentação dos fabricantes, **não exercitados em equipamento**.
 
+### ADR-016, complemento — túnel integrado (14/10/2026)
+
+**Decisão do proprietário:** o caminho entre o concentrador e o sistema é um túnel entregue pelo produto, como nos concorrentes.
+
+- Serviço `vpn` no compose (mesma imagem da API, comando `vpn.js`): interface WireGuard com **um par por concentrador** cadastrado no painel. O concentrador disca para
+  o sistema (funciona atrás de NAT, sem IP público nem porta de entrada no provedor) e recebe um endereço próprio em `10.250.0.0/16`; o servidor é `10.250.0.1`.
+- O endereço do túnel passa a ser o que identifica o concentrador no RADIUS. O servidor RADIUS **compartilha a rede** do serviço do túnel (`network_mode: service:vpn`).
+- As chaves do par são geradas pelo sistema; a **privada é mostrada uma vez** e não é guardada. A chave do servidor fica num volume (`vpnstate`).
+- A desconexão de sessão sai pelo serviço do túnel (repasse interno), porque é de lá que o concentrador a aceita.
+- Pares não se alcançam entre si: cada um só tem rota para o endereço do servidor, e o serviço não encaminha pacotes.
+
+**Limites assumidos:** WireGuard existe no RouterOS 7; **RouterOS 6, Huawei e Cisco não têm** — para eles vale o acesso direto por IP ou um túnel próprio do provedor
+(L2TP/IPsec não é entregue). Reiniciar o serviço do túnel (toda implantação o recria) derruba os túneis por cerca de 25 s: quem está conectado continua, logins novos
+esperam. A faixa `10.250.0.0/16` é fixa. O host precisa do módulo `wireguard` do kernel (Linux 5.6+).
+
+**Situação:** validado no CHR 7.17 do cenário PNETLab — túnel estabelecido, autenticação, accounting, desconexão, suspensão e reativação por dentro dele.
+
