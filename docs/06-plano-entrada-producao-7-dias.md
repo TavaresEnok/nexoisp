@@ -556,3 +556,14 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   (NOC pode), nunca sozinho; exige o módulo de avisos ao assinante e um canal ativo. Migração 051.
 - **Limites:** não há detecção automática de queda que dispare o aviso (decisão: nada vai ao assinante sem alguém mandar); o recorte é por equipamento, não por
   caixa óptica ou porta PON; o canal é o HTTP genérico já existente (nenhuma operadora de SMS/WhatsApp real testada).
+
+### 14/10/2026 — réplica do banco (redundância)
+
+- **Entregue:** serviço `db-replica` no perfil `ha` — réplica em espera do Postgres por replicação contínua, com slot próprio; papel `nexo_replica` só de
+  replicação (criado pela migração quando `NEXO_REPLICA_PASSWORD` existe); `pg_hba` do primário com o acesso dela; conferência no `preflight`; procedimento de
+  promoção em `docs/operacao.md`.
+- **Validado neste servidor (PNETLab):** cópia inicial e replicação em tempo real (atraso medido 0,06 s); assinante criado pelo painel apareceu na réplica em
+  menos de 1 s; a réplica recusa escrita; **promoção ensaiada numa cópia descartável** da réplica: saiu de recuperação, com os dados, e aceitou escrita. O
+  primário foi recriado para ler o novo `pg_hba` (cópia de segurança `pg_dump` feita antes).
+- **Limites:** promoção manual (sem eleição automática nem troca de endereço automática); réplica na mesma máquina do primário neste servidor (protege contra
+  perda do disco/volume do banco, não contra perda da máquina); o RADIUS continua dependendo do primário para gravar accounting e tentativas.

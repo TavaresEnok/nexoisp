@@ -128,6 +128,17 @@ O servidor de autenticação sobe junto com o sistema (`radius` no compose). O p
 - No servidor ficam carregados sob demanda os módulos `esp4`, `ppp_generic` e `ppp_async` (o kernel carrega sozinho quando o serviço usa).
 - A chave IPsec é da instalação; trocá-la exige reconfigurar todos os concentradores L2TP. Usuário e senha são por concentrador ("Refazer túnel" gera outros).
 
+### Réplica do banco (perfil `ha`)
+
+- Defina `NEXO_REPLICA_PASSWORD` e suba com `--profile ha`: o serviço `db-replica` copia o primário na primeira vez (com slot de replicação próprio, para não
+  perder o que ainda não recebeu) e segue recebendo tudo em tempo real. Só leitura. O primário passa a usar `infra/compose/db/pg_hba.conf` (acesso de replicação
+  só para o papel `nexo_replica`, com senha). `cli.js preflight` avisa se a réplica não está conectada ou está atrasada mais de 1 minuto.
+- **Promover (o primário morreu):** 1) pare o que escreve no banco (`api`, `vpn`, `radius`, `radius2`); 2) `docker compose exec db-replica pg_ctl promote -D /var/lib/postgresql/data`;
+  3) aponte `DATABASE_URL_*` e `RADIUS_DB_HOST` para `db-replica` (ou troque os volumes e suba `db` com os dados promovidos); 4) suba de novo e rode o preflight.
+  Depois, recrie uma réplica nova a partir do novo primário (a antiga não volta sozinha). A promoção é manual: não há eleição automática.
+- Mesma máquina não protege contra perder a máquina: em produção, a réplica deve ficar em outro servidor (mesmo `replica.sh`, com `PRIMARY_HOST` apontando para o
+  primário e a porta 5432 liberada só para ela).
+
 ### IPoE (DHCP) e hotspot
 
 - Tipo de acesso escolhido ao provisionar: PPPoE, IPoE (usuário = MAC do equipamento do assinante, sem senha) ou hotspot (usuário e senha na página de acesso).
