@@ -14,9 +14,10 @@ function Setup({ data, onClose }: { data: any; onClose: () => void }) {
         <input readOnly className="mono" value={data.secret} aria-label="Segredo" onFocus={(e) => e.currentTarget.select()} />
       </>)}
       {s.connection === 'vpn' && <p className="small">Conexão por <b>túnel</b>: o concentrador disca para <span className="mono">{s.tunnel.endpoint}</span> e recebe o endereço <span className="mono">{s.tunnel.tunnel_ip}</span>. Não é preciso IP público nem liberar portas de entrada no provedor; só a saída UDP para esse endereço.{s.commands.includes('<CHAVE PRIVADA') ? ' A chave privada do túnel só foi mostrada na criação; para gerar outra, use "Refazer túnel".' : ' Os comandos abaixo trazem a chave privada do túnel: ela também não será mostrada de novo.'}</p>}
+      {s.connection === 'l2tp' && <p className="small">Conexão por <b>túnel L2TP/IPsec</b>: o concentrador disca para <span className="mono">{s.tunnel.endpoint}</span> (UDP 500 e 4500 de saída) e recebe o endereço <span className="mono">{s.tunnel.tunnel_ip}</span>. Não é preciso IP público no provedor.{s.commands.includes('<SENHA DO TÚNEL>') ? ' A senha do túnel só foi mostrada na criação; para gerar outra, use "Refazer túnel".' : ' Os comandos abaixo trazem a senha do túnel e a chave IPsec: a senha não será mostrada de novo.'}</p>}
       {!s.host_configured && <div className="state" style={{ textAlign: 'left' }}>O endereço público deste servidor ainda não foi informado na instalação; troque <span className="mono">{s.server_host}</span> pelo endereço pelo qual o concentrador alcança o NexoISP.</div>}
       {!s.validated && <div className="state" style={{ textAlign: 'left' }}><b>Atenção:</b> {VENDOR[s.vendor]} ainda não foi testado por nós em equipamento. Os comandos seguem a documentação do fabricante; confira antes de aplicar em produção.</div>}
-      <p className="small muted">Servidor de autenticação <span className="mono">{s.server_host}</span>{s.connection === 'vpn' ? ' (dentro do túnel)' : ''} · autenticação {s.auth_port}/UDP · accounting {s.acct_port}/UDP · desconexão {s.coa_port}/UDP (do servidor para o concentrador).</p>
+      <p className="small muted">Servidor de autenticação <span className="mono">{s.server_host}</span>{s.connection !== 'direct' ? ' (dentro do túnel)' : ''} · autenticação {s.auth_port}/UDP · accounting {s.acct_port}/UDP · desconexão {s.coa_port}/UDP (do servidor para o concentrador).</p>
       <Field label="Comandos"><textarea readOnly rows={Math.min(16, s.commands.split('\n').length + 1)} className="mono" value={s.commands} onFocus={(e) => e.currentTarget.select()} /></Field>
       <div className="row">
         <button onClick={() => { navigator.clipboard?.writeText(s.commands); toast('Comandos copiados.'); }}>Copiar comandos</button>
@@ -37,6 +38,12 @@ export function Concentradores({ devices, reload, canWrite }: { devices: any[]; 
   const legacy = devices.filter((d) => d.driver === 'mikrotik_radius' || d.driver === 'demo');
   const enabled = st.data?.enabled;
   const tunnelVendor = (v: string) => !!st.data?.vendors?.find((x: any) => x.id === v)?.tunnel;
+  // formas de chegar ao sistema que valem para o fabricante: WireGuard (quem tem), L2TP/IPsec (qualquer um) e acesso direto
+  const conns = (v: string): [string, string][] => [
+    ...(tunnelVendor(v) && st.data?.vpn?.enabled ? [['vpn', 'Túnel WireGuard (recomendado)'] as [string, string]] : []),
+    ...(st.data?.vpn?.l2tp ? [['l2tp', tunnelVendor(v) ? 'Túnel L2TP/IPsec (RouterOS 6 e equipamentos sem WireGuard)' : 'Túnel L2TP/IPsec (recomendado)'] as [string, string]] : []),
+    ['direct', 'Acesso direto por IP']];
+  const connOf = (v: string, c: string) => (conns(v).some(([k]) => k === c) ? c : conns(v)[0][0]);
   return (
     <Card title="Concentradores" actions={canWrite && enabled && <button className="primary" onClick={() => setF({ name: '', vendor: 'mikrotik', connection: st.data?.vpn?.enabled ? 'vpn' : 'direct', nas_ip: '', coa_port: '3799' })}>Novo concentrador</button>}>
       <p className="small muted">A autenticação dos assinantes é feita pelo próprio NexoISP: cadastre o concentrador aqui e aponte o equipamento para o sistema. Não há nada para instalar na sua rede.</p>
@@ -49,15 +56,15 @@ export function Concentradores({ devices, reload, canWrite }: { devices: any[]; 
               <td>{d.name} {d.maintenance && <Badge tone="amber">manutenção</Badge>}</td>
               <td>{VENDOR[d.vendor]} {d.vendor !== 'mikrotik' && <Badge tone="amber">não homologado</Badge>}</td>
               <td>{d.tunnel
-                ? <>Túnel <span className="mono small">{d.tunnel.ip}</span><div className="small">{d.tunnel.handshake_at && Date.now() - new Date(d.tunnel.handshake_at).getTime() < 180000
+                ? <>Túnel {d.tunnel.kind === 'l2tp' ? 'L2TP' : ''} <span className="mono small">{d.tunnel.ip}</span><div className="small">{d.tunnel.handshake_at && Date.now() - new Date(d.tunnel.handshake_at).getTime() < 180000
                     ? <Badge tone="green">conectado</Badge> : d.tunnel.handshake_at ? <Badge tone="red">caiu {ago(d.tunnel.handshake_at)}</Badge> : <Badge tone="amber">aguardando o concentrador</Badge>}</div></>
                 : <>Direto <span className="mono small">{d.nas_ip}</span></>}</td>
               <td>{d.last_check ? <>{d.last_check.ok ? <Badge tone="green">ok</Badge> : <Badge tone="red">sem pacotes recentes</Badge>} <span className="small muted">{ago(d.last_check_at)}</span><div className="small muted">{d.last_check.detail}</div></> : <span className="muted">aguardando</span>}</td>
               <td className="num">{d.accounts}</td>
               <td>{canWrite && <div className="row" style={{ justifyContent: 'flex-end' }}>
                 <button className="sm" onClick={async () => setShown(await api(`/radius/devices/${d.id}/setup`))}>Instruções</button>
-                {st.data?.vpn?.enabled && tunnelVendor(d.vendor) && <ActionButton className="sm" confirm={d.tunnel ? 'Gerar endereço e chaves novos para o túnel? O túnel atual deixa de valer e o concentrador precisa ser reconfigurado.' : 'Passar este concentrador para o túnel? Ele passa a ser reconhecido pelo endereço do túnel e precisa ser reconfigurado com os comandos da próxima tela.'}
-                  onClick={async () => { setShown(await api(`/radius/devices/${d.id}/tunnel`, { method: 'POST' })); reload(); }}>{d.tunnel ? 'Refazer túnel' : 'Usar túnel'}</ActionButton>}
+                {conns(d.vendor).filter(([k]) => k !== 'direct').map(([k]) => <ActionButton key={k} className="sm" confirm={d.tunnel ? 'Gerar credenciais e endereço novos para o túnel? O túnel atual deixa de valer e o concentrador precisa ser reconfigurado.' : 'Passar este concentrador para o túnel? Ele passa a ser reconhecido pelo endereço do túnel e precisa ser reconfigurado com os comandos da próxima tela.'}
+                  onClick={async () => { setShown(await api(`/radius/devices/${d.id}/tunnel`, { body: { kind: k } })); reload(); }}>{(d.tunnel?.kind === 'l2tp') === (k === 'l2tp') && d.tunnel ? 'Refazer túnel' : k === 'l2tp' ? 'Usar túnel L2TP' : 'Usar túnel WireGuard'}</ActionButton>)}
                 <button className="sm" onClick={() => setPar({ id: d.id, name: d.name, simultaneous_use: d.simultaneous_use ?? '', acct_interim_seconds: d.acct_interim_seconds ?? '' })}>Parâmetros</button>
                 <ActionButton className="sm" confirm="Gerar um segredo novo? O atual deixa de valer em até 2 minutos e precisa ser trocado também no concentrador; enquanto diferirem, ninguém autentica."
                   onClick={async () => setShown(await api(`/radius/devices/${d.id}/secret`, { method: 'POST' }))}>Trocar segredo</ActionButton>
@@ -77,19 +84,18 @@ export function Concentradores({ devices, reload, canWrite }: { devices: any[]; 
       {f && (
         <Modal title="Novo concentrador" onClose={() => setF(null)}>
           <Form submit="Cadastrar" onCancel={() => setF(null)} onSubmit={async () => {
-            const vpn = f.connection === 'vpn' && tunnelVendor(f.vendor);
-            const r = await api<any>('/radius/devices', { body: { name: f.name, vendor: f.vendor, connection: vpn ? 'vpn' : 'direct', nas_ip: vpn ? undefined : f.nas_ip, coa_port: Number(f.coa_port) || 3799 } });
+            const conn = connOf(f.vendor, f.connection);
+            const r = await api<any>('/radius/devices', { body: { name: f.name, vendor: f.vendor, connection: conn, nas_ip: conn === 'direct' ? f.nas_ip : undefined, coa_port: Number(f.coa_port) || 3799 } });
             setF(null); setShown(r); reload();
           }}>
             <Field label="Nome"><input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} required minLength={2} autoFocus /></Field>
             <Field label="Fabricante" hint="Define como o plano (perfil, velocidade, pool) é enviado ao equipamento.">
               <select value={f.vendor} onChange={(e) => setF({ ...f, vendor: e.target.value })}>{Object.entries(VENDOR).map(([k, v]) => <option key={k} value={k}>{v}{k === 'mikrotik' ? '' : ' — não homologado'}</option>)}</select></Field>
-            <Field label="Como o concentrador chega ao NexoISP" hint={tunnelVendor(f.vendor) ? 'Túnel: o concentrador disca para o sistema; funciona atrás de NAT e não precisa de IP público.' : 'Este fabricante não tem o túnel pelo painel: use o acesso direto (ou um túnel próprio até o servidor).'}>
-              <select value={tunnelVendor(f.vendor) && st.data?.vpn?.enabled ? f.connection : 'direct'} onChange={(e) => setF({ ...f, connection: e.target.value })}>
-                {tunnelVendor(f.vendor) && st.data?.vpn?.enabled && <option value="vpn">Túnel (recomendado)</option>}
-                <option value="direct">Acesso direto por IP</option>
+            <Field label="Como o concentrador chega ao NexoISP" hint="Túnel: o concentrador disca para o sistema; funciona atrás de NAT e não precisa de IP público.">
+              <select value={connOf(f.vendor, f.connection)} onChange={(e) => setF({ ...f, connection: e.target.value })}>
+                {conns(f.vendor).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
               </select></Field>
-            {!(f.connection === 'vpn' && tunnelVendor(f.vendor) && st.data?.vpn?.enabled) && (
+            {connOf(f.vendor, f.connection) === 'direct' && (
               <Field label="Endereço de origem do concentrador" hint="O IP com que os pacotes dele chegam ao NexoISP. É por ele que o sistema reconhece o equipamento.">
                 <input className="mono" value={f.nas_ip} onChange={(e) => setF({ ...f, nas_ip: e.target.value })} required placeholder="203.0.113.10" /></Field>)}
             <Field label="Porta de desconexão no concentrador" hint="Padrão 3799."><input type="number" min="1" max="65535" value={f.coa_port} onChange={(e) => setF({ ...f, coa_port: e.target.value })} /></Field>
@@ -99,16 +105,16 @@ export function Concentradores({ devices, reload, canWrite }: { devices: any[]; 
       {conv && (
         <Modal title={`Passar “${conv.name}” para a autenticação integrada`} onClose={() => setConv(null)}>
           <Form submit="Converter" onCancel={() => setConv(null)} onSubmit={async () => {
-            const vpn = conv.connection === 'vpn' && tunnelVendor(conv.vendor);
-            const r = await api<any>(`/devices/${conv.id}/convert-to-integrated`, { body: { vendor: conv.vendor, connection: vpn ? 'vpn' : 'direct', nas_ip: vpn ? undefined : conv.nas_ip } });
+            const conn = connOf(conv.vendor, conv.connection);
+            const r = await api<any>(`/devices/${conv.id}/convert-to-integrated`, { body: { vendor: conv.vendor, connection: conn, nas_ip: conn === 'direct' ? conv.nas_ip : undefined } });
             setConv(null); setShown(r); reload();
             toast(`${r.accounts_requested} conta(s) reenviada(s)${r.accounts_without_secret ? `; ${r.accounts_without_secret} sem senha cadastrada ficaram de fora` : ''}.`);
           }}>
             <p className="small">As {conv.accounts} conta(s) deste equipamento passam a ser respondidas pelo NexoISP. Quem está conectado continua conectado; a troca só vale quando o concentrador for apontado para o sistema (comandos na próxima tela). O agente local deixa de ser usado por este equipamento.</p>
             <Field label="Fabricante"><select value={conv.vendor} onChange={(e) => setConv({ ...conv, vendor: e.target.value })}>{Object.entries(VENDOR).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></Field>
-            <Field label="Como o concentrador chega ao NexoISP"><select value={tunnelVendor(conv.vendor) && st.data?.vpn?.enabled ? conv.connection : 'direct'} onChange={(e) => setConv({ ...conv, connection: e.target.value })}>
-              {tunnelVendor(conv.vendor) && st.data?.vpn?.enabled && <option value="vpn">Túnel (recomendado)</option>}<option value="direct">Acesso direto por IP</option></select></Field>
-            {!(conv.connection === 'vpn' && tunnelVendor(conv.vendor) && st.data?.vpn?.enabled) && <Field label="Endereço de origem do concentrador"><input className="mono" value={conv.nas_ip} onChange={(e) => setConv({ ...conv, nas_ip: e.target.value })} required /></Field>}
+            <Field label="Como o concentrador chega ao NexoISP"><select value={connOf(conv.vendor, conv.connection)} onChange={(e) => setConv({ ...conv, connection: e.target.value })}>
+              {conns(conv.vendor).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></Field>
+            {connOf(conv.vendor, conv.connection) === 'direct' && <Field label="Endereço de origem do concentrador"><input className="mono" value={conv.nas_ip} onChange={(e) => setConv({ ...conv, nas_ip: e.target.value })} required /></Field>}
           </Form>
         </Modal>
       )}

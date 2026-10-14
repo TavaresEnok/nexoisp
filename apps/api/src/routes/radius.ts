@@ -6,7 +6,7 @@ import { noScope, withScope, type Tx } from '../db.js';
 import { requestOperation } from '../network/engine.js';
 import { ensureInternalAgent, radiusConfigured, radiusKey } from '../radius/executor.js';
 import { setupCommands, TUNNEL_VENDORS, VENDOR_VALIDATED, VENDORS, type Tunnel, type Vendor } from '../radius/vendor.js';
-import { newPeerKeys, TUNNEL_ACCT_PORT, TUNNEL_AUTH_PORT, VPN_SERVER_IP, vpnEndpoint } from '../radius/vpn-shared.js';
+import { L2TP_SERVER_IP, l2tpConfigured, l2tpPsk, newPeerKeys, TUNNEL_ACCT_PORT, TUNNEL_AUTH_PORT, VPN_SERVER_IP, vpnEndpoint } from '../radius/vpn-shared.js';
 import { zUuid } from '../validators.js';
 
 /**
@@ -35,7 +35,8 @@ const setup = (vendor: Vendor, coaPort: number, secret: string, tunnel: Tunnel |
   const s = tunnel ? { host: tunnel.serverIp, authPort: TUNNEL_AUTH_PORT, acctPort: TUNNEL_ACCT_PORT } : server();
   const ep = vpnEndpoint();
   return { server_host: s.host, auth_port: s.authPort, acct_port: s.acctPort, coa_port: coaPort, vendor, validated: VENDOR_VALIDATED[vendor],
-    connection: tunnel ? 'vpn' : 'direct', tunnel: tunnel ? { tunnel_ip: tunnel.tunnelIp, endpoint: `${tunnel.endpointHost}:${tunnel.endpointPort}` } : null,
+    connection: tunnel ? (tunnel.kind === 'l2tp' ? 'l2tp' : 'vpn') : 'direct',
+    tunnel: tunnel ? { kind: tunnel.kind ?? 'wireguard', tunnel_ip: tunnel.tunnelIp, endpoint: tunnel.kind === 'l2tp' ? tunnel.endpointHost : `${tunnel.endpointHost}:${tunnel.endpointPort}` } : null,
     host_configured: tunnel ? !!(process.env.NEXO_VPN_PUBLIC_HOST || process.env.NEXO_RADIUS_PUBLIC_HOST) : !!process.env.NEXO_RADIUS_PUBLIC_HOST,
     endpoint_host: ep.host, secondary: secondary(tunnel), commands: setupCommands(vendor, { ...s, coaPort, secret, tunnel, secondary: secondary(tunnel) }) };
 };
@@ -48,12 +49,33 @@ async function newTunnel(c: Tx, tenantId: string, deviceId: string, vendor: Vend
   const ip = (await c.query('select host(vpn_free_ip()) as ip')).rows[0].ip;
   if (!ip) throw new HttpError(503, 'sem endereços livres no túnel');
   await c.query('delete from vpn_peers where device_id = $1', [deviceId]);
+  await c.query('delete from l2tp_peers where device_id = $1', [deviceId]);
   await c.query('insert into vpn_peers (device_id, tenant_id, tunnel_ip, public_key) values ($1,$2,$3,$4)', [deviceId, tenantId, ip, keys.publicKey]);
   const ep = vpnEndpoint();
   return { privateKey: keys.privateKey, serverPublicKey: srv.public_key, endpointHost: ep.host, endpointPort: ep.port, tunnelIp: ip, serverIp: VPN_SERVER_IP };
 }
+/** Túnel L2TP/IPsec: usuário e senha próprios, endereço fixo na faixa do L2TP. A senha aparece uma vez (fica cifrada para o serviço do túnel). */
+async function newL2tp(c: Tx, tenantId: string, deviceId: string): Promise<Tunnel> {
+  if (!l2tpConfigured()) throw new HttpError(503, 'o túnel L2TP/IPsec não está habilitado nesta instalação', 'l2tp_unavailable');
+  const ip = (await c.query('select host(l2tp_free_ip()) as ip')).rows[0].ip;
+  if (!ip) throw new HttpError(503, 'sem endereços livres no túnel L2TP');
+  const username = `nx-${randomBytes(6).toString('hex')}`, password = randomBytes(15).toString('base64url');
+  await c.query('delete from vpn_peers where device_id = $1', [deviceId]);
+  await c.query('delete from l2tp_peers where device_id = $1', [deviceId]);
+  await c.query('insert into l2tp_peers (device_id, tenant_id, username, secret_enc, tunnel_ip) values ($1,$2,$3,pgp_sym_encrypt($4,$5),$6)',
+    [deviceId, tenantId, username, password, radiusKey(), ip]);
+  return { kind: 'l2tp', privateKey: '', serverPublicKey: '', endpointHost: vpnEndpoint().host, endpointPort: 1701, tunnelIp: ip, serverIp: L2TP_SERVER_IP,
+    l2tp: { username, password, psk: l2tpPsk() } };
+}
+async function makeTunnel(c: Tx, tenantId: string, deviceId: string, vendor: Vendor, kind: 'vpn' | 'l2tp') {
+  return kind === 'l2tp' ? newL2tp(c, tenantId, deviceId) : newTunnel(c, tenantId, deviceId, vendor);
+}
+
 /** Túnel já existente, para reexibir as instruções (sem a chave privada). */
 async function tunnelOf(c: Tx, deviceId: string): Promise<Tunnel | null> {
+  const l = (await c.query('select username, host(tunnel_ip) as ip from l2tp_peers where device_id = $1', [deviceId])).rows[0];
+  if (l) return { kind: 'l2tp', privateKey: '', serverPublicKey: '', endpointHost: vpnEndpoint().host, endpointPort: 1701, tunnelIp: l.ip, serverIp: L2TP_SERVER_IP,
+    l2tp: { username: l.username, password: '<SENHA DO TÚNEL>', psk: '<CHAVE IPSEC DA INSTALAÇÃO>' } };
   const p = (await c.query('select host(p.tunnel_ip) as ip, (select public_key from vpn_settings) as srv from vpn_peers p where p.device_id = $1', [deviceId])).rows[0];
   if (!p) return null;
   const ep = vpnEndpoint();
@@ -74,7 +96,7 @@ const ipTaken = (e: any) => (e?.code === '23505' && String(e.constraint).include
 export async function radiusRoutes(app: FastifyInstance) {
   app.get('/api/radius/status', { preHandler: guard('network:read') }, async () =>
     ({ enabled: radiusConfigured(), ...server(), host_configured: !!process.env.NEXO_RADIUS_PUBLIC_HOST,
-      vpn: await withScope(noScope, async (c) => ({ enabled: !!(await c.query('select 1 from vpn_settings')).rowCount, endpoint: vpnEndpoint() })),
+      vpn: await withScope(noScope, async (c) => ({ enabled: !!(await c.query('select 1 from vpn_settings')).rowCount, endpoint: vpnEndpoint(), l2tp: l2tpConfigured() })),
       vendors: VENDORS.map((v) => ({ id: v, validated: VENDOR_VALIDATED[v], tunnel: TUNNEL_VENDORS.includes(v) })) }));
 
   // Para o provedor/operador montar a regra de firewall do acesso direto: só estes endereços precisam alcançar 1812/1813.
@@ -82,14 +104,14 @@ export async function radiusRoutes(app: FastifyInstance) {
     withScope(req.ctx.scope, async (c) => {
       const rows = (await c.query(
         `select d.name, host(n.nas_ip) as ip, (p.device_id is not null) as via_tunnel from radius_nas n join devices d on d.id = n.device_id
-         left join vpn_peers p on p.device_id = n.device_id order by d.name`)).rows;
+         left join (select device_id from vpn_peers union all select device_id from l2tp_peers) p on p.device_id = n.device_id order by d.name`)).rows;
       return { direct: rows.filter((r) => !r.via_tunnel), tunnel: rows.filter((r) => r.via_tunnel),
         note: 'Concentradores por túnel não precisam de regra: chegam pelo túnel. Para os diretos, libere UDP 1812 e 1813 só destes endereços.' };
     }));
 
   app.post('/api/radius/devices', { preHandler: guard('network:write') }, async (req) => {
     const b = z.object({
-      name: z.string().trim().min(2).max(80), vendor: z.enum(VENDORS), connection: z.enum(['vpn', 'direct']).default('direct'), nas_ip: zIp.optional(),
+      name: z.string().trim().min(2).max(80), vendor: z.enum(VENDORS), connection: z.enum(['vpn', 'l2tp', 'direct']).default('direct'), nas_ip: zIp.optional(),
       coa_host: z.string().trim().max(200).nullish().transform((v) => v || null), coa_port: z.number().int().min(1).max(65535).default(3799),
     }).parse(req.body);
     if (b.connection === 'direct' && !b.nas_ip) throw new HttpError(400, 'informe o endereço de origem do concentrador (ou use o túnel)');
@@ -102,7 +124,7 @@ export async function radiusRoutes(app: FastifyInstance) {
           `insert into devices (tenant_id, name, driver, vendor, host, agent_id) values ($1,$2,'radius',$3,$4,$5) returning id, name, driver, vendor`,
           [req.ctx.tenantId, b.name, b.vendor, b.nas_ip ?? null, agentId])).rows[0];
         // com túnel, o endereço que identifica o concentrador é o que o sistema lhe dá dentro do túnel
-        const tunnel = b.connection === 'vpn' ? await newTunnel(c, req.ctx.tenantId!, d.id, b.vendor) : null;
+        const tunnel = b.connection !== 'direct' ? await makeTunnel(c, req.ctx.tenantId!, d.id, b.vendor, b.connection) : null;
         const nasIp = tunnel ? tunnel.tunnelIp : b.nas_ip!;
         await c.query('update devices set host = $2 where id = $1', [d.id, nasIp]);
         await c.query('insert into radius_nas (device_id, tenant_id, nas_ip, secret, coa_host, coa_port) values ($1,$2,$3,$4,$5,$6)', [d.id, req.ctx.tenantId, nasIp, secret, tunnel ? null : b.coa_host, b.coa_port]);
@@ -157,10 +179,11 @@ export async function radiusRoutes(app: FastifyInstance) {
     const id = zUuid.parse((req.params as any).id);
     return withScope(req.ctx.scope, async (c) => {
       const n = await nasOf(c, id);
-      const tunnel = await newTunnel(c, req.ctx.tenantId!, id, n.vendor);
+      const kind = z.object({ kind: z.enum(['vpn', 'l2tp']).default('vpn') }).parse(req.body ?? {}).kind;
+      const tunnel = await makeTunnel(c, req.ctx.tenantId!, id, n.vendor, kind);
       await c.query('update radius_nas set nas_ip = $2, coa_host = null, coa_port = 3799 where device_id = $1', [id, tunnel.tunnelIp]);
       await c.query('update devices set host = $2 where id = $1', [id, tunnel.tunnelIp]);
-      await audit(c, req.ctx, 'radius.device_tunnel', 'device', id, { tunnel_ip: tunnel.tunnelIp });
+      await audit(c, req.ctx, 'radius.device_tunnel', 'device', id, { tunnel_ip: tunnel.tunnelIp, kind });
       return { id, nas_ip: tunnel.tunnelIp, setup: setup(n.vendor, 3799, '<SEGREDO>', tunnel),
         note: 'O segredo do RADIUS não mudou. Aplique os comandos do túnel e aponte o RADIUS do concentrador para o endereço interno.' };
     });
@@ -172,7 +195,7 @@ export async function radiusRoutes(app: FastifyInstance) {
    */
   app.post('/api/devices/:id/convert-to-integrated', { preHandler: guard('network:write') }, async (req) => {
     const id = zUuid.parse((req.params as any).id);
-    const b = z.object({ vendor: z.enum(VENDORS), connection: z.enum(['vpn', 'direct']).default('direct'), nas_ip: zIp.optional(),
+    const b = z.object({ vendor: z.enum(VENDORS), connection: z.enum(['vpn', 'l2tp', 'direct']).default('direct'), nas_ip: zIp.optional(),
       coa_host: z.string().trim().max(200).nullish().transform((v) => v || null), coa_port: z.number().int().min(1).max(65535).default(3799) }).parse(req.body);
     if (b.connection === 'direct' && !b.nas_ip) throw new HttpError(400, 'informe o endereço de origem do concentrador (ou use o túnel)');
     radiusKey();
@@ -185,7 +208,7 @@ export async function radiusRoutes(app: FastifyInstance) {
         if ((await c.query(`select 1 from operations o where o.device_id = $1 and o.status in ('PENDING','RESERVED','EXECUTING','VERIFYING','UNCERTAIN')`, [id])).rowCount)
           throw new HttpError(409, 'há operações em andamento neste equipamento; aguarde concluírem');
         const agentId = await ensureInternalAgent(c, req.ctx.tenantId!);
-        const tunnel = b.connection === 'vpn' ? await newTunnel(c, req.ctx.tenantId!, id, b.vendor) : null;
+        const tunnel = b.connection !== 'direct' ? await makeTunnel(c, req.ctx.tenantId!, id, b.vendor, b.connection) : null;
         const nasIp = tunnel ? tunnel.tunnelIp : b.nas_ip!;
         await c.query(`update devices set driver = 'radius', vendor = $2, agent_id = $3, host = $4, api_port = null, credential_ref = null where id = $1`, [id, b.vendor, agentId, nasIp]);
         await c.query('insert into radius_nas (device_id, tenant_id, nas_ip, secret, coa_host, coa_port) values ($1,$2,$3,$4,$5,$6)', [id, req.ctx.tenantId, nasIp, secret, tunnel ? null : b.coa_host, b.coa_port]);

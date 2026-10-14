@@ -19,6 +19,7 @@ init_env() {  # segredos e certificados de DESENVOLVIMENTO, gerados localmente (
   addenv NEXO_DEMO_AGENT_TOKEN "$(openssl rand -hex 24)"
   addenv NEXO_GATEWAY_WEBHOOK_SECRET "$(openssl rand -hex 24)"
   addenv NEXO_RADIUS_KEY "$(openssl rand -hex 24)"            # cifra as senhas PPPoE lidas pelo RADIUS integrado
+  addenv NEXO_L2TP_PSK "$(openssl rand -hex 20)"              # chave IPsec do túnel L2TP/IPsec (concentradores sem WireGuard)
   addenv NEXO_RADIUS_DB_PASSWORD "$(openssl rand -hex 24)"
   addenv NEXO_UID "$(id -u):$(id -g)"
   scripts/dev-certs.sh init

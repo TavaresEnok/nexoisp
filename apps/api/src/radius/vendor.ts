@@ -83,7 +83,11 @@ export function replyRows(vendor: Vendor, w: Wanted): Row[] {
   return rows;
 }
 
-export interface Tunnel { privateKey: string; serverPublicKey: string; endpointHost: string; endpointPort: number; tunnelIp: string; serverIp: string }
+export interface Tunnel {
+  kind?: 'wireguard' | 'l2tp';
+  privateKey: string; serverPublicKey: string; endpointHost: string; endpointPort: number; tunnelIp: string; serverIp: string;
+  l2tp?: { username: string; password: string; psk: string };   // só no L2TP/IPsec; senha e chave aparecem como marcador depois da criação
+}
 /** Fabricantes em que sabemos montar o túnel pelo painel. Huawei e Cisco não têm WireGuard: usam acesso direto. */
 export const TUNNEL_VENDORS: Vendor[] = ['mikrotik', 'generic'];
 
@@ -93,6 +97,7 @@ export const TUNNEL_VENDORS: Vendor[] = ['mikrotik', 'generic'];
  */
 export interface Secondary { host: string; authPort: number; acctPort: number }
 export function setupCommands(vendor: Vendor, o: { host: string; authPort: number; acctPort: number; coaPort: number; secret: string; tunnel?: Tunnel | null; secondary?: Secondary | null }): string {
+  if (o.tunnel?.kind === 'l2tp') return l2tpCommands(vendor, o);
   const tn = o.tunnel;
   if (vendor === 'mikrotik') return [
     ...(tn ? [
@@ -158,5 +163,36 @@ export function setupCommands(vendor: Vendor, o: { host: string; authPort: numbe
     `Segredo compartilhado: ${o.secret}`,
     `Desconexão (RFC 5176): aceitar de ${o.host} na porta ${o.coaPort}`,
     `Atualização de accounting: 5 minutos`,
+  ].join('\n');
+}
+
+/**
+ * Túnel L2TP/IPsec (para quem não tem WireGuard). MikroTik (RouterOS 6.16+ e 7) validado só com o RouterOS 7.17 do laboratório;
+ * Huawei e Cisco recebem os parâmetros, porque a configuração do cliente L2TP (LAC) muda muito entre modelos: NÃO homologados.
+ */
+function l2tpCommands(vendor: Vendor, o: { host: string; authPort: number; acctPort: number; coaPort: number; secret: string; tunnel?: Tunnel | null; secondary?: Secondary | null }): string {
+  const tn = o.tunnel!, l = tn.l2tp!;
+  if (vendor === 'mikrotik') return [
+    `# 1. túnel L2TP/IPsec até o NexoISP (RouterOS 6.16 ou mais novo)`,
+    `/interface l2tp-client add name=nexoisp connect-to=${tn.endpointHost} user="${l.username}" password="${l.password}" use-ipsec=yes ipsec-secret="${l.psk}" allow=chap add-default-route=no keepalive-timeout=30 disabled=no comment=nexoisp`,
+    `/ip firewall filter add chain=input in-interface=nexoisp protocol=udp dst-port=${o.coaPort} action=accept place-before=0 comment="nexoisp: desconexao de sessao"`,
+    `# 2. autenticação pelo túnel (o endereço ${tn.tunnelIp} é entregue pelo NexoISP ao conectar)`,
+    `/radius add service=ppp,hotspot,dhcp address=${o.host} secret="${o.secret}" authentication-port=${o.authPort} accounting-port=${o.acctPort} timeout=3s src-address=${tn.tunnelIp} comment=nexoisp`,
+    ...(o.secondary ? [`/radius add service=ppp,hotspot,dhcp address=${o.secondary.host} secret="${o.secret}" authentication-port=${o.secondary.authPort} accounting-port=${o.secondary.acctPort} timeout=3s src-address=${tn.tunnelIp} comment=nexoisp-2`] : []),
+    `/radius incoming set accept=yes port=${o.coaPort}`,
+    `/ppp aaa set use-radius=yes accounting=yes interim-update=5m`,
+  ].join('\n');
+  return [
+    `Túnel L2TP sobre IPsec (configure o cliente L2TP/LAC do equipamento conforme o manual do fabricante)`,
+    `  servidor: ${tn.endpointHost}  |  IPsec: IKEv1, modo transporte, chave compartilhada "${l.psk}" (UDP 500 e 4500)`,
+    `  L2TP: UDP 1701 dentro do IPsec  |  usuário: ${l.username}  |  senha: ${l.password}  |  autenticação: CHAP`,
+    `  endereço entregue a este equipamento: ${tn.tunnelIp} (o servidor é ${tn.serverIp})`,
+    ``,
+    `Servidor RADIUS: ${o.host} (pelo túnel; origem ${tn.tunnelIp})`,
+    `Porta de autenticação: ${o.authPort}  |  Porta de accounting: ${o.acctPort}`,
+    `Segredo compartilhado: ${o.secret}`,
+    `Desconexão (RFC 5176): aceitar de ${o.host} na porta ${o.coaPort}`,
+    `Atualização de accounting: 5 minutos`,
+    `Situação: ${vendor === 'generic' ? 'genérico' : vendor} pelo L2TP/IPsec NÃO foi exercitado em equipamento.`,
   ].join('\n');
 }

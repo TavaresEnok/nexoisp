@@ -23,3 +23,36 @@ export function renderServerConf(privateKey: string, peers: { public_key: string
   return [`[Interface]`, `PrivateKey = ${privateKey}`, `ListenPort = ${VPN_INTERNAL_PORT}`, '',
     ...peers.flatMap((p) => [`[Peer]`, `PublicKey = ${p.public_key}`, `AllowedIPs = ${p.tunnel_ip}/32`, ''])].join('\n');
 }
+
+// ---------------------------------------------------------------- L2TP/IPsec
+/** Concentradores sem WireGuard: L2TP sobre IPsec (transporte, chave da instalação), usuário e senha por concentrador. */
+export const L2TP_SERVER_IP = '10.251.0.1';
+export const l2tpPsk = () => process.env.NEXO_L2TP_PSK ?? '';
+export const l2tpConfigured = () => /^[A-Za-z0-9_-]{16,}$/.test(l2tpPsk());
+
+export function renderIpsecConf(): string {
+  return [
+    'config setup', '  uniqueids=no', '',
+    'conn nexoisp-l2tp',
+    '  keyexchange=ikev1', '  authby=secret', '  type=transport',
+    '  left=%any', '  leftprotoport=17/1701', '  right=%any', '  rightprotoport=17/%any', '  auto=add',
+    // RouterOS 6/7, Huawei e Cisco negociam ao menos uma destas; 3DES/MODP1024 só para equipamentos antigos
+    '  ike=aes256-sha256-modp2048,aes256-sha1-modp2048,aes128-sha1-modp2048,aes256-sha1-modp1024,aes128-sha1-modp1024,3des-sha1-modp1024!',
+    '  esp=aes256-sha256,aes256-sha1,aes128-sha1,3des-sha1!',
+    '  dpddelay=30s', '  dpdtimeout=120s', '  dpdaction=clear', '  rekey=no', '  ikelifetime=8h', '  lifetime=1h', '',
+  ].join('\n');
+}
+export const renderIpsecSecrets = (psk: string) => `%any %any : PSK "${psk.replace(/"/g, '')}"\n`;
+export function renderXl2tpdConf(): string {
+  return ['[global]', 'port = 1701', 'ipsec saref = no', 'force userspace = yes', '',
+    '[lns default]', `local ip = ${L2TP_SERVER_IP}`, 'assign ip = no', 'require authentication = yes', 'refuse pap = yes', 'require chap = yes',
+    'name = nexoisp', 'pppoptfile = /etc/ppp/options.xl2tpd', 'length bit = yes', ''].join('\n');
+}
+export function renderPppOptions(): string {
+  return ['name nexoisp', 'auth', 'refuse-pap', 'nodefaultroute', 'noproxyarp', 'noccp', 'novj', 'novjccomp', 'nobsdcomp', 'nodeflate',
+    'mtu 1400', 'mru 1400', 'lcp-echo-interval 30', 'lcp-echo-failure 4', 'noipdefault', ''].join('\n');
+}
+/** Um par usuário/senha/endereço por concentrador: o endereço fixo da linha é o que o pppd entrega a ele. */
+export function renderChapSecrets(peers: { username: string; secret: string; tunnel_ip: string }[]): string {
+  return ['# gerado pelo NexoISP — não editar', ...peers.map((p) => `"${p.username}" nexoisp "${p.secret.replace(/"/g, '')}" ${p.tunnel_ip}`), ''].join('\n');
+}

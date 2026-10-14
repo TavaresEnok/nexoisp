@@ -457,5 +457,39 @@ describe('túnel integrado', () => {
       expect(got[0][6]).toBe(40);                                                    // seguido do Disconnect-Request intacto
     } finally { delete process.env.NEXO_RADIUS_COA_RELAY; relay.close(); }
   });
+  it('L2TP/IPsec: qualquer fabricante; usuário, senha e endereço próprios; o serviço do túnel lê a senha; a senha não reaparece', async () => {
+    const saved = process.env.NEXO_L2TP_PSK;
+    try {
+      delete process.env.NEXO_L2TP_PSK;
+      expect((await call(admin, 'POST', '/api/radius/devices', { name: `l2-off ${tag}`, vendor: 'huawei', connection: 'l2tp' })).status).toBe(503);
+      process.env.NEXO_L2TP_PSK = 'chave-ipsec-de-teste-0001';
+      expect((await call(admin, 'GET', '/api/radius/status')).body.vpn.l2tp).toBe(true);
+      const d = (await call(admin, 'POST', '/api/radius/devices', { name: `l2-hw ${tag}`, vendor: 'huawei', connection: 'l2tp' })).body;
+      expect(d.nas_ip).toMatch(/^10\.251\.\d+\.\d+$/);
+      expect(d.setup).toMatchObject({ connection: 'l2tp', server_host: '10.251.0.1', auth_port: 1812 });
+      expect(d.setup.commands).toContain('chave-ipsec-de-teste-0001');
+      expect(d.setup.commands).toMatch(/NÃO foi exercitado/);               // Huawei: parâmetros, não homologado
+      const peer = (await sql('select username from l2tp_peers where device_id = $1', [d.id]))[0];
+      const pw = /senha: (\S+)/.exec(d.setup.commands)![1];
+      // o serviço do túnel enxerga o par com a senha em claro (função própria, com a chave do RADIUS)
+      const all = (await withScope(noScope, (c) => c.query('select * from l2tp_peers_all($1)', [process.env.NEXO_RADIUS_KEY]))).rows;
+      expect(all.find((x: any) => x.username === peer.username)).toMatchObject({ secret: pw, tunnel_ip: d.nas_ip });
+      // reexibir não traz a senha
+      expect((await call(admin, 'GET', `/api/radius/devices/${d.id}/setup`)).body.setup.commands).toContain('<SENHA DO TÚNEL>');
+      // MikroTik pelo L2TP (RouterOS 6): cliente L2TP com IPsec e RADIUS saindo do endereço do túnel
+      const m = (await call(admin, 'POST', '/api/radius/devices', { name: `l2-mk ${tag}`, vendor: 'mikrotik', connection: 'l2tp' })).body;
+      expect(m.setup.commands).toMatch(/\/interface l2tp-client add name=nexoisp .*use-ipsec=yes ipsec-secret="chave-ipsec-de-teste-0001"/);
+      expect(m.setup.commands).toContain(`src-address=${m.nas_ip}`);
+      // estado: o serviço informa quem está no ar
+      await withScope(noScope, (c) => c.query('select l2tp_report($1)', [[m.nas_ip]]));
+      const lista = (await call(admin, 'GET', '/api/devices')).body.find((x: any) => x.id === m.id);
+      expect(lista.tunnel).toMatchObject({ kind: 'l2tp', ip: m.nas_ip });
+      expect(lista.tunnel.handshake_at).toBeTruthy();
+      // trocar para WireGuard apaga o par L2TP
+      await call(admin, 'POST', `/api/radius/devices/${m.id}/tunnel`, { kind: 'vpn' });
+      expect((await sql('select count(*)::int as n from l2tp_peers where device_id = $1', [m.id]))[0].n).toBe(0);
+      expect((await call(beta, 'GET', '/api/radius/allowed-sources')).body.tunnel.some((x: any) => x.ip === d.nas_ip)).toBe(false);
+    } finally { if (saved) process.env.NEXO_L2TP_PSK = saved; else delete process.env.NEXO_L2TP_PSK; }
+  });
 });
 

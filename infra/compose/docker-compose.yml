@@ -33,6 +33,7 @@ services:
       NEXO_RADIUS_COA_RELAY: vpn:3798                           # a desconexão de sessão sai pelo serviço do túnel
       NEXO_VPN_PUBLIC_HOST: ${NEXO_VPN_PUBLIC_HOST:-}
       NEXO_VPN_PORT: ${NEXO_VPN_PORT:-51820}
+      NEXO_L2TP_PSK: ${NEXO_L2TP_PSK:-}                        # chave IPsec do túnel L2TP (concentradores sem WireGuard)
       NEXO_RADIUS_SECONDARY_HOST: ${NEXO_RADIUS_SECONDARY_HOST:-}
       NEXO_RADIUS_SECONDARY_PORT: ${NEXO_RADIUS_SECONDARY_PORT:-}
     volumes: ["../certs:/certs:ro"]
@@ -44,14 +45,17 @@ services:
     command: ["node", "apps/api/dist/vpn.js"]
     user: root
     cap_add: [NET_ADMIN]
+    device_cgroup_rules: ["c 108:0 rwm"]   # /dev/ppp do L2TP (criado pelo serviço se faltar)
     restart: unless-stopped
     depends_on: { db: { condition: service_healthy }, api: { condition: service_started } }
     environment:
       DATABASE_URL_APP: postgres://nexo_app:${NEXO_APP_DB_PASSWORD}@db:5432/nexo
+      NEXO_L2TP_PSK: ${NEXO_L2TP_PSK:-}
+      NEXO_RADIUS_KEY: ${NEXO_RADIUS_KEY:-}                    # lê as senhas L2TP dos concentradores
     volumes: [vpnstate:/state]
     # Só o túnel (51820) fica exposto. A autenticação direta por IP só escuta na própria máquina, a menos que NEXO_RADIUS_DIRECT_BIND
     # seja definido (ex.: 0.0.0.0) — e então libere 1812/1813 no firewall apenas para os endereços dos concentradores.
-    ports: ["${NEXO_VPN_PORT:-51820}:51820/udp", "${NEXO_RADIUS_DIRECT_BIND:-127.0.0.1}:${NEXO_RADIUS_PORT:-1812}:1812/udp", "${NEXO_RADIUS_DIRECT_BIND:-127.0.0.1}:${NEXO_RADIUS_ACCT_PORT:-1813}:1813/udp"]
+    ports: ["${NEXO_VPN_PORT:-51820}:51820/udp", "${NEXO_L2TP_BIND:-0.0.0.0}:500:500/udp", "${NEXO_L2TP_BIND:-0.0.0.0}:4500:4500/udp", "${NEXO_RADIUS_DIRECT_BIND:-127.0.0.1}:${NEXO_RADIUS_PORT:-1812}:1812/udp", "${NEXO_RADIUS_DIRECT_BIND:-127.0.0.1}:${NEXO_RADIUS_ACCT_PORT:-1813}:1813/udp"]
   # RADIUS integrado: sobe junto com o sistema e lê o banco do NexoISP. O provedor não instala nada; só aponta o concentrador para cá.
   radius:
     build: ../radius
