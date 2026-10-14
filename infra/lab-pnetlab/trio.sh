@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Laboratório PPPoE sobre o cenário Trio do PNETLab (substitui infra/lab, que usava um CHR em container).
 # ESCREVE em nós do cenário: só rodar com autorização do dono do laboratório. Tudo o que cria leva a marca "nexo-lab".
-#   trio.sh up | down | status | radius-ha [usuario] | cgnat <n>... | nas '<comando RouterOS>' | cli '<comando RouterOS>' | client up <n> <usuario> <senha> | client down <n> | ipoe [mac] | ros '<caminho>'
+#   trio.sh up | down | status | radius-ha [usuario] | cgnat <n>... | nas '<comando RouterOS>' | cli '<comando RouterOS>' | client up <n> <usuario> <senha> | client down <n> | ipoe [mac] | hotspot <usuario> <senha> | ros '<caminho>'
 # Variáveis: NEXO_DOCKER (ex.: "sudo docker"), NEXO_ROOT (checkout com .env e infra/certs; padrão: este repositório).
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"; ROOT="${NEXO_ROOT:-$(cd "$HERE/../.." && pwd)}"
@@ -60,7 +60,7 @@ case "${1:-}" in
     set -a; . "$STATE/.env"; set +a
     py nexoisp-agent python /setup_nas.py down || echo "AVISO: concentrador não foi limpo pela API; confira com: trio.sh nas '/radius print'"
     cli '/interface pppoe-client remove [find comment="nexo-lab"]' '/ip dhcp-client remove [find comment="nexo-lab"]' '/interface macvlan remove [find comment="nexo-lab"]' '/interface vlan remove [find comment="nexo-lab"]' >/dev/null
-    nas '/ip dhcp-server remove [find comment="nexo-lab"]' '/ip dhcp-server network remove [find comment="nexo-lab"]' '/ip pool remove [find comment="nexo-lab"]' \
+    nas '/ip hotspot remove [find name=nexo-hs]' '/ip hotspot profile remove [find name=nexo-hs]' '/ip dhcp-server remove [find comment="nexo-lab"]' '/ip dhcp-server network remove [find comment="nexo-lab"]' '/ip pool remove [find comment="nexo-lab"]' \
         '/ip address remove [find comment~"nexo-lab"]' '/interface vlan remove [find comment="nexo-lab"]' >/dev/null
     $C --profile ha down; sudo ip link set $NAS_TAP nomaster; sudo ip link del $BR
     echo "desfeito. O estado local ficou em $STATE (apague para recomeçar do zero); antes-nexo.rsc continua no concentrador." ;;
@@ -76,6 +76,21 @@ case "${1:-}" in
         ":if ([:len [/interface macvlan find name=nexo-m9]] = 0) do={/interface macvlan add name=nexo-m9 interface=nexo-v309 mac-address=$MAC mode=private comment=nexo-lab}" \
         ':if ([:len [/ip dhcp-client find interface=nexo-m9]] = 0) do={/ip dhcp-client add interface=nexo-m9 add-default-route=no use-peer-dns=no comment=nexo-lab disabled=no}' >/dev/null
     echo "pronto: cadastre a conta IPoE com o MAC $MAC e confira com: trio.sh nas '/ip dhcp-server lease print detail where server=nexo-ipoe'" ;;
+  hotspot)  # hotspot no cenário: VLAN 310 com página de acesso autorizada pelo RADIUS; o nó cliente pega DHCP e faz o login por HTTP
+    U="${2:?usuario}"; P="${3:?senha}"
+    nas ':if ([:len [/interface vlan find name=nexo-v310]] = 0) do={/interface vlan add name=nexo-v310 interface=ether7 vlan-id=310 comment=nexo-lab}' \
+        ':if ([:len [/ip address find comment="nexo-lab-hs"]] = 0) do={/ip address add address=10.99.10.1/24 interface=nexo-v310 comment=nexo-lab-hs}' \
+        ':if ([:len [/ip pool find name=nexo-hs]] = 0) do={/ip pool add name=nexo-hs ranges=10.99.10.10-10.99.10.50 comment=nexo-lab}' \
+        ':if ([:len [/ip dhcp-server find name=nexo-hs]] = 0) do={/ip dhcp-server add name=nexo-hs interface=nexo-v310 address-pool=nexo-hs comment=nexo-lab disabled=no}' \
+        ':if ([:len [/ip dhcp-server network find address="10.99.10.0/24"]] = 0) do={/ip dhcp-server network add address=10.99.10.0/24 gateway=10.99.10.1 comment=nexo-lab}' \
+        ':if ([:len [/ip hotspot profile find name=nexo-hs]] = 0) do={/ip hotspot profile add name=nexo-hs hotspot-address=10.99.10.1 login-by=http-pap use-radius=yes radius-accounting=yes radius-interim-update=5m}' \
+        ':if ([:len [/ip hotspot find name=nexo-hs]] = 0) do={/ip hotspot add name=nexo-hs interface=nexo-v310 address-pool=nexo-hs profile=nexo-hs disabled=no}' \
+        '/radius set [find comment~"nexo"] service=ppp,hotspot,dhcp' >/dev/null
+    cli ':if ([:len [/interface vlan find name=nexo-v310]] = 0) do={/interface vlan add name=nexo-v310 interface=ether1 vlan-id=310 comment=nexo-lab}' \
+        ':if ([:len [/interface macvlan find name=nexo-m10]] = 0) do={/interface macvlan add name=nexo-m10 interface=nexo-v310 mac-address=02:4E:58:00:00:1A mode=private comment=nexo-lab}' \
+        ':if ([:len [/ip dhcp-client find interface=nexo-m10]] = 0) do={/ip dhcp-client add interface=nexo-m10 add-default-route=no use-peer-dns=no comment=nexo-lab disabled=no}' >/dev/null
+    sleep 8; cli "/tool fetch url=\"http://10.99.10.1/login?username=$U&password=$P\" mode=http output=none" >/dev/null || true
+    nas '/log print terse where topics~"hotspot"' | tail -3 ;;
   radius-ha)  # 2ª instância do RADIUS sobre o mesmo banco: para a principal, derruba a sessão e o cliente precisa reautenticar pela segunda
     set -a; . "$STATE/.env"; set +a; U="${2:-nexo-w2}"
     $C --profile ha up -d radius2 >/dev/null 2>&1; sleep 4

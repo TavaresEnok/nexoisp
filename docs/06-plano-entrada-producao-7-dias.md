@@ -500,5 +500,9 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   protocolo de desconexão e responde "sessão inexistente" com a concessão ainda valendo — a primeira versão registrou isso como desconexão feita. Agora o IPoE não
   pede desconexão: a mudança vale na próxima renovação, e o prazo da concessão vem do RADIUS (`NEXO_IPOE_LEASE_SECONDS`, padrão 600 s); (3) no DHCP o
   `Calling-Station-Id` é o client-id, não o MAC — o vínculo de MAC não se aplica ao IPoE (o usuário já é o MAC).
-- **Não validado:** hotspot no laboratório (exige página de acesso e cliente HTTP; a autorização é a mesma do PPPoE, que está validada); IPoE em Huawei/Cisco
+- **Hotspot validado no mesmo cenário (VLAN 310, `trio.sh hotspot`):** o nó cliente pegou DHCP e fez login por HTTP; o RADIUS aceitou, a sessão abriu com accounting;
+  suspender derrubou a sessão pelo protocolo (RouterOS: "logged out: radius disconnect") e o novo login foi recusado. **Achado:** com `Mikrotik-Group` o RouterOS
+  recusava o login ("unknown user profile") mesmo com o RADIUS aceitando, porque exigiria perfil de usuário de hotspot com o mesmo nome; o perfil do plano passou a
+  ir como lista de endereços, como no IPoE.
+- **Não validado:** IPoE em Huawei/Cisco
   (DHCP com RADIUS tem configuração própria por fabricante; só MikroTik); IPoE por Option 82 (circuito da OLT) em vez de MAC.
