@@ -357,6 +357,8 @@ describe('concentrador no RADIUS integrado', () => {
     expect(h.body.generated_password).toBeTruthy();
     await run();
     expect(await rows('radius_check', `hs${tag}`)).not.toHaveProperty('Auth-Type');
+    expect(await rows('radius_reply', `hs${tag}`)).toMatchObject({ 'Mikrotik-Address-List': expect.any(String) });
+    expect(await rows('radius_reply', `hs${tag}`)).not.toHaveProperty('Session-Timeout');
     // concentrador com agente local não entende IPoE
     const ag = (await call(admin, 'POST', '/api/agents', { name: `ag-ipoe-${tag}` })).body;
     const dl = (await call(admin, 'POST', '/api/devices', { name: `nas-ipoe-${tag}`, driver: 'demo', agent_id: ag.id })).body;

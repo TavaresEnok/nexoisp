@@ -54,11 +54,12 @@ export function replyRows(vendor: Vendor, w: Wanted): Row[] {
   const blocked = byProfile(w), profile = effectiveProfile(w);
   const rows: Row[] = [];
   const set = (attribute: string, value: string | number, op = ':=') => rows.push({ attribute, op, value: String(value) });
-  if (vendor === 'mikrotik' && w.accessType === 'ipoe') {
-    // DHCP: o perfil vira lista de endereços (o firewall do provedor decide o que cada lista pode, inclusive a de bloqueio)
-    // e o prazo da concessão vem daqui, para suspensão e troca de plano valerem logo na renovação
+  if (vendor === 'mikrotik' && (w.accessType === 'ipoe' || w.accessType === 'hotspot')) {
+    // DHCP e hotspot: o perfil vira lista de endereços (o firewall do provedor decide o que cada lista pode, inclusive a de bloqueio).
+    // Mikrotik-Group aqui exigiria um perfil de usuário de hotspot com o mesmo nome no equipamento — sem ele o RouterOS recusa o
+    // login mesmo com o RADIUS aceitando (medido no CHR 7.17). No IPoE o prazo da concessão vem daqui, para a mudança valer na renovação.
     set('Mikrotik-Address-List', profile);
-    set('Session-Timeout', ipoeLeaseSeconds());
+    if (w.accessType === 'ipoe') set('Session-Timeout', ipoeLeaseSeconds());
     if (!blocked && w.rateLimit) set('Mikrotik-Rate-Limit', w.rateLimit);
   } else if (vendor === 'mikrotik') {
     set('Mikrotik-Group', profile);
