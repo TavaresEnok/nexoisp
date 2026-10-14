@@ -11,6 +11,7 @@ import { ContractFinance } from './Finance';
 import { ContractCompany } from './Empresas';
 import { ContractAddons } from './Adicionais';
 import { ContractArea } from './Anatel';
+import { ContractCpe } from './Cpe';
 import { OnuPanel } from './Olt';
 import { WorkOrderList } from './Field';
 import { InfraPanel } from './Noc';
@@ -111,6 +112,7 @@ export function ContractDetail() {
             <InfraPanel contractId={c.id} />
             <ContractFinance contractId={c.id}>{(fin, numbers) => <ServicePanel contract={c} financial={fin} fin={numbers} />}</ContractFinance>
             <ContractUsage contractId={c.id} />
+            <ContractCpe contractId={c.id} />
             <AuthLog contractId={c.id} />
             <Availability contractId={c.id} />
             <Sessions contractId={c.id} />

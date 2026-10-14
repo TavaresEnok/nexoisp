@@ -3,6 +3,7 @@ import { api, d, doc, dt, money, speed, useLoad } from '../api';
 import { has, useMe } from '../App';
 import { ActionButton, Badge, Brand, Card, Icon, KV, Modal, State } from '../ui';
 import { UsageSeries, UsageTable } from './Extras';
+import { PortalWifi } from './Cpe';
 import { PortalTickets } from './Crm';
 import { InvoiceBadge } from './Finance';
 
@@ -43,6 +44,7 @@ export function Portal() {
             </div>
           ))}
           <PortalAcceptances />
+          <PortalWifi />
           <div className="grid2">
             <Card>
               <div className={`status ${suspended ? 'bad' : installing ? 'warn' : ''}`} style={{ paddingLeft: 14 }}>

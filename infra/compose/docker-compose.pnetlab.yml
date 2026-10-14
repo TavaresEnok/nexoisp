@@ -24,3 +24,8 @@ services:
   olt-huawei-emu:
     build: { network: host }
     security_opt: ["seccomp=unconfined"]
+  # mesmo motivo do RADIUS (criação de threads barrada pelo seccomp deste Docker)
+  acs:
+    security_opt: ["seccomp=unconfined"]
+  acs-db:
+    security_opt: ["seccomp=unconfined"]
