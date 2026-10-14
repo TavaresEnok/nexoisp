@@ -42,6 +42,7 @@ export function Portal() {
               <div className="small muted">{dt(n.starts_at)} até {dt(n.ends_at)}</div>
             </div>
           ))}
+          <PortalAcceptances />
           <div className="grid2">
             <Card>
               <div className={`status ${suspended ? 'bad' : installing ? 'warn' : ''}`} style={{ paddingLeft: 14 }}>
@@ -137,6 +138,35 @@ function PortalSurveys() {
           <ActionButton className="primary" disabled={!score[s.id]} onClick={async () => { await api(`/portal/surveys/${s.id}`, { body: { score: score[s.id], comment: comment[s.id] || null } }); sv.reload(); }}>Enviar avaliação</ActionButton>
         </div>
       ))}
+    </Card>
+  );
+}
+
+/** Documentos que a empresa pediu para o assinante aceitar. O aceite registra o texto, o momento e o endereço de rede. */
+function PortalAcceptances() {
+  const list = useLoad<any[]>('/portal/acceptances', 30000);
+  const [open, setOpen] = useState<any>(null);
+  const [agree, setAgree] = useState(false);
+  const pending = list.data?.filter((a) => a.status === 'pending') ?? [];
+  if (!pending.length) return null;
+  return (
+    <Card title="Documentos para aceitar" tone="amber">
+      {pending.map((a) => (
+        <div key={a.id} className="row" style={{ justifyContent: 'space-between' }}>
+          <span><b>{a.title}</b></span>
+          <button className="sm primary" onClick={() => { setOpen(a); setAgree(false); }}>Ler e aceitar</button>
+        </div>))}
+      {open && (
+        <Modal title={open.title} onClose={() => setOpen(null)} wide>
+          <div style={{ whiteSpace: 'pre-wrap' }}>{open.body}</div>
+          <label className="check" style={{ marginTop: 12 }}><input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} /> Li o texto acima e concordo.</label>
+          <p className="small muted">Ao aceitar, ficam registrados o texto, a data e hora e o endereço de rede de onde você está acessando.</p>
+          <div className="row">
+            <ActionButton disabled={!agree} className="primary" onClick={async () => { await api(`/portal/acceptances/${open.id}/accept`, { body: { agree: true } }); setOpen(null); list.reload(); }}>Aceitar</ActionButton>
+            <button onClick={() => setOpen(null)}>Agora não</button>
+          </div>
+        </Modal>
+      )}
     </Card>
   );
 }

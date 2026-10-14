@@ -17,6 +17,7 @@ import { fluxoOsRoutes } from './routes/fluxo-os.js';
 import { integracoesRoutes } from './routes/integracoes.js';
 import { mapaRoutes } from './routes/mapa.js';
 import { empresasRoutes } from './routes/empresas.js';
+import { aceitesRoutes } from './routes/aceites.js';
 import { produtividadeRoutes } from './routes/produtividade.js';
 import { publicApiRoutes } from './routes/public-api.js';
 import { radiusRoutes } from './routes/radius.js';
@@ -90,6 +91,7 @@ export async function buildApp(opts: { logger?: boolean } = {}) {
   await app.register(consultaIpRoutes);
   await app.register(mapaRoutes);
   await app.register(empresasRoutes);
+  await app.register(aceitesRoutes);
   await app.register(integracoesRoutes);
   await app.register(publicApiRoutes);
   await app.register(networkRoutes);

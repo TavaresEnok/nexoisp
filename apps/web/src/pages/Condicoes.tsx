@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { api, d, dt, money, useLoad } from '../api';
 import { can, useMe } from '../App';
-import { ActionButton, Badge, Card, Field, Form, KV, State } from '../ui';
+import { ActionButton, Badge, Card, Field, Form, KV, Modal, State } from '../ui';
 
 const CHANGE: Record<string, string> = { plan_change: 'Troca de plano', due_day: 'Troca do vencimento', end: 'Encerramento' };
 const STATUS: Record<string, ['green' | 'red' | 'amber' | 'gray', string]> = { pending: ['amber', 'agendada'], applied: ['green', 'aplicada'], canceled: ['gray', 'cancelada'], failed: ['red', 'falhou'] };
@@ -134,5 +134,61 @@ export function ContractConditions({ contract, onChange }: { contract: any; onCh
         ))}</tbody></table>
       </State>
     </Card>
+
+    <Acceptances contract={contract} amendments={amend.data ?? []} />
   </>);
+}
+
+const ACC: Record<string, [string, 'amber' | 'green' | 'gray']> = { pending: ['Aguardando o assinante', 'amber'], accepted: ['Aceito', 'green'], canceled: ['Cancelado', 'gray'] };
+
+/** Aceite eletrônico simples: o assinante concorda no portal; ficam texto, data, endereço de rede e resumo. Não é assinatura avançada/qualificada. */
+function Acceptances({ contract, amendments }: { contract: any; amendments: any[] }) {
+  const { me } = useMe();
+  const list = useLoad<any[]>(`/contracts/${contract.id}/acceptances`);
+  const [f, setF] = useState<{ amendment_id: string; title: string; body: string } | null>(null);
+  const [ev, setEv] = useState<any>(null);
+  const w = can(me, 'contracts:write');
+  return (
+    <Card title="Aceite eletrônico" actions={w && <button className="sm" onClick={() => setF({ amendment_id: '', title: '', body: '' })}>Pedir aceite</button>}>
+      <p className="small muted" style={{ marginTop: 0 }}>O assinante aceita pelo portal. Fica registrado o texto, quando e de qual endereço. É aceite eletrônico simples (Lei 14.063/2020, art. 4º, I), não assinatura avançada nem qualificada: valide o uso com o jurídico.</p>
+      {f && (
+        <Form submit="Enviar ao portal" onCancel={() => setF(null)} onSubmit={async () => {
+          await api(`/contracts/${contract.id}/acceptances`, { body: f.amendment_id ? { amendment_id: f.amendment_id } : { title: f.title, body: f.body } });
+          setF(null); list.reload();
+        }}>
+          <Field label="Documento"><select value={f.amendment_id} onChange={(e) => setF({ ...f, amendment_id: e.target.value })}>
+            <option value="">Texto livre</option>{amendments.map((a) => <option key={a.id} value={a.id}>Aditivo: {a.title}</option>)}</select></Field>
+          {!f.amendment_id && (<>
+            <Field label="Título"><input value={f.title} minLength={3} maxLength={120} required onChange={(e) => setF({ ...f, title: e.target.value })} /></Field>
+            <Field label="Texto que o assinante vai ler e aceitar"><textarea rows={5} value={f.body} maxLength={8000} required onChange={(e) => setF({ ...f, body: e.target.value })} /></Field>
+          </>)}
+        </Form>
+      )}
+      <State empty={list.data?.length === 0} emptyText="Nenhum pedido de aceite.">
+        <table><tbody>{list.data?.map((a) => (
+          <tr key={a.id}>
+            <td><b>{a.title}</b><div className="small muted">pedido em {dt(a.requested_at)}{a.requested_by_name ? ` por ${a.requested_by_name}` : ''}{a.accepted_at ? ` · aceito em ${dt(a.accepted_at)} de ${a.accepted_ip}` : ''}</div></td>
+            <td><Badge tone={ACC[a.status][1] === 'gray' ? 'gray' : ACC[a.status][1]}>{ACC[a.status][0]}</Badge></td>
+            <td className="actions">
+              {a.status === 'accepted' && <button className="sm" onClick={async () => setEv(await api(`/acceptances/${a.id}/evidence`))}>Comprovante</button>}
+              {w && a.status === 'pending' && <ActionButton className="sm danger" onClick={async () => { await api(`/acceptances/${a.id}/cancel`, { method: 'POST' }); list.reload(); }}>Cancelar</ActionButton>}
+            </td>
+          </tr>))}</tbody></table>
+      </State>
+      {ev && (
+        <Modal title="Comprovante de aceite" onClose={() => setEv(null)} wide>
+          <KV items={[
+            ['Documento', ev.title], ['Assinante', `${ev.subscriber.name}`], ['Aceito em', dt(ev.accepted_at)], ['Endereço de rede', <span className="mono">{ev.accepted_ip}</span>],
+            ['Acesso do portal', ev.accepted_email], ['Navegador', <span className="small">{ev.accepted_user_agent ?? '—'}</span>],
+            ['Resumo do texto (SHA-256)', <span className="mono small">{ev.body_hash}</span>], ['Resumo da prova (SHA-256)', <span className="mono small">{ev.evidence_hash}</span>],
+            ['Conferência', ev.verification.text_matches_hash && ev.verification.evidence_matches ? <Badge tone="green">Texto e prova conferem</Badge> : <Badge tone="red">Divergência: não confie neste registro</Badge>],
+          ]} />
+          <h4>Texto aceito</h4>
+          <div style={{ whiteSpace: 'pre-wrap' }} className="small">{ev.body}</div>
+          <p className="small muted">{ev.method}</p>
+          <div className="row"><button onClick={() => window.print()}>Imprimir</button></div>
+        </Modal>
+      )}
+    </Card>
+  );
 }

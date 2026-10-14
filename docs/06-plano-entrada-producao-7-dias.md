@@ -444,3 +444,14 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   Sem empresa cadastrada, nada aparece e nada muda. Migração 041.
 - **Fora do escopo desta entrega:** numeração e série fiscais por empresa, certificado digital por empresa, gateway/conta de recebimento por empresa, permissão de
   usuário por empresa (hoje o recorte por usuário continua sendo por POP), relatórios gerenciais agrupados por empresa. Entram junto com a nota fiscal.
+
+### 14/10/2026 — aceite eletrônico simples de documento do contrato
+
+- **Entregue (testado: 4 testes novos):** no contrato, aba Condições → Aceite eletrônico: a equipe pede o aceite de um aditivo ou de um texto livre; o assinante vê em
+  "Documentos para aceitar" no portal, lê e confirma. Ficam registrados o texto exato (cópia: mudar o aditivo depois não muda o que foi aceito), o resumo SHA-256 do
+  texto, data e hora, endereço de rede, navegador e o acesso do portal que aceitou, mais um resumo da prova. O comprovante (imprimível) confere os dois resumos.
+  O banco recusa alterar um aceite registrado. Migração 042.
+- **O que é e o que não é:** aceite eletrônico **simples** (Lei 14.063/2020, art. 4º, I) — identificação pelo acesso autenticado ao portal. **Não** é assinatura
+  avançada nem qualificada (ICP-Brasil, certificado). A força de prova em disputa depende do caso; **validar o uso com o jurídico do provedor**.
+- **Limites:** exige que o assinante tenha acesso ao portal; sem verificação em segundo fator no ato do aceite (a senha do portal é o único fator); sem envio
+  automático de lembrete ao assinante (a equipe avisa pelos meios que já usa); sem assinatura da empresa no documento; sem PDF (impressão do comprovante pela tela).
