@@ -2,7 +2,7 @@ import { execFileSync, spawn, type ChildProcess } from 'node:child_process';
 import { createSocket } from 'node:dgram';
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { closePool, noScope, withScope } from './db.js';
-import { l2tpConfigured, l2tpPsk, renderChapSecrets, renderIpsecConf, renderIpsecSecrets, renderPppOptions, renderServerConf, renderXl2tpdConf,
+import { l2tpConfigured, l2tpPsk, renderChapSecrets, renderIpsecConf, renderIpsecSecrets, renderPppOptions, renderStrongswanConf, renderServerConf, renderXl2tpdConf,
   VPN_INTERNAL_PORT, VPN_SERVER_IP } from './radius/vpn-shared.js';
 
 /**
@@ -72,7 +72,8 @@ function l2tpSetup(): boolean {
   if (!l2tpConfigured()) { log('L2TP/IPsec desligado (defina NEXO_L2TP_PSK para habilitar)'); return false; }
   if (!L2TP_BIN.every(existsSync)) { log('L2TP/IPsec indisponível: faltam strongSwan, xl2tpd ou pppd nesta imagem'); return false; }
   if (!process.env.NEXO_RADIUS_KEY) { log('L2TP/IPsec desligado: o serviço precisa de NEXO_RADIUS_KEY para ler as senhas dos concentradores'); return false; }
-  for (const d of ['/etc/xl2tpd', '/etc/ppp', '/var/run/xl2tpd']) mkdirSync(d, { recursive: true });
+  for (const d of ['/etc/xl2tpd', '/etc/ppp', '/var/run/xl2tpd', '/etc/strongswan.d']) mkdirSync(d, { recursive: true });
+  writeFileSync('/etc/strongswan.d/nexoisp.conf', renderStrongswanConf());
   if (!existsSync('/dev/ppp')) try { sh('mknod', ['/dev/ppp', 'c', '108', '0']); } catch (e) { log(`sem /dev/ppp: ${(e as Error).message}`); return false; }
   writeFileSync('/etc/ipsec.conf', renderIpsecConf());
   writeFileSync('/etc/ipsec.secrets', renderIpsecSecrets(l2tpPsk()), { mode: 0o600 });

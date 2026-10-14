@@ -43,6 +43,11 @@ export function renderIpsecConf(): string {
     '  dpddelay=30s', '  dpdtimeout=120s', '  dpdaction=clear', '  rekey=no', '  ikelifetime=8h', '  lifetime=1h', '',
   ].join('\n');
 }
+/**
+ * O plugin bypass-lan do strongSwan deixa passar sem cifrar o tráfego das redes locais do contêiner. Atrás do proxy de portas do Docker
+ * (ou de um NAT na mesma rede) o concentrador aparece com um endereço dessas redes e a resposta L2TP sairia em claro (medido no lab).
+ */
+export const renderStrongswanConf = () => 'charon {\n  plugins {\n    bypass-lan {\n      load = no\n    }\n  }\n}\n';
 export const renderIpsecSecrets = (psk: string) => `%any %any : PSK "${psk.replace(/"/g, '')}"\n`;
 export function renderXl2tpdConf(): string {
   return ['[global]', 'port = 1701', 'ipsec saref = no', 'force userspace = yes', '',
