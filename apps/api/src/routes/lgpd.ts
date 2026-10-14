@@ -64,4 +64,32 @@ export async function lgpdRoutes(app: FastifyInstance) {
       }
     });
   });
+
+  // ---- Retenção de dados do provedor ----
+  const env = (n: string, d: number) => Number(process.env[n]) || d;
+  app.get('/api/settings/retention', { preHandler: guard('settings:manage') }, async (req) =>
+    withScope(req.ctx.scope, async (c) => {
+      const s = (await c.query('select retention_auth_log_days, retention_sessions_days, retention_notice_log_days from tenant_settings where tenant_id = $1', [req.ctx.tenantId])).rows[0] ?? {};
+      return {
+        auth_log_days: s.retention_auth_log_days ?? null, sessions_days: s.retention_sessions_days ?? null, notice_log_days: s.retention_notice_log_days ?? null,
+        defaults: { auth_log_days: env('NEXO_RADIUS_LOG_DAYS', 30), sessions_days: env('NEXO_SESSION_KEEP_DAYS', 400), notice_log_days: env('NEXO_NOTICE_LOG_DAYS', 400) },
+        limits: { auth_log_days: [7, 365], sessions_days: [365, 1825], notice_log_days: [30, 1825] },
+        kept: 'Faturas, pagamentos, aceites e auditoria não são apagados pela rotina.',
+      };
+    }));
+  app.put('/api/settings/retention', { preHandler: guard('settings:manage') }, async (req) => {
+    const d = (min: number, max: number, msg: string) => z.number().int().min(min, msg).max(max, msg).nullable();
+    const b = z.object({
+      auth_log_days: d(7, 365, 'log de autenticação: de 7 a 365 dias'),
+      sessions_days: d(365, 1825, 'registro de conexões: de 365 (mínimo do Marco Civil) a 1825 dias'),
+      notice_log_days: d(30, 1825, 'registro de avisos: de 30 a 1825 dias'),
+    }).parse(req.body);
+    return withScope(req.ctx.scope, async (c) => {
+      await c.query('insert into tenant_settings (tenant_id) values ($1) on conflict (tenant_id) do nothing', [req.ctx.tenantId]);
+      await c.query('update tenant_settings set retention_auth_log_days = $2, retention_sessions_days = $3, retention_notice_log_days = $4 where tenant_id = $1',
+        [req.ctx.tenantId, b.auth_log_days, b.sessions_days, b.notice_log_days]);
+      await audit(c, req.ctx, 'settings.retention', 'tenant_settings', req.ctx.tenantId, b);
+      return b;
+    });
+  });
 }

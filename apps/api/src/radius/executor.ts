@@ -257,8 +257,13 @@ export async function syncAccounting(tenantId: string, opts: { full?: boolean } 
  */
 export async function purgeRadius(tenantId: string, batch = 5000): Promise<{ postauth: number; acct: number; sessions: number }> {
   const days = (name: string, def: number, min: number) => Math.max(min, Number(process.env[name]) || def);
-  const logDays = days('NEXO_RADIUS_LOG_DAYS', 30, 1), keepDays = days('NEXO_SESSION_KEEP_DAYS', 400, 30);
   return withScope(SYS(tenantId), async (c) => {
+    // retenção do provedor (se definida) ou o padrão da instalação
+    const s = (await c.query('select retention_auth_log_days as a, retention_sessions_days as s, retention_notice_log_days as n from tenant_settings where tenant_id = $1', [tenantId])).rows[0] ?? {};
+    const logDays = s.a ?? days('NEXO_RADIUS_LOG_DAYS', 30, 1), keepDays = s.s ?? days('NEXO_SESSION_KEEP_DAYS', 400, 30);
+    const noticeDays = s.n ?? days('NEXO_NOTICE_LOG_DAYS', 400, 30);
+    await c.query(`delete from notice_log where ctid in (select ctid from notice_log where tenant_id = $1 and status in ('sent','failed','skipped_no_consent','uncertain','test')
+                   and created_at < now() - make_interval(days => $2::int) limit $3)`, [tenantId, noticeDays, batch]);
     const del = async (table: string, col: string, d: number) => (await c.query(
       `delete from ${table} where ctid in (select ctid from ${table} where tenant_id = $1 and ${col} < now() - make_interval(days => $2::int) limit $3)`, [tenantId, d, batch])).rowCount ?? 0;
     const usageDays = days('NEXO_USAGE_DAILY_DAYS', 800, 400);   // cobre "por ano" com folga

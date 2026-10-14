@@ -68,4 +68,17 @@ describe('LGPD do titular', () => {
     const aud = (await call(admin, 'GET', '/api/audit?limit=50')).body;
     expect(JSON.stringify(aud)).toMatch(/subscriber\.anonymize/);
   });
+  it('retenção por provedor: mínimos legais travados; a limpeza respeita o prazo do provedor', async () => {
+    expect((await call(admin, 'PUT', '/api/settings/retention', { auth_log_days: 7, sessions_days: 200, notice_log_days: null })).status).toBe(400);   // < 1 ano
+    expect((await call(atend, 'PUT', '/api/settings/retention', { auth_log_days: 7, sessions_days: 400, notice_log_days: null })).status).toBe(403);
+    expect((await call(admin, 'PUT', '/api/settings/retention', { auth_log_days: 10, sessions_days: 400, notice_log_days: 30 })).status).toBe(200);
+    expect((await call(admin, 'GET', '/api/settings/retention')).body).toMatchObject({ auth_log_days: 10, sessions_days: 400, notice_log_days: 30 });
+    await withScope({ tenantId, operator: false }, (c) => c.query(
+      `insert into notice_log (tenant_id, subscriber_id, status, created_at) values ($1, $2, 'sent', now() - interval '40 days'), ($1, $2, 'sent', now() - interval '5 days')`, [tenantId, sub.id]));
+    const { purgeRadius } = await import('../src/radius/executor.js');
+    await purgeRadius(tenantId);
+    const left = (await withScope({ tenantId, operator: false }, (c) => c.query(`select count(*)::int as n from notice_log where subscriber_id = $1`, [sub.id]))).rows[0].n;
+    expect(left).toBe(1);                                                 // o de 40 dias saiu (prazo 30), o de 5 dias ficou
+    await call(admin, 'PUT', '/api/settings/retention', { auth_log_days: null, sessions_days: null, notice_log_days: null });
+  });
 });

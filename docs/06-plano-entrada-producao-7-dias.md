@@ -618,3 +618,11 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
 - **Limite:** a contagem fica na memória de cada réplica da API (com N réplicas atrás de balanceamento, o efetivo pode chegar a N vezes o configurado).
 - **Correção de teste:** com o Vitest 5 a ordem dos arquivos mudou e o teste de suspensão por inadimplência passou a pegar contratos de outros testes; agora
   ele roda a rotina só para o próprio contrato (a rota já aceitava). 191 testes passando.
+
+### 14/10/2026 — retenção de dados por provedor (revisão de segurança, parte 5)
+
+- **Entregue (testado):** Auditoria → "Retenção de dados" (administrador): prazos do provedor para tentativas de autenticação (7 a 365 dias), registro de
+  conexões (365 a 1825 — o mínimo de 1 ano do Marco Civil fica travado no servidor e no banco) e registro de avisos enviados (30 a 1825). Vazio = padrão da
+  instalação. A limpeza periódica usa o prazo do provedor; o registro de avisos passou a ser limpo também (só os concluídos). Faturas, pagamentos, aceites e
+  auditoria nunca são apagados pela rotina. Migração 053.
+- **Revisão de segurança — o que ainda falta:** teste de invasão por terceiros (depende de contratar).
