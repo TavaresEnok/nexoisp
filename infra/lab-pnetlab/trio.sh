@@ -60,6 +60,7 @@ case "${1:-}" in
     set -a; . "$STATE/.env"; set +a
     py nexoisp-agent python /setup_nas.py down || echo "AVISO: concentrador não foi limpo pela API; confira com: trio.sh nas '/radius print'"
     cli '/interface pppoe-client remove [find comment="nexo-lab"]' '/ip dhcp-client remove [find comment="nexo-lab"]' '/interface macvlan remove [find comment="nexo-lab"]' '/interface vlan remove [find comment="nexo-lab"]' >/dev/null
+    nas '/interface l2tp-client remove [find comment="nexo-lab"]' '/radius remove [find comment="nexo-lab-l2tp"]' '/ip firewall filter remove [find comment="nexo-lab"]' >/dev/null
     nas '/ip hotspot remove [find name=nexo-hs]' '/ip hotspot profile remove [find name=nexo-hs]' '/ip dhcp-server remove [find comment="nexo-lab"]' '/ip dhcp-server network remove [find comment="nexo-lab"]' '/ip pool remove [find comment="nexo-lab"]' \
         '/ip address remove [find comment~"nexo-lab"]' '/interface vlan remove [find comment="nexo-lab"]' >/dev/null
     $C --profile ha down; sudo ip link set $NAS_TAP nomaster; sudo ip link del $BR

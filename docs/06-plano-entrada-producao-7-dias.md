@@ -506,3 +506,23 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   ir como lista de endereços, como no IPoE.
 - **Não validado:** IPoE em Huawei/Cisco
   (DHCP com RADIUS tem configuração própria por fabricante; só MikroTik); IPoE por Option 82 (circuito da OLT) em vez de MAC.
+
+### 14/10/2026 — consumo por hora e túnel L2TP/IPsec (decisão do proprietário: "faça")
+
+- **Consumo por hora (testado):** guardado só na janela recente — 48 h por padrão (`NEXO_USAGE_HOURLY_HOURS`, até 31 dias) — da mesma leitura de diferenças
+  que alimenta o diário; a limpeza periódica apaga o que sai da janela. Contrato → Consumo → Hora, dia, semana, ano; também no portal. Migração 047.
+  **Carga (100 mil contas online):** passada completa 35 s (antes 27,7 s), ciclo sem mudança 0,24 s, ciclo com 5% das contas 1,6 s (antes 1,3 s).
+- **Túnel L2TP/IPsec (para RouterOS 6, Huawei, Cisco e quem não tem WireGuard):** o serviço do túnel passa a rodar também strongSwan (IKEv1, modo
+  transporte, chave compartilhada da instalação `NEXO_L2TP_PSK`), xl2tpd e pppd. Cada concentrador recebe usuário e senha próprios (senha mostrada uma vez,
+  guardada cifrada) e um endereço fixo em 10.251.0.0/16, pelo qual o RADIUS o reconhece; o servidor é 10.251.0.1. Portas UDP 500 e 4500. Escolha no cadastro do
+  concentrador ("Túnel L2TP/IPsec") ou em "Usar túnel L2TP" num já cadastrado; a lista mostra conectado/caiu. Migração 048.
+- **Validado no cenário PNETLab (CHR 7.17 como cliente L2TP com IPsec, concentrador de teste separado):** IPsec fases 1 e 2, L2TP e PPP estabelecidos; o
+  concentrador recebeu 10.251.0.2 e alcança o servidor; autenticação de hotspot com accounting chegando por 10.251.0.2; suspensão derrubou a sessão por dentro do
+  túnel L2TP ("aceita pelo concentrador") e o novo login foi recusado.
+- **Achados da validação e corrigidos:** (1) o RouterOS pede PFS com MODP1024 na fase 2 — sem o grupo na lista de propostas, "NO_PROPOSAL_CHOSEN";
+  (2) o strongSwan deixa passar sem cifrar as redes locais do contêiner (plugin bypass-lan) — atrás do proxy de portas do Docker deste servidor o concentrador
+  aparece com o endereço do gateway do Docker e a resposta L2TP saía em claro; o plugin foi desligado.
+- **Limites:** a chave IPsec é uma só para a instalação (L2TP/IPsec com concentradores atrás de NAT não permite chave por par sem saber o endereço deles); cada
+  concentrador ainda precisa do próprio usuário e senha para subir o L2TP, e só recebe o endereço dele. RouterOS 6, Huawei e Cisco **não foram exercitados**:
+  o RouterOS 6 usa o mesmo comando (`use-ipsec` existe desde a 6.16); para Huawei/Cisco o painel entrega os parâmetros, não comandos prontos. O L2TP roda em
+  espaço de usuário (sem o módulo L2TP do kernel): adequado para dezenas de concentradores, não medido com centenas.

@@ -121,6 +121,13 @@ O servidor de autenticação sobe junto com o sistema (`radius` no compose). O p
 - **Fabricantes:** MikroTik validado em laboratório. Huawei e Cisco ainda não foram testados em equipamento.
 - **Chave:** perder `NEXO_RADIUS_KEY` não perde as senhas (elas continuam no cadastro), mas obriga a "Reaplicar contas" em todos os concentradores.
 
+### Túnel L2TP/IPsec (concentradores sem WireGuard)
+
+- Ligado quando `NEXO_L2TP_PSK` está definido (o `./nexo init` gera). O serviço `vpn` precisa também de `NEXO_RADIUS_KEY` (lê as senhas dos concentradores),
+  de `NET_ADMIN` e do dispositivo `/dev/ppp` (regra `c 108:0` no compose; o serviço cria o nó se faltar). Liberar UDP 500 e 4500 de entrada (`NEXO_L2TP_BIND`).
+- No servidor ficam carregados sob demanda os módulos `esp4`, `ppp_generic` e `ppp_async` (o kernel carrega sozinho quando o serviço usa).
+- A chave IPsec é da instalação; trocá-la exige reconfigurar todos os concentradores L2TP. Usuário e senha são por concentrador ("Refazer túnel" gera outros).
+
 ### IPoE (DHCP) e hotspot
 
 - Tipo de acesso escolhido ao provisionar: PPPoE, IPoE (usuário = MAC do equipamento do assinante, sem senha) ou hotspot (usuário e senha na página de acesso).
