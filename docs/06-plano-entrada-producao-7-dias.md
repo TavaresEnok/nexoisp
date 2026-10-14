@@ -592,3 +592,12 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   chamada de API com erro — o que também confirma que a política de segurança de conteúdo (CSP) não quebrou nenhuma tela.
 - **Não coberto pelo teste:** o conteúdo dos blocos do mapa (servidor externo do OpenStreetMap; o teste só confere que os blocos são pedidos), o roteador do
   cliente (depende do perfil `acs`) e o envio real de mensagens.
+
+### 14/10/2026 — RADIUS: limite para pacotes de origem desconhecida
+
+- **Medido antes:** 300 pacotes de um endereço que não é concentrador cadastrado provocaram 208 consultas ao banco (uma por pacote, menos os descartados por
+  excesso). **Depois:** cache negativo de 60 s por endereço no reconhecimento de concentradores — o primeiro pacote consulta, os seguintes do mesmo endereço
+  são descartados sem ir ao banco: **7 consultas** para os mesmos 300 pacotes (as 7 são da rotina do sistema). Concentrador cadastrado continua autenticando
+  (login de hotspot aceito pelo CHR logo depois).
+- **Efeito colateral aceito:** concentrador cadastrado agora, que tenha mandado pacote nos 60 s anteriores ao cadastro, espera até 60 s para ser reconhecido.
+  **Não resolve** enxurrada vinda de muitos endereços diferentes (cada endereço novo ainda faz uma consulta); para isso, firewall na borda.
