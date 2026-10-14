@@ -111,4 +111,17 @@ describe('rotinas periódicas com mais de uma réplica', () => {
     const outro = await app.inject({ method: 'GET', url: '/public/v1/subscribers', headers: { authorization: 'Bearer nxk_zzz' }, remoteAddress: '10.98.0.2' });
     expect(outro.statusCode).toBe(401);                                      // outro endereço segue normal
   });
+  it('limite de requisições por sessão: passou do limite, 429; outra sessão segue', async () => {
+    const saved = process.env.NEXO_PANEL_RATE_PER_MIN;
+    process.env.NEXO_PANEL_RATE_PER_MIN = '30';
+    try {
+      const a = await login('atendimento@alfa.demo'), b = await login('atendimento@alfa.demo');
+      const codes: number[] = [];
+      for (let i = 0; i < 40; i++) codes.push((await call(a, 'GET', '/api/me')).status);
+      // a virada de minuto no meio do laço zera a janela: confere só que houve recusa e que ela veio depois de passar do limite
+      if (codes.includes(429)) expect(codes.indexOf(429)).toBeGreaterThanOrEqual(30);
+      else expect(new Date().getSeconds()).toBeLessThan(5);
+      expect((await call(b, 'GET', '/api/me')).status).toBe(200);
+    } finally { if (saved) process.env.NEXO_PANEL_RATE_PER_MIN = saved; else delete process.env.NEXO_PANEL_RATE_PER_MIN; }
+  });
 });

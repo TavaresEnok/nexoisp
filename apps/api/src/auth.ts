@@ -140,9 +140,30 @@ export async function loadCtx(req: FastifyRequest): Promise<Ctx> {
 export const mfaRequiredFor = (role: string) => process.env.NEXO_REQUIRE_ADMIN_MFA === '1' && (role === 'admin' || role === 'saas_operator');
 
 /** preHandler: autentica e exige permissão. O tenant vem sempre da sessão, nunca do navegador. */
+/**
+ * Limite de requisições por sessão (painel e portal): contra script ou sessão roubada martelando a API. Janela de 1 minuto, em memória
+ * de cada réplica (com N réplicas atrás de balanceamento, o limite efetivo pode chegar a N vezes o configurado). O painel faz consultas
+ * periódicas; o padrão (1200/min, 20 por segundo) fica bem acima do uso normal.
+ */
+const rate = new Map<string, { minute: number; n: number }>();
+let rateSweep = 0;
+function rateCheck(key: string, reply: FastifyReply) {
+  const limit = Math.max(30, Number(process.env.NEXO_PANEL_RATE_PER_MIN) || 1200);
+  const minute = Math.floor(Date.now() / 60_000);
+  if (minute !== rateSweep) { rateSweep = minute; for (const [k, v] of rate) if (v.minute < minute) rate.delete(k); }
+  const cur = rate.get(key);
+  const n = cur && cur.minute === minute ? cur.n + 1 : 1;
+  rate.set(key, { minute, n });
+  if (n > limit) {
+    reply.header('retry-after', String(60 - new Date().getSeconds()));
+    throw new HttpError(429, 'muitas requisições desta sessão; aguarde um instante', 'rate_limited');
+  }
+}
+
 export function guard(perm?: string, opts: { allowMfaPending?: boolean } = {}) {
-  return async (req: FastifyRequest, _reply: FastifyReply) => {
+  return async (req: FastifyRequest, reply: FastifyReply) => {
     req.ctx = await loadCtx(req);
+    rateCheck(req.ctx.tokenHash, reply);
     if (req.ctx.mfaPending && !opts.allowMfaPending) throw new HttpError(403, 'configure a verificação em duas etapas para continuar', 'mfa_setup_required');
     if (perm && !req.ctx.perms.includes(perm)) {
       await audit(null, req.ctx, 'access.denied', 'permission', perm, { url: req.url }, 'denied').catch(() => {});

@@ -610,3 +610,11 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   com as versões novas; implantado neste servidor.
 - **Ainda não feito na revisão:** teste de invasão por terceiros; limite de requisições por endereço nas rotas autenticadas do painel; política de retenção
   configurável por tipo de dado.
+
+### 14/10/2026 — limite de requisições por sessão
+
+- **Entregue (testado):** toda rota autenticada (painel e portal) conta requisições por sessão numa janela de 1 minuto; passou do limite
+  (`NEXO_PANEL_RATE_PER_MIN`, padrão 1200 = 20 por segundo, bem acima do uso normal do painel), responde 429 com `Retry-After`; outra sessão não é afetada.
+- **Limite:** a contagem fica na memória de cada réplica da API (com N réplicas atrás de balanceamento, o efetivo pode chegar a N vezes o configurado).
+- **Correção de teste:** com o Vitest 5 a ordem dos arquivos mudou e o teste de suspensão por inadimplência passou a pegar contratos de outros testes; agora
+  ele roda a rotina só para o próprio contrato (a rota já aceitava). 191 testes passando.

@@ -104,8 +104,8 @@ describe('financeiro', () => {
     expect((await ag.runNext())?.action).toBe('subscriber.provision');
 
     // fatura vencida => política configurada solicita a suspensão
-    expect((await call(admin, 'POST', '/api/finance/run-auto-suspend')).body.requested).toBeGreaterThanOrEqual(1);
-    expect((await call(admin, 'POST', '/api/finance/run-auto-suspend')).body.requested).toBe(0); // não repete
+    expect((await call(admin, 'POST', '/api/finance/run-auto-suspend', { contract_id: contract.id })).body.requested).toBeGreaterThanOrEqual(1);
+    expect((await call(admin, 'POST', '/api/finance/run-auto-suspend', { contract_id: contract.id })).body.requested).toBe(0); // não repete
     let s = (await call(admin, 'GET', `/api/contracts/${contract.id}/service`)).body;
     expect(s.resource.desired_policy).toBe('suspended');
     const suspendOp = s.operations[0];
@@ -125,7 +125,7 @@ describe('financeiro', () => {
     await call(admin, 'POST', '/api/finance/generate', { competence: C2 });
     const inv2 = (await invoices(`?status=open&contract_id=${contract.id}`))[0];
     await pay(inv2.id, 'lost');
-    expect((await call(admin, 'POST', '/api/finance/run-auto-suspend')).body.requested).toBe(0);
+    expect((await call(admin, 'POST', '/api/finance/run-auto-suspend', { contract_id: contract.id })).body.requested).toBe(0);
     expect((await invoice(inv2.id)).status).toBe('paid');
     expect((await call(admin, 'GET', `/api/contracts/${contract.id}/service`)).body.resource.desired_policy).toBe('active');
   });
