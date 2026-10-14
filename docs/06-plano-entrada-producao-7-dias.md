@@ -547,3 +547,12 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   Migração 050.
 - **Limites:** o arquivo precisa estar no formato intermediário (os adaptadores diretos do SGP/IXC continuam dependendo de exportação real); anexos não entram;
   usuários do sistema anterior não são criados.
+
+### 14/10/2026 — aviso de incidente aos assinantes afetados
+
+- **Entregue (testado: 2 testes):** em Rede → Manutenções, "Avisar afetados" envia o aviso (manutenção, lentidão ou queda) pela fila de mensagens de saída a
+  quem é atingido — todos ou só os atendidos pelo equipamento do aviso —, apenas para contato com autorização de avisos; depois, "Avisar normalização". Um envio
+  por assinante, aviso e fase (repetir não manda de novo); texto do aviso ou personalizado com `{nome}`; aparece no registro de avisos. Disparado pelo operador
+  (NOC pode), nunca sozinho; exige o módulo de avisos ao assinante e um canal ativo. Migração 051.
+- **Limites:** não há detecção automática de queda que dispare o aviso (decisão: nada vai ao assinante sem alguém mandar); o recorte é por equipamento, não por
+  caixa óptica ou porta PON; o canal é o HTTP genérico já existente (nenhuma operadora de SMS/WhatsApp real testada).

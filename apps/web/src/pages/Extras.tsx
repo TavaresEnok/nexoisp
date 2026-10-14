@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { api, dt, useLoad } from '../api';
-import { can, useMe } from '../App';
-import { ActionButton, Badge, Card, Field, Form, Page, State } from '../ui';
+import { can, has, useMe } from '../App';
+import { ActionButton, Badge, Card, Field, Form, Page, State, toast } from '../ui';
 
 const SEVERITY: Record<string, string> = { info: 'Informativo', degraded: 'Lentidão ou instabilidade', outage: 'Sem acesso' };
 const STATE: Record<string, [string, 'blue' | 'amber' | 'green' | undefined]> = {
@@ -17,10 +17,12 @@ export function Maintenance() {
   const w = can(me, 'network:write');
   const list = useLoad<any[]>('/maintenance-notices', 10000);
   const devices = useLoad<any[]>('/devices');
+  const msg = has(me, 'messages');
+  const channels = useLoad<any[]>(w && msg ? '/maintenance-notices/channels' : null);
   const [f, setF] = useState<any>(null);
   return (
     <Page title="Manutenções" actions={w && <button className="primary" onClick={() => setF({ title: '', message: '', severity: 'info', device_id: '', starts_at: nowLocal(1), ends_at: nowLocal(3) })}>Novo aviso</button>}>
-      <p className="muted small">O aviso aparece no portal do assinante enquanto estiver em andamento e nos 7 dias anteriores ao início. Não envia SMS nem e-mail.</p>
+      <p className="muted small">O aviso aparece no portal do assinante enquanto estiver em andamento e nos 7 dias anteriores ao início. Com o módulo de avisos ao assinante, "Avisar afetados" envia também pela fila de mensagens (só a quem autorizou), e depois "Avisar normalização".</p>
       {f && (
         <Card title="Novo aviso de manutenção">
           <Form submit="Publicar aviso" onCancel={() => setF(null)} onSubmit={async () => {
@@ -57,8 +59,15 @@ export function Maintenance() {
                 <td>{n.device_name ? `Via ${n.device_name}` : 'Todos'} <span className="muted small">({n.affected_subscribers} assinante(s))</span></td>
                 <td className="small">{dt(n.starts_at)}<br />até {dt(n.ends_at)}</td>
                 <td><Badge tone={tone}>{label}</Badge></td>
-                <td>{w && (n.state === 'scheduled' || n.state === 'active') && (
-                  <ActionButton className="sm danger" confirm="Cancelar este aviso? Ele deixa de aparecer no portal." onClick={async () => { await api(`/maintenance-notices/${n.id}/cancel`, { method: 'POST' }); list.reload(); }}>Cancelar</ActionButton>)}</td>
+                <td className="actions">{w && msg && channels.data?.[0] && n.state !== 'canceled' && (<>
+                  {!n.notified_start_at && <ActionButton className="sm" confirm={`Enviar este aviso a ${n.affected_subscribers} assinante(s) afetado(s), pelo canal "${channels.data[0].name}"? Só recebe quem autorizou avisos.`}
+                    onClick={async () => { const r = await api<any>(`/maintenance-notices/${n.id}/notify`, { body: { channel_id: channels.data![0].id, phase: 'start' } }); toast(`${r.queued} aviso(s) na fila; ${r.skipped_no_consent} sem autorização de contato.`); list.reload(); }}>Avisar afetados</ActionButton>}
+                  {n.notified_start_at && !n.notified_resolved_at && <ActionButton className="sm" confirm="Avisar aos mesmos assinantes que o serviço foi normalizado?"
+                    onClick={async () => { const r = await api<any>(`/maintenance-notices/${n.id}/notify`, { body: { channel_id: channels.data![0].id, phase: 'resolved' } }); toast(`${r.queued} aviso(s) de normalização na fila.`); list.reload(); }}>Avisar normalização</ActionButton>}
+                </>)}
+                  {w && (n.state === 'scheduled' || n.state === 'active') && (
+                  <ActionButton className="sm danger" confirm="Cancelar este aviso? Ele deixa de aparecer no portal." onClick={async () => { await api(`/maintenance-notices/${n.id}/cancel`, { method: 'POST' }); list.reload(); }}>Cancelar</ActionButton>)}
+                  {n.notified_start_at && <div className="small muted">avisado {dt(n.notified_start_at)}{n.notified_resolved_at ? ` · normalização ${dt(n.notified_resolved_at)}` : ''}</div>}</td>
               </tr>
             );
           })}</tbody>

@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { audit, guard, HttpError } from '../auth.js';
 import { withScope } from '../db.js';
+import { runNotices } from '../notices.js';
 import { zUuid } from '../validators.js';
 
 const zWhen = z.string().datetime({ offset: true });
@@ -84,5 +85,50 @@ export async function extraRoutes(app: FastifyInstance) {
       await audit(c, req.ctx, 'maintenance_notice.cancel', 'maintenance_notice', id);
       return { ok: true };
     });
+  });
+
+  /**
+   * Envia o aviso aos assinantes afetados pela fila de mensagens de saída: no início ("start") ou na normalização ("resolved").
+   * Só para contato com consentimento; um por assinante, aviso e fase (repetir não manda de novo). Disparado pelo operador, nunca sozinho.
+   */
+  // canais ativos para quem dispara o aviso (o NOC não administra canais, só escolhe por onde sai)
+  app.get('/api/maintenance-notices/channels', { preHandler: guard('network:write') }, async (req) =>
+    withScope(req.ctx.scope, async (c) => (await c.query('select id, name from notice_channels where active order by name')).rows));
+
+  app.post('/api/maintenance-notices/:id/notify', { preHandler: guard('network:write') }, async (req) => {
+    const id = zUuid.parse((req.params as any).id);
+    const b = z.object({ channel_id: zUuid, phase: z.enum(['start', 'resolved']).default('start'), text: z.string().trim().min(3).max(600).optional() }).parse(req.body);
+    const out = await withScope(req.ctx.scope, async (c) => {
+      const m = (await c.query(`${SELECT} where m.id = $1`, [id])).rows[0];
+      if (!m) throw new HttpError(404, 'aviso não encontrado');
+      if (m.state === 'canceled') throw new HttpError(409, 'aviso cancelado');
+      if (b.phase === 'resolved' && !m.notified_start_at) throw new HttpError(409, 'o aviso de início não foi enviado; não há o que normalizar');
+      const mod = (await c.query(`select 'messages' = any(modules) as on from tenants where id = $1`, [req.ctx.tenantId])).rows[0];
+      if (!mod?.on) throw new HttpError(409, 'o módulo de avisos ao assinante não está liberado para o provedor', 'module_disabled');
+      if (!(await c.query('select 1 from notice_channels where id = $1 and active', [b.channel_id])).rowCount) throw new HttpError(400, 'canal de envio não encontrado ou inativo');
+      const text = b.text ?? (b.phase === 'start' ? `${m.title}: ${m.message}` : `${m.title}: serviço normalizado. Obrigado pela paciência.`);
+      // afetados: todos os assinantes com contrato ativo, ou só os atendidos pelo equipamento do aviso
+      const rows = (await c.query(
+        `with afetados as (
+           select distinct k.subscriber_id from contracts k
+           where k.status = 'active' and ($2::uuid is null or exists (select 1 from service_resources r where r.contract_id = k.id and r.device_id = $2))),
+         contato as (
+           select a.subscriber_id, s.name,
+                  (select value from subscriber_contacts x where x.subscriber_id = a.subscriber_id and x.allow_notices and x.kind in ('mobile','whatsapp')
+                   order by (x.purpose = 'technical') desc, x.created_at limit 1) as value
+           from afetados a join subscribers s on s.id = a.subscriber_id where s.status = 'active')
+         insert into notice_log (tenant_id, subscriber_id, contact_value, status, channel_id, message, maintenance_notice_id, phase)
+         select $1, subscriber_id, value, case when value is null then 'skipped_no_consent' else 'queued' end, case when value is null then null else $3::uuid end,
+                case when value is null then null else left(replace($4, '{nome}', split_part(name, ' ', 1)), 600) end, $5, $6
+         from contato
+         on conflict (maintenance_notice_id, subscriber_id, phase) where maintenance_notice_id is not null do nothing
+         returning status`, [req.ctx.tenantId, m.device_id, b.channel_id, text, id, b.phase])).rows;
+      await c.query(`update maintenance_notices set ${b.phase === 'start' ? 'notified_start_at' : 'notified_resolved_at'} = coalesce(${b.phase === 'start' ? 'notified_start_at' : 'notified_resolved_at'}, now()) where id = $1`, [id]);
+      const queued = rows.filter((r) => r.status === 'queued').length, skipped = rows.length - queued;
+      await audit(c, req.ctx, 'maintenance_notice.notify', 'maintenance_notice', id, { phase: b.phase, queued, skipped_no_consent: skipped });
+      return { phase: b.phase, queued, skipped_no_consent: skipped, already_sent: m.affected_subscribers - rows.length > 0 ? m.affected_subscribers - rows.length : 0 };
+    });
+    runNotices(req.ctx.tenantId!).catch(() => {});     // envio começa já; o que sobrar vai na rotina periódica
+    return out;
   });
 }
