@@ -77,7 +77,8 @@ export const TUNNEL_VENDORS: Vendor[] = ['mikrotik', 'generic'];
  * Comandos para o provedor colar no concentrador. `secret` e a chave privada do túnel só são conhecidos na criação/troca;
  * depois vão marcadores. Com túnel, o RADIUS é o endereço interno do servidor e os pacotes saem do endereço do túnel.
  */
-export function setupCommands(vendor: Vendor, o: { host: string; authPort: number; acctPort: number; coaPort: number; secret: string; tunnel?: Tunnel | null }): string {
+export interface Secondary { host: string; authPort: number; acctPort: number }
+export function setupCommands(vendor: Vendor, o: { host: string; authPort: number; acctPort: number; coaPort: number; secret: string; tunnel?: Tunnel | null; secondary?: Secondary | null }): string {
   const tn = o.tunnel;
   if (vendor === 'mikrotik') return [
     ...(tn ? [
@@ -89,6 +90,8 @@ export function setupCommands(vendor: Vendor, o: { host: string; authPort: numbe
       `# 2. autenticação pelo túnel`,
     ] : []),
     `/radius add service=ppp address=${o.host} secret="${o.secret}" authentication-port=${o.authPort} accounting-port=${o.acctPort} timeout=3s${tn ? ` src-address=${tn.tunnelIp}` : ''} comment=nexoisp`,
+    ...(o.secondary ? [`# servidor secundário: o equipamento tenta este se o primeiro não responder`,
+      `/radius add service=ppp address=${o.secondary.host} secret="${o.secret}" authentication-port=${o.secondary.authPort} accounting-port=${o.secondary.acctPort} timeout=3s${tn ? ` src-address=${tn.tunnelIp}` : ''} comment=nexoisp-2`] : []),
     `/radius incoming set accept=yes port=${o.coaPort}`,
     `/ppp aaa set use-radius=yes accounting=yes interim-update=5m`,
   ].join('\n');

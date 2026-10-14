@@ -19,6 +19,17 @@ const server = () => ({
   host: process.env.NEXO_RADIUS_PUBLIC_HOST || '<endereço do NexoISP>',
   authPort: Number(process.env.NEXO_RADIUS_PORT ?? 1812), acctPort: Number(process.env.NEXO_RADIUS_PORT ?? 1812) + 1,
 });
+/**
+ * Servidor secundário (redundância): outro endereço/porta que o concentrador tenta quando o primeiro não responde. Definido na
+ * instalação (NEXO_RADIUS_SECONDARY_HOST / _PORT). Outra instância no mesmo túnel protege contra a queda do processo; contra a perda
+ * da máquina é preciso um segundo servidor com o mesmo banco e o próprio túnel (ver docs/operacao.md).
+ */
+const secondary = (tunnel: Tunnel | null) => {
+  const host = process.env.NEXO_RADIUS_SECONDARY_HOST || (tunnel ? tunnel.serverIp : '');
+  const port = Number(process.env.NEXO_RADIUS_SECONDARY_PORT || 0);
+  if (!host || !port) return null;
+  return { host, authPort: port, acctPort: port + 1 };
+};
 /** Com túnel, o RADIUS é o endereço interno do servidor, nas portas padrão; sem túnel, o endereço público e as portas publicadas. */
 const setup = (vendor: Vendor, coaPort: number, secret: string, tunnel: Tunnel | null = null) => {
   const s = tunnel ? { host: tunnel.serverIp, authPort: TUNNEL_AUTH_PORT, acctPort: TUNNEL_ACCT_PORT } : server();
@@ -26,7 +37,7 @@ const setup = (vendor: Vendor, coaPort: number, secret: string, tunnel: Tunnel |
   return { server_host: s.host, auth_port: s.authPort, acct_port: s.acctPort, coa_port: coaPort, vendor, validated: VENDOR_VALIDATED[vendor],
     connection: tunnel ? 'vpn' : 'direct', tunnel: tunnel ? { tunnel_ip: tunnel.tunnelIp, endpoint: `${tunnel.endpointHost}:${tunnel.endpointPort}` } : null,
     host_configured: tunnel ? !!(process.env.NEXO_VPN_PUBLIC_HOST || process.env.NEXO_RADIUS_PUBLIC_HOST) : !!process.env.NEXO_RADIUS_PUBLIC_HOST,
-    endpoint_host: ep.host, commands: setupCommands(vendor, { ...s, coaPort, secret, tunnel }) };
+    endpoint_host: ep.host, secondary: secondary(tunnel), commands: setupCommands(vendor, { ...s, coaPort, secret, tunnel, secondary: secondary(tunnel) }) };
 };
 /** Cria o par do túnel para o equipamento: endereço próprio e chaves novas. Devolve a privada, que não fica guardada. */
 async function newTunnel(c: Tx, tenantId: string, deviceId: string, vendor: Vendor): Promise<Tunnel> {

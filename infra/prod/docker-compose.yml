@@ -38,6 +38,8 @@ services:
       NEXO_RADIUS_COA_RELAY: vpn:3798                           # a desconexão de sessão sai pelo serviço do túnel
       NEXO_VPN_PUBLIC_HOST: ${NEXO_VPN_PUBLIC_HOST:-}
       NEXO_VPN_PORT: ${NEXO_VPN_PORT:-51820}
+      NEXO_RADIUS_SECONDARY_HOST: ${NEXO_RADIUS_SECONDARY_HOST:-}
+      NEXO_RADIUS_SECONDARY_PORT: ${NEXO_RADIUS_SECONDARY_PORT:-}
     volumes: ["./certs:/certs:ro"]
     ports: ["${NEXO_AGENT_PORT:-8443}:8443"]   # agentes (mTLS). O painel (8080) só é alcançado pelo Caddy.
   # Túnel integrado (WireGuard): o concentrador disca para cá e a autenticação passa por dentro. Mesma imagem da API, outro comando.
@@ -67,6 +69,21 @@ services:
       RADIUS_DB_NAME: nexo
       RADIUS_DB_PASSWORD: ${NEXO_RADIUS_DB_PASSWORD:?}
       NEXO_RADIUS_KEY: ${NEXO_RADIUS_KEY:?}
+  # Segunda instância do servidor de autenticação (perfil "ha"), sobre o MESMO banco, em outra porta do mesmo túnel. O concentrador a usa
+  # se a primeira não responder. Protege contra a queda do processo, não da máquina.
+  radius2:
+    build: ../radius
+    profiles: [ha]
+    restart: unless-stopped
+    network_mode: "service:vpn"
+    depends_on: { db: { condition: service_healthy }, vpn: { condition: service_started } }
+    environment:
+      RADIUS_DB_HOST: db
+      RADIUS_DB_PORT: "5432"
+      RADIUS_DB_NAME: nexo
+      RADIUS_DB_PASSWORD: ${NEXO_RADIUS_DB_PASSWORD:?}
+      NEXO_RADIUS_KEY: ${NEXO_RADIUS_KEY:?}
+      RADIUS_PORT: "${NEXO_RADIUS_SECONDARY_PORT:-1822}"
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
