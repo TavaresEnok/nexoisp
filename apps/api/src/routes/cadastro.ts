@@ -243,16 +243,17 @@ export async function cadastroRoutes(app: FastifyInstance) {
 
   // ---- Contratos ----
   app.get('/api/contracts', { preHandler: guard('contracts:read') }, async (req, reply) => {
-    const q = z.object({ q: z.string().trim().optional(), status: z.enum(['active', 'ended']).optional(), tag: zUuid.optional(), format: z.string().optional(), ...zPage }).parse(req.query);
+    const q = z.object({ q: z.string().trim().optional(), status: z.enum(['active', 'ended']).optional(), tag: zUuid.optional(), company_id: zUuid.optional(), format: z.string().optional(), ...zPage }).parse(req.query);
     const cap = q.format === 'csv' ? 5000 : 500;
     const limit = Math.min(q.limit ?? cap, cap), offset = q.offset ?? 0;
     return withScope(req.ctx.scope, async (c) => {
       // filtros só sobre `contracts` (a página sai do índice); nome do assinante, plano e etiquetas entram depois, só para as linhas da página
       const where = `($2::text is null or c.status = $2)
         and ($3::uuid is null or exists (select 1 from contract_tags x where x.contract_id = c.id and x.tag_id = $3))
+        and ($4::uuid is null or c.company_id = $4)
         and ($1::text is null or c.subscriber_id in (select s.id from subscribers s where s.name ilike '%' || $1 || '%')
              or c.plan_version_id in (select pv.id from plan_versions pv join plans p on p.id = pv.plan_id where p.name ilike '%' || $1 || '%'))`;
-      const params = [q.q || null, q.status ?? null, q.tag ?? null];
+      const params = [q.q || null, q.status ?? null, q.tag ?? null, q.company_id ?? null];
       const rows = (await c.query(
         `select c.*, s.name as subscriber_name, s.document as subscriber_document,
                 p.id as plan_id, p.name as plan_name, pv.version as plan_version, pv.price_cents, pv.down_kbps, pv.up_kbps, pv.profile_name,

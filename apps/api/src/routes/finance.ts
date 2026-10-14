@@ -77,7 +77,7 @@ export async function financeRoutes(app: FastifyInstance) {
   });
 
   app.get('/api/invoices', { preHandler: guard('finance:read') }, async (req, reply) => {
-    const q = z.object({ q: z.string().trim().optional(), status: z.enum(['open', 'paid', 'reconciling', 'canceled', 'overdue']).optional(), contract_id: zUuid.optional(), format: z.string().optional(), ...zPage }).parse(req.query);
+    const q = z.object({ q: z.string().trim().optional(), status: z.enum(['open', 'paid', 'reconciling', 'canceled', 'overdue']).optional(), contract_id: zUuid.optional(), company_id: zUuid.optional(), format: z.string().optional(), ...zPage }).parse(req.query);
     const cap = q.format === 'csv' ? 5000 : 500;
     const limit = Math.min(q.limit ?? cap, cap), offset = q.offset ?? 0;
     return withScope(req.ctx.scope, async (c) => {
@@ -86,8 +86,9 @@ export async function financeRoutes(app: FastifyInstance) {
       // filtros só sobre `invoices`: a página é escolhida pelo índice e só depois recebe nome do assinante, plano e saldo
       const where = `($1::uuid is null or i.contract_id = $1)
         and ($2::text is null or ($2 = 'overdue' and i.status = 'open' and i.due_date < $3::date) or ($2 <> 'overdue' and i.status = $2))
-        and ($4::text is null or i.subscriber_id in (select s.id from subscribers s where s.name ilike '%' || $4 || '%'))`;
-      const params = [q.contract_id ?? null, q.status ?? null, today, q.q || null];
+        and ($4::text is null or i.subscriber_id in (select s.id from subscribers s where s.name ilike '%' || $4 || '%'))
+        and ($5::uuid is null or i.company_id = $5)`;
+      const params = [q.contract_id ?? null, q.status ?? null, today, q.q || null, q.company_id ?? null];
       const rows = (await c.query(
         `select i.*, s.name as subscriber_name, p.name as plan_name, (i.status = 'open' and i.due_date < $3::date) as overdue,
                 (select coalesce(sum(x.signed_cents), 0)::int from payments x where x.invoice_id = i.id) as paid_cents
@@ -225,19 +226,22 @@ export async function financeRoutes(app: FastifyInstance) {
     });
   });
 
-  app.get('/api/finance/summary', { preHandler: guard('finance:read') }, async (req) =>
-    withScope(req.ctx.scope, async (c) =>
+  app.get('/api/finance/summary', { preHandler: guard('finance:read') }, async (req) => {
+    const q = z.object({ company_id: zUuid.optional() }).parse(req.query);
+    return withScope(req.ctx.scope, async (c) =>
       (await c.query(
         `select count(*) filter (where status = 'open') as open, coalesce(sum(amount_cents) filter (where status = 'open'),0)::int as open_cents,
                 count(*) filter (where overdue) as overdue, coalesce(sum(amount_cents) filter (where overdue),0)::int as overdue_cents,
                 count(*) filter (where status = 'reconciling') as reconciling,
-                (select coalesce(sum(signed_cents),0)::int from payments where paid_at >= date_trunc('month', now())) as received_month_cents
+                (select coalesce(sum(p.signed_cents),0)::int from payments p join invoices pi on pi.id = p.invoice_id
+                  where p.paid_at >= date_trunc('month', now()) and ($1::uuid is null or pi.company_id = $1)) as received_month_cents
          from (select i.*, (i.status = 'open' and i.due_date < today.d) as overdue from invoices i, (select (now() at time zone coalesce((select timezone from tenant_settings where tenant_id = app_tenant()), 'America/Sao_Paulo'))::date as d) today
-               where i.status in ('open', 'reconciling')) x`)).rows[0]));
+               where i.status in ('open', 'reconciling') and ($1::uuid is null or i.company_id = $1)) x`, [q.company_id ?? null])).rows[0]);
+  });
 
   /** Exportação para a contabilidade (CSV): recebimentos por data de pagamento ou faturas por vencimento. Não é documento fiscal. */
   app.get('/api/finance/export', { preHandler: guard('finance:read') }, async (req, reply) => {
-    const q = z.object({ kind: z.enum(['payments', 'invoices']).default('payments'), from: zDate, to: zDate }).parse(req.query);
+    const q = z.object({ kind: z.enum(['payments', 'invoices']).default('payments'), from: zDate, to: zDate, company_id: zUuid.optional() }).parse(req.query);
     if (q.to < q.from) throw new HttpError(400, 'período inválido');
     const rows = await withScope(req.ctx.scope, async (c) => {
       const tz = (await getSettings(c, req.ctx.tenantId!)).timezone;
@@ -247,12 +251,12 @@ export async function financeRoutes(app: FastifyInstance) {
                   to_char(i.competence, 'YYYY-MM') as competencia, i.due_date as vencimento, i.amount_cents as valor_fatura, p.signed_cents as valor_pago,
                   p.method as meio, case when p.kind = 'reversal' then 'estorno' else p.source end as origem, coalesce(p.gateway, '') as gateway, coalesce(p.gateway_payment_id, '') as id_pagamento, i.id as fatura
            from payments p join invoices i on i.id = p.invoice_id join subscribers s on s.id = i.subscriber_id
-           where (p.paid_at at time zone $3)::date between $1::date and $2::date order by p.paid_at, p.id`
+           where (p.paid_at at time zone $3)::date between $1::date and $2::date and ($4::uuid is null or i.company_id = $4) order by p.paid_at, p.id`
         : `select i.due_date as vencimento, s.name as assinante, s.document as cpf_cnpj, i.kind as tipo, to_char(i.competence, 'YYYY-MM') as competencia,
                   i.amount_cents as valor_fatura, (select coalesce(sum(x.signed_cents),0)::int from payments x where x.invoice_id = i.id) as valor_pago,
                   i.status as situacao, to_char(i.paid_at at time zone $3, 'YYYY-MM-DD') as data_pagamento, i.id as fatura
            from invoices i join subscribers s on s.id = i.subscriber_id
-           where i.due_date between $1::date and $2::date order by i.due_date, i.id`, [q.from, q.to, tz])).rows;
+           where i.due_date between $1::date and $2::date and ($4::uuid is null or i.company_id = $4) order by i.due_date, i.id`, [q.from, q.to, tz, q.company_id ?? null])).rows;
     });
     const money = new Set(['valor_fatura', 'valor_pago']);
     const cell = (k: string, v: unknown) => {

@@ -435,3 +435,12 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
   Os blocos do mapa são pedidos pelo navegador de quem abre a tela ao servidor do OpenStreetMap (ele vê a região consultada); os dados dos assinantes não saem.
 - **Verificado só por tipo e API:** a tela do mapa passou na checagem de tipos e a API na implantação; a interação (arrastar, aproximar, posicionar) não foi
   exercitada num navegador nesta rodada.
+
+### 14/10/2026 — multiempresa (várias empresas/CNPJs no mesmo provedor)
+
+- **Entregue (testado: 165 testes da API):** Administração → Empresas. Cadastro de empresas (nome, CNPJ opcional), uma padrão, ativar/desativar. O contrato aponta
+  para a empresa que o fatura; a fatura nasce com a empresa do contrato (ou a padrão) por gatilho no banco, valendo para mensal, avulsa, acordo e importação.
+  Mudar a empresa do contrato vale para as faturas daí em diante. Filtro por empresa na lista de faturas, no resumo, na exportação contábil e na lista de contratos.
+  Sem empresa cadastrada, nada aparece e nada muda. Migração 041.
+- **Fora do escopo desta entrega:** numeração e série fiscais por empresa, certificado digital por empresa, gateway/conta de recebimento por empresa, permissão de
+  usuário por empresa (hoje o recorte por usuário continua sendo por POP), relatórios gerenciais agrupados por empresa. Entram junto com a nota fiscal.

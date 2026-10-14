@@ -15,6 +15,7 @@ import { Busca, Online, Pops, SearchBox } from './pages/Atendimento';
 import { Agenda } from './pages/Agenda';
 import { ConsultaIp } from './pages/ConsultaIp';
 import { Mapa } from './pages/Mapa';
+import { Empresas } from './pages/Empresas';
 import { Integracoes } from './pages/Integracoes';
 import { AvisosAssinante } from './pages/AvisosAssinante';
 import { Qualidade } from './pages/Qualidade';
@@ -67,7 +68,7 @@ const NAV: { id: string; label: string; items: { to: string; label: string; icon
     { to: '/manutencoes', label: 'Manutenções', icon: 'bell', perm: 'network:read' },
     { to: '/online', label: 'Online agora', icon: 'pulse', perm: 'network:read' }, { to: '/mapa', label: 'Mapa', icon: 'pin', perm: 'contracts:read' }, { to: '/consulta-ip', label: 'Consulta de IP (ofício)', icon: 'ip', perm: 'legal:query' }, { to: '/pops', label: 'POPs', icon: 'building', perm: 'contracts:read' }] },
   { id: 'admin', label: 'Administração', items: [
-    { to: '/usuarios', label: 'Usuários', icon: 'user', perm: 'users:manage' }, { to: '/avisos', label: 'Avisos', icon: 'bell', perm: 'settings:manage', mod: 'notices' },
+    { to: '/usuarios', label: 'Usuários', icon: 'user', perm: 'users:manage' }, { to: '/empresas', label: 'Empresas', icon: 'building', perm: 'contracts:read' }, { to: '/avisos', label: 'Avisos', icon: 'bell', perm: 'settings:manage', mod: 'notices' },
     { to: '/avisos-assinante', label: 'Avisos ao assinante', icon: 'bell', perm: 'settings:manage', mod: 'messages' },
     { to: '/integracoes', label: 'Integrações', icon: 'plug', perm: 'settings:manage', mod: 'api' },
     { to: '/qualidade', label: 'Catálogos e SLA', icon: 'list', perm: 'settings:manage', mod: 'crm|field' },
@@ -171,6 +172,7 @@ export function App() {
               <Route path="/agenda" element={<Agenda />} />
               <Route path="/consulta-ip" element={<ConsultaIp />} />
               <Route path="/mapa" element={<Mapa />} />
+              <Route path="/empresas" element={<Empresas />} />
               <Route path="/integracoes" element={<Integracoes />} />
               <Route path="/qualidade" element={<Qualidade />} />
               <Route path="/online" element={<Online />} />

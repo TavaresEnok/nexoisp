@@ -8,6 +8,7 @@ import { ContractEquipment, ContractTags, ContractUsage } from './Extras';
 import { AuthLog } from './Concentradores';
 import { ContractConditions, useQuote } from './Condicoes';
 import { ContractFinance } from './Finance';
+import { ContractCompany } from './Empresas';
 import { OnuPanel } from './Olt';
 import { WorkOrderList } from './Field';
 import { InfraPanel } from './Noc';
@@ -125,6 +126,7 @@ export function ContractDetail() {
             <CustomValues entity="contract" id={c.id} values={c.custom} onChange={reload} />
             <Card title="Etiquetas"><ContractTags contract={c} onChange={reload} /></Card>
             <Card title="POP"><ContractPop contract={c} onChange={reload} /></Card>
+            <ContractCompany contract={c} onChange={reload} />
             {has(me, 'field') && can(me, 'stock:read') && <ContractEquipment contractId={c.id} />}
             {!net && <ContractFinance contractId={c.id}>{(fin) => <Card title="Financeiro">{fin}</Card>}</ContractFinance>}
           </>)}

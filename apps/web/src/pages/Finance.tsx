@@ -192,9 +192,12 @@ export function Invoices() {
   const { me } = useMe();
   const [q, setQ] = useState('');
   const [status, setStatus] = useState('');
-  const list = usePaged<any>(`/invoices?q=${encodeURIComponent(q)}${status ? `&status=${status}` : ''}`);
+  const [company, setCompany] = useState('');
+  const companies = useLoad<any[]>('/companies');
+  const filter = `${status ? `&status=${status}` : ''}${company ? `&company_id=${company}` : ''}`;
+  const list = usePaged<any>(`/invoices?q=${encodeURIComponent(q)}${filter}`);
   const { data, loading, error, reload } = list;
-  const sum = useLoad<any>('/finance/summary');
+  const sum = useLoad<any>(`/finance/summary${company ? `?company_id=${company}` : ''}`);
   const [open, setOpen] = useState<string | null>(null);
   const [gen, setGen] = useState<any>(null);
   const [competence, setCompetence] = useState(new Date().toISOString().slice(0, 7));
@@ -205,7 +208,11 @@ export function Invoices() {
         <option value="">Todas</option><option value="open">Em aberto</option><option value="overdue">Vencidas</option>
         <option value="paid">Pagas</option><option value="reconciling">Em conciliação</option><option value="canceled">Canceladas</option>
       </select>
-      <ActionButton onClick={() => download(`/invoices?q=${encodeURIComponent(q)}${status ? `&status=${status}` : ''}&format=csv&limit=5000`, 'faturas.csv')}>Exportar CSV</ActionButton>
+      {!!companies.data?.length && (
+        <select aria-label="Filtrar por empresa" style={{ width: 190 }} value={company} onChange={(e) => setCompany(e.target.value)}>
+          <option value="">Todas as empresas</option>{companies.data.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
+        </select>)}
+      <ActionButton onClick={() => download(`/invoices?q=${encodeURIComponent(q)}${filter}&format=csv&limit=5000`, 'faturas.csv')}>Exportar CSV</ActionButton>
     </>}>
       {sum.data && (
         <div className="grid">
