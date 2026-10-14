@@ -114,7 +114,7 @@ async function executeOne(tenantId: string, agentId: string, d: { attempt_id: st
       const w: Wanted = {
         policy: p.policy, profile: p.profile, blockProfile: p.policy === 'suspended' && p.suspension?.mode === 'profile' ? p.suspension.profile : null,
         rateLimit: p.rate_limit ?? null, addressPool: p.address_pool ?? null, framedIp: p.framed_ip ?? null, acctInterim: p.acct_interim ?? null,
-        simultaneousUse: p.simultaneous_use ?? null, mac: p.mac ?? null, downKbps: dev.down_kbps, upKbps: dev.up_kbps,
+        simultaneousUse: p.simultaneous_use ?? null, mac: p.mac ?? null, accessType: p.access_type ?? 'pppoe', downKbps: dev.down_kbps, upKbps: dev.up_kbps,
       };
       const before = await readAccount(c, tenantId, p.username);
       if (before && before.applied_version === env.desired_version && before.policy === p.policy) step('autorização no RADIUS', 'ok', 'já aplicada nesta versão');

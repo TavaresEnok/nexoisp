@@ -19,6 +19,7 @@ export interface Wanted {
   acctInterim?: number | null;
   simultaneousUse?: number | null;
   mac?: string | null;
+  accessType?: 'pppoe' | 'ipoe' | 'hotspot';
   downKbps: number;
   upKbps: number;
 }
@@ -37,6 +38,9 @@ const byProfile = (w: Wanted) => w.policy === 'suspended' && !!w.blockProfile;
 export function checkRows(w: Wanted): Row[] {
   const rows: Row[] = [];
   if (w.policy === 'suspended' && !byProfile(w)) rows.push({ attribute: 'Auth-Type', op: ':=', value: 'Reject' });
+  // IPoE: o concentrador pede autorização pelo MAC do cliente (DHCP) e não há senha a conferir; a identidade é o MAC visto na rede
+  // de acesso, e o pedido só vale vindo de um concentrador cadastrado (segredo compartilhado).
+  else if (w.accessType === 'ipoe') rows.push({ attribute: 'Auth-Type', op: ':=', value: 'Accept' });
   if (w.mac) rows.push({ attribute: 'Calling-Station-Id', op: '==', value: w.mac });
   if (w.simultaneousUse) rows.push({ attribute: 'Simultaneous-Use', op: ':=', value: String(w.simultaneousUse) });
   return rows;
@@ -89,11 +93,14 @@ export function setupCommands(vendor: Vendor, o: { host: string; authPort: numbe
       `/ip firewall filter add chain=input in-interface=nexoisp protocol=udp dst-port=${o.coaPort} action=accept place-before=0 comment="nexoisp: desconexao de sessao"`,
       `# 2. autenticação pelo túnel`,
     ] : []),
-    `/radius add service=ppp address=${o.host} secret="${o.secret}" authentication-port=${o.authPort} accounting-port=${o.acctPort} timeout=3s${tn ? ` src-address=${tn.tunnelIp}` : ''} comment=nexoisp`,
+    `/radius add service=ppp,hotspot,dhcp address=${o.host} secret="${o.secret}" authentication-port=${o.authPort} accounting-port=${o.acctPort} timeout=3s${tn ? ` src-address=${tn.tunnelIp}` : ''} comment=nexoisp`,
     ...(o.secondary ? [`# servidor secundário: o equipamento tenta este se o primeiro não responder`,
-      `/radius add service=ppp address=${o.secondary.host} secret="${o.secret}" authentication-port=${o.secondary.authPort} accounting-port=${o.secondary.acctPort} timeout=3s${tn ? ` src-address=${tn.tunnelIp}` : ''} comment=nexoisp-2`] : []),
+      `/radius add service=ppp,hotspot,dhcp address=${o.secondary.host} secret="${o.secret}" authentication-port=${o.secondary.authPort} accounting-port=${o.secondary.acctPort} timeout=3s${tn ? ` src-address=${tn.tunnelIp}` : ''} comment=nexoisp-2`] : []),
     `/radius incoming set accept=yes port=${o.coaPort}`,
     `/ppp aaa set use-radius=yes accounting=yes interim-update=5m`,
+    `# opcional, se houver assinantes por IPoE (DHCP) ou hotspot neste equipamento:`,
+    `# /ip dhcp-server set [find] use-radius=yes`,
+    `# /ip hotspot profile set [find] use-radius=yes radius-accounting=yes radius-interim-update=5m`,
   ].join('\n');
   if (vendor === 'huawei') return [
     `radius-server group nexoisp`,

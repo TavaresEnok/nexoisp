@@ -327,6 +327,35 @@ describe('concentrador no RADIUS integrado', () => {
     expect((await call(beta, 'GET', `/api/contracts/${a.contractId}/usage-series`)).body).toEqual([]);   // outro provedor não vê
   });
 
+  it('IPoE: o usuário é o MAC, autoriza sem senha, suspender nega; hotspot usa usuário e senha; agente local recusa IPoE', async () => {
+    const d = await device('mikrotik');
+    const sub = (await call(admin, 'POST', '/api/subscribers', { name: `IPoE ${tag}` })).body;
+    const k = (await call(admin, 'POST', '/api/contracts', { subscriber_id: sub.id, plan_id: planId, due_day: 10 })).body.id;
+    expect((await call(admin, 'POST', `/api/contracts/${k}/service`, { device_id: d.id, access_type: 'ipoe', mac: '02:4e:58' })).status).toBe(400);
+    const mac = `02-4e-58-${tag.slice(-2).padStart(2, '0')}-0a-0b`;
+    const s = await call(admin, 'POST', `/api/contracts/${k}/service`, { device_id: d.id, access_type: 'ipoe', mac });
+    expect(s.status).toBe(200);
+    expect(s.body.generated_password).toBeNull();                         // não há senha para o assinante
+    await run();
+    const user = mac.toUpperCase().replace(/-/g, ':');
+    expect(await rows('radius_check', user)).toMatchObject({ 'Auth-Type': 'Accept' });
+    expect((await call(admin, 'GET', `/api/contracts/${k}/service`)).body.resource).toMatchObject({ access_type: 'ipoe', pppoe_username: user });
+    await call(admin, 'POST', `/api/resources/${s.body.resource_id}/suspend`, { reason: 'teste' });
+    await run();
+    expect(await rows('radius_check', user)).toMatchObject({ 'Auth-Type': 'Reject' });
+    // hotspot: igual ao PPPoE na autorização (senha conferida), só muda onde o assinante digita
+    const k2 = (await call(admin, 'POST', '/api/contracts', { subscriber_id: sub.id, plan_id: planId, due_day: 10 })).body.id;
+    const h = await call(admin, 'POST', `/api/contracts/${k2}/service`, { device_id: d.id, access_type: 'hotspot', pppoe_username: `hs${tag}` });
+    expect(h.body.generated_password).toBeTruthy();
+    await run();
+    expect(await rows('radius_check', `hs${tag}`)).not.toHaveProperty('Auth-Type');
+    // concentrador com agente local não entende IPoE
+    const ag = (await call(admin, 'POST', '/api/agents', { name: `ag-ipoe-${tag}` })).body;
+    const dl = (await call(admin, 'POST', '/api/devices', { name: `nas-ipoe-${tag}`, driver: 'demo', agent_id: ag.id })).body;
+    const k3 = (await call(admin, 'POST', '/api/contracts', { subscriber_id: sub.id, plan_id: planId, due_day: 10 })).body.id;
+    expect((await call(admin, 'POST', `/api/contracts/${k3}/service`, { device_id: dl.id, access_type: 'ipoe', mac: '02:4E:58:99:99:99' })).status).toBe(409);
+  });
+
   it('equipamento que usava agente local passa ao RADIUS integrado levando as contas', async () => {
     const ag = (await call(admin, 'POST', '/api/agents', { name: `agente-conv-${tag}` })).body;
     const old = (await call(admin, 'POST', '/api/devices', { name: `nas-conv-${tag}`, driver: 'demo', agent_id: ag.id })).body;
@@ -363,7 +392,7 @@ describe('túnel integrado', () => {
     const priv = cmd.match(/private-key="([A-Za-z0-9+/]{43}=)"/)![1];
     expect(cmd).toContain(`public-key="${SERVER_PUB}"`);
     expect(cmd).toContain(`address=${d.nas_ip}/32 network=10.250.0.1`);
-    expect(cmd).toContain(`/radius add service=ppp address=10.250.0.1 secret="${d.secret}"`);
+    expect(cmd).toContain(`/radius add service=ppp,hotspot,dhcp address=10.250.0.1 secret="${d.secret}"`);
     expect(cmd).toContain(`src-address=${d.nas_ip}`);
     expect(cmd).toContain('allowed-address=10.250.0.1/32');
     // a chave privada não fica no sistema: só a pública do par, e as instruções reexibidas trazem marcadores

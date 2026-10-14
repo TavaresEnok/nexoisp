@@ -12,7 +12,7 @@ export const AGENT_OFFLINE_S = 30;
 export const RESOURCE_SELECT = `
   select r.id, r.contract_id, r.device_id, r.pppoe_username, (r.secret_enc is not null) as has_secret,
          r.desired_version, r.desired_policy, r.desired_stage, r.desired_profile, r.desired_reason, r.desired_at,
-         r.observed_policy, r.observed_profile, r.observed_session, r.observed_version, r.observed_at, r.mac,
+         r.observed_policy, r.observed_profile, r.observed_session, r.observed_version, r.observed_at, r.mac, r.access_type,
          d.name as device_name, d.driver, d.maintenance, a.id as agent_id, a.name as agent_name, a.last_seen_at as agent_last_seen,
          (a.last_seen_at is not null and a.last_seen_at > now() - interval '${AGENT_OFFLINE_S} seconds') as agent_online,
          (r.observed_at is not null and (r.observed_policy <> r.desired_policy or (r.observed_policy = 'active' and r.observed_profile is distinct from r.desired_profile))
@@ -185,10 +185,18 @@ export async function networkRoutes(app: FastifyInstance) {
     const id = zUuid.parse((req.params as any).id);
     const b = z.object({
       device_id: zUuid,
-      pppoe_username: z.string().trim().regex(/^[A-Za-z0-9_.@-]{3,64}$/, 'usuário PPPoE: 3 a 64 caracteres (letras, números, _ . @ -)'),
-      password: z.string().min(6, 'senha PPPoE: mínimo de 6 caracteres').max(64).optional(),
+      access_type: z.enum(['pppoe', 'ipoe', 'hotspot']).default('pppoe'),
+      pppoe_username: z.string().trim().regex(/^[A-Za-z0-9_.@-]{3,64}$/, 'usuário: 3 a 64 caracteres (letras, números, _ . @ -)').optional(),
+      mac: z.string().trim().optional(),
+      password: z.string().min(6, 'senha: mínimo de 6 caracteres').max(64).optional(),
     }).parse(req.body);
-    const generated = b.password ? null : randomBytes(9).toString('base64url');
+    // IPoE: o usuário é o MAC do equipamento do assinante (normalizado); não há senha para o assinante digitar
+    const ipoe = b.access_type === 'ipoe';
+    const mac = b.mac?.toUpperCase().replace(/[^0-9A-F]/g, '');
+    if (ipoe && (!mac || mac.length !== 12)) throw new HttpError(400, 'IPoE: informe o MAC do equipamento do assinante (12 dígitos hexadecimais)');
+    if (!ipoe && !b.pppoe_username) throw new HttpError(400, 'informe o usuário da conta');
+    const username = ipoe ? mac!.match(/../g)!.join(':') : b.pppoe_username!;
+    const generated = b.password || ipoe ? null : randomBytes(9).toString('base64url');
     return withScope(req.ctx.scope, async (c) => {
       const k = (await c.query(`select k.status, pv.profile_name from contracts k join plan_versions pv on pv.id = k.plan_version_id where k.id = $1`, [id])).rows[0];
       if (!k) throw new HttpError(404, 'contrato não encontrado');
@@ -196,10 +204,10 @@ export async function networkRoutes(app: FastifyInstance) {
       if ((await c.query('select driver from devices where id = $1', [b.device_id])).rows[0]?.driver?.startsWith('olt'))
         throw new HttpError(400, 'o equipamento escolhido é uma OLT; a conta PPPoE precisa de um concentrador (NAS)');
       const r = (await c.query(
-        `insert into service_resources (tenant_id, contract_id, device_id, pppoe_username, secret_enc, desired_profile) values ($1,$2,$3,$4,$5,$6) returning id`,
-        [req.ctx.tenantId, id, b.device_id, b.pppoe_username, encryptSecret(b.password ?? generated!), k.profile_name])).rows[0];
+        `insert into service_resources (tenant_id, contract_id, device_id, pppoe_username, secret_enc, desired_profile, access_type) values ($1,$2,$3,$4,$5,$6,$7) returning id`,
+        [req.ctx.tenantId, id, b.device_id, username, encryptSecret(b.password ?? generated ?? randomBytes(18).toString('base64url')), k.profile_name, b.access_type])).rows[0];
       const op = await requestOperation(c, req.ctx.tenantId!, r.id, 'subscriber.provision', { type: 'user', id: req.ctx.userId, reason: 'provisionamento inicial' });
-      await audit(c, req.ctx, 'service.provision', 'service_resource', r.id, { operation_id: op.id, username: b.pppoe_username });
+      await audit(c, req.ctx, 'service.provision', 'service_resource', r.id, { operation_id: op.id, username, access_type: b.access_type });
       // senha gerada é devolvida uma única vez para configurar o equipamento do assinante; não é registrada em log/auditoria
       return { resource_id: r.id, operation_id: op.id, generated_password: generated };
     });

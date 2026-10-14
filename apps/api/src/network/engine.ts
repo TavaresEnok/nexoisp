@@ -34,7 +34,7 @@ export async function requestOperation(c: Tx, tenantId: string, resourceId: stri
   opts: { stage?: 'reduced' | 'blocked' } = {}) {
   const r = (await c.query(
     `select r.*, k.status as contract_status, pv.profile_name, pl.reduced_profile, pl.rate_limit, pl.address_pool, d.simultaneous_use, d.acct_interim_seconds,
-            d.agent_id, d.name as device_name, ag.version as agent_version
+            d.agent_id, d.name as device_name, ag.version as agent_version, ag.internal as agent_internal
      from service_resources r join contracts k on k.id = r.contract_id join plan_versions pv on pv.id = k.plan_version_id join plans pl on pl.id = pv.plan_id
      join devices d on d.id = r.device_id left join agents ag on ag.id = d.agent_id where r.id = $1 for update of r`, [resourceId])).rows[0];
   if (!r) throw new HttpError(404, 'conta PPPoE não encontrada');
@@ -94,7 +94,10 @@ export async function requestOperation(c: Tx, tenantId: string, resourceId: stri
     ...(r.address_pool ? { address_pool: r.address_pool as string } : {}),
     ...(r.simultaneous_use ? { simultaneous_use: r.simultaneous_use as number } : {}),
     ...(r.acct_interim_seconds ? { acct_interim: r.acct_interim_seconds as number } : {}),
+    ...(r.access_type !== 'pppoe' ? { access_type: r.access_type as string } : {}),   // só o RADIUS integrado entende
   };
+  if (r.access_type !== 'pppoe' && !r.agent_internal)
+    throw new HttpError(409, `acesso ${r.access_type === 'ipoe' ? 'IPoE' : 'hotspot'} só funciona com o concentrador no RADIUS integrado`);
   if ((disconnect || r.rate_limit || r.address_pool || r.simultaneous_use || r.acct_interim_seconds) && !agentAtLeast(r.agent_version, NETWORK_PARAMS_MIN_AGENT))
     throw new HttpError(409, `o agente do equipamento "${r.device_name}" (versão ${r.agent_version ?? 'desconhecida'}) não suporta ${disconnect ? 'desconexão pedida' : 'os parâmetros de rede do plano/NAS'}; atualize para ${NETWORK_PARAMS_MIN_AGENT}`);
   if (r.mac && !agentAtLeast(r.agent_version, PROFILE_SUSPENSION_MIN_AGENT))
