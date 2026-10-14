@@ -3,7 +3,7 @@ import { HttpError, sha256 } from '../auth.js';
 import { noScope, withScope, type Tx } from '../db.js';
 import { begin, progress, reserve, result } from '../network/engine.js';
 import { sendDisconnect, type DisconnectResult } from './coa.js';
-import { checkRows, effectiveProfile, replyRows, SESSION_GONE_CAUSES, type Row, type Vendor, type Wanted } from './vendor.js';
+import { checkRows, effectiveProfile, ipoeLeaseSeconds, replyRows, SESSION_GONE_CAUSES, type Row, type Vendor, type Wanted } from './vendor.js';
 
 /**
  * RADIUS integrado: o NexoISP executa as operações de rede por conta própria, gravando no banco que o servidor RADIUS lê e
@@ -129,7 +129,10 @@ async function executeOne(tenantId: string, agentId: string, d: { attempt_id: st
     await withScope(SYS(tenantId), (c) => progress(c, agentId, d.attempt_id, 'EXECUTING', steps));
 
     // 2. sessão em uso: pedir a desconexão ao concentrador (fora de transação)
-    const targets = ctx.fresh ? [] : ctx.sessions.filter((s) => mustDrop(p, ctx.acc, s));
+    // IPoE: o concentrador não derruba concessão de DHCP pelo protocolo (o RouterOS responde "sessão inexistente" com a concessão
+    // ainda valendo — medido no CHR 7.17). A mudança vale na próxima renovação, que o prazo curto da concessão garante.
+    const ipoe = p.access_type === 'ipoe';
+    const targets = ctx.fresh || ipoe ? [] : ctx.sessions.filter((s) => mustDrop(p, ctx.acc, s));
     const gone = (cause: number | null) => cause !== null && SESSION_GONE_CAUSES[ctx.dev.vendor as Vendor].includes(cause);
     const pending: OpenSession[] = [];
     for (const s of targets) {
@@ -144,7 +147,8 @@ async function executeOne(tenantId: string, agentId: string, d: { attempt_id: st
     // Conta de que nunca recebemos accounting (ex.: sessão anterior à passagem para o RADIUS integrado): não dá para saber se há
     // sessão. Quando a intenção exige derrubar, pergunta-se ao concentrador pelo nome do usuário.
     const wantsDrop = !!p.reconnect || (p.policy === 'suspended' && p.suspension?.session === 'disconnect');
-    if (!targets.length && wantsDrop && !ctx.fresh && !ctx.everSeen) {
+    if (ipoe) step('desconexão da sessão', 'ok', `IPoE: vale na próxima renovação da concessão (até ${ipoeLeaseSeconds()} s)`);
+    else if (!targets.length && wantsDrop && !ctx.fresh && !ctx.everSeen) {
       const r: DisconnectResult = await drop({ host: ctx.dev.coa_host || ctx.dev.nas_host, port: ctx.dev.coa_port, secret: ctx.dev.secret, username: p.username });
       if (r.outcome === 'ack') step('desconexão da sessão', 'ok', { resposta: 'aceita pelo concentrador (sessão sem registro de accounting)' });
       else if (r.outcome === 'nak' && gone(r.errorCause)) step('desconexão da sessão', 'ok', 'o concentrador não tem sessão desta conta');

@@ -339,10 +339,18 @@ describe('concentrador no RADIUS integrado', () => {
     await run();
     const user = mac.toUpperCase().replace(/-/g, ':');
     expect(await rows('radius_check', user)).toMatchObject({ 'Auth-Type': 'Accept' });
+    expect(await rows('radius_reply', user)).toMatchObject({ 'Mikrotik-Address-List': expect.any(String), 'Session-Timeout': '600' });
+    expect(await rows('radius_reply', user)).not.toHaveProperty('Mikrotik-Group');
     expect((await call(admin, 'GET', `/api/contracts/${k}/service`)).body.resource).toMatchObject({ access_type: 'ipoe', pppoe_username: user });
+    await openSession(user, 1, '10.99.9.10');                               // concessão em curso
+    const before = drops.length;
     await call(admin, 'POST', `/api/resources/${s.body.resource_id}/suspend`, { reason: 'teste' });
     await run();
     expect(await rows('radius_check', user)).toMatchObject({ 'Auth-Type': 'Reject' });
+    expect(drops.length).toBe(before);                                      // não pede desconexão de concessão DHCP
+    const op = (await call(admin, 'GET', `/api/contracts/${k}/service`)).body.operations[0];
+    expect(op.status).toBe('SUCCEEDED');
+    expect(JSON.stringify(op.result ?? op.steps ?? op)).toMatch(/renovação da concessão/);
     // hotspot: igual ao PPPoE na autorização (senha conferida), só muda onde o assinante digita
     const k2 = (await call(admin, 'POST', '/api/contracts', { subscriber_id: sub.id, plan_id: planId, due_day: 10 })).body.id;
     const h = await call(admin, 'POST', `/api/contracts/${k2}/service`, { device_id: d.id, access_type: 'hotspot', pppoe_username: `hs${tag}` });

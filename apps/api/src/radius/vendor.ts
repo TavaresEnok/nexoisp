@@ -34,6 +34,9 @@ export const SESSION_GONE_CAUSES: Record<Vendor, number[]> = { mikrotik: [503, 4
 export const effectiveProfile = (w: Wanted) => (w.policy === 'suspended' && w.blockProfile ? w.blockProfile : w.profile);
 const byProfile = (w: Wanted) => w.policy === 'suspended' && !!w.blockProfile;
 
+/** Prazo da concessão DHCP das contas IPoE (segundos): é o tempo máximo até uma suspensão ou troca de plano valer. */
+export const ipoeLeaseSeconds = () => Math.min(86400, Math.max(60, Number(process.env.NEXO_IPOE_LEASE_SECONDS) || 600));
+
 /** Atributos de CONFERÊNCIA (o que precisa bater para autenticar). Iguais para todos os fabricantes. */
 export function checkRows(w: Wanted): Row[] {
   const rows: Row[] = [];
@@ -41,7 +44,7 @@ export function checkRows(w: Wanted): Row[] {
   // IPoE: o concentrador pede autorização pelo MAC do cliente (DHCP) e não há senha a conferir; a identidade é o MAC visto na rede
   // de acesso, e o pedido só vale vindo de um concentrador cadastrado (segredo compartilhado).
   else if (w.accessType === 'ipoe') rows.push({ attribute: 'Auth-Type', op: ':=', value: 'Accept' });
-  if (w.mac) rows.push({ attribute: 'Calling-Station-Id', op: '==', value: w.mac });
+  if (w.mac && w.accessType !== 'ipoe') rows.push({ attribute: 'Calling-Station-Id', op: '==', value: w.mac });   // no DHCP o Calling-Station-Id é o client-id, e o usuário já é o MAC
   if (w.simultaneousUse) rows.push({ attribute: 'Simultaneous-Use', op: ':=', value: String(w.simultaneousUse) });
   return rows;
 }
@@ -51,7 +54,13 @@ export function replyRows(vendor: Vendor, w: Wanted): Row[] {
   const blocked = byProfile(w), profile = effectiveProfile(w);
   const rows: Row[] = [];
   const set = (attribute: string, value: string | number, op = ':=') => rows.push({ attribute, op, value: String(value) });
-  if (vendor === 'mikrotik') {
+  if (vendor === 'mikrotik' && w.accessType === 'ipoe') {
+    // DHCP: o perfil vira lista de endereços (o firewall do provedor decide o que cada lista pode, inclusive a de bloqueio)
+    // e o prazo da concessão vem daqui, para suspensão e troca de plano valerem logo na renovação
+    set('Mikrotik-Address-List', profile);
+    set('Session-Timeout', ipoeLeaseSeconds());
+    if (!blocked && w.rateLimit) set('Mikrotik-Rate-Limit', w.rateLimit);
+  } else if (vendor === 'mikrotik') {
     set('Mikrotik-Group', profile);
     if (!blocked && w.rateLimit) set('Mikrotik-Rate-Limit', w.rateLimit);
   } else if (vendor === 'huawei') {
