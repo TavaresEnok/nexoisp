@@ -312,6 +312,14 @@ describe('concentrador no RADIUS integrado', () => {
     await syncAccounting(tenantId);
     day = (await call(admin, 'GET', `/api/contracts/${a.contractId}/usage-series?by=day`)).body;
     expect(day[0]).toMatchObject({ bytes_in: 3000, bytes_out: 9000 });
+    const hour = (await call(admin, 'GET', `/api/contracts/${a.contractId}/usage-series?by=hour`)).body;
+    expect(hour.reduce((s: number, r: any) => s + r.bytes_out, 0)).toBe(9000);   // mesma soma, quebrada por hora
+    expect(hour[0].period).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:00$/);
+    // hora fora da janela sai na limpeza; o diário fica
+    await sql(`insert into usage_hourly (tenant_id, resource_id, hour, bytes_in, bytes_out)
+               select tenant_id, id, date_trunc('hour', now() - interval '3 days'), 1, 1 from service_resources where id = $1`, [a.resourceId]);
+    await purgeRadius(tenantId);
+    expect((await sql(`select count(*)::int as n from usage_hourly where resource_id = $1 and hour < now() - interval '2 days'`, [a.resourceId]))[0].n).toBe(0);
     // dias anteriores entram na semana e no ano
     await sql(`insert into usage_daily (tenant_id, resource_id, day, bytes_in, bytes_out)
                select tenant_id, id, current_date - 400, 1, 2 from service_resources where id = $1`, [a.resourceId]);

@@ -82,7 +82,7 @@ export function Portal() {
             </State>
           </Card>
           {data.usage?.length > 0 && <Card title="Meu consumo"><UsageTable rows={data.usage} />
-            {active[0] && <details style={{ marginTop: 10 }}><summary>Ver por dia, semana ou ano</summary><UsageSeries path={(by) => `/portal/usage-series?contract_id=${active[0].id}&by=${by}`} /></details>}</Card>}
+            {active[0] && <details style={{ marginTop: 10 }}><summary>Ver por hora, dia, semana ou ano</summary><UsageSeries path={(by) => `/portal/usage-series?contract_id=${active[0].id}&by=${by}`} /></details>}</Card>}
           <Card title="Minhas faturas">
             <State empty={data.invoices.length === 0}>
               <table>

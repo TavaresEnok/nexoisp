@@ -177,6 +177,9 @@ const watermark = new Map<string, Date>();     // por provedor: até onde já co
  * INCREMENTAL: depois da primeira passada só toca nas contas que tiveram accounting ou mudança de autorização desde a última vez.
  * (Regravar todas as contas a cada ciclo, como na primeira versão, vira escrita constante com dezenas de milhares de assinantes.)
  */
+/** Janela do consumo por hora (horas). */
+export const usageHourlyHours = () => Math.min(24 * 31, Math.max(24, Number(process.env.NEXO_USAGE_HOURLY_HOURS) || 48));
+
 export async function syncAccounting(tenantId: string, opts: { full?: boolean } = {}): Promise<{ accounts: number; sessions: number; full: boolean }> {
   const since = opts.full ? null : watermark.get(tenantId) ?? null;
   return withScope(SYS(tenantId), async (c) => {
@@ -195,17 +198,25 @@ export async function syncAccounting(tenantId: string, opts: { full?: boolean } 
     // não jogar o histórico em "hoje". Duas instruções simples, com junção pelo índice única (resource_id, session_key).
     const tzSql = `coalesce((select timezone from tenant_settings where tenant_id = $2), 'America/Sao_Paulo')`;
     const fresh = `(($1::timestamptz is null and (x.stopped_at is null or x.updated_at > now() - interval '2 days')) or x.seen_at > $1)`;
+    // Uma leitura das diferenças (materializada uma vez) alimenta o diário e a hora; sem junção da CTE com ela mesma.
     await c.query(
-      `insert into usage_daily (tenant_id, resource_id, day, bytes_in, bytes_out)
-       select x.tenant_id, r.id,
-              (case when s.session_key is null then least(x.updated_at, now()) else now() end at time zone ${tzSql})::date,
-              sum(greatest(0, x.bytes_in - coalesce(s.bytes_in, 0))), sum(greatest(0, x.bytes_out - coalesce(s.bytes_out, 0)))
-       from radius_acct x join service_resources r on r.tenant_id = x.tenant_id and r.pppoe_username = x.username
-       join devices d on d.id = r.device_id and d.driver = 'radius'
-       left join service_sessions s on s.resource_id = r.id and s.session_key = left(x.unique_id, 80)
-       where ${fresh} and (x.bytes_in > coalesce(s.bytes_in, 0) or x.bytes_out > coalesce(s.bytes_out, 0))
-       group by 1, 2, 3
-       on conflict (resource_id, day) do update set bytes_in = usage_daily.bytes_in + excluded.bytes_in, bytes_out = usage_daily.bytes_out + excluded.bytes_out`, [since, tenantId]);
+      `with d as materialized (
+         select x.tenant_id, r.id as resource_id, case when s.session_key is null then least(x.updated_at, now()) else now() end as at,
+                greatest(0, x.bytes_in - coalesce(s.bytes_in, 0)) as bytes_in, greatest(0, x.bytes_out - coalesce(s.bytes_out, 0)) as bytes_out
+         from radius_acct x join service_resources r on r.tenant_id = x.tenant_id and r.pppoe_username = x.username
+         join devices d on d.id = r.device_id and d.driver = 'radius'
+         left join service_sessions s on s.resource_id = r.id and s.session_key = left(x.unique_id, 80)
+         where ${fresh} and (x.bytes_in > coalesce(s.bytes_in, 0) or x.bytes_out > coalesce(s.bytes_out, 0))),
+       daily as (
+         insert into usage_daily (tenant_id, resource_id, day, bytes_in, bytes_out)
+         select tenant_id, resource_id, (at at time zone ${tzSql})::date, sum(bytes_in), sum(bytes_out) from d group by 1, 2, 3
+         on conflict (resource_id, day) do update set bytes_in = usage_daily.bytes_in + excluded.bytes_in, bytes_out = usage_daily.bytes_out + excluded.bytes_out
+         returning 1)
+       insert into usage_hourly (tenant_id, resource_id, hour, bytes_in, bytes_out)
+       select tenant_id, resource_id, date_trunc('hour', at), sum(bytes_in), sum(bytes_out) from d
+       where at > now() - make_interval(hours => $3::int) group by 1, 2, 3
+       on conflict (resource_id, hour) do update set bytes_in = usage_hourly.bytes_in + excluded.bytes_in, bytes_out = usage_hourly.bytes_out + excluded.bytes_out`,
+      [since, tenantId, usageHourlyHours()]);
     const ses = await c.query(
       `insert into service_sessions (tenant_id, resource_id, session_key, started_at, stopped_at, ip, mac, nas_ip, bytes_in, bytes_out, seconds, terminate_cause)
        select x.tenant_id, r.id, left(x.unique_id, 80), x.started_at, x.stopped_at, x.framed_ip, x.calling_station, host(x.nas_ip), x.bytes_in, x.bytes_out, x.session_seconds, x.terminate_cause
@@ -251,6 +262,7 @@ export async function purgeRadius(tenantId: string, batch = 5000): Promise<{ pos
     const del = async (table: string, col: string, d: number) => (await c.query(
       `delete from ${table} where ctid in (select ctid from ${table} where tenant_id = $1 and ${col} < now() - make_interval(days => $2::int) limit $3)`, [tenantId, d, batch])).rowCount ?? 0;
     const usageDays = days('NEXO_USAGE_DAILY_DAYS', 800, 400);   // cobre "por ano" com folga
+    await c.query(`delete from usage_hourly where ctid in (select ctid from usage_hourly where tenant_id = $1 and hour < now() - make_interval(hours => $2::int) limit $3)`, [tenantId, usageHourlyHours(), batch * 4]);
     await c.query(`delete from usage_daily where ctid in (select ctid from usage_daily where tenant_id = $1 and day < (now() - make_interval(days => $2::int))::date limit $3)`, [tenantId, usageDays, batch]);
     return { postauth: await del('radius_postauth', 'at', logDays), acct: await del('radius_acct', 'stopped_at', keepDays), sessions: await del('service_sessions', 'stopped_at', keepDays) };
   });

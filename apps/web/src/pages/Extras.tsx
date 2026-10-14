@@ -178,6 +178,7 @@ export function UsageSeries({ path }: { path: (by: string) => string }) {
   const { data } = useLoad<any[]>(path(by));
   const max = Math.max(1, ...(data ?? []).map((r) => r.bytes_out));
   const label = (p: string) => {
+    if (by === 'hour') { const [dt, h] = p.split('T'); const [, m, dd] = dt.split('-'); return `${dd}/${m} ${h.slice(0, 2)}h`; }
     const [y, m, dd] = p.split('-');
     return by === 'year' ? y : by === 'week' ? `semana de ${dd}/${m}` : `${dd}/${m}/${y}`;
   };
@@ -185,7 +186,7 @@ export function UsageSeries({ path }: { path: (by: string) => string }) {
     <div>
       <div className="row" style={{ marginBottom: 8 }}>
         <select aria-label="Período do consumo" value={by} onChange={(e) => setBy(e.target.value)} style={{ width: 200 }}>
-          <option value="day">Por dia (30 dias)</option><option value="week">Por semana (26 semanas)</option><option value="year">Por ano (3 anos)</option>
+          <option value="hour">Por hora (últimas 48 h)</option><option value="day">Por dia (30 dias)</option><option value="week">Por semana (26 semanas)</option><option value="year">Por ano (3 anos)</option>
         </select>
       </div>
       <State empty={data?.length === 0} emptyText="Sem consumo registrado neste período.">
@@ -208,7 +209,7 @@ export function ContractUsage({ contractId }: { contractId: string }) {
   return (
     <Card title="Consumo" actions={<div className="row">
       <button className={`sm ${view === 'month' ? 'primary' : ''}`} onClick={() => setView('month')}>Mensal</button>
-      <button className={`sm ${view === 'series' ? 'primary' : ''}`} onClick={() => setView('series')}>Dia, semana, ano</button></div>}>
+      <button className={`sm ${view === 'series' ? 'primary' : ''}`} onClick={() => setView('series')}>Hora, dia, semana, ano</button></div>}>
       {view === 'month'
         ? <UsageTable rows={data} empty="Calculado a partir do accounting do RADIUS local; o mês corrente é atualizado a cada 15 minutos." />
         : <UsageSeries path={(by) => `/contracts/${contractId}/usage-series?by=${by}`} />}

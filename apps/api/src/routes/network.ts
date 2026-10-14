@@ -177,7 +177,7 @@ export async function networkRoutes(app: FastifyInstance) {
   /** Consumo por dia, semana (segunda a domingo) ou ano do contrato; só contas atendidas pelo RADIUS integrado. */
   app.get('/api/contracts/:id/usage-series', { preHandler: guard('network:read') }, async (req) => {
     const id = zUuid.parse((req.params as any).id);
-    const q = z.object({ by: z.enum(['day', 'week', 'year']).default('day') }).parse(req.query);
+    const q = z.object({ by: z.enum(['hour', 'day', 'week', 'year']).default('day') }).parse(req.query);
     return withScope(req.ctx.scope, async (c) => usageSeries(c, { contractId: id }, q.by));
   });
 
@@ -352,8 +352,13 @@ export async function networkRoutes(app: FastifyInstance) {
       (await c.query(`select x.*, s.name as subscriber_name from (${RESOURCE_SELECT}) x join contracts k on k.id = x.contract_id join subscribers s on s.id = k.subscriber_id where x.drift`)).rows));
 }
 
-/** Série de consumo a partir do diário. O período cobre 31 dias, 26 semanas ou 3 anos. */
-export async function usageSeries(c: any, who: { contractId: string }, by: 'day' | 'week' | 'year') {
+/** Série de consumo: por hora (janela recente, horário do provedor) ou a partir do diário (31 dias, 26 semanas ou 3 anos). */
+export async function usageSeries(c: any, who: { contractId: string }, by: 'hour' | 'day' | 'week' | 'year') {
+  if (by === 'hour') return (await c.query(
+    `select to_char(u.hour at time zone coalesce(ts.timezone, 'America/Sao_Paulo'), 'YYYY-MM-DD"T"HH24:00') as period,
+            sum(u.bytes_in)::float as bytes_in, sum(u.bytes_out)::float as bytes_out
+     from usage_hourly u join service_resources r on r.id = u.resource_id left join tenant_settings ts on ts.tenant_id = u.tenant_id
+     where r.contract_id = $1 group by 1 order by 1 desc`, [who.contractId])).rows;
   const span = { day: "interval '30 days'", week: "interval '26 weeks'", year: "interval '3 years'" }[by];
   return (await c.query(
     `select to_char(date_trunc('${by}', u.day::timestamp)::date, 'YYYY-MM-DD') as period, sum(u.bytes_in)::float as bytes_in, sum(u.bytes_out)::float as bytes_out
