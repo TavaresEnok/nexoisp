@@ -8,7 +8,7 @@ Estado: **implementação entregue em laboratório; fase 1 pendente no portão d
 - Apenas as três leituras previstas, com HEAD implícito equivalente ao Fastify. Saúde, métricas e OpenAPI em outro listener.
 - Cache Ristretto de 5 segundos, índices por usuário/tenant, expiração da sessão, geração para impedir reinserção concorrente após invalidação e desligamento do cache quando LISTEN cai.
 - 53 migrations copiadas sem mudar o SQL, manifest de hashes, adoção goose, invalidação e diretório de células com RLS. CLI `bootstrap`, `baseline`, `up` e `verificar`.
-- Harness independente do proxy, esperado calculado como dono com filtros explícitos, comparação HTTP, auditoria, testes de cache, pool de uma conexão e 17 mutações. `./nexo contrato up|run|mutacoes|migrations|carga|down`.
+- Harness independente do proxy, esperado calculado como dono com filtros explícitos, comparação HTTP, auditoria, testes de cache, pool de uma conexão e 17 mutações. Fixtures podem ser reaplicadas e renovam as sessões sintéticas; esse caminho foi conferido duas vezes após expirar uma sessão deliberadamente. `./nexo contrato up|run|mutacoes|migrations|carga|down`.
 - Workflow `.github/workflows/go.yml` com paridade, deriva, sqlc reproduzível, lint, testes com detector de concorrência, contrato, migrations e mutações. Os checks foram exercitados localmente; o workflow remoto ainda não foi executado.
 
 ## Ajustes em relação ao prompt
