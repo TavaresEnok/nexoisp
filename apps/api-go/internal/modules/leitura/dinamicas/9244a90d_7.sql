@@ -1,0 +1,1 @@
+select t.id, t.number, t.subject, t.status, t.created_at, t.contract_id from tickets t where t.subscriber_id = $1 order by t.created_at desc limit $2

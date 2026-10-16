@@ -114,7 +114,7 @@ def up():
 
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('command',choices=['up','down','run','mutacoes','migrations','carga','leituras','proxy','consultas','grupos','escopo_pop','regressoes','e2e','aviso']);args,rest=parser.parse_known_args()
+    parser=argparse.ArgumentParser();parser.add_argument('command',choices=['up','down','run','mutacoes','migrations','carga','leituras','proxy','consultas','grupos','escopo_pop','regressoes','e2e','aviso','dinamicas']);args,rest=parser.parse_known_args()
     if args.command=='up':up()
     elif args.command=='down':
         stop_go();subprocess.run(['docker','rm','-f','nexo-fase1-fastify',DB_CONTAINER],check=True)

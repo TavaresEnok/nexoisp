@@ -1,0 +1,2 @@
+select count(*) filter (where status = 'open')::int as open, count(*) filter (where status = 'open' and assignee_id = $1)::int as mine,
+                                    (select count(*) from leads where stage = 'new')::int as leads from tickets

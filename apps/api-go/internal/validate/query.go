@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math"
 	"net/url"
+	"regexp"
+	"strconv"
 	"strings"
 	"unicode/utf16"
 
@@ -88,8 +90,11 @@ func (q *Query) Err() error {
 }
 
 func (q *Query) BoundedString(name string, trim bool, min, max int) string {
+	return q.Text(name, false, trim, min, max)
+}
+func (q *Query) Text(name string, required, trim bool, min, max int) string {
 	before := len(q.Issues)
-	v := q.String(name, trim, false)
+	v := q.String(name, trim, required)
 	if _, ok := q.Values[name]; ok && len(q.Issues) == before {
 		n := len(utf16.Encode([]rune(v)))
 		if min > 0 && n < min {
@@ -125,3 +130,39 @@ func (q *Query) Integer(name string, fallback, min, max int) int {
 	}
 	return int(n)
 }
+
+func (q *Query) Date(name string, required bool, message string) string {
+	before := len(q.Issues)
+	value := q.String(name, false, required)
+	if _, present := q.Values[name]; present && len(q.Issues) == before && !regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`).MatchString(value) {
+		q.Issues = append(q.Issues, name+": "+message)
+	}
+	return value
+}
+func (q *Query) Number(name string, fallback *float64, min, max float64, integer bool) float64 {
+	values, present := q.Values[name]
+	if !present && fallback != nil {
+		return *fallback
+	}
+	value := math.NaN()
+	if present {
+		value = number(strings.Join(values, ","))
+	}
+	if math.IsNaN(value) {
+		q.Issues = append(q.Issues, name+": Expected number, received nan")
+		return 0
+	}
+	if integer && (math.IsInf(value, 0) || value != math.Trunc(value)) {
+		q.Issues = append(q.Issues, name+": Expected integer, received float")
+	}
+	if value < min {
+		q.Issues = append(q.Issues, fmt.Sprintf("%s: Number must be greater than or equal to %s", name, strconv.FormatFloat(min, 'f', -1, 64)))
+	}
+	if value > max {
+		q.Issues = append(q.Issues, fmt.Sprintf("%s: Number must be less than or equal to %s", name, strconv.FormatFloat(max, 'f', -1, 64)))
+	}
+	return value
+}
+
+// JSNumber is the Number(string) coercion shared by legacy environment settings.
+func JSNumber(value string) float64 { return number(value) }

@@ -15,6 +15,14 @@
     },
     {
       "method": "GET",
+      "path": "/api/agenda"
+    },
+    {
+      "method": "GET",
+      "path": "/api/agenda/free"
+    },
+    {
+      "method": "GET",
       "path": "/api/agents"
     },
     {
@@ -32,6 +40,18 @@
     {
       "method": "GET",
       "path": "/api/catalogs"
+    },
+    {
+      "method": "GET",
+      "path": "/api/cgnat/plans"
+    },
+    {
+      "method": "GET",
+      "path": "/api/cgnat/plans/:id/lookup"
+    },
+    {
+      "method": "GET",
+      "path": "/api/cgnat/plans/:id/map"
     },
     {
       "method": "GET",
@@ -60,6 +80,10 @@
     {
       "method": "GET",
       "path": "/api/contracts/:id/amendments"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/availability"
     },
     {
       "method": "GET",
@@ -103,6 +127,10 @@
     },
     {
       "method": "GET",
+      "path": "/api/contracts/:id/termination-quote"
+    },
+    {
+      "method": "GET",
       "path": "/api/contracts/:id/trust-release"
     },
     {
@@ -115,11 +143,19 @@
     },
     {
       "method": "GET",
+      "path": "/api/crm/report"
+    },
+    {
+      "method": "GET",
       "path": "/api/custom-fields"
     },
     {
       "method": "GET",
       "path": "/api/dashboard"
+    },
+    {
+      "method": "GET",
+      "path": "/api/dashboard/panels"
     },
     {
       "method": "GET",
@@ -164,6 +200,10 @@
     {
       "method": "GET",
       "path": "/api/integrations/catalog"
+    },
+    {
+      "method": "GET",
+      "path": "/api/invoices"
     },
     {
       "method": "GET",
@@ -212,6 +252,10 @@
     {
       "method": "GET",
       "path": "/api/map/coverage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/map/points"
     },
     {
       "method": "GET",
@@ -299,7 +343,23 @@
     },
     {
       "method": "GET",
+      "path": "/api/radius/devices/:id/setup"
+    },
+    {
+      "method": "GET",
+      "path": "/api/radius/status"
+    },
+    {
+      "method": "GET",
       "path": "/api/reports/referrals"
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/sla"
+    },
+    {
+      "method": "GET",
+      "path": "/api/search"
     },
     {
       "method": "GET",
@@ -359,6 +419,10 @@
     },
     {
       "method": "GET",
+      "path": "/api/subscribers/:id/timeline"
+    },
+    {
+      "method": "GET",
       "path": "/api/surveys"
     },
     {
@@ -376,6 +440,10 @@
     {
       "method": "GET",
       "path": "/api/tickets/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/today"
     },
     {
       "method": "GET",

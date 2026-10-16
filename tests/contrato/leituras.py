@@ -14,12 +14,12 @@ GO='http://127.0.0.1:18082'
 RESULTS=[]
 
 
-def check(name,path,token=None,cookie=False,status=None,oracle=None,method='GET'):
+def check(name,path,token=None,cookie=False,status=None,oracle=None,method='GET',compare=same):
     a,b=[request(base,path,token,cookie,method=method) for base in (FASTIFY,GO)]
     failures=[]
     if a['status']!=b['status']:failures.append(f'status {a["status"]}/{b["status"]}')
     if a['json'] is not None:
-        if not same(a['json'],b['json']):failures.append('JSON')
+        if not compare(a['json'],b['json']):failures.append('JSON')
     elif a['body']!=b['body']:failures.append('bytes')
     for h in HEADERS:
         if a['headers'].get(h)!=b['headers'].get(h):failures.append('header '+h)

@@ -26,6 +26,8 @@ jobs:
           node scripts/migracao-go/extrair_consultas.cjs --check
           node scripts/migracao-go/extrair_grupos.cjs --check
           node scripts/migracao-go/extrair_aviso.cjs --check
+          node scripts/migracao-go/extrair_dinamicas.cjs --check
+          node scripts/migracao-go/extrair_radius_templates.cjs --check
           python3 scripts/migracao-go/proxy.py --check
       - name: Lint e limites de acesso ao banco
         uses: golangci/golangci-lint-action@v8
@@ -40,6 +42,7 @@ jobs:
       - run: ./nexo contrato leituras
       - run: ./nexo contrato consultas
       - run: ./nexo contrato grupos
+      - run: ./nexo contrato dinamicas
       - run: ./nexo contrato aviso
       - run: ./nexo contrato proxy
       - run: ./nexo contrato regressoes

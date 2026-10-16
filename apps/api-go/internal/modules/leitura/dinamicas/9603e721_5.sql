@@ -1,0 +1,3 @@
+select count(*)::int as n from contracts k join plan_versions pv on pv.id = k.plan_version_id
+           where k.status = 'active' and pv.price_cents > 0 and not exists (select 1 from invoices i where i.contract_id = k.id and i.status <> 'canceled'
+             and i.due_date >= date_trunc('month', (now() at time zone $1)::date) and i.due_date < date_trunc('month', (now() at time zone $1)::date) + interval '1 month')

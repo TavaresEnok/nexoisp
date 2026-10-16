@@ -1,0 +1,2 @@
+select count(*) filter (where p.kind = 'payment')::int as pagamentos, coalesce(sum(p.signed_cents),0)::bigint::float as cents
+           from payments p where (p.paid_at at time zone $1)::date = (now() at time zone $1)::date

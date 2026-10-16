@@ -1,0 +1,3 @@
+select count(*) filter (where status in ('open','scheduled') and scheduled_for < now())::int as late,
+                                    count(*) filter (where status in ('open','analysis','awaiting_schedule','scheduled','en_route','in_progress') and assignee_id = $1)::int as mine,
+                                    count(*) filter (where status = 'open' and assignee_id is null)::int as unassigned from work_orders

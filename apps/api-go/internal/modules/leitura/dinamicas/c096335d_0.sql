@@ -1,0 +1,1 @@
+select (($1::date)::timestamp at time zone $2) as t

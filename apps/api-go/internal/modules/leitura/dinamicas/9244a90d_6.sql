@@ -1,0 +1,1 @@
+select w.id, w.number, w.kind, w.status, w.description, w.created_at, w.contract_id from work_orders w where w.subscriber_id = $1 order by w.created_at desc limit $2

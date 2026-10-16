@@ -1,0 +1,4 @@
+select t.category, count(*)::int as opened, count(*) filter (where t.status = 'closed')::int as closed, count(*) filter (where t.origin = 'portal')::int as from_portal,
+                round((extract(epoch from avg((select min(m.at) from ticket_messages m where m.ticket_id = t.id and m.author_kind = 'staff' and not m.internal) - t.created_at)) / 3600)::numeric, 1)::float as first_response_h,
+                round((extract(epoch from avg(t.closed_at - t.created_at)) / 3600)::numeric, 1)::float as resolution_h
+         from tickets t where (t.created_at at time zone $3)::date between $1::date and $2::date group by 1 order by 2 desc, 1

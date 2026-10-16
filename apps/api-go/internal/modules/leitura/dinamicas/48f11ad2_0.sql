@@ -1,0 +1,9 @@
+select s.id as subscriber_id, s.name as subscriber_name, s.document, s.status as subscriber_status,
+                           k.id as contract_id, k.status as contract_status, p.name as plan_name,
+                           r.pppoe_username, r.desired_policy, r.observed_policy,
+                           (r.observed_session->>'online')::boolean as online, r.observed_session->>'ip' as ip, r.mac,
+                           {{finance_overdue}} as overdue
+                    from subscribers s
+                    left join contracts k on k.subscriber_id = s.id
+                    left join plan_versions pv on pv.id = k.plan_version_id left join plans p on p.id = pv.plan_id
+                    left join service_resources r on r.contract_id = k.id where s.name ilike $1 or s.email ilike $1 or ($2 <> '' and (s.document like '%'||$2||'%' or s.phone like '%'||$2||'%')) {{lim}}

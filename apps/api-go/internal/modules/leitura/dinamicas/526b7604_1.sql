@@ -1,0 +1,2 @@
+select w.id, w.number, w.kind, w.awaiting_reason, s.name as subscriber_name, w.created_at from work_orders w join subscribers s on s.id = w.subscriber_id
+         where w.status = 'awaiting_schedule' order by w.created_at limit 100
