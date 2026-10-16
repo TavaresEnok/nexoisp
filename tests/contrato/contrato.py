@@ -4,6 +4,7 @@ import argparse
 from datetime import datetime, timezone
 import json
 import os
+import re
 from pathlib import Path
 import sys
 import time
@@ -104,11 +105,23 @@ def expected(scope, path):
 
 
 class Harness:
-    def __init__(self, fastify, go):
+    def __init__(self, fastify, go, selected=None):
         self.fastify, self.go = fastify, go
         self.results = []
+        self.selected=selected
+        self.specs=[]
+        for path in sorted((ROOT/'tests/contrato/rotas').glob('*.yaml')):
+            spec=json.loads(path.read_text())
+            if spec['fase']==1:
+                assert spec['resposta']['chaves_exatas'] and not spec['resposta']['volateis']
+                pattern='^'+re.escape(spec['rota'].split(' ',1)[1]).replace(':id','[^/]+')+'$'
+                self.specs.append((re.compile(pattern),spec))
+        assert len(self.specs)==3,'especificações incompletas'
 
     def check(self, name, path, token=None, cookie=False, scope=None, status=None, **kwargs):
+        spec=next((spec for pattern,spec in self.specs if pattern.fullmatch(path.split('?',1)[0])),None)
+        assert spec is not None,'rota sem especificação: '+path
+        if self.selected and spec['rota']!=self.selected:return None,None
         a, b = [request(base, path, token, cookie, **kwargs) for base in (self.fastify, self.go)]
         failures = []
         if a['status'] != b['status']:
@@ -213,8 +226,9 @@ def main():
     parser.add_argument('--fastify', default=os.getenv('NEXO_CONTRATO_FASTIFY', 'http://127.0.0.1:18081'))
     parser.add_argument('--go', default=os.getenv('NEXO_CONTRATO_GO', 'http://127.0.0.1:18082'))
     parser.add_argument('--rotas', default='fase1', choices=['fase1'])
+    parser.add_argument('--rota', choices=['GET /api/subscribers','GET /api/subscribers/:id','GET /api/contracts/:id'])
     args = parser.parse_args()
-    h = Harness(args.fastify, args.go)
+    h = Harness(args.fastify, args.go,args.rota)
     suite(h)
     dest = ROOT/'tests/contrato/relatorios'/datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
     dest.mkdir(parents=True)

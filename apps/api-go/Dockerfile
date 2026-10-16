@@ -4,7 +4,7 @@ COPY apps/api-go/go.mod apps/api-go/go.sum ./
 RUN go mod download
 COPY apps/api-go/ ./
 RUN CGO_ENABLED=0 go build -trimpath -o /out/api ./cmd/api
-FROM alpine:3.23
+FROM alpine:3.22
 RUN apk add --no-cache ca-certificates && addgroup -S nexo && adduser -S -G nexo nexo
 COPY --from=build /out/api /usr/local/bin/nexo-api-go
 USER nexo

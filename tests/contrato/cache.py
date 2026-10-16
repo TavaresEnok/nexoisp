@@ -10,6 +10,19 @@ BASE='http://127.0.0.1:18082'
 FASTIFY='http://127.0.0.1:18081'
 
 
+def metric(name):
+    response=request('http://127.0.0.1:19082','/metrics')
+    return next(float(line.split()[1]) for line in response['body'].decode().splitlines() if line.startswith(name+' '))
+
+
+def await_metric(name,before):
+    start=time.monotonic()
+    while time.monotonic()-start<1:
+        if metric(name)>before:return time.monotonic()-start
+        time.sleep(.01)
+    raise AssertionError('evento não observado: '+name)
+
+
 def await_status(token,status,path='/api/subscribers?limit=1'):
     start=time.monotonic()
     while time.monotonic()-start<1:
@@ -31,9 +44,10 @@ def main():
     try:tests.append({'caso':'suspensão pelo Fastify','atraso_s':await_status(token,401)})
     finally:sql(f"update tenants set status='active' where id={quote(tenant)}")
     await_status(token,200)
+    free_sub=sql(f"select s.id from subscribers s where s.tenant_id={quote(tenant)} and not exists(select 1 from users u where u.subscriber_id=s.id) order by s.id limit 1")
     for label,change,restore,status in (
         ('usuário inativo',f"update users set active=false where id={quote(uid)}",f"update users set active=true where id={quote(uid)}",401),
-        ('papel alterado',f"update users set role='finance' where id={quote(uid)}",f"update users set role='admin' where id={quote(uid)}",200),
+        ('papel alterado',f"update users set role='subscriber',subscriber_id={quote(free_sub)} where id={quote(uid)}",f"update users set role='admin',subscriber_id=null where id={quote(uid)}",403),
         ('MFA desativado',f"update users set mfa_enabled=false where id={quote(uid)}",f"update users set mfa_enabled=true where id={quote(uid)}",403)):
         request(BASE,'/api/subscribers?limit=1',token);sql(change)
         try:tests.append({'caso':label,'atraso_s':await_status(token,status)})
@@ -45,16 +59,33 @@ def main():
     try:tests.append({'caso':'logout pelo Fastify','atraso_s':await_status(token,401)})
     finally:sql(f"insert into sessions(user_id,token_hash,expires_at) values({quote(uid)},encode(digest({quote(token)},'sha256'),'hex'),now()+interval '12 hours')")
     await_status(token,200)
+    modules=json.loads(sql(f"select to_json(modules) from tenants where id={quote(tenant)}"))
+    request(BASE,'/api/subscribers?limit=1',token)
+    invalidations=metric('nexo_auth_invalidation_seconds_count')
+    response=request(FASTIFY,'/api/tenants/'+tenant,op_token,method='PATCH',headers={'Content-Type':'application/json'},body=b'{"modules":[]}')
+    assert response['status']==200,response['body']
+    try:
+        delay=await_metric('nexo_auth_invalidation_seconds_count',invalidations)
+        misses=metric('nexo_auth_cache_misses_total')
+        assert request(BASE,'/api/subscribers?limit=1',token)['status']==200
+        assert metric('nexo_auth_cache_misses_total')>misses
+        tests.append({'caso':'módulos pelo Fastify invalidam cache e preservam núcleo','atraso_s':delay})
+    finally:sql(f"update tenants set modules=array[{','.join(quote(m) for m in modules)}]::text[] where id={quote(tenant)}")
     # A escuta é uma conexão dedicada, identificada por application_name e estado LISTEN.
     pid=sql("select pid from pg_stat_activity where application_name='nexo-go' and query='listen nexo_auth' order by backend_start limit 1")
     assert pid,'conexão LISTEN não encontrada'
+    disconnects=metric('nexo_auth_listen_disconnects_total')
     sql('select pg_terminate_backend('+pid+')')
+    await_metric('nexo_auth_listen_disconnects_total',disconnects)
+    misses=metric('nexo_auth_cache_misses_total')
     tests.append({'caso':'queda LISTEN sem interrupção da leitura','atraso_s':await_status(token,200)})
+    await_status(token,200)
+    assert metric('nexo_auth_cache_misses_total')>=misses+2,'cache não desligou após queda de LISTEN'
     # A expiração ocorre dentro do TTL de 5 segundos.
     short='expira:'+uid
-    sql(f"insert into sessions(user_id,token_hash,expires_at) values({quote(uid)},encode(digest({quote(short)},'sha256'),'hex'),now()+interval '0.3 second')")
+    sql(f"insert into sessions(user_id,token_hash,expires_at) values({quote(uid)},encode(digest({quote(short)},'sha256'),'hex'),now()+interval '1 second')")
     assert request(BASE,'/api/subscribers?limit=1',short)['status']==200
-    time.sleep(.35);tests.append({'caso':'expires_at dentro do TTL','atraso_s':await_status(short,401)})
+    time.sleep(1.05);tests.append({'caso':'expires_at dentro do TTL','atraso_s':await_status(short,401)})
     sql(f"delete from sessions where token_hash=encode(digest({quote(short)},'sha256'),'hex')")
     pop_user=records(f"select * from users where tenant_id={quote(tenant)} and email like '%-pop@contrato.invalid'")[0]
     pop=sql(f"select pop_id from user_pops where user_id={quote(pop_user['id'])}")

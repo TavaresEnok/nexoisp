@@ -3,6 +3,7 @@
 import argparse
 from datetime import datetime, timezone
 import json
+import hashlib
 import os
 from pathlib import Path
 import random
@@ -34,7 +35,7 @@ def prepare():
         query(controls)
     # O núcleo funciona com e sem módulos adicionais. Ambos entram na carga.
     query("update tenants set modules=case when mod(abs(hashtext(id::text)::bigint),2)=0 then array['crm','field'] else '{}'::text[] end")
-    fixture_query='''select u.id uid,u.tenant_id,t.modules,k.id contract,k.subscriber_id subscriber,
+    fixture_query='''select u.id uid,u.tenant_id,t.modules,u.email like '%-pop@contrato.invalid' restricted_pop,k.id contract,k.subscriber_id subscriber,
        coalesce((select count(*) from subscribers s where s.tenant_id=u.tenant_id),0) tenant_size
        from users u join tenants t on t.id=u.tenant_id join lateral
        (select c.id,c.subscriber_id from contracts c where c.tenant_id=u.tenant_id
@@ -49,7 +50,9 @@ def prepare():
                              cookie=i%2==0,offset=0 if i%10<7 else 20*(i%min(50,max(1,row['tenant_size']//20)))))
     (LOCAL/'carga-fixtures.json').write_text(json.dumps(fixtures));os.chmod(LOCAL/'carga-fixtures.json',0o600)
     return {'subscribers':int(query('select count(*) from subscribers')),'contracts':int(query('select count(*) from contracts')),
-            'tenants':int(query('select count(*) from tenants')),'fixtures':len(fixtures),'cookie_fraction':.5,'pop':True,'modulos':True}
+            'tenants':int(query('select count(*) from tenants')),'fixtures':len(fixtures),'cookie_fraction':.5,
+            'pop_fraction':sum(r['restricted_pop'] for r in rows)/len(rows),'modulos':True,
+            'amostragem':'40 contratos por usuário; provedores têm o mesmo peso, população segue Zipf'}
 
 
 def stop():
@@ -149,7 +152,12 @@ def main():
           'api_cpu':g['api_cpu_ms_req']['mean']<=f['api_cpu_ms_req']['mean'],
           'p99':g['p99_ms']['mean']<=f['p99_ms']['mean'],
           'db_cpu':g['db_cpu_ms_req']['mean']<=f['db_cpu_ms_req']['mean']+f['db_cpu_ms_req']['stdev']}
-    report={'dataset':dataset,'method':{'rate':1000,'repetitions':3,'duration_s':args.duration,'warmup_s':15,'instances':4,'cpu_each':1,'pool_each':10,'mix':[45,40,15],
+    sources={str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in (ROOT/'apps/api-go').rglob('*.go')}
+    provenance={'commit':command(['git','rev-parse','HEAD'],capture_output=True).stdout.strip(),
+                'go_binary_sha256':hashlib.sha256((ROOT/'apps/api-go/bin/api-carga').read_bytes()).hexdigest(),
+                'go_sources_sha256':hashlib.sha256(json.dumps(sources,sort_keys=True).encode()).hexdigest(),
+                'workload_sha256':hashlib.sha256((ROOT/'tests/contrato/carga.js').read_bytes()).hexdigest()}
+    report={'dataset':dataset,'provenance':provenance,'method':{'rate':1000,'repetitions':3,'duration_s':args.duration,'warmup_s':15,'instances':4,'cpu_each':1,'pool_each':10,'mix':[45,40,15],
                                      'api_cores':cores[30:34] if len(cores)>=38 else cores[-4:],'db_cores':db_cores,'generator':'k6 constant-arrival-rate; acesso direto balanceado entre quatro portas','order':order,
                                      'dispersao':'desvio padrão amostral entre três repetições'},'summary':groups,'gate':gate,'passed':all(gate.values())}
     (dest/'summary.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n');print(json.dumps(report,ensure_ascii=False,indent=2))

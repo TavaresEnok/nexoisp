@@ -91,7 +91,7 @@ def up():
         command(['docker','run','-d','--name',DB_CONTAINER,'--network','host','--cpus','4',
                  '-e','POSTGRES_USER=nexo_owner','-e','POSTGRES_PASSWORD=fase1-owner-local','-e','POSTGRES_DB='+DB_NAME,
                  'postgres:16-alpine','-p',str(DB_PORT),'-c','shared_preload_libraries=pg_stat_statements',
-                 '-c','pg_stat_statements.track_planning=on','-c','max_connections=150'])
+                 '-c','pg_stat_statements.track_planning=on','-c','max_connections=150','-c','listen_addresses=127.0.0.1'])
     else: command(['docker','start',DB_CONTAINER],stdout=subprocess.DEVNULL)
     for _ in range(100):
         try: sql('select 1');break
