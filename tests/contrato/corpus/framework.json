@@ -1,0 +1,30 @@
+[
+  {
+    "name": "malformed",
+    "status": 400,
+    "body": {
+      "error": "Body is not valid JSON but content-type is set to 'application/json'"
+    }
+  },
+  {
+    "name": "empty",
+    "status": 400,
+    "body": {
+      "error": "Body cannot be empty when content-type is set to 'application/json'"
+    }
+  },
+  {
+    "name": "unsupported",
+    "status": 415,
+    "body": {
+      "error": "Unsupported Media Type"
+    }
+  },
+  {
+    "name": "too_large",
+    "status": 413,
+    "body": {
+      "error": "Request body is too large"
+    }
+  }
+]

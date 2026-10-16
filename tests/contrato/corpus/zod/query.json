@@ -1,0 +1,272 @@
+{
+  "validators": [
+    {
+      "input": {},
+      "ok": true,
+      "value": {},
+      "error": null
+    },
+    {
+      "input": {
+        "limit": ""
+      },
+      "ok": false,
+      "value": null,
+      "error": "limit: Number must be greater than or equal to 1"
+    },
+    {
+      "input": {
+        "limit": " "
+      },
+      "ok": false,
+      "value": null,
+      "error": "limit: Number must be greater than or equal to 1"
+    },
+    {
+      "input": {
+        "limit": "0x10"
+      },
+      "ok": true,
+      "value": {
+        "limit": 16
+      },
+      "error": null
+    },
+    {
+      "input": {
+        "limit": "1e1"
+      },
+      "ok": true,
+      "value": {
+        "limit": 10
+      },
+      "error": null
+    },
+    {
+      "input": {
+        "limit": "0b10"
+      },
+      "ok": true,
+      "value": {
+        "limit": 2
+      },
+      "error": null
+    },
+    {
+      "input": {
+        "limit": "0o10"
+      },
+      "ok": true,
+      "value": {
+        "limit": 8
+      },
+      "error": null
+    },
+    {
+      "input": {
+        "limit": "1.5"
+      },
+      "ok": false,
+      "value": null,
+      "error": "limit: Expected integer, received float"
+    },
+    {
+      "input": {
+        "limit": "-1.5"
+      },
+      "ok": false,
+      "value": null,
+      "error": "limit: Expected integer, received float; limit: Number must be greater than or equal to 1"
+    },
+    {
+      "input": {
+        "limit": "Infinity"
+      },
+      "ok": false,
+      "value": null,
+      "error": "limit: Expected integer, received float; limit: Number must be less than or equal to 5000"
+    },
+    {
+      "input": {
+        "limit": "NaN"
+      },
+      "ok": false,
+      "value": null,
+      "error": "limit: Expected number, received nan"
+    },
+    {
+      "input": {
+        "limit": "foo"
+      },
+      "ok": false,
+      "value": null,
+      "error": "limit: Expected number, received nan"
+    },
+    {
+      "input": {
+        "limit": "5001"
+      },
+      "ok": false,
+      "value": null,
+      "error": "limit: Number must be less than or equal to 5000"
+    },
+    {
+      "input": {
+        "offset": "-1"
+      },
+      "ok": false,
+      "value": null,
+      "error": "offset: Number must be greater than or equal to 0"
+    },
+    {
+      "input": {
+        "q": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "status": "wrong",
+        "limit": "0",
+        "offset": "-1"
+      },
+      "ok": false,
+      "value": null,
+      "error": "q: String must contain at most 100 character(s); status: Invalid enum value. Expected 'active' | 'inactive', received 'wrong'; limit: Number must be greater than or equal to 1; offset: Number must be greater than or equal to 0"
+    },
+    {
+      "input": {
+        "q": [
+          "a",
+          "b"
+        ]
+      },
+      "ok": false,
+      "value": null,
+      "error": "q: Expected string, received array"
+    },
+    {
+      "input": {
+        "status": [
+          "a",
+          "b"
+        ]
+      },
+      "ok": false,
+      "value": null,
+      "error": "status: Expected 'active' | 'inactive', received array"
+    },
+    {
+      "input": {
+        "limit": [
+          "1",
+          "2"
+        ]
+      },
+      "ok": false,
+      "value": null,
+      "error": "limit: Expected number, received nan"
+    },
+    {
+      "input": {
+        "q": "﻿ foo ﻿"
+      },
+      "ok": true,
+      "value": {
+        "q": "foo"
+      },
+      "error": null
+    },
+    {
+      "input": {
+        "q": "foo"
+      },
+      "ok": true,
+      "value": {
+        "q": "foo"
+      },
+      "error": null
+    },
+    {
+      "input": {
+        "q": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+      },
+      "ok": false,
+      "value": null,
+      "error": "q: String must contain at most 100 character(s)"
+    },
+    {
+      "input": {
+        "limit": "1_0"
+      },
+      "ok": false,
+      "value": null,
+      "error": "limit: Expected number, received nan"
+    },
+    {
+      "input": {
+        "limit": "Inf"
+      },
+      "ok": false,
+      "value": null,
+      "error": "limit: Expected number, received nan"
+    },
+    {
+      "input": {
+        "limit": "+0x10"
+      },
+      "ok": false,
+      "value": null,
+      "error": "limit: Expected number, received nan"
+    },
+    {
+      "input": {
+        "offset": "9007199254740992"
+      },
+      "ok": true,
+      "value": {
+        "offset": 9007199254740992
+      },
+      "error": null
+    },
+    {
+      "input": {
+        "offset": "1e30"
+      },
+      "ok": true,
+      "value": {
+        "offset": 1e+30
+      },
+      "error": null
+    },
+    {
+      "input": {
+        "limit": "0"
+      },
+      "ok": false,
+      "value": null,
+      "error": "limit: Number must be greater than or equal to 1"
+    },
+    {
+      "input": {
+        "status": "ACTIVE"
+      },
+      "ok": false,
+      "value": null,
+      "error": "status: Invalid enum value. Expected 'active' | 'inactive', received 'ACTIVE'"
+    }
+  ],
+  "uuid": [
+    {
+      "input": "invalid",
+      "ok": false
+    },
+    {
+      "input": "00000000-0000-0000-0000-000000000000",
+      "ok": true
+    },
+    {
+      "input": "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA",
+      "ok": true
+    },
+    {
+      "input": "12345678-1234-1234-1234-123456789012",
+      "ok": true
+    }
+  ]
+}

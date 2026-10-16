@@ -1,0 +1,37 @@
+version: "2"
+linters:
+  default: none
+  enable:
+    - govet
+    - ineffassign
+    - unused
+    - depguard
+    - forbidigo
+  settings:
+    depguard:
+      rules:
+        pool:
+          files:
+            - "$all"
+            - "!**/internal/db/**"
+          deny:
+            - pkg: github.com/jackc/pgx/v5/pgxpool
+              desc: Conexões pertencem somente a internal/db; use WithScope.
+            - pkg: database/sql
+              desc: Credenciais administrativas pertencem somente a internal/db.
+            - pkg: github.com/jackc/pgx/v5/stdlib
+              desc: Conexões administrativas pertencem somente a internal/db.
+    forbidigo:
+      forbid:
+        - pattern: '^pgx\.(Connect|ConnectConfig)$'
+          msg: Conexões diretas pertencem somente a internal/db.
+        - pattern: '^pgconn\.(Connect|ConnectConfig)$'
+          msg: Conexões diretas pertencem somente a internal/db.
+        - pattern: '^pgx\.Conn$'
+          msg: Conexões diretas pertencem somente a internal/db.
+        - pattern: '^gen\.New$'
+          msg: Crie queries somente dentro de WithScope em internal/db.
+  exclusions:
+    rules:
+      - path: internal/db/
+        linters: [forbidigo]
