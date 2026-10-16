@@ -1,0 +1,24 @@
+{
+  "rota": "GET /api/subscribers",
+  "permissao": "subscribers:read",
+  "modulo": null,
+  "fase": 1,
+  "resposta": {
+    "volateis": [],
+    "chaves_exatas": true
+  },
+  "estado": {
+    "tabelas": [
+      "audit_events"
+    ]
+  },
+  "hashes": {
+    "sql": {
+      "list": "d1d1a779a31e27ec9456e43d2642cc67e9772e42795ed79351a86e284861a222"
+    },
+    "zod": {
+      "list": "16bec7e1b100db270425bf3c2688baffa5f3b7a3022b12829ea562a089973981",
+      "page": "f4d5ca3ee9f88e29022f6585ab02071b775f28c72e1df46544a12ea3fe65d32a"
+    }
+  }
+}

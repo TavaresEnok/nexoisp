@@ -28,6 +28,7 @@ init_env() {  # segredos e certificados de DESENVOLVIMENTO, gerados localmente (
   mkdir -p .data/agent-demo .data/olt-huawei-emu
 }
 case "${1:-help}" in
+  contrato)  shift; python3 tests/contrato/laboratorio.py "$@" ;;
   init)      init_env ;;
   agent-cert) scripts/dev-certs.sh agent "$2" "${3:-infra/certs/agent-$2}" ;;
   e2e)  # fumaça da interface num navegador de verdade (imagem oficial do Playwright); BASE padrão: o painel local

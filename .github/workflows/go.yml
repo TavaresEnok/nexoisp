@@ -1,0 +1,39 @@
+name: migração Go — fase 1
+on:
+  push:
+  pull_request:
+jobs:
+  contrato:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.2'
+          cache-dependency-path: apps/api-go/go.sum
+      - uses: actions/setup-node@v4
+        with: {node-version: 22, cache: npm}
+      - run: npm ci
+      - run: python3 scripts/migracao-go/migrations.py && python3 scripts/migracao-go/verificar_deriva.py
+      - name: Código gerado reproduzível
+        run: |
+          go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.31.1
+          cd apps/api-go
+          sqlc generate
+          git diff --exit-code -- internal/modules/cadastro/gen
+      - name: Lint e limites de acesso ao banco
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.14.0
+          working-directory: apps/api-go
+      - run: ./nexo contrato up
+      - run: ./nexo contrato migrations
+      - run: ./nexo contrato run --rotas fase1
+      - run: ./nexo contrato mutacoes
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: contrato-go-fase1
+          path: tests/contrato/relatorios/
+      - run: ./nexo contrato down
+        if: always()
