@@ -33,6 +33,7 @@ def prepare():
         query('\\set tenants 40\n\\set subscribers 300000\n\\set min_per_tenant 200\n'+seed)
         controls=(ROOT/'tests/contrato/dados/controles.sql').read_text().replace("<> 'nexo_contrato_lab'","not in ('nexo_contrato_lab','nexo_contrato_carga_lab')")
         query(controls)
+    query("update sessions s set expires_at=now()+interval '12 hours' from users u where u.id=s.user_id and u.email like '%@contrato.invalid' and s.token_hash=encode(digest('contrato:'||u.id::text,'sha256'),'hex')")
     # O núcleo funciona com e sem módulos adicionais. Ambos entram na carga.
     query("update tenants set modules=case when mod(abs(hashtext(id::text)::bigint),2)=0 then array['crm','field'] else '{}'::text[] end")
     fixture_query='''select u.id uid,u.tenant_id,t.modules,u.email like '%-pop@contrato.invalid' restricted_pop,k.id contract,k.subscriber_id subscriber,
