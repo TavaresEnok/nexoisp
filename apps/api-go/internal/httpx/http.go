@@ -17,6 +17,14 @@ import (
 )
 
 type requestKey struct{}
+type routeKey struct{}
+type routeLabel struct{ value string }
+
+func SetRoute(ctx context.Context, route string) {
+	if label, ok := ctx.Value(routeKey{}).(*routeLabel); ok {
+		label.value = route
+	}
+}
 
 func Request(ctx context.Context) *http.Request {
 	r, _ := ctx.Value(requestKey{}).(*http.Request)
@@ -54,6 +62,7 @@ func Middleware(reg prometheus.Registerer) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
+			label := &routeLabel{}
 			Security(w, r)
 			w.Header().Set("X-Request-Id", uuid.NewString())
 			sw := &writer{ResponseWriter: w}
@@ -76,11 +85,15 @@ func Middleware(reg prometheus.Registerer) func(http.Handler) http.Handler {
 						route = "other"
 					}
 				}
+				if label.value != "" {
+					route = label.value
+				}
 				latency.WithLabelValues(route, fmt.Sprint(status), "c1").Observe(time.Since(start).Seconds())
 			}()
 			ctx, span := otel.Tracer("nexo.http").Start(r.Context(), r.Method)
 			defer span.End()
 			ctx = context.WithValue(ctx, requestKey{}, r)
+			ctx = context.WithValue(ctx, routeKey{}, label)
 			next.ServeHTTP(sw, r.WithContext(ctx))
 		})
 	}

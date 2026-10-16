@@ -1,6 +1,8 @@
 # Relatório da fase 1 — 16/10/2026
 
-Estado: **implementação entregue em laboratório; fase 1 pendente no portão de desempenho**. Ramo `migracao-go/fase-1`. Não foram iniciadas as fases 0 ou 2.
+Registro histórico da entrega da fase 1. A continuidade autorizada posteriormente está em [ANDAMENTO.md](ANDAMENTO.md).
+
+Estado na entrega: **implementação entregue em laboratório; fase 1 pendente no portão de desempenho**. Ramo `migracao-go/fase-1`. Não foram iniciadas as fases 0 ou 2.
 
 ## Entregas
 

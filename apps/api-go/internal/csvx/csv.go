@@ -18,6 +18,8 @@ func Cell(v any) string {
 		s = x
 	case bool:
 		s = fmt.Sprint(x)
+	case float64:
+		s = jsString(x)
 	default:
 		r := reflect.ValueOf(v)
 		if r.Kind() == reflect.Slice {
@@ -27,7 +29,7 @@ func Cell(v any) string {
 				if value == nil {
 					parts = append(parts, "")
 				} else {
-					parts = append(parts, fmt.Sprint(value))
+					parts = append(parts, jsString(value))
 				}
 			}
 			s = strings.Join(parts, "; ")
@@ -40,6 +42,34 @@ func Cell(v any) string {
 	}
 	return "\"" + strings.ReplaceAll(s, "\"", "\"\"") + "\""
 }
+
+// JavaScript String(number) uses decimal notation through 1e20; fmt.Sprint
+// switches to exponent notation much earlier and changes exported CSV bytes.
+func jsString(v any) string {
+	switch x := v.(type) {
+	case nil:
+		return ""
+	case string:
+		return x
+	case float64:
+		if x == 0 {
+			return "0"
+		}
+		b, _ := jsonx.Encode(x)
+		return string(b)
+	case map[string]any:
+		return "[object Object]"
+	case []any:
+		parts := make([]string, len(x))
+		for i, item := range x {
+			parts[i] = jsString(item)
+		}
+		return strings.Join(parts, ",")
+	default:
+		return fmt.Sprint(v)
+	}
+}
+
 func first(s string) string {
 	if len(s) > 0 {
 		return s[:1]

@@ -1,10 +1,82 @@
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, InjectOptions } from 'fastify';
+import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
+import { request as httpRequest } from 'node:http';
+import { request as httpsRequest } from 'node:https';
+import { afterAll } from 'vitest';
 import { buildApp } from '../src/app.js';
 
 let app: FastifyInstance | undefined;
-export async function getApp() {
-  return (app ??= await buildApp());
+let starting: Promise<FastifyInstance> | undefined;
+const relayKey = randomBytes(32);
+const relayHeader = 'x-nexo-test-context';
+const signRelay = (value: string) => createHmac('sha256', relayKey).update(value).digest('hex');
+
+/** D1: o mesmo teste pode atravessar o proxy sem perder suas fixtures locais.
+ * O backend de teste fica no processo do Vitest: alterações de env e simuladores
+ * continuam visíveis. O contexto assinado reproduz apenas opções do inject.
+ */
+async function injectHTTP(options: InjectOptions) {
+  const base = process.env.NEXO_TEST_BASE_URL!;
+  const target = new URL(String(options.url ?? options.path ?? '/'), base);
+  if (target.origin !== new URL(base).origin) throw new Error('teste tentou sair da origem do proxy');
+  const context = Buffer.from(JSON.stringify({ remoteAddress: options.remoteAddress,
+    forwardedProto: options.headers?.['x-forwarded-proto'] })).toString('base64url');
+  const headers: Record<string, any> = { ...options.headers, [relayHeader]: `${context}.${signRelay(context)}` };
+  let payload = options.payload;
+  if (payload != null && typeof payload === 'object' && !Buffer.isBuffer(payload)) {
+    payload = JSON.stringify(payload);
+    headers['content-type'] ??= 'application/json';
+  }
+  const data = payload == null ? undefined : Buffer.isBuffer(payload) ? payload : Buffer.from(String(payload));
+  if (data) headers['content-length'] = String(data.length);
+  return new Promise<any>((resolve, reject) => {
+    const request = (target.protocol === 'https:' ? httpsRequest : httpRequest)(target,
+      { method: String(options.method ?? 'GET'), headers }, (response) => {
+        const chunks: Buffer[] = [];
+        response.on('data', (chunk) => chunks.push(chunk));
+        response.on('error', reject);
+        response.on('end', () => {
+          const rawPayload = Buffer.concat(chunks), body = rawPayload.toString('utf8');
+          resolve({ statusCode: response.statusCode, headers: response.headers, body, payload: body, rawPayload,
+            json: () => JSON.parse(body) });
+        });
+      });
+    request.on('error', reject);
+    request.setTimeout(30_000, () => request.destroy(new Error('timeout do proxy de teste')));
+    request.end(data);
+  });
 }
+
+export async function getApp(): Promise<FastifyInstance> {
+  if (app) return app;
+  starting ??= (async () => {
+    const server = await buildApp();
+    if (process.env.NEXO_TEST_BASE_URL) {
+      server.addHook('onRequest', async (req) => {
+        const header = req.headers[relayHeader];
+        if (!header) return;
+        const [context, signature = ''] = String(header).split('.');
+        const expected = Buffer.from(signRelay(context));
+        const actual = Buffer.from(signature);
+        if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) throw new Error('contexto de teste inválido');
+        const data = JSON.parse(Buffer.from(context, 'base64url').toString('utf8'));
+        delete req.headers[relayHeader];
+        if (data.remoteAddress) Object.defineProperty(req, 'ip', { value: data.remoteAddress });
+        if (data.forwardedProto !== undefined) req.headers['x-forwarded-proto'] = data.forwardedProto;
+      });
+      await server.listen({ host: '127.0.0.1', port: Number(process.env.NEXO_TEST_UPSTREAM_PORT ?? 18181) });
+      server.inject = injectHTTP as FastifyInstance['inject'];
+    }
+    app = server;
+    return server;
+  })();
+  return starting;
+}
+
+afterAll(async () => {
+  if (process.env.NEXO_TEST_BASE_URL && app) await app.close();
+});
+
 export async function login(email: string): Promise<string> {
   const r = await (await getApp()).inject({ method: 'POST', url: '/api/auth/login', payload: { email, password: 'demo1234' } });
   if (r.statusCode !== 200) throw new Error(`login falhou: ${r.body}`);

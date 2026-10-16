@@ -20,6 +20,12 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+type routeKey struct{}
+
+func WithRoute(ctx context.Context, route string) context.Context {
+	return context.WithValue(ctx, routeKey{}, route)
+}
+
 type AuditFunc func(context.Context, *Ctx, string, string, any, map[string]any, string) error
 type cacheIndex struct {
 	user, tenant string
@@ -233,6 +239,9 @@ func (a *Auth) Require(perm string, allowMFA bool, next http.Handler) http.Handl
 					route = r.URL.Path
 				} else if strings.HasPrefix(r.URL.Path, "/api/contracts/") {
 					route = "/api/contracts/:id"
+				}
+				if matched, ok := r.Context().Value(routeKey{}).(string); ok {
+					route = matched
 				}
 				a.Requests.WithLabelValues(current.TenantID, route, strconv.Itoa(recorded.status), "c1").Inc()
 			}

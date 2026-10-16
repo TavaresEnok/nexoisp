@@ -1,0 +1,26 @@
+# Sobreposição preparada para coexistência; todas as rotas começam no Fastify.
+# Use após bootstrap/baseline/up pelo nexo-db. Não executa migrações na API.
+services:
+  api-go:
+    build: {context: ../.., dockerfile: apps/api-go/Dockerfile}
+    restart: unless-stopped
+    depends_on: {db: {condition: service_healthy}}
+    environment:
+      DATABASE_URL_GO: postgres://nexo_go:${NEXO_GO_DB_PASSWORD:?}@db:5432/nexo
+      NEXO_GO_ADDR: 0.0.0.0:8080
+      NEXO_GO_INTERNAL_ADDR: 0.0.0.0:9090
+      NEXO_REQUIRE_ADMIN_MFA: "1"
+      NEXO_COOKIE_SECURE: "1"
+      NEXO_GO_DB_POOL: "10"
+      NEXO_GO_PLAN_CACHE_MODE: force_custom_plan
+      NEXO_GO_AUTH_CACHE_TTL: "5"
+  caddy:
+    build: {context: ../.., dockerfile: infra/prod/caddy/Dockerfile}
+    image: nexo-caddy-go:local
+    command: [caddy, run, --config, /etc/caddy/Caddyfile, --adapter, caddyfile]
+    depends_on: [api, api-go]
+    environment:
+      NEXO_DOMAIN: ${NEXO_DOMAIN:?}
+      NEXO_FASTIFY_UPSTREAM: api:8080
+      NEXO_GO_UPSTREAM: api-go:8080
+    volumes: ["./caddy:/etc/caddy:ro"]

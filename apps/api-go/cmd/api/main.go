@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"regexp"
 	"syscall"
 	"time"
 
@@ -17,9 +16,11 @@ import (
 	"nexoisp/api-go/internal/auth"
 	"nexoisp/api-go/internal/config"
 	"nexoisp/api-go/internal/db"
+	"nexoisp/api-go/internal/endpoint"
 	"nexoisp/api-go/internal/httpx"
 	"nexoisp/api-go/internal/jsonx"
 	"nexoisp/api-go/internal/modules/cadastro"
+	"nexoisp/api-go/internal/modules/leitura"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
@@ -72,31 +73,11 @@ func run() error {
 	defer func() { cancel(); <-listenerDone }()
 	router := chi.NewRouter()
 	router.Use(httpx.Middleware(reg))
-	detail := regexp.MustCompile(`^/api/(subscribers|contracts)/[^/]+$`)
-	router.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			perm := ""
-			if r.URL.Path == "/api/subscribers" || detail.MatchString(r.URL.Path) {
-				perm = "subscribers:read"
-				if len(r.URL.Path) >= 15 && r.URL.Path[:15] == "/api/contracts/" {
-					perm = "contracts:read"
-				}
-			}
-			if perm != "" && (r.Method == "GET" || r.Method == "HEAD") {
-				handler := next
-				if r.Method == "HEAD" {
-					handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-						copy := r.Clone(r.Context())
-						copy.Method = "GET"
-						next.ServeHTTP(w, copy)
-					})
-				}
-				authentication.Require(perm, false, handler).ServeHTTP(w, r)
-			} else {
-				next.ServeHTTP(w, r)
-			}
-		})
-	})
+	registry := endpoint.New(authentication)
+	registry.Protect("GET", "/api/subscribers", "subscribers:read", false)
+	registry.Protect("GET", "/api/subscribers/{id}", "subscribers:read", false)
+	registry.Protect("GET", "/api/contracts/{id}", "contracts:read", false)
+	router.Use(registry.Middleware)
 	router.NotFound(func(w http.ResponseWriter, r *http.Request) { apierr.Write(w, apierr.New(404, "rota não encontrada")) })
 	huma.NewError = func(status int, msg string, errs ...error) huma.StatusError {
 		if len(errs) > 0 {
@@ -104,7 +85,7 @@ func run() error {
 		}
 		return apierr.New(status, msg)
 	}
-	hc := huma.DefaultConfig("NexoISP Go — fase 1", "1.0.0")
+	hc := huma.DefaultConfig("NexoISP Go", "1.0.0")
 	hc.CreateHooks = nil
 	hc.OpenAPIPath = ""
 	hc.DocsPath = ""
@@ -112,6 +93,7 @@ func run() error {
 	hc.Formats = map[string]huma.Format{"application/json": {Marshal: jsonx.Marshal, Unmarshal: json.Unmarshal}, "json": {Marshal: jsonx.Marshal, Unmarshal: json.Unmarshal}}
 	api := humachi.New(router, hc)
 	cadastro.Register(api, cadastro.Service{DB: database}, auditor)
+	leitura.Register(api, registry, leitura.Service{DB: database, Audit: auditor, RequireMFA: cfg.RequireMFA})
 	internal := http.NewServeMux()
 	internal.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}))
 	internal.HandleFunc("/openapi.json", func(w http.ResponseWriter, r *http.Request) {

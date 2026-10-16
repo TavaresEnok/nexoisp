@@ -15,7 +15,7 @@ type Scope struct {
 
 // O operador global não é concedido por cabeçalho HTTP.
 func OperatorScope(reason string) (Scope, error) {
-	if reason != "auditoria_negativa" {
+	if reason != "auditoria_negativa" && reason != "listar_provedores" {
 		return Scope{}, fmt.Errorf("escopo de operador não autorizado: %s", reason)
 	}
 	return Scope{Cell: "c1", operator: true}, nil

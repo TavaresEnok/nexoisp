@@ -1,0 +1,2069 @@
+{
+  "version": 1,
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/acceptances",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/acceptances",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/acceptances/:id/cancel",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/acceptances/:id/evidence",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/portal/acceptances",
+      "phase": 2,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/portal/acceptances/:id/accept",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/addons",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/addons",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/addons/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/addons",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/addons",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/contracts/:id/addons/:addonId",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/anatel/dici",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/anatel/municipalities",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/anatel/municipalities",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/plans/:id/technology",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/contracts/:id/service-area",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/search",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/subscribers/:id/timeline",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/sessions",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/availability",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/network/online",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/network/disconnect",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/subscribers/:id/contacts",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/subscribers/:id/contacts",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/pops",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/pops",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/pops/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/contracts/:id/pop",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notice-channels",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/notice-channels",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/notice-channels/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/notice-channels/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/notice-channels/:id/test",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notice-templates",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/notice-templates",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/notice-templates/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notice-rules",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/notice-rules",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/notice-rules/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/notice-rules/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/notice-rules/run",
+      "phase": 6,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notice-log",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/subscribers",
+      "phase": 1,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/subscribers/:id",
+      "phase": 1,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/subscribers",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/subscribers/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/plans",
+      "phase": 2,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/plans/:id/versions",
+      "phase": 2,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/plans",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/plans/:id/versions",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/plans/:id/dunning",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/plans/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts",
+      "phase": 2,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id",
+      "phase": 1,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/contracts/:id",
+      "phase": 6,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/dashboard",
+      "phase": 2,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/plans/:id/loyalty",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/contracts/:id/loyalty",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/termination-quote",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/discounts",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/discounts",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/discounts/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/contracts/:id/referral",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/referrals",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/scheduled-changes",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/scheduled-changes",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/scheduled-changes/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/amendments",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/amendments",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/legal/ip-lookup",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/legal/ip-lookup/history",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/leads",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/leads/summary",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/leads/:id",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/leads",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/leads/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/leads/:id/stage",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/leads/:id/notes",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/leads/:id/convert",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tickets",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tickets/:id",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/tickets",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/tickets/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/tickets/:id/messages",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/tickets/:id/status",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notifications/settings",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/notifications/test",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/notifications/deliver",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/crm/report",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/portal/tickets",
+      "phase": 2,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/portal/tickets/:id",
+      "phase": 2,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/portal/tickets",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/portal/tickets/:id/messages",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/companies",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/companies",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/companies/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/contracts/:id/company",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/users/:id/pops",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/users/:id/pops",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notice-page",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notice-page",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/aviso/:slug",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/subscribers/:id/documents",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/subscribers/:id/documents",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/documents/:id/download",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/documents/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/states",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/contracts/:id/credit-restriction",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/subscribers/:id/notes",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/subscribers/:id/notes",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/notes/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tags",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/tags",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/tags/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/contracts/:id/tags",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/maintenance-notices",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/maintenance-notices",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/maintenance-notices/:id/cancel",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/maintenance-notices/channels",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/maintenance-notices/:id/notify",
+      "phase": 6,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/work-orders",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/work-orders/:id",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/work-orders",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/work-orders/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/work-orders/:id/status",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/work-orders/:id/notes",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/work-orders/:id/materials",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/stock/items",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/stock/items",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/stock/items/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/stock/items/:id/movements",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/stock/items/:id/movements",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/stock/items/:id/units",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/stock/units",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/stock/units/:id/events",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/stock/items/:id/units",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/stock/units/:id/transfer",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/stock/units/:id/status",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/work-orders/:id/checklist",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/work-orders/:id/checklist/:itemId",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/equipment",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/work-orders/:id/units",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/ftth/boxes",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/ftth/boxes/:id",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ftth/boxes",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/ftth/boxes/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/ftth/boxes/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ftth/boxes/:id/drops",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/ftth/drops/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/ftth",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/finance/settings",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/finance/settings",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/finance/generate",
+      "phase": 6,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/invoices",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/invoices/:id",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/invoices",
+      "phase": 6,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/invoices/:id/cancel",
+      "phase": 6,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/invoices/:id/manual-payment",
+      "phase": 6,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/invoices/:id/due",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/invoices/:id/payments/:paymentId/reverse",
+      "phase": 6,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/agreement",
+      "phase": 6,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/trust-release",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/trust-release",
+      "phase": 6,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/invoices/:id/resolve",
+      "phase": 6,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/finance",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/finance/summary",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/finance/export",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/finance/monthly",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/finance/reconciliation",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/finance/reconcile",
+      "phase": 6,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/finance/run-auto-suspend",
+      "phase": 6,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhooks/gateway/:gateway",
+      "phase": 6,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/demo-gateway/pay",
+      "phase": 6,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/catalogs",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/catalogs",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/catalogs/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/sla-policies",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/sla-policies",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/sla-policies/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/sla-policies/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/sla",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/install-address",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/contracts/:id/install-address",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/agenda",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/agenda/free",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/surveys",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/portal/surveys",
+      "phase": 2,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/portal/surveys/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/logout",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/me",
+      "phase": 2,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/me/password",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/me/mfa/setup",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/me/mfa/enable",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/me/mfa/disable",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tenants",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/tenants",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/tenants/:id",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/support/enter",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/support/exit",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/users",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/users",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/users/:id",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/audit",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/import/preview",
+      "phase": 6,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/import/apply",
+      "phase": 6,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/import/batches",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/import/batches/:id",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/import/batches/:id/provision",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/catalog",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/api-tokens",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/api-tokens",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/api-tokens/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/webhook-endpoints",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhook-endpoints",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/webhook-endpoints/:id",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhook-endpoints/:id/rotate-secret",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/webhook-endpoints/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhook-endpoints/:id/test",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/webhook-deliveries",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhook-deliveries/:id/retry",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/ipam/pools",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ipam/pools",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/ipam/pools/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/ipam/pools/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/ipam/pools/:id/allocations",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/ips",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ipam/pools/:id/allocations",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/ipam/allocations/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/ipam/pools/:id/delegations",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/ipv6",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ipam/pools/:id/delegations",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/ipam/delegations/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/cgnat/plans",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/cgnat/plans/check",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/cgnat/plans",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/cgnat/plans/:id/retire",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/cgnat/plans/:id/map",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/cgnat/plans/:id/script",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/cgnat/trace",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/cgnat/plans/:id/lookup",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/subscribers/:id/lgpd-export",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/subscribers/:id/anonymize",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/settings/retention",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/settings/retention",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/map/points",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/map/coverage",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/contracts/:id/location",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/pops/:id/location",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/agents",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/agents",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/agents/:id",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/devices",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/devices",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/devices/:id",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/devices/:id/reapply",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/service",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/usage",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/usage-series",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/service",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/:id/:action",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/plans/:id/network",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/plans/:id/reapply",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/resources/:id/mac",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/resources/:id/secret",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/operations",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/operations/:id",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/network/health",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/network/drift",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/noc/settings",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/noc/settings",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/noc/overview",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/today",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/diagnosis",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/olt/discoveries",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/onus",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/onu",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/onu",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/onus/:id/:action",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/subscribers/:id/portal-access",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/subscribers/:id/portal-access",
+      "phase": 2,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/portal/overview",
+      "phase": 2,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/portal/usage-series",
+      "phase": 2,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/portal/trust-release",
+      "phase": 6,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/custom-fields",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/custom-fields",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/custom-fields/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/install-kits",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/install-kits",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/install-kits/:id",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/work-orders/:id/kit",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/work-orders/:id/helpers",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/work-orders/:id/helpers",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/work-orders/:id/helpers/:userId",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/commission-rules",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/commission-rules",
+      "phase": 4,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/commissions",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/public/v1",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/public/v1/subscribers",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/public/v1/subscribers/:id",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/public/v1/contracts",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/public/v1/invoices",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/public/v1/tickets",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/public/v1/work-orders",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/public/v1/work-orders/:id",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/radius/status",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/radius/allowed-sources",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/radius/devices",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/radius/devices/:id",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/radius/devices/:id/setup",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/radius/devices/:id/secret",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/radius/devices/:id/tunnel",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/devices/:id/convert-to-integrated",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/radius-log",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/finance/reports/aging",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/finance/reports/receipts",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/finance/reports/without-invoice",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/finance/reports/to-cancel",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/dashboard/panels",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/acs/status",
+      "phase": 3,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/cpe",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/cpe/candidates",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/cpe/link",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/contracts/:id/cpe/link",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/cpe/wifi",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/cpe/reboot",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/cpe/refresh",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/portal/cpe",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/portal/cpe/:contractId/wifi",
+      "phase": 5,
+      "state": "fastify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "phase": 8,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/hello",
+      "phase": 7,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/sync-done",
+      "phase": 7,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/poll",
+      "phase": 7,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/attempts/:id/begin",
+      "phase": 7,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/attempts/:id/progress",
+      "phase": 7,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/attempts/:id/result",
+      "phase": 7,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/olt-report",
+      "phase": 7,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/usage-report",
+      "phase": 7,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/sessions-report",
+      "phase": 7,
+      "state": "fastify"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/observations",
+      "phase": 7,
+      "state": "fastify"
+    }
+  ]
+}

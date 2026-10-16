@@ -18,7 +18,7 @@ def command(args, **kwargs):
 
 
 def sql(query, database=DB_NAME):
-    if database not in (DB_NAME, 'nexo_contrato_novo', 'nexo_contrato_legado', 'nexo_contrato_parcial', 'nexo_contrato_carga', 'nexo_contrato_carga_lab', 'postgres'):
+    if database not in (DB_NAME, 'nexo_contrato_novo', 'nexo_contrato_legado', 'nexo_contrato_parcial', 'nexo_contrato_carga', 'nexo_contrato_carga_lab', 'nexo_test', 'postgres'):
         raise ValueError('banco fora do laboratório')
     p = command(['docker', 'exec', '-i', DB_CONTAINER, 'psql', '-X', '-qAt',
                  '-v', 'ON_ERROR_STOP=1', '-p', str(DB_PORT), '-U', 'nexo_owner', '-d', database],

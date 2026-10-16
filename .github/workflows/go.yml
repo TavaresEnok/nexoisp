@@ -1,4 +1,4 @@
-name: migração Go — fase 1
+name: migração Go — contrato e coexistência
 on:
   push:
   pull_request:
@@ -20,7 +20,13 @@ jobs:
           go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.31.1
           cd apps/api-go
           sqlc generate
-          git diff --exit-code -- internal/modules/cadastro/gen
+          git diff --exit-code -- internal/modules/cadastro/gen internal/modules/leitura/gen
+      - name: SQL e templates revisados
+        run: |
+          node scripts/migracao-go/extrair_consultas.cjs --check
+          node scripts/migracao-go/extrair_grupos.cjs --check
+          node scripts/migracao-go/extrair_aviso.cjs --check
+          python3 scripts/migracao-go/proxy.py --check
       - name: Lint e limites de acesso ao banco
         uses: golangci/golangci-lint-action@v8
         with:
@@ -30,6 +36,14 @@ jobs:
       - run: ./nexo contrato migrations
       - run: ./nexo contrato run --rotas fase1
       - run: ./nexo contrato mutacoes
+      - run: ./nexo contrato escopo_pop
+      - run: ./nexo contrato leituras
+      - run: ./nexo contrato consultas
+      - run: ./nexo contrato grupos
+      - run: ./nexo contrato aviso
+      - run: ./nexo contrato proxy
+      - run: ./nexo contrato regressoes
+      - run: ./nexo contrato e2e
       - uses: actions/upload-artifact@v4
         if: always()
         with:
