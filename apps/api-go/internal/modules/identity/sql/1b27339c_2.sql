@@ -1,0 +1,1 @@
+select sessions_revoke_others($1,$2)

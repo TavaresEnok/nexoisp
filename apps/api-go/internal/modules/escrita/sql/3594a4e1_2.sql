@@ -1,0 +1,1 @@
+update devices set driver = 'radius', vendor = $2, agent_id = $3, host = $4, api_port = null, credential_ref = null where id = $1

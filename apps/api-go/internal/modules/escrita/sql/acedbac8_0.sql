@@ -1,0 +1,1 @@
+update contracts set service_area = $2 where id = $1 returning id

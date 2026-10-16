@@ -1,0 +1,3 @@
+insert into tenant_settings (tenant_id, onu_rx_min_dbm, pon_outage_min, onu_remove_on_contract_end, updated_by) values ($1,$2,$3,coalesce($4, false),$5)
+         on conflict (tenant_id) do update set onu_rx_min_dbm = excluded.onu_rx_min_dbm, pon_outage_min = excluded.pon_outage_min,
+           onu_remove_on_contract_end = coalesce($4, tenant_settings.onu_remove_on_contract_end), updated_by = excluded.updated_by, updated_at = now()

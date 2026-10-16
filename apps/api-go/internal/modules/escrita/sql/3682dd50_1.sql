@@ -1,0 +1,1 @@
+delete from vpn_peers where device_id = $1

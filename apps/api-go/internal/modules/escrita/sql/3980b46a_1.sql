@@ -1,0 +1,1 @@
+insert into plan_versions (tenant_id, plan_id, version, price_cents, down_kbps, up_kbps, profile_name) values ($1,$2,1,$3,$4,$5,$6)

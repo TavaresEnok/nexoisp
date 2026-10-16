@@ -1,0 +1,1 @@
+select count(*)::int as n from tags where id = any($1::uuid[])

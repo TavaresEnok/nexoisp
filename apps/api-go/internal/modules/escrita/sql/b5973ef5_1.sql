@@ -1,0 +1,1 @@
+select kind from catalog_items where id = $1

@@ -1,0 +1,1 @@
+update tickets set assignee_id = $2, updated_at = now() where id = $1

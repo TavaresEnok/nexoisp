@@ -1,0 +1,2 @@
+select id, name, document, email, phone, address_street, address_number, address_district, address_city, address_state, address_zip, created_at from subscribers where ($1::text is null or name ilike '%'||$1||'%') and ($2::text is null or regexp_replace(document, '\D', '', 'g') = regexp_replace($2, '\D', '', 'g'))
+       order by name, id

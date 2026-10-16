@@ -1,0 +1,1 @@
+select coalesce(-sum(qty),0)::int as n from stock_movements where work_order_id = $1 and item_id = $2

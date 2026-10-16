@@ -1,0 +1,1 @@
+select to_char(date_trunc('month', now() at time zone $1), 'YYYY-MM-DD') as d

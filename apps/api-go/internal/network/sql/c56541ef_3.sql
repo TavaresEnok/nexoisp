@@ -1,0 +1,1 @@
+update operations set status = $2, note = $3, finished_at = now(), updated_at = now(), lease_until = null where id = $1

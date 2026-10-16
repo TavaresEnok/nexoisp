@@ -28,7 +28,15 @@ jobs:
           node scripts/migracao-go/extrair_aviso.cjs --check
           node scripts/migracao-go/extrair_dinamicas.cjs --check
           node scripts/migracao-go/extrair_radius_templates.cjs --check
+          node scripts/migracao-go/extrair_escritas.cjs --check
+          node scripts/migracao-go/extrair_identity.cjs --check
+          node scripts/migracao-go/extrair_motor.cjs --check
+          node scripts/migracao-go/extrair_financeiro.cjs --check
+          node scripts/migracao-go/extrair_rotinas.cjs --check
+          node scripts/migracao-go/extrair_agentes.cjs --check
+          node scripts/migracao-go/extrair_radius.cjs --check
           python3 scripts/migracao-go/proxy.py --check
+          python3 scripts/migracao-go/proxy.py --table infra/prod/caddy/rotas.go.yaml --output infra/prod/caddy/Caddyfile.go --fallback go --check
       - name: Lint e limites de acesso ao banco
         uses: golangci/golangci-lint-action@v8
         with:
@@ -47,6 +55,12 @@ jobs:
       - run: ./nexo contrato proxy
       - run: ./nexo contrato regressoes
       - run: ./nexo contrato e2e
+      - run: ./nexo contrato consolidacao
+      - run: docker build -q -t nexoisp-agent services/network-agent
+      - run: ./nexo contrato agente_go
+      - run: ./nexo contrato mtls_go
+      - run: ./nexo contrato jobs-up
+      - run: ./nexo contrato river_radius
       - uses: actions/upload-artifact@v4
         if: always()
         with:

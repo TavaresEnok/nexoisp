@@ -1,0 +1,1 @@
+update contracts set plan_version_id = $2, updated_at = now() where id = $1

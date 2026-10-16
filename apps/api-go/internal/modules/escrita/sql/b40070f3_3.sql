@@ -1,0 +1,1 @@
+update contracts set due_day = $2, updated_at = now() where id = $1

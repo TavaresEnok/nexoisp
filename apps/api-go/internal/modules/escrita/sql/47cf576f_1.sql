@@ -1,0 +1,1 @@
+insert into contract_amendments (tenant_id, contract_id, kind, title, body, effective_date, created_by) values ($1,$2,$3,$4,$5,coalesce($6::date, current_date),$7) returning *

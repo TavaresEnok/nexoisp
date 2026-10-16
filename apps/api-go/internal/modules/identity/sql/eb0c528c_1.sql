@@ -1,0 +1,1 @@
+insert into users (tenant_id, email, name, password_hash, role) values ($1,$2,$3,$4,'admin')

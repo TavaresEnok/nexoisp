@@ -1,0 +1,1 @@
+update plans set access_technology = $2 where id = $1 returning id, name, access_technology

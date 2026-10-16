@@ -1,0 +1,114 @@
+[
+  {
+    "path": "helper:authAgent",
+    "permission": "",
+    "file": "agent-api.ts",
+    "queries": [
+      "961d7035_0.sql",
+      "961d7035_1.sql",
+      "961d7035_2.sql"
+    ],
+    "sha256": "02e19e5e440d88c640ffd606a450aaa8073a2499b8bd3bedd8ff943fc95d4db6"
+  },
+  {
+    "path": "helper:saveChecks",
+    "permission": "",
+    "file": "agent-api.ts",
+    "queries": [
+      "8b745bb1_0.sql"
+    ],
+    "sha256": "3ea15b240d37315a4b05367e02f6257e2c7e475d3af47fe496712fa081e8f713"
+  },
+  {
+    "path": "/agent/v1/hello",
+    "permission": "",
+    "file": "agent-api.ts",
+    "queries": [
+      "78dc1899_0.sql",
+      "78dc1899_1.sql",
+      "78dc1899_2.sql",
+      "78dc1899_3.sql"
+    ],
+    "sha256": "9f5e5a8bd34f893614b948575575aab4b8313a6293d6eb6b29ba8ae004bf2230"
+  },
+  {
+    "path": "/agent/v1/sync-done",
+    "permission": "",
+    "file": "agent-api.ts",
+    "queries": [
+      "463fdde2_0.sql"
+    ],
+    "sha256": "dd0f93c1a8f54e0e6ba7bb44ddcda8fde852f2d8d2a5b287c7b1600e4990f4f6"
+  },
+  {
+    "path": "/agent/v1/poll",
+    "permission": "",
+    "file": "agent-api.ts",
+    "queries": [
+      "bcfae3ba_0.sql"
+    ],
+    "sha256": "495144f2ee5dc1ca2664871dfacfec31c60667ab5d95ead6ac2511c0a2570a28"
+  },
+  {
+    "path": "/agent/v1/attempts/:id/begin",
+    "permission": "",
+    "file": "agent-api.ts",
+    "queries": [],
+    "sha256": "c4db4aaaaa27eaa4037b8116449a9386a121ead4b26ebcf317ed1fd3626086b0"
+  },
+  {
+    "path": "/agent/v1/attempts/:id/progress",
+    "permission": "",
+    "file": "agent-api.ts",
+    "queries": [],
+    "sha256": "9d8bb3dd04b1adcc3b1a036a9c112003021ef31beb1a1dd24294f93665368e25"
+  },
+  {
+    "path": "/agent/v1/attempts/:id/result",
+    "permission": "",
+    "file": "agent-api.ts",
+    "queries": [
+      "be94d58c_0.sql"
+    ],
+    "sha256": "bfdb94d0f56315cc2683e6fdaece6c732d211939f5ed7dc98a9675af55a075c5"
+  },
+  {
+    "path": "/agent/v1/olt-report",
+    "permission": "",
+    "file": "agent-api.ts",
+    "queries": [
+      "9bb67ff0_0.sql",
+      "9bb67ff0_1.sql",
+      "9bb67ff0_2.sql",
+      "9bb67ff0_3.sql"
+    ],
+    "sha256": "53c22cab34d759f5ee2608088c831025a385ec6554b5acfdb9bdf4dab99ce325"
+  },
+  {
+    "path": "/agent/v1/usage-report",
+    "permission": "",
+    "file": "agent-api.ts",
+    "queries": [
+      "fd1d566e_0.sql",
+      "fd1d566e_1.sql"
+    ],
+    "sha256": "859da0310d1b0e1e3e151dfae283b2cb80b826ebd3a625658043845db0a72300"
+  },
+  {
+    "path": "/agent/v1/sessions-report",
+    "permission": "",
+    "file": "agent-api.ts",
+    "queries": [
+      "abf421e3_0.sql",
+      "abf421e3_1.sql"
+    ],
+    "sha256": "94def169975f2a8aea9d131f1cbef72c61be4b303371c722485f0d95cafd5ef4"
+  },
+  {
+    "path": "/agent/v1/observations",
+    "permission": "",
+    "file": "agent-api.ts",
+    "queries": [],
+    "sha256": "7b4bd0d21f23fb307d6fab6a6edc6005716609b506aa38fc079c4938b1c6abc9"
+  }
+]

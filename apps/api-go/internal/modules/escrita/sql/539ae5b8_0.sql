@@ -1,0 +1,1 @@
+select * from invoices where id = $1 and status = 'reconciling' for update

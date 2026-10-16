@@ -1,0 +1,1 @@
+delete from ftth_boxes where id = $1

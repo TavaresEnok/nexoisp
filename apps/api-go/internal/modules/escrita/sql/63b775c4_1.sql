@@ -1,0 +1,1 @@
+insert into stock_units (tenant_id, item_id, serial) values ($1,$2,$3) returning id

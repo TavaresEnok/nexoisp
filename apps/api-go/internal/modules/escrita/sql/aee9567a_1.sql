@@ -1,0 +1,1 @@
+select 'messages' = any(modules) as on from tenants where id = $1

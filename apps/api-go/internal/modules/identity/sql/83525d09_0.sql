@@ -1,0 +1,1 @@
+select login_throttle_clear($1)

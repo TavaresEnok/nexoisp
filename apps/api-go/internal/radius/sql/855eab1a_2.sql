@@ -1,0 +1,1 @@
+delete from {{table}} where tenant_id = $1 and username = $2

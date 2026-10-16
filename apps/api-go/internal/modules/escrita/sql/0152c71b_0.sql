@@ -1,0 +1,1 @@
+update contracts set credit_restricted_at = case when $2 then coalesce(credit_restricted_at, now()) end, updated_at = now() where id = $1 and status = 'active' returning credit_restricted_at

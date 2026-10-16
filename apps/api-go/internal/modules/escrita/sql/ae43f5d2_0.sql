@@ -1,0 +1,1 @@
+update install_kits set active = $2 where id = $1 returning id, name, active

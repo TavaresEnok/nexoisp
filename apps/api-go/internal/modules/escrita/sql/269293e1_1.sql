@@ -1,0 +1,1 @@
+insert into ticket_messages (tenant_id, ticket_id, author_id, author_kind, body) values ($1,$2,$3,'subscriber',$4)

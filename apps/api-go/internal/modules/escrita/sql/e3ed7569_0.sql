@@ -1,0 +1,1 @@
+update pops set name = coalesce($2, name), city = coalesce($3, city), state = coalesce($4, state), active = coalesce($5, active) where id = $1 returning id, name, active

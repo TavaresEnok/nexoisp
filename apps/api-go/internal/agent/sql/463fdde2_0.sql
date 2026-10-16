@@ -1,0 +1,1 @@
+update agents set sync_session_id = $2, last_sync_at = now(), last_seen_at = now() where id = $1

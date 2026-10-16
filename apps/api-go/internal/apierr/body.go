@@ -5,6 +5,7 @@ import (
 	"io"
 	"mime"
 	"net/http"
+	"nexoisp/api-go/internal/jsonx"
 )
 
 const BodyLimit = 20 * 1024 * 1024
@@ -24,6 +25,14 @@ func DecodeJSON(r *http.Request, dst any) error {
 	}
 	if len(b) == 0 {
 		return New(400, "Body cannot be empty when content-type is set to 'application/json'")
+	}
+	if target, ok := dst.(*any); ok {
+		var value any
+		if err = json.Unmarshal(b, &value); err != nil {
+			return New(400, "Body is not valid JSON but content-type is set to 'application/json'")
+		}
+		*target = jsonx.JSON(b)
+		return nil
 	}
 	if err = json.Unmarshal(b, dst); err != nil {
 		return New(400, "Body is not valid JSON but content-type is set to 'application/json'")

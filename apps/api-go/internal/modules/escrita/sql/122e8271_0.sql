@@ -1,0 +1,2 @@
+select id, number, kind, status, subscriber_id, contract_id, scheduled_for, description, resolution, created_at, finished_at, sla_due_at, en_route_at, started_at
+         from work_orders where id = $1

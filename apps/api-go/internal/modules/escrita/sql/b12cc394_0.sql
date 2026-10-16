@@ -1,0 +1,1 @@
+update service_resources set secret_enc = $2 where id = $1 returning desired_version, desired_policy

@@ -1,0 +1,1 @@
+select host(address) as ip from ip_allocations where contract_id = $1 and family(address) = 4 order by address limit 1

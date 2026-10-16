@@ -1,0 +1,48 @@
+# Ativar somente após os portões operacionais do plano. Mantém VPN e FreeRADIUS.
+# Sobrepor depois de docker-compose.yml e docker-compose.go.yml (Compose >= 2.24.4).
+services:
+  api:
+    profiles: [legacy]
+    ports: !override []
+    environment:
+      NEXO_NODE_JOB_BILLING: "0"
+      NEXO_NODE_JOB_RECONCILE: "0"
+      NEXO_NODE_JOB_NOTICES: "0"
+      NEXO_NODE_JOB_SCHEDULED: "0"
+      NEXO_NODE_JOB_SLA: "0"
+      NEXO_NODE_JOB_PURGE: "0"
+      NEXO_NODE_JOB_TRUST: "0"
+      NEXO_NODE_JOB_SUSPEND: "0"
+      NEXO_NODE_JOB_NOTIFICATIONS: "0"
+      NEXO_NODE_JOB_WEBHOOKS: "0"
+      NEXO_NODE_JOB_ALERTS: "0"
+      NEXO_NODE_JOB_CLEANUP: "0"
+      NEXO_NODE_JOB_RADIUS: "0"
+  api-go:
+    ports: ["${NEXO_AGENT_PORT:-8443}:8443"]
+    volumes: ["./certs:/certs:ro"]
+    environment:
+      NEXO_AGENT_TLS_DIR: /certs
+      NEXO_GO_AGENT_ADDR: 0.0.0.0:8443
+      NEXO_GO_JOBS: "1"
+      NEXO_GO_JOB_BILLING: "1"
+      NEXO_GO_JOB_RECONCILE: "1"
+      NEXO_GO_JOB_NOTICES: "1"
+      NEXO_GO_JOB_SCHEDULED: "1"
+      NEXO_GO_JOB_SLA: "1"
+      NEXO_GO_JOB_PURGE: "1"
+      NEXO_GO_JOB_TRUST: "1"
+      NEXO_GO_JOB_SUSPEND: "1"
+      NEXO_GO_JOB_NOTIFICATIONS: "1"
+      NEXO_GO_JOB_WEBHOOKS: "1"
+      NEXO_GO_JOB_ALERTS: "1"
+      NEXO_GO_JOB_CLEANUP: "1"
+      NEXO_GO_JOB_RADIUS: "1"
+      NEXO_GO_JOB_RADIUS_SYNC: "1"
+  vpn:
+    depends_on: !override {db: {condition: service_healthy}, api-go: {condition: service_started}}
+  radius:
+    depends_on: !override {db: {condition: service_healthy}, api-go: {condition: service_started}, vpn: {condition: service_started, restart: true}}
+  caddy:
+    depends_on: !override [api-go]
+    command: [caddy, run, --config, /etc/caddy/Caddyfile.go, --adapter, caddyfile]

@@ -1,0 +1,1 @@
+update leads set stage = $2, lost_reason = $3, updated_at = now() where id = $1 returning *

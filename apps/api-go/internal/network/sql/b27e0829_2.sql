@@ -1,0 +1,1 @@
+update operations set status = 'RESERVED', attempts = attempts + 1, current_attempt_id = $2, lease_until = now() + interval '45 seconds', updated_at = now() where id = $1

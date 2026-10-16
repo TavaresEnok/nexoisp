@@ -1,0 +1,1 @@
+select desired_version from service_resources where id = $1

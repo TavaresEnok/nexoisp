@@ -1,0 +1,1 @@
+select status from tickets where id = $1 for update

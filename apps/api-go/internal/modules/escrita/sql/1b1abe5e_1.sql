@@ -1,0 +1,1 @@
+select driver from devices where id = $1

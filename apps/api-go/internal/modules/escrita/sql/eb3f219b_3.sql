@@ -1,0 +1,2 @@
+select distinct p.id, p.name from plans p join plan_versions pv on pv.plan_id = p.id join contracts k on k.plan_version_id = pv.id
+         where p.access_technology is null and k.status = 'active' order by p.name limit 50

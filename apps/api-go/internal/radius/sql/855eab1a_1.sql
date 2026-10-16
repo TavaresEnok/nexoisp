@@ -1,0 +1,2 @@
+update radius_account set policy = $3, by_profile = $5, prev_profile = case when profile <> $4 then profile end, profile = $4, applied_version = $6, updated_at = now()
+       where tenant_id = $1 and username = $2

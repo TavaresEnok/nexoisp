@@ -1,0 +1,1 @@
+update webhook_endpoints set secret_enc = $2 where id = $1

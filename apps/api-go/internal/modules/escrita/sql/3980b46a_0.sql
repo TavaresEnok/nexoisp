@@ -1,0 +1,1 @@
+insert into plans (tenant_id, name) values ($1,$2) returning *

@@ -1,0 +1,1 @@
+update catalog_items set name = coalesce($2, name), active = coalesce($3, active) where id = $1 returning *

@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"nexoisp/api-go/internal/agent"
 	"nexoisp/api-go/internal/apierr"
 	"nexoisp/api-go/internal/audit"
 	"nexoisp/api-go/internal/auth"
@@ -18,9 +19,13 @@ import (
 	"nexoisp/api-go/internal/db"
 	"nexoisp/api-go/internal/endpoint"
 	"nexoisp/api-go/internal/httpx"
+	"nexoisp/api-go/internal/jobs"
 	"nexoisp/api-go/internal/jsonx"
 	"nexoisp/api-go/internal/modules/cadastro"
+	"nexoisp/api-go/internal/modules/escrita"
+	"nexoisp/api-go/internal/modules/identity"
 	"nexoisp/api-go/internal/modules/leitura"
+	_ "time/tzdata"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
@@ -94,6 +99,16 @@ func run() error {
 	api := humachi.New(router, hc)
 	cadastro.Register(api, cadastro.Service{DB: database}, auditor)
 	leitura.Register(api, registry, leitura.Service{DB: database, Audit: auditor, RequireMFA: cfg.RequireMFA})
+	escrita.Register(api, registry, escrita.Service{DB: database})
+	escrita.RegisterPublic(api, registry, escrita.Service{DB: database})
+	escrita.RegisterGateway(api, registry, escrita.Service{DB: database})
+	identity.Register(api, registry, identity.Service{DB: database, Audit: auditor})
+	registry.PublicGet(api, "/api/health", func(ctx context.Context, r *http.Request) (endpoint.Result, error) {
+		if err := database.Verify(ctx); err != nil {
+			return endpoint.Result{Status: 503, Value: map[string]any{"ok": false, "db": "indisponível"}}, nil
+		}
+		return endpoint.Result{Value: map[string]any{"ok": true, "db": "ok", "demo": os.Getenv("NEXO_DEMO_MODE") == "1"}}, nil
+	})
 	internal := http.NewServeMux()
 	internal.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}))
 	internal.HandleFunc("/openapi.json", func(w http.ResponseWriter, r *http.Request) {
@@ -109,9 +124,32 @@ func run() error {
 		_, _ = w.Write([]byte(`{"ok":true}`))
 	})
 	servers := []*http.Server{{Addr: cfg.Addr, Handler: router, ReadHeaderTimeout: 5 * time.Second, IdleTimeout: 60 * time.Second}, {Addr: cfg.InternalAddr, Handler: internal, ReadHeaderTimeout: 5 * time.Second, IdleTimeout: 60 * time.Second}}
-	fail := make(chan error, 2)
+	stopJobs, err := jobs.Start(ctx, database)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		stopCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		_ = stopJobs(stopCtx)
+	}()
+	agentServer, err := agent.Server(database)
+	if err != nil {
+		return err
+	}
+	if agentServer != nil {
+		servers = append(servers, agentServer)
+	}
+	fail := make(chan error, len(servers))
 	for _, s := range servers {
-		go func() { slog.Info("HTTP iniciado", "addr", s.Addr); fail <- s.ListenAndServe() }()
+		go func() {
+			slog.Info("HTTP iniciado", "addr", s.Addr)
+			if s.TLSConfig != nil {
+				fail <- s.ListenAndServeTLS("", "")
+			} else {
+				fail <- s.ListenAndServe()
+			}
+		}()
 	}
 	select {
 	case <-ctx.Done():

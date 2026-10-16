@@ -1,0 +1,2 @@
+insert into contract_discounts (tenant_id, contract_id, kind, value, reason, from_competence, months, created_by)
+         values ($1,$2,$3,$4,$5, date_trunc('month', coalesce($6::date, (current_date + interval '1 month')::date))::date, $7, $8) returning *

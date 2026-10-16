@@ -315,7 +315,7 @@ export async function runWorkerOnce(log: (m: string) => void = () => {}, opts: {
   const tenants = await withScope(noScope, async (c) => (await c.query('select * from worker_tenants()')).rows);
   for (const t of tenants) {
     try {
-      if (t.billing_auto) {
+      if (process.env.NEXO_NODE_JOB_BILLING !== '0' && t.billing_auto) {
         const n = await withScope(SYS(t.tenant_id), async (c) => {
           const created = await generateMonthly(c, t.tenant_id, await currentCompetence(c, t.timezone));
           await ensureCharges(c, t.tenant_id);
@@ -324,13 +324,13 @@ export async function runWorkerOnce(log: (m: string) => void = () => {}, opts: {
         });
         if (n) log(`faturamento: ${n} fatura(s) geradas para ${t.tenant_id}`);
       }
-      if (opts.reconcile && t.gateway !== 'none') await reconcile(t.tenant_id);
-      await runNotices(t.tenant_id).then((r) => { if (r.sent || r.failed) log(`avisos ao assinante: ${r.sent} enviado(s), ${r.failed} falha(s) para ${t.tenant_id}`); });
-      await applyScheduledChanges(t.tenant_id).then((r) => { if (r.applied || r.failed) log(`mudanças agendadas: ${r.applied} aplicada(s), ${r.failed} com falha para ${t.tenant_id}`); });
-      await purgeRadius(t.tenant_id).then((r) => { if (r.postauth || r.acct || r.sessions) log(`limpeza do RADIUS: ${r.postauth} tentativa(s), ${r.acct + r.sessions} sessão(ões) antigas para ${t.tenant_id}`); });
-      await runSla(t.tenant_id).then((r) => { if (r.tickets || r.work_orders) log(`SLA vencido: ${r.tickets} atendimento(s), ${r.work_orders} OS para ${t.tenant_id}`); });
-      await withScope(SYS(t.tenant_id), (c) => c.query(`update trust_releases set status = 'expired', closed_at = now() where status = 'active' and expires_at <= now()`));
-      if (t.auto_suspend) {
+      if (process.env.NEXO_NODE_JOB_RECONCILE !== '0' && opts.reconcile && t.gateway !== 'none') await reconcile(t.tenant_id);
+      if (process.env.NEXO_NODE_JOB_NOTICES !== '0') await runNotices(t.tenant_id).then((r) => { if (r.sent || r.failed) log(`avisos ao assinante: ${r.sent} enviado(s), ${r.failed} falha(s) para ${t.tenant_id}`); });
+      if (process.env.NEXO_NODE_JOB_SCHEDULED !== '0') await applyScheduledChanges(t.tenant_id).then((r) => { if (r.applied || r.failed) log(`mudanças agendadas: ${r.applied} aplicada(s), ${r.failed} com falha para ${t.tenant_id}`); });
+      if (process.env.NEXO_NODE_JOB_PURGE !== '0') await purgeRadius(t.tenant_id).then((r) => { if (r.postauth || r.acct || r.sessions) log(`limpeza do RADIUS: ${r.postauth} tentativa(s), ${r.acct + r.sessions} sessão(ões) antigas para ${t.tenant_id}`); });
+      if (process.env.NEXO_NODE_JOB_SLA !== '0') await runSla(t.tenant_id).then((r) => { if (r.tickets || r.work_orders) log(`SLA vencido: ${r.tickets} atendimento(s), ${r.work_orders} OS para ${t.tenant_id}`); });
+      if (process.env.NEXO_NODE_JOB_TRUST !== '0') await withScope(SYS(t.tenant_id), (c) => c.query(`update trust_releases set status = 'expired', closed_at = now() where status = 'active' and expires_at <= now()`));
+      if (process.env.NEXO_NODE_JOB_SUSPEND !== '0' && t.auto_suspend) {
         const n = await autoSuspend(t.tenant_id);
         if (n) log(`suspensão automática: ${n} solicitação(ões) para ${t.tenant_id}`);
       }

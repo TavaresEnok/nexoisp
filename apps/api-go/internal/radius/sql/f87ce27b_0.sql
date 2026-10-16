@@ -1,0 +1,1 @@
+insert into audit_events (tenant_id, actor_type, actor_id, action, entity_type, entity_id, result, detail) values ($1,'system','radius-integrado','operation.result','operation_attempt',$2,$3,$4)

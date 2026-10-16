@@ -1,0 +1,1 @@
+select competence, due_date, amount_cents, status, kind, paid_at, created_at from invoices where subscriber_id = $1 order by due_date

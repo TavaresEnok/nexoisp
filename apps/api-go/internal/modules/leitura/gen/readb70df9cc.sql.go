@@ -8,9 +8,8 @@ package gen
 import (
 	"context"
 
-	"nexoisp/api-go/internal/jsonx"
-
 	"github.com/jackc/pgx/v5/pgtype"
+	"nexoisp/api-go/internal/jsonx"
 )
 
 const Readb70df9cc = `-- name: Readb70df9cc :many

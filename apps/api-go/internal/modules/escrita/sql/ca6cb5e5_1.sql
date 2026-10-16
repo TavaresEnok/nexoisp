@@ -1,0 +1,2 @@
+update acceptances set status = 'accepted', accepted_at = $2, accepted_by = $3, accepted_ip = $4, accepted_user_agent = $5, evidence_hash = $6
+         where id = $1 and status = 'pending' returning id

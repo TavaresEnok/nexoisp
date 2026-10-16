@@ -1,0 +1,1 @@
+select 1 from devices where id = $1

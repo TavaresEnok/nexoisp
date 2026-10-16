@@ -1,0 +1,2 @@
+insert into onu_discoveries (tenant_id, device_id, serial, pon_port, vendor, model) values ($1,$2,$3,$4,$5,$6)
+           on conflict (device_id, serial) do update set pon_port = excluded.pon_port, vendor = excluded.vendor, model = excluded.model, last_seen_at = now()

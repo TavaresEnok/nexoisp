@@ -1,0 +1,1 @@
+select title, body, status, requested_at, accepted_at, accepted_ip from acceptances where subscriber_id = $1 order by requested_at

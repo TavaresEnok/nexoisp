@@ -1,0 +1,1 @@
+select onu_rx_min_dbm, pon_outage_min, onu_remove_on_contract_end from tenant_settings where tenant_id = $1

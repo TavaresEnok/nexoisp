@@ -1,0 +1,2 @@
+insert into tenant_settings (tenant_id, notify_webhook_url, updated_by) values ($1,$2,$3)
+                     on conflict (tenant_id) do update set notify_webhook_url = excluded.notify_webhook_url, updated_by = excluded.updated_by, updated_at = now()

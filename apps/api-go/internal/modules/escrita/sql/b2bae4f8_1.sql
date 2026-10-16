@@ -1,0 +1,1 @@
+select name, active from install_kits where id = $1

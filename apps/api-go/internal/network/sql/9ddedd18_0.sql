@@ -1,0 +1,2 @@
+select n.*, k.status as contract_status, d.agent_id, d.name as device_name from onus n join contracts k on k.id = n.contract_id
+     join devices d on d.id = n.device_id where n.id = $1 for update of n

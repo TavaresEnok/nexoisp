@@ -1,0 +1,1 @@
+update contracts set install_street=$2, install_number=$3, install_district=$4, install_city=$5, install_state=$6, install_zip=$7 where id = $1 returning id

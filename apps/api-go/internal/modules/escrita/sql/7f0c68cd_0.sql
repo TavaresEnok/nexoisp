@@ -1,0 +1,1 @@
+select desired_version, desired_policy, mac from service_resources where id = $1 for update

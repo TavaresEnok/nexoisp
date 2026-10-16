@@ -1,0 +1,1 @@
+update onus set desired_version = $2, desired_state = $3, desired_reason = $4, desired_at = now() where id = $1

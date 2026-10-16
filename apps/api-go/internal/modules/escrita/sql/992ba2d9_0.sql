@@ -1,0 +1,1 @@
+select id from plans where id = $1 for update

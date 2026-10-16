@@ -1,0 +1,1 @@
+select ((now() at time zone coalesce((select timezone from tenant_settings where tenant_id = app_tenant()), 'America/Sao_Paulo'))::date + $1::int)::text as d

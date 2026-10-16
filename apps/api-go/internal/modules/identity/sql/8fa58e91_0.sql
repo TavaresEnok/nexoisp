@@ -1,0 +1,1 @@
+update tenants set name = coalesce($2,name), status = coalesce($3,status), modules = coalesce($4::text[], modules) where id = $1 returning *

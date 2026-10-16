@@ -1,0 +1,1 @@
+insert into gateway_events (tenant_id, gateway, event_id, type, charge_id, payload) values ($1,$2,$3,$4,$5,$6) on conflict (gateway, event_id) do nothing returning id

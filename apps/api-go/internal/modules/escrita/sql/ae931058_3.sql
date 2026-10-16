@@ -1,0 +1,2 @@
+insert into documents (tenant_id, subscriber_id, contract_id, kind, name, mime, size_bytes, sha256, content, created_by)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) returning id, kind, name, mime, size_bytes, created_at

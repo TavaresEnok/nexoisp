@@ -1,0 +1,2 @@
+insert into contract_addons (tenant_id, contract_id, product_id, description, quantity, unit_price_cents, from_competence, created_by)
+         values ($1,$2,$3,$4,$5,$6, coalesce($7::date, (date_trunc('month', now()) + interval '1 month')::date), $8) returning id

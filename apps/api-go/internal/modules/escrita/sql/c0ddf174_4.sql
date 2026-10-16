@@ -1,0 +1,1 @@
+update contracts set loyalty_until = $2, penalty_model = $3, penalty_cents = $4 where id = $1 and loyalty_until is null

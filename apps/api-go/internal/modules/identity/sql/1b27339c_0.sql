@@ -1,0 +1,1 @@
+select * from user_self_get($1)

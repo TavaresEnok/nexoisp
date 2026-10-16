@@ -1,0 +1,1 @@
+update contract_discounts set canceled_at = now() where id = $1 and canceled_at is null returning contract_id

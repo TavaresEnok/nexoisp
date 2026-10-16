@@ -1,0 +1,1 @@
+delete from cpe_links where contract_id = $1 returning acs_device_id

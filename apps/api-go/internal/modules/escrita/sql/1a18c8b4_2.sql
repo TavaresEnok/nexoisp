@@ -1,0 +1,1 @@
+insert into stock_movements (tenant_id, item_id, qty, kind, work_order_id, note, created_by) values ($1,$2,$3,$4,$5,$6,$7) returning id

@@ -78,17 +78,29 @@ func (s Service) radiusSetup(ctx context.Context, tx *db.Tx, _ *http.Request, v 
 		return endpoint.Result{}, apierr.New(404, "concentrador do RADIUS integrado não encontrado")
 	}
 	nas := rows[0]
-	var tunnel map[string]any
-	rows, err = complexRows(ctx, tx, "helper:tunnelOf", 0, v["id"])
+	tunnel, err := RadiusTunnel(ctx, tx, v["id"])
 	if err != nil {
 		return endpoint.Result{}, err
+	}
+	setup, err := RadiusSetupData(fmt.Sprint(nas.Get("vendor")), nas.Get("coa_port"), "<SEGREDO>", tunnel)
+	if err != nil {
+		return endpoint.Result{}, err
+	}
+	nas.Set("setup", setup)
+	return endpoint.Result{Value: nas}, nil
+}
+func RadiusTunnel(ctx context.Context, tx *db.Tx, id any) (map[string]any, error) {
+	var tunnel map[string]any
+	rows, err := complexRows(ctx, tx, "helper:tunnelOf", 0, id)
+	if err != nil {
+		return nil, err
 	}
 	if len(rows) > 0 {
 		tunnel = map[string]any{"kind": "l2tp", "privateKey": "", "serverPublicKey": "", "endpointHost": vpnHost(), "endpointPort": 1701, "tunnelIp": rows[0].Get("ip"), "serverIp": "10.251.0.1", "l2tp": map[string]any{"username": rows[0].Get("username"), "password": "<SENHA DO TÚNEL>", "psk": "<CHAVE IPSEC DA INSTALAÇÃO>"}}
 	} else {
-		rows, err = complexRows(ctx, tx, "helper:tunnelOf", 1, v["id"])
+		rows, err = complexRows(ctx, tx, "helper:tunnelOf", 1, id)
 		if err != nil {
-			return endpoint.Result{}, err
+			return nil, err
 		}
 		if len(rows) > 0 {
 			key := rows[0].Get("srv")
@@ -98,6 +110,9 @@ func (s Service) radiusSetup(ctx context.Context, tx *db.Tx, _ *http.Request, v 
 			tunnel = map[string]any{"privateKey": "<CHAVE PRIVADA DO TÚNEL>", "serverPublicKey": key, "endpointHost": vpnHost(), "endpointPort": jsCommandNumber(envNullishNumber("NEXO_VPN_PORT", 51820)), "tunnelIp": rows[0].Get("ip"), "serverIp": "10.250.0.1"}
 		}
 	}
+	return tunnel, nil
+}
+func RadiusSetupData(vendor string, coaPort any, secret string, tunnel map[string]any) (map[string]any, error) {
 	host := radiusHost()
 	port := envNullishNumber("NEXO_RADIUS_PORT", 1812)
 	connection := "direct"
@@ -126,17 +141,15 @@ func (s Service) radiusSetup(ctx context.Context, tx *db.Tx, _ *http.Request, v 
 		secondary = map[string]any{"host": secondaryHost, "authPort": wireNumber(secondaryPort), "acctPort": wireNumber(secondaryPort + 1)}
 		commandSecondary = map[string]any{"host": secondaryHost, "authPort": jsCommandNumber(secondaryPort), "acctPort": jsCommandNumber(secondaryPort + 1)}
 	}
-	vendor := fmt.Sprint(nas.Get("vendor"))
-	commands, err := renderRadiusCommands(vendor, map[string]any{"host": host, "authPort": jsCommandNumber(port), "acctPort": jsCommandNumber(port + 1), "coaPort": nas.Get("coa_port"), "secret": "<SEGREDO>", "tunnel": tunnel, "secondary": commandSecondary})
+	commands, err := renderRadiusCommands(vendor, map[string]any{"host": host, "authPort": jsCommandNumber(port), "acctPort": jsCommandNumber(port + 1), "coaPort": coaPort, "secret": secret, "tunnel": tunnel, "secondary": commandSecondary})
 	if err != nil {
-		return endpoint.Result{}, err
+		return nil, err
 	}
 	configured := os.Getenv("NEXO_RADIUS_PUBLIC_HOST") != ""
 	if tunnel != nil {
 		configured = configured || os.Getenv("NEXO_VPN_PUBLIC_HOST") != ""
 	}
-	nas.Set("setup", map[string]any{"server_host": host, "auth_port": wireNumber(port), "acct_port": wireNumber(port + 1), "coa_port": nas.Get("coa_port"), "vendor": vendor, "validated": vendor == "mikrotik", "connection": connection, "tunnel": publicTunnel, "host_configured": configured, "endpoint_host": vpnHost(), "secondary": secondary, "commands": commands})
-	return endpoint.Result{Value: nas}, nil
+	return map[string]any{"server_host": host, "auth_port": wireNumber(port), "acct_port": wireNumber(port + 1), "coa_port": coaPort, "vendor": vendor, "validated": vendor == "mikrotik", "connection": connection, "tunnel": publicTunnel, "host_configured": configured, "endpoint_host": vpnHost(), "secondary": secondary, "commands": commands}, nil
 }
 
 func jsCommandNumber(n float64) any {
@@ -150,4 +163,8 @@ func jsCommandNumber(n float64) any {
 		return "-Infinity"
 	}
 	return jsText(n)
+}
+
+func RadiusEndpoint() (string, any) {
+	return vpnHost(), jsCommandNumber(envNullishNumber("NEXO_VPN_PORT", 51820))
 }

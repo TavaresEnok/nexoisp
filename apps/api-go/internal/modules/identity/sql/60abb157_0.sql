@@ -1,0 +1,1 @@
+select id from tenants where id = $1

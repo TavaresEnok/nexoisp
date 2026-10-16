@@ -1,0 +1,1 @@
+select host(vpn_free_ip()) as ip

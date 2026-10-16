@@ -1,0 +1,1 @@
+select * from ftth_boxes where id = $1 for update

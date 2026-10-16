@@ -1,0 +1,1 @@
+select id from invoices where gateway = $1 and gateway_charge_id = $2

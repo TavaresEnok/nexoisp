@@ -1,0 +1,1 @@
+update pops set latitude = $2, longitude = $3 where id = $1 returning id

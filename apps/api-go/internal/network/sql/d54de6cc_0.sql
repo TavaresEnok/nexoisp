@@ -1,0 +1,1 @@
+select contract_id, desired_stage from service_resources where id = $1

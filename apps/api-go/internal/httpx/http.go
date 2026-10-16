@@ -17,6 +17,14 @@ import (
 )
 
 type requestKey struct{}
+type responseKey struct{}
+
+func Header(ctx context.Context, name, value string) {
+	if w, ok := ctx.Value(responseKey{}).(http.ResponseWriter); ok {
+		w.Header().Set(name, value)
+	}
+}
+
 type routeKey struct{}
 type routeLabel struct{ value string }
 
@@ -94,6 +102,7 @@ func Middleware(reg prometheus.Registerer) func(http.Handler) http.Handler {
 			defer span.End()
 			ctx = context.WithValue(ctx, requestKey{}, r)
 			ctx = context.WithValue(ctx, routeKey{}, label)
+			ctx = context.WithValue(ctx, responseKey{}, sw)
 			next.ServeHTTP(sw, r.WithContext(ctx))
 		})
 	}

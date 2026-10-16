@@ -1,0 +1,1 @@
+insert into contract_tags (tenant_id, contract_id, tag_id) values ($1,$2,$3) on conflict do nothing

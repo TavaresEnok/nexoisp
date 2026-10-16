@@ -1,0 +1,2 @@
+insert into tickets (tenant_id, number, subscriber_id, contract_id, subject, category, priority, origin, created_by, type_id, classification_id, origin_id)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) returning *

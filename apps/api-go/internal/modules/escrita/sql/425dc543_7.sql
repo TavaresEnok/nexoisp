@@ -1,0 +1,1 @@
+select kind, name, mime, size_bytes, created_at, deleted_at from documents where subscriber_id = $1 order by created_at

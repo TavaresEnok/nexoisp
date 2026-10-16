@@ -1,0 +1,1 @@
+select 1 from ip_allocations where contract_id = $1 and family(address) = 4

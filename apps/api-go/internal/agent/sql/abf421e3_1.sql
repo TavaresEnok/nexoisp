@@ -1,0 +1,4 @@
+insert into service_sessions (tenant_id, resource_id, session_key, started_at, stopped_at, ip, mac, nas_ip, bytes_in, bytes_out, seconds, terminate_cause)
+           select $1, r.id, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12 from service_resources r where r.id = $2 and r.device_id = $13
+           on conflict (resource_id, session_key) do update set stopped_at = excluded.stopped_at, ip = excluded.ip, mac = excluded.mac, nas_ip = excluded.nas_ip,
+             bytes_in = excluded.bytes_in, bytes_out = excluded.bytes_out, seconds = excluded.seconds, terminate_cause = excluded.terminate_cause, reported_at = now()

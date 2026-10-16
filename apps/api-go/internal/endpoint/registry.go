@@ -73,8 +73,11 @@ type Result struct {
 	Status                                   int
 	ContentType, CacheControl, CSP, Referrer string
 	Raw                                      []byte
+	Cookie                                   string
+	Disposition                              string
 }
 type output struct {
+	Cookie       string `header:"Set-Cookie"`
 	ContentType  string `header:"Content-Type"`
 	Total        string `header:"X-Total-Count"`
 	Disposition  string `header:"Content-Disposition"`
@@ -87,23 +90,32 @@ type output struct {
 type Handler func(context.Context, *http.Request) (Result, error)
 
 func (r *Registry) Get(api huma.API, path, permission string, pending bool, handler Handler) {
-	r.register(api, path, permission, pending, false, handler)
+	r.register(api, http.MethodGet, path, permission, pending, false, handler)
 }
 func (r *Registry) PublicGet(api huma.API, path string, handler Handler) {
-	r.register(api, path, "", false, true, handler)
+	r.register(api, http.MethodGet, path, "", false, true, handler)
 }
-func (r *Registry) register(api huma.API, path, permission string, pending, public bool, handler Handler) {
-	r.Protect(http.MethodGet, path, permission, pending)
-	key := http.MethodGet + " " + path
+func (r *Registry) Handle(api huma.API, method, path, permission string, handler Handler) {
+	r.register(api, method, path, permission, false, false, handler)
+}
+func (r *Registry) PublicHandle(api huma.API, method, path string, handler Handler) {
+	r.register(api, method, path, "", false, true, handler)
+}
+func (r *Registry) Pending(api huma.API, method, path string, handler Handler) {
+	r.register(api, method, path, "", true, false, handler)
+}
+func (r *Registry) register(api huma.API, method, path, permission string, pending, public bool, handler Handler) {
+	r.Protect(method, path, permission, pending)
+	key := method + " " + path
 	p := r.policies[key]
 	p.public = public
 	r.policies[key] = p
-	huma.Register(api, huma.Operation{OperationID: "get-" + strings.NewReplacer("/", "-", "{", "", "}", "").Replace(path), Method: http.MethodGet, Path: path, SkipValidateParams: true, SkipValidateBody: true}, func(ctx context.Context, _ *struct{}) (*output, error) {
+	huma.Register(api, huma.Operation{OperationID: strings.ToLower(method) + "-" + strings.NewReplacer("/", "-", "{", "", "}", "").Replace(path), Method: method, Path: path, SkipValidateParams: true, SkipValidateBody: true}, func(ctx context.Context, _ *struct{}) (*output, error) {
 		result, err := handler(ctx, httpx.Request(ctx))
 		if err != nil {
 			return nil, err
 		}
-		out := &output{ContentType: "application/json; charset=utf-8", Total: result.Total, Status: result.Status, CacheControl: result.CacheControl, CSP: result.CSP, Referrer: result.Referrer}
+		out := &output{ContentType: "application/json; charset=utf-8", Total: result.Total, Status: result.Status, CacheControl: result.CacheControl, CSP: result.CSP, Referrer: result.Referrer, Cookie: result.Cookie, Disposition: result.Disposition}
 		if out.Status == 0 {
 			out.Status = http.StatusOK
 		}

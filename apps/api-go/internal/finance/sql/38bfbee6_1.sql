@@ -1,0 +1,2 @@
+insert into trust_releases (tenant_id, contract_id, source, requested_by, reason, days, expires_at)
+     values ($1,$2,$3,$4,$5,$6::int, now() + make_interval(days => $6::int)) returning id, expires_at

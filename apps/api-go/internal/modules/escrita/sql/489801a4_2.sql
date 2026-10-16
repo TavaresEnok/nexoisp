@@ -1,0 +1,1 @@
+insert into invoice_items (tenant_id, invoice_id, description, amount_cents) values ($1,$2,$3,$4)

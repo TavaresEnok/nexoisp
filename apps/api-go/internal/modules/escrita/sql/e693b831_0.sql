@@ -1,0 +1,1 @@
+select 1 from users where id = $1 and active and role <> 'subscriber'

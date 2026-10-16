@@ -1,0 +1,1 @@
+update stock_units set status = $2, holder_id = null, contract_id = null, work_order_id = null, contract_mode = null, updated_at = now() where id = $1

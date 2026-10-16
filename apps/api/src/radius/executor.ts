@@ -294,6 +294,7 @@ export async function runHostedOnce(opts: { tenantId?: string; drop?: typeof sen
 
 /** Laço em segundo plano: operações a cada 2 s; sessões, consumo e estado online a cada 15 s. */
 export function startHostedRadius(log: (m: string) => void) {
+  if (process.env.NEXO_NODE_JOB_RADIUS === '0') return () => {};
   if (!radiusConfigured()) { log('RADIUS integrado desligado: defina NEXO_RADIUS_KEY para habilitar'); return () => {}; }
   let busy = false, tick = 0;
   const t = setInterval(async () => {

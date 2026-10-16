@@ -41,6 +41,12 @@ func (t Time) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(t.UTC().Format("2006-01-02T15:04:05.000Z"))
 }
+func (t Time) TimestamptzValue() (pgtype.Timestamptz, error) {
+	return pgtype.Timestamptz{Time: t.Time, Valid: !t.IsZero()}, nil
+}
+func (t Time) TimestampValue() (pgtype.Timestamp, error) {
+	return pgtype.Timestamp{Time: t.Time, Valid: !t.IsZero()}, nil
+}
 func (t *Time) ScanTimestamptz(v pgtype.Timestamptz) error { t.Time = v.Time; return nil }
 func (t *Time) ScanTimestamp(v pgtype.Timestamp) error     { t.Time = v.Time; return nil }
 
@@ -228,6 +234,9 @@ func Normalize(v any, oid uint32) any {
 	case nil:
 		return nil
 	case []byte:
+		if oid == 17 {
+			return append([]byte{}, x...)
+		}
 		if x == nil {
 			return nil
 		}
@@ -301,4 +310,40 @@ func Normalize(v any, oid uint32) any {
 		return x
 	}
 	return v
+}
+
+// String preserves JavaScript primitive formatting in protocol headers and interpolated text.
+func String(value any) string {
+	switch v := value.(type) {
+	case nil:
+		return "null"
+	case string:
+		return v
+	case float64, float32, int, int32, int64, uint64:
+		raw, err := Encode(v)
+		if err == nil {
+			return string(raw)
+		}
+	}
+	return fmt.Sprint(value)
+}
+
+func Truthy(value any) bool {
+	switch v := value.(type) {
+	case nil:
+		return false
+	case bool:
+		return v
+	case string:
+		return v != ""
+	case float64:
+		return v != 0 && !math.IsNaN(v)
+	case int:
+		return v != 0
+	case int32:
+		return v != 0
+	case int64:
+		return v != 0
+	}
+	return true
 }

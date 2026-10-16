@@ -1,0 +1,1 @@
+delete from onu_discoveries where device_id = $1 and not (serial = any($2))

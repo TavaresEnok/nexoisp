@@ -1,0 +1,1 @@
+update trust_releases set status = 'settled', closed_at = now() where contract_id = $1 and status = 'active'

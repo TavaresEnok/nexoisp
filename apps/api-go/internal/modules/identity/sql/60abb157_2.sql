@@ -1,0 +1,1 @@
+insert into audit_events (tenant_id, actor_type, actor_id, action, entity_type, entity_id, detail) values ($1::uuid,'user',$2,'support.enter','tenant',$1::text,$3)

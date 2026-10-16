@@ -53,13 +53,15 @@ export function startWorker(log: (m: string) => void, everyMs = 60_000) {
     try {
       await withWorkerLock(async () => {
         await runWorkerOnce(log, { reconcile: n++ % 10 === 0 });
-        const h = await withScope({ tenantId: null, operator: true }, async (c) =>
-          (await c.query('select tenant_id, agents_offline, uncertain from platform_health() where agents_offline > 0 or uncertain > 0 order by tenant_id')).rows);
-        for (const t of h) log(`ALERTA tenant=${t.tenant_id} agentes_offline=${t.agents_offline} operacoes_incertas=${t.uncertain}`);
-        await notify(h, log);
-        await deliverNotifications(log);
-        await deliverWebhooks(log);
-        await withScope(noScope, (c) => c.query('select login_throttle_purge()'));
+        if (process.env.NEXO_NODE_JOB_ALERTS !== '0') {
+          const h = await withScope({ tenantId: null, operator: true }, async (c) =>
+            (await c.query('select tenant_id, agents_offline, uncertain from platform_health() where agents_offline > 0 or uncertain > 0 order by tenant_id')).rows);
+          for (const t of h) log(`ALERTA tenant=${t.tenant_id} agentes_offline=${t.agents_offline} operacoes_incertas=${t.uncertain}`);
+          await notify(h, log);
+        }
+        if (process.env.NEXO_NODE_JOB_NOTIFICATIONS !== '0') await deliverNotifications(log);
+        if (process.env.NEXO_NODE_JOB_WEBHOOKS !== '0') await deliverWebhooks(log);
+        if (process.env.NEXO_NODE_JOB_CLEANUP !== '0') await withScope(noScope, (c) => c.query('select login_throttle_purge()'));
       });
     } catch (e) {
       log(`rotina periódica falhou: ${(e as Error).message}`);

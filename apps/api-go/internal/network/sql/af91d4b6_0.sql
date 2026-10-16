@@ -1,0 +1,1 @@
+update operation_attempts set status = $2, finished_at = now(), steps = coalesce($3::jsonb, steps) where id = $1

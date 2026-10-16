@@ -1,0 +1,1 @@
+select id from pops where lower(name) = lower($1) and active

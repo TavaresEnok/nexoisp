@@ -1,0 +1,1 @@
+select coalesce(sum(signed_cents),0)::int as t from payments where invoice_id = $1

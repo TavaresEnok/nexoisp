@@ -1,0 +1,1 @@
+delete from usage_hourly where ctid in (select ctid from usage_hourly where tenant_id = $1 and hour < now() - make_interval(hours => $2::int) limit $3)

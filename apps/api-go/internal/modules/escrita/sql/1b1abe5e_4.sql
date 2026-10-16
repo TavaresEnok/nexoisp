@@ -1,0 +1,1 @@
+insert into onus (tenant_id, contract_id, device_id, serial, pon_port, line_profile, service_vlan, service_profile) values ($1,$2,$3,$4,$5,$6,$7,$8) returning id

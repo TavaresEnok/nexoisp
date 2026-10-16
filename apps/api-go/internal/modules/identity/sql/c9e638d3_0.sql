@@ -1,0 +1,2 @@
+update users set name = coalesce($3,name), role = coalesce($4,role), active = coalesce($5,active), password_hash = coalesce($6,password_hash)
+         where id = $1 and tenant_id = $2 and role <> 'subscriber' returning id, name, email, role, active

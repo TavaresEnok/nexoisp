@@ -1,0 +1,45 @@
+[
+  {
+    "path": "helper:runNotices",
+    "permission": "",
+    "file": "notices.ts",
+    "queries": [
+      "69b06ce3_0.sql",
+      "69b06ce3_1.sql",
+      "69b06ce3_2.sql",
+      "69b06ce3_3.sql",
+      "69b06ce3_4.sql",
+      "69b06ce3_5.sql",
+      "69b06ce3_6.sql",
+      "69b06ce3_7.sql"
+    ],
+    "sha256": "bd54b3b760d85a10d95c3583625e7ae75aa06f610d89e0338b884f52a9f5e419"
+  },
+  {
+    "path": "helper:applyScheduledChanges",
+    "permission": "",
+    "file": "scheduled.ts",
+    "queries": [
+      "eeea6e33_0.sql",
+      "eeea6e33_1.sql",
+      "eeea6e33_2.sql"
+    ],
+    "sha256": "7d71990e0c37e94b1048efad6c39121b7be708993adc7a631637383274b2528c"
+  },
+  {
+    "path": "helper:runSla",
+    "permission": "",
+    "file": "sla.ts",
+    "queries": [
+      "c544ab77_0.sql",
+      "c544ab77_1.sql",
+      "c544ab77_2.sql",
+      "c544ab77_3.sql",
+      "c544ab77_4.sql",
+      "c544ab77_5.sql",
+      "c544ab77_6.sql",
+      "c544ab77_7.sql"
+    ],
+    "sha256": "8969a3fa0a9977c4702caa9deaa1dadc2c665719a42127fdc63aa2497cc06eef"
+  }
+]

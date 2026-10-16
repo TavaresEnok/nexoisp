@@ -1,0 +1,1 @@
+select 1 from cgnat_plans where private_pool_id = $1 and retired_at is null

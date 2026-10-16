@@ -1,0 +1,1 @@
+delete from ftth_drops where id = $1 returning box_id, port, contract_id

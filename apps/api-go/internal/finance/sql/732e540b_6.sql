@@ -1,0 +1,1 @@
+select id, desired_policy from service_resources where contract_id = $1 and desired_version > 0 for update

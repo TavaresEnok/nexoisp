@@ -1,0 +1,1 @@
+select stage from leads where id = $1 for update

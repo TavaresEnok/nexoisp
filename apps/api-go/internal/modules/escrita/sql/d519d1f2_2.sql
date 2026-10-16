@@ -1,0 +1,1 @@
+update ftth_boxes set name=$2, kind=$3, ports=$4, parent_id=$5, device_id=$6, pon_port=$7, address=$8, latitude=$9, longitude=$10, notes=$11 where id=$1 returning *

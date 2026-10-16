@@ -1,0 +1,1 @@
+select id from contracts where subscriber_id = $1 order by created_at limit 1

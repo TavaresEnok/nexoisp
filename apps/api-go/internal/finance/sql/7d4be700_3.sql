@@ -1,0 +1,1 @@
+select r.id, r.desired_policy, r.desired_reason, k.status from service_resources r join contracts k on k.id = r.contract_id where r.contract_id = $1 for update of r

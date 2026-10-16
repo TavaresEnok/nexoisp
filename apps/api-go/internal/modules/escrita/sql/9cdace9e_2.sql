@@ -1,0 +1,1 @@
+insert into radius_nas (device_id, tenant_id, nas_ip, secret, coa_host, coa_port) values ($1,$2,$3,$4,$5,$6)

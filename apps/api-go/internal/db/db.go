@@ -143,6 +143,10 @@ func (t *Tx) Exec(ctx context.Context, sql string, args ...any) error {
 	_, e := t.raw.Exec(ctx, sql, args...)
 	return e
 }
+func (t *Tx) Affected(ctx context.Context, sql string, args ...any) (int64, error) {
+	tag, err := t.raw.Exec(ctx, sql, args...)
+	return tag.RowsAffected(), err
+}
 func (t *Tx) QueryRow(ctx context.Context, sql string, args ...any) pgx.Row {
 	return t.raw.QueryRow(ctx, sql, args...)
 }

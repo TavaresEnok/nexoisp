@@ -1,0 +1,1 @@
+select item_id, qty from install_kit_items where kit_id = $1

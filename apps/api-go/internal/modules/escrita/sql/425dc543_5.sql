@@ -1,0 +1,1 @@
+select number, kind, status, description, resolution, address_text, created_at, finished_at from work_orders where subscriber_id = $1 order by created_at

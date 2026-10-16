@@ -1,0 +1,1 @@
+update notice_channels set active = $2 where id = $1 returning id, active

@@ -1,0 +1,1 @@
+insert into notice_log (tenant_id, contact_value, status) values ($1,$2,'test')

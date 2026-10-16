@@ -1,0 +1,1 @@
+update companies set is_default = false where is_default

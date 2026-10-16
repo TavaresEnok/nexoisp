@@ -1,0 +1,1 @@
+update radius_acct set stopped_at = now(), updated_at = now(), terminate_cause = 'Lost-Service' where id = $1 and stopped_at is null

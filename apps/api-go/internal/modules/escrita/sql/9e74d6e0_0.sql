@@ -1,0 +1,2 @@
+insert into notice_channels (tenant_id, name, url, phone_field, message_field, extra_body, headers_enc) values ($1,$2,$3,$4,$5,$6,$7)
+         on conflict (tenant_id, name) do nothing returning id, name

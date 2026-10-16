@@ -1,0 +1,2 @@
+update onus set device_id = $2, serial = $3, pon_port = $4, line_profile = $5, service_vlan = $6, service_profile = $7, observed_state = null, observed_online = null,
+                          observed_rx_dbm = null, observed_tx_dbm = null, observed_detail = null, observed_at = null where id = $1 returning id

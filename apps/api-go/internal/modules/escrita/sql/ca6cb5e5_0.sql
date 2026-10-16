@@ -1,0 +1,1 @@
+select id, contract_id, subscriber_id, body_hash, status from acceptances where id = $1 and subscriber_id = $2

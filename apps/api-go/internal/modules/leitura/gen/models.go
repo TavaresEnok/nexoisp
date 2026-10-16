@@ -7,9 +7,8 @@ package gen
 import (
 	"net/netip"
 
-	"nexoisp/api-go/internal/jsonx"
-
 	"github.com/jackc/pgx/v5/pgtype"
+	"nexoisp/api-go/internal/jsonx"
 )
 
 type Acceptance struct {

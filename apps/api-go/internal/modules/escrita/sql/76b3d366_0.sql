@@ -1,0 +1,1 @@
+update scheduled_changes set status = 'canceled' where id = $1 and status = 'pending' returning contract_id

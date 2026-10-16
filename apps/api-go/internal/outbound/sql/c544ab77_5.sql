@@ -1,0 +1,1 @@
+select p.name, p.escalate_to, u.name as to_name from sla_policies p left join users u on u.id = p.escalate_to where p.id = $1

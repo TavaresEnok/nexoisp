@@ -1,0 +1,1 @@
+insert into subscriber_contacts (tenant_id, subscriber_id, kind, value, label, purpose, allow_notices) values ($1,$2,$3,$4,$5,$6,$7)

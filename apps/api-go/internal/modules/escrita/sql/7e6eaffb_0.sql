@@ -1,0 +1,1 @@
+update invoices set status = 'canceled', canceled_at = now(), status_note = $2 where id = $1 and status = 'open' returning id

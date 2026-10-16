@@ -1,0 +1,1 @@
+select count(*)::int as n from service_resources where device_id = $1 and desired_version > 0 and secret_enc is null

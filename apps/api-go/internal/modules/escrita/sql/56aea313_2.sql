@@ -1,0 +1,1 @@
+select 1 from invoices where contract_id = $1 and competence = $2 and kind = 'monthly'

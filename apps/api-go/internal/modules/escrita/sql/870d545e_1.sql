@@ -1,0 +1,2 @@
+update custom_fields set label = coalesce($2, label), options = coalesce($3, options), required = coalesce($4, required),
+                active = coalesce($5, active), position = coalesce($6, position) where id = $1 returning *

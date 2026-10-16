@@ -1,0 +1,1 @@
+delete from contract_tags where contract_id = $1

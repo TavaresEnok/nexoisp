@@ -1,0 +1,1 @@
+select id, subscriber_id from contracts where id = $1

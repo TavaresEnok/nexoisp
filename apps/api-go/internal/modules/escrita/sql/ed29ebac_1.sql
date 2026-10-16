@@ -1,0 +1,1 @@
+insert into work_order_events (tenant_id, work_order_id, actor_id, event, detail) values ($1,$2,$3,'helper_removed',$4)

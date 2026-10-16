@@ -1,0 +1,1 @@
+select * from api_token_get($1)

@@ -1,0 +1,1 @@
+update contracts set pop_id = $2 where id = $1 and pop_id is null

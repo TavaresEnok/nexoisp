@@ -1,0 +1,1 @@
+update addon_products set price_cents = coalesce($2, price_cents), active = coalesce($3, active) where id = $1 returning *

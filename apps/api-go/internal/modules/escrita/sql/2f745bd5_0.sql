@@ -1,0 +1,1 @@
+update acceptances set status = 'canceled', canceled_at = now() where id = $1 and status = 'pending' returning id, contract_id

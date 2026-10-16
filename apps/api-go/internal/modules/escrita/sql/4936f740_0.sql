@@ -1,0 +1,1 @@
+insert into tags (tenant_id, name) values ($1,$2) on conflict (tenant_id, name) do nothing returning id, name

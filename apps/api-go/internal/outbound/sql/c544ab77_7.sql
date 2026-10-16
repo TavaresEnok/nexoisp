@@ -1,0 +1,1 @@
+insert into work_order_events (tenant_id, work_order_id, event, detail) values ($1,$2,'sla_breached',$3)

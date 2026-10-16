@@ -1,0 +1,1 @@
+insert into lead_events (tenant_id, lead_id, actor_id, event, detail) values ($1,$2,$3,$4,$5)

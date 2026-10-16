@@ -1,0 +1,1 @@
+update devices set name=$2, driver=$3, host=$4, api_port=$5, credential_ref=$6, agent_id=$7, maintenance=$8, simultaneous_use=$9, acct_interim_seconds=$10 where id=$1 returning *

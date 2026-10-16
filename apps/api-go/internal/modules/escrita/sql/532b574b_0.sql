@@ -1,0 +1,1 @@
+update leads set name = $2, phone = $3, email = $4, document = $5, address_street = $6, address_number = $7, address_district = $8, address_city = $9, address_state = $10, address_zip = $11, source = $12, plan_id = $13, notes = $14, owner_id = $15, updated_at = now() where id = $1 returning *

@@ -1,0 +1,1 @@
+select l.contract_id, l.acs_device_id from cpe_links l join contracts k on k.id = l.contract_id where k.subscriber_id = $1 and k.status = $2

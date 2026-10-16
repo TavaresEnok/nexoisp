@@ -1,0 +1,1 @@
+select url, secret_enc from webhook_endpoints where id = $1

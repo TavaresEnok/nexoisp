@@ -1,0 +1,1 @@
+insert into work_order_checklist (tenant_id, work_order_id, position, label) values ($1,$2,$3,$4)

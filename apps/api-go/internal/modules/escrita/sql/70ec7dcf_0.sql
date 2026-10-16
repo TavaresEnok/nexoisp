@@ -1,0 +1,1 @@
+delete from webhook_endpoints where id = $1

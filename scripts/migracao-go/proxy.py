@@ -35,7 +35,7 @@ def load(path=TABLE):
     return routes
 
 
-def generate(routes):
+def generate(routes, fallback="fastify"):
     out=['# Gerado por scripts/migracao-go/proxy.py; edite rotas.yaml.','{$NEXO_DOMAIN:localhost} {','  log {','    format json','  }','  route {']
     for i,r in enumerate(routes):
         if r['path'].startswith('/agent/'):continue
@@ -51,17 +51,17 @@ def generate(routes):
         if r['state']=='go-canario':out += [f'        lb_policy weighted_round_robin {100-r["percent"]} {r["percent"]}']
         # Uma falha de transporte não reenvia uma escrita cujo commit pode ter ocorrido.
         out += ['        lb_try_duration 0','      }','    }']
-    out += ['    @backend path /api /api/* /public /public/* /aviso /aviso/*','    handle @backend {','      log_append nexo_route unmatched-api','      log_append nexo_upstream {http.reverse_proxy.upstream.address}','      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080}','    }','    handle {','      log_append nexo_route static','      log_append nexo_upstream caddy','      header {','        X-Content-Type-Options nosniff','        X-Frame-Options DENY','        Referrer-Policy same-origin','        Permissions-Policy "camera=(), microphone=(), geolocation=(self), payment=()"', '      }','      header {','        match header Content-Type text/html*','        Content-Security-Policy "default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data: blob: https://tile.openstreetmap.org; connect-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'"','      }','      @https protocol https','      header @https Strict-Transport-Security max-age=31536000','      root * {$NEXO_WEB_ROOT:/srv}','      try_files {path} /index.html','      file_server','    }','  }','}']
+    out += ['    @backend path /api /api/* /public /public/* /aviso /aviso/*','    handle @backend {','      log_append nexo_route unmatched-api','      log_append nexo_upstream {http.reverse_proxy.upstream.address}','      reverse_proxy '+('{$NEXO_GO_UPSTREAM:api-go:8080}' if fallback=='go' else '{$NEXO_FASTIFY_UPSTREAM:api:8080}'),'    }','    handle {','      log_append nexo_route static','      log_append nexo_upstream caddy','      header {','        X-Content-Type-Options nosniff','        X-Frame-Options DENY','        Referrer-Policy same-origin','        Permissions-Policy "camera=(), microphone=(), geolocation=(self), payment=()"', '      }','      header {','        match header Content-Type text/html*','        Content-Security-Policy "default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data: blob: https://tile.openstreetmap.org; connect-src \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'; frame-ancestors \'none\'"','      }','      @https protocol https','      header @https Strict-Transport-Security max-age=31536000','      root * {$NEXO_WEB_ROOT:/srv}','      try_files {path} /index.html','      file_server','    }','  }','}']
     return '\n'.join(out)+'\n'
 
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--init',action='store_true');p.add_argument('--table',default=str(TABLE));p.add_argument('--output',default=str(ROOT/'infra/prod/caddy/Caddyfile'));p.add_argument('--check',action='store_true');a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--init',action='store_true');p.add_argument('--table',default=str(TABLE));p.add_argument('--output',default=str(ROOT/'infra/prod/caddy/Caddyfile'));p.add_argument('--check',action='store_true');p.add_argument('--fallback',choices=['fastify','go'],default='fastify');a=p.parse_args()
     if a.init:
         target=Path(a.table)
         if target.exists():raise ValueError('tabela já existe')
         target.write_text(json.dumps({'version':1,'routes':[dict(r,state='fastify') for r in inventory()]},ensure_ascii=False,indent=2)+'\n')
-    content=generate(load(a.table));target=Path(a.output)
+    content=generate(load(a.table),a.fallback);target=Path(a.output)
     if a.check:
         if target.read_text()!=content:raise ValueError('Caddyfile desatualizado')
     else:target.write_text(content)

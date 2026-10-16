@@ -1,0 +1,1 @@
+update devices set host = $2 where id = $1

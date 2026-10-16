@@ -1,0 +1,1 @@
+insert into leads (tenant_id, created_by, name, phone, email, document, address_street, address_number, address_district, address_city, address_state, address_zip, source, plan_id, notes, owner_id) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) returning *

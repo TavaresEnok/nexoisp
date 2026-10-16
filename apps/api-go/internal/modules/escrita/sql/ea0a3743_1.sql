@@ -1,0 +1,2 @@
+select count(*)::int as n from service_resources r join contracts k on k.id = r.contract_id join plan_versions pv on pv.id = k.plan_version_id
+         where pv.plan_id = $1 and k.status = 'active' and r.desired_version > 0

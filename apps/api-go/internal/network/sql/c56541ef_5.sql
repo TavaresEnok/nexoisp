@@ -1,0 +1,1 @@
+update operations set status = 'EXECUTING', lease_until = now() + interval '120 seconds', updated_at = now() where id = $1

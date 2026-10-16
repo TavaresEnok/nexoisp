@@ -1,0 +1,1 @@
+select session_create($1,$2, now() + interval '12 hours')

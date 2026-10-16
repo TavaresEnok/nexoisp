@@ -1,0 +1,1 @@
+select 1 from tickets where id = $1 and subscriber_id = $2

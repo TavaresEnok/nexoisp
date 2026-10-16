@@ -1,0 +1,1 @@
+insert into tenant_settings (tenant_id) values ($1) on conflict (tenant_id) do nothing

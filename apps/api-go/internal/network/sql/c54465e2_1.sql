@@ -1,0 +1,1 @@
+update operation_attempts set status = $2, steps = $3 where id = $1

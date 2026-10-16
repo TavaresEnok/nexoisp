@@ -1,0 +1,1 @@
+update invoices set status = 'open', status_note = $2, paid_at = null where id = $1

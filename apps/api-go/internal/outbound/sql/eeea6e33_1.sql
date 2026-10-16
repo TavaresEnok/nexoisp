@@ -1,0 +1,1 @@
+update scheduled_changes set status = 'applied', applied_at = now() where id = $1

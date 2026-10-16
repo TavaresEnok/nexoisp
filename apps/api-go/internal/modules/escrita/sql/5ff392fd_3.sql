@@ -1,0 +1,1 @@
+select $1::inet << $2::cidr as ok

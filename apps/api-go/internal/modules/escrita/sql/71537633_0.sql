@@ -1,0 +1,1 @@
+select v.id, v.version, p.active, p.name from plans p join plan_versions v on v.plan_id = p.id where p.id = $1 order by v.version desc limit 1

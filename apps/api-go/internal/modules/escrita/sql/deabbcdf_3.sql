@@ -1,0 +1,1 @@
+insert into user_pops (tenant_id, user_id, pop_id) values ($1,$2,$3)

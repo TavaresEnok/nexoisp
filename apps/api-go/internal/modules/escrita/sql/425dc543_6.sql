@@ -1,0 +1,1 @@
+select body, alert, created_at from subscriber_notes where subscriber_id = $1 order by created_at

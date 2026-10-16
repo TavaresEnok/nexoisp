@@ -1,0 +1,2 @@
+insert into notice_rules (tenant_id, name, template_id, channel_id, days_relative, plan_id, pop_id, tag_id, hour_from, hour_to, weekdays, min_interval_days)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) returning id, name

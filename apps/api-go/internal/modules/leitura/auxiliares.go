@@ -48,13 +48,13 @@ func registerAuxiliares(api huma.API, r *endpoint.Registry, s Service) {
 			err := s.DB.WithScope(ctx, c.Scope, func(tx *db.Tx) error {
 				switch route.path {
 				case "/api/finance/settings":
-					settings, err := getSettings(ctx, tx, c.TenantID)
+					settings, err := GetSettings(ctx, tx, c.TenantID)
 					settings.Set("demo_mode", os.Getenv("NEXO_DEMO_MODE") == "1")
 					result = settings
 					return err
 				case "/api/invoices/{id}/due":
 					var err error
-					result, err = dueBreakdown(ctx, tx, id)
+					result, err = DueBreakdown(ctx, tx, id)
 					return err
 				case "/api/contracts/{id}/trust-release":
 					var err error
@@ -84,7 +84,7 @@ func registerAuxiliares(api huma.API, r *endpoint.Registry, s Service) {
 		})
 	}
 }
-func getSettings(ctx context.Context, tx *db.Tx, tenant string) (jsonx.Object, error) {
+func GetSettings(ctx context.Context, tx *db.Tx, tenant string) (jsonx.Object, error) {
 	rows, err := tx.Objects(ctx, gen.Trust0, tenant)
 	if err != nil {
 		return nil, err
@@ -95,7 +95,7 @@ func getSettings(ctx context.Context, tx *db.Tx, tenant string) (jsonx.Object, e
 	defaults := jsonx.Object{{Name: "tenant_id", Value: tenant}, {Name: "timezone", Value: "America/Sao_Paulo"}, {Name: "gateway", Value: "none"}, {Name: "billing_auto", Value: false}, {Name: "auto_suspend", Value: false}, {Name: "suspend_after_days", Value: nil}, {Name: "auto_resume_on_payment", Value: false}, {Name: "suspension_mode", Value: "reject"}, {Name: "suspension_profile", Value: nil}, {Name: "trust_release_enabled", Value: false}, {Name: "trust_release_days", Value: 3}, {Name: "trust_release_gap_days", Value: 30}, {Name: "late_fee_percent", Value: 0}, {Name: "interest_monthly_percent", Value: 0}, {Name: "prorate_first_month", Value: false}}
 	return defaults, nil
 }
-func dueBreakdown(ctx context.Context, tx *db.Tx, id string) (map[string]any, error) {
+func DueBreakdown(ctx context.Context, tx *db.Tx, id string) (map[string]any, error) {
 	rows, err := tx.Objects(ctx, gen.Due, id)
 	if err != nil {
 		return nil, err

@@ -1,0 +1,1 @@
+select suspension_mode, suspension_profile from tenant_settings where tenant_id = $1

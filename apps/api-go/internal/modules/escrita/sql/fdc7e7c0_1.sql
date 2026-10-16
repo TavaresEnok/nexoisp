@@ -1,0 +1,1 @@
+select 1 from stock_movements where item_id = $1 limit 1

@@ -1,0 +1,1 @@
+select status, number, contract_id from work_orders where id = $1 for update

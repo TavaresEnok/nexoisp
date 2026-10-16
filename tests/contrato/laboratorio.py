@@ -114,10 +114,11 @@ def up():
 
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('command',choices=['up','down','run','mutacoes','migrations','carga','leituras','proxy','consultas','grupos','escopo_pop','regressoes','e2e','aviso','dinamicas']);args,rest=parser.parse_known_args()
+    parser=argparse.ArgumentParser();parser.add_argument('command',choices=['up','down','run','mutacoes','migrations','carga','leituras','proxy','consultas','grupos','escopo_pop','regressoes','e2e','aviso','dinamicas','consolidacao','agente_go','river_radius','mtls_go','jobs-up']);args,rest=parser.parse_known_args()
     if args.command=='up':up()
     elif args.command=='down':
         stop_go();subprocess.run(['docker','rm','-f','nexo-fase1-fastify',DB_CONTAINER],check=True)
+    elif args.command=='jobs-up':go('run','./cmd/nexo-db','jobs-up',env=go_env())
     elif args.command=='run':
         go('test','-race','./...',env=dict(go_env(),NEXO_GO_TEST_DATABASE_URL=go_env()['DATABASE_URL_GO']))
         command([sys.executable,str(ROOT/'tests/contrato/contrato.py'),*rest])

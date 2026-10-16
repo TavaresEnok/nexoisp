@@ -1,0 +1,1 @@
+update radius_nas set nas_ip = $2, coa_host = null, coa_port = 3799 where device_id = $1

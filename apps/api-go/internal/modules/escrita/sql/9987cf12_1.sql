@@ -1,0 +1,1 @@
+select id, recover, status, steps, started_at, finished_at from operation_attempts where operation_id = $1 order by started_at

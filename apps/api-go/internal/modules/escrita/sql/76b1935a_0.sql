@@ -1,0 +1,1 @@
+update cgnat_plans set retired_at = now() where id = $1 and retired_at is null returning *

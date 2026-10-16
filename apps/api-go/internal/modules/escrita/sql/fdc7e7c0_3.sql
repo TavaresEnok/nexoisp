@@ -1,0 +1,1 @@
+update stock_items set name=$2, sku=$3, unit=$4, min_qty=$5, active=$6 where id=$1 returning *

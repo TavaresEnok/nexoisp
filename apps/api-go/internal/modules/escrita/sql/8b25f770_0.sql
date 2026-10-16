@@ -1,0 +1,1 @@
+select id, cidr, kind, family(cidr) as family from ip_pools where id = any($1::uuid[])

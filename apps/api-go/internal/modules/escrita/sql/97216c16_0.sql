@@ -1,0 +1,1 @@
+update api_tokens set active = false, revoked_at = coalesce(revoked_at, now()) where id = $1 returning id

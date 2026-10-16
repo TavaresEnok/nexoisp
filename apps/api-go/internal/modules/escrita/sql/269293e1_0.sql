@@ -1,0 +1,1 @@
+select status from tickets where id = $1 and subscriber_id = $2 for update

@@ -1,0 +1,1 @@
+select id, driver, name from devices where id = $1 for update

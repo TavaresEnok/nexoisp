@@ -1,0 +1,1 @@
+select coalesce(max(position), 0)::int as p from work_order_checklist where work_order_id = $1

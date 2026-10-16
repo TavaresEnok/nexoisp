@@ -1,0 +1,1 @@
+insert into stock_unit_events (tenant_id, unit_id, actor_id, event, detail) values ($1,$2,$3,$4,$5)

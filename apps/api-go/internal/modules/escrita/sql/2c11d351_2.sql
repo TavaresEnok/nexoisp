@@ -1,0 +1,1 @@
+insert into ftth_drops (tenant_id, box_id, port, contract_id, note) values ($1,$2,$3,$4,$5) returning *

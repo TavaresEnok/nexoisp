@@ -1,0 +1,1 @@
+select serial from stock_units where item_id = $1 and serial = any($2)

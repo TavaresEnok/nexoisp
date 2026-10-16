@@ -1,0 +1,1 @@
+select * from onus where contract_id = $1 for update

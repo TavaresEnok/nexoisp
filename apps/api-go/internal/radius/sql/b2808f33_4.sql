@@ -1,0 +1,1 @@
+delete from usage_daily where ctid in (select ctid from usage_daily where tenant_id = $1 and day < (now() - make_interval(days => $2::int))::date limit $3)

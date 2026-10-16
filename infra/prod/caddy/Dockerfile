@@ -9,3 +9,4 @@ RUN npm -w apps/web run build
 FROM caddy:2-alpine
 COPY --from=web /app/apps/web/dist /srv
 COPY infra/prod/caddy/Caddyfile /etc/caddy/Caddyfile
+COPY infra/prod/caddy/Caddyfile.go /etc/caddy/Caddyfile.go

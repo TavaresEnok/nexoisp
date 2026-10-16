@@ -9,9 +9,8 @@ import (
 	"context"
 	"net/netip"
 
-	"nexoisp/api-go/internal/jsonx"
-
 	"github.com/jackc/pgx/v5/pgtype"
+	"nexoisp/api-go/internal/jsonx"
 )
 
 const Readc7f08457 = `-- name: Readc7f08457 :many

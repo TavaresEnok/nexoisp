@@ -1,0 +1,1 @@
+insert into ftth_boxes (tenant_id, name, kind, ports, parent_id, device_id, pon_port, address, latitude, longitude, notes) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) returning *

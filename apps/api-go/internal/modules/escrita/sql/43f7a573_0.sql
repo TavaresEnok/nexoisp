@@ -1,0 +1,1 @@
+delete from notice_rules where id = $1

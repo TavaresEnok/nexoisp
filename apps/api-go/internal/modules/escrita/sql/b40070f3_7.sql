@@ -1,0 +1,1 @@
+update contracts set status = 'ended', end_date = current_date, end_reason_id = $2, end_note = $3, updated_at = now() where id = $1

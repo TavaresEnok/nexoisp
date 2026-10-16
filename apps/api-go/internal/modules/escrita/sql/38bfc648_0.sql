@@ -1,0 +1,1 @@
+select pppoe_username from service_resources where contract_id = $1

@@ -1,0 +1,1 @@
+select family($1::cidr) as family, masklen($1::cidr) as masklen

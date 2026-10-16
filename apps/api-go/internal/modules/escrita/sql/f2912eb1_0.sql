@@ -1,0 +1,1 @@
+update webhook_deliveries set status = 'pending', attempts = 0, next_attempt_at = now(), last_error = null where id = $1 and status = 'failed' returning id

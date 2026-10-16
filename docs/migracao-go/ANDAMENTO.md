@@ -4,7 +4,7 @@ Autorização vigente: prosseguir por todas as fases sem novas perguntas. D1 (ad
 
 ## Implementação disponível neste ponto
 
-- 119 rotas nativas Go: as três da fase 1, as 12 da fase 2 e todas as 104 leituras da fase 3. A listagem efetiva vem do OpenAPI no listener interno. Não há encaminhamento dessas implementações para o Node.
+- 344 rotas com implementação nativa Go: todas as fases do inventário. São 334 operações HTTP no OpenAPI e dez rotas de agentes no listener separado. O manifesto completo é `apps/api-go/rotas.json`; não há encaminhamento de negócio para o Node.
 - Caddy com tabela versionada das 344 rotas, distinção por método e segmentos, canários de 1%, 10% e 50%, volta por recarga e logs JSON de rota/destino. Agentes continuam fora do proxy, conforme o plano.
 - Sobreposição `infra/prod/docker-compose.go.yml` e imagem do Caddy com o build do painel. A tabela versionada permanece integralmente em `fastify`; os ensaios de roteamento são descartáveis.
 - Registros de permissão ligados às operações, incluindo MFA pendente em `/api/me`, métricas por padrão de rota e HEAD equivalente. SQL das consultas revisadas e o template da página pública possuem extração reproduzível e verificação de deriva.
@@ -26,12 +26,20 @@ Autorização vigente: prosseguir por todas as fases sem novas perguntas. D1 (ad
 | Regressão original através do Caddy | **41 arquivos, 192 testes aprovados** |
 | Painel através do Caddy, Playwright original | teste de fumaça aprovado, com os cenários de painel e portal |
 | Go e lint | compilação/testes aprovados; zero problemas no lint |
+| Imagem Go e roteamento final | imagem Docker compilada; Caddy final validado pelo binário real |
+| Consolidação das escritas | 20 verificações; inclui idempotência e baixa/estorno misturados com Fastify |
+| Agente Python real contra Go | sincronização, assinatura Ed25519, reserva, execução e confirmação aprovadas |
+| River real e RADIUS integrado | schema/migrations, provisionamento, accounting, cleanup e gateway assinado/idempotente aprovados em processo descartável |
+| mTLS Go | CA, identidade, fixação e rejeição de conexão sem certificado aprovadas |
+| Inventário final | 344/344 rotas presentes, sem extras; Compose final validado |
+
+Os resultados das baterias extensas acima são históricos, anteriores às últimas escritas. Essas baterias não foram repetidas por rota: a pedido do usuário, a validação final foi concentrada nos fluxos críticos. Isso deixa a paridade exaustiva das novas rotas e as integrações externas para homologação.
 
 Os relatórios completos locais ficam em `tests/contrato/relatorios/`. As evidências históricas da carga original continuam em `evidencias-fase-1/`.
 
-## Próximo trabalho e critérios ainda pendentes
+## Implantação e critérios ainda pendentes
 
-Restam as escritas das fases 4–6, as rotinas e a API de agentes da fase 7 e a saúde/desativação operacional da fase 8. O comando e a documentação de execução serão ampliados junto com cada conjunto validado.
+A implementação das escritas, identidade, integrações, API pública, importação, financeiro, agentes, executor RADIUS e rotinas River está disponível. A configuração final está preparada separadamente em `infra/prod/docker-compose.go-final.yml`; o procedimento e a volta à coexistência estão em [EXECUCAO_GO.md](EXECUCAO_GO.md). A configuração produtiva vigente não foi alterada.
 
 O portão de desempenho da fase 1 ainda está pendente. A otimização da função POP reduziu uma consulta isolada do maior provedor sintético de aproximadamente 4,2 s para 2,9 s; isso não é uma nova prova de capacidade HTTP nem substitui o ensaio completo. A técnica final mantém a semântica de criação de assinantes e não adiciona função que enumere identificadores ocultos por POP.
 

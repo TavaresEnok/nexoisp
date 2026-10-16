@@ -1,0 +1,1 @@
+select id, gateway, gateway_charge_id from invoices where status in ('open','reconciling') and gateway_charge_id is not null
