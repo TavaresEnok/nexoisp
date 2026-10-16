@@ -164,5 +164,5 @@ func (q *Query) Number(name string, fallback *float64, min, max float64, integer
 	return value
 }
 
-// JSNumber is the Number(string) coercion shared by legacy environment settings.
+// JSNumber implements the Number(string) coercion accepted by existing settings.
 func JSNumber(value string) float64 { return number(value) }

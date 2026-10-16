@@ -2,7 +2,7 @@
 
 Documento único de operação. O que está marcado **não exercitado** ainda precisa ser provado no ambiente do piloto.
 
-Desde 16/10/2026 o backend padrão é Go: API, rotinas River, VPN e CLI. A referência Fastify está em `legacy/fastify`, fora das imagens e workspaces ativos. Os ensaios históricos abaixo não representam homologação do novo backend; evidências atuais e limites estão em [migração Go](migracao-go/ANDAMENTO.md).
+Desde 16/10/2026 o backend é Go: API, rotinas River, VPN e CLI. A aplicação não contém backend Node. O frontend React usa Node somente durante a compilação; a imagem entregue usa Caddy.
 
 ## 1. Instalação central (nuvem/servidor do SaaS)
 

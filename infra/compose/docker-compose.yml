@@ -75,7 +75,7 @@ services:
   caddy:
     build: { context: ../.., dockerfile: infra/prod/caddy/Dockerfile }
     depends_on: [api]
-    command: [caddy, run, --config, /etc/caddy/Caddyfile.go, --adapter, caddyfile]
+    command: [caddy, run, --config, /etc/caddy/Caddyfile, --adapter, caddyfile]
     environment:
       NEXO_DOMAIN: ":8080"
       NEXO_GO_UPSTREAM: api:8080

@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
 """Fumaça original do painel pelo Caddy, com API e seed exclusivamente Go."""
-import importlib.util
 from pathlib import Path
 import subprocess
-import tempfile
 import time
 
 from lib import ROOT,LOCAL,command,sql,go_env,request
-from laboratorio import go,wait
+from lib import go, wait
 
 
 def main():
-    spec=importlib.util.spec_from_file_location('proxy_generator',ROOT/'scripts/migracao-go/proxy.py');proxy=importlib.util.module_from_spec(spec);spec.loader.exec_module(proxy)
     go('build','-o','bin/nexo-db','./cmd/nexo-db')
     go('build','-o','bin/api','./cmd/api')
     sql('drop database if exists nexo_test with (force);create database nexo_test;','postgres')
@@ -24,30 +21,29 @@ def main():
         command(['docker','cp','nexo-fase1-web-build:/srv/.',str(web)])
     finally:subprocess.run(['docker','rm','nexo-fase1-web-build'],capture_output=True)
     command(['npm','ci'],cwd=ROOT/'e2e')
-    with tempfile.TemporaryDirectory(prefix='nexo-e2e-proxy-') as tmp:
-        cfg=Path(tmp)/'Caddyfile';cfg.write_text('{\n admin 127.0.0.1:18390\n}\n'+proxy.generate(proxy.load(ROOT/'infra/prod/caddy/rotas.go.yaml'),fallback='go'))
-        log=open(LOCAL/'e2e-go.log','w')
-        api=subprocess.Popen([str(ROOT/'apps/api-go/bin/api')],cwd=ROOT,env=env,stdout=log,stderr=subprocess.STDOUT)
-        try:
-            wait('http://127.0.0.1:18181','/api/health',api)
-            command(['docker','run','-d','--name','nexo-fase1-caddy-e2e','--network','host','-v',tmp+':/cfg:ro','-v',str(web)+':/srv:ro',
-                     '-e','NEXO_DOMAIN=http://127.0.0.1:18380','-e','NEXO_GO_UPSTREAM=127.0.0.1:18181',
-                     'caddy:2-alpine','caddy','run','--config','/cfg/Caddyfile','--adapter','caddyfile'],capture_output=True)
-            wait('http://127.0.0.1:18380','/api/health')
-            keys=['x-content-type-options','x-frame-options','referrer-policy','permissions-policy','content-security-policy','strict-transport-security']
-            for path in ['/','/login']:
-                r=request('http://127.0.0.1:18380',path)
-                assert r['status']==200 and r['body']==(web/'index.html').read_bytes()
-                assert r['headers']['x-content-type-options']=='nosniff' and r['headers']['x-frame-options']=='DENY'
-                assert "frame-ancestors 'none'" in r['headers']['content-security-policy']
-            command(['docker','run','--rm','--network','host','--ipc=host','--security-opt','seccomp=unconfined',
-                     '-v',str(ROOT/'e2e')+':/e2e','-w','/e2e','-e','BASE=http://127.0.0.1:18380',
-                     'mcr.microsoft.com/playwright:v1.49.1-jammy','node','smoke.mjs'])
-        finally:
-            api.terminate()
-            try:api.wait(timeout=15)
-            except subprocess.TimeoutExpired:api.kill();api.wait()
-            log.close()
-            subprocess.run(['docker','rm','-f','nexo-fase1-caddy-e2e'],capture_output=True)
+    log=open(LOCAL/'e2e-go.log','w')
+    api=subprocess.Popen([str(ROOT/'apps/api-go/bin/api')],cwd=ROOT,env=env,stdout=log,stderr=subprocess.STDOUT)
+    try:
+        wait('http://127.0.0.1:18181','/api/health',api)
+        command(['docker','run','-d','--name','nexo-fase1-caddy-e2e','--network','host',
+                 '-v',str(ROOT/'infra/prod/caddy/Caddyfile')+':/etc/caddy/Caddyfile:ro','-v',str(web)+':/srv:ro',
+                 '-e','NEXO_DOMAIN=http://127.0.0.1:18380','-e','NEXO_GO_UPSTREAM=127.0.0.1:18181',
+                 'caddy:2-alpine','caddy','run','--config','/etc/caddy/Caddyfile','--adapter','caddyfile'],capture_output=True)
+        wait('http://127.0.0.1:18380','/api/health')
+        keys=['x-content-type-options','x-frame-options','referrer-policy','permissions-policy','content-security-policy','strict-transport-security']
+        for path in ['/','/login']:
+            r=request('http://127.0.0.1:18380',path)
+            assert r['status']==200 and r['body']==(web/'index.html').read_bytes()
+            assert r['headers']['x-content-type-options']=='nosniff' and r['headers']['x-frame-options']=='DENY'
+            assert "frame-ancestors 'none'" in r['headers']['content-security-policy']
+        command(['docker','run','--rm','--network','host','--ipc=host','--security-opt','seccomp=unconfined',
+                 '-v',str(ROOT/'e2e')+':/e2e','-w','/e2e','-e','BASE=http://127.0.0.1:18380',
+                 'mcr.microsoft.com/playwright:v1.49.1-jammy','node','smoke.mjs'])
+    finally:
+        api.terminate()
+        try:api.wait(timeout=15)
+        except subprocess.TimeoutExpired:api.kill();api.wait()
+        log.close()
+        subprocess.run(['docker','rm','-f','nexo-fase1-caddy-e2e'],capture_output=True)
 
 if __name__=='__main__':main()

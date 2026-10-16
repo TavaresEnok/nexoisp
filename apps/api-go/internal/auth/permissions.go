@@ -1,4 +1,4 @@
-// Tabelas copiadas de apps/api/src/auth.ts; conferidas pelo harness.
+// Permissões e módulos autorizados pelo backend.
 package auth
 
 import "regexp"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# CLI de desenvolvimento do NexoISP. Node/Python rodam em containers (sem Node no host).
+# CLI de desenvolvimento do NexoISP. Node é usado somente para o frontend; API, VPN e CLI usam Go.
 set -euo pipefail
 cd "$(dirname "$0")"
 NODE_IMG=node:22-alpine
@@ -32,7 +32,12 @@ init_env() {  # segredos e certificados de DESENVOLVIMENTO, gerados localmente (
   mkdir -p .data/agent-demo .data/olt-huawei-emu
 }
 case "${1:-help}" in
-  contrato)  shift; python3 tests/contrato/laboratorio.py "$@" ;;
+  contrato)  shift; case "${1:-}" in
+               nativo) python3 tests/contrato/nativo.py ;;
+               e2e) python3 tests/contrato/e2e.py ;;
+               vpn) python3 tests/contrato/vpn_go.py ;;
+               *) echo "uso: ./nexo contrato {nativo|e2e|vpn}"; exit 2 ;;
+             esac ;;
   init)      init_env ;;
   agent-cert) scripts/dev-certs.sh agent "$2" "${3:-infra/certs/agent-$2}" ;;
   e2e)  # fumaça da interface num navegador de verdade (imagem oficial do Playwright); BASE padrão: o painel local
@@ -66,17 +71,5 @@ case "${1:-help}" in
   ps)        $COMPOSE ps ;;
   compose)   shift; $COMPOSE "$@" ;;
   test)      gobox go test ./... ;;
-  test-legacy) $COMPOSE up -d --wait db >/dev/null
-             docker exec nexoisp-db-1 psql -q -U nexo_owner -d nexo -c "drop database if exists nexo_test with (force)" -c "create database nexo_test" >/dev/null
-             set -a; . ./.env; set +a; export NEXO_AGENT_MTLS=off
-             export DATABASE_URL_OWNER="postgres://nexo_owner:${POSTGRES_PASSWORD}@db:5432/nexo_test"
-             export DATABASE_URL_APP="postgres://nexo_app:${NEXO_APP_DB_PASSWORD}@db:5432/nexo_test"
-             nodebox "$NODE_IMG" npm --prefix legacy/fastify --workspaces=false test ;;
-  load-check) $COMPOSE up -d --wait db >/dev/null
-             docker exec nexoisp-db-1 psql -q -U nexo_owner -d nexo -c "drop database if exists nexo_test with (force)" -c "create database nexo_test" >/dev/null
-             set -a; . ./.env; set +a; export NEXO_AGENT_MTLS=off
-             export DATABASE_URL_OWNER="postgres://nexo_owner:${POSTGRES_PASSWORD}@db:5432/nexo_test"
-             export DATABASE_URL_APP="postgres://nexo_app:${NEXO_APP_DB_PASSWORD}@db:5432/nexo_test"
-             export NEXO_LOAD=1; nodebox -e NEXO_LOAD "$NODE_IMG" npm --prefix legacy/fastify --workspaces=false test ;;
-  *) echo "uso: ./nexo {homolog up|preflight|down|backup|restore-check <arq>|restore <arq> --yes|lab-radius|lab-up|lab-down|lab client ...|trio up|down|status|...|init|agent-cert <id>|agent-test|demo-tool ...|install|typecheck|build|up|down|logs|ps|test|npm ...|compose ...}" ;;
+  *) echo "uso: ./nexo {homolog up|preflight|down|backup|restore-check <arq>|restore <arq> --yes|lab-radius|lab-up|lab-down|lab client ...|trio up|down|status|...|init|agent-cert <id>|agent-test|demo-tool ...|install|typecheck|build|up|down|logs|ps|test|contrato {nativo|e2e|vpn}|npm ...|compose ...}" ;;
 esac

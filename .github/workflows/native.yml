@@ -19,10 +19,6 @@ jobs:
           go test -race ./...
       - uses: golangci/golangci-lint-action@v8
         with: {version: v2.14.0, working-directory: apps/api-go}
-      - name: Migrations e proxy finais
-        run: |
-          python3 scripts/migracao-go/migrations.py
-          python3 scripts/migracao-go/proxy.py --table infra/prod/caddy/rotas.go.yaml --output infra/prod/caddy/Caddyfile.go --fallback go --check
       - uses: actions/setup-node@v4
         with: {node-version: 22, cache: npm}
       - name: Frontend preservado

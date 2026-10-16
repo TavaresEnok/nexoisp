@@ -31,7 +31,7 @@ Este pacote consolida o planejamento para iniciar o desenvolvimento. As proposta
 |---|---|
 | Web | React, TypeScript, Vite |
 | Interface | Tailwind CSS e shadcn/ui, se o projeto ainda não tiver padrão |
-| Backend | Node.js em versão LTS suportada, TypeScript e Fastify |
+| Backend | Go, Chi/Huma e executáveis nativos para API, VPN e administração |
 | Dados | PostgreSQL; SQL explícito e Kysely como opção inicial de acesso |
 | Agente | Python; validação de mensagens e drivers por operação |
 | Persistência do agente | SQLite para tentativas, resultados e sincronização |
@@ -49,7 +49,7 @@ Não introduzir inicialmente Kubernetes, Kafka, RabbitMQ, microserviços por mó
 
 ### Aplicação central
 
-O backend Fastify concentra autenticação, autorização, isolamento, cadastros, regras comerciais, integração financeira, estado desejado e tarefas. Organizar o código em módulos de identidade, clientes, contratos, financeiro, rede e operações.
+O backend Go concentra autenticação, autorização, isolamento, cadastros, regras comerciais, integração financeira, estado desejado e tarefas. Organizar o código em módulos de identidade, clientes, contratos, financeiro, rede e operações.
 
 Workers podem ser processos separados do mesmo produto, reutilizando módulos e contratos. O monólito modular não exige um único processo ou servidor.
 

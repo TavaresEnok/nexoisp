@@ -95,7 +95,7 @@ O restante — fila, telas, auditoria, recuperação — já está pronto e não
 
 ## Verificação
 
-- API: `apps/api/test/olt.test.ts` (6 testes) — descoberta completa x parcial, isolamento, autorização, leitura, divergência, desautorização obsoleta, troca de ONU, permissões.
+- API: ensaios nativos do backend Go — descoberta completa x parcial, isolamento, autorização, leitura, divergência, desautorização obsoleta, troca de ONU e permissões.
 - Agente: `services/network-agent/tests/test_onu.py` (5 testes) — autorizar/ler/desautorizar, confirmação perdida, reinício no meio, mudança de VLAN, porta errada.
 - Driver Huawei: `tests/test_olt_huawei.py` (5 testes, contra o emulador) — serial e interpretadores, ciclo completo, falhas da OLT, tentativa de injeção de comando, sessão reaproveitada, autorização parcial que converge.
 - Caminho completo no ambiente rodando: painel → agente → SSH (netmiko) → emulador: descoberta, autorização (~3 s), sinal, e conferência direta na CLI.

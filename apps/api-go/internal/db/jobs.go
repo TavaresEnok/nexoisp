@@ -51,7 +51,7 @@ func JobsMigrate(ctx context.Context, ownerURL string) error {
 	return e
 }
 
-// WithWorkerLock shares the legacy session lock during coexistence.
+// WithWorkerLock serializes workers that handle the same exclusive operation.
 func (d *DB) WithWorkerLock(ctx context.Context, key int64, fn func() error) error {
 	// A dedicated owned connection avoids exhausting a pool of one while fn opens
 	// its scoped transaction. Closing it also releases the lock after cancellation.

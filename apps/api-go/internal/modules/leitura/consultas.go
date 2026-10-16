@@ -101,7 +101,7 @@ func (s Service) export(ctx context.Context, r *http.Request, result endpoint.Re
 	if r.Method != http.MethodGet || len(formats) != 1 || formats[0] != "csv" {
 		return result, nil
 	}
-	// Kept separate from the business transaction, as in the Fastify onSend hook.
+	// Kept separate from the business transaction to preserve audit atomicity.
 	items := result.Value.([]jsonx.Object)
 	err := s.Audit.Write(ctx, auth.From(ctx), "export.csv", "list", nil, map[string]any{"path": r.URL.Path, "rows": len(items)}, "ok")
 	if err == nil {

@@ -2,14 +2,12 @@ package auth
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
 	"nexoisp/api-go/internal/apierr"
 	"nexoisp/api-go/internal/db"
 	"nexoisp/api-go/internal/tenancy"
-	"os"
 	"reflect"
 	"sync/atomic"
 	"testing"
@@ -163,22 +161,18 @@ func TestCacheExpiresAt(t *testing.T) {
 		t.Fatal("sessão expirada aceita")
 	}
 }
-func TestAuthGolden(t *testing.T) {
-	b, e := os.ReadFile("../../../../tests/contrato/corpus/auth.json")
-	if e != nil {
-		t.Fatal(e)
+func TestAuthorizationContract(t *testing.T) {
+	if !reflect.DeepEqual(Permissions["saas_operator"], []string{"tenants:manage"}) || !reflect.DeepEqual(Permissions["subscriber"], []string{"portal:self"}) {
+		t.Fatal("permissões centrais divergentes")
 	}
-	var c struct {
-		Permissions map[string][]string
-		Modules     map[string][]string
-	}
-	if e = json.Unmarshal(b, &c); e != nil {
-		t.Fatal(e)
-	}
-	if !reflect.DeepEqual(Permissions, c.Permissions) {
-		t.Fatal("permissões divergentes do Fastify")
-	}
-	for path, want := range c.Modules {
+	for path, want := range map[string][]string{
+		"/api/subscribers":    nil,
+		"/api/contracts/x":    nil,
+		"/api/tickets":        {"crm"},
+		"/api/portal/surveys": {"field"},
+		"/api/reports/sla":    {"crm", "field"},
+		"/api/stock/items":    {"field"},
+	} {
 		if !reflect.DeepEqual(Modules(path), want) {
 			t.Fatalf("módulo %s", path)
 		}

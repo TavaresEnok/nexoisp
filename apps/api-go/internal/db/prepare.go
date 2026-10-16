@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-// Prepare adopts a complete legacy database or initializes a fresh one; never resets data.
+// Prepare adopts a complete pre-Go database or initializes a fresh one; never resets data.
 func Prepare(ctx context.Context, root string) error {
 	if e := Admin(ctx, "bootstrap", root, true); e != nil {
 		return e

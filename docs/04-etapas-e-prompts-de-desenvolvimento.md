@@ -70,7 +70,7 @@ Entrega: banco e migrations, login, papéis iniciais, dois tenants de demonstra�
 ```text
 Execute a E1 do NexoISP conforme os quatro documentos em docs/.
 
-Entregue uma aplicação local utilizável com Fastify, React/TypeScript e PostgreSQL: login, contexto autorizado de tenant, assinantes, planos e contratos. Use migrations e dados sintéticos de dois provedores. Inclua permissões básicas, validação e estados de carregamento/erro na interface.
+Entregue uma aplicação local utilizável com Go, React/TypeScript e PostgreSQL: login, contexto autorizado de tenant, assinantes, planos e contratos. Use migrations e dados sintéticos de dois provedores. Inclua permissões básicas, validação e estados de carregamento/erro na interface.
 
 Não comece financeiro, OLTs ou integração real de rede nesta etapa. Prepare os vínculos de contrato/plano necessários ao próximo fluxo, sem criar módulos futuros vazios.
 
@@ -301,7 +301,7 @@ Detalhes de operação e produção: `docs/operacao.md`. Decisões técnicas tom
 |---|---|---|
 | Equipamento físico e versão do RouterOS do piloto | O piloto (não mais o desenvolvimento) | Repetir `docs/lab-pppoe.md` no equipamento real, com mais de um cliente |
 | Acesso a uma OLT Huawei (modelo e firmware do provedor) | Homologar o driver `olt_huawei` | Seguir o roteiro de homologação em `docs/expansao-olt-onu.md` |
-| Gateway de pagamento e credenciais de sandbox | Conclusão da E4 | Implementar um adaptador em `apps/api/src/finance/gateway.ts` (interface `Gateway`) e repetir os testes de webhook/conciliação |
+| Gateway de pagamento e credenciais de sandbox | Conclusão da E4 | Implementar um adaptador em `apps/api-go/internal/finance/gateway.go` e repetir os testes de webhook/conciliação |
 | Política comercial (dias, modalidade de suspensão, juros/multa, parcial, estorno) | Ativar automações em produção | Provedor configura em "Política de cobrança"; regras novas exigem implementação |
 | Amostra autorizada do MK-Auth (com versão) | Migração real | Mapear para o CSV intermediário ou escrever conversor; conferir a prévia |
 | Provedor piloto, volume, RPO/RTO, processo fiscal, canal de alerta | E6 | Preencher a lista de entrada em produção em `docs/operacao.md` |

@@ -31,7 +31,7 @@ e perfil `VPN-SGP`: eles são atendidos por um SGP hoje. O pedido original de te
 ### 2.2 O SGP não suspende negando a autenticação
 
 Os perfis `SGP-BLOQUEADOS` do cenário usam `rate-limit=1k/1k` e um pool próprio de endereços (`bloqueados`): o cliente **conecta**, cai num endereço de bloqueio
-e vê uma página de aviso (a captura é feita no roteador). Nosso motor só implementa `Auth-Type := Reject` ("modalidade de demonstração", `apps/api/src/network/engine.ts:12`).
+e vê uma página de aviso (a captura é feita no roteador). Nosso motor só implementa `Auth-Type := Reject` como modalidade de demonstração.
 
 - Um provedor que hoje usa o perfil de bloqueio **perde a página de aviso** se migrar com a suspensão por rejeição.
 - A modalidade por perfil de bloqueio é pequena no motor (outro `Mikrotik-Group` e, opcionalmente, `Framed-Pool`) e já está listada em `docs/lab-pppoe.md` como pendência do driver.

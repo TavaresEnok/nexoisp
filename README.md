@@ -31,7 +31,6 @@ cd e2e && npm i && npx playwright install chromium && BASE=http://localhost:1808
 ```
 apps/api-go             Backend Go: API, identidade, rede, financeiro, importação, IPAM, campo, CRM, NOC, River, VPN e CLI
 db/migrations           Migrations goose (fonte única do schema)
-legacy/fastify          Referência TypeScript arquivada, fora da execução padrão e dos workspaces
 apps/web                React + Vite (painel e portal do assinante)
 services/network-agent  Agente Python (SQLite, drivers demo e mikrotik_radius)
 infra/compose           Ambiente local      infra/site  Agente + RADIUS no provedor      infra/prod  Instalação central
@@ -41,7 +40,7 @@ scripts                 Certificados dev, backup/restauração, pacote assinado 
 samples                 CSVs sintéticos do importador
 ```
 
-Produção: `./nexo prod up`, após configurar `infra/prod/.env` e os certificados. Administração: `./nexo prod db create-operator <email> <nome>` (senha em `NEXO_NEW_PASSWORD`), `./nexo prod db preflight` e `./nexo prod db rotate-secrets`. Consulte [execução Go](docs/migracao-go/EXECUCAO_GO.md) para implantação e retorno.
+Produção: `./nexo prod up`, após configurar `infra/prod/.env` e os certificados. Administração: `./nexo prod db create-operator <email> <nome>` (senha em `NEXO_NEW_PASSWORD`), `./nexo prod db preflight` e `./nexo prod db rotate-secrets`. Consulte a [operação](docs/operacao.md) para implantação e recuperação.
 
 Expansões pós-MVP: OLT/ONU (`docs/expansao-olt-onu.md`); IPAM/CGNAT, ordens de serviço, estoque, FTTH, CRM e NOC (`docs/expansoes-2-a-5.md`).
 O que ficou para depois, em ordem de prioridade: `docs/05-prioridades-pos-projeto.md`.

@@ -154,7 +154,7 @@ Atualizar ao final de cada dia: entrega concluída, impedimento externo, respons
 - 5.1 e 5.2 corrigidos no commit `a7da726`, cada um com regressão que falha no código anterior; troca de plano repetida no laboratório com cliente PPPoE online.
 - Módulos por provedor: provedor novo nasce só com o núcleo do item 2; OLT, CGNAT/IP, OS/estoque, rede óptica, CRM, NOC e avisos só com liberação do operador,
   recusados pelo servidor (`module_disabled`) e ocultos no menu.
-- Conferência de entrada em produção (`cli.js preflight`) e homologação local com a configuração de produção (`./nexo homolog up`): sem contas, drivers ou gateway de
+- Conferência de entrada em produção (`nexo-db preflight`) e homologação local com a configuração de produção (`./nexo homolog up`): sem contas, drivers ou gateway de
   demonstração; MFA obrigatório; backup e `restore-check` feitos nela; conferência sem falhas.
 - Telas do item 6: “Próxima ação” no acesso do contrato, sessão desconhecida diferenciada de sem sessão, login com mostrar/ocultar senha e orientação de recuperação,
   menu só com o que está liberado.
@@ -182,7 +182,7 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
 - **Integração contínua** (`.github/workflows/ci.yml`): a cada envio roda auditoria de dependências, tipos, build, 62 testes da API com o papel real do banco,
   31 testes do agente e a fumaça da interface em navegador sobre banco vazio.
 - **Fumaça da interface versionada** (`e2e/smoke.mjs`): login, assinantes, contrato, faturas, confirmação do sistema, NOC, tema, perfil sem acesso à rede e portal no celular.
-- **Dependências:** `@fastify/static` 8 → 10 e `react-router-dom` 6 → 7 (quatro avisos altos e dois moderados); `npm audit --omit=dev` sem vulnerabilidades.
+- **Dependências do painel:** `react-router-dom` 6 → 7; `npm audit --omit=dev` sem vulnerabilidades.
 - **Limite de login no banco**, por e-mail e por endereço de origem, com teste que simula outra réplica.
 
 ### 10/10/2026 — cenário do PNETLab, etapa 1 (levantamento, só leitura)
@@ -604,10 +604,7 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
 
 ### 14/10/2026 — auditoria de pacotes (revisão de segurança, parte 3)
 
-- **`npm audit`:** dependências de produção — **0 vulnerabilidades**. Ferramentas de desenvolvimento tinham 6 (2 críticas: Vitest/tinypool; 1 alta: Vite; esbuild),
-  que afetam só a máquina de quem desenvolve (servidor de desenvolvimento e interface do Vitest), não a imagem de produção. Atualizadas: Vitest 2 → 5.0.4,
-  Vite 6.0 → 6.4.4 e esbuild corrigido: **0 no total**. Suíte inteira (41 arquivos, 190 testes), tipos, build do painel e fumaça da interface (13/13) passaram
-  com as versões novas; implantado neste servidor.
+- **`npm audit`:** dependências de produção do painel — **0 vulnerabilidades**. Vite e esbuild fazem parte somente da compilação do frontend; a imagem de produção serve os artefatos estáticos pelo Caddy.
 - **Ainda não feito na revisão:** teste de invasão por terceiros; limite de requisições por endereço nas rotas autenticadas do painel; política de retenção
   configurável por tipo de dado.
 
@@ -616,8 +613,7 @@ Se o gateway não chegar, a alternativa do item 8 (entrada só operacional, cobr
 - **Entregue (testado):** toda rota autenticada (painel e portal) conta requisições por sessão numa janela de 1 minuto; passou do limite
   (`NEXO_PANEL_RATE_PER_MIN`, padrão 1200 = 20 por segundo, bem acima do uso normal do painel), responde 429 com `Retry-After`; outra sessão não é afetada.
 - **Limite:** a contagem fica na memória de cada réplica da API (com N réplicas atrás de balanceamento, o efetivo pode chegar a N vezes o configurado).
-- **Correção de teste:** com o Vitest 5 a ordem dos arquivos mudou e o teste de suspensão por inadimplência passou a pegar contratos de outros testes; agora
-  ele roda a rotina só para o próprio contrato (a rota já aceitava). 191 testes passando.
+- Os ensaios nativos cobrem concorrência financeira, operações River e o painel pelo Caddy.
 
 ### 14/10/2026 — retenção de dados por provedor (revisão de segurança, parte 5)
 

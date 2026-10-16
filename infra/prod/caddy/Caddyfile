@@ -1,4 +1,4 @@
-# Gerado por scripts/migracao-go/proxy.py; edite rotas.yaml.
+# Rotas HTTP nativas do backend Go.
 {$NEXO_DOMAIN:localhost} {
   log {
     format json
@@ -11,7 +11,7 @@
     handle @r0 {
       log_append nexo_route "DELETE /api/api-tokens/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -22,7 +22,7 @@
     handle @r1 {
       log_append nexo_route "DELETE /api/contracts/:id/addons/:addonId"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -33,7 +33,7 @@
     handle @r2 {
       log_append nexo_route "DELETE /api/contracts/:id/cpe/link"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -44,7 +44,7 @@
     handle @r3 {
       log_append nexo_route "DELETE /api/discounts/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -55,7 +55,7 @@
     handle @r4 {
       log_append nexo_route "DELETE /api/documents/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -66,7 +66,7 @@
     handle @r5 {
       log_append nexo_route "DELETE /api/ftth/boxes/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -77,7 +77,7 @@
     handle @r6 {
       log_append nexo_route "DELETE /api/ftth/drops/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -88,7 +88,7 @@
     handle @r7 {
       log_append nexo_route "DELETE /api/ipam/allocations/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -99,7 +99,7 @@
     handle @r8 {
       log_append nexo_route "DELETE /api/ipam/delegations/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -110,7 +110,7 @@
     handle @r9 {
       log_append nexo_route "DELETE /api/ipam/pools/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -121,7 +121,7 @@
     handle @r10 {
       log_append nexo_route "DELETE /api/notice-channels/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -132,7 +132,7 @@
     handle @r11 {
       log_append nexo_route "DELETE /api/notice-rules/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -143,7 +143,7 @@
     handle @r12 {
       log_append nexo_route "DELETE /api/notice-templates/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -154,7 +154,7 @@
     handle @r13 {
       log_append nexo_route "DELETE /api/scheduled-changes/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -165,7 +165,7 @@
     handle @r14 {
       log_append nexo_route "DELETE /api/sla-policies/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -176,7 +176,7 @@
     handle @r15 {
       log_append nexo_route "DELETE /api/tags/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -187,7 +187,7 @@
     handle @r16 {
       log_append nexo_route "DELETE /api/webhook-endpoints/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -198,7 +198,7 @@
     handle @r17 {
       log_append nexo_route "DELETE /api/work-orders/:id/helpers/:userId"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -209,7 +209,7 @@
     handle @r18 {
       log_append nexo_route "GET /api/acceptances/:id/evidence"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -220,7 +220,7 @@
     handle @r19 {
       log_append nexo_route "GET /api/acs/status"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -231,7 +231,7 @@
     handle @r20 {
       log_append nexo_route "GET /api/addons"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -242,7 +242,7 @@
     handle @r21 {
       log_append nexo_route "GET /api/agenda"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -253,7 +253,7 @@
     handle @r22 {
       log_append nexo_route "GET /api/agenda/free"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -264,7 +264,7 @@
     handle @r23 {
       log_append nexo_route "GET /api/agents"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -275,7 +275,7 @@
     handle @r24 {
       log_append nexo_route "GET /api/anatel/dici"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -286,7 +286,7 @@
     handle @r25 {
       log_append nexo_route "GET /api/anatel/municipalities"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -297,7 +297,7 @@
     handle @r26 {
       log_append nexo_route "GET /api/api-tokens"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -308,7 +308,7 @@
     handle @r27 {
       log_append nexo_route "GET /api/audit"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -319,7 +319,7 @@
     handle @r28 {
       log_append nexo_route "GET /api/catalogs"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -330,7 +330,7 @@
     handle @r29 {
       log_append nexo_route "GET /api/cgnat/plans"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -341,7 +341,7 @@
     handle @r30 {
       log_append nexo_route "GET /api/cgnat/plans/:id/lookup"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -352,7 +352,7 @@
     handle @r31 {
       log_append nexo_route "GET /api/cgnat/plans/:id/map"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -363,7 +363,7 @@
     handle @r32 {
       log_append nexo_route "GET /api/cgnat/plans/:id/script"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -374,7 +374,7 @@
     handle @r33 {
       log_append nexo_route "GET /api/cgnat/trace"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -385,7 +385,7 @@
     handle @r34 {
       log_append nexo_route "GET /api/commission-rules"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -396,7 +396,7 @@
     handle @r35 {
       log_append nexo_route "GET /api/companies"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -407,7 +407,7 @@
     handle @r36 {
       log_append nexo_route "GET /api/contracts"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -418,7 +418,7 @@
     handle @r37 {
       log_append nexo_route "GET /api/contracts/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -429,7 +429,7 @@
     handle @r38 {
       log_append nexo_route "GET /api/contracts/:id/acceptances"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -440,7 +440,7 @@
     handle @r39 {
       log_append nexo_route "GET /api/contracts/:id/addons"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -451,7 +451,7 @@
     handle @r40 {
       log_append nexo_route "GET /api/contracts/:id/amendments"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -462,7 +462,7 @@
     handle @r41 {
       log_append nexo_route "GET /api/contracts/:id/availability"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -473,7 +473,7 @@
     handle @r42 {
       log_append nexo_route "GET /api/contracts/:id/cpe"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -484,7 +484,7 @@
     handle @r43 {
       log_append nexo_route "GET /api/contracts/:id/cpe/candidates"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -495,7 +495,7 @@
     handle @r44 {
       log_append nexo_route "GET /api/contracts/:id/diagnosis"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -506,7 +506,7 @@
     handle @r45 {
       log_append nexo_route "GET /api/contracts/:id/discounts"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -517,7 +517,7 @@
     handle @r46 {
       log_append nexo_route "GET /api/contracts/:id/equipment"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -528,7 +528,7 @@
     handle @r47 {
       log_append nexo_route "GET /api/contracts/:id/finance"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -539,7 +539,7 @@
     handle @r48 {
       log_append nexo_route "GET /api/contracts/:id/ftth"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -550,7 +550,7 @@
     handle @r49 {
       log_append nexo_route "GET /api/contracts/:id/install-address"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -561,7 +561,7 @@
     handle @r50 {
       log_append nexo_route "GET /api/contracts/:id/ips"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -572,7 +572,7 @@
     handle @r51 {
       log_append nexo_route "GET /api/contracts/:id/ipv6"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -583,7 +583,7 @@
     handle @r52 {
       log_append nexo_route "GET /api/contracts/:id/onu"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -594,7 +594,7 @@
     handle @r53 {
       log_append nexo_route "GET /api/contracts/:id/radius-log"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -605,7 +605,7 @@
     handle @r54 {
       log_append nexo_route "GET /api/contracts/:id/scheduled-changes"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -616,7 +616,7 @@
     handle @r55 {
       log_append nexo_route "GET /api/contracts/:id/service"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -627,7 +627,7 @@
     handle @r56 {
       log_append nexo_route "GET /api/contracts/:id/sessions"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -638,7 +638,7 @@
     handle @r57 {
       log_append nexo_route "GET /api/contracts/:id/states"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -649,7 +649,7 @@
     handle @r58 {
       log_append nexo_route "GET /api/contracts/:id/termination-quote"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -660,7 +660,7 @@
     handle @r59 {
       log_append nexo_route "GET /api/contracts/:id/trust-release"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -671,7 +671,7 @@
     handle @r60 {
       log_append nexo_route "GET /api/contracts/:id/usage"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -682,7 +682,7 @@
     handle @r61 {
       log_append nexo_route "GET /api/contracts/:id/usage-series"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -693,7 +693,7 @@
     handle @r62 {
       log_append nexo_route "GET /api/crm/report"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -704,7 +704,7 @@
     handle @r63 {
       log_append nexo_route "GET /api/custom-fields"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -715,7 +715,7 @@
     handle @r64 {
       log_append nexo_route "GET /api/dashboard"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -726,7 +726,7 @@
     handle @r65 {
       log_append nexo_route "GET /api/dashboard/panels"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -737,7 +737,7 @@
     handle @r66 {
       log_append nexo_route "GET /api/devices"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -748,7 +748,7 @@
     handle @r67 {
       log_append nexo_route "GET /api/documents/:id/download"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -759,7 +759,7 @@
     handle @r68 {
       log_append nexo_route "GET /api/finance/export"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -770,7 +770,7 @@
     handle @r69 {
       log_append nexo_route "GET /api/finance/monthly"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -781,7 +781,7 @@
     handle @r70 {
       log_append nexo_route "GET /api/finance/reconciliation"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -792,7 +792,7 @@
     handle @r71 {
       log_append nexo_route "GET /api/finance/reports/aging"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -803,7 +803,7 @@
     handle @r72 {
       log_append nexo_route "GET /api/finance/reports/receipts"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -814,7 +814,7 @@
     handle @r73 {
       log_append nexo_route "GET /api/finance/reports/to-cancel"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -825,7 +825,7 @@
     handle @r74 {
       log_append nexo_route "GET /api/finance/reports/without-invoice"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -836,7 +836,7 @@
     handle @r75 {
       log_append nexo_route "GET /api/finance/settings"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -847,7 +847,7 @@
     handle @r76 {
       log_append nexo_route "GET /api/finance/summary"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -858,7 +858,7 @@
     handle @r77 {
       log_append nexo_route "GET /api/ftth/boxes"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -869,7 +869,7 @@
     handle @r78 {
       log_append nexo_route "GET /api/ftth/boxes/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -880,7 +880,7 @@
     handle @r79 {
       log_append nexo_route "GET /api/health"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -891,7 +891,7 @@
     handle @r80 {
       log_append nexo_route "GET /api/import/batches"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -902,7 +902,7 @@
     handle @r81 {
       log_append nexo_route "GET /api/import/batches/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -913,7 +913,7 @@
     handle @r82 {
       log_append nexo_route "GET /api/install-kits"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -924,7 +924,7 @@
     handle @r83 {
       log_append nexo_route "GET /api/integrations/catalog"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -935,7 +935,7 @@
     handle @r84 {
       log_append nexo_route "GET /api/invoices"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -946,7 +946,7 @@
     handle @r85 {
       log_append nexo_route "GET /api/invoices/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -957,7 +957,7 @@
     handle @r86 {
       log_append nexo_route "GET /api/invoices/:id/due"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -968,7 +968,7 @@
     handle @r87 {
       log_append nexo_route "GET /api/ipam/pools"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -979,7 +979,7 @@
     handle @r88 {
       log_append nexo_route "GET /api/ipam/pools/:id/allocations"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -990,7 +990,7 @@
     handle @r89 {
       log_append nexo_route "GET /api/ipam/pools/:id/delegations"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1001,7 +1001,7 @@
     handle @r90 {
       log_append nexo_route "GET /api/leads"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1012,7 +1012,7 @@
     handle @r91 {
       log_append nexo_route "GET /api/leads/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1023,7 +1023,7 @@
     handle @r92 {
       log_append nexo_route "GET /api/leads/summary"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1034,7 +1034,7 @@
     handle @r93 {
       log_append nexo_route "GET /api/legal/ip-lookup/history"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1045,7 +1045,7 @@
     handle @r94 {
       log_append nexo_route "GET /api/maintenance-notices"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1056,7 +1056,7 @@
     handle @r95 {
       log_append nexo_route "GET /api/maintenance-notices/channels"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1067,7 +1067,7 @@
     handle @r96 {
       log_append nexo_route "GET /api/map/coverage"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1078,7 +1078,7 @@
     handle @r97 {
       log_append nexo_route "GET /api/map/points"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1089,7 +1089,7 @@
     handle @r98 {
       log_append nexo_route "GET /api/me"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1100,7 +1100,7 @@
     handle @r99 {
       log_append nexo_route "GET /api/network/drift"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1111,7 +1111,7 @@
     handle @r100 {
       log_append nexo_route "GET /api/network/health"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1122,7 +1122,7 @@
     handle @r101 {
       log_append nexo_route "GET /api/network/online"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1133,7 +1133,7 @@
     handle @r102 {
       log_append nexo_route "GET /api/noc/overview"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1144,7 +1144,7 @@
     handle @r103 {
       log_append nexo_route "GET /api/noc/settings"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1155,7 +1155,7 @@
     handle @r104 {
       log_append nexo_route "GET /api/notice-channels"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1166,7 +1166,7 @@
     handle @r105 {
       log_append nexo_route "GET /api/notice-log"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1177,7 +1177,7 @@
     handle @r106 {
       log_append nexo_route "GET /api/notice-page"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1188,7 +1188,7 @@
     handle @r107 {
       log_append nexo_route "GET /api/notice-rules"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1199,7 +1199,7 @@
     handle @r108 {
       log_append nexo_route "GET /api/notice-templates"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1210,7 +1210,7 @@
     handle @r109 {
       log_append nexo_route "GET /api/notifications"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1221,7 +1221,7 @@
     handle @r110 {
       log_append nexo_route "GET /api/olt/discoveries"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1232,7 +1232,7 @@
     handle @r111 {
       log_append nexo_route "GET /api/onus"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1243,7 +1243,7 @@
     handle @r112 {
       log_append nexo_route "GET /api/operations"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1254,7 +1254,7 @@
     handle @r113 {
       log_append nexo_route "GET /api/operations/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1265,7 +1265,7 @@
     handle @r114 {
       log_append nexo_route "GET /api/plans"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1276,7 +1276,7 @@
     handle @r115 {
       log_append nexo_route "GET /api/plans/:id/versions"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1287,7 +1287,7 @@
     handle @r116 {
       log_append nexo_route "GET /api/pops"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1298,7 +1298,7 @@
     handle @r117 {
       log_append nexo_route "GET /api/portal/acceptances"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1309,7 +1309,7 @@
     handle @r118 {
       log_append nexo_route "GET /api/portal/cpe"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1320,7 +1320,7 @@
     handle @r119 {
       log_append nexo_route "GET /api/portal/overview"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1331,7 +1331,7 @@
     handle @r120 {
       log_append nexo_route "GET /api/portal/surveys"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1342,7 +1342,7 @@
     handle @r121 {
       log_append nexo_route "GET /api/portal/tickets"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1353,7 +1353,7 @@
     handle @r122 {
       log_append nexo_route "GET /api/portal/tickets/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1364,7 +1364,7 @@
     handle @r123 {
       log_append nexo_route "GET /api/portal/usage-series"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1375,7 +1375,7 @@
     handle @r124 {
       log_append nexo_route "GET /api/radius/allowed-sources"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1386,7 +1386,7 @@
     handle @r125 {
       log_append nexo_route "GET /api/radius/devices/:id/setup"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1397,7 +1397,7 @@
     handle @r126 {
       log_append nexo_route "GET /api/radius/status"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1408,7 +1408,7 @@
     handle @r127 {
       log_append nexo_route "GET /api/reports/commissions"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1419,7 +1419,7 @@
     handle @r128 {
       log_append nexo_route "GET /api/reports/referrals"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1430,7 +1430,7 @@
     handle @r129 {
       log_append nexo_route "GET /api/reports/sla"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1441,7 +1441,7 @@
     handle @r130 {
       log_append nexo_route "GET /api/search"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1452,7 +1452,7 @@
     handle @r131 {
       log_append nexo_route "GET /api/settings/retention"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1463,7 +1463,7 @@
     handle @r132 {
       log_append nexo_route "GET /api/sla-policies"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1474,7 +1474,7 @@
     handle @r133 {
       log_append nexo_route "GET /api/staff"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1485,7 +1485,7 @@
     handle @r134 {
       log_append nexo_route "GET /api/stock/items"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1496,7 +1496,7 @@
     handle @r135 {
       log_append nexo_route "GET /api/stock/items/:id/movements"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1507,7 +1507,7 @@
     handle @r136 {
       log_append nexo_route "GET /api/stock/items/:id/units"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1518,7 +1518,7 @@
     handle @r137 {
       log_append nexo_route "GET /api/stock/units"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1529,7 +1529,7 @@
     handle @r138 {
       log_append nexo_route "GET /api/stock/units/:id/events"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1540,7 +1540,7 @@
     handle @r139 {
       log_append nexo_route "GET /api/subscribers"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1551,7 +1551,7 @@
     handle @r140 {
       log_append nexo_route "GET /api/subscribers/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1562,7 +1562,7 @@
     handle @r141 {
       log_append nexo_route "GET /api/subscribers/:id/contacts"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1573,7 +1573,7 @@
     handle @r142 {
       log_append nexo_route "GET /api/subscribers/:id/documents"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1584,7 +1584,7 @@
     handle @r143 {
       log_append nexo_route "GET /api/subscribers/:id/lgpd-export"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1595,7 +1595,7 @@
     handle @r144 {
       log_append nexo_route "GET /api/subscribers/:id/notes"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1606,7 +1606,7 @@
     handle @r145 {
       log_append nexo_route "GET /api/subscribers/:id/portal-access"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1617,7 +1617,7 @@
     handle @r146 {
       log_append nexo_route "GET /api/subscribers/:id/timeline"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1628,7 +1628,7 @@
     handle @r147 {
       log_append nexo_route "GET /api/surveys"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1639,7 +1639,7 @@
     handle @r148 {
       log_append nexo_route "GET /api/tags"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1650,7 +1650,7 @@
     handle @r149 {
       log_append nexo_route "GET /api/tenants"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1661,7 +1661,7 @@
     handle @r150 {
       log_append nexo_route "GET /api/tickets"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1672,7 +1672,7 @@
     handle @r151 {
       log_append nexo_route "GET /api/tickets/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1683,7 +1683,7 @@
     handle @r152 {
       log_append nexo_route "GET /api/today"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1694,7 +1694,7 @@
     handle @r153 {
       log_append nexo_route "GET /api/users"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1705,7 +1705,7 @@
     handle @r154 {
       log_append nexo_route "GET /api/users/:id/pops"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1716,7 +1716,7 @@
     handle @r155 {
       log_append nexo_route "GET /api/webhook-deliveries"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1727,7 +1727,7 @@
     handle @r156 {
       log_append nexo_route "GET /api/webhook-endpoints"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1738,7 +1738,7 @@
     handle @r157 {
       log_append nexo_route "GET /api/work-orders"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1749,7 +1749,7 @@
     handle @r158 {
       log_append nexo_route "GET /api/work-orders/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1760,7 +1760,7 @@
     handle @r159 {
       log_append nexo_route "GET /api/work-orders/:id/helpers"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1771,7 +1771,7 @@
     handle @r160 {
       log_append nexo_route "GET /aviso/:slug"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1782,7 +1782,7 @@
     handle @r161 {
       log_append nexo_route "GET /public/v1"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1793,7 +1793,7 @@
     handle @r162 {
       log_append nexo_route "GET /public/v1/contracts"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1804,7 +1804,7 @@
     handle @r163 {
       log_append nexo_route "GET /public/v1/invoices"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1815,7 +1815,7 @@
     handle @r164 {
       log_append nexo_route "GET /public/v1/subscribers"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1826,7 +1826,7 @@
     handle @r165 {
       log_append nexo_route "GET /public/v1/subscribers/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1837,7 +1837,7 @@
     handle @r166 {
       log_append nexo_route "GET /public/v1/work-orders/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1848,7 +1848,7 @@
     handle @r167 {
       log_append nexo_route "PATCH /api/addons/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1859,7 +1859,7 @@
     handle @r168 {
       log_append nexo_route "PATCH /api/agents/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1870,7 +1870,7 @@
     handle @r169 {
       log_append nexo_route "PATCH /api/catalogs/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1881,7 +1881,7 @@
     handle @r170 {
       log_append nexo_route "PATCH /api/companies/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1892,7 +1892,7 @@
     handle @r171 {
       log_append nexo_route "PATCH /api/contracts/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1903,7 +1903,7 @@
     handle @r172 {
       log_append nexo_route "PATCH /api/custom-fields/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1914,7 +1914,7 @@
     handle @r173 {
       log_append nexo_route "PATCH /api/devices/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1925,7 +1925,7 @@
     handle @r174 {
       log_append nexo_route "PATCH /api/ftth/boxes/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1936,7 +1936,7 @@
     handle @r175 {
       log_append nexo_route "PATCH /api/install-kits/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1947,7 +1947,7 @@
     handle @r176 {
       log_append nexo_route "PATCH /api/ipam/pools/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1958,7 +1958,7 @@
     handle @r177 {
       log_append nexo_route "PATCH /api/leads/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1969,7 +1969,7 @@
     handle @r178 {
       log_append nexo_route "PATCH /api/notes/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1980,7 +1980,7 @@
     handle @r179 {
       log_append nexo_route "PATCH /api/notice-channels/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -1991,7 +1991,7 @@
     handle @r180 {
       log_append nexo_route "PATCH /api/notice-rules/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2002,7 +2002,7 @@
     handle @r181 {
       log_append nexo_route "PATCH /api/plans/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2013,7 +2013,7 @@
     handle @r182 {
       log_append nexo_route "PATCH /api/pops/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2024,7 +2024,7 @@
     handle @r183 {
       log_append nexo_route "PATCH /api/radius/devices/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2035,7 +2035,7 @@
     handle @r184 {
       log_append nexo_route "PATCH /api/resources/:id/mac"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2046,7 +2046,7 @@
     handle @r185 {
       log_append nexo_route "PATCH /api/resources/:id/secret"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2057,7 +2057,7 @@
     handle @r186 {
       log_append nexo_route "PATCH /api/sla-policies/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2068,7 +2068,7 @@
     handle @r187 {
       log_append nexo_route "PATCH /api/stock/items/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2079,7 +2079,7 @@
     handle @r188 {
       log_append nexo_route "PATCH /api/subscribers/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2090,7 +2090,7 @@
     handle @r189 {
       log_append nexo_route "PATCH /api/tenants/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2101,7 +2101,7 @@
     handle @r190 {
       log_append nexo_route "PATCH /api/tickets/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2112,7 +2112,7 @@
     handle @r191 {
       log_append nexo_route "PATCH /api/users/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2123,7 +2123,7 @@
     handle @r192 {
       log_append nexo_route "PATCH /api/webhook-endpoints/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2134,7 +2134,7 @@
     handle @r193 {
       log_append nexo_route "PATCH /api/work-orders/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2145,7 +2145,7 @@
     handle @r204 {
       log_append nexo_route "POST /api/acceptances/:id/cancel"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2156,7 +2156,7 @@
     handle @r205 {
       log_append nexo_route "POST /api/addons"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2167,7 +2167,7 @@
     handle @r206 {
       log_append nexo_route "POST /api/agents"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2178,7 +2178,7 @@
     handle @r207 {
       log_append nexo_route "POST /api/api-tokens"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2189,7 +2189,7 @@
     handle @r208 {
       log_append nexo_route "POST /api/auth/login"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2200,7 +2200,7 @@
     handle @r209 {
       log_append nexo_route "POST /api/auth/logout"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2211,7 +2211,7 @@
     handle @r210 {
       log_append nexo_route "POST /api/catalogs"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2222,7 +2222,7 @@
     handle @r211 {
       log_append nexo_route "POST /api/cgnat/plans"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2233,7 +2233,7 @@
     handle @r212 {
       log_append nexo_route "POST /api/cgnat/plans/:id/retire"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2244,7 +2244,7 @@
     handle @r213 {
       log_append nexo_route "POST /api/cgnat/plans/check"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2255,7 +2255,7 @@
     handle @r214 {
       log_append nexo_route "POST /api/commission-rules"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2266,7 +2266,7 @@
     handle @r215 {
       log_append nexo_route "POST /api/companies"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2277,7 +2277,7 @@
     handle @r216 {
       log_append nexo_route "POST /api/contracts"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2288,7 +2288,7 @@
     handle @r217 {
       log_append nexo_route "POST /api/contracts/:id/acceptances"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2299,7 +2299,7 @@
     handle @r218 {
       log_append nexo_route "POST /api/contracts/:id/addons"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2310,7 +2310,7 @@
     handle @r219 {
       log_append nexo_route "POST /api/contracts/:id/agreement"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2321,7 +2321,7 @@
     handle @r220 {
       log_append nexo_route "POST /api/contracts/:id/amendments"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2332,7 +2332,7 @@
     handle @r221 {
       log_append nexo_route "POST /api/contracts/:id/cpe/link"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2343,7 +2343,7 @@
     handle @r222 {
       log_append nexo_route "POST /api/contracts/:id/cpe/reboot"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2354,7 +2354,7 @@
     handle @r223 {
       log_append nexo_route "POST /api/contracts/:id/cpe/refresh"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2365,7 +2365,7 @@
     handle @r224 {
       log_append nexo_route "POST /api/contracts/:id/cpe/wifi"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2376,7 +2376,7 @@
     handle @r225 {
       log_append nexo_route "POST /api/contracts/:id/discounts"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2387,7 +2387,7 @@
     handle @r226 {
       log_append nexo_route "POST /api/contracts/:id/onu"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2398,7 +2398,7 @@
     handle @r227 {
       log_append nexo_route "POST /api/contracts/:id/scheduled-changes"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2409,7 +2409,7 @@
     handle @r228 {
       log_append nexo_route "POST /api/contracts/:id/service"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2420,7 +2420,7 @@
     handle @r229 {
       log_append nexo_route "POST /api/contracts/:id/trust-release"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2431,7 +2431,7 @@
     handle @r230 {
       log_append nexo_route "POST /api/custom-fields"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2442,7 +2442,7 @@
     handle @r231 {
       log_append nexo_route "POST /api/demo-gateway/pay"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2453,7 +2453,7 @@
     handle @r232 {
       log_append nexo_route "POST /api/devices"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2464,7 +2464,7 @@
     handle @r233 {
       log_append nexo_route "POST /api/devices/:id/convert-to-integrated"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2475,7 +2475,7 @@
     handle @r234 {
       log_append nexo_route "POST /api/devices/:id/reapply"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2486,7 +2486,7 @@
     handle @r235 {
       log_append nexo_route "POST /api/finance/generate"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2497,7 +2497,7 @@
     handle @r236 {
       log_append nexo_route "POST /api/finance/reconcile"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2508,7 +2508,7 @@
     handle @r237 {
       log_append nexo_route "POST /api/finance/run-auto-suspend"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2519,7 +2519,7 @@
     handle @r238 {
       log_append nexo_route "POST /api/ftth/boxes"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2530,7 +2530,7 @@
     handle @r239 {
       log_append nexo_route "POST /api/ftth/boxes/:id/drops"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2541,7 +2541,7 @@
     handle @r240 {
       log_append nexo_route "POST /api/import/apply"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2552,7 +2552,7 @@
     handle @r241 {
       log_append nexo_route "POST /api/import/batches/:id/provision"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2563,7 +2563,7 @@
     handle @r242 {
       log_append nexo_route "POST /api/import/preview"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2574,7 +2574,7 @@
     handle @r243 {
       log_append nexo_route "POST /api/install-kits"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2585,7 +2585,7 @@
     handle @r244 {
       log_append nexo_route "POST /api/invoices"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2596,7 +2596,7 @@
     handle @r245 {
       log_append nexo_route "POST /api/invoices/:id/cancel"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2607,7 +2607,7 @@
     handle @r246 {
       log_append nexo_route "POST /api/invoices/:id/manual-payment"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2618,7 +2618,7 @@
     handle @r247 {
       log_append nexo_route "POST /api/invoices/:id/payments/:paymentId/reverse"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2629,7 +2629,7 @@
     handle @r248 {
       log_append nexo_route "POST /api/invoices/:id/resolve"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2640,7 +2640,7 @@
     handle @r249 {
       log_append nexo_route "POST /api/ipam/pools"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2651,7 +2651,7 @@
     handle @r250 {
       log_append nexo_route "POST /api/ipam/pools/:id/allocations"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2662,7 +2662,7 @@
     handle @r251 {
       log_append nexo_route "POST /api/ipam/pools/:id/delegations"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2673,7 +2673,7 @@
     handle @r252 {
       log_append nexo_route "POST /api/leads"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2684,7 +2684,7 @@
     handle @r253 {
       log_append nexo_route "POST /api/leads/:id/convert"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2695,7 +2695,7 @@
     handle @r254 {
       log_append nexo_route "POST /api/leads/:id/notes"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2706,7 +2706,7 @@
     handle @r255 {
       log_append nexo_route "POST /api/leads/:id/stage"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2717,7 +2717,7 @@
     handle @r256 {
       log_append nexo_route "POST /api/legal/ip-lookup"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2728,7 +2728,7 @@
     handle @r257 {
       log_append nexo_route "POST /api/maintenance-notices"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2739,7 +2739,7 @@
     handle @r258 {
       log_append nexo_route "POST /api/maintenance-notices/:id/cancel"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2750,7 +2750,7 @@
     handle @r259 {
       log_append nexo_route "POST /api/maintenance-notices/:id/notify"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2761,7 +2761,7 @@
     handle @r260 {
       log_append nexo_route "POST /api/me/mfa/disable"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2772,7 +2772,7 @@
     handle @r261 {
       log_append nexo_route "POST /api/me/mfa/enable"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2783,7 +2783,7 @@
     handle @r262 {
       log_append nexo_route "POST /api/me/mfa/setup"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2794,7 +2794,7 @@
     handle @r263 {
       log_append nexo_route "POST /api/me/password"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2805,7 +2805,7 @@
     handle @r264 {
       log_append nexo_route "POST /api/network/disconnect"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2816,7 +2816,7 @@
     handle @r265 {
       log_append nexo_route "POST /api/notice-channels"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2827,7 +2827,7 @@
     handle @r266 {
       log_append nexo_route "POST /api/notice-channels/:id/test"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2838,7 +2838,7 @@
     handle @r267 {
       log_append nexo_route "POST /api/notice-rules"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2849,7 +2849,7 @@
     handle @r268 {
       log_append nexo_route "POST /api/notice-rules/run"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2860,7 +2860,7 @@
     handle @r269 {
       log_append nexo_route "POST /api/notice-templates"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2871,7 +2871,7 @@
     handle @r270 {
       log_append nexo_route "POST /api/notifications/deliver"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2882,7 +2882,7 @@
     handle @r271 {
       log_append nexo_route "POST /api/notifications/test"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2893,7 +2893,7 @@
     handle @r272 {
       log_append nexo_route "POST /api/onus/:id/:action"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2904,7 +2904,7 @@
     handle @r273 {
       log_append nexo_route "POST /api/plans"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2915,7 +2915,7 @@
     handle @r274 {
       log_append nexo_route "POST /api/plans/:id/reapply"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2926,7 +2926,7 @@
     handle @r275 {
       log_append nexo_route "POST /api/plans/:id/versions"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2937,7 +2937,7 @@
     handle @r276 {
       log_append nexo_route "POST /api/pops"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2948,7 +2948,7 @@
     handle @r277 {
       log_append nexo_route "POST /api/portal/acceptances/:id/accept"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2959,7 +2959,7 @@
     handle @r278 {
       log_append nexo_route "POST /api/portal/cpe/:contractId/wifi"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2970,7 +2970,7 @@
     handle @r279 {
       log_append nexo_route "POST /api/portal/surveys/:id"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2981,7 +2981,7 @@
     handle @r280 {
       log_append nexo_route "POST /api/portal/tickets"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -2992,7 +2992,7 @@
     handle @r281 {
       log_append nexo_route "POST /api/portal/tickets/:id/messages"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3003,7 +3003,7 @@
     handle @r282 {
       log_append nexo_route "POST /api/portal/trust-release"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3014,7 +3014,7 @@
     handle @r283 {
       log_append nexo_route "POST /api/radius/devices"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3025,7 +3025,7 @@
     handle @r284 {
       log_append nexo_route "POST /api/radius/devices/:id/secret"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3036,7 +3036,7 @@
     handle @r285 {
       log_append nexo_route "POST /api/radius/devices/:id/tunnel"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3047,7 +3047,7 @@
     handle @r286 {
       log_append nexo_route "POST /api/resources/:id/:action"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3058,7 +3058,7 @@
     handle @r287 {
       log_append nexo_route "POST /api/sla-policies"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3069,7 +3069,7 @@
     handle @r288 {
       log_append nexo_route "POST /api/stock/items"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3080,7 +3080,7 @@
     handle @r289 {
       log_append nexo_route "POST /api/stock/items/:id/movements"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3091,7 +3091,7 @@
     handle @r290 {
       log_append nexo_route "POST /api/stock/items/:id/units"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3102,7 +3102,7 @@
     handle @r291 {
       log_append nexo_route "POST /api/stock/units/:id/status"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3113,7 +3113,7 @@
     handle @r292 {
       log_append nexo_route "POST /api/stock/units/:id/transfer"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3124,7 +3124,7 @@
     handle @r293 {
       log_append nexo_route "POST /api/subscribers"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3135,7 +3135,7 @@
     handle @r294 {
       log_append nexo_route "POST /api/subscribers/:id/anonymize"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3146,7 +3146,7 @@
     handle @r295 {
       log_append nexo_route "POST /api/subscribers/:id/documents"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3157,7 +3157,7 @@
     handle @r296 {
       log_append nexo_route "POST /api/subscribers/:id/notes"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3168,7 +3168,7 @@
     handle @r297 {
       log_append nexo_route "POST /api/subscribers/:id/portal-access"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3179,7 +3179,7 @@
     handle @r298 {
       log_append nexo_route "POST /api/support/enter"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3190,7 +3190,7 @@
     handle @r299 {
       log_append nexo_route "POST /api/support/exit"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3201,7 +3201,7 @@
     handle @r300 {
       log_append nexo_route "POST /api/tags"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3212,7 +3212,7 @@
     handle @r301 {
       log_append nexo_route "POST /api/tenants"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3223,7 +3223,7 @@
     handle @r302 {
       log_append nexo_route "POST /api/tickets"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3234,7 +3234,7 @@
     handle @r303 {
       log_append nexo_route "POST /api/tickets/:id/messages"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3245,7 +3245,7 @@
     handle @r304 {
       log_append nexo_route "POST /api/tickets/:id/status"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3256,7 +3256,7 @@
     handle @r305 {
       log_append nexo_route "POST /api/users"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3267,7 +3267,7 @@
     handle @r306 {
       log_append nexo_route "POST /api/webhook-deliveries/:id/retry"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3278,7 +3278,7 @@
     handle @r307 {
       log_append nexo_route "POST /api/webhook-endpoints"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3289,7 +3289,7 @@
     handle @r308 {
       log_append nexo_route "POST /api/webhook-endpoints/:id/rotate-secret"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3300,7 +3300,7 @@
     handle @r309 {
       log_append nexo_route "POST /api/webhook-endpoints/:id/test"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3311,7 +3311,7 @@
     handle @r310 {
       log_append nexo_route "POST /api/webhooks/gateway/:gateway"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3322,7 +3322,7 @@
     handle @r311 {
       log_append nexo_route "POST /api/work-orders"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3333,7 +3333,7 @@
     handle @r312 {
       log_append nexo_route "POST /api/work-orders/:id/checklist"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3344,7 +3344,7 @@
     handle @r313 {
       log_append nexo_route "POST /api/work-orders/:id/checklist/:itemId"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3355,7 +3355,7 @@
     handle @r314 {
       log_append nexo_route "POST /api/work-orders/:id/helpers"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3366,7 +3366,7 @@
     handle @r315 {
       log_append nexo_route "POST /api/work-orders/:id/kit"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3377,7 +3377,7 @@
     handle @r316 {
       log_append nexo_route "POST /api/work-orders/:id/materials"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3388,7 +3388,7 @@
     handle @r317 {
       log_append nexo_route "POST /api/work-orders/:id/notes"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3399,7 +3399,7 @@
     handle @r318 {
       log_append nexo_route "POST /api/work-orders/:id/status"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3410,7 +3410,7 @@
     handle @r319 {
       log_append nexo_route "POST /api/work-orders/:id/units"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3421,7 +3421,7 @@
     handle @r320 {
       log_append nexo_route "POST /public/v1/tickets"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3432,7 +3432,7 @@
     handle @r321 {
       log_append nexo_route "POST /public/v1/work-orders"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3443,7 +3443,7 @@
     handle @r322 {
       log_append nexo_route "PUT /api/anatel/municipalities"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3454,7 +3454,7 @@
     handle @r323 {
       log_append nexo_route "PUT /api/contracts/:id/company"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3465,7 +3465,7 @@
     handle @r324 {
       log_append nexo_route "PUT /api/contracts/:id/credit-restriction"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3476,7 +3476,7 @@
     handle @r325 {
       log_append nexo_route "PUT /api/contracts/:id/custom"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3487,7 +3487,7 @@
     handle @r326 {
       log_append nexo_route "PUT /api/contracts/:id/install-address"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3498,7 +3498,7 @@
     handle @r327 {
       log_append nexo_route "PUT /api/contracts/:id/location"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3509,7 +3509,7 @@
     handle @r328 {
       log_append nexo_route "PUT /api/contracts/:id/loyalty"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3520,7 +3520,7 @@
     handle @r329 {
       log_append nexo_route "PUT /api/contracts/:id/pop"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3531,7 +3531,7 @@
     handle @r330 {
       log_append nexo_route "PUT /api/contracts/:id/referral"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3542,7 +3542,7 @@
     handle @r331 {
       log_append nexo_route "PUT /api/contracts/:id/service-area"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3553,7 +3553,7 @@
     handle @r332 {
       log_append nexo_route "PUT /api/contracts/:id/tags"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3564,7 +3564,7 @@
     handle @r333 {
       log_append nexo_route "PUT /api/finance/settings"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3575,7 +3575,7 @@
     handle @r334 {
       log_append nexo_route "PUT /api/noc/settings"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3586,7 +3586,7 @@
     handle @r335 {
       log_append nexo_route "PUT /api/notice-page"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3597,7 +3597,7 @@
     handle @r336 {
       log_append nexo_route "PUT /api/notifications/settings"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3608,7 +3608,7 @@
     handle @r337 {
       log_append nexo_route "PUT /api/plans/:id/dunning"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3619,7 +3619,7 @@
     handle @r338 {
       log_append nexo_route "PUT /api/plans/:id/loyalty"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3630,7 +3630,7 @@
     handle @r339 {
       log_append nexo_route "PUT /api/plans/:id/network"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3641,7 +3641,7 @@
     handle @r340 {
       log_append nexo_route "PUT /api/plans/:id/technology"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3652,7 +3652,7 @@
     handle @r341 {
       log_append nexo_route "PUT /api/pops/:id/location"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3663,7 +3663,7 @@
     handle @r342 {
       log_append nexo_route "PUT /api/settings/retention"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3674,7 +3674,7 @@
     handle @r343 {
       log_append nexo_route "PUT /api/subscribers/:id/contacts"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3685,7 +3685,7 @@
     handle @r344 {
       log_append nexo_route "PUT /api/subscribers/:id/custom"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3696,7 +3696,7 @@
     handle @r345 {
       log_append nexo_route "PUT /api/users/:id/pops"
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080} {
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
         lb_try_duration 0
       }
     }
@@ -3704,7 +3704,7 @@
     handle @backend {
       log_append nexo_route unmatched-api
       log_append nexo_upstream {http.reverse_proxy.upstream.address}
-      reverse_proxy {$NEXO_FASTIFY_UPSTREAM:api:8080}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080}
     }
     handle {
       log_append nexo_route static

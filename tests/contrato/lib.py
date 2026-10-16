@@ -2,7 +2,10 @@
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
+import tempfile
+import time
 import urllib.error
 import urllib.request
 
@@ -61,3 +64,37 @@ def go_env(database=DB_NAME):
                 DATABASE_URL_APP=f'postgres://nexo_app:fase1-app-local@127.0.0.1:{DB_PORT}/{database}',
                 NEXO_GO_DB_PASSWORD='fase1-go-local', NEXO_APP_DB_PASSWORD='fase1-app-local',
                 NEXO_REQUIRE_ADMIN_MFA='1', NEXO_AGENT_MTLS='off')
+
+
+def go(*args, **kwargs):
+    env = dict(kwargs.pop('env', os.environ))
+    if args and args[0] == 'build':
+        env['CGO_ENABLED'] = '0'
+    kwargs['env'] = env
+    executable = os.getenv('NEXO_GO_BIN') or shutil.which('go')
+    if executable:
+        return command([executable, *args], cwd=ROOT / 'apps/api-go', **kwargs)
+    cache = LOCAL / 'go-cache'
+    cache.mkdir(exist_ok=True, parents=True)
+    image = 'nexo-fase1-go-tools:local'
+    if subprocess.run(['docker', 'image', 'inspect', image], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode:
+        with tempfile.TemporaryDirectory(prefix='nexo-go-tools-') as temp:
+            shutil.copyfile(ROOT / 'tests/contrato/Dockerfile.tools', Path(temp) / 'Dockerfile')
+            command(['docker', 'build', '--network', 'host', '-t', image, temp])
+    return command(['docker', 'run', '--rm', '--network', 'host', '--security-opt', 'seccomp=unconfined',
+                    '-v', str(ROOT) + ':/app', '-v', str(cache) + ':/go', '-w', '/app/apps/api-go',
+                    '-e', 'DATABASE_URL_OWNER', '-e', 'NEXO_GO_DB_PASSWORD', '-e', 'NEXO_APP_DB_PASSWORD',
+                    '-e', 'NEXO_GO_TEST_DATABASE_URL', '-e', 'CGO_ENABLED', image, 'go', *args], **kwargs)
+
+
+def wait(base, path, process=None):
+    for _ in range(100):
+        if process and process.poll() is not None:
+            raise RuntimeError('processo encerrou; veja tests/contrato/local')
+        try:
+            if request(base, path)['status'] == 200:
+                return
+        except OSError:
+            pass
+        time.sleep(.1)
+    raise RuntimeError('serviço não ficou pronto: ' + base)

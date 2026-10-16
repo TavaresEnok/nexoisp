@@ -1,5 +1,5 @@
 # Instalação central do NexoISP (produção/piloto). Sem modo demonstração, sem dados sintéticos.
-# Backend nativo Go (API, rotinas, administração e VPN). Fastify: docker-compose.fastify.yml, somente retorno explícito.
+# Backend nativo Go (API, rotinas, administração e VPN).
 # HTTPS do painel: Caddy com certificado automático para NEXO_DOMAIN. Agentes: porta 8443 com mTLS direto na API.
 # Exercitado localmente em 10/10/2026 (NEXO_DOMAIN=localhost, portas alternativas). Ainda NÃO exercitado em host público
 # com domínio e certificado reais.
@@ -158,7 +158,7 @@ services:
     build: { context: ../.., dockerfile: infra/prod/caddy/Dockerfile }
     restart: unless-stopped
     depends_on: [api]
-    command: [caddy, run, --config, /etc/caddy/Caddyfile.go, --adapter, caddyfile]
+    command: [caddy, run, --config, /etc/caddy/Caddyfile, --adapter, caddyfile]
     environment:
       NEXO_DOMAIN: ${NEXO_DOMAIN:?}
       NEXO_GO_UPSTREAM: api:8080

@@ -1,4 +1,4 @@
-// Package jsonx preserves node-postgres/JSON.stringify wire conventions.
+// Package jsonx preserves the established JSON wire conventions.
 package jsonx
 
 import (
@@ -302,7 +302,7 @@ func Normalize(v any, oid uint32) any {
 		}
 		return s
 	case int64:
-		return float64(x) // node-postgres parser: Number(int8).
+		return float64(x) // JSON numeric convention for int8.
 	case float64:
 		if math.IsInf(x, 0) || math.IsNaN(x) {
 			return nil

@@ -24,7 +24,7 @@ func Root() (string, error) {
 		return "", err
 	}
 	for {
-		if _, err = os.Stat(filepath.Join(p, "db/legado.sha256.json")); err == nil {
+		if _, err = os.Stat(filepath.Join(p, "db/baseline-migrations.json")); err == nil {
 			return p, nil
 		}
 		parent := filepath.Dir(p)
@@ -36,7 +36,7 @@ func Root() (string, error) {
 }
 
 func VerifyCopies(root string) error {
-	raw, err := os.ReadFile(filepath.Join(root, "db/legado.sha256.json"))
+	raw, err := os.ReadFile(filepath.Join(root, "db/baseline-migrations.json"))
 	if err != nil {
 		return err
 	}
@@ -66,11 +66,6 @@ func VerifyCopies(root string) error {
 		sum := sha256.Sum256(original)
 		if hex.EncodeToString(sum[:]) != hashes[file] {
 			return fmt.Errorf("SQL divergente: %s", name)
-		}
-		if legacy, e := os.ReadFile(filepath.Join(root, "legacy/fastify/migrations", file)); e == nil && !bytes.Equal(legacy, original) {
-			return fmt.Errorf("legado divergente: %s", file)
-		} else if e != nil && !os.IsNotExist(e) {
-			return e
 		}
 	}
 	return nil
@@ -198,7 +193,7 @@ func baseline(ctx context.Context, conn *sql.DB, root string) error {
 	if err != nil {
 		return err
 	}
-	raw, err := os.ReadFile(filepath.Join(root, "db/legado.sha256.json"))
+	raw, err := os.ReadFile(filepath.Join(root, "db/baseline-migrations.json"))
 	if err != nil {
 		return err
 	}
@@ -212,7 +207,7 @@ func baseline(ctx context.Context, conn *sql.DB, root string) error {
 	}
 	sort.Strings(expected)
 	if strings.Join(names, "\n") != strings.Join(expected, "\n") {
-		return fmt.Errorf("baseline recusado: conjunto legado incompleto ou desconhecido")
+		return fmt.Errorf("baseline recusado: conjunto histórico incompleto ou desconhecido")
 	}
 	tx, err := conn.BeginTx(ctx, nil)
 	if err != nil {

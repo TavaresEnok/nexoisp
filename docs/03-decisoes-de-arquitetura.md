@@ -12,7 +12,7 @@ Quando uma decisão mudar, registrar data, motivo e consequência. Preservar ide
 
 **Situação:** base de implementação.
 
-Usar Fastify/TypeScript como backend central. Separar módulos de identidade, cadastro, contratos, financeiro e rede, com acesso controlado entre eles. Workers podem usar o mesmo código em processos próprios. Frontend React/TypeScript.
+Usar Go como backend central. Separar módulos de identidade, cadastro, contratos, financeiro e rede, com acesso controlado entre eles. Workers podem usar o mesmo código em processos próprios. Frontend React/TypeScript.
 
 Não criar FastAPI central, microserviços por tabela, barramento universal ou arquitetura de plugins sem necessidade demonstrada.
 
@@ -146,10 +146,10 @@ Escolhas reversíveis feitas durante o desenvolvimento do MVP. Não alteram os A
 | ADR-005 | FreeRADIUS 3.2 lendo SQLite local (`rlm_sql_sqlite`) como candidato **experimental** | Provado com `radclient` e, em 10/10/2026, com sessão PPPoE real em CHR 7.24.5 (`docs/lab-pppoe.md`). ToughRADIUS não avaliado. Licença/distribuição não avaliadas |
 | ADR-012 | Laboratório virtual executado: CHR RouterOS 7.24.5 + `pppd`, 12 casos aprovados | Equipamento físico e versão do piloto continuam pendentes |
 | ADR-006 | Listener próprio para agentes (8443) com mTLS + token; CN = `agent:<id>`; **impressão digital do certificado fixada** no primeiro uso | Certificado antigo/vazado é recusado mesmo válido e assinado pela CA; trocar exige "Aceitar novo certificado" no painel. Substitui a CRL |
-| ADR-007 | Envelope assinado com Ed25519 (`node:crypto` / `cryptography`) sobre o JSON exato persistido; segredo PPPoE fora do envelope, entregue só no `begin` | Agente fixa a chave pública no primeiro contato (troca exige ação manual) |
+| ADR-007 | Envelope assinado com Ed25519 sobre o JSON exato persistido; segredo PPPoE fora do envelope, entregue só no `begin` | Agente fixa a chave pública no primeiro contato (troca exige ação manual) |
 | ADR-008 | SQLite do agente não guarda segredos. No RADIUS local há duas opções por equipamento (`password_storage`): `cleartext` (necessário para CHAP) ou `nt_hash` (só o hash NT; exige NAS em MS-CHAPv2) | Com `nt_hash` não há senha em claro no disco do site (comprovado no laboratório). O hash NT ainda equivale à credencial para MS-CHAP: manter permissões restritas e, se exigido, criptografia de disco do host (não implementada pelo produto) |
 | ADR-010 | Gateway atrás de uma interface com um único adaptador (`demo`); fatura com valor cheio do plano; títulos importados não geram cobrança automática | Juros, multa, proporcionalidade, parcial e estorno ficam em conciliação manual até existir regra |
-| ADR-013 | Senhas PPPoE e segredo de MFA cifrados com AES-256-GCM por chave do ambiente; credencial do equipamento fica só no agente. **Rotação da chave**: `NEXO_SECRET_KEY_PREVIOUS` + `cli.js rotate-secrets` | Rotação exercitada na instalação de produção local |
+| ADR-013 | Senhas PPPoE e segredo de MFA cifrados com AES-256-GCM por chave do ambiente; credencial do equipamento fica só no agente. **Rotação da chave**: `NEXO_SECRET_KEY_PREVIOUS` + `nexo-db rotate-secrets` | Rotação exercitada na instalação de produção local |
 | ADR-014 | Marcador de versão gravado junto da autorização local permite distinguir o efeito de cada operação; um executor por equipamento garantido pela reserva; operação incerta bloqueia o equipamento até ser verificada | "Exatamente uma vez" não é prometido |
 | Expansão 1 | OLT/ONU reaproveita a fila de operações: `operations` passa a apontar para conta PPPoE **ou** ONU; o agente trata as duas famílias com o mesmo fluxo (persistir, revalidar, aplicar, verificar). Marcador de versão na descrição da ONU | Sem segunda infraestrutura de automação. Driver real depende do fabricante |
 | — | Suspensão implementada apenas como "negar autenticação + derrubar sessão", rotulada como modalidade de demonstração | Modalidade real depende da política comercial |

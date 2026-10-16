@@ -13,7 +13,7 @@ import (
 	"nexoisp/api-go/internal/jsonx"
 )
 
-// ParseAgent preserves ZodError.message, used verbatim by the legacy agent API.
+// ParseAgent preserves the established validation message format for agents.
 func (r Rule) ParseAgent(value any, present bool) (map[string]any, error) {
 	out, e := r.Parse(value, present)
 	if e == nil {

@@ -1,4 +1,4 @@
-// Package cryptox preserves the persisted Node cryptographic formats during coexistence.
+// Package cryptox preserves the persisted cryptographic formats.
 package cryptox
 
 import (

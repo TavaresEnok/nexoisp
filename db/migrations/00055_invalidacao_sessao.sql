@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
--- Interface adicional: o Fastify continua usando session_get(text), inalterada.
+-- Interface adicional para autenticação do backend Go.
 create function nexo_go_session_get(p_token_hash text) returns table
   (user_id uuid, tenant_id uuid, role text, name text, email text, subscriber_id uuid,
    support_tenant_id uuid, mfa_enabled boolean, expires_at timestamptz)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Instalação e fluxos críticos Go sem executar API, seed ou migrador Node."""
+"""Instalação e fluxos críticos exclusivamente em Go."""
 import base64
 import concurrent.futures
 import json
@@ -10,8 +10,7 @@ import sys
 import time
 import uuid
 
-from lib import ROOT, LOCAL, DB_CONTAINER, DB_PORT, command, go_env, sql, quote, request
-from laboratorio import go, wait
+from lib import ROOT, LOCAL, DB_CONTAINER, DB_PORT, command, go, go_env, sql, quote, request, wait
 
 def records(query):
     return json.loads(sql("select coalesce(json_agg(r),'[]') from ("+query+") r",'nexo_test'))
