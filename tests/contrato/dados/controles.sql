@@ -17,21 +17,24 @@ select md5(t.id::text||':'||r)::uuid,t.id,t.slug||'-'||r||'@contrato.invalid',r,
   case when r in ('pop','inactive','pending') then case when r='pop' then 'attendant' else 'admin' end else r end,
   r<>'pending',case when r='subscriber' then (select id from subscribers where tenant_id=t.id order by id limit 1) end
 from tenants t cross join unnest(array['admin','attendant','finance','noc','subscriber','pop','inactive','pending']) r
-where t.slug like 'bench-%' on conflict do nothing;
+where t.slug like 'bench-%' on conflict (id) do update
+set role=excluded.role,mfa_enabled=excluded.mfa_enabled,subscriber_id=excluded.subscriber_id,active=true;
 update users set active=false where email like '%-inactive@contrato.invalid';
+delete from user_pops where user_id in (select id from users where email like '%-pop@contrato.invalid');
 insert into user_pops(tenant_id,user_id,pop_id)
 select tenant_id,id,md5(tenant_id::text||':pop:1')::uuid from users where email like '%-pop@contrato.invalid' on conflict do nothing;
 insert into users(id,email,name,password_hash,role,mfa_enabled)
-values (md5('contrato:operator')::uuid,'operator@contrato.invalid','Operador','unused','saas_operator',true) on conflict do nothing;
+values (md5('contrato:operator')::uuid,'operator@contrato.invalid','Operador','unused','saas_operator',true)
+on conflict (id) do update set mfa_enabled=true,active=true;
 insert into sessions(user_id,token_hash,expires_at)
 select id,encode(digest('contrato:'||id::text,'sha256'),'hex'),now()+interval '12 hours' from users
-where email like '%@contrato.invalid' on conflict do nothing;
+where email like '%@contrato.invalid' on conflict (token_hash) do update set expires_at=excluded.expires_at,support_tenant_id=null;
 insert into sessions(user_id,token_hash,expires_at)
 select id,encode(digest('expired:'||id::text,'sha256'),'hex'),now()-interval '1 minute' from users
-where email like '%-admin@contrato.invalid' on conflict do nothing;
+where email like '%-admin@contrato.invalid' on conflict (token_hash) do update set expires_at=excluded.expires_at;
 insert into sessions(user_id,token_hash,support_tenant_id,expires_at)
 select md5('contrato:operator')::uuid,encode(digest('support:'||t.id::text,'sha256'),'hex'),t.id,now()+interval '12 hours'
-from tenants t where slug like 'bench-%' on conflict do nothing;
+from tenants t where slug like 'bench-%' on conflict (token_hash) do update set expires_at=excluded.expires_at,support_tenant_id=excluded.support_tenant_id;
 -- Casos de serialização e CSV: objetos, acentos, fórmulas, aspas, datas e numeric com escala.
 update subscribers set name='=Teste; "Árvore"',notes=E'linha 1\nlinha 2',birth_date='1990-01-02',
  custom='{"z":1,"aa":2,"nested":{"html":"<b>&"}}'
