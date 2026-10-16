@@ -1,0 +1,82 @@
+[
+  {
+    "role": "nexo_app",
+    "calls": 1020,
+    "total_exec_time": 677542.496621,
+    "total_plan_time": 654.9780020000001,
+    "mean_exec_time": 664.2573496284318,
+    "query": "select count(*) as n from (select s.*, (select count(*) from contracts c where c.subscriber_id = s.id and c.status = $4) as active_contracts\n         from subscribers s\n         where ($1::text is null or s.name ilike $5||$1||$6 or s.email ilike $7||$1||$8 or ($2 <> $9 and (s.document like $10||$2||$11 or s.phone like $12||$2||$13)))\n           and ($3::text is null or s.status = $3)\n         order by s.name, s.id) x"
+  },
+  {
+    "role": "nexo_app",
+    "calls": 1020,
+    "total_exec_time": 428004.5313190001,
+    "total_plan_time": 1124.0526829999974,
+    "mean_exec_time": 419.61228560686277,
+    "query": "select x.* from (select s.*, (select count(*) from contracts c where c.subscriber_id = s.id and c.status = $4) as active_contracts\n         from subscribers s\n         where ($1::text is null or s.name ilike $5||$1||$6 or s.email ilike $7||$1||$8 or ($2 <> $9 and (s.document like $10||$2||$11 or s.phone like $12||$2||$13)))\n           and ($3::text is null or s.status = $3)\n         order by s.name, s.id) x limit $14 offset $15"
+  },
+  {
+    "role": "nexo_app",
+    "calls": 6813,
+    "total_exec_time": 14098.960669999971,
+    "total_plan_time": 140.1011050000006,
+    "mean_exec_time": 2.0694203243798746,
+    "query": "select * from session_get($1)"
+  },
+  {
+    "role": "nexo_app",
+    "calls": 2720,
+    "total_exec_time": 2224.7721870000014,
+    "total_plan_time": 9896.974741000007,
+    "mean_exec_time": 0.8179309511029406,
+    "query": "select c.*, s.name as subscriber_name, s.document as subscriber_document,\n         p.id as plan_id, p.name as plan_name, pv.version as plan_version, pv.price_cents, pv.down_kbps, pv.up_kbps, pv.profile_name,\n         coalesce((select json_agg(json_build_object($2, t.id, $3, t.name) order by t.name) from contract_tags ct join tags t on t.id = ct.tag_id where ct.contract_id = c.id), $4) as tags\n  from contracts c\n  join subscribers s on s.id = c.subscriber_id\n  join plan_versions pv on pv.id = c.plan_version_id\n  join plans p on p.id = pv.plan_id where c.id = $1"
+  },
+  {
+    "role": "nexo_app",
+    "calls": 3073,
+    "total_exec_time": 2798.857757000011,
+    "total_plan_time": 8919.661735999998,
+    "mean_exec_time": 0.9107900283110966,
+    "query": "select c.*, s.name as subscriber_name, s.document as subscriber_document,\n         p.id as plan_id, p.name as plan_name, pv.version as plan_version, pv.price_cents, pv.down_kbps, pv.up_kbps, pv.profile_name,\n         coalesce((select json_agg(json_build_object($2, t.id, $3, t.name) order by t.name) from contract_tags ct join tags t on t.id = ct.tag_id where ct.contract_id = c.id), $4) as tags\n  from contracts c\n  join subscribers s on s.id = c.subscriber_id\n  join plan_versions pv on pv.id = c.plan_version_id\n  join plans p on p.id = pv.plan_id where c.subscriber_id = $1 order by c.created_at desc"
+  },
+  {
+    "role": "nexo_app",
+    "calls": 3073,
+    "total_exec_time": 1150.169922000001,
+    "total_plan_time": 1160.1646180000007,
+    "mean_exec_time": 0.37428243475431194,
+    "query": "select * from subscribers where id = $1"
+  },
+  {
+    "role": "nexo_app",
+    "calls": 2720,
+    "total_exec_time": 314.5143060000002,
+    "total_plan_time": 1517.8814289999973,
+    "mean_exec_time": 0.11563025955882347,
+    "query": "select h.at, h.event, h.detail, u.name as actor_name from contract_history h left join users u on u.id = h.actor_id\n         where h.contract_id = $1 order by h.id desc"
+  },
+  {
+    "role": "nexo_app",
+    "calls": 6813,
+    "total_exec_time": 154.6283460000004,
+    "total_plan_time": 651.6122179999986,
+    "mean_exec_time": 0.022696073095552584,
+    "query": "select modules from tenants where id = $1"
+  },
+  {
+    "role": "nexo_app",
+    "calls": 5451,
+    "total_exec_time": 50.91468999999994,
+    "total_plan_time": 509.9939940000014,
+    "mean_exec_time": 0.00934043111355717,
+    "query": "select pop_id from user_pops where user_id = $1"
+  },
+  {
+    "role": "nexo_app",
+    "calls": 25890,
+    "total_exec_time": 233.1975190000009,
+    "total_plan_time": 326.7228679999983,
+    "mean_exec_time": 0.009007242912321365,
+    "query": "select set_config($5, $1, $6), set_config($7, $2, $8), set_config($9, $3, $10), set_config($11, $4, $12)"
+  }
+]

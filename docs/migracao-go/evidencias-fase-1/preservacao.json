@@ -1,0 +1,6 @@
+{
+  "arquivos_protegidos": 207,
+  "alterados_desde_inicio": [],
+  "baseline_patch_sha256": "4a1b6f99e8096cf271cdffaa1ce20abad657e285a47c8483db1065009be461e2",
+  "observacao": "Alterações já existentes em apps/api, infra e arquivos não rastreados foram preservadas e não incluídas nos commits da implementação."
+}

@@ -1,0 +1,3541 @@
+{
+  "casos": 591,
+  "aprovados": 591,
+  "falhas": 0,
+  "resultados": [
+    {
+      "caso": "bench-0001-admin bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-admin bearer",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-admin bearer",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-admin bearer",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-admin bearer",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-admin bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-admin bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-admin cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-admin cookie",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-admin cookie",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-admin cookie",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-admin cookie",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-admin cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-admin cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-attendant bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-attendant bearer",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-attendant bearer",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-attendant bearer",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-attendant bearer",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-attendant bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-attendant bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-attendant cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-attendant cookie",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-attendant cookie",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-attendant cookie",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-attendant cookie",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-attendant cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-attendant cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-finance bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-finance bearer",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-finance bearer",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-finance bearer",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-finance bearer",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-finance bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-finance bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-finance cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-finance cookie",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-finance cookie",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-finance cookie",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-finance cookie",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-finance cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-finance cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-noc bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-noc bearer",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-noc bearer",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-noc bearer",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-noc bearer",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-noc bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-noc bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-noc cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-noc cookie",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-noc cookie",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-noc cookie",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-noc cookie",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-noc cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-noc cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-subscriber bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-subscriber bearer",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-subscriber bearer",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-subscriber bearer",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-subscriber bearer",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-subscriber bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-subscriber bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-subscriber cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-subscriber cookie",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-subscriber cookie",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-subscriber cookie",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-subscriber cookie",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-subscriber cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-subscriber cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pop bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pop bearer",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pop bearer",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pop bearer",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pop bearer",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pop bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pop bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pop cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pop cookie",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pop cookie",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pop cookie",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pop cookie",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pop cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pop cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pop POP",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pop POP",
+      "rota": "/api/contracts/0276a8ef-dabe-40c0-9fea-469beafdde1e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pop POP",
+      "rota": "/api/contracts/03271c57-9c4a-4725-b78d-dee71baff19a",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pending bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pending bearer",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pending bearer",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pending bearer",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pending bearer",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pending bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pending bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pending cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pending cookie",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pending cookie",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pending cookie",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pending cookie",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pending cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-pending cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-inactive bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-inactive bearer",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-inactive bearer",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-inactive bearer",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-inactive bearer",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-inactive bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-inactive bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-inactive cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-inactive cookie",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-inactive cookie",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-inactive cookie",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-inactive cookie",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-inactive cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0001-inactive cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator bearer",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator bearer",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator bearer",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator bearer",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator cookie",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator cookie",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator cookie",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator cookie",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support bearer",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support bearer",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support bearer",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support bearer",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support cookie",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support cookie",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support cookie",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support cookie",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=1",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=5000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=3&offset=2",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?offset=99999",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?status=active",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?status=inactive",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=Teste",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=%40",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=123",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=%20%20",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=%25",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=_",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?format=csv&limit=2",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?format=csv",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?format=csv&offset=99999",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=0x10",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=1e1",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=%20",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=1.5",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?offset=-1",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=5001",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=x",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=a&q=b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?status=wrong",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?status=a&status=b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=1&limit=2",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&status=wrong&limit=0&offset=-1",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "sem credencial",
+      "rota": "/api/subscribers",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "token inválido",
+      "rota": "/api/subscribers",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "sessão expirada",
+      "rota": "/api/subscribers",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "HTTPS cabeçalhos",
+      "rota": "/api/subscribers",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "HEAD implícito do Fastify",
+      "rota": "/api/subscribers",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "sem credencial",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "token inválido",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "sessão expirada",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "HTTPS cabeçalhos",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "HEAD implícito do Fastify",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "sem credencial",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "token inválido",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "sessão expirada",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "HTTPS cabeçalhos",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "HEAD implícito do Fastify",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "HEAD CSV mantém JSON sem exportação",
+      "rota": "/api/subscribers?format=csv&limit=1",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "format repetido não exporta CSV",
+      "rota": "/api/subscribers?format=csv&format=json&limit=1",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "UUID inválido autenticado",
+      "rota": "/api/subscribers/invalid",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "UUID inválido sem permissão",
+      "rota": "/api/subscribers/invalid",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "UUID inválido autenticado",
+      "rota": "/api/contracts/invalid",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "UUID inválido sem permissão",
+      "rota": "/api/contracts/invalid",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "export.csv no banco Fastify",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "access.denied no banco Fastify",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "export.csv no banco Go",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "access.denied no banco Go",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-admin bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-admin bearer",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-admin bearer",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-admin bearer",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-admin bearer",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-admin bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-admin bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-admin cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-admin cookie",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-admin cookie",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-admin cookie",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-admin cookie",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-admin cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-admin cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-attendant bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-attendant bearer",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-attendant bearer",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-attendant bearer",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-attendant bearer",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-attendant bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-attendant bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-attendant cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-attendant cookie",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-attendant cookie",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-attendant cookie",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-attendant cookie",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-attendant cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-attendant cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-finance bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-finance bearer",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-finance bearer",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-finance bearer",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-finance bearer",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-finance bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-finance bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-finance cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-finance cookie",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-finance cookie",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-finance cookie",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-finance cookie",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-finance cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-finance cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-noc bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-noc bearer",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-noc bearer",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-noc bearer",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-noc bearer",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-noc bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-noc bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-noc cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-noc cookie",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-noc cookie",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-noc cookie",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-noc cookie",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-noc cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-noc cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-subscriber bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-subscriber bearer",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-subscriber bearer",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-subscriber bearer",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-subscriber bearer",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-subscriber bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-subscriber bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-subscriber cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-subscriber cookie",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-subscriber cookie",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-subscriber cookie",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-subscriber cookie",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-subscriber cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-subscriber cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pop bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pop bearer",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pop bearer",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pop bearer",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pop bearer",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pop bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pop bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pop cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pop cookie",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pop cookie",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pop cookie",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pop cookie",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pop cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pop cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pop POP",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pop POP",
+      "rota": "/api/contracts/0bbdec1a-84ee-45a7-8648-3911081ad36e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pop POP",
+      "rota": "/api/contracts/135e4e25-3597-468c-91c0-d4b4e5e6fbd3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pending bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pending bearer",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pending bearer",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pending bearer",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pending bearer",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pending bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pending bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pending cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pending cookie",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pending cookie",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pending cookie",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pending cookie",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pending cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-pending cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-inactive bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-inactive bearer",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-inactive bearer",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-inactive bearer",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-inactive bearer",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-inactive bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-inactive bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-inactive cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-inactive cookie",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-inactive cookie",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-inactive cookie",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-inactive cookie",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-inactive cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0016-inactive cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator bearer",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator bearer",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator bearer",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator bearer",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator cookie",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator cookie",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator cookie",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator cookie",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support bearer",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support bearer",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support bearer",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support bearer",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support cookie",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support cookie",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support cookie",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support cookie",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=1",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=5000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=3&offset=2",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?offset=99999",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?status=active",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?status=inactive",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=Teste",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=%40",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=123",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=%20%20",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=%25",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=_",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?format=csv&limit=2",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?format=csv",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?format=csv&offset=99999",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=0x10",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=1e1",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=%20",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=1.5",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?offset=-1",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=5001",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=x",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=a&q=b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?status=wrong",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?status=a&status=b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=1&limit=2",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&status=wrong&limit=0&offset=-1",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "sem credencial",
+      "rota": "/api/subscribers",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "token inválido",
+      "rota": "/api/subscribers",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "sessão expirada",
+      "rota": "/api/subscribers",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "HTTPS cabeçalhos",
+      "rota": "/api/subscribers",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "HEAD implícito do Fastify",
+      "rota": "/api/subscribers",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "sem credencial",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "token inválido",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "sessão expirada",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "HTTPS cabeçalhos",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "HEAD implícito do Fastify",
+      "rota": "/api/subscribers/035f56fa-72bd-4d41-a0d5-49c2ee391f3d",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "sem credencial",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "token inválido",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "sessão expirada",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "HTTPS cabeçalhos",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "HEAD implícito do Fastify",
+      "rota": "/api/contracts/0529bee3-0a4e-4eff-87d7-fa9de9fa5253",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "HEAD CSV mantém JSON sem exportação",
+      "rota": "/api/subscribers?format=csv&limit=1",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "format repetido não exporta CSV",
+      "rota": "/api/subscribers?format=csv&format=json&limit=1",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "UUID inválido autenticado",
+      "rota": "/api/subscribers/invalid",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "UUID inválido sem permissão",
+      "rota": "/api/subscribers/invalid",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "UUID inválido autenticado",
+      "rota": "/api/contracts/invalid",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "UUID inválido sem permissão",
+      "rota": "/api/contracts/invalid",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "export.csv no banco Fastify",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "access.denied no banco Fastify",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "export.csv no banco Go",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "access.denied no banco Go",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-admin bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-admin bearer",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-admin bearer",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-admin bearer",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-admin bearer",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-admin bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-admin bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-admin cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-admin cookie",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-admin cookie",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-admin cookie",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-admin cookie",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-admin cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-admin cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-attendant bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-attendant bearer",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-attendant bearer",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-attendant bearer",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-attendant bearer",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-attendant bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-attendant bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-attendant cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-attendant cookie",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-attendant cookie",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-attendant cookie",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-attendant cookie",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-attendant cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-attendant cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-finance bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-finance bearer",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-finance bearer",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-finance bearer",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-finance bearer",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-finance bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-finance bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-finance cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-finance cookie",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-finance cookie",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-finance cookie",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-finance cookie",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-finance cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-finance cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-noc bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-noc bearer",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-noc bearer",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-noc bearer",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-noc bearer",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-noc bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-noc bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-noc cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-noc cookie",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-noc cookie",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-noc cookie",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-noc cookie",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-noc cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-noc cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-subscriber bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-subscriber bearer",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-subscriber bearer",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-subscriber bearer",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-subscriber bearer",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-subscriber bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-subscriber bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-subscriber cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-subscriber cookie",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-subscriber cookie",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-subscriber cookie",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-subscriber cookie",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-subscriber cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-subscriber cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pop bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pop bearer",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pop bearer",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pop bearer",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pop bearer",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pop bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pop bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pop cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pop cookie",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pop cookie",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pop cookie",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pop cookie",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pop cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pop cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pop POP",
+      "rota": "/api/contracts/08d81871-0f73-497b-9d3b-b49f938d34c3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pop POP",
+      "rota": "/api/contracts/07f67194-e7c5-4e64-9789-96b3ef473f26",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pop POP",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pending bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pending bearer",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pending bearer",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pending bearer",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pending bearer",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pending bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pending bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pending cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pending cookie",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pending cookie",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pending cookie",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pending cookie",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pending cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-pending cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-inactive bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-inactive bearer",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-inactive bearer",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-inactive bearer",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-inactive bearer",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-inactive bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-inactive bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-inactive cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-inactive cookie",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-inactive cookie",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-inactive cookie",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-inactive cookie",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-inactive cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "bench-0030-inactive cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator bearer",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator bearer",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator bearer",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator bearer",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator cookie",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator cookie",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator cookie",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator cookie",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support bearer",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support bearer",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support bearer",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support bearer",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support bearer",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support bearer",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support bearer",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support cookie",
+      "rota": "/api/subscribers?limit=3",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support cookie",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support cookie",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support cookie",
+      "rota": "/api/subscribers/01886bc6-cba1-4bdf-a91f-e3d525f3674e",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support cookie",
+      "rota": "/api/contracts/008fbf71-55fe-43e1-867d-c5648097c304",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support cookie",
+      "rota": "/api/subscribers/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "operator-support cookie",
+      "rota": "/api/contracts/00000000-0000-4000-8000-000000000000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=1",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=5000",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=3&offset=2",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?offset=99999",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?status=active",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?status=inactive",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=Teste",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=%40",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=123",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=%20%20",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=%25",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=_",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?format=csv&limit=2",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?format=csv",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?format=csv&offset=99999",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=0x10",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=1e1",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=%20",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=1.5",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?offset=-1",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=5001",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=x",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=a&q=b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?status=wrong",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?status=a&status=b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?limit=1&limit=2",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "filtros/paginação/CSV",
+      "rota": "/api/subscribers?q=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&status=wrong&limit=0&offset=-1",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "sem credencial",
+      "rota": "/api/subscribers",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "token inválido",
+      "rota": "/api/subscribers",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "sessão expirada",
+      "rota": "/api/subscribers",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "HTTPS cabeçalhos",
+      "rota": "/api/subscribers",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "HEAD implícito do Fastify",
+      "rota": "/api/subscribers",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "sem credencial",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "token inválido",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "sessão expirada",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "HTTPS cabeçalhos",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "HEAD implícito do Fastify",
+      "rota": "/api/subscribers/18cce508-9c64-4505-8529-e1e4294cae3b",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "sem credencial",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "token inválido",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "sessão expirada",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "HTTPS cabeçalhos",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "HEAD implícito do Fastify",
+      "rota": "/api/contracts/00829f87-4320-4f66-bd10-0ed5e9e87430",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "HEAD CSV mantém JSON sem exportação",
+      "rota": "/api/subscribers?format=csv&limit=1",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "format repetido não exporta CSV",
+      "rota": "/api/subscribers?format=csv&format=json&limit=1",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "UUID inválido autenticado",
+      "rota": "/api/subscribers/invalid",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "UUID inválido sem permissão",
+      "rota": "/api/subscribers/invalid",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "UUID inválido autenticado",
+      "rota": "/api/contracts/invalid",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "UUID inválido sem permissão",
+      "rota": "/api/contracts/invalid",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "export.csv no banco Fastify",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "access.denied no banco Fastify",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "export.csv no banco Go",
+      "ok": true,
+      "falhas": []
+    },
+    {
+      "caso": "access.denied no banco Go",
+      "ok": true,
+      "falhas": []
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+[
+  {
+    "candidato": "go-custom",
+    "cache_hit_ratio_media": 0.5285583776323911,
+    "pool_p95_limites_superiores_s": [
+      "acima do último bucket finito",
+      "acima do último bucket finito",
+      "acima do último bucket finito"
+    ],
+    "pool_p99_limites_superiores_s": [
+      "acima do último bucket finito",
+      "acima do último bucket finito",
+      "acima do último bucket finito"
+    ]
+  },
+  {
+    "candidato": "go-auto",
+    "cache_hit_ratio_media": 0.5333244088606168,
+    "pool_p95_limites_superiores_s": [
+      "acima do último bucket finito",
+      "acima do último bucket finito",
+      "acima do último bucket finito"
+    ],
+    "pool_p99_limites_superiores_s": [
+      "acima do último bucket finito",
+      "acima do último bucket finito",
+      "acima do último bucket finito"
+    ]
+  }
+]

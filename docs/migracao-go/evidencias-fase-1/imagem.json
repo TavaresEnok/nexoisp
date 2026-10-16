@@ -1,0 +1,32 @@
+[
+  {
+    "porta": 19282,
+    "rota": "/healthz",
+    "status": 200
+  },
+  {
+    "porta": 19282,
+    "rota": "/metrics",
+    "status": 200
+  },
+  {
+    "porta": 19282,
+    "rota": "/openapi.json",
+    "status": 200
+  },
+  {
+    "porta": 18282,
+    "rota": "/api/subscribers?limit=1",
+    "status": 200
+  },
+  {
+    "porta": 18282,
+    "rota": "/metrics",
+    "status": 404
+  },
+  {
+    "porta": 18282,
+    "rota": "/api/health",
+    "status": 404
+  }
+]

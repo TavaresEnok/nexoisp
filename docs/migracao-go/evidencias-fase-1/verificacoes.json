@@ -1,0 +1,11 @@
+{
+  "go_test_race": "aprovado",
+  "contrato": 591,
+  "cache": 12,
+  "mutacoes": 17,
+  "lint_issues": 0,
+  "sql_copias": 53,
+  "fontes_go_iguais_as_medidas": true,
+  "arquivos_protegidos_sem_alteracao": 207,
+  "ci_remoto_executado": false
+}
