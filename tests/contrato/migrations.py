@@ -18,13 +18,13 @@ def main():
         env=go_env(database)
         command([binary,'bootstrap','--init-app-role'],cwd=ROOT,env=env)
         if database.endswith('legado'):
-            node("import {migrate} from './apps/api/src/migrate.ts'; await migrate(()=>{});",database)
+            node("import {migrate} from './legacy/fastify/src/migrate.ts'; await migrate(()=>{});",database)
             command([binary,'baseline'],cwd=ROOT,env=env)
             # Baseline é deliberadamente uma operação de adoção única.
             again=subprocess.run([binary,'baseline'],cwd=ROOT,env=env,capture_output=True,text=True)
             assert again.returncode!=0 and 'já existe' in again.stderr
         command([binary,'up'],cwd=ROOT,env=env)
-        result=node("import {migrate} from './apps/api/src/migrate.ts'; const applied=[]; await migrate(x=>applied.push(x)); console.log(JSON.stringify(applied));",database,capture=True)
+        result=node("import {migrate} from './legacy/fastify/src/migrate.ts'; const applied=[]; await migrate(x=>applied.push(x)); console.log(JSON.stringify(applied));",database,capture=True)
         assert json.loads(result.stdout.strip())==[], 'Fastify reaplicou migration'
         command([binary,'verificar'],cwd=ROOT,env=env)
         dump=command(['docker','exec',DB_CONTAINER,'pg_dump','-p',str(DB_PORT),'-U','nexo_owner','-d',database,

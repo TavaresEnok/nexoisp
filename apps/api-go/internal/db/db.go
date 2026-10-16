@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"log/slog"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"nexoisp/api-go/internal/fault"
 	"nexoisp/api-go/internal/jsonx"
 	gen "nexoisp/api-go/internal/modules/cadastro/gen"
+	"nexoisp/api-go/internal/requestctx"
 	"nexoisp/api-go/internal/tenancy"
 
 	"github.com/exaring/otelpgx"
@@ -18,17 +20,21 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/riverqueue/river"
 )
 
 type DB struct {
-	pool         *pgxpool.Pool
-	config       *pgx.ConnConfig
-	Directory    *tenancy.Directory
-	Wait         prometheus.Histogram
-	Transactions prometheus.Counter
-	Queries      prometheus.Histogram
+	operationQueue atomic.Pointer[river.Client[pgx.Tx]]
+	pool           *pgxpool.Pool
+	config         *pgx.ConnConfig
+	Directory      *tenancy.Directory
+	Wait           prometheus.Histogram
+	Transactions   prometheus.Counter
+	Queries        prometheus.Histogram
+	RouteTime      *prometheus.HistogramVec
 }
 type Tx struct {
+	db      *DB
 	raw     pgx.Tx
 	Queries *gen.Queries
 }
@@ -52,7 +58,8 @@ func Open(ctx context.Context, url, mode string, maxConns int, reg prometheus.Re
 		return nil, err
 	}
 	d := &DB{pool: p, config: cfg.ConnConfig.Copy(), Directory: &tenancy.Directory{}, Wait: prometheus.NewHistogram(prometheus.HistogramOpts{Name: "nexo_pool_acquire_seconds", Buckets: prometheus.ExponentialBuckets(.0001, 2, 16)}), Transactions: prometheus.NewCounter(prometheus.CounterOpts{Name: "nexo_db_transactions_total"}), Queries: prometheus.NewHistogram(prometheus.HistogramOpts{Name: "nexo_db_scope_seconds", Buckets: prometheus.DefBuckets})}
-	reg.MustRegister(d.Wait, d.Transactions, d.Queries, prometheus.NewGaugeFunc(prometheus.GaugeOpts{Name: "nexo_pool_in_use"}, func() float64 { return float64(p.Stat().AcquiredConns()) }))
+	d.RouteTime = prometheus.NewHistogramVec(prometheus.HistogramOpts{Name: "nexo_db_route_seconds", Buckets: prometheus.DefBuckets}, []string{"route", "cell"})
+	reg.MustRegister(d.Wait, d.Transactions, d.Queries, d.RouteTime, prometheus.NewGaugeFunc(prometheus.GaugeOpts{Name: "nexo_pool_in_use"}, func() float64 { return float64(p.Stat().AcquiredConns()) }))
 	if err = d.Verify(ctx); err != nil {
 		p.Close()
 		return nil, err
@@ -83,6 +90,12 @@ func (d *DB) Verify(ctx context.Context) error {
 	return nil
 }
 func (d *DB) WithScope(ctx context.Context, s tenancy.Scope, fn func(*Tx) error) error {
+	started := time.Now()
+	defer func() {
+		if d.RouteTime != nil {
+			d.RouteTime.WithLabelValues(requestctx.Route(ctx), "c1").Observe(time.Since(started).Seconds())
+		}
+	}()
 	if fault.Active("sem_pop") {
 		s.PopIDs = nil
 	}
@@ -134,7 +147,7 @@ func (d *DB) WithScope(ctx context.Context, s tenancy.Scope, fn func(*Tx) error)
 	}
 	d.Transactions.Inc()
 	defer func() { d.Queries.Observe(time.Since(start).Seconds()) }()
-	if err = fn(&Tx{raw: tx, Queries: gen.New(tx)}); err != nil {
+	if err = fn(&Tx{raw: tx, Queries: gen.New(tx), db: d}); err != nil {
 		return err
 	}
 	return tx.Commit(ctx)

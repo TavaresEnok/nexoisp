@@ -1,0 +1,8 @@
+**
+!apps/
+!apps/api-go/
+!apps/api-go/**
+!db/
+!db/**
+apps/api-go/bin/
+apps/api-go/coverage.out

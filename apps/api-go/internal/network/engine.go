@@ -276,6 +276,11 @@ func Request(ctx context.Context, tx *db.Tx, tenant, resource, action string, au
 	if err != nil {
 		return nil, err
 	}
+	if r.Get("agent_internal") == true {
+		if err = tx.EnqueueOperation(ctx, tenant, jsonx.String(id)); err != nil {
+			return nil, err
+		}
+	}
 	if action == "subscriber.suspend" || action == "subscriber.resume" {
 		event := "access.resume_requested"
 		if action == "subscriber.suspend" {

@@ -1,7 +1,7 @@
 // Extract reviewed command text; the Go runtime renders these without JavaScript.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const root=path.resolve(__dirname,'../..'),ts=require(path.join(root,'node_modules/typescript'));
-const source=fs.readFileSync(path.join(root,'apps/api/src/radius/vendor.ts'),'utf8');
+const source=fs.readFileSync(path.join(root,'legacy/fastify/src/radius/vendor.ts'),'utf8');
 const ast=ts.createSourceFile('vendor.ts',source,ts.ScriptTarget.Latest,true);
 function unwrap(n){while(ts.isParenthesizedExpression(n)||ts.isNonNullExpression(n))n=n.expression;return n;}
 function value(n){n=unwrap(n);if(ts.isStringLiteralLike(n))return n.text;

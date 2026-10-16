@@ -1,0 +1,56 @@
+name: backend Go e painel
+on:
+  push:
+  pull_request:
+jobs:
+  verificar:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.2'
+          cache-dependency-path: apps/api-go/go.sum
+      - name: Build, análise e testes Go
+        working-directory: apps/api-go
+        run: |
+          go build ./...
+          go vet ./...
+          go test -race ./...
+      - uses: golangci/golangci-lint-action@v8
+        with: {version: v2.14.0, working-directory: apps/api-go}
+      - name: Migrations e proxy finais
+        run: |
+          python3 scripts/migracao-go/migrations.py
+          python3 scripts/migracao-go/proxy.py --table infra/prod/caddy/rotas.go.yaml --output infra/prod/caddy/Caddyfile.go --fallback go --check
+      - uses: actions/setup-node@v4
+        with: {node-version: 22, cache: npm}
+      - name: Frontend preservado
+        run: |
+          npm ci
+          npm -w apps/web run typecheck
+          npm -w apps/web run build
+      - name: Instalação, administração, financeiro e outbox com duas réplicas Go
+        run: python3 tests/contrato/nativo.py
+      - name: Painel real contra Go
+        run: python3 tests/contrato/e2e.py
+      - name: Imagem da VPN Go
+        run: |
+          docker build -f apps/api-go/Dockerfile -t nexo-api-go:final .
+          docker build -f apps/api-go/Dockerfile.vpn -t nexo-vpn-go:final .
+          python3 tests/contrato/vpn_go.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: verificacao-go, path: tests/contrato/relatorios/}
+      - name: Limpeza do laboratório
+        if: always()
+        run: docker rm -f nexo-fase1-db || true
+  agente:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r services/network-agent/requirements.txt
+      - working-directory: services/network-agent
+        run: python -m unittest discover -s tests -t .

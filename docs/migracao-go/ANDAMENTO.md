@@ -1,46 +1,51 @@
-# Migração em execução — 16/10/2026
+# Migração Go — estado em 16/10/2026
 
-Autorização vigente: prosseguir por todas as fases sem novas perguntas. D1 (adaptação dos testes) e D2 (desligamento das rotinas Node quando substituídas) estão autorizadas no plano. A autorização amplia a implementação; não substitui as medições, os ensaios e o tempo de observação exigidos para declarar a virada operacional concluída.
+## Entrega de código
 
-## Implementação disponível neste ponto
+A migração do backend próprio está implementada: **346 rotas (336 HTTP e dez de agentes)**, autenticação, cadastros, financeiro, importação, operações de rede, ACS, RADIUS, rotinas River, administração e VPN usam Go. A conferência final comparou as **336 rotas HTTP registradas pelo Fastify real** com o inventário corrigido, sem faltas ou extras. O OpenAPI Go real também corresponde às 336 operações.
 
-- 344 rotas com implementação nativa Go: todas as fases do inventário. São 334 operações HTTP no OpenAPI e dez rotas de agentes no listener separado. O manifesto completo é `apps/api-go/rotas.json`; não há encaminhamento de negócio para o Node.
-- Caddy com tabela versionada das 344 rotas, distinção por método e segmentos, canários de 1%, 10% e 50%, volta por recarga e logs JSON de rota/destino. Agentes continuam fora do proxy, conforme o plano.
-- Sobreposição `infra/prod/docker-compose.go.yml` e imagem do Caddy com o build do painel. A tabela versionada permanece integralmente em `fastify`; os ensaios de roteamento são descartáveis.
-- Registros de permissão ligados às operações, incluindo MFA pendente em `/api/me`, métricas por padrão de rota e HEAD equivalente. SQL das consultas revisadas e o template da página pública possuem extração reproduzível e verificação de deriva.
-- Migration 57 otimiza a implementação de `subscriber_in_pops` com agregação e plano genérico local à função. Mantém o predicado de RLS e as verificações de escrita, incluindo cadastro com `INSERT ... RETURNING`. As 53 migrations congeladas permanecem intactas.
-- O adaptador D1 em `apps/api/test/helpers.ts` aceita `NEXO_TEST_BASE_URL`. O backend de teste roda no processo do Vitest; assim os simuladores e as alterações locais de configuração continuam funcionando através do proxy. O contexto que reproduz `remoteAddress` é assinado com chave efêmera e existe apenas no adaptador de teste.
+O inventário inicial omitia duas rotas dinâmicas: `PUT /api/subscribers/:id/custom` e `PUT /api/contracts/:id/custom`. Ambas foram implementadas com validação por definição, limpeza de valores, auditoria e isolamento. O extrator agora expande os templates conhecidos e recusa templates desconhecidos.
 
-## Verificações já executadas
+O Fastify está arquivado em `legacy/fastify`. Não pertence aos workspaces ativos nem às imagens/serviços padrão. As configurações legadas estão separadas em `docker-compose.fastify.yml` para comparação/retorno explícito. Node permanece no build do frontend React e nas ferramentas opcionais de compatibilidade. O agente Python e os serviços externos previstos no plano permanecem.
 
-| Ensaio | Resultado |
+## O que foi fechado após a auditoria
+
+- API e VPN padrão nos Compose de desenvolvimento/produção são Go; o Caddy serve o frontend e encaminha as 336 operações HTTP ao Go.
+- `nexo-vpn` substitui `vpn.ts`: WireGuard, sincronização de peers, publicação da chave, L2TP/IPsec/PPP, relatórios e relay UDP.
+- `nexo-db prepare` prepara banco novo ou adota legado completo, configura os papéis Go/RADIUS/réplica, aplica goose e o migrador River e verifica RLS.
+- Criação de operador, rotação de segredos, preflight, TOTP e seed de laboratório têm CLI Go. A imagem inclui o executável administrativo e SQL; o runtime não recebe `DATABASE_URL_OWNER`.
+- `./nexo up|build|test|typecheck`, homologação, produção, backup e restauração foram adaptados ao fluxo Go. Restore pausa os escritores que estavam em execução e prepara o banco antes de reiniciá-los.
+- Intenções de rede integrada enfileiram jobs River por operação na mesma transação. O executor usa tenant/operação, unicidade e reservas com `SKIP LOCKED`; a varredura periódica recupera operações legadas.
+- Erros de validação dos agentes preservam a representação textual das issues Zod; corpus capturado da biblioteca legada cobre os formatos corrigidos.
+- Logs HTTP incluem request ID, rota, status, duração, tenant, usuário e célula. Há tempo de banco por rota e amostragem de traces de 5%, retendo HTTP 5xx e seus spans associados dentro dos limites de buffer.
+- CI padrão verifica Go, frontend e ensaios nativos. As baterias de comparação com o Fastify arquivado ficaram manuais.
+
+## Evidências finais
+
+| Verificação | Resultado |
 |---|---|
-| Fase 1 após expansão inicial | 591/591; cache 12/12 |
-| Fase 2, respostas, filtros, CSV, portal e sentinelas | 794/794 |
-| Primeiro lote de consultas simples F3 | 1.941/1.941 em 55 rotas |
-| Leituras compostas, auxiliares e paginadas F3 | 1.098/1.098 em 30 rotas |
-| Últimas 17 leituras F3: busca, linha do tempo, agenda, CGNAT, financeiro e RADIUS | 819/819, com dados positivos e oráculos independentes |
-| Página pública de aviso | 12/12; bytes HTML, escape, cabeçalhos e HEAD |
-| Predicado POP contra SQL independente | 39/39, incluindo INSERT/UPDATE com RETURNING |
-| Caddy real: pesos e retorno | 100 requisições por estado; pesos exatos, método/caminho isolados e recarga exercitada |
-| Regressão original através do Caddy | **41 arquivos, 192 testes aprovados** |
-| Painel através do Caddy, Playwright original | teste de fumaça aprovado, com os cenários de painel e portal |
-| Go e lint | compilação/testes aprovados; zero problemas no lint |
-| Imagem Go e roteamento final | imagem Docker compilada; Caddy final validado pelo binário real |
-| Consolidação das escritas | 20 verificações; inclui idempotência e baixa/estorno misturados com Fastify |
-| Agente Python real contra Go | sincronização, assinatura Ed25519, reserva, execução e confirmação aprovadas |
-| River real e RADIUS integrado | schema/migrations, provisionamento, accounting, cleanup e gateway assinado/idempotente aprovados em processo descartável |
-| mTLS Go | CA, identidade, fixação e rejeição de conexão sem certificado aprovadas |
-| Inventário final | 344/344 rotas presentes, sem extras; Compose final validado |
+| Registro Go e inventário corrigido | 346 rotas: 336 HTTP + dez agentes |
+| Fastify real × inventário HTTP | 336/336; zero faltas e extras |
+| Compilação, `go vet`, testes Go com detector de concorrência | aprovados; testes de banco condicionais exigem a variável do laboratório |
+| Lint Go | zero problemas |
+| Regressões históricas com requests HTTP/agente dirigidos a Go | execução completa: 189/192; três falhas reais corrigidas; nove casos dos arquivos afetados passaram na repetição direcionada |
+| Painel Playwright pelo Caddy e API Go, com seed Go | aprovado: painel, financeiro, permissões e portal |
+| Instalação e administração nativas | prepare/seed repetidos, papéis de RADIUS/réplica, operador e rotação idempotente aprovados |
+| Duas réplicas Go | baixa concorrente, estorno versus baixa, acordo versus baixa e geração financeira sem duplicação aprovados |
+| River | operação executada uma vez; rollback da intenção, job e auditoria comprovado por falha injetada |
+| VPN Go isolada | WireGuard real, strongSwan/xl2tpd, NAS criados pela API, peers/CHAP sincronizados e chave preservada no reinício |
+| Relay CoA | protocolo UDP e cancelamento conferidos por teste Go |
+| SQL e roteamento | 53 migrations congeladas intactas; 12 extratores sem deriva; Caddy final com 346 entradas validado |
+| Imagens | API/administração e VPN compiladas sem runtime Node |
 
-Os resultados das baterias extensas acima são históricos, anteriores às últimas escritas. Essas baterias não foram repetidas por rota: a pedido do usuário, a validação final foi concentrada nos fluxos críticos. Isso deixa a paridade exaustiva das novas rotas e as integrações externas para homologação.
+Os ensaios finais usaram somente dados sintéticos e containers descartáveis; não alteraram serviços produtivos. Alguns testes históricos importam funções Node diretamente como referência: seus resultados não são contados como execução de workers Go. Os workers e a administração Go tiveram ensaios próprios.
 
-Os relatórios completos locais ficam em `tests/contrato/relatorios/`. As evidências históricas da carga original continuam em `evidencias-fase-1/`.
+Relatórios detalhados locais: `tests/contrato/relatorios/`; os resumos sem credenciais estão em `evidencias-final-go/`. Evidências das primeiras fases continuam em `evidencias-fase-1/`, com seu escopo e limitações originais.
 
-## Implantação e critérios ainda pendentes
+## Aceitação operacional ainda pendente
 
-A implementação das escritas, identidade, integrações, API pública, importação, financeiro, agentes, executor RADIUS e rotinas River está disponível. A configuração final está preparada separadamente em `infra/prod/docker-compose.go-final.yml`; o procedimento e a volta à coexistência estão em [EXECUCAO_GO.md](EXECUCAO_GO.md). A configuração produtiva vigente não foi alterada.
+A implementação e o fluxo padrão Go estão entregues; **a aceitação operacional completa do plano não está concluída**.
 
-O portão de desempenho da fase 1 ainda está pendente. A otimização da função POP reduziu uma consulta isolada do maior provedor sintético de aproximadamente 4,2 s para 2,9 s; isso não é uma nova prova de capacidade HTTP nem substitui o ensaio completo. A técnica final mantém a semântica de criação de assinantes e não adiciona função que enumere identificadores ocultos por POP.
+Não foi identificado/configurado um destino de produção nesta sessão. Nenhum proxy produtivo foi recarregado nem há evidência de tráfego real transferido. Faltam a carga comparativa válida, sete dias de baseline, canários e semanas de observação aplicáveis, consolidação de 30 dias e fechamento mensal financeiro. Os ensaios de VPN não substituem homologação de NAS/OLT/CPE em equipamento real.
 
-Os sete dias de linha de base, canários, consolidação de 30 dias e fechamento mensal financeiro ainda não ocorreram. Nenhuma configuração produtiva foi recarregada nem há alegação de tráfego produtivo migrado. A implementação e os ensaios continuam no laboratório.
+A carga histórica da fase 1 perdeu iterações e não comprova desempenho. Não se deduz ganho de capacidade dos testes funcionais. O procedimento atual de implantação e retorno está em [EXECUCAO_GO.md](EXECUCAO_GO.md); o plano original e a auditoria são registros históricos, com as alterações de escopo aqui explicitadas.

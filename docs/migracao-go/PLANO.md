@@ -2,6 +2,8 @@
 
 Estado: **em execução por autorização do usuário em 16/10/2026**. O usuário determinou prosseguir por todas as fases sem novas perguntas. Estado verificável em `ANDAMENTO.md`; os critérios operacionais continuam sendo medidos, sem declarar períodos de observação que ainda não ocorreram.
 
+Atualização de escopo autorizada pelo usuário após a auditoria: concluir também VPN, ferramentas administrativas e desativação do Fastify no fluxo padrão. API/VPN/CLI agora usam Go; a referência anterior foi movida para `legacy/fastify`, fora dos workspaces e imagens ativos. O inventário final é **346 rotas (336 HTTP + dez agentes)**: a execução das regressões contra Go encontrou duas rotas dinâmicas de campos personalizados omitidas na versão inicial. As contagens e caminhos antigos no corpo deste plano são históricos; os procedimentos atuais estão em `EXECUCAO_GO.md`. A implementação não declara cumpridos os períodos de produção ainda não observados.
+
 Documentos deste diretório:
 
 | Arquivo | Conteúdo |

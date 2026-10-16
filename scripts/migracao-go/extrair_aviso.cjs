@@ -1,5 +1,5 @@
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');const root=path.resolve(__dirname,'../..'),ts=require(path.join(root,'node_modules/typescript'));
-const source=fs.readFileSync(path.join(root,'apps/api/src/routes/escopo-docs.ts'),'utf8'),ast=ts.createSourceFile('notice.ts',source,ts.ScriptTarget.Latest,true);let found;
+const source=fs.readFileSync(path.join(root,'legacy/fastify/src/routes/escopo-docs.ts'),'utf8'),ast=ts.createSourceFile('notice.ts',source,ts.ScriptTarget.Latest,true);let found;
 function walk(n){if(ts.isTemplateExpression(n)&&n.head.text.startsWith('<!doctype html><html lang="pt-BR">'))found=n;ts.forEachChild(n,walk);}walk(ast);if(!found)throw Error('notice template missing');
 let output=found.head.text;
 for(const span of found.templateSpans){const expr=span.expression.getText(ast);const vars={'esc(p.title)':'Title','esc(t.name)':'Tenant','esc(text)':'Text'};let name=vars[expr];if(!name){for(const [prefix,v] of [['p.show_portal_link ?','Portal'],['p.whatsapp ?','WhatsApp'],['p.phone ?','Phone']])if(expr.startsWith(prefix))name=v;}if(!name)throw Error('notice expression changed: '+expr);output+='{{.'+name+'}}'+span.literal.text;}

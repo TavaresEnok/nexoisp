@@ -55,6 +55,7 @@ type operation struct {
 }
 
 func Register(api huma.API, registry *endpoint.Registry, s Service) {
+	registerCustom(api,registry,s)
 	for key, op := range s.operations() {
 		descriptor, exists := specs[key]
 		if !exists {

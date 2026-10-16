@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "checks": [
+    "WireGuard real em namespace isolado",
+    "strongSwan e xl2tpd iniciados",
+    "NAS WireGuard/L2TP criados pela API Go",
+    "sincronização de peers e CHAP",
+    "reinício preserva chave do servidor"
+  ]
+}

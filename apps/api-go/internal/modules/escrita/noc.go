@@ -89,7 +89,8 @@ func (s Service) nocOverview(ctx context.Context, tx *db.Tx, _ string, _ map[str
 		alerts = append(alerts, a)
 	}
 	collective := map[string]bool{}
-	for _, p := range pons {
+	for i, p := range pons {
+		pons[i].Set("outage", outage(p, cfg["pon_outage_min"]))
 		if outage(p, cfg["pon_outage_min"]) {
 			collective[fmt.Sprint(p.Get("device_id"))+"|"+fmt.Sprint(p.Get("pon_port"))] = true
 		}
@@ -151,9 +152,6 @@ func (s Service) nocOverview(ctx context.Context, tx *db.Tx, _ string, _ map[str
 	sort.SliceStable(alerts, func(i, j int) bool { return nocRank(alerts[i]["severity"]) < nocRank(alerts[j]["severity"]) })
 	n.Set("onus_down", len(down))
 	n.Set("agents_offline", len(agents))
-	for _, p := range pons {
-		p.Set("outage", outage(p, cfg["pon_outage_min"]))
-	}
 	return map[string]any{"generated_at": time.Now().UTC().Format("2006-01-02T15:04:05.000Z"), "settings": cfg, "counters": n, "alerts": alerts, "pons": pons}, nil
 }
 func (s Service) diagnosis(ctx context.Context, tx *db.Tx, id string, _ map[string]any) (any, error) {

@@ -24,7 +24,7 @@ func Root() (string, error) {
 		return "", err
 	}
 	for {
-		if _, err = os.Stat(filepath.Join(p, "apps/api/migrations")); err == nil {
+		if _, err = os.Stat(filepath.Join(p, "db/legado.sha256.json")); err == nil {
 			return p, nil
 		}
 		parent := filepath.Dir(p)
@@ -44,31 +44,33 @@ func VerifyCopies(root string) error {
 	if err = json.Unmarshal(raw, &hashes); err != nil {
 		return err
 	}
-	files, err := filepath.Glob(filepath.Join(root, "apps/api/migrations/*.sql"))
-	if err != nil {
-		return err
-	}
-	if len(files) != 53 || len(hashes) != 53 {
+	if len(hashes) != 53 {
 		return fmt.Errorf("esperadas 53 migrations legadas")
 	}
-	for i, file := range files {
-		original, err := os.ReadFile(file)
-		if err != nil {
-			return err
-		}
-		sum := sha256.Sum256(original)
-		if hex.EncodeToString(sum[:]) != hashes[filepath.Base(file)] {
-			return fmt.Errorf("hash legado divergente: %s", file)
-		}
-		name := fmt.Sprintf("%05d_%s", i+1, strings.SplitN(filepath.Base(file), "_", 2)[1])
+	names := make([]string, 0, len(hashes))
+	for name := range hashes {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for i, file := range names {
+		name := fmt.Sprintf("%05d_%s", i+1, strings.SplitN(file, "_", 2)[1])
 		copySQL, err := os.ReadFile(filepath.Join(root, "db/migrations", name))
 		if err != nil {
 			return err
 		}
-		expected := append([]byte("-- +goose Up\n-- +goose StatementBegin\n"), original...)
-		expected = append(expected, []byte("-- +goose StatementEnd\n")...)
-		if !bytes.Equal(copySQL, expected) {
+		prefix, suffix := []byte("-- +goose Up\n-- +goose StatementBegin\n"), []byte("-- +goose StatementEnd\n")
+		if !bytes.HasPrefix(copySQL, prefix) || !bytes.HasSuffix(copySQL, suffix) {
+			return fmt.Errorf("anotações goose inválidas: %s", name)
+		}
+		original := copySQL[len(prefix) : len(copySQL)-len(suffix)]
+		sum := sha256.Sum256(original)
+		if hex.EncodeToString(sum[:]) != hashes[file] {
 			return fmt.Errorf("SQL divergente: %s", name)
+		}
+		if legacy, e := os.ReadFile(filepath.Join(root, "legacy/fastify/migrations", file)); e == nil && !bytes.Equal(legacy, original) {
+			return fmt.Errorf("legado divergente: %s", file)
+		} else if e != nil && !os.IsNotExist(e) {
+			return e
 		}
 	}
 	return nil
@@ -137,8 +139,10 @@ func Admin(ctx context.Context, command, root string, initApp bool) error {
 		if _, err = conn.ExecContext(ctx, verb+" role nexo_go login inherit nosuperuser nobypassrls nocreatedb nocreaterole password "+quote(pw)); err != nil {
 			return err
 		}
-		_, err = conn.ExecContext(ctx, "grant nexo_app to nexo_go")
-		return err
+		if _, err = conn.ExecContext(ctx, "grant nexo_app to nexo_go"); err != nil {
+			return err
+		}
+		return provisionNetworkRoles(ctx, conn)
 	case "baseline":
 		return baseline(ctx, conn, root)
 	case "up":
@@ -194,10 +198,17 @@ func baseline(ctx context.Context, conn *sql.DB, root string) error {
 	if err != nil {
 		return err
 	}
-	files, _ := filepath.Glob(filepath.Join(root, "apps/api/migrations/*.sql"))
+	raw, err := os.ReadFile(filepath.Join(root, "db/legado.sha256.json"))
+	if err != nil {
+		return err
+	}
+	var hashes map[string]string
+	if err = json.Unmarshal(raw, &hashes); err != nil {
+		return err
+	}
 	expected := []string{}
-	for _, p := range files {
-		expected = append(expected, filepath.Base(p))
+	for name := range hashes {
+		expected = append(expected, name)
 	}
 	sort.Strings(expected)
 	if strings.Join(names, "\n") != strings.Join(expected, "\n") {

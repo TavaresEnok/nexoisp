@@ -152,7 +152,7 @@ func (s Service) Handler() http.Handler {
 			if schema != nil {
 				var raw any
 				if e = apierr.DecodeJSON(r, &raw); e == nil {
-					body, e = schema.Parse(raw, true)
+					body, e = schema.ParseAgent(raw, true)
 				}
 				if e != nil {
 					apierr.Write(w, e)

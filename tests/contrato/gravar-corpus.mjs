@@ -1,9 +1,9 @@
 import { writeFileSync } from 'node:fs';
 import { z } from 'zod';
-import { pool, closePool } from '../../apps/api/src/db.ts';
-import { buildApp } from '../../apps/api/src/app.ts';
-import { zUuid,zPage } from '../../apps/api/src/validators.ts';
-import { PERMISSIONS,moduleOf } from '../../apps/api/src/auth.ts';
+import { pool, closePool } from '../../legacy/fastify/src/db.ts';
+import { buildApp } from '../../legacy/fastify/src/app.ts';
+import { zUuid,zPage } from '../../legacy/fastify/src/validators.ts';
+import { PERMISSIONS,moduleOf } from '../../legacy/fastify/src/auth.ts';
 const schema=z.object({q:z.string().trim().max(100).optional(),status:z.enum(['active','inactive']).optional(),...zPage});
 const cases=[{}, {limit:''},{limit:' '},{limit:'0x10'},{limit:'1e1'},{limit:'0b10'},{limit:'0o10'},
  {limit:'1.5'},{limit:'-1.5'},{limit:'Infinity'},{limit:'NaN'},{limit:'foo'},{limit:'5001'},{offset:'-1'},

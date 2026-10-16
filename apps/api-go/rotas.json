@@ -1303,6 +1303,10 @@
     },
     {
       "method": "PUT",
+      "path": "/api/contracts/:id/custom"
+    },
+    {
+      "method": "PUT",
       "path": "/api/contracts/:id/install-address"
     },
     {
@@ -1372,6 +1376,10 @@
     {
       "method": "PUT",
       "path": "/api/subscribers/:id/contacts"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/subscribers/:id/custom"
     },
     {
       "method": "PUT",

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -25,6 +26,7 @@ import (
 	"nexoisp/api-go/internal/modules/escrita"
 	"nexoisp/api-go/internal/modules/identity"
 	"nexoisp/api-go/internal/modules/leitura"
+	"nexoisp/api-go/internal/testbridge"
 	_ "time/tzdata"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -123,7 +125,15 @@ func run() error {
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{"ok":true}`))
 	})
-	servers := []*http.Server{{Addr: cfg.Addr, Handler: router, ReadHeaderTimeout: 5 * time.Second, IdleTimeout: 60 * time.Second}, {Addr: cfg.InternalAddr, Handler: internal, ReadHeaderTimeout: 5 * time.Second, IdleTimeout: 60 * time.Second}}
+	handler := testbridge.Wrap(router, func() {
+		authentication.RequireMFA = os.Getenv("NEXO_REQUIRE_ADMIN_MFA") == "1"
+		limit, _ := strconv.Atoi(os.Getenv("NEXO_PANEL_RATE_PER_MIN"))
+		if limit == 0 {
+			limit = 1200
+		}
+		authentication.Limit = max(30, limit)
+	})
+	servers := []*http.Server{{Addr: cfg.Addr, Handler: handler, ReadHeaderTimeout: 5 * time.Second, IdleTimeout: 60 * time.Second}, {Addr: cfg.InternalAddr, Handler: internal, ReadHeaderTimeout: 5 * time.Second, IdleTimeout: 60 * time.Second}}
 	stopJobs, err := jobs.Start(ctx, database)
 	if err != nil {
 		return err
@@ -138,6 +148,7 @@ func run() error {
 		return err
 	}
 	if agentServer != nil {
+		agentServer.Handler = testbridge.Wrap(agentServer.Handler, nil)
 		servers = append(servers, agentServer)
 	}
 	fail := make(chan error, len(servers))

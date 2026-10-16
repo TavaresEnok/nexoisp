@@ -26,14 +26,14 @@ const filters={
  '/api/finance/summary':[{name:'company_id',kind:'uuid'}],
 };
 const queriesDir=path.join(root,'apps/api-go/internal/modules/leitura/queries');const outputs={};const found=[];
-for(const file of fs.readdirSync(path.join(root,'apps/api/src/routes')).filter(s=>s.endsWith('.ts'))){
- const source=fs.readFileSync(path.join(root,'apps/api/src/routes',file),'utf8'),ast=ts.createSourceFile(file,source,ts.ScriptTarget.Latest,true),constants={};
+for(const file of fs.readdirSync(path.join(root,'legacy/fastify/src/routes')).filter(s=>s.endsWith('.ts'))){
+ const source=fs.readFileSync(path.join(root,'legacy/fastify/src/routes',file),'utf8'),ast=ts.createSourceFile(file,source,ts.ScriptTarget.Latest,true),constants={};
  function collect(n){if(ts.isVariableDeclaration(n)&&ts.isIdentifier(n.name)&&n.initializer)constants[n.name.text]=n.initializer;ts.forEachChild(n,collect);}collect(ast);
  for(const statement of ast.statements){
   if(!ts.isImportDeclaration(statement)||!statement.moduleSpecifier.text.startsWith('.'))continue;
   const imported=statement.importClause?.namedBindings;if(!imported||!ts.isNamedImports(imported))continue;
   const names=new Set(imported.elements.map(n=>(n.propertyName||n.name).text));
-  const modulePath=path.resolve(root,'apps/api/src/routes',statement.moduleSpecifier.text.replace(/\.js$/,'.ts'));
+  const modulePath=path.resolve(root,'legacy/fastify/src/routes',statement.moduleSpecifier.text.replace(/\.js$/,'.ts'));
   if(!fs.existsSync(modulePath))continue;
   const module=ts.createSourceFile(modulePath,fs.readFileSync(modulePath,'utf8'),ts.ScriptTarget.Latest,true);
   function imports(n){if(ts.isVariableDeclaration(n)&&ts.isIdentifier(n.name)&&names.has(n.name.text)&&n.initializer)constants[n.name.text]=n.initializer;ts.forEachChild(n,imports);}imports(module);

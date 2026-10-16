@@ -15,10 +15,10 @@ Legenda — **Tipo**: leitura, leitura + auditoria (grava em `audit_events`) ou 
 
 ## Resumo
 
-- **344 rotas** HTTP: DELETE 18, GET 149, PATCH 27, POST 128, PUT 22.
-- Por tipo: leitura 137, leitura + auditoria 14, escrita 193.
-- Por complexidade: B 136, M 183, A 25.
-- Por fase sugerida: F1: 3, F2: 12, F3: 104, F4: 115, F5: 81, F6: 18, F7: 10, F8: 1.
+- **346 rotas** HTTP: DELETE 18, GET 149, PATCH 27, POST 128, PUT 24. A revisão final identificou duas rotas dinâmicas de campos personalizados omitidas pela extração anterior.
+- Por tipo: leitura 137, leitura + auditoria 14, escrita 195.
+- Por complexidade: B 136, M 185, A 25.
+- Por fase sugerida: F1: 3, F2: 12, F3: 104, F4: 117, F5: 81, F6: 18, F7: 10, F8: 1.
 - **25 GETs com escrita lateral** (ex.: `sweep()` que expira operações vencidas, contador de uso da API pública, auditoria de relatório). Eles não podem ser tratados como leitura pura: o Go precisa reproduzir o efeito, e o teste de contrato compara também o estado do banco depois da chamada.
 
 | Arquivo | Rotas | Leitura | Escrita | A | Fase predominante |
@@ -49,7 +49,7 @@ Legenda — **Tipo**: leitura, leitura + auditoria (grava em `audit_events`) ou 
 | `noc.ts` | 5 | 4 | 1 | 0 | F3 |
 | `olt.ts` | 5 | 3 | 2 | 0 | F5 |
 | `portal.ts` | 5 | 3 | 2 | 1 | F2 |
-| `produtividade.ts` | 13 | 5 | 8 | 0 | F4 |
+| `produtividade.ts` | 15 | 5 | 10 | 0 | F4 |
 | `public-api.ts` | 8 | 6 | 2 | 0 | F5 |
 | `radius.ts` | 9 | 4 | 5 | 1 | F5 |
 | `relatorios.ts` | 5 | 5 | 0 | 0 | F5 |
@@ -492,6 +492,8 @@ O proxy precisa conhecer estes prefixos além de `/api/*` (ver `ARQUITETURA.md`,
 | GET | `/api/custom-fields` | `subscribers:read` | núcleo | `custom_fields` | leitura | B | F3 |  |
 | POST | `/api/custom-fields` | `settings:manage` | núcleo | `custom_fields`, `audit_events` | escrita | M | F4 |  |
 | PATCH | `/api/custom-fields/:id` | `settings:manage` | núcleo | `custom_fields`, `audit_events` | escrita | M | F4 |  |
+| PUT | `/api/subscribers/:id/custom` | `subscribers:write` | núcleo | `subscribers`, `custom_fields`, `audit_events` | escrita | M | F4 | valores tipados, limpeza e obrigatoriedade |
+| PUT | `/api/contracts/:id/custom` | `contracts:write` | núcleo | `contracts`, `custom_fields`, `audit_events` | escrita | M | F4 | valores tipados, limpeza e obrigatoriedade |
 | GET | `/api/install-kits` | `stock:read` | field | `install_kit_items`, `install_kits`, `stock_items` | leitura | B | F3 |  |
 | POST | `/api/install-kits` | `stock:write` | field | `install_kit_items`, `install_kits`, `stock_items`, `audit_events` | escrita | M | F4 |  |
 | PATCH | `/api/install-kits/:id` | `stock:write` | field | `install_kits`, `audit_events` | escrita | M | F4 |  |

@@ -7,7 +7,7 @@ import { buildApp } from '../src/app.js';
 
 let app: FastifyInstance | undefined;
 let starting: Promise<FastifyInstance> | undefined;
-const relayKey = randomBytes(32);
+const relayKey = process.env.NEXO_TEST_RELAY_KEY ? Buffer.from(process.env.NEXO_TEST_RELAY_KEY, 'base64url') : randomBytes(32);
 const relayHeader = 'x-nexo-test-context';
 const signRelay = (value: string) => createHmac('sha256', relayKey).update(value).digest('hex');
 
@@ -15,12 +15,11 @@ const signRelay = (value: string) => createHmac('sha256', relayKey).update(value
  * O backend de teste fica no processo do Vitest: alterações de env e simuladores
  * continuam visíveis. O contexto assinado reproduz apenas opções do inject.
  */
-async function injectHTTP(options: InjectOptions) {
-  const base = process.env.NEXO_TEST_BASE_URL!;
+async function injectHTTP(options: InjectOptions, base = process.env.NEXO_TEST_BASE_URL!) {
   const target = new URL(String(options.url ?? options.path ?? '/'), base);
   if (target.origin !== new URL(base).origin) throw new Error('teste tentou sair da origem do proxy');
   const context = Buffer.from(JSON.stringify({ remoteAddress: options.remoteAddress,
-    forwardedProto: options.headers?.['x-forwarded-proto'] })).toString('base64url');
+    forwardedProto: options.headers?.['x-forwarded-proto'], env: Object.fromEntries(['NEXO_DEMO_MODE','NEXO_REQUIRE_ADMIN_MFA','NEXO_PANEL_RATE_PER_MIN','NEXO_TRUST_PROXY','NEXO_ACS_URL','NEXO_RADIUS_KEY','NEXO_RADIUS_PUBLIC_HOST','NEXO_RADIUS_COA_RELAY','NEXO_L2TP_PSK','NEXO_ALERT_WEBHOOK_URL','NEXO_GATEWAY_WEBHOOK_SECRET','NEXO_COOKIE_SECURE'].map(k => [k, process.env[k] ?? null])) })).toString('base64url');
   const headers: Record<string, any> = { ...options.headers, [relayHeader]: `${context}.${signRelay(context)}` };
   let payload = options.payload;
   if (payload != null && typeof payload === 'object' && !Buffer.isBuffer(payload)) {
@@ -49,6 +48,10 @@ async function injectHTTP(options: InjectOptions) {
 
 export async function getApp(): Promise<FastifyInstance> {
   if (app) return app;
+  if (process.env.NEXO_TEST_BACKEND === 'go') {
+    app = { inject: (options: InjectOptions) => injectHTTP(options), close: async () => {} } as unknown as FastifyInstance;
+    return app;
+  }
   starting ??= (async () => {
     const server = await buildApp();
     if (process.env.NEXO_TEST_BASE_URL) {
@@ -94,6 +97,10 @@ export async function call(token: string | null, method: string, url: string, pa
 import { buildAgentApp } from '../src/agent-api.js';
 let agentApp: FastifyInstance | undefined;
 export async function agentCall(token: string, path: string, body: unknown = {}) {
+  if (process.env.NEXO_TEST_BACKEND === 'go') {
+    const r = await injectHTTP({ method: 'POST', url: `/agent/v1/${path}`, payload: body as any, headers: { authorization: `Bearer ${token}` } }, process.env.NEXO_TEST_AGENT_URL!);
+    return { status: r.statusCode, body: r.json() };
+  }
   agentApp ??= (await buildAgentApp())!;
   const r = await agentApp.inject({ method: 'POST', url: `/agent/v1/${path}`, payload: body as any, headers: { authorization: `Bearer ${token}` } });
   return { status: r.statusCode, body: r.json() };

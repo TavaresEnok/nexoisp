@@ -1,7 +1,6 @@
-name: verificação
+name: compatibilidade Fastify arquivada (manual)
 on:
-  push:
-  pull_request:
+  workflow_dispatch:
 
 # Roda a cada envio: tipos, build, dependências de produção, testes da API, testes do agente e fumaça da interface.
 # Não prova nada contra equipamento real nem contra gateway real: isso continua sendo laboratório/homologação.
@@ -35,14 +34,15 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
+      - run: npm ci --prefix legacy/fastify --workspaces=false
       - name: Dependências de produção sem vulnerabilidade alta
         run: npm audit --omit=dev --audit-level=high
       - name: Tipos
-        run: npm -w apps/api run typecheck && npm -w apps/web run typecheck
+        run: npm --prefix legacy/fastify --workspaces=false run typecheck && npm -w apps/web run typecheck
       - name: Build
-        run: npm -w apps/api run build && npm -w apps/web run build
+        run: npm --prefix legacy/fastify --workspaces=false run build && npm -w apps/web run build
       - name: Testes da API (papel real do banco, com RLS)
-        run: npm -w apps/api test
+        run: npm --prefix legacy/fastify --workspaces=false test
 
   agente:
     runs-on: ubuntu-24.04
@@ -79,10 +79,11 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
-      - run: npm -w apps/api run build && npm -w apps/web run build
+      - run: npm ci --prefix legacy/fastify --workspaces=false
+      - run: npm --prefix legacy/fastify --workspaces=false run build && npm -w apps/web run build
       - name: Sobe a API em modo demonstração
         run: |
-          node apps/api/dist/main.js > api.log 2>&1 &
+          node legacy/fastify/dist/main.js > api.log 2>&1 &
           for i in $(seq 1 60); do curl -sf localhost:8080/api/health && break; sleep 1; done
           curl -sf localhost:8080/api/health || { cat api.log; exit 1; }
       - name: Navegador

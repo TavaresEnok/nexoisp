@@ -40,7 +40,7 @@ def node(script, database=DB_NAME, capture=False):
           '-v',str(ROOT)+':/app','-w','/app']
     for k in ('DATABASE_URL_APP','DATABASE_URL_OWNER','NEXO_APP_DB_PASSWORD','NEXO_AGENT_MTLS'):
         args += ['-e',k]
-    args += ['node:22-alpine','node','--import','tsx','--input-type=module','-e',script]
+    args += ['node:22-alpine','node','--import','./legacy/fastify/node_modules/tsx/dist/loader.mjs','--input-type=module','-e',script]
     return command(args, env=env, capture_output=capture)
 
 
@@ -107,14 +107,14 @@ def up():
     subprocess.run(['docker','rm','-f','nexo-fase1-fastify'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
     command(['docker','run','-d','--name','nexo-fase1-fastify','--network','host','--security-opt','seccomp=unconfined',
              '-v',str(ROOT)+':/app','-w','/app','-e','DATABASE_URL_APP','-e','NEXO_AGENT_MTLS','-e','NEXO_REQUIRE_ADMIN_MFA',
-             '-e','PORT=18081','node:22-alpine','node','--import','tsx','tests/contrato/fastify.mjs'],env=env)
+             '-e','PORT=18081','node:22-alpine','node','--import','./legacy/fastify/node_modules/tsx/dist/loader.mjs','tests/contrato/fastify.mjs'],env=env)
     wait('http://127.0.0.1:18081','/api/health')
     start_go()
     print('Laboratório pronto: Fastify 127.0.0.1:18081; Go 127.0.0.1:18082; interno 127.0.0.1:19082')
 
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('command',choices=['up','down','run','mutacoes','migrations','carga','leituras','proxy','consultas','grupos','escopo_pop','regressoes','e2e','aviso','dinamicas','consolidacao','agente_go','river_radius','mtls_go','jobs-up']);args,rest=parser.parse_known_args()
+    parser=argparse.ArgumentParser();parser.add_argument('command',choices=['up','down','run','mutacoes','migrations','carga','leituras','proxy','consultas','grupos','escopo_pop','regressoes','e2e','aviso','dinamicas','consolidacao','agente_go','river_radius','mtls_go','jobs-up','nativo','vpn_go']);args,rest=parser.parse_known_args()
     if args.command=='up':up()
     elif args.command=='down':
         stop_go();subprocess.run(['docker','rm','-f','nexo-fase1-fastify',DB_CONTAINER],check=True)

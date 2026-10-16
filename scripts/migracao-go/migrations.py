@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-ORIGINS = ROOT / 'apps/api/migrations'
+ORIGINS = ROOT / 'legacy/fastify/migrations'
 DEST = ROOT / 'db/migrations'
 PREFIX = b'-- +goose Up\n-- +goose StatementBegin\n'
 SUFFIX = b'-- +goose StatementEnd\n'

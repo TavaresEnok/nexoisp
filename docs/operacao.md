@@ -2,6 +2,8 @@
 
 Documento único de operação. O que está marcado **não exercitado** ainda precisa ser provado no ambiente do piloto.
 
+Desde 16/10/2026 o backend padrão é Go: API, rotinas River, VPN e CLI. A referência Fastify está em `legacy/fastify`, fora das imagens e workspaces ativos. Os ensaios históricos abaixo não representam homologação do novo backend; evidências atuais e limites estão em [migração Go](migracao-go/ANDAMENTO.md).
+
 ## 1. Instalação central (nuvem/servidor do SaaS)
 
 Requisitos: Linux com Docker e Docker Compose; domínio apontando para o host; portas 80/443 (painel) e 8443 (agentes).
@@ -11,13 +13,14 @@ cd infra/prod
 cp .env.example .env && chmod 600 .env      # gerar cada segredo NESTE host (comandos no próprio arquivo)
 # certificados da API de agentes: CA própria do operador + certificado do servidor
 NEXO_API_SAN=DNS:agentes.exemplo.com.br ../../scripts/dev-certs.sh init    # gera em infra/certs; copie ca.crt, server.crt, server.key para infra/prod/certs
-docker compose up -d --build
-docker compose exec -e NEXO_NEW_PASSWORD='<12+ caracteres>' api node apps/api/dist/cli.js create-operator voce@empresa.com "Seu Nome"
+cd ../..
+./nexo prod up
+NEXO_NEW_PASSWORD='<12+ caracteres>' ./nexo prod db create-operator voce@empresa.com "Seu Nome"
 ```
 
 - Produção sobe com `NEXO_DEMO_MODE=0`: sem dados sintéticos, sem driver/gateway de demonstração.
 - `NEXO_REQUIRE_ADMIN_MFA=1`: administradores e operadores só usam o sistema depois de ativar a verificação em duas etapas (Minha conta).
-- O banco tem dois papéis: `nexo_owner` (migrations, backup) e `nexo_app` (aplicação; sem superusuário, sem `BYPASSRLS`, não é dono das tabelas).
+- O banco usa `nexo_owner` apenas em administração/migrations, `nexo_go` na API/VPN (membro de `nexo_app`, sem superusuário, sem `BYPASSRLS` ou propriedade de tabelas), `nexo_radius` no FreeRADIUS e `nexo_replica` quando há réplica.
 - Sessão do painel em cookie `HttpOnly`/`SameSite=Strict`/`Secure` (`NEXO_COOKIE_SECURE=1`); o navegador nunca expõe o token ao JavaScript.
 - **Exercitado localmente em 10/10/2026** (`NEXO_DOMAIN=localhost`, portas alternativas): subida do zero, HTTPS pelo Caddy com redirecionamento, criação do operador,
   MFA obrigatório, criação de provedor, acesso de suporte, bloqueio do driver/gateway de demonstração, agente com mTLS, backup + `restore-check`, rotação da chave de segredos.
@@ -35,7 +38,7 @@ docker compose exec -e NEXO_NEW_PASSWORD='<12+ caracteres>' api node apps/api/di
 Guardar cópia de `.env` e de `infra/prod/certs` em cofre separado do backup do banco.
 
 **Rotação de `NEXO_SECRET_KEY`:** (1) backup; (2) no `.env`, mover a chave atual para `NEXO_SECRET_KEY_PREVIOUS` e gerar a nova em `NEXO_SECRET_KEY`; (3) `docker compose up -d api`;
-(4) `docker compose exec api node apps/api/dist/cli.js rotate-secrets` até mostrar "0 pendente(s)"; (5) remover `NEXO_SECRET_KEY_PREVIOUS` e reiniciar. A aplicação segue funcionando durante o processo.
+(4) `./nexo prod db rotate-secrets` até mostrar "0 pendente(s)"; (5) remover `NEXO_SECRET_KEY_PREVIOUS` e reiniciar. A aplicação segue funcionando durante o processo.
 
 ### Módulos por provedor
 
@@ -142,7 +145,7 @@ O servidor de autenticação sobe junto com o sistema (`radius` no compose). O p
 
 - Defina `NEXO_REPLICA_PASSWORD` e suba com `--profile ha`: o serviço `db-replica` copia o primário na primeira vez (com slot de replicação próprio, para não
   perder o que ainda não recebeu) e segue recebendo tudo em tempo real. Só leitura. O primário passa a usar `infra/compose/db/pg_hba.conf` (acesso de replicação
-  só para o papel `nexo_replica`, com senha). `cli.js preflight` avisa se a réplica não está conectada ou está atrasada mais de 1 minuto.
+  só para o papel `nexo_replica`, com senha). `./nexo prod db preflight` avisa se a réplica não está conectada ou está atrasada mais de 1 minuto.
 - **Promover (o primário morreu):** 1) pare o que escreve no banco (`api`, `vpn`, `radius`, `radius2`); 2) `docker compose exec db-replica pg_ctl promote -D /var/lib/postgresql/data`;
   3) aponte `DATABASE_URL_*` e `RADIUS_DB_HOST` para `db-replica` (ou troque os volumes e suba `db` com os dados promovidos); 4) suba de novo e rode o preflight.
   Depois, recrie uma réplica nova a partir do novo primário (a antiga não volta sozinha). A promoção é manual: não há eleição automática.
@@ -170,7 +173,7 @@ A resposta depende do registro de sessões: mantenha o accounting ligado nos con
 ### Conferência antes de entrar em produção
 
 ```bash
-docker compose exec api node apps/api/dist/cli.js preflight
+./nexo prod db preflight
 ```
 
 Não altera nada. **FALHA** impede a entrada (modo demonstração ligado, MFA não obrigatório, cookie sem HTTPS, contas ou equipamentos de demonstração,
@@ -247,8 +250,9 @@ Não há envio nativo por e-mail/WhatsApp: use o webhook com o serviço escolhid
 ./nexo restore <arquivo> --yes      # substitui o banco principal (para a API durante a operação)
 ```
 
-Em produção use `scripts/backup.sh` com `NEXO_DB_CONTAINER=nexoisp-prod-db-1` e `NEXO_BACKUP_COPY=<comando ou script>` para levar cada backup para **fora do host**
+Em produção use `./nexo prod backup`, `./nexo prod restore-check <arquivo>` e `./nexo prod restore <arquivo> --yes`, com `NEXO_BACKUP_COPY=<comando ou script>` para levar cada backup para **fora do host**
 (o comando recebe o arquivo e o `.sha256`; se falhar, o script termina com erro para o agendador alertar). Sem ele o script avisa que o backup está no mesmo domínio de falha do banco.
+O wrapper Go pausa os escritores em execução (API, VPN e RADIUS), prepara os papéis/migrations do banco restaurado e reinicia os mesmos serviços. Usar o script de baixo nível diretamente exige fornecer os comandos de parada/retomada; ele não descobre serviços sozinho.
 Exercício feito em 10/10/2026 (ambiente local): backup → criação de um registro → `restore-check` → `restore` → registro posterior ausente, login e consultas funcionando, 31 políticas RLS presentes; arquivo adulterado recusado pela soma de verificação.
 
 - O backup do banco **não** inclui: `.env`, certificados, SQLite dos agentes e do RADIUS (ficam nos sites).

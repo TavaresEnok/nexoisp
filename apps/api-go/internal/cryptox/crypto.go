@@ -159,6 +159,40 @@ func DecryptSecret(stored string) (string, error) {
 	return "", errors.New("segredo não pôde ser decifrado com as chaves configuradas")
 }
 
+// UsesCurrentKey checks authentication with only the active encryption key.
+func UsesCurrentKey(stored string) (bool, error) {
+	p := strings.Split(stored, ".")
+	if len(p) != 4 || p[0] != "v1" {
+		return false, errors.New("formato de segredo desconhecido")
+	}
+	keys, e := secretKeys()
+	if e != nil {
+		return false, e
+	}
+	iv, e := base64.StdEncoding.DecodeString(p[1])
+	if e != nil || len(iv) != 12 {
+		return false, errors.New("IV inválido")
+	}
+	tag, e := base64.StdEncoding.DecodeString(p[2])
+	if e != nil || len(tag) != 16 {
+		return false, errors.New("tag inválida")
+	}
+	data, e := base64.StdEncoding.DecodeString(p[3])
+	if e != nil {
+		return false, e
+	}
+	block, e := aes.NewCipher(keys[0])
+	if e != nil {
+		return false, e
+	}
+	gcm, e := cipher.NewGCM(block)
+	if e != nil {
+		return false, e
+	}
+	_, e = gcm.Open(nil, iv, append(data, tag...), nil)
+	return e == nil, nil
+}
+
 var signingState struct {
 	once sync.Once
 	key  ed25519.PrivateKey

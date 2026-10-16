@@ -1,88 +1,89 @@
-# Backend Go: execução e virada
+# Execução do backend Go
 
-## Estado da implementação
+## Configuração atual
 
-As 344 rotas do inventário têm implementação nativa: 334 operações do painel, portal e API pública, mais dez operações dos agentes em listener separado. `apps/api-go/rotas.json` é o manifesto completo. O painel React, o banco PostgreSQL, o agente Python, o FreeRADIUS e o serviço de túnel existente são preservados.
+O fluxo padrão usa API Go, River, VPN Go e Caddy. Há **346 rotas**, sendo 336 HTTP e dez dos agentes no listener mTLS. As duas rotas dinâmicas de valores personalizados omitidas no inventário inicial foram incluídas após as regressões contra Go.
 
-As novas escritas usam transações com escopo de tenant/assinante/POP, validação compatível com o painel, auditoria e efeitos associados. O motor grava intenções versionadas e envelopes Ed25519; os agentes continuam verificando a assinatura dos bytes recebidos. A identidade Go usa o formato de senha scrypt, AES-GCM e cookies existentes.
+O Fastify foi movido para `legacy/fastify`, retirado dos workspaces ativos e preservado somente para comparação e retorno explícito. O frontend React usa Node no build, mas sua imagem final é Caddy. Os serviços externos Python/FreeRADIUS/GenieACS permanecem conforme o escopo original.
 
-A disponibilidade de código não declara concluídos os portões operacionais do plano. Permanecem pendentes a medição de desempenho em carga válida, a linha de base, os canários, os períodos de observação e o fechamento mensal financeiro. Nenhum serviço produtivo foi alterado nesta execução.
-
-## Preparação do banco
-
-Usar o papel administrativo somente no processo de migração. A API recebe exclusivamente `DATABASE_URL_GO`, com o papel `nexo_go`, membro de `nexo_app`, sem propriedade das tabelas do produto nem bypass de RLS.
+## Desenvolvimento
 
 ```bash
-go -C apps/api-go build -o bin/nexo-db ./cmd/nexo-db
-apps/api-go/bin/nexo-db up
-apps/api-go/bin/nexo-db jobs-up
-apps/api-go/bin/nexo-db verificar
+./nexo up
+./nexo db prepare
+NEXO_NEW_PASSWORD='<12+ caracteres>' ./nexo db create-operator voce@empresa.com 'Seu nome'
+./nexo test
 ```
 
-Esses comandos usam `DATABASE_URL_OWNER` já configurada no ambiente de implantação. O bootstrap/baseline de bancos legados continua seguindo o procedimento das fases anteriores. As 53 migrations originais permanecem congeladas; as migrations públicas Go continuam em `db/migrations`.
+`up` prepara o banco antes de iniciar a API. Quando `NEXO_DEMO_MODE=1` está explicitamente configurado no arquivo local, executa também o seed Go. `seed-demo` recusa produção.
 
-`jobs-up` aplica as migrations oficiais do River 0.49.0 ao schema separado `nexo_jobs`, usando o proprietário. Revoga acesso de `public` e `nexo_app` e concede acesso explícito ao papel Go. Os argumentos dos jobs contêm apenas o nome da rotina; informações pessoais, senhas e envelopes não são copiados para essa fila. A API não executa DDL ao iniciar.
+## Produção
 
-## Coexistência
-
-`infra/prod/docker-compose.go.yml` adiciona a API Go e mantém o roteamento inicial no Fastify. As chaves `NEXO_SECRET_KEY`, `NEXO_SECRET_KEY_PREVIOUS` e `NEXO_OP_SIGNING_KEY` precisam ser as mesmas entre as duas implementações. Isso permite ler as credenciais, validar MFA e reconhecer assinaturas já existentes. Não gerar novas chaves para fazer a troca de linguagem.
-
-As rotas continuam sendo transferidas pela tabela do Caddy e pelos canários previstos no plano. `infra/prod/caddy/rotas.yaml` permanece integralmente em `fastify`. O arquivo `Caddyfile.go` é um artefato separado para a configuração final; não foi recarregado em produção.
-
-## Rotinas
-
-O River utiliza duas filas: a principal executa as automações sequencialmente; `network` executa RADIUS e sincronização de accounting. A unicidade por rotina impede acumular cópias enquanto uma execução estiver pendente ou em andamento. O scheduler eleito e as reservas de operação com `SKIP LOCKED` permitem múltiplas réplicas.
-
-`NEXO_GO_JOBS=1` inicia o cliente River; cada rotina também exige `NEXO_GO_JOB_<ROTINA>=1`. O Node preserva o comportamento anterior por padrão; `NEXO_NODE_JOB_<ROTINA>=0` desliga somente aquela automação. Os controles são independentes das rotas manuais correspondentes.
-
-| Rotina | Intervalo Go | Controle Node |
-|---|---|---|
-| BILLING, NOTICES, SCHEDULED, SLA, PURGE, TRUST, SUSPEND | 1 minuto | mesmo nome |
-| NOTIFICATIONS, WEBHOOKS, ALERTS, CLEANUP | 1 minuto | mesmo nome |
-| RECONCILE | 10 minutos | RECONCILE |
-| RADIUS | 2 segundos | RADIUS |
-| RADIUS_SYNC | 15 segundos | desligado junto ao executor Node RADIUS |
-
-As rotinas Go compartilham a trava consultiva de sessão do worker legado. A E/S de entrega e desconexão ocorre fora das transações de negócio. Avisos interrompidos continuam sendo marcados como incertos, sem reenvio automático. Reservas e intenções continuam na fila de operações existente; o River agenda o executor integrado.
-
-## Configuração final preparada
-
-Depois de cumprir os portões do plano, a sobreposição final pode ser usada sobre as duas configurações anteriores:
+Configure `infra/prod/.env` e `infra/prod/certs/{ca.crt,server.crt,server.key}`. O exemplo inclui `NEXO_GO_DB_PASSWORD`. Preserve as chaves de cifra/assinatura, o volume do banco e `vpnstate` de instalações existentes.
 
 ```bash
-docker compose -f infra/prod/docker-compose.yml \
-  -f infra/prod/docker-compose.go.yml \
-  -f infra/prod/docker-compose.go-final.yml config --quiet
+./nexo prod up
+NEXO_NEW_PASSWORD='<12+ caracteres>' ./nexo prod db create-operator voce@empresa.com 'Seu nome'
+./nexo prod db preflight
+./nexo prod ps
 ```
 
-A sobreposição final exige Compose 2.24.4 ou posterior. Ela coloca o serviço Fastify no perfil `legacy`, retira suas dependências do Caddy/VPN/RADIUS, transfere a porta dos agentes para o Go, habilita as rotinas Go e seleciona `Caddyfile.go`. O frontend é servido pelo Caddy, todas as rotas HTTP vão para Go e os agentes usam mTLS diretamente na porta 8443. O listener interno de métricas/OpenAPI permanece sem publicação de porta. VPN e FreeRADIUS permanecem como serviços separados.
+A configuração padrão é `infra/prod/docker-compose.yml`; as antigas sobreposições de coexistência não são necessárias para uma instalação nativa. `NEXO_PROD_ENV_FILE` e `NEXO_PROD_PROJECT` permitem selecionar o arquivo e o projeto explicitamente. Não imprimir a saída completa de `docker compose config`, pois contém segredos; usar `config --quiet` na validação.
 
-Na janela de virada, o serviço legado que já estiver em execução precisa ser parado explicitamente antes de transferir a publicação da porta dos agentes; adicionar um perfil ao Compose não encerra um container anterior. Depois disso, aplicar a sobreposição final com `up -d --build`. Essa operação e a recarga do Caddy não foram executadas nesta entrega.
+Em uma instalação já em execução com Fastify, a troca substitui os serviços `api` e `vpn` e o proxy. Deve ser feita na janela de implantação depois dos critérios operacionais aplicáveis. O procedimento não copia nem reinicializa dados. O acesso administrativo é um container temporário `migrate`, separado dos processos de execução. Não inicie stacks distintas simultaneamente sobre as mesmas rotinas.
 
-Para regenerar e conferir o artefato de roteamento final:
+A produção deste usuário não foi identificada/configurada nesta sessão. Os comandos acima foram preparados e validados, mas não há alegação de tráfego produtivo já transferido.
+
+## Banco e administração
+
+`nexo-db` oferece:
+
+- `prepare`: bootstrap de papéis, adoção de legado completo quando necessário, goose up, River up e verificação;
+- `bootstrap [--init-app-role]`, `baseline`, `up`, `jobs-up`, `verificar`: etapas explícitas;
+- `create-operator <email> <nome>`: senha lida somente de `NEXO_NEW_PASSWORD`;
+- `rotate-secrets`: recifra recursos, MFA, segredos de webhooks e cabeçalhos de canais em uma transação; falha desfaz o conjunto;
+- `preflight`: configuração, certificados, migrations, RLS, papéis e verificações operacionais;
+- `seed-demo` e `totp`: ferramentas de desenvolvimento/homologação.
+
+`DATABASE_URL_OWNER` pertence exclusivamente ao processo administrativo. API/VPN usam `DATABASE_URL_GO`. O bootstrap configura `nexo_radius` e, quando solicitada, `nexo_replica`; em legado preserva a senha existente de `nexo_app`.
+
+As 53 migrations originais permanecem congeladas em `legacy/fastify/migrations`; `db/legado.sha256.json` permite verificar as cópias goose sem distribuir TypeScript junto à imagem. Novas migrations pertencem a `db/migrations`.
+
+O River usa seu migrador oficial versionado pela dependência Go, no schema `nexo_jobs`, por `jobs-up`/prepare. Essa é a implementação efetiva, substituindo a proposta inicial de copiar o SQL River para uma migration goose.
+
+## Operações e rotinas
+
+O River possui a fila principal e `network`. As intenções do RADIUS integrado inserem um job com tenant/operação na mesma transação; a unicidade usa os argumentos. As reservas continuam em `operations` com `SKIP LOCKED` e exclusividade por equipamento. Jobs periódicos também recuperam operações legadas e continuam os estados incertos/reagendados.
+
+`NEXO_GO_JOBS=1` e `NEXO_GO_JOB_<ROTINA>=1` habilitam os trabalhos. BILLING, NOTICES, SCHEDULED, SLA, PURGE, TRUST, SUSPEND, NOTIFICATIONS, WEBHOOKS, ALERTS e CLEANUP usam intervalo de um minuto; RECONCILE, dez minutos; RADIUS, dois segundos; RADIUS_SYNC, quinze segundos. A unicidade impede acumular jobs vivos da mesma rotina.
+
+Na coexistência explícita, desligar os controles `NEXO_NODE_JOB_*` correspondentes antes da transferência. As rotinas Go compartilham a trava de sessão do worker legado durante essa janela. Não remover tabelas River para fazer retorno.
+
+## VPN
+
+`nexo-vpn` mantém WireGuard, peers, estado e relay UDP, e supervisiona strongSwan/xl2tpd para L2TP. Usa o volume `vpnstate` existente: preservar `server.key`. A imagem precisa de `NET_ADMIN` e acesso ao dispositivo PPP conforme o Compose. WireGuard, L2TP, FreeRADIUS e o banco permanecem serviços distintos da API.
+
+## Backup, restauração e rotação
 
 ```bash
-python3 scripts/migracao-go/proxy.py \
-  --table infra/prod/caddy/rotas.go.yaml \
-  --output infra/prod/caddy/Caddyfile.go --fallback go --check
+./nexo prod backup
+./nexo prod restore-check <arquivo>
+./nexo prod restore <arquivo> --yes
+./nexo prod db rotate-secrets
 ```
 
-As linhas `/agent/*` da tabela são ignoradas pelo Caddy; a indicação `fastify` nelas é o marcador exigido pelo validador para rotas fora do proxy. Na configuração final, o destino efetivo dos agentes é o listener Go publicado pela sobreposição.
+O restore valida o checksum antes de parar os escritores; pausa API, VPN e RADIUS que estavam em execução, provisiona o banco restaurado e reinicia os mesmos serviços. Uma falha mantém os escritores parados para recuperação, sem tentar continuar sobre um banco parcialmente restaurado. Papéis/login não são incluídos pelo pg_dump: `prepare` os configura com as credenciais da instalação.
 
-## Volta à coexistência
+Para rotação, configurar a chave nova em `NEXO_SECRET_KEY` e a antiga em `NEXO_SECRET_KEY_PREVIOUS`, executar a CLI, conferir zero pendências e reiniciar os serviços com a chave nova. Só então retirar a chave anterior.
 
-Preservar as chaves, o banco e as tabelas de operações. Desligar o cliente River e retirar a publicação da porta dos agentes no Go antes de republicar essa porta no serviço legado. Reativar os controles `NEXO_NODE_JOB_*`, usar as duas configurações de coexistência e recarregar o Caddy com a tabela `rotas.yaml`. Não executar os dois schedulers para a mesma rotina durante a troca. Não remover as tabelas River para fazer rollback; os jobs pendentes devem permanecer disponíveis para inspeção.
+## Retorno explícito
 
-## Validação concentrada
+Os arquivos `docker-compose.fastify.yml` em `infra/prod` e `infra/compose` preservam a configuração anterior. As sobreposições `docker-compose.go.yml` e `docker-compose.go-final.yml` pertencem ao fluxo de coexistência baseado nesse arquivo legado, não ao Compose padrão nativo.
 
-A pedido do usuário, as baterias extensas por rota foram substituídas por compilação em blocos e verificações concentradas. Estão disponíveis:
+No retorno, parar Go/River e a VPN Go antes de iniciar a configuração Fastify do mesmo projeto/volumes. Desligar os jobs Go, religar os controles Node e transferir a porta dos agentes. Preservar banco, chaves e tabelas River; nunca usar `down -v` para trocar de implementação.
 
-```bash
-./nexo contrato consolidacao
-./nexo contrato agente_go
-./nexo contrato mtls_go
-./nexo contrato jobs-up
-./nexo contrato river_radius
-```
+## Evidências e limites
 
-A consolidação exercita a idempotência entre Go e Fastify, auditoria de token, OS, NOC, prévia com rollback, importação com savepoints, reimportação, baixa concorrente e estorno repetido. O ensaio do agente usa o código Python real e o driver de demonstração; o de River usa um processo Go descartável e um NAS loopback sem sessões, incluindo accounting e webhook assinado/idempotente do gateway de demonstração. O ensaio mTLS usa uma CA efêmera e confere identidade, fixação e rejeições de certificado. Todos usam exclusivamente o banco sintético do laboratório. Os ensaios não substituem a comparação exaustiva, a homologação de equipamentos ou o canário operacional.
+Compilação/testes Go, requests da suíte histórica contra Go, correções dos casos afetados, Playwright contra Go, preparação/seed/operador/rotação nativos, concorrência entre duas réplicas, outbox/rollback e VPN isolada são registrados em `ANDAMENTO.md` e nos relatórios locais. O backend não usa subprocessos Node.
+
+A carga histórica inválida não comprova desempenho. Baseline, canários, consolidação de 30 dias, fechamento financeiro mensal e homologação no equipamento real continuam exigindo ambiente e tempo reais; não foram substituídos por ensaios sintéticos.

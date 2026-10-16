@@ -3,6 +3,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 NODE_IMG=node:22-alpine
+GO_IMG=golang:1.27.2-alpine
 # Ajustes só deste servidor (não versionados): ver .nexo.local.example. Ex.: Docker antigo/sem iptables, como o do PNETLab.
 NEXO_COMPOSE_OVERRIDE=""; NEXO_BUILD_OPTS=""; NEXO_RUN_OPTS=""; NEXO_TOOL_NET=""
 [ -f .nexo.local ] && . ./.nexo.local
@@ -10,12 +11,15 @@ COMPOSE="docker compose -p nexoisp -f infra/compose/docker-compose.yml ${NEXO_CO
 nodebox() { docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp -e npm_config_cache=/tmp/.npm \
   --network nexoisp_default -e DATABASE_URL_OWNER -e DATABASE_URL_APP -e NEXO_AGENT_MTLS -e NEXO_DEMO_MODE -e NEXO_GATEWAY_WEBHOOK_SECRET \
   -v "$PWD":/app -w /app "$@"; }
+gobox() { docker run --rm -e HOME=/tmp -e GOCACHE=/tmp/go-cache -e GOFLAGS=-mod=readonly \
+  -v "$PWD":/app -v nexo-go-mod:/go/pkg/mod -v nexo-go-cache:/tmp/go-cache -w /app/apps/api-go "$GO_IMG" "$@"; }
 DEMO_AGENT_ID=00000000-0000-4000-8000-0000000000a1
 init_env() {  # segredos e certificados de DESENVOLVIMENTO, gerados localmente (nunca versionados)
   [ -f .env ] || cp .env.example .env
   addenv() { grep -q "^$1=" .env || echo "$1=$2" >> .env; }
   addenv NEXO_OP_SIGNING_KEY "$(openssl genpkey -algorithm ed25519 -outform DER | base64 -w0)"
   addenv NEXO_SECRET_KEY "$(openssl rand -base64 32)"
+  addenv NEXO_GO_DB_PASSWORD "$(openssl rand -hex 24)"
   addenv NEXO_DEMO_AGENT_TOKEN "$(openssl rand -hex 24)"
   addenv NEXO_GATEWAY_WEBHOOK_SECRET "$(openssl rand -hex 24)"
   addenv NEXO_RADIUS_KEY "$(openssl rand -hex 24)"            # cifra as senhas PPPoE lidas pelo RADIUS integrado
@@ -37,7 +41,10 @@ case "${1:-help}" in
   agent-test) docker build -q $NEXO_BUILD_OPTS -t nexoisp-agent services/network-agent >/dev/null && docker run --rm $NEXO_RUN_OPTS nexoisp-agent python -m unittest discover -s tests -t . ;;
   backup)    scripts/backup.sh backup "${2:-backups}" ;;
   restore-check) scripts/backup.sh restore-check "$2" ;;
-  restore)   NEXO_API_SERVICE_STOP="$COMPOSE stop api" NEXO_API_SERVICE_START="$COMPOSE start api" scripts/backup.sh restore "$2" "${3:-}" ;;
+  restore)   running="$($COMPOSE ps --services --filter status=running | rg '^(api|api-go|vpn|radius|radius2)$' | tr '\n' ' ' || true)"
+             stop=true; start=true; if [ -n "$running" ]; then stop="$COMPOSE stop $running"; start="$COMPOSE run --rm migrate prepare && $COMPOSE start $running"; fi
+             NEXO_API_SERVICE_STOP="$stop" NEXO_API_SERVICE_START="$start" scripts/backup.sh restore "$2" "${3:-}" ;;
+  prod)      shift; bash scripts/prod-go.sh "$@" ;;
   lab-radius) scripts/lab-radius.sh ;;
   lab-up)    infra/lab/lab.sh up ;;
   lab-down)  infra/lab/lab.sh down ;;
@@ -48,24 +55,28 @@ case "${1:-help}" in
   npm)       shift; if [ -n "$NEXO_TOOL_NET" ]; then docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp -e npm_config_cache=/tmp/.npm --network "$NEXO_TOOL_NET" -v "$PWD":/app -w /app "$NODE_IMG" npm "$@"; else nodebox "$NODE_IMG" npm "$@"; fi ;;
   sh)        shift; nodebox -it "$NODE_IMG" sh ;;
   install)   "$0" npm install ;;
-  typecheck) nodebox "$NODE_IMG" sh -c "npm -w apps/api run typecheck && npm -w apps/web run typecheck" ;;
-  build)     nodebox "$NODE_IMG" sh -c "npm -w apps/api run build && npm -w apps/web run build" ;;
-  up)        init_env; $COMPOSE up -d --build ;;
+  typecheck) gobox go vet ./...; nodebox "$NODE_IMG" npm -w apps/web run typecheck ;;
+  build)     init_env; $COMPOSE build api migrate vpn caddy ;;
+  db)        shift; $COMPOSE run --rm --build migrate "$@" ;;
+  up)        init_env; $COMPOSE up -d --wait db; $COMPOSE run --rm --build migrate prepare
+             if rg -q '^NEXO_DEMO_MODE=1$' .env; then $COMPOSE run --rm migrate seed-demo; fi
+             $COMPOSE up -d --build ;;
   down)      $COMPOSE down ;;
   logs)      shift; $COMPOSE logs -f "$@" ;;
   ps)        $COMPOSE ps ;;
   compose)   shift; $COMPOSE "$@" ;;
-  test)      $COMPOSE up -d --wait db >/dev/null
+  test)      gobox go test ./... ;;
+  test-legacy) $COMPOSE up -d --wait db >/dev/null
              docker exec nexoisp-db-1 psql -q -U nexo_owner -d nexo -c "drop database if exists nexo_test with (force)" -c "create database nexo_test" >/dev/null
              set -a; . ./.env; set +a; export NEXO_AGENT_MTLS=off
              export DATABASE_URL_OWNER="postgres://nexo_owner:${POSTGRES_PASSWORD}@db:5432/nexo_test"
              export DATABASE_URL_APP="postgres://nexo_app:${NEXO_APP_DB_PASSWORD}@db:5432/nexo_test"
-             nodebox "$NODE_IMG" npm -w apps/api test ;;
+             nodebox "$NODE_IMG" npm --prefix legacy/fastify --workspaces=false test ;;
   load-check) $COMPOSE up -d --wait db >/dev/null
              docker exec nexoisp-db-1 psql -q -U nexo_owner -d nexo -c "drop database if exists nexo_test with (force)" -c "create database nexo_test" >/dev/null
              set -a; . ./.env; set +a; export NEXO_AGENT_MTLS=off
              export DATABASE_URL_OWNER="postgres://nexo_owner:${POSTGRES_PASSWORD}@db:5432/nexo_test"
              export DATABASE_URL_APP="postgres://nexo_app:${NEXO_APP_DB_PASSWORD}@db:5432/nexo_test"
-             export NEXO_LOAD=1; nodebox -e NEXO_LOAD "$NODE_IMG" npm -w apps/api test ;;
+             export NEXO_LOAD=1; nodebox -e NEXO_LOAD "$NODE_IMG" npm --prefix legacy/fastify --workspaces=false test ;;
   *) echo "uso: ./nexo {homolog up|preflight|down|backup|restore-check <arq>|restore <arq> --yes|lab-radius|lab-up|lab-down|lab client ...|trio up|down|status|...|init|agent-cert <id>|agent-test|demo-tool ...|install|typecheck|build|up|down|logs|ps|test|npm ...|compose ...}" ;;
 esac

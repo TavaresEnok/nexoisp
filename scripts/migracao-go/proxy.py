@@ -17,7 +17,7 @@ def inventory():
         fields=[x.strip() for x in line.strip('|').split(' | ')]
         if len(fields)==9 and fields[0] in {'GET','POST','PUT','PATCH','DELETE'}:
             result.append({'method':fields[0],'path':fields[1].strip('`'),'phase':int(fields[7][1:])})
-    assert len(result)==344,'inventário incompleto'
+    assert result,'inventário vazio'
     return result
 
 
@@ -25,7 +25,7 @@ def load(path=TABLE):
     routes=json.loads(Path(path).read_text())['routes']
     expected={(r['method'],r['path']) for r in inventory()}
     keys=[(r['method'],r['path']) for r in routes]
-    if len(keys)!=len(set(keys)) or set(keys)!=expected:raise ValueError('tabela precisa conter as 344 rotas, sem duplicatas')
+    if len(keys)!=len(set(keys)) or set(keys)!=expected:raise ValueError(f'tabela precisa conter as {len(expected)} rotas, sem duplicatas')
     implemented={(r['method'],r['path']) for r in json.loads(IMPLEMENTED.read_text())['routes']}
     for r in routes:
         if r['state'] not in STATES:raise ValueError('estado inválido: '+r['path'])
@@ -61,10 +61,10 @@ def main():
         target=Path(a.table)
         if target.exists():raise ValueError('tabela já existe')
         target.write_text(json.dumps({'version':1,'routes':[dict(r,state='fastify') for r in inventory()]},ensure_ascii=False,indent=2)+'\n')
-    content=generate(load(a.table),a.fallback);target=Path(a.output)
+    routes=load(a.table);content=generate(routes,a.fallback);target=Path(a.output)
     if a.check:
         if target.read_text()!=content:raise ValueError('Caddyfile desatualizado')
     else:target.write_text(content)
-    print('Proxy: 344 rotas validadas; '+str(target))
+    print(f'Proxy: {len(routes)} rotas validadas; '+str(target))
 
 if __name__=='__main__':main()

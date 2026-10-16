@@ -4,14 +4,14 @@ const root=path.resolve(__dirname,'../..'),ts=require(path.join(root,'node_modul
 const selected=["/agent/v1/hello", "/agent/v1/sync-done", "/agent/v1/poll", "/agent/v1/attempts/:id/begin", "/agent/v1/attempts/:id/progress", "/agent/v1/attempts/:id/result", "/agent/v1/olt-report", "/agent/v1/usage-report", "/agent/v1/sessions-report", "/agent/v1/observations"];
 const helpers={"agent-api.ts":["authAgent","saveChecks"]};
 const outputs={},found=[];
-for(const file of fs.readdirSync(path.join(root,'apps/api/src')).filter(s=>s.endsWith('.ts'))){
- const source=fs.readFileSync(path.join(root,'apps/api/src',file),'utf8'),ast=ts.createSourceFile(file,source,ts.ScriptTarget.Latest,true),constants={};
+for(const file of fs.readdirSync(path.join(root,'legacy/fastify/src')).filter(s=>s.endsWith('.ts'))){
+ const source=fs.readFileSync(path.join(root,'legacy/fastify/src',file),'utf8'),ast=ts.createSourceFile(file,source,ts.ScriptTarget.Latest,true),constants={};
  function collect(n){if(ts.isVariableDeclaration(n)&&ts.isIdentifier(n.name)&&n.initializer)constants[n.name.text]=n.initializer;ts.forEachChild(n,collect);}collect(ast);
  function str(n,seen=[]){
   if(ts.isStringLiteral(n)||ts.isNoSubstitutionTemplateLiteral(n)||ts.isNumericLiteral(n))return n.text;
   if(ts.isIdentifier(n)){
-   if(n.text==='OPEN_WO_SQL')return fs.readFileSync(path.join(root,'apps/api/src/sla.ts'),'utf8').match(/export const OPEN_WO = \[([^\]]+)\]/)[1].split(',').map(s=>s.trim()).join(',');
-   if(n.text==='AGENT_OFFLINE_S')return fs.readFileSync(path.join(root,'apps/api/src/network/network.ts'),'utf8').match(/AGENT_OFFLINE_S = (\d+)/)[1];
+   if(n.text==='OPEN_WO_SQL')return fs.readFileSync(path.join(root,'legacy/fastify/src/sla.ts'),'utf8').match(/export const OPEN_WO = \[([^\]]+)\]/)[1].split(',').map(s=>s.trim()).join(',');
+   if(n.text==='AGENT_OFFLINE_S')return fs.readFileSync(path.join(root,'legacy/fastify/src/network/network.ts'),'utf8').match(/AGENT_OFFLINE_S = (\d+)/)[1];
    if(constants[n.text]&&!seen.includes(n.text)){const value=str(constants[n.text],[...seen,n.text]);if(!value.startsWith('{{'))return value;}
    return '{{'+n.text+'}}';
   }

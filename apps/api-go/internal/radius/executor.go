@@ -64,6 +64,39 @@ type Executor struct {
 func (x *Executor) scope(ctx context.Context, tenant string, f func(*db.Tx) error) error {
 	return x.DB.WithScope(ctx, tenancy.Scope{TenantID: tenant}, f)
 }
+
+// RunOperation executes only the operation identified by a transactional River job.
+func (x *Executor) RunOperation(ctx context.Context, tenant, id string) (bool, error) {
+	var op jsonx.Object
+	var task any
+	e := x.scope(ctx, tenant, func(tx *db.Tx) error {
+		rs, e := tx.Objects(ctx, `select o.agent_id,o.status from operations o join agents a on a.id=o.agent_id where o.id=$1 and a.internal`, id)
+		if e != nil || len(rs) == 0 {
+			return e
+		}
+		op = rs[0]
+		if e = tx.Exec(ctx, query("runHostedOnce", 1), op.Get("agent_id")); e != nil {
+			return e
+		}
+		task, e = network.ReserveOperation(ctx, tx, jsonx.String(op.Get("agent_id")), id)
+		return e
+	})
+	if e != nil {
+		return false, e
+	}
+	if op == nil {
+		return true, nil
+	}
+	if task == nil {
+		return op.Get("status") != "PENDING" && op.Get("status") != "UNCERTAIN", nil
+	}
+	b, e := jsonx.Encode(task)
+	if e != nil {
+		return false, e
+	}
+	e = x.execute(ctx, tenant, jsonx.String(op.Get("agent_id")), object(jsonx.JSON(b)))
+	return e == nil, e
+}
 func (x *Executor) Run(ctx context.Context, syncAccounting bool) error {
 	if _, e := Key(); e != nil {
 		return nil

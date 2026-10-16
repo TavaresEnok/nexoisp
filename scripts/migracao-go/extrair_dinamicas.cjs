@@ -7,14 +7,14 @@ const selected=['/api/search','/api/subscribers/:id/timeline','/api/contracts/:i
  '/api/map/points','/api/today','/api/radius/status','/api/radius/devices/:id/setup','/api/dashboard/panels'];
 const helpers={ 'cadastro.ts':['terminationQuote','localToday'], 'ipam.ts':['loadPlan'], 'radius.ts':['nasOf','tunnelOf'] };
 const outputs={},found=[];
-for(const file of fs.readdirSync(path.join(root,'apps/api/src/routes')).filter(s=>s.endsWith('.ts'))){
- const source=fs.readFileSync(path.join(root,'apps/api/src/routes',file),'utf8'),ast=ts.createSourceFile(file,source,ts.ScriptTarget.Latest,true),constants={};
+for(const file of fs.readdirSync(path.join(root,'legacy/fastify/src/routes')).filter(s=>s.endsWith('.ts'))){
+ const source=fs.readFileSync(path.join(root,'legacy/fastify/src/routes',file),'utf8'),ast=ts.createSourceFile(file,source,ts.ScriptTarget.Latest,true),constants={};
  function collect(n){if(ts.isVariableDeclaration(n)&&ts.isIdentifier(n.name)&&n.initializer)constants[n.name.text]=n.initializer;ts.forEachChild(n,collect);}collect(ast);
  function str(n,seen=[]){
   if(ts.isStringLiteral(n)||ts.isNoSubstitutionTemplateLiteral(n)||ts.isNumericLiteral(n))return n.text;
   if(ts.isIdentifier(n)){
-   if(n.text==='OPEN_WO_SQL')return fs.readFileSync(path.join(root,'apps/api/src/sla.ts'),'utf8').match(/export const OPEN_WO = \[([^\]]+)\]/)[1].split(',').map(s=>s.trim()).join(',');
-   if(n.text==='AGENT_OFFLINE_S')return fs.readFileSync(path.join(root,'apps/api/src/routes/network.ts'),'utf8').match(/AGENT_OFFLINE_S = (\d+)/)[1];
+   if(n.text==='OPEN_WO_SQL')return fs.readFileSync(path.join(root,'legacy/fastify/src/sla.ts'),'utf8').match(/export const OPEN_WO = \[([^\]]+)\]/)[1].split(',').map(s=>s.trim()).join(',');
+   if(n.text==='AGENT_OFFLINE_S')return fs.readFileSync(path.join(root,'legacy/fastify/src/routes/network.ts'),'utf8').match(/AGENT_OFFLINE_S = (\d+)/)[1];
    if(constants[n.text]&&!seen.includes(n.text)){const value=str(constants[n.text],[...seen,n.text]);if(!value.startsWith('{{'))return value;}
    return '{{'+n.text+'}}';
   }

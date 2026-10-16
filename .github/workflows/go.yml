@@ -1,7 +1,6 @@
-name: migração Go — contrato e coexistência
+name: comparação Go e Fastify arquivado (manual)
 on:
-  push:
-  pull_request:
+  workflow_dispatch:
 jobs:
   contrato:
     runs-on: ubuntu-24.04
@@ -14,6 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: 22, cache: npm}
       - run: npm ci
+      - run: npm ci --prefix legacy/fastify --workspaces=false
       - run: python3 scripts/migracao-go/migrations.py && python3 scripts/migracao-go/verificar_deriva.py
       - name: Código gerado reproduzível
         run: |

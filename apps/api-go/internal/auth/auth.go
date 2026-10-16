@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"net/http"
+	"nexoisp/api-go/internal/requestctx"
 	"regexp"
 	"slices"
 	"strconv"
@@ -253,6 +254,12 @@ func (a *Auth) Require(perm string, allowMFA bool, next http.Handler) http.Handl
 		}
 		c, err := a.Load(r.Context(), token)
 		current = c
+		if c != nil {
+			if state := requestctx.From(r.Context()); state != nil {
+				state.UserID = c.UserID
+				state.TenantID = c.TenantID
+			}
+		}
 		if err == nil {
 			err = a.Guard(r.Context(), w, r, c, perm, allowMFA)
 		}

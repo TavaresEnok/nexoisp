@@ -40,6 +40,10 @@ services:
       NEXO_GO_JOB_RADIUS: "1"
       NEXO_GO_JOB_RADIUS_SYNC: "1"
   vpn:
+    build: {context: ../.., dockerfile: apps/api-go/Dockerfile.vpn}
+    command: !override []
+    environment:
+      DATABASE_URL_GO: postgres://nexo_go:${NEXO_GO_DB_PASSWORD:?}@db:5432/nexo
     depends_on: !override {db: {condition: service_healthy}, api-go: {condition: service_started}}
   radius:
     depends_on: !override {db: {condition: service_healthy}, api-go: {condition: service_started}, vpn: {condition: service_started, restart: true}}

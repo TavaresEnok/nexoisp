@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[2]
-FILES=['apps/api/src/routes/cadastro.ts','apps/api/src/validators.ts','apps/api/src/auth.ts','apps/api/src/db.ts','apps/api/src/csv.ts','apps/api/src/app.ts']
+FILES=['legacy/fastify/src/routes/cadastro.ts','legacy/fastify/src/validators.ts','legacy/fastify/src/auth.ts','legacy/fastify/src/db.ts','legacy/fastify/src/csv.ts','legacy/fastify/src/app.ts']
 
 
 def shared(path, source):
@@ -33,7 +33,7 @@ def fingerprints():
     for name,sql in queries.items():
         source=(ROOT/f'apps/api-go/internal/modules/cadastro/queries/{name}.sql').read_text().split('\n',1)[1]
         assert source==sql+';\n', 'SQL divergente: '+name
-    validators=(ROOT/'apps/api/src/validators.ts').read_text()
+    validators=(ROOT/'legacy/fastify/src/validators.ts').read_text()
     schemas={'uuid':re.search(r'export const zUuid = (.*?);',validators).group(1),
              'page':re.search(r'export const zPage = (.*?);',validators).group(1),
              'list':re.search(r"app.get\('/api/subscribers'.*?const q = (.*?)\.parse\(req.query\)",cadastro,re.S).group(1)}

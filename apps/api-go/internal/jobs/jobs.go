@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"nexoisp/api-go/internal/db"
 	"nexoisp/api-go/internal/finance"
+	"nexoisp/api-go/internal/jobargs"
 	"nexoisp/api-go/internal/jsonx"
 	"nexoisp/api-go/internal/modules/escrita"
 	"nexoisp/api-go/internal/outbound"
@@ -16,6 +17,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/riverqueue/river"
 	"github.com/riverqueue/river/rivertype"
 )
@@ -32,6 +34,30 @@ type worker struct {
 	radius    *radius.Executor
 	mu        sync.Mutex
 	lastAlert string
+}
+type operationWorker struct {
+	river.WorkerDefaults[jobargs.Operation]
+	radius *radius.Executor
+}
+
+func (w *operationWorker) Work(ctx context.Context, j *river.Job[jobargs.Operation]) error {
+	if _, e := uuid.Parse(j.Args.TenantID); e != nil {
+		return e
+	}
+	if _, e := uuid.Parse(j.Args.OperationID); e != nil {
+		return e
+	}
+	if os.Getenv("NEXO_GO_JOB_RADIUS") != "1" {
+		return river.JobSnooze(time.Minute)
+	}
+	done, e := w.radius.RunOperation(ctx, j.Args.TenantID, j.Args.OperationID)
+	if e != nil {
+		return e
+	}
+	if !done {
+		return river.JobSnooze(2 * time.Second)
+	}
+	return nil
 }
 
 func (w *worker) Work(ctx context.Context, j *river.Job[Args]) error {
@@ -181,6 +207,7 @@ func Start(ctx context.Context, database *db.DB) (func(context.Context) error, e
 	workers := river.NewWorkers()
 	w := &worker{db: database, radius: &radius.Executor{DB: database}}
 	river.AddWorker(workers, w)
+	river.AddWorker(workers, &operationWorker{radius: w.radius})
 	periodic := []*river.PeriodicJob{}
 	for _, task := range []string{"BILLING", "RECONCILE", "NOTICES", "SCHEDULED", "SLA", "PURGE", "TRUST", "SUSPEND", "NOTIFICATIONS", "WEBHOOKS", "ALERTS", "CLEANUP", "RADIUS", "RADIUS_SYNC"} {
 		if os.Getenv("NEXO_GO_JOB_"+task) != "1" {
@@ -210,5 +237,6 @@ func Start(ctx context.Context, database *db.DB) (func(context.Context) error, e
 	if e = client.Start(ctx); e != nil {
 		return nil, e
 	}
+	database.SetOperationQueue(client)
 	return client.Stop, nil
 }

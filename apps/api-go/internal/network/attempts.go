@@ -9,19 +9,34 @@ import (
 	"nexoisp/api-go/internal/domain"
 	"nexoisp/api-go/internal/jsonx"
 	"slices"
+	"strings"
 	"time"
 )
 
 func Reserve(ctx context.Context, tx *db.Tx, agent string) (any, error) {
+	return ReserveOperation(ctx, tx, agent, "")
+}
+func ReserveOperation(ctx context.Context, tx *db.Tx, agent, operation string) (any, error) {
 	if err := Sweep(ctx, tx); err != nil {
 		return nil, err
 	}
-	op, err := one(ctx, tx, "reserve", 0, agent, "UNCERTAIN")
+	find := func(status string) (jsonx.Object, error) {
+		if operation == "" {
+			return one(ctx, tx, "reserve", 0, agent, status)
+		}
+		sql := strings.Replace(query("reserve", 0), "where o.agent_id = $1", "where o.id = $3 and o.agent_id = $1", 1)
+		rs, e := tx.Objects(ctx, sql, agent, status, operation)
+		if len(rs) > 0 {
+			return rs[0], e
+		}
+		return nil, e
+	}
+	op, err := find("UNCERTAIN")
 	if err != nil {
 		return nil, err
 	}
 	if op == nil {
-		op, err = one(ctx, tx, "reserve", 0, agent, "PENDING")
+		op, err = find("PENDING")
 		if err != nil {
 			return nil, err
 		}

@@ -1,0 +1,138 @@
+# Instalação central do NexoISP (produção/piloto). Sem modo demonstração, sem dados sintéticos.
+# HTTPS do painel: Caddy com certificado automático para NEXO_DOMAIN. Agentes: porta 8443 com mTLS direto na API.
+# Exercitado localmente em 10/10/2026 (NEXO_DOMAIN=localhost, portas alternativas). Ainda NÃO exercitado em host público
+# com domínio e certificado reais.
+name: nexoisp-prod
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: nexo_owner
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_DB: nexo
+    # Até 30 workers paralelos; 32 vagas de processos deixam margem para outros workers.
+    command: ["postgres", "-c", "hba_file=/etc/nexo/pg_hba.conf", "-c", "max_worker_processes=32", "-c", "max_parallel_workers=30", "-c", "max_parallel_workers_per_gather=30"]
+    volumes: [dbdata:/var/lib/postgresql/data, "../compose/db/pg_hba.conf:/etc/nexo/pg_hba.conf:ro"]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U nexo_owner -d nexo"], interval: 5s, retries: 20 }
+  api:
+    build: { context: ../.., dockerfile: infra/compose/Dockerfile.api }
+    restart: unless-stopped
+    depends_on: { db: { condition: service_healthy } }
+    environment:
+      NODE_ENV: production
+      NEXO_DEMO_MODE: "0"
+      NEXO_REQUIRE_ADMIN_MFA: "1"
+      NEXO_COOKIE_SECURE: "1"
+      NEXO_TRUST_PROXY: "1"   # o painel só é alcançado pelo Caddy: o endereço de origem vem do X-Forwarded-For
+      DATABASE_URL_OWNER: postgres://nexo_owner:${POSTGRES_PASSWORD}@db:5432/nexo
+      DATABASE_URL_APP: postgres://nexo_app:${NEXO_APP_DB_PASSWORD:?}@db:5432/nexo
+      NEXO_APP_DB_PASSWORD: ${NEXO_APP_DB_PASSWORD}
+      NEXO_OP_SIGNING_KEY: ${NEXO_OP_SIGNING_KEY:?}
+      NEXO_SECRET_KEY: ${NEXO_SECRET_KEY:?}
+      NEXO_AGENT_TLS_DIR: /certs
+      NEXO_SECRET_KEY_PREVIOUS: ${NEXO_SECRET_KEY_PREVIOUS:-}   # só durante a rotação da chave
+      NEXO_ALERT_WEBHOOK_URL: ${NEXO_ALERT_WEBHOOK_URL:-}
+      NEXO_RADIUS_KEY: ${NEXO_RADIUS_KEY:?}
+      NEXO_REPLICA_PASSWORD: ${NEXO_REPLICA_PASSWORD:-}           # papel de replicação (perfil ha)
+      NEXO_RADIUS_DB_PASSWORD: ${NEXO_RADIUS_DB_PASSWORD:?}
+      NEXO_RADIUS_PUBLIC_HOST: ${NEXO_RADIUS_PUBLIC_HOST:-}     # endereço que os concentradores usam para chegar ao RADIUS (aparece nas instruções)
+      NEXO_RADIUS_PORT: ${NEXO_RADIUS_PORT:-1812}
+      NEXO_RADIUS_COA_RELAY: vpn:3798                           # a desconexão de sessão sai pelo serviço do túnel
+      NEXO_VPN_PUBLIC_HOST: ${NEXO_VPN_PUBLIC_HOST:-}
+      NEXO_VPN_PORT: ${NEXO_VPN_PORT:-51820}
+      NEXO_L2TP_PSK: ${NEXO_L2TP_PSK:-}                        # chave IPsec do túnel L2TP (concentradores sem WireGuard)
+      NEXO_ACS_URL: ${NEXO_ACS_URL:-}                          # gerência de roteadores (TR-069), perfil acs: http://acs:7557
+      NEXO_ACS_PUBLIC_URL: ${NEXO_ACS_PUBLIC_URL:-}            # endereço que o roteador do cliente usa (http://<host>:7547/)
+      NEXO_RADIUS_SECONDARY_HOST: ${NEXO_RADIUS_SECONDARY_HOST:-}
+      NEXO_RADIUS_SECONDARY_PORT: ${NEXO_RADIUS_SECONDARY_PORT:-}
+    volumes: ["./certs:/certs:ro"]
+    ports: ["${NEXO_AGENT_PORT:-8443}:8443"]   # agentes (mTLS). O painel (8080) só é alcançado pelo Caddy.
+  # Túnel integrado (WireGuard): o concentrador disca para cá e a autenticação passa por dentro. Mesma imagem da API, outro comando.
+  # O servidor RADIUS compartilha a rede deste serviço; por isso as portas dele são publicadas aqui.
+  vpn:
+    build: { context: ../.., dockerfile: infra/compose/Dockerfile.api }
+    command: ["node", "legacy/fastify/dist/vpn.js"]
+    user: root
+    cap_add: [NET_ADMIN]
+    device_cgroup_rules: ["c 108:0 rwm"]   # /dev/ppp do L2TP (criado pelo serviço se faltar)
+    restart: unless-stopped
+    depends_on: { db: { condition: service_healthy }, api: { condition: service_started } }
+    environment:
+      DATABASE_URL_APP: postgres://nexo_app:${NEXO_APP_DB_PASSWORD:?}@db:5432/nexo
+      NEXO_L2TP_PSK: ${NEXO_L2TP_PSK:-}
+      NEXO_RADIUS_KEY: ${NEXO_RADIUS_KEY:-}                    # lê as senhas L2TP dos concentradores
+    volumes: [vpnstate:/state]
+    # Só o túnel (51820) fica exposto. A autenticação direta por IP só escuta na própria máquina, a menos que NEXO_RADIUS_DIRECT_BIND
+    # seja definido (ex.: 0.0.0.0) — e então libere 1812/1813 no firewall apenas para os endereços dos concentradores.
+    ports: ["${NEXO_VPN_PORT:-51820}:51820/udp", "${NEXO_L2TP_BIND:-0.0.0.0}:500:500/udp", "${NEXO_L2TP_BIND:-0.0.0.0}:4500:4500/udp", "${NEXO_RADIUS_DIRECT_BIND:-127.0.0.1}:${NEXO_RADIUS_PORT:-1812}:1812/udp", "${NEXO_RADIUS_DIRECT_BIND:-127.0.0.1}:${NEXO_RADIUS_ACCT_PORT:-1813}:1813/udp"]
+  # RADIUS integrado: sobe junto com o sistema e lê o banco do NexoISP. O provedor não instala nada; só aponta o concentrador para cá.
+  radius:
+    build: ../radius
+    restart: unless-stopped
+    network_mode: "service:vpn"        # recebe os pacotes que chegam pelo túnel e pelas portas publicadas no serviço vpn
+    depends_on: { db: { condition: service_healthy }, api: { condition: service_started }, vpn: { condition: service_started, restart: true } }
+    environment:
+      RADIUS_DB_HOST: db
+      RADIUS_DB_PORT: "5432"
+      RADIUS_DB_NAME: nexo
+      RADIUS_DB_PASSWORD: ${NEXO_RADIUS_DB_PASSWORD:?}
+      NEXO_RADIUS_KEY: ${NEXO_RADIUS_KEY:?}
+  # Segunda instância do servidor de autenticação (perfil "ha"), sobre o MESMO banco, em outra porta do mesmo túnel. O concentrador a usa
+  # se a primeira não responder. Protege contra a queda do processo, não da máquina.
+  # Réplica em espera do banco (perfil "ha"): recebe tudo do primário por replicação contínua; só leitura. Promoção manual (docs/operacao.md).
+  db-replica:
+    image: postgres:16-alpine
+    profiles: [ha]
+    restart: unless-stopped
+    user: postgres
+    depends_on: { db: { condition: service_healthy } }
+    entrypoint: ["/nexo-replica.sh"]
+    environment:
+      PGPASSWORD: ${NEXO_REPLICA_PASSWORD:-}
+      PRIMARY_HOST: db
+    volumes: [dbreplica:/var/lib/postgresql/data, "../compose/db/replica.sh:/nexo-replica.sh:ro"]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U postgres"], interval: 5s, retries: 30 }
+  # Gerência de roteadores do cliente (TR-069), perfil "acs": o roteador contata a porta 7547; o NexoISP fala com a API interna (7557),
+  # que não é publicada. A interface própria do servidor de gerência também não é publicada: tudo é feito pelo painel do NexoISP.
+  acs-db:
+    image: mongo:7.0
+    profiles: [acs]
+    restart: unless-stopped
+    volumes: [acsdb:/data/db]
+  acs:
+    image: drumsergio/genieacs:1.2.13
+    profiles: [acs]
+    restart: unless-stopped
+    depends_on: [acs-db]
+    environment:
+      GENIEACS_MONGODB_CONNECTION_URL: mongodb://acs-db/genieacs
+      GENIEACS_UI_JWT_SECRET: ${NEXO_ACS_UI_SECRET:-nao-usado-a-interface-nao-e-publicada}
+      GENIEACS_EXT_DIR: /opt/genieacs/ext
+    ports: ["${NEXO_ACS_BIND:-0.0.0.0}:7547:7547"]
+  radius2:
+    build: ../radius
+    profiles: [ha]
+    restart: unless-stopped
+    network_mode: "service:vpn"
+    depends_on: { db: { condition: service_healthy }, vpn: { condition: service_started, restart: true } }
+    environment:
+      RADIUS_DB_HOST: db
+      RADIUS_DB_PORT: "5432"
+      RADIUS_DB_NAME: nexo
+      RADIUS_DB_PASSWORD: ${NEXO_RADIUS_DB_PASSWORD:?}
+      NEXO_RADIUS_KEY: ${NEXO_RADIUS_KEY:?}
+      RADIUS_PORT: "${NEXO_RADIUS_SECONDARY_PORT:-1822}"
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on: [api]
+    command: caddy reverse-proxy --from ${NEXO_DOMAIN:?} --to api:8080
+    ports: ["${NEXO_HTTP_PORT:-80}:80", "${NEXO_HTTPS_PORT:-443}:443"]
+    volumes: [caddydata:/data]
+volumes:
+  dbdata:
+  acsdb:
+  dbreplica:
+  vpnstate:
+  caddydata:

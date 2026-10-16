@@ -54,3 +54,18 @@ func CheckTOTP(code, secret string) bool {
 	}
 	return false
 }
+
+func TOTPCode(secret string, at time.Time) (string, error) {
+	key, e := base32.StdEncoding.WithPadding(base32.NoPadding).DecodeString(strings.TrimRight(strings.ToUpper(secret), "="))
+	if e != nil {
+		return "", e
+	}
+	var data [8]byte
+	binary.BigEndian.PutUint64(data[:], uint64(at.Unix()/30))
+	h := hmac.New(sha1.New, key)
+	_, _ = h.Write(data[:])
+	sum := h.Sum(nil)
+	offset := sum[len(sum)-1] & 15
+	number := (uint32(sum[offset])&127)<<24 | uint32(sum[offset+1])<<16 | uint32(sum[offset+2])<<8 | uint32(sum[offset+3])
+	return fmt.Sprintf("%06d", number%1000000), nil
+}
