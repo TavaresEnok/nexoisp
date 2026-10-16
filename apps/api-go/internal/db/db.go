@@ -103,9 +103,9 @@ func (d *DB) WithScope(ctx context.Context, s tenancy.Scope, fn func(*Tx) error)
 		return fmt.Errorf("pool da célula não configurado")
 	}
 	start := time.Now()
-	acquire, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
-	c, err := d.pool.Acquire(acquire)
+	// pg.Pool no produto aguarda até obter conexão ou cancelar a requisição.
+	// Um timeout exclusivo do Go mudaria o contrato sob contenção.
+	c, err := d.pool.Acquire(ctx)
 	d.Wait.Observe(time.Since(start).Seconds())
 	if err != nil {
 		return err
