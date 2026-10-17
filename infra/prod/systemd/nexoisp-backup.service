@@ -1,0 +1,10 @@
+[Unit]
+Description=Backup diário do banco NexoISP
+Wants=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+# Ajuste estes dois caminhos à instalação real antes de habilitar a unidade.
+WorkingDirectory=/opt/nexoisp
+ExecStart=/opt/nexoisp/nexo prod backup

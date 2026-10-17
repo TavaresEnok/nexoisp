@@ -252,6 +252,18 @@ Não há envio nativo por e-mail/WhatsApp: use o webhook com o serviço escolhid
 
 Em produção use `./nexo prod backup`, `./nexo prod restore-check <arquivo>` e `./nexo prod restore <arquivo> --yes`, com `NEXO_BACKUP_COPY=<comando ou script>` para levar cada backup para **fora do host**
 (o comando recebe o arquivo e o `.sha256`; se falhar, o script termina com erro para o agendador alertar). Sem ele o script avisa que o backup está no mesmo domínio de falha do banco.
+
+Defina também `NEXO_BACKUP_DIR` no `infra/prod/.env` (por exemplo, `/var/lib/nexoisp/backups`) e crie o diretório com permissão `700`. O comando de produção lê esses dois valores do arquivo de ambiente, sem executá-lo como script.
+
+Para agendar o backup diário, copie `infra/prod/systemd/nexoisp-backup.service` e `infra/prod/systemd/nexoisp-backup.timer` para `/etc/systemd/system/`, ajuste `/opt/nexoisp` para o diretório real da instalação e rode:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now nexoisp-backup.timer
+systemctl list-timers nexoisp-backup.timer
+```
+
+Antes de habilitar o agendamento, execute um backup manual e um `restore-check` do arquivo gerado. O timer só é considerado pronto quando a cópia externa também concluir sem erro.
 O wrapper Go pausa os escritores em execução (API, VPN e RADIUS), prepara os papéis/migrations do banco restaurado e reinicia os mesmos serviços. Usar o script de baixo nível diretamente exige fornecer os comandos de parada/retomada; ele não descobre serviços sozinho.
 Exercício feito em 10/10/2026 (ambiente local): backup → criação de um registro → `restore-check` → `restore` → registro posterior ausente, login e consultas funcionando, 31 políticas RLS presentes; arquivo adulterado recusado pela soma de verificação.
 

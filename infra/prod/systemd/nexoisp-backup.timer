@@ -1,0 +1,11 @@
+[Unit]
+Description=Agenda o backup diário do NexoISP
+
+[Timer]
+OnCalendar=*-*-* 02:15:00
+Persistent=true
+RandomizedDelaySec=15m
+Unit=nexoisp-backup.service
+
+[Install]
+WantedBy=timers.target
