@@ -1,0 +1,3 @@
+select w.kind, count(*)::int as opened, count(*) filter (where w.status = 'done')::int as done, count(*) filter (where w.status = 'canceled')::int as canceled,
+                round((extract(epoch from avg(case when w.status = 'done' then w.finished_at - w.created_at end)) / 3600)::numeric, 1)::float as completion_h
+         from work_orders w where (w.created_at at time zone $3)::date between $1::date and $2::date group by 1 order by 2 desc, 1

@@ -1,0 +1,1 @@
+insert into notice_templates (tenant_id, name, body) values ($1,$2,$3) on conflict (tenant_id, name) do nothing returning id, name

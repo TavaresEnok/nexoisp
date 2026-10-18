@@ -1,6 +1,6 @@
 # Expansão 1 — OLT/ONU
 
-Primeira expansão após o MVP (documento 04, seção 10). Limite adotado: **descoberta, autorização e leitura de estado**, um fabricante por vez.
+Guia do módulo OLT/ONU: descoberta, autorização, remoção e leitura de estado, com homologação por fabricante/modelo. A configuração dos demais módulos fica em [Operação](operacao.md).
 
 **Situação em 10/10/2026:**
 
@@ -36,12 +36,11 @@ resultado antigo não altera a intenção, isolamento entre provedores, evidênc
 
 ## Decisões e limites desta entrega
 
-- **Perfil de linha e VLAN são digitados** na autorização e precisam já existir na OLT. O sistema não cria perfis, VLANs nem `service-port` genéricos:
-  isso depende do fabricante e do desenho de rede do provedor.
-- **Encerrar o contrato não remove a ONU automaticamente.** O painel avisa; a remoção é decisão do operador (regra comercial não definida).
-- **Sem limiar de sinal:** o painel mostra os valores de RX/TX, mas não classifica como bom ou ruim (os limites dependem do equipamento e do projeto óptico).
-- Uma ONU por contrato. Sem ONU em modo roteador/TR-069, sem Wi-Fi, sem VoIP, sem atualização de firmware.
-- Sem IPAM/CGNAT (expansão 2) e sem inventário de rede óptica — caixas, splitters, portas (expansão 3).
+- **Perfil de linha, perfil de serviço e VLAN são informados** na autorização; os perfis precisam existir na OLT. O driver Huawei cria o `service-port` da autorização descrito abaixo; não configura os perfis e o desenho de rede do provedor.
+- **Remoção ao encerrar contrato é opcional**, configurada nas regras do NOC e desligada por padrão. Sem essa regra, a remoção é manual.
+- Os limites de sinal são configurados pelo provedor no NOC; não há limiar universal por fabricante.
+- Uma ONU por contrato. TR-069/Wi-Fi é uma integração separada via GenieACS; não faz parte do driver de provisionamento da OLT.
+- IPAM/CGNAT e inventário óptico existem como módulos separados; não homologam o driver Huawei.
 - O driver `olt_demo` é bloqueado fora do modo demonstração. Em produção o único driver de OLT selecionável é o `olt_huawei`, marcado como não homologado.
 - Perfil de serviço (`ont-srvprofile`) é um campo a mais na autorização, obrigatório na Huawei.
 
@@ -95,7 +94,7 @@ O restante — fila, telas, auditoria, recuperação — já está pronto e não
 
 ## Verificação
 
-- API: `apps/api/test/olt.test.ts` (6 testes) — descoberta completa x parcial, isolamento, autorização, leitura, divergência, desautorização obsoleta, troca de ONU, permissões.
+- API: ensaios nativos do backend Go — descoberta completa x parcial, isolamento, autorização, leitura, divergência, desautorização obsoleta, troca de ONU e permissões.
 - Agente: `services/network-agent/tests/test_onu.py` (5 testes) — autorizar/ler/desautorizar, confirmação perdida, reinício no meio, mudança de VLAN, porta errada.
 - Driver Huawei: `tests/test_olt_huawei.py` (5 testes, contra o emulador) — serial e interpretadores, ciclo completo, falhas da OLT, tentativa de injeção de comando, sessão reaproveitada, autorização parcial que converge.
 - Caminho completo no ambiente rodando: painel → agente → SSH (netmiko) → emulador: descoberta, autorização (~3 s), sinal, e conferência direta na CLI.

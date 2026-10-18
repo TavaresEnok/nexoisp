@@ -1,0 +1,1 @@
+insert into l2tp_peers (device_id, tenant_id, username, secret_enc, tunnel_ip) values ($1,$2,$3,pgp_sym_encrypt($4,$5),$6)

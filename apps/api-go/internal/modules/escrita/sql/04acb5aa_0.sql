@@ -1,0 +1,1 @@
+select * from devices where id = $1 for update

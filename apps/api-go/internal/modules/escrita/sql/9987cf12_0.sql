@@ -1,0 +1,2 @@
+select id, action, status, desired_version, attempts, note, reason, parameters, idempotency_key, valid_until, authorization_ref, result, created_at, updated_at, finished_at
+         from operations where id = $1

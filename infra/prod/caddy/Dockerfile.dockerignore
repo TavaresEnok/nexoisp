@@ -1,0 +1,12 @@
+**
+!package.json
+!package-lock.json
+!apps/
+!apps/web/
+!apps/web/**
+!infra/
+!infra/prod/
+!infra/prod/caddy/
+!infra/prod/caddy/**
+**/node_modules/
+apps/web/dist/

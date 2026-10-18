@@ -1,0 +1,1 @@
+select host(l2tp_free_ip()) as ip

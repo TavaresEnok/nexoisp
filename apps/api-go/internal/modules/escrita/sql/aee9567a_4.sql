@@ -1,0 +1,1 @@
+update maintenance_notices set {{undefined}} = coalesce({{undefined}}, now()) where id = $1

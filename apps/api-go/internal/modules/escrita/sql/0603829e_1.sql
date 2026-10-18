@@ -1,0 +1,1 @@
+insert into maintenance_notices (tenant_id, title, message, severity, device_id, starts_at, ends_at, created_by) values ($1,$2,$3,$4,$5,$6,$7,$8) returning id

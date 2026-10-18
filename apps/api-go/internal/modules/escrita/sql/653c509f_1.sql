@@ -1,0 +1,2 @@
+insert into cgnat_plans (tenant_id, name, public_pool_id, private_pool_id, public_cidr, private_cidr, ports_per_subscriber, port_start, created_by)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning *

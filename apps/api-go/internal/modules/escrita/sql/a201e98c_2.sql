@@ -1,0 +1,1 @@
+insert into install_kit_items (tenant_id, kit_id, item_id, qty) values ($1,$2,$3,$4)

@@ -1,0 +1,1 @@
+insert into addon_products (tenant_id, name, price_cents) values ($1,$2,$3) returning *

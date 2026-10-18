@@ -1,0 +1,1 @@
+select count(*)::int as n from companies

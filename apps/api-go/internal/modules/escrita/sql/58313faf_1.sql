@@ -1,0 +1,1 @@
+delete from notice_channels where id = $1

@@ -1,0 +1,1 @@
+update maintenance_notices set canceled_at = now() where id = $1 and canceled_at is null and ends_at > now() returning id

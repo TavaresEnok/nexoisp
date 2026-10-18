@@ -1,0 +1,2 @@
+select value from subscriber_contacts where subscriber_id = $1 and allow_notices and kind in ('mobile','whatsapp') and purpose in ('billing','general')
+           order by (purpose = 'billing') desc, created_at limit 1

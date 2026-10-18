@@ -1,0 +1,1 @@
+select id, created_at from service_resources where contract_id = $1

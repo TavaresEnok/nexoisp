@@ -1,0 +1,3729 @@
+# Rotas HTTP nativas do backend Go.
+{$NEXO_DOMAIN:localhost} {
+  log {
+    format json
+  }
+  route {
+    @r0 {
+      method DELETE
+      path_regexp r0 ^/api/api\-tokens/[^/]+$
+    }
+    handle @r0 {
+      log_append nexo_route "DELETE /api/api-tokens/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r1 {
+      method DELETE
+      path_regexp r1 ^/api/contracts/[^/]+/addons/[^/]+$
+    }
+    handle @r1 {
+      log_append nexo_route "DELETE /api/contracts/:id/addons/:addonId"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r2 {
+      method DELETE
+      path_regexp r2 ^/api/contracts/[^/]+/cpe/link$
+    }
+    handle @r2 {
+      log_append nexo_route "DELETE /api/contracts/:id/cpe/link"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r3 {
+      method DELETE
+      path_regexp r3 ^/api/discounts/[^/]+$
+    }
+    handle @r3 {
+      log_append nexo_route "DELETE /api/discounts/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r4 {
+      method DELETE
+      path_regexp r4 ^/api/documents/[^/]+$
+    }
+    handle @r4 {
+      log_append nexo_route "DELETE /api/documents/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r5 {
+      method DELETE
+      path_regexp r5 ^/api/ftth/boxes/[^/]+$
+    }
+    handle @r5 {
+      log_append nexo_route "DELETE /api/ftth/boxes/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r6 {
+      method DELETE
+      path_regexp r6 ^/api/ftth/drops/[^/]+$
+    }
+    handle @r6 {
+      log_append nexo_route "DELETE /api/ftth/drops/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r7 {
+      method DELETE
+      path_regexp r7 ^/api/ipam/allocations/[^/]+$
+    }
+    handle @r7 {
+      log_append nexo_route "DELETE /api/ipam/allocations/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r8 {
+      method DELETE
+      path_regexp r8 ^/api/ipam/delegations/[^/]+$
+    }
+    handle @r8 {
+      log_append nexo_route "DELETE /api/ipam/delegations/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r9 {
+      method DELETE
+      path_regexp r9 ^/api/ipam/pools/[^/]+$
+    }
+    handle @r9 {
+      log_append nexo_route "DELETE /api/ipam/pools/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r10 {
+      method DELETE
+      path_regexp r10 ^/api/notice\-channels/[^/]+$
+    }
+    handle @r10 {
+      log_append nexo_route "DELETE /api/notice-channels/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r11 {
+      method DELETE
+      path_regexp r11 ^/api/notice\-rules/[^/]+$
+    }
+    handle @r11 {
+      log_append nexo_route "DELETE /api/notice-rules/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r12 {
+      method DELETE
+      path_regexp r12 ^/api/notice\-templates/[^/]+$
+    }
+    handle @r12 {
+      log_append nexo_route "DELETE /api/notice-templates/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r13 {
+      method DELETE
+      path_regexp r13 ^/api/scheduled\-changes/[^/]+$
+    }
+    handle @r13 {
+      log_append nexo_route "DELETE /api/scheduled-changes/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r14 {
+      method DELETE
+      path_regexp r14 ^/api/sla\-policies/[^/]+$
+    }
+    handle @r14 {
+      log_append nexo_route "DELETE /api/sla-policies/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r15 {
+      method DELETE
+      path_regexp r15 ^/api/tags/[^/]+$
+    }
+    handle @r15 {
+      log_append nexo_route "DELETE /api/tags/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r16 {
+      method DELETE
+      path_regexp r16 ^/api/webhook\-endpoints/[^/]+$
+    }
+    handle @r16 {
+      log_append nexo_route "DELETE /api/webhook-endpoints/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r17 {
+      method DELETE
+      path_regexp r17 ^/api/work\-orders/[^/]+/helpers/[^/]+$
+    }
+    handle @r17 {
+      log_append nexo_route "DELETE /api/work-orders/:id/helpers/:userId"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r18 {
+      method GET HEAD
+      path_regexp r18 ^/api/acceptances/[^/]+/evidence$
+    }
+    handle @r18 {
+      log_append nexo_route "GET /api/acceptances/:id/evidence"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r19 {
+      method GET HEAD
+      path_regexp r19 ^/api/acs/status$
+    }
+    handle @r19 {
+      log_append nexo_route "GET /api/acs/status"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r20 {
+      method GET HEAD
+      path_regexp r20 ^/api/addons$
+    }
+    handle @r20 {
+      log_append nexo_route "GET /api/addons"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r21 {
+      method GET HEAD
+      path_regexp r21 ^/api/agenda$
+    }
+    handle @r21 {
+      log_append nexo_route "GET /api/agenda"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r22 {
+      method GET HEAD
+      path_regexp r22 ^/api/agenda/free$
+    }
+    handle @r22 {
+      log_append nexo_route "GET /api/agenda/free"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r23 {
+      method GET HEAD
+      path_regexp r23 ^/api/agents$
+    }
+    handle @r23 {
+      log_append nexo_route "GET /api/agents"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r24 {
+      method GET HEAD
+      path_regexp r24 ^/api/anatel/dici$
+    }
+    handle @r24 {
+      log_append nexo_route "GET /api/anatel/dici"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r25 {
+      method GET HEAD
+      path_regexp r25 ^/api/anatel/municipalities$
+    }
+    handle @r25 {
+      log_append nexo_route "GET /api/anatel/municipalities"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r26 {
+      method GET HEAD
+      path_regexp r26 ^/api/api\-tokens$
+    }
+    handle @r26 {
+      log_append nexo_route "GET /api/api-tokens"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r27 {
+      method GET HEAD
+      path_regexp r27 ^/api/audit$
+    }
+    handle @r27 {
+      log_append nexo_route "GET /api/audit"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r28 {
+      method GET HEAD
+      path_regexp r28 ^/api/catalogs$
+    }
+    handle @r28 {
+      log_append nexo_route "GET /api/catalogs"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r29 {
+      method GET HEAD
+      path_regexp r29 ^/api/cgnat/plans$
+    }
+    handle @r29 {
+      log_append nexo_route "GET /api/cgnat/plans"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r30 {
+      method GET HEAD
+      path_regexp r30 ^/api/cgnat/plans/[^/]+/lookup$
+    }
+    handle @r30 {
+      log_append nexo_route "GET /api/cgnat/plans/:id/lookup"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r31 {
+      method GET HEAD
+      path_regexp r31 ^/api/cgnat/plans/[^/]+/map$
+    }
+    handle @r31 {
+      log_append nexo_route "GET /api/cgnat/plans/:id/map"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r32 {
+      method GET HEAD
+      path_regexp r32 ^/api/cgnat/plans/[^/]+/script$
+    }
+    handle @r32 {
+      log_append nexo_route "GET /api/cgnat/plans/:id/script"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r33 {
+      method GET HEAD
+      path_regexp r33 ^/api/cgnat/trace$
+    }
+    handle @r33 {
+      log_append nexo_route "GET /api/cgnat/trace"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r34 {
+      method GET HEAD
+      path_regexp r34 ^/api/commission\-rules$
+    }
+    handle @r34 {
+      log_append nexo_route "GET /api/commission-rules"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r35 {
+      method GET HEAD
+      path_regexp r35 ^/api/companies$
+    }
+    handle @r35 {
+      log_append nexo_route "GET /api/companies"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r36 {
+      method GET HEAD
+      path_regexp r36 ^/api/contracts$
+    }
+    handle @r36 {
+      log_append nexo_route "GET /api/contracts"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r37 {
+      method GET HEAD
+      path_regexp r37 ^/api/contracts/[^/]+$
+    }
+    handle @r37 {
+      log_append nexo_route "GET /api/contracts/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r38 {
+      method GET HEAD
+      path_regexp r38 ^/api/contracts/[^/]+/acceptances$
+    }
+    handle @r38 {
+      log_append nexo_route "GET /api/contracts/:id/acceptances"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r39 {
+      method GET HEAD
+      path_regexp r39 ^/api/contracts/[^/]+/addons$
+    }
+    handle @r39 {
+      log_append nexo_route "GET /api/contracts/:id/addons"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r40 {
+      method GET HEAD
+      path_regexp r40 ^/api/contracts/[^/]+/amendments$
+    }
+    handle @r40 {
+      log_append nexo_route "GET /api/contracts/:id/amendments"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r41 {
+      method GET HEAD
+      path_regexp r41 ^/api/contracts/[^/]+/availability$
+    }
+    handle @r41 {
+      log_append nexo_route "GET /api/contracts/:id/availability"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r42 {
+      method GET HEAD
+      path_regexp r42 ^/api/contracts/[^/]+/cpe$
+    }
+    handle @r42 {
+      log_append nexo_route "GET /api/contracts/:id/cpe"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r43 {
+      method GET HEAD
+      path_regexp r43 ^/api/contracts/[^/]+/cpe/candidates$
+    }
+    handle @r43 {
+      log_append nexo_route "GET /api/contracts/:id/cpe/candidates"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r44 {
+      method GET HEAD
+      path_regexp r44 ^/api/contracts/[^/]+/diagnosis$
+    }
+    handle @r44 {
+      log_append nexo_route "GET /api/contracts/:id/diagnosis"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r45 {
+      method GET HEAD
+      path_regexp r45 ^/api/contracts/[^/]+/discounts$
+    }
+    handle @r45 {
+      log_append nexo_route "GET /api/contracts/:id/discounts"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r46 {
+      method GET HEAD
+      path_regexp r46 ^/api/contracts/[^/]+/equipment$
+    }
+    handle @r46 {
+      log_append nexo_route "GET /api/contracts/:id/equipment"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r47 {
+      method GET HEAD
+      path_regexp r47 ^/api/contracts/[^/]+/finance$
+    }
+    handle @r47 {
+      log_append nexo_route "GET /api/contracts/:id/finance"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r48 {
+      method GET HEAD
+      path_regexp r48 ^/api/contracts/[^/]+/ftth$
+    }
+    handle @r48 {
+      log_append nexo_route "GET /api/contracts/:id/ftth"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r49 {
+      method GET HEAD
+      path_regexp r49 ^/api/contracts/[^/]+/install\-address$
+    }
+    handle @r49 {
+      log_append nexo_route "GET /api/contracts/:id/install-address"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r50 {
+      method GET HEAD
+      path_regexp r50 ^/api/contracts/[^/]+/ips$
+    }
+    handle @r50 {
+      log_append nexo_route "GET /api/contracts/:id/ips"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r51 {
+      method GET HEAD
+      path_regexp r51 ^/api/contracts/[^/]+/ipv6$
+    }
+    handle @r51 {
+      log_append nexo_route "GET /api/contracts/:id/ipv6"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r52 {
+      method GET HEAD
+      path_regexp r52 ^/api/contracts/[^/]+/onu$
+    }
+    handle @r52 {
+      log_append nexo_route "GET /api/contracts/:id/onu"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r53 {
+      method GET HEAD
+      path_regexp r53 ^/api/contracts/[^/]+/radius\-log$
+    }
+    handle @r53 {
+      log_append nexo_route "GET /api/contracts/:id/radius-log"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r54 {
+      method GET HEAD
+      path_regexp r54 ^/api/contracts/[^/]+/scheduled\-changes$
+    }
+    handle @r54 {
+      log_append nexo_route "GET /api/contracts/:id/scheduled-changes"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r55 {
+      method GET HEAD
+      path_regexp r55 ^/api/contracts/[^/]+/service$
+    }
+    handle @r55 {
+      log_append nexo_route "GET /api/contracts/:id/service"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r56 {
+      method GET HEAD
+      path_regexp r56 ^/api/contracts/[^/]+/sessions$
+    }
+    handle @r56 {
+      log_append nexo_route "GET /api/contracts/:id/sessions"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r57 {
+      method GET HEAD
+      path_regexp r57 ^/api/contracts/[^/]+/states$
+    }
+    handle @r57 {
+      log_append nexo_route "GET /api/contracts/:id/states"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r58 {
+      method GET HEAD
+      path_regexp r58 ^/api/contracts/[^/]+/termination\-quote$
+    }
+    handle @r58 {
+      log_append nexo_route "GET /api/contracts/:id/termination-quote"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r59 {
+      method GET HEAD
+      path_regexp r59 ^/api/contracts/[^/]+/trust\-release$
+    }
+    handle @r59 {
+      log_append nexo_route "GET /api/contracts/:id/trust-release"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r60 {
+      method GET HEAD
+      path_regexp r60 ^/api/contracts/[^/]+/usage$
+    }
+    handle @r60 {
+      log_append nexo_route "GET /api/contracts/:id/usage"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r61 {
+      method GET HEAD
+      path_regexp r61 ^/api/contracts/[^/]+/usage\-series$
+    }
+    handle @r61 {
+      log_append nexo_route "GET /api/contracts/:id/usage-series"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r62 {
+      method GET HEAD
+      path_regexp r62 ^/api/crm/report$
+    }
+    handle @r62 {
+      log_append nexo_route "GET /api/crm/report"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r63 {
+      method GET HEAD
+      path_regexp r63 ^/api/custom\-fields$
+    }
+    handle @r63 {
+      log_append nexo_route "GET /api/custom-fields"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r64 {
+      method GET HEAD
+      path_regexp r64 ^/api/dashboard$
+    }
+    handle @r64 {
+      log_append nexo_route "GET /api/dashboard"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r65 {
+      method GET HEAD
+      path_regexp r65 ^/api/dashboard/panels$
+    }
+    handle @r65 {
+      log_append nexo_route "GET /api/dashboard/panels"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r66 {
+      method GET HEAD
+      path_regexp r66 ^/api/devices$
+    }
+    handle @r66 {
+      log_append nexo_route "GET /api/devices"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r67 {
+      method GET HEAD
+      path_regexp r67 ^/api/documents/[^/]+/download$
+    }
+    handle @r67 {
+      log_append nexo_route "GET /api/documents/:id/download"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r68 {
+      method GET HEAD
+      path_regexp r68 ^/api/finance/export$
+    }
+    handle @r68 {
+      log_append nexo_route "GET /api/finance/export"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r69 {
+      method GET HEAD
+      path_regexp r69 ^/api/finance/monthly$
+    }
+    handle @r69 {
+      log_append nexo_route "GET /api/finance/monthly"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r70 {
+      method GET HEAD
+      path_regexp r70 ^/api/finance/reconciliation$
+    }
+    handle @r70 {
+      log_append nexo_route "GET /api/finance/reconciliation"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r71 {
+      method GET HEAD
+      path_regexp r71 ^/api/finance/reports/aging$
+    }
+    handle @r71 {
+      log_append nexo_route "GET /api/finance/reports/aging"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r72 {
+      method GET HEAD
+      path_regexp r72 ^/api/finance/reports/receipts$
+    }
+    handle @r72 {
+      log_append nexo_route "GET /api/finance/reports/receipts"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r73 {
+      method GET HEAD
+      path_regexp r73 ^/api/finance/reports/to\-cancel$
+    }
+    handle @r73 {
+      log_append nexo_route "GET /api/finance/reports/to-cancel"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r74 {
+      method GET HEAD
+      path_regexp r74 ^/api/finance/reports/without\-invoice$
+    }
+    handle @r74 {
+      log_append nexo_route "GET /api/finance/reports/without-invoice"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r75 {
+      method GET HEAD
+      path_regexp r75 ^/api/finance/settings$
+    }
+    handle @r75 {
+      log_append nexo_route "GET /api/finance/settings"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r76 {
+      method GET HEAD
+      path_regexp r76 ^/api/finance/summary$
+    }
+    handle @r76 {
+      log_append nexo_route "GET /api/finance/summary"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r77 {
+      method GET HEAD
+      path_regexp r77 ^/api/ftth/boxes$
+    }
+    handle @r77 {
+      log_append nexo_route "GET /api/ftth/boxes"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r78 {
+      method GET HEAD
+      path_regexp r78 ^/api/ftth/boxes/[^/]+$
+    }
+    handle @r78 {
+      log_append nexo_route "GET /api/ftth/boxes/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r79 {
+      method GET HEAD
+      path_regexp r79 ^/api/health$
+    }
+    handle @r79 {
+      log_append nexo_route "GET /api/health"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r80 {
+      method GET HEAD
+      path_regexp r80 ^/api/import/batches$
+    }
+    handle @r80 {
+      log_append nexo_route "GET /api/import/batches"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r81 {
+      method GET HEAD
+      path_regexp r81 ^/api/import/batches/[^/]+$
+    }
+    handle @r81 {
+      log_append nexo_route "GET /api/import/batches/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r82 {
+      method GET HEAD
+      path_regexp r82 ^/api/install\-kits$
+    }
+    handle @r82 {
+      log_append nexo_route "GET /api/install-kits"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r83 {
+      method GET HEAD
+      path_regexp r83 ^/api/integrations/catalog$
+    }
+    handle @r83 {
+      log_append nexo_route "GET /api/integrations/catalog"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r84 {
+      method GET HEAD
+      path_regexp r84 ^/api/invoices$
+    }
+    handle @r84 {
+      log_append nexo_route "GET /api/invoices"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r85 {
+      method GET HEAD
+      path_regexp r85 ^/api/invoices/[^/]+$
+    }
+    handle @r85 {
+      log_append nexo_route "GET /api/invoices/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r86 {
+      method GET HEAD
+      path_regexp r86 ^/api/invoices/[^/]+/due$
+    }
+    handle @r86 {
+      log_append nexo_route "GET /api/invoices/:id/due"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r87 {
+      method GET HEAD
+      path_regexp r87 ^/api/ipam/pools$
+    }
+    handle @r87 {
+      log_append nexo_route "GET /api/ipam/pools"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r88 {
+      method GET HEAD
+      path_regexp r88 ^/api/ipam/pools/[^/]+/allocations$
+    }
+    handle @r88 {
+      log_append nexo_route "GET /api/ipam/pools/:id/allocations"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r89 {
+      method GET HEAD
+      path_regexp r89 ^/api/ipam/pools/[^/]+/delegations$
+    }
+    handle @r89 {
+      log_append nexo_route "GET /api/ipam/pools/:id/delegations"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r90 {
+      method GET HEAD
+      path_regexp r90 ^/api/leads$
+    }
+    handle @r90 {
+      log_append nexo_route "GET /api/leads"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r91 {
+      method GET HEAD
+      path_regexp r91 ^/api/leads/[^/]+$
+    }
+    handle @r91 {
+      log_append nexo_route "GET /api/leads/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r92 {
+      method GET HEAD
+      path_regexp r92 ^/api/leads/summary$
+    }
+    handle @r92 {
+      log_append nexo_route "GET /api/leads/summary"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r93 {
+      method GET HEAD
+      path_regexp r93 ^/api/legal/ip\-lookup/history$
+    }
+    handle @r93 {
+      log_append nexo_route "GET /api/legal/ip-lookup/history"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r94 {
+      method GET HEAD
+      path_regexp r94 ^/api/maintenance\-notices$
+    }
+    handle @r94 {
+      log_append nexo_route "GET /api/maintenance-notices"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r95 {
+      method GET HEAD
+      path_regexp r95 ^/api/maintenance\-notices/channels$
+    }
+    handle @r95 {
+      log_append nexo_route "GET /api/maintenance-notices/channels"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r96 {
+      method GET HEAD
+      path_regexp r96 ^/api/map/coverage$
+    }
+    handle @r96 {
+      log_append nexo_route "GET /api/map/coverage"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r97 {
+      method GET HEAD
+      path_regexp r97 ^/api/map/points$
+    }
+    handle @r97 {
+      log_append nexo_route "GET /api/map/points"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r98 {
+      method GET HEAD
+      path_regexp r98 ^/api/me$
+    }
+    handle @r98 {
+      log_append nexo_route "GET /api/me"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r99 {
+      method GET HEAD
+      path_regexp r99 ^/api/network/drift$
+    }
+    handle @r99 {
+      log_append nexo_route "GET /api/network/drift"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r100 {
+      method GET HEAD
+      path_regexp r100 ^/api/network/health$
+    }
+    handle @r100 {
+      log_append nexo_route "GET /api/network/health"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r101 {
+      method GET HEAD
+      path_regexp r101 ^/api/network/online$
+    }
+    handle @r101 {
+      log_append nexo_route "GET /api/network/online"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r102 {
+      method GET HEAD
+      path_regexp r102 ^/api/noc/overview$
+    }
+    handle @r102 {
+      log_append nexo_route "GET /api/noc/overview"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r103 {
+      method GET HEAD
+      path_regexp r103 ^/api/noc/settings$
+    }
+    handle @r103 {
+      log_append nexo_route "GET /api/noc/settings"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r104 {
+      method GET HEAD
+      path_regexp r104 ^/api/notice\-channels$
+    }
+    handle @r104 {
+      log_append nexo_route "GET /api/notice-channels"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r105 {
+      method GET HEAD
+      path_regexp r105 ^/api/notice\-log$
+    }
+    handle @r105 {
+      log_append nexo_route "GET /api/notice-log"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r106 {
+      method GET HEAD
+      path_regexp r106 ^/api/notice\-page$
+    }
+    handle @r106 {
+      log_append nexo_route "GET /api/notice-page"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r107 {
+      method GET HEAD
+      path_regexp r107 ^/api/notice\-rules$
+    }
+    handle @r107 {
+      log_append nexo_route "GET /api/notice-rules"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r108 {
+      method GET HEAD
+      path_regexp r108 ^/api/notice\-templates$
+    }
+    handle @r108 {
+      log_append nexo_route "GET /api/notice-templates"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r109 {
+      method GET HEAD
+      path_regexp r109 ^/api/notifications$
+    }
+    handle @r109 {
+      log_append nexo_route "GET /api/notifications"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r110 {
+      method GET HEAD
+      path_regexp r110 ^/api/olt/discoveries$
+    }
+    handle @r110 {
+      log_append nexo_route "GET /api/olt/discoveries"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r111 {
+      method GET HEAD
+      path_regexp r111 ^/api/onus$
+    }
+    handle @r111 {
+      log_append nexo_route "GET /api/onus"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r112 {
+      method GET HEAD
+      path_regexp r112 ^/api/operations$
+    }
+    handle @r112 {
+      log_append nexo_route "GET /api/operations"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r113 {
+      method GET HEAD
+      path_regexp r113 ^/api/operations/[^/]+$
+    }
+    handle @r113 {
+      log_append nexo_route "GET /api/operations/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r114 {
+      method GET HEAD
+      path_regexp r114 ^/api/plans$
+    }
+    handle @r114 {
+      log_append nexo_route "GET /api/plans"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r115 {
+      method GET HEAD
+      path_regexp r115 ^/api/plans/[^/]+/versions$
+    }
+    handle @r115 {
+      log_append nexo_route "GET /api/plans/:id/versions"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r116 {
+      method GET HEAD
+      path_regexp r116 ^/api/pops$
+    }
+    handle @r116 {
+      log_append nexo_route "GET /api/pops"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r117 {
+      method GET HEAD
+      path_regexp r117 ^/api/portal/acceptances$
+    }
+    handle @r117 {
+      log_append nexo_route "GET /api/portal/acceptances"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r118 {
+      method GET HEAD
+      path_regexp r118 ^/api/portal/cpe$
+    }
+    handle @r118 {
+      log_append nexo_route "GET /api/portal/cpe"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r119 {
+      method GET HEAD
+      path_regexp r119 ^/api/portal/overview$
+    }
+    handle @r119 {
+      log_append nexo_route "GET /api/portal/overview"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r120 {
+      method GET HEAD
+      path_regexp r120 ^/api/portal/surveys$
+    }
+    handle @r120 {
+      log_append nexo_route "GET /api/portal/surveys"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r121 {
+      method GET HEAD
+      path_regexp r121 ^/api/portal/tickets$
+    }
+    handle @r121 {
+      log_append nexo_route "GET /api/portal/tickets"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r122 {
+      method GET HEAD
+      path_regexp r122 ^/api/portal/tickets/[^/]+$
+    }
+    handle @r122 {
+      log_append nexo_route "GET /api/portal/tickets/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r123 {
+      method GET HEAD
+      path_regexp r123 ^/api/portal/usage\-series$
+    }
+    handle @r123 {
+      log_append nexo_route "GET /api/portal/usage-series"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r124 {
+      method GET HEAD
+      path_regexp r124 ^/api/radius/allowed\-sources$
+    }
+    handle @r124 {
+      log_append nexo_route "GET /api/radius/allowed-sources"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r125 {
+      method GET HEAD
+      path_regexp r125 ^/api/radius/devices/[^/]+/setup$
+    }
+    handle @r125 {
+      log_append nexo_route "GET /api/radius/devices/:id/setup"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r126 {
+      method GET HEAD
+      path_regexp r126 ^/api/radius/status$
+    }
+    handle @r126 {
+      log_append nexo_route "GET /api/radius/status"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r127 {
+      method GET HEAD
+      path_regexp r127 ^/api/reports/commissions$
+    }
+    handle @r127 {
+      log_append nexo_route "GET /api/reports/commissions"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r128 {
+      method GET HEAD
+      path_regexp r128 ^/api/reports/referrals$
+    }
+    handle @r128 {
+      log_append nexo_route "GET /api/reports/referrals"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r129 {
+      method GET HEAD
+      path_regexp r129 ^/api/reports/sla$
+    }
+    handle @r129 {
+      log_append nexo_route "GET /api/reports/sla"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r130 {
+      method GET HEAD
+      path_regexp r130 ^/api/search$
+    }
+    handle @r130 {
+      log_append nexo_route "GET /api/search"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r131 {
+      method GET HEAD
+      path_regexp r131 ^/api/settings/retention$
+    }
+    handle @r131 {
+      log_append nexo_route "GET /api/settings/retention"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r132 {
+      method GET HEAD
+      path_regexp r132 ^/api/sla\-policies$
+    }
+    handle @r132 {
+      log_append nexo_route "GET /api/sla-policies"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r133 {
+      method GET HEAD
+      path_regexp r133 ^/api/staff$
+    }
+    handle @r133 {
+      log_append nexo_route "GET /api/staff"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r134 {
+      method GET HEAD
+      path_regexp r134 ^/api/stock/items$
+    }
+    handle @r134 {
+      log_append nexo_route "GET /api/stock/items"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r135 {
+      method GET HEAD
+      path_regexp r135 ^/api/stock/items/[^/]+/movements$
+    }
+    handle @r135 {
+      log_append nexo_route "GET /api/stock/items/:id/movements"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r136 {
+      method GET HEAD
+      path_regexp r136 ^/api/stock/items/[^/]+/units$
+    }
+    handle @r136 {
+      log_append nexo_route "GET /api/stock/items/:id/units"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r137 {
+      method GET HEAD
+      path_regexp r137 ^/api/stock/units$
+    }
+    handle @r137 {
+      log_append nexo_route "GET /api/stock/units"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r138 {
+      method GET HEAD
+      path_regexp r138 ^/api/stock/units/[^/]+/events$
+    }
+    handle @r138 {
+      log_append nexo_route "GET /api/stock/units/:id/events"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r139 {
+      method GET HEAD
+      path_regexp r139 ^/api/subscribers$
+    }
+    handle @r139 {
+      log_append nexo_route "GET /api/subscribers"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r140 {
+      method GET HEAD
+      path_regexp r140 ^/api/subscribers/[^/]+$
+    }
+    handle @r140 {
+      log_append nexo_route "GET /api/subscribers/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r141 {
+      method GET HEAD
+      path_regexp r141 ^/api/subscribers/[^/]+/contacts$
+    }
+    handle @r141 {
+      log_append nexo_route "GET /api/subscribers/:id/contacts"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r142 {
+      method GET HEAD
+      path_regexp r142 ^/api/subscribers/[^/]+/documents$
+    }
+    handle @r142 {
+      log_append nexo_route "GET /api/subscribers/:id/documents"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r143 {
+      method GET HEAD
+      path_regexp r143 ^/api/subscribers/[^/]+/lgpd\-export$
+    }
+    handle @r143 {
+      log_append nexo_route "GET /api/subscribers/:id/lgpd-export"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r144 {
+      method GET HEAD
+      path_regexp r144 ^/api/subscribers/[^/]+/notes$
+    }
+    handle @r144 {
+      log_append nexo_route "GET /api/subscribers/:id/notes"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r145 {
+      method GET HEAD
+      path_regexp r145 ^/api/subscribers/[^/]+/portal\-access$
+    }
+    handle @r145 {
+      log_append nexo_route "GET /api/subscribers/:id/portal-access"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r146 {
+      method GET HEAD
+      path_regexp r146 ^/api/subscribers/[^/]+/timeline$
+    }
+    handle @r146 {
+      log_append nexo_route "GET /api/subscribers/:id/timeline"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r147 {
+      method GET HEAD
+      path_regexp r147 ^/api/surveys$
+    }
+    handle @r147 {
+      log_append nexo_route "GET /api/surveys"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r148 {
+      method GET HEAD
+      path_regexp r148 ^/api/tags$
+    }
+    handle @r148 {
+      log_append nexo_route "GET /api/tags"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r149 {
+      method GET HEAD
+      path_regexp r149 ^/api/tenants$
+    }
+    handle @r149 {
+      log_append nexo_route "GET /api/tenants"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r150 {
+      method GET HEAD
+      path_regexp r150 ^/api/tickets$
+    }
+    handle @r150 {
+      log_append nexo_route "GET /api/tickets"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r151 {
+      method GET HEAD
+      path_regexp r151 ^/api/tickets/[^/]+$
+    }
+    handle @r151 {
+      log_append nexo_route "GET /api/tickets/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r152 {
+      method GET HEAD
+      path_regexp r152 ^/api/today$
+    }
+    handle @r152 {
+      log_append nexo_route "GET /api/today"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r153 {
+      method GET HEAD
+      path_regexp r153 ^/api/users$
+    }
+    handle @r153 {
+      log_append nexo_route "GET /api/users"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r154 {
+      method GET HEAD
+      path_regexp r154 ^/api/users/[^/]+/pops$
+    }
+    handle @r154 {
+      log_append nexo_route "GET /api/users/:id/pops"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r155 {
+      method GET HEAD
+      path_regexp r155 ^/api/webhook\-deliveries$
+    }
+    handle @r155 {
+      log_append nexo_route "GET /api/webhook-deliveries"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r156 {
+      method GET HEAD
+      path_regexp r156 ^/api/webhook\-endpoints$
+    }
+    handle @r156 {
+      log_append nexo_route "GET /api/webhook-endpoints"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r157 {
+      method GET HEAD
+      path_regexp r157 ^/api/work\-orders$
+    }
+    handle @r157 {
+      log_append nexo_route "GET /api/work-orders"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r158 {
+      method GET HEAD
+      path_regexp r158 ^/api/work\-orders/[^/]+$
+    }
+    handle @r158 {
+      log_append nexo_route "GET /api/work-orders/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r159 {
+      method GET HEAD
+      path_regexp r159 ^/api/work\-orders/[^/]+/helpers$
+    }
+    handle @r159 {
+      log_append nexo_route "GET /api/work-orders/:id/helpers"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r160 {
+      method GET HEAD
+      path_regexp r160 ^/aviso/[^/]+$
+    }
+    handle @r160 {
+      log_append nexo_route "GET /aviso/:slug"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r161 {
+      method GET HEAD
+      path_regexp r161 ^/public/v1$
+    }
+    handle @r161 {
+      log_append nexo_route "GET /public/v1"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r162 {
+      method GET HEAD
+      path_regexp r162 ^/public/v1/contracts$
+    }
+    handle @r162 {
+      log_append nexo_route "GET /public/v1/contracts"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r163 {
+      method GET HEAD
+      path_regexp r163 ^/public/v1/invoices$
+    }
+    handle @r163 {
+      log_append nexo_route "GET /public/v1/invoices"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r164 {
+      method GET HEAD
+      path_regexp r164 ^/public/v1/subscribers$
+    }
+    handle @r164 {
+      log_append nexo_route "GET /public/v1/subscribers"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r165 {
+      method GET HEAD
+      path_regexp r165 ^/public/v1/subscribers/[^/]+$
+    }
+    handle @r165 {
+      log_append nexo_route "GET /public/v1/subscribers/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r166 {
+      method GET HEAD
+      path_regexp r166 ^/public/v1/work\-orders/[^/]+$
+    }
+    handle @r166 {
+      log_append nexo_route "GET /public/v1/work-orders/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r167 {
+      method PATCH
+      path_regexp r167 ^/api/addons/[^/]+$
+    }
+    handle @r167 {
+      log_append nexo_route "PATCH /api/addons/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r168 {
+      method PATCH
+      path_regexp r168 ^/api/agents/[^/]+$
+    }
+    handle @r168 {
+      log_append nexo_route "PATCH /api/agents/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r169 {
+      method PATCH
+      path_regexp r169 ^/api/catalogs/[^/]+$
+    }
+    handle @r169 {
+      log_append nexo_route "PATCH /api/catalogs/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r170 {
+      method PATCH
+      path_regexp r170 ^/api/companies/[^/]+$
+    }
+    handle @r170 {
+      log_append nexo_route "PATCH /api/companies/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r171 {
+      method PATCH
+      path_regexp r171 ^/api/contracts/[^/]+$
+    }
+    handle @r171 {
+      log_append nexo_route "PATCH /api/contracts/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r172 {
+      method PATCH
+      path_regexp r172 ^/api/custom\-fields/[^/]+$
+    }
+    handle @r172 {
+      log_append nexo_route "PATCH /api/custom-fields/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r173 {
+      method PATCH
+      path_regexp r173 ^/api/devices/[^/]+$
+    }
+    handle @r173 {
+      log_append nexo_route "PATCH /api/devices/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r174 {
+      method PATCH
+      path_regexp r174 ^/api/ftth/boxes/[^/]+$
+    }
+    handle @r174 {
+      log_append nexo_route "PATCH /api/ftth/boxes/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r175 {
+      method PATCH
+      path_regexp r175 ^/api/install\-kits/[^/]+$
+    }
+    handle @r175 {
+      log_append nexo_route "PATCH /api/install-kits/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r176 {
+      method PATCH
+      path_regexp r176 ^/api/ipam/pools/[^/]+$
+    }
+    handle @r176 {
+      log_append nexo_route "PATCH /api/ipam/pools/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r177 {
+      method PATCH
+      path_regexp r177 ^/api/leads/[^/]+$
+    }
+    handle @r177 {
+      log_append nexo_route "PATCH /api/leads/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r178 {
+      method PATCH
+      path_regexp r178 ^/api/notes/[^/]+$
+    }
+    handle @r178 {
+      log_append nexo_route "PATCH /api/notes/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r179 {
+      method PATCH
+      path_regexp r179 ^/api/notice\-channels/[^/]+$
+    }
+    handle @r179 {
+      log_append nexo_route "PATCH /api/notice-channels/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r180 {
+      method PATCH
+      path_regexp r180 ^/api/notice\-rules/[^/]+$
+    }
+    handle @r180 {
+      log_append nexo_route "PATCH /api/notice-rules/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r181 {
+      method PATCH
+      path_regexp r181 ^/api/plans/[^/]+$
+    }
+    handle @r181 {
+      log_append nexo_route "PATCH /api/plans/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r182 {
+      method PATCH
+      path_regexp r182 ^/api/pops/[^/]+$
+    }
+    handle @r182 {
+      log_append nexo_route "PATCH /api/pops/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r183 {
+      method PATCH
+      path_regexp r183 ^/api/radius/devices/[^/]+$
+    }
+    handle @r183 {
+      log_append nexo_route "PATCH /api/radius/devices/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r184 {
+      method PATCH
+      path_regexp r184 ^/api/resources/[^/]+/mac$
+    }
+    handle @r184 {
+      log_append nexo_route "PATCH /api/resources/:id/mac"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r185 {
+      method PATCH
+      path_regexp r185 ^/api/resources/[^/]+/secret$
+    }
+    handle @r185 {
+      log_append nexo_route "PATCH /api/resources/:id/secret"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r186 {
+      method PATCH
+      path_regexp r186 ^/api/sla\-policies/[^/]+$
+    }
+    handle @r186 {
+      log_append nexo_route "PATCH /api/sla-policies/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r187 {
+      method PATCH
+      path_regexp r187 ^/api/stock/items/[^/]+$
+    }
+    handle @r187 {
+      log_append nexo_route "PATCH /api/stock/items/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r188 {
+      method PATCH
+      path_regexp r188 ^/api/subscribers/[^/]+$
+    }
+    handle @r188 {
+      log_append nexo_route "PATCH /api/subscribers/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r189 {
+      method PATCH
+      path_regexp r189 ^/api/tenants/[^/]+$
+    }
+    handle @r189 {
+      log_append nexo_route "PATCH /api/tenants/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r190 {
+      method PATCH
+      path_regexp r190 ^/api/tickets/[^/]+$
+    }
+    handle @r190 {
+      log_append nexo_route "PATCH /api/tickets/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r191 {
+      method PATCH
+      path_regexp r191 ^/api/users/[^/]+$
+    }
+    handle @r191 {
+      log_append nexo_route "PATCH /api/users/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r192 {
+      method PATCH
+      path_regexp r192 ^/api/webhook\-endpoints/[^/]+$
+    }
+    handle @r192 {
+      log_append nexo_route "PATCH /api/webhook-endpoints/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r193 {
+      method PATCH
+      path_regexp r193 ^/api/work\-orders/[^/]+$
+    }
+    handle @r193 {
+      log_append nexo_route "PATCH /api/work-orders/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r204 {
+      method POST
+      path_regexp r204 ^/api/acceptances/[^/]+/cancel$
+    }
+    handle @r204 {
+      log_append nexo_route "POST /api/acceptances/:id/cancel"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r205 {
+      method POST
+      path_regexp r205 ^/api/addons$
+    }
+    handle @r205 {
+      log_append nexo_route "POST /api/addons"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r206 {
+      method POST
+      path_regexp r206 ^/api/agents$
+    }
+    handle @r206 {
+      log_append nexo_route "POST /api/agents"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r207 {
+      method POST
+      path_regexp r207 ^/api/api\-tokens$
+    }
+    handle @r207 {
+      log_append nexo_route "POST /api/api-tokens"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r208 {
+      method POST
+      path_regexp r208 ^/api/auth/login$
+    }
+    handle @r208 {
+      log_append nexo_route "POST /api/auth/login"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r209 {
+      method POST
+      path_regexp r209 ^/api/auth/logout$
+    }
+    handle @r209 {
+      log_append nexo_route "POST /api/auth/logout"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r210 {
+      method POST
+      path_regexp r210 ^/api/catalogs$
+    }
+    handle @r210 {
+      log_append nexo_route "POST /api/catalogs"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r211 {
+      method POST
+      path_regexp r211 ^/api/cgnat/plans$
+    }
+    handle @r211 {
+      log_append nexo_route "POST /api/cgnat/plans"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r212 {
+      method POST
+      path_regexp r212 ^/api/cgnat/plans/[^/]+/retire$
+    }
+    handle @r212 {
+      log_append nexo_route "POST /api/cgnat/plans/:id/retire"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r213 {
+      method POST
+      path_regexp r213 ^/api/cgnat/plans/check$
+    }
+    handle @r213 {
+      log_append nexo_route "POST /api/cgnat/plans/check"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r214 {
+      method POST
+      path_regexp r214 ^/api/commission\-rules$
+    }
+    handle @r214 {
+      log_append nexo_route "POST /api/commission-rules"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r215 {
+      method POST
+      path_regexp r215 ^/api/companies$
+    }
+    handle @r215 {
+      log_append nexo_route "POST /api/companies"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r216 {
+      method POST
+      path_regexp r216 ^/api/contracts$
+    }
+    handle @r216 {
+      log_append nexo_route "POST /api/contracts"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r217 {
+      method POST
+      path_regexp r217 ^/api/contracts/[^/]+/acceptances$
+    }
+    handle @r217 {
+      log_append nexo_route "POST /api/contracts/:id/acceptances"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r218 {
+      method POST
+      path_regexp r218 ^/api/contracts/[^/]+/addons$
+    }
+    handle @r218 {
+      log_append nexo_route "POST /api/contracts/:id/addons"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r219 {
+      method POST
+      path_regexp r219 ^/api/contracts/[^/]+/agreement$
+    }
+    handle @r219 {
+      log_append nexo_route "POST /api/contracts/:id/agreement"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r220 {
+      method POST
+      path_regexp r220 ^/api/contracts/[^/]+/amendments$
+    }
+    handle @r220 {
+      log_append nexo_route "POST /api/contracts/:id/amendments"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r221 {
+      method POST
+      path_regexp r221 ^/api/contracts/[^/]+/cpe/link$
+    }
+    handle @r221 {
+      log_append nexo_route "POST /api/contracts/:id/cpe/link"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r222 {
+      method POST
+      path_regexp r222 ^/api/contracts/[^/]+/cpe/reboot$
+    }
+    handle @r222 {
+      log_append nexo_route "POST /api/contracts/:id/cpe/reboot"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r223 {
+      method POST
+      path_regexp r223 ^/api/contracts/[^/]+/cpe/refresh$
+    }
+    handle @r223 {
+      log_append nexo_route "POST /api/contracts/:id/cpe/refresh"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r224 {
+      method POST
+      path_regexp r224 ^/api/contracts/[^/]+/cpe/wifi$
+    }
+    handle @r224 {
+      log_append nexo_route "POST /api/contracts/:id/cpe/wifi"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r225 {
+      method POST
+      path_regexp r225 ^/api/contracts/[^/]+/discounts$
+    }
+    handle @r225 {
+      log_append nexo_route "POST /api/contracts/:id/discounts"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r226 {
+      method POST
+      path_regexp r226 ^/api/contracts/[^/]+/onu$
+    }
+    handle @r226 {
+      log_append nexo_route "POST /api/contracts/:id/onu"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r227 {
+      method POST
+      path_regexp r227 ^/api/contracts/[^/]+/scheduled\-changes$
+    }
+    handle @r227 {
+      log_append nexo_route "POST /api/contracts/:id/scheduled-changes"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r228 {
+      method POST
+      path_regexp r228 ^/api/contracts/[^/]+/service$
+    }
+    handle @r228 {
+      log_append nexo_route "POST /api/contracts/:id/service"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r229 {
+      method POST
+      path_regexp r229 ^/api/contracts/[^/]+/trust\-release$
+    }
+    handle @r229 {
+      log_append nexo_route "POST /api/contracts/:id/trust-release"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r230 {
+      method POST
+      path_regexp r230 ^/api/custom\-fields$
+    }
+    handle @r230 {
+      log_append nexo_route "POST /api/custom-fields"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r231 {
+      method POST
+      path_regexp r231 ^/api/demo\-gateway/pay$
+    }
+    handle @r231 {
+      log_append nexo_route "POST /api/demo-gateway/pay"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r232 {
+      method POST
+      path_regexp r232 ^/api/devices$
+    }
+    handle @r232 {
+      log_append nexo_route "POST /api/devices"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r233 {
+      method POST
+      path_regexp r233 ^/api/devices/[^/]+/convert\-to\-integrated$
+    }
+    handle @r233 {
+      log_append nexo_route "POST /api/devices/:id/convert-to-integrated"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r234 {
+      method POST
+      path_regexp r234 ^/api/devices/[^/]+/reapply$
+    }
+    handle @r234 {
+      log_append nexo_route "POST /api/devices/:id/reapply"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r235 {
+      method POST
+      path_regexp r235 ^/api/finance/generate$
+    }
+    handle @r235 {
+      log_append nexo_route "POST /api/finance/generate"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r236 {
+      method POST
+      path_regexp r236 ^/api/finance/reconcile$
+    }
+    handle @r236 {
+      log_append nexo_route "POST /api/finance/reconcile"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r237 {
+      method POST
+      path_regexp r237 ^/api/finance/run\-auto\-suspend$
+    }
+    handle @r237 {
+      log_append nexo_route "POST /api/finance/run-auto-suspend"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r238 {
+      method POST
+      path_regexp r238 ^/api/ftth/boxes$
+    }
+    handle @r238 {
+      log_append nexo_route "POST /api/ftth/boxes"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r239 {
+      method POST
+      path_regexp r239 ^/api/ftth/boxes/[^/]+/drops$
+    }
+    handle @r239 {
+      log_append nexo_route "POST /api/ftth/boxes/:id/drops"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r240 {
+      method POST
+      path_regexp r240 ^/api/import/apply$
+    }
+    handle @r240 {
+      log_append nexo_route "POST /api/import/apply"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r241 {
+      method POST
+      path_regexp r241 ^/api/import/batches/[^/]+/provision$
+    }
+    handle @r241 {
+      log_append nexo_route "POST /api/import/batches/:id/provision"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r242 {
+      method POST
+      path_regexp r242 ^/api/import/preview$
+    }
+    handle @r242 {
+      log_append nexo_route "POST /api/import/preview"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r243 {
+      method POST
+      path_regexp r243 ^/api/install\-kits$
+    }
+    handle @r243 {
+      log_append nexo_route "POST /api/install-kits"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r244 {
+      method POST
+      path_regexp r244 ^/api/invoices$
+    }
+    handle @r244 {
+      log_append nexo_route "POST /api/invoices"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r245 {
+      method POST
+      path_regexp r245 ^/api/invoices/[^/]+/cancel$
+    }
+    handle @r245 {
+      log_append nexo_route "POST /api/invoices/:id/cancel"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r246 {
+      method POST
+      path_regexp r246 ^/api/invoices/[^/]+/manual\-payment$
+    }
+    handle @r246 {
+      log_append nexo_route "POST /api/invoices/:id/manual-payment"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r247 {
+      method POST
+      path_regexp r247 ^/api/invoices/[^/]+/payments/[^/]+/reverse$
+    }
+    handle @r247 {
+      log_append nexo_route "POST /api/invoices/:id/payments/:paymentId/reverse"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r248 {
+      method POST
+      path_regexp r248 ^/api/invoices/[^/]+/resolve$
+    }
+    handle @r248 {
+      log_append nexo_route "POST /api/invoices/:id/resolve"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r249 {
+      method POST
+      path_regexp r249 ^/api/ipam/pools$
+    }
+    handle @r249 {
+      log_append nexo_route "POST /api/ipam/pools"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r250 {
+      method POST
+      path_regexp r250 ^/api/ipam/pools/[^/]+/allocations$
+    }
+    handle @r250 {
+      log_append nexo_route "POST /api/ipam/pools/:id/allocations"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r251 {
+      method POST
+      path_regexp r251 ^/api/ipam/pools/[^/]+/delegations$
+    }
+    handle @r251 {
+      log_append nexo_route "POST /api/ipam/pools/:id/delegations"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r252 {
+      method POST
+      path_regexp r252 ^/api/leads$
+    }
+    handle @r252 {
+      log_append nexo_route "POST /api/leads"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r253 {
+      method POST
+      path_regexp r253 ^/api/leads/[^/]+/convert$
+    }
+    handle @r253 {
+      log_append nexo_route "POST /api/leads/:id/convert"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r254 {
+      method POST
+      path_regexp r254 ^/api/leads/[^/]+/notes$
+    }
+    handle @r254 {
+      log_append nexo_route "POST /api/leads/:id/notes"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r255 {
+      method POST
+      path_regexp r255 ^/api/leads/[^/]+/stage$
+    }
+    handle @r255 {
+      log_append nexo_route "POST /api/leads/:id/stage"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r256 {
+      method POST
+      path_regexp r256 ^/api/legal/ip\-lookup$
+    }
+    handle @r256 {
+      log_append nexo_route "POST /api/legal/ip-lookup"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r257 {
+      method POST
+      path_regexp r257 ^/api/maintenance\-notices$
+    }
+    handle @r257 {
+      log_append nexo_route "POST /api/maintenance-notices"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r258 {
+      method POST
+      path_regexp r258 ^/api/maintenance\-notices/[^/]+/cancel$
+    }
+    handle @r258 {
+      log_append nexo_route "POST /api/maintenance-notices/:id/cancel"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r259 {
+      method POST
+      path_regexp r259 ^/api/maintenance\-notices/[^/]+/notify$
+    }
+    handle @r259 {
+      log_append nexo_route "POST /api/maintenance-notices/:id/notify"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r260 {
+      method POST
+      path_regexp r260 ^/api/me/mfa/disable$
+    }
+    handle @r260 {
+      log_append nexo_route "POST /api/me/mfa/disable"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r261 {
+      method POST
+      path_regexp r261 ^/api/me/mfa/enable$
+    }
+    handle @r261 {
+      log_append nexo_route "POST /api/me/mfa/enable"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r262 {
+      method POST
+      path_regexp r262 ^/api/me/mfa/setup$
+    }
+    handle @r262 {
+      log_append nexo_route "POST /api/me/mfa/setup"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r263 {
+      method POST
+      path_regexp r263 ^/api/me/password$
+    }
+    handle @r263 {
+      log_append nexo_route "POST /api/me/password"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r264 {
+      method POST
+      path_regexp r264 ^/api/network/disconnect$
+    }
+    handle @r264 {
+      log_append nexo_route "POST /api/network/disconnect"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r265 {
+      method POST
+      path_regexp r265 ^/api/notice\-channels$
+    }
+    handle @r265 {
+      log_append nexo_route "POST /api/notice-channels"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r266 {
+      method POST
+      path_regexp r266 ^/api/notice\-channels/[^/]+/test$
+    }
+    handle @r266 {
+      log_append nexo_route "POST /api/notice-channels/:id/test"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r267 {
+      method POST
+      path_regexp r267 ^/api/notice\-rules$
+    }
+    handle @r267 {
+      log_append nexo_route "POST /api/notice-rules"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r268 {
+      method POST
+      path_regexp r268 ^/api/notice\-rules/run$
+    }
+    handle @r268 {
+      log_append nexo_route "POST /api/notice-rules/run"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r269 {
+      method POST
+      path_regexp r269 ^/api/notice\-templates$
+    }
+    handle @r269 {
+      log_append nexo_route "POST /api/notice-templates"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r270 {
+      method POST
+      path_regexp r270 ^/api/notifications/deliver$
+    }
+    handle @r270 {
+      log_append nexo_route "POST /api/notifications/deliver"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r271 {
+      method POST
+      path_regexp r271 ^/api/notifications/test$
+    }
+    handle @r271 {
+      log_append nexo_route "POST /api/notifications/test"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r272 {
+      method POST
+      path_regexp r272 ^/api/onus/[^/]+/[^/]+$
+    }
+    handle @r272 {
+      log_append nexo_route "POST /api/onus/:id/:action"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r273 {
+      method POST
+      path_regexp r273 ^/api/plans$
+    }
+    handle @r273 {
+      log_append nexo_route "POST /api/plans"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r274 {
+      method POST
+      path_regexp r274 ^/api/plans/[^/]+/reapply$
+    }
+    handle @r274 {
+      log_append nexo_route "POST /api/plans/:id/reapply"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r275 {
+      method POST
+      path_regexp r275 ^/api/plans/[^/]+/versions$
+    }
+    handle @r275 {
+      log_append nexo_route "POST /api/plans/:id/versions"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r276 {
+      method POST
+      path_regexp r276 ^/api/pops$
+    }
+    handle @r276 {
+      log_append nexo_route "POST /api/pops"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r277 {
+      method POST
+      path_regexp r277 ^/api/portal/acceptances/[^/]+/accept$
+    }
+    handle @r277 {
+      log_append nexo_route "POST /api/portal/acceptances/:id/accept"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r278 {
+      method POST
+      path_regexp r278 ^/api/portal/cpe/[^/]+/wifi$
+    }
+    handle @r278 {
+      log_append nexo_route "POST /api/portal/cpe/:contractId/wifi"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r279 {
+      method POST
+      path_regexp r279 ^/api/portal/surveys/[^/]+$
+    }
+    handle @r279 {
+      log_append nexo_route "POST /api/portal/surveys/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r280 {
+      method POST
+      path_regexp r280 ^/api/portal/tickets$
+    }
+    handle @r280 {
+      log_append nexo_route "POST /api/portal/tickets"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r281 {
+      method POST
+      path_regexp r281 ^/api/portal/tickets/[^/]+/messages$
+    }
+    handle @r281 {
+      log_append nexo_route "POST /api/portal/tickets/:id/messages"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r282 {
+      method POST
+      path_regexp r282 ^/api/portal/trust\-release$
+    }
+    handle @r282 {
+      log_append nexo_route "POST /api/portal/trust-release"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r283 {
+      method POST
+      path_regexp r283 ^/api/radius/devices$
+    }
+    handle @r283 {
+      log_append nexo_route "POST /api/radius/devices"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r284 {
+      method POST
+      path_regexp r284 ^/api/radius/devices/[^/]+/secret$
+    }
+    handle @r284 {
+      log_append nexo_route "POST /api/radius/devices/:id/secret"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r285 {
+      method POST
+      path_regexp r285 ^/api/radius/devices/[^/]+/tunnel$
+    }
+    handle @r285 {
+      log_append nexo_route "POST /api/radius/devices/:id/tunnel"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r286 {
+      method POST
+      path_regexp r286 ^/api/resources/[^/]+/[^/]+$
+    }
+    handle @r286 {
+      log_append nexo_route "POST /api/resources/:id/:action"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r287 {
+      method POST
+      path_regexp r287 ^/api/sla\-policies$
+    }
+    handle @r287 {
+      log_append nexo_route "POST /api/sla-policies"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r288 {
+      method POST
+      path_regexp r288 ^/api/stock/items$
+    }
+    handle @r288 {
+      log_append nexo_route "POST /api/stock/items"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r289 {
+      method POST
+      path_regexp r289 ^/api/stock/items/[^/]+/movements$
+    }
+    handle @r289 {
+      log_append nexo_route "POST /api/stock/items/:id/movements"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r290 {
+      method POST
+      path_regexp r290 ^/api/stock/items/[^/]+/units$
+    }
+    handle @r290 {
+      log_append nexo_route "POST /api/stock/items/:id/units"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r291 {
+      method POST
+      path_regexp r291 ^/api/stock/units/[^/]+/status$
+    }
+    handle @r291 {
+      log_append nexo_route "POST /api/stock/units/:id/status"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r292 {
+      method POST
+      path_regexp r292 ^/api/stock/units/[^/]+/transfer$
+    }
+    handle @r292 {
+      log_append nexo_route "POST /api/stock/units/:id/transfer"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r293 {
+      method POST
+      path_regexp r293 ^/api/subscribers$
+    }
+    handle @r293 {
+      log_append nexo_route "POST /api/subscribers"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r294 {
+      method POST
+      path_regexp r294 ^/api/subscribers/[^/]+/anonymize$
+    }
+    handle @r294 {
+      log_append nexo_route "POST /api/subscribers/:id/anonymize"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r295 {
+      method POST
+      path_regexp r295 ^/api/subscribers/[^/]+/documents$
+    }
+    handle @r295 {
+      log_append nexo_route "POST /api/subscribers/:id/documents"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r296 {
+      method POST
+      path_regexp r296 ^/api/subscribers/[^/]+/notes$
+    }
+    handle @r296 {
+      log_append nexo_route "POST /api/subscribers/:id/notes"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r297 {
+      method POST
+      path_regexp r297 ^/api/subscribers/[^/]+/portal\-access$
+    }
+    handle @r297 {
+      log_append nexo_route "POST /api/subscribers/:id/portal-access"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r298 {
+      method POST
+      path_regexp r298 ^/api/support/enter$
+    }
+    handle @r298 {
+      log_append nexo_route "POST /api/support/enter"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r299 {
+      method POST
+      path_regexp r299 ^/api/support/exit$
+    }
+    handle @r299 {
+      log_append nexo_route "POST /api/support/exit"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r300 {
+      method POST
+      path_regexp r300 ^/api/tags$
+    }
+    handle @r300 {
+      log_append nexo_route "POST /api/tags"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r301 {
+      method POST
+      path_regexp r301 ^/api/tenants$
+    }
+    handle @r301 {
+      log_append nexo_route "POST /api/tenants"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r302 {
+      method POST
+      path_regexp r302 ^/api/tickets$
+    }
+    handle @r302 {
+      log_append nexo_route "POST /api/tickets"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r303 {
+      method POST
+      path_regexp r303 ^/api/tickets/[^/]+/messages$
+    }
+    handle @r303 {
+      log_append nexo_route "POST /api/tickets/:id/messages"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r304 {
+      method POST
+      path_regexp r304 ^/api/tickets/[^/]+/status$
+    }
+    handle @r304 {
+      log_append nexo_route "POST /api/tickets/:id/status"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r305 {
+      method POST
+      path_regexp r305 ^/api/users$
+    }
+    handle @r305 {
+      log_append nexo_route "POST /api/users"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r306 {
+      method POST
+      path_regexp r306 ^/api/webhook\-deliveries/[^/]+/retry$
+    }
+    handle @r306 {
+      log_append nexo_route "POST /api/webhook-deliveries/:id/retry"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r307 {
+      method POST
+      path_regexp r307 ^/api/webhook\-endpoints$
+    }
+    handle @r307 {
+      log_append nexo_route "POST /api/webhook-endpoints"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r308 {
+      method POST
+      path_regexp r308 ^/api/webhook\-endpoints/[^/]+/rotate\-secret$
+    }
+    handle @r308 {
+      log_append nexo_route "POST /api/webhook-endpoints/:id/rotate-secret"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r309 {
+      method POST
+      path_regexp r309 ^/api/webhook\-endpoints/[^/]+/test$
+    }
+    handle @r309 {
+      log_append nexo_route "POST /api/webhook-endpoints/:id/test"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r310 {
+      method POST
+      path_regexp r310 ^/api/webhooks/gateway/[^/]+$
+    }
+    handle @r310 {
+      log_append nexo_route "POST /api/webhooks/gateway/:gateway"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r311 {
+      method POST
+      path_regexp r311 ^/api/work\-orders$
+    }
+    handle @r311 {
+      log_append nexo_route "POST /api/work-orders"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r312 {
+      method POST
+      path_regexp r312 ^/api/work\-orders/[^/]+/checklist$
+    }
+    handle @r312 {
+      log_append nexo_route "POST /api/work-orders/:id/checklist"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r313 {
+      method POST
+      path_regexp r313 ^/api/work\-orders/[^/]+/checklist/[^/]+$
+    }
+    handle @r313 {
+      log_append nexo_route "POST /api/work-orders/:id/checklist/:itemId"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r314 {
+      method POST
+      path_regexp r314 ^/api/work\-orders/[^/]+/helpers$
+    }
+    handle @r314 {
+      log_append nexo_route "POST /api/work-orders/:id/helpers"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r315 {
+      method POST
+      path_regexp r315 ^/api/work\-orders/[^/]+/kit$
+    }
+    handle @r315 {
+      log_append nexo_route "POST /api/work-orders/:id/kit"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r316 {
+      method POST
+      path_regexp r316 ^/api/work\-orders/[^/]+/materials$
+    }
+    handle @r316 {
+      log_append nexo_route "POST /api/work-orders/:id/materials"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r317 {
+      method POST
+      path_regexp r317 ^/api/work\-orders/[^/]+/notes$
+    }
+    handle @r317 {
+      log_append nexo_route "POST /api/work-orders/:id/notes"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r318 {
+      method POST
+      path_regexp r318 ^/api/work\-orders/[^/]+/status$
+    }
+    handle @r318 {
+      log_append nexo_route "POST /api/work-orders/:id/status"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r319 {
+      method POST
+      path_regexp r319 ^/api/work\-orders/[^/]+/units$
+    }
+    handle @r319 {
+      log_append nexo_route "POST /api/work-orders/:id/units"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r320 {
+      method POST
+      path_regexp r320 ^/public/v1/tickets$
+    }
+    handle @r320 {
+      log_append nexo_route "POST /public/v1/tickets"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r321 {
+      method POST
+      path_regexp r321 ^/public/v1/work\-orders$
+    }
+    handle @r321 {
+      log_append nexo_route "POST /public/v1/work-orders"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r322 {
+      method PUT
+      path_regexp r322 ^/api/anatel/municipalities$
+    }
+    handle @r322 {
+      log_append nexo_route "PUT /api/anatel/municipalities"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r323 {
+      method PUT
+      path_regexp r323 ^/api/contracts/[^/]+/company$
+    }
+    handle @r323 {
+      log_append nexo_route "PUT /api/contracts/:id/company"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r324 {
+      method PUT
+      path_regexp r324 ^/api/contracts/[^/]+/credit\-restriction$
+    }
+    handle @r324 {
+      log_append nexo_route "PUT /api/contracts/:id/credit-restriction"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r325 {
+      method PUT
+      path_regexp r325 ^/api/contracts/[^/]+/custom$
+    }
+    handle @r325 {
+      log_append nexo_route "PUT /api/contracts/:id/custom"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r326 {
+      method PUT
+      path_regexp r326 ^/api/contracts/[^/]+/install\-address$
+    }
+    handle @r326 {
+      log_append nexo_route "PUT /api/contracts/:id/install-address"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r327 {
+      method PUT
+      path_regexp r327 ^/api/contracts/[^/]+/location$
+    }
+    handle @r327 {
+      log_append nexo_route "PUT /api/contracts/:id/location"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r328 {
+      method PUT
+      path_regexp r328 ^/api/contracts/[^/]+/loyalty$
+    }
+    handle @r328 {
+      log_append nexo_route "PUT /api/contracts/:id/loyalty"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r329 {
+      method PUT
+      path_regexp r329 ^/api/contracts/[^/]+/pop$
+    }
+    handle @r329 {
+      log_append nexo_route "PUT /api/contracts/:id/pop"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r330 {
+      method PUT
+      path_regexp r330 ^/api/contracts/[^/]+/referral$
+    }
+    handle @r330 {
+      log_append nexo_route "PUT /api/contracts/:id/referral"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r331 {
+      method PUT
+      path_regexp r331 ^/api/contracts/[^/]+/service\-area$
+    }
+    handle @r331 {
+      log_append nexo_route "PUT /api/contracts/:id/service-area"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r332 {
+      method PUT
+      path_regexp r332 ^/api/contracts/[^/]+/tags$
+    }
+    handle @r332 {
+      log_append nexo_route "PUT /api/contracts/:id/tags"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r333 {
+      method PUT
+      path_regexp r333 ^/api/finance/settings$
+    }
+    handle @r333 {
+      log_append nexo_route "PUT /api/finance/settings"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r334 {
+      method PUT
+      path_regexp r334 ^/api/noc/settings$
+    }
+    handle @r334 {
+      log_append nexo_route "PUT /api/noc/settings"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r335 {
+      method PUT
+      path_regexp r335 ^/api/notice\-page$
+    }
+    handle @r335 {
+      log_append nexo_route "PUT /api/notice-page"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r336 {
+      method PUT
+      path_regexp r336 ^/api/notifications/settings$
+    }
+    handle @r336 {
+      log_append nexo_route "PUT /api/notifications/settings"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r337 {
+      method PUT
+      path_regexp r337 ^/api/plans/[^/]+/dunning$
+    }
+    handle @r337 {
+      log_append nexo_route "PUT /api/plans/:id/dunning"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r338 {
+      method PUT
+      path_regexp r338 ^/api/plans/[^/]+/loyalty$
+    }
+    handle @r338 {
+      log_append nexo_route "PUT /api/plans/:id/loyalty"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r339 {
+      method PUT
+      path_regexp r339 ^/api/plans/[^/]+/network$
+    }
+    handle @r339 {
+      log_append nexo_route "PUT /api/plans/:id/network"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r340 {
+      method PUT
+      path_regexp r340 ^/api/plans/[^/]+/technology$
+    }
+    handle @r340 {
+      log_append nexo_route "PUT /api/plans/:id/technology"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r341 {
+      method PUT
+      path_regexp r341 ^/api/pops/[^/]+/location$
+    }
+    handle @r341 {
+      log_append nexo_route "PUT /api/pops/:id/location"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r342 {
+      method PUT
+      path_regexp r342 ^/api/settings/retention$
+    }
+    handle @r342 {
+      log_append nexo_route "PUT /api/settings/retention"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r343 {
+      method PUT
+      path_regexp r343 ^/api/subscribers/[^/]+/contacts$
+    }
+    handle @r343 {
+      log_append nexo_route "PUT /api/subscribers/:id/contacts"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r344 {
+      method PUT
+      path_regexp r344 ^/api/subscribers/[^/]+/custom$
+    }
+    handle @r344 {
+      log_append nexo_route "PUT /api/subscribers/:id/custom"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @r345 {
+      method PUT
+      path_regexp r345 ^/api/users/[^/]+/pops$
+    }
+    handle @r345 {
+      log_append nexo_route "PUT /api/users/:id/pops"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @backend path /api /api/* /public /public/* /aviso /aviso/*
+    handle @backend {
+      log_append nexo_route unmatched-api
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080}
+    }
+    handle {
+      log_append nexo_route static
+      log_append nexo_upstream caddy
+      header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy same-origin
+        Permissions-Policy "camera=(), microphone=(), geolocation=(self), payment=()"
+      }
+      header {
+        match header Content-Type text/html*
+        Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tile.openstreetmap.org; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+      }
+      @https protocol https
+      header @https Strict-Transport-Security max-age=31536000
+      root * {$NEXO_WEB_ROOT:/srv}
+      try_files {path} /index.html
+      file_server
+    }
+  }
+}

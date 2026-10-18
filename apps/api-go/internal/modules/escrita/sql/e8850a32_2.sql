@@ -1,0 +1,3 @@
+select o.id, o.action, o.status, o.note, o.updated_at, coalesce(r.pppoe_username, 'ONU ' || n.serial) as target, coalesce(r.contract_id, n.contract_id) as contract_id
+         from operations o left join service_resources r on r.id = o.resource_id left join onus n on n.id = o.onu_id
+         where o.status = 'UNCERTAIN' or (o.status in ('FAILED','EXPIRED') and o.finished_at > now() - interval '24 hours') order by (o.status = 'UNCERTAIN') desc, o.updated_at desc limit 30

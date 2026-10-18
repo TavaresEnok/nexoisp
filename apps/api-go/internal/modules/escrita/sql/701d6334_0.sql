@@ -1,0 +1,1 @@
+insert into stock_items (tenant_id, name, sku, unit, min_qty, serialized) values ($1,$2,$3,$4,$5,$6) returning *

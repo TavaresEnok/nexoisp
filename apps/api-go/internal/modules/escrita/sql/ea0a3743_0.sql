@@ -1,0 +1,1 @@
+update plans set rate_limit = $2, address_pool = $3 where id = $1 returning id, name, rate_limit, address_pool

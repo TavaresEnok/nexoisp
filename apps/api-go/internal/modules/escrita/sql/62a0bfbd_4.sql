@@ -1,0 +1,1 @@
+select min(started_at) as t from service_sessions

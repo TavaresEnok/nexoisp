@@ -1,0 +1,1 @@
+select count(*)::int as low from stock_items i where i.active and coalesce((select sum(m.qty) from stock_movements m where m.item_id = i.id), 0) < i.min_qty

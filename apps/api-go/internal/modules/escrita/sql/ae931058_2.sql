@@ -1,0 +1,1 @@
+select count(*)::int as n from documents where subscriber_id = $1 and deleted_at is null

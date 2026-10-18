@@ -1,0 +1,1 @@
+insert into ip_allocations (tenant_id, pool_id, address, contract_id, description, created_by) values ($1,$2,host($3::inet)::inet,$4,$5,$6) returning id, host(address) as address

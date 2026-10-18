@@ -1,0 +1,1 @@
+select coalesce(max(port),0)::int as p from ftth_drops where box_id = $1

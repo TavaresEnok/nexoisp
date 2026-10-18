@@ -1,0 +1,1 @@
+select 1 from scheduled_changes where contract_id = $1 and kind = $2 and status = 'pending' and effective_date = $3

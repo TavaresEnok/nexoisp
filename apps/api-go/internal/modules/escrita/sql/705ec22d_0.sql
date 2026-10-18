@@ -1,0 +1,1 @@
+insert into agents (tenant_id, name, token_hash) values ($1,$2,$3) returning id, name

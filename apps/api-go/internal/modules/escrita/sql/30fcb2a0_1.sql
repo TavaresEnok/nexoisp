@@ -1,0 +1,1 @@
+delete from sla_policies where id = $1

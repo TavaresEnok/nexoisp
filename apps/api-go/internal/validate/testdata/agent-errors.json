@@ -1,0 +1,37 @@
+[
+  {
+    "schema": "hello",
+    "input": {
+      "session_id": "x"
+    },
+    "error": "[\n  {\n    \"code\": \"too_small\",\n    \"minimum\": 8,\n    \"type\": \"string\",\n    \"inclusive\": true,\n    \"exact\": false,\n    \"message\": \"String must contain at least 8 character(s)\",\n    \"path\": [\n      \"session_id\"\n    ]\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"version\"\n    ],\n    \"message\": \"Required\"\n  }\n]"
+  },
+  {
+    "schema": "progress",
+    "input": {
+      "status": "<bad>",
+      "steps": []
+    },
+    "error": "[\n  {\n    \"received\": \"<bad>\",\n    \"code\": \"invalid_enum_value\",\n    \"options\": [\n      \"EXECUTING\",\n      \"VERIFYING\"\n    ],\n    \"path\": [\n      \"status\"\n    ],\n    \"message\": \"Invalid enum value. Expected 'EXECUTING' | 'VERIFYING', received '<bad>'\"\n  }\n]"
+  },
+  {
+    "schema": "observations",
+    "input": {
+      "items": [
+        {
+          "resource_id": "bad",
+          "at": "today"
+        }
+      ]
+    },
+    "error": "[\n  {\n    \"validation\": \"uuid\",\n    \"code\": \"invalid_string\",\n    \"message\": \"Invalid uuid\",\n    \"path\": [\n      \"items\",\n      0,\n      \"resource_id\"\n    ]\n  },\n  {\n    \"code\": \"invalid_string\",\n    \"validation\": \"datetime\",\n    \"message\": \"Invalid datetime\",\n    \"path\": [\n      \"items\",\n      0,\n      \"at\"\n    ]\n  }\n]"
+  },
+  {
+    "schema": "progress",
+    "input": {
+      "status": false,
+      "steps": "bad"
+    },
+    "error": "[\n  {\n    \"expected\": \"'EXECUTING' | 'VERIFYING'\",\n    \"received\": \"boolean\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"status\"\n    ],\n    \"message\": \"Expected 'EXECUTING' | 'VERIFYING', received boolean\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"array\",\n    \"received\": \"string\",\n    \"path\": [\n      \"steps\"\n    ],\n    \"message\": \"Expected array, received string\"\n  }\n]"
+  }
+]

@@ -1,0 +1,1 @@
+select concat_ws(', ', install_street, install_number, install_district, install_city) as a, install_street, install_city from contracts where id = $1

@@ -1,0 +1,3 @@
+select k.id, k.status, k.start_date, k.end_date, k.due_day, k.install_street, k.install_number, k.install_district, k.install_city, k.install_state,
+                                   k.install_zip, k.latitude::float8 as latitude, k.longitude::float8 as longitude, p.name as plan, pv.price_cents
+                            from contracts k join plan_versions pv on pv.id = k.plan_version_id join plans p on p.id = pv.plan_id where k.subscriber_id = $1 order by k.created_at

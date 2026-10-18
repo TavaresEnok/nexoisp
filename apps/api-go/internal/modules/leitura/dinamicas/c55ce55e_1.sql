@@ -1,0 +1,1 @@
+select host(p.tunnel_ip) as ip, (select public_key from vpn_settings) as srv from vpn_peers p where p.device_id = $1

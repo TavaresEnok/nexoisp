@@ -1,0 +1,2 @@
+insert into tenant_settings (tenant_id, notice_page, updated_by) values ($1,$2,$3)
+         on conflict (tenant_id) do update set notice_page = excluded.notice_page, updated_at = now(), updated_by = excluded.updated_by

@@ -1,0 +1,1 @@
+select count(*) as n from tickets where subscriber_id = $1 and status <> 'closed'

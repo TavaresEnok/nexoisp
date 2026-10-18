@@ -1,0 +1,1 @@
+insert into payments (tenant_id, invoice_id, amount_cents, paid_at, method, source, note) values ($1,$2,$3,$4,$5,'manual',$6)

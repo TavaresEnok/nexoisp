@@ -1,0 +1,1 @@
+insert into contract_history (tenant_id, contract_id, actor_id, event, detail) values ($1,$2,$3,$4,$5)

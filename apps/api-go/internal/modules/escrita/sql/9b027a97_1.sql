@@ -1,0 +1,1 @@
+select name, price_cents, active from addon_products where id = $1

@@ -1,0 +1,1 @@
+select status, response from api_idempotency where token_id = $1 and key = $2

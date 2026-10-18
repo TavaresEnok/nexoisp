@@ -1,0 +1,1 @@
+select status from invoices where id = $1

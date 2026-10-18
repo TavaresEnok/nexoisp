@@ -1,0 +1,1 @@
+insert into companies (tenant_id, name, document, is_default) values ($1,$2,$3,$4) returning id, name, document, is_default, active

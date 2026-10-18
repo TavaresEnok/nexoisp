@@ -1,0 +1,2 @@
+update notice_log set status = 'uncertain', message = null, error = 'envio interrompido: não se sabe se a mensagem chegou; confira antes de reenviar'
+       where tenant_id = $1 and status = 'sending' and claimed_at < now() - make_interval(mins => $2::int)

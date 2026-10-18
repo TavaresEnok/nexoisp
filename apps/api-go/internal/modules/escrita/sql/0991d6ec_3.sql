@@ -1,0 +1,1 @@
+insert into subscriber_notes (tenant_id, subscriber_id, contract_id, body, created_at, external_source, external_id) values ($1,$2,$3,$4,$5,$6,$7) returning id

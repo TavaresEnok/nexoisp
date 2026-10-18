@@ -1,0 +1,1 @@
+insert into pops (tenant_id, name, city, state) values ($1,$2,$3,$4) on conflict (tenant_id, name) do nothing returning id, name

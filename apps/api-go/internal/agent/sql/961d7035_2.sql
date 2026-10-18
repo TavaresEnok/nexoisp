@@ -1,0 +1,1 @@
+insert into audit_events (tenant_id, actor_type, actor_id, action, entity_type, entity_id, result, detail) values ($1,'agent',$2,'agent.certificate_rejected','agent',$2,'denied',$3)

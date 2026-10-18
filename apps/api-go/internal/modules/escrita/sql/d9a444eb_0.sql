@@ -1,0 +1,1 @@
+delete from ip_allocations where id = $1 returning host(address) as address, contract_id, family(address) as family

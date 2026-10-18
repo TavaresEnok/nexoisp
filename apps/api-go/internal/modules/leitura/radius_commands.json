@@ -1,0 +1,341 @@
+{
+  "source_sha256": "ac8374017e52b959c4683d82ae4d6944cfd7ec95fe982dacac58bca5debf22ce",
+  "templates": {
+    "wireguard": {
+      "mikrotik": [
+        {
+          "condition": "tn",
+          "lines": [
+            "# 1. túnel até o NexoISP (RouterOS 7 ou mais novo)",
+            "/interface wireguard add name=nexoisp private-key=\"{{.tn.privateKey}}\" comment=nexoisp",
+            "/interface wireguard peers add interface=nexoisp public-key=\"{{.tn.serverPublicKey}}\" endpoint-address={{.tn.endpointHost}} endpoint-port={{.tn.endpointPort}} allowed-address={{.tn.serverIp}}/32 persistent-keepalive=25s comment=nexoisp",
+            "/ip address add address={{.tn.tunnelIp}}/32 network={{.tn.serverIp}} interface=nexoisp comment=nexoisp",
+            "/ip firewall filter add chain=input in-interface=nexoisp protocol=udp dst-port={{.o.coaPort}} action=accept place-before=0 comment=\"nexoisp: desconexao de sessao\"",
+            "# 2. autenticação pelo túnel"
+          ]
+        },
+        {
+          "lines": [
+            "/radius add service=ppp,hotspot,dhcp address={{.o.host}} secret=\"{{.o.secret}}\" authentication-port={{.o.authPort}} accounting-port={{.o.acctPort}} timeout=3s{{if .tn}} src-address={{.tn.tunnelIp}}{{else}}{{end}} comment=nexoisp"
+          ]
+        },
+        {
+          "condition": "o.secondary",
+          "lines": [
+            "# servidor secundário: o equipamento tenta este se o primeiro não responder",
+            "/radius add service=ppp,hotspot,dhcp address={{.o.secondary.host}} secret=\"{{.o.secret}}\" authentication-port={{.o.secondary.authPort}} accounting-port={{.o.secondary.acctPort}} timeout=3s{{if .tn}} src-address={{.tn.tunnelIp}}{{else}}{{end}} comment=nexoisp-2"
+          ]
+        },
+        {
+          "lines": [
+            "/radius incoming set accept=yes port={{.o.coaPort}}"
+          ]
+        },
+        {
+          "lines": [
+            "/ppp aaa set use-radius=yes accounting=yes interim-update=5m"
+          ]
+        },
+        {
+          "lines": [
+            "# opcional, se houver assinantes por IPoE (DHCP) ou hotspot neste equipamento:"
+          ]
+        },
+        {
+          "lines": [
+            "# /ip dhcp-server set [find] use-radius=yes"
+          ]
+        },
+        {
+          "lines": [
+            "# /ip hotspot profile set [find] use-radius=yes radius-accounting=yes radius-interim-update=5m"
+          ]
+        }
+      ],
+      "huawei": [
+        {
+          "lines": [
+            "radius-server group nexoisp"
+          ]
+        },
+        {
+          "lines": [
+            " radius-server authentication {{.o.host}} {{.o.authPort}} weight 0"
+          ]
+        },
+        {
+          "lines": [
+            " radius-server accounting {{.o.host}} {{.o.acctPort}} weight 0"
+          ]
+        },
+        {
+          "lines": [
+            " radius-server shared-key cipher {{.o.secret}}"
+          ]
+        },
+        {
+          "lines": [
+            "radius-server authorization {{.o.host}} shared-key cipher {{.o.secret}}"
+          ]
+        },
+        {
+          "lines": [
+            "aaa"
+          ]
+        },
+        {
+          "lines": [
+            " authentication-scheme nexoisp"
+          ]
+        },
+        {
+          "lines": [
+            "  authentication-mode radius"
+          ]
+        },
+        {
+          "lines": [
+            " accounting-scheme nexoisp"
+          ]
+        },
+        {
+          "lines": [
+            "  accounting-mode radius"
+          ]
+        },
+        {
+          "lines": [
+            "  accounting interim interval 5"
+          ]
+        },
+        {
+          "lines": [
+            " domain nexoisp"
+          ]
+        },
+        {
+          "lines": [
+            "  authentication-scheme nexoisp"
+          ]
+        },
+        {
+          "lines": [
+            "  accounting-scheme nexoisp"
+          ]
+        },
+        {
+          "lines": [
+            "  radius-server group nexoisp"
+          ]
+        }
+      ],
+      "cisco": [
+        {
+          "lines": [
+            "aaa new-model"
+          ]
+        },
+        {
+          "lines": [
+            "radius server nexoisp"
+          ]
+        },
+        {
+          "lines": [
+            " address ipv4 {{.o.host}} auth-port {{.o.authPort}} acct-port {{.o.acctPort}}"
+          ]
+        },
+        {
+          "lines": [
+            " key {{.o.secret}}"
+          ]
+        },
+        {
+          "lines": [
+            "aaa group server radius NEXOISP"
+          ]
+        },
+        {
+          "lines": [
+            " server name nexoisp"
+          ]
+        },
+        {
+          "lines": [
+            "aaa authentication ppp default group NEXOISP"
+          ]
+        },
+        {
+          "lines": [
+            "aaa authorization network default group NEXOISP"
+          ]
+        },
+        {
+          "lines": [
+            "aaa accounting network default start-stop group NEXOISP"
+          ]
+        },
+        {
+          "lines": [
+            "aaa accounting update periodic 5"
+          ]
+        },
+        {
+          "lines": [
+            "aaa server radius dynamic-author"
+          ]
+        },
+        {
+          "lines": [
+            " client {{.o.host}} server-key {{.o.secret}}"
+          ]
+        },
+        {
+          "lines": [
+            " port {{.o.coaPort}}"
+          ]
+        }
+      ],
+      "generic": [
+        {
+          "condition": "tn",
+          "lines": [
+            "Túnel WireGuard",
+            "  chave privada deste equipamento: {{.tn.privateKey}}",
+            "  endereço deste equipamento no túnel: {{.tn.tunnelIp}}/32",
+            "  par (servidor): chave pública {{.tn.serverPublicKey}}",
+            "  endereço do par: {{.tn.endpointHost}}:{{.tn.endpointPort}}  |  redes permitidas: {{.tn.serverIp}}/32  |  keepalive: 25 s",
+            ""
+          ]
+        },
+        {
+          "lines": [
+            "Servidor RADIUS: {{.o.host}}{{if .tn}} (pelo túnel; origem {{.tn.tunnelIp}}){{else}}{{end}}"
+          ]
+        },
+        {
+          "lines": [
+            "Porta de autenticação: {{.o.authPort}}  |  Porta de accounting: {{.o.acctPort}}"
+          ]
+        },
+        {
+          "lines": [
+            "Segredo compartilhado: {{.o.secret}}"
+          ]
+        },
+        {
+          "lines": [
+            "Desconexão (RFC 5176): aceitar de {{.o.host}} na porta {{.o.coaPort}}"
+          ]
+        },
+        {
+          "lines": [
+            "Atualização de accounting: 5 minutos"
+          ]
+        }
+      ]
+    },
+    "l2tp": {
+      "mikrotik": [
+        {
+          "lines": [
+            "# 1. túnel L2TP/IPsec até o NexoISP (RouterOS 6.16 ou mais novo)"
+          ]
+        },
+        {
+          "lines": [
+            "/interface l2tp-client add name=nexoisp connect-to={{.tn.endpointHost}} user=\"{{.l.username}}\" password=\"{{.l.password}}\" use-ipsec=yes ipsec-secret=\"{{.l.psk}}\" allow=chap add-default-route=no keepalive-timeout=30 disabled=no comment=nexoisp"
+          ]
+        },
+        {
+          "lines": [
+            "/ip firewall filter add chain=input in-interface=nexoisp protocol=udp dst-port={{.o.coaPort}} action=accept place-before=0 comment=\"nexoisp: desconexao de sessao\""
+          ]
+        },
+        {
+          "lines": [
+            "# 2. autenticação pelo túnel (o endereço {{.tn.tunnelIp}} é entregue pelo NexoISP ao conectar)"
+          ]
+        },
+        {
+          "lines": [
+            "/radius add service=ppp,hotspot,dhcp address={{.o.host}} secret=\"{{.o.secret}}\" authentication-port={{.o.authPort}} accounting-port={{.o.acctPort}} timeout=3s src-address={{.tn.tunnelIp}} comment=nexoisp"
+          ]
+        },
+        {
+          "condition": "o.secondary",
+          "lines": [
+            "/radius add service=ppp,hotspot,dhcp address={{.o.secondary.host}} secret=\"{{.o.secret}}\" authentication-port={{.o.secondary.authPort}} accounting-port={{.o.secondary.acctPort}} timeout=3s src-address={{.tn.tunnelIp}} comment=nexoisp-2"
+          ]
+        },
+        {
+          "lines": [
+            "/radius incoming set accept=yes port={{.o.coaPort}}"
+          ]
+        },
+        {
+          "lines": [
+            "/ppp aaa set use-radius=yes accounting=yes interim-update=5m"
+          ]
+        }
+      ],
+      "generic": [
+        {
+          "lines": [
+            "Túnel L2TP sobre IPsec (configure o cliente L2TP/LAC do equipamento conforme o manual do fabricante)"
+          ]
+        },
+        {
+          "lines": [
+            "  servidor: {{.tn.endpointHost}}  |  IPsec: IKEv1, modo transporte, chave compartilhada \"{{.l.psk}}\" (UDP 500 e 4500)"
+          ]
+        },
+        {
+          "lines": [
+            "  L2TP: UDP 1701 dentro do IPsec  |  usuário: {{.l.username}}  |  senha: {{.l.password}}  |  autenticação: CHAP"
+          ]
+        },
+        {
+          "lines": [
+            "  endereço entregue a este equipamento: {{.tn.tunnelIp}} (o servidor é {{.tn.serverIp}})"
+          ]
+        },
+        {
+          "lines": [
+            ""
+          ]
+        },
+        {
+          "lines": [
+            "Servidor RADIUS: {{.o.host}} (pelo túnel; origem {{.tn.tunnelIp}})"
+          ]
+        },
+        {
+          "lines": [
+            "Porta de autenticação: {{.o.authPort}}  |  Porta de accounting: {{.o.acctPort}}"
+          ]
+        },
+        {
+          "lines": [
+            "Segredo compartilhado: {{.o.secret}}"
+          ]
+        },
+        {
+          "lines": [
+            "Desconexão (RFC 5176): aceitar de {{.o.host}} na porta {{.o.coaPort}}"
+          ]
+        },
+        {
+          "lines": [
+            "Atualização de accounting: 5 minutos"
+          ]
+        },
+        {
+          "lines": [
+            "Situação: {{if eq .vendor \"generic\"}}genérico{{else}}{{.vendor}}{{end}} pelo L2TP/IPsec NÃO foi exercitado em equipamento."
+          ]
+        }
+      ]
+    }
+  }
+}

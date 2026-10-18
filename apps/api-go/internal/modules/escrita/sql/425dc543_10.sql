@@ -1,0 +1,1 @@
+select email, active, created_at from users where subscriber_id = $1

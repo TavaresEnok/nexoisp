@@ -1,0 +1,1 @@
+update contracts set referred_by_subscriber_id = $2 where id = $1 and ($2::uuid is null or subscriber_id <> $2) returning referred_by_subscriber_id

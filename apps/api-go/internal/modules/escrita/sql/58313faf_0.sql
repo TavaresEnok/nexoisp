@@ -1,0 +1,1 @@
+select 1 from notice_rules where channel_id = $1

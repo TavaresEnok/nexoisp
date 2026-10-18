@@ -1,0 +1,1 @@
+update users set mfa_enabled = false, mfa_secret_enc = null where id = $1 and tenant_id = $2

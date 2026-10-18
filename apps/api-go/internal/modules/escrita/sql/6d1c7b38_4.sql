@@ -1,0 +1,1 @@
+select t.id, t.name from contract_tags ct join tags t on t.id = ct.tag_id where ct.contract_id = $1 order by t.name

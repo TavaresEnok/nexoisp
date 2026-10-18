@@ -1,0 +1,1 @@
+select * from operations where idempotency_key = $1

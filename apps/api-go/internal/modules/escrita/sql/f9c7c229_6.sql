@@ -1,0 +1,2 @@
+select c.prefix::text as prefix from unnest($1::cidr[]) with ordinality as c(prefix, ord)
+             where not exists (select 1 from ip6_delegations d where d.prefix && c.prefix) order by c.ord limit 1

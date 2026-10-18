@@ -1,0 +1,1 @@
+update invoices set gateway = $2, gateway_charge_id = $3, payment_methods = $4 where id = $1

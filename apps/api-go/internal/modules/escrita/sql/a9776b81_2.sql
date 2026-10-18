@@ -1,0 +1,1 @@
+insert into api_idempotency (tenant_id, token_id, key, status, response) values ($1,$2,$3,201,$4)

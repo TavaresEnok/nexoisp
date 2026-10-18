@@ -1,0 +1,1 @@
+select k.status, pv.profile_name from contracts k join plan_versions pv on pv.id = k.plan_version_id where k.id = $1

@@ -1,0 +1,1 @@
+select loyalty_months, penalty_model, penalty_cents from plans where id = $1

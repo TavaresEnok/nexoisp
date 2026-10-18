@@ -1,0 +1,2 @@
+update operations set status = 'UNCERTAIN', lease_until = null, updated_at = now(), note = 'posse expirou durante a execução; verificar antes de repetir'
+     where status in ('EXECUTING','VERIFYING') and lease_until < now()

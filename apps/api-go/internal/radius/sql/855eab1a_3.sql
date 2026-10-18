@@ -1,0 +1,1 @@
+insert into {{table}} (tenant_id, username, attribute, op, value) values ($1,$2,$3,$4,$5)

@@ -1,11 +1,11 @@
 # NexoISP
 
-ERP SaaS para provedores de internet (MVP). Documentos em `docs/`; estado atual e pendências na seção **Progresso** de
-`docs/04-etapas-e-prompts-de-desenvolvimento.md`.
+ERP SaaS para provedores de internet. Consulte o [índice da documentação](docs/README.md), a
+[arquitetura atual](docs/arquitetura.md) e as [pendências para produção](docs/pendencias.md).
 
 ## Rodar localmente (demonstração)
 
-Requisitos: Docker + Docker Compose, `openssl`. Node/Python/PostgreSQL rodam em containers.
+Requisitos: Docker + Docker Compose, `openssl`. API, rotinas, VPN e ferramentas administrativas usam Go. O frontend React usa Node somente no build; o agente de rede permanece Python.
 
 ```bash
 ./nexo up          # gera segredos/certificados de desenvolvimento, sobe banco, API+web e o agente de demonstração
@@ -14,12 +14,13 @@ Requisitos: Docker + Docker Compose, `openssl`. Node/Python/PostgreSQL rodam em 
 Abrir http://localhost:18080 — contas de demonstração na tela de login (senha `demo1234`).
 
 ```bash
-./nexo test        # regressões da API (isolamento, financeiro, operações, importação/portal, MFA, sessão)
+./nexo test        # testes Go
+./nexo contrato nativo # instalação e fluxos críticos com duas réplicas Go, banco sintético
 ./nexo agent-test  # regressões do agente (confirmação perdida, reinício, reentrega)
 ./nexo lab-radius  # prova com FreeRADIUS real (sem NAS)
 ./nexo lab-up      # laboratório PPPoE real: MikroTik CHR 7.24.5 em KVM + cliente pppd (ver docs/lab-pppoe.md)
 ./nexo lab cgnat   # com o laboratório no ar: aplica o CGNAT gerado no CHR, confere as traduções e remove
-./nexo typecheck   # tipos de API e web
+./nexo typecheck   # análise Go e tipos do frontend
 cd e2e && npm i && npx playwright install chromium && BASE=http://localhost:18080 npm run smoke   # fumaça da interface (servidor em modo demonstração)
 ./nexo backup      # backup do banco;  ./nexo restore-check <arquivo>
 ./nexo logs api    # logs;  ./nexo down para parar
@@ -28,7 +29,8 @@ cd e2e && npm i && npx playwright install chromium && BASE=http://localhost:1808
 ## Estrutura
 
 ```
-apps/api                Fastify + TypeScript; migrations SQL; identidade, cadastro, rede, financeiro, importação, IPAM, campo, CRM, NOC
+apps/api-go             Backend Go: API, identidade, rede, financeiro, importação, IPAM, campo, CRM, NOC, River, VPN e CLI
+db/migrations           Migrations goose (fonte única do schema)
 apps/web                React + Vite (painel e portal do assinante)
 services/network-agent  Agente Python (SQLite, drivers demo e mikrotik_radius)
 infra/compose           Ambiente local      infra/site  Agente + RADIUS no provedor      infra/prod  Instalação central
@@ -38,8 +40,10 @@ scripts                 Certificados dev, backup/restauração, pacote assinado 
 samples                 CSVs sintéticos do importador
 ```
 
-Expansões pós-MVP: OLT/ONU (`docs/expansao-olt-onu.md`); IPAM/CGNAT, ordens de serviço, estoque, FTTH, CRM e NOC (`docs/expansoes-2-a-5.md`).
-O que ficou para depois, em ordem de prioridade: `docs/05-prioridades-pos-projeto.md`.
+Produção: `./nexo prod up`, após configurar `infra/prod/.env` e os certificados. Administração: `./nexo prod db create-operator <email> <nome>` (senha em `NEXO_NEW_PASSWORD`), `./nexo prod db preflight` e `./nexo prod db rotate-secrets`. Consulte a [operação](docs/operacao.md) para implantação e recuperação.
+
+Configuração dos módulos: [operação](docs/operacao.md). Driver e homologação de OLT/ONU: [guia OLT](docs/expansao-olt-onu.md).
+Bloqueios do lançamento e evolução ainda necessária: [pendências](docs/pendencias.md).
 
 Simulado x real: os drivers `demo` e `olt_demo` e o gateway `demo` são simulações identificadas na interface e bloqueadas fora do modo
 demonstração. A integração MikroTik/PPPoE foi validada em laboratório virtual (CHR 7.24.5), não no equipamento do piloto, e não há gateway de pagamento real integrado.

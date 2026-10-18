@@ -1,0 +1,1 @@
+update devices set vendor = $2 where id = $1

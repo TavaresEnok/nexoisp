@@ -1,0 +1,1 @@
+update contracts set company_id = $2 where id = $1 returning id

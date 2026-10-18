@@ -1,0 +1,1 @@
+update webhook_endpoints set url = coalesce($2, url), events = coalesce($3, events), active = coalesce($4, active) where id = $1 returning id, name, url, events, active

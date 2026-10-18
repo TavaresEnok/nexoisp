@@ -1,0 +1,1 @@
+update operations set status = 'PENDING', current_attempt_id = null, lease_until = null, next_attempt_at = now() + interval '30 seconds', note = 'equipamento em manutenção', updated_at = now() where id = $1

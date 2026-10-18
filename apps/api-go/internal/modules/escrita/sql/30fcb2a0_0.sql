@@ -1,0 +1,1 @@
+select (select count(*) from tickets where sla_policy_id = $1) + (select count(*) from work_orders where sla_policy_id = $1) as n

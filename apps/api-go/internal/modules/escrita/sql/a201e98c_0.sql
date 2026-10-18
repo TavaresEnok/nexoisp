@@ -1,0 +1,1 @@
+select name, serialized, active from stock_items where id = $1

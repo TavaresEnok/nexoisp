@@ -1,0 +1,1 @@
+insert into custom_fields (tenant_id, entity, key, label, type, options, required, position) values ($1,$2,$3,$4,$5,$6,$7,$8) returning *

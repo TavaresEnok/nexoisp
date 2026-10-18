@@ -1,0 +1,2 @@
+insert into scheduled_changes (tenant_id, contract_id, kind, effective_date, plan_id, due_day, end_reason_id, penalty, penalty_waive_reason, note, created_by)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) returning *

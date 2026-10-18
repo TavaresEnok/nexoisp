@@ -1,0 +1,347 @@
+metodo,rota,capacidades_candidatas,validacao
+DELETE,/api/api-tokens/:id,C33,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+DELETE,/api/contracts/:id/addons/:addonId,C07; C08; C32,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+DELETE,/api/contracts/:id/cpe/link,C08; C27,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+DELETE,/api/discounts/:id,C09,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+DELETE,/api/documents/:id,C43,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+DELETE,/api/ftth/boxes/:id,C26; C42,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+DELETE,/api/ftth/drops/:id,C26; C42,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+DELETE,/api/ipam/allocations/:id,C23,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+DELETE,/api/ipam/delegations/:id,C23,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+DELETE,/api/ipam/pools/:id,C23,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+DELETE,/api/notice-channels/:id,C04; C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+DELETE,/api/notice-rules/:id,C04; C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+DELETE,/api/notice-templates/:id,C04; C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+DELETE,/api/scheduled-changes/:id,C09,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+DELETE,/api/sla-policies/:id,C15,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+DELETE,/api/tags/:id,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+DELETE,/api/webhook-endpoints/:id,C33,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+DELETE,/api/work-orders/:id/helpers/:userId,C16,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/acceptances/:id/evidence,C30,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/acs/status,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/addons,C07; C32,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/agenda,C16,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/agenda/free,C16,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/agents,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/anatel/dici,C38,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/anatel/municipalities,C38,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/api-tokens,C33,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/audit,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/catalogs,C15; C40,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/cgnat/plans,C23,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/cgnat/plans/:id/lookup,C23,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/cgnat/plans/:id/map,C23,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/cgnat/plans/:id/script,C23,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/cgnat/trace,C23,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/commission-rules,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/companies,C13,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/acceptances,C08; C30,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/addons,C07; C08; C32,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/amendments,C08; C09,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/availability,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/cpe,C08; C27,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/cpe/candidates,C08; C27,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/diagnosis,C08; C28,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/discounts,C08; C09,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/equipment,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/finance,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/ftth,C08; C26,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/install-address,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/ips,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/ipv6,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/onu,C08; C25,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/radius-log,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/scheduled-changes,C08; C09,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/service,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/sessions,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/states,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/termination-quote,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/trust-release,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/usage,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/contracts/:id/usage-series,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/crm/report,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/custom-fields,C05,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/dashboard,C34,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/dashboard/panels,C34,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/devices,C42,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/documents/:id/download,C43,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/finance/export,C10,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/finance/monthly,C10,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/finance/reconciliation,C10,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/finance/reports/aging,C10,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/finance/reports/receipts,C10,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/finance/reports/to-cancel,C10,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/finance/reports/without-invoice,C10,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/finance/settings,C10,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/finance/summary,C10,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/ftth/boxes,C26; C42,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/ftth/boxes/:id,C26; C42,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/health,C35,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/import/batches,C36,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/import/batches/:id,C36,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/install-kits,C18,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/integrations/catalog,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/invoices,C10,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/invoices/:id,C10,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/invoices/:id/due,C10,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/ipam/pools,C23,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/ipam/pools/:id/allocations,C23,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/ipam/pools/:id/delegations,C23,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/leads,C06,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/leads/:id,C06,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/leads/summary,C06,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/legal/ip-lookup/history,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/maintenance-notices,C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/maintenance-notices/channels,C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/map/coverage,C37,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/map/points,C37,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/me,C01,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/network/drift,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/network/health,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/network/online,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/noc/overview,C28,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/noc/settings,C28,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/notice-channels,C04; C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/notice-log,C04; C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/notice-page,C04; C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/notice-rules,C04; C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/notice-templates,C04; C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/notifications,C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/olt/discoveries,C25,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/onus,C25,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/operations,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/operations/:id,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/plans,C07,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/plans/:id/versions,C07,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/pops,C42,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/portal/acceptances,C30; C39,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/portal/cpe,C27; C39,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/portal/overview,C39,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/portal/surveys,C39,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/portal/tickets,C39,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/portal/tickets/:id,C39,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/portal/usage-series,C39,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/radius/allowed-sources,C21,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/radius/devices/:id/setup,C21,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/radius/status,C21,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/reports/commissions,C37,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/reports/referrals,C09; C37,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/reports/sla,C37,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/search,C37,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/settings/retention,C40,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/sla-policies,C15,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/staff,C14,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/stock/items,C17,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/stock/items/:id/movements,C17,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/stock/items/:id/units,C17,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/stock/units,C17,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/stock/units/:id/events,C17,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/subscribers,C03,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/subscribers/:id,C03,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/subscribers/:id/contacts,C03; C04,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/subscribers/:id/documents,C03; C43,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/subscribers/:id/lgpd-export,C03,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/subscribers/:id/notes,C03,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/subscribers/:id/portal-access,C03,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/subscribers/:id/timeline,C03,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/surveys,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/tags,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/tenants,C02,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/tickets,C15,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/tickets/:id,C15,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/today,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/users,C02; C14,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/users/:id/pops,C02; C14,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/webhook-deliveries,C33,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/webhook-endpoints,C33,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/work-orders,C16,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/work-orders/:id,C16,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/api/work-orders/:id/helpers,C16,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/aviso/:slug,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/public/v1,C33,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/public/v1/contracts,C33,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/public/v1/invoices,C33,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/public/v1/subscribers,C33,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/public/v1/subscribers/:id,C33,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+GET,/public/v1/work-orders/:id,C33,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/addons/:id,C07; C32,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/agents/:id,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/catalogs/:id,C15; C40,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/companies/:id,C13,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/contracts/:id,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/custom-fields/:id,C05,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/devices/:id,C42,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/ftth/boxes/:id,C26; C42,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/install-kits/:id,C18,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/ipam/pools/:id,C23,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/leads/:id,C06,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/notes/:id,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/notice-channels/:id,C04; C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/notice-rules/:id,C04; C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/plans/:id,C07,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/pops/:id,C42,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/radius/devices/:id,C21,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/resources/:id/mac,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/resources/:id/secret,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/sla-policies/:id,C15,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/stock/items/:id,C17,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/subscribers/:id,C03,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/tenants/:id,C02,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/tickets/:id,C15,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/users/:id,C02; C14,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/webhook-endpoints/:id,C33,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PATCH,/api/work-orders/:id,C16,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/agent/v1/attempts/:id/begin,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/agent/v1/attempts/:id/progress,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/agent/v1/attempts/:id/result,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/agent/v1/hello,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/agent/v1/observations,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/agent/v1/olt-report,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/agent/v1/poll,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/agent/v1/sessions-report,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/agent/v1/sync-done,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/agent/v1/usage-report,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/acceptances/:id/cancel,C30,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/addons,C07; C32,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/agents,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/api-tokens,C33,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/auth/login,C01,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/auth/logout,C01,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/catalogs,C15; C40,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/cgnat/plans,C23,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/cgnat/plans/:id/retire,C23,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/cgnat/plans/check,C23,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/commission-rules,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/companies,C13,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/contracts,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/contracts/:id/acceptances,C08; C30,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/contracts/:id/addons,C07; C08; C32,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/contracts/:id/agreement,C08; C10,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/contracts/:id/amendments,C08; C09,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/contracts/:id/cpe/link,C08; C27,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/contracts/:id/cpe/reboot,C08; C27,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/contracts/:id/cpe/refresh,C08; C27,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/contracts/:id/cpe/wifi,C08; C27,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/contracts/:id/discounts,C08; C09,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/contracts/:id/onu,C08; C25,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/contracts/:id/scheduled-changes,C08; C09,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/contracts/:id/service,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/contracts/:id/trust-release,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/custom-fields,C05,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/demo-gateway/pay,C11,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/devices,C42,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/devices/:id/convert-to-integrated,C42,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/devices/:id/reapply,C42,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/finance/generate,C10,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/finance/reconcile,C10; C11,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/finance/run-auto-suspend,C10,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/ftth/boxes,C26; C42,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/ftth/boxes/:id/drops,C26; C42,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/import/apply,C36,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/import/batches/:id/provision,C36,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/import/preview,C36,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/install-kits,C18,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/invoices,C10,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/invoices/:id/cancel,C10,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/invoices/:id/manual-payment,C10,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/invoices/:id/payments/:paymentId/reverse,C10,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/invoices/:id/resolve,C10,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/ipam/pools,C23,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/ipam/pools/:id/allocations,C23,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/ipam/pools/:id/delegations,C23,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/leads,C06,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/leads/:id/convert,C06,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/leads/:id/notes,C06,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/leads/:id/stage,C06,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/legal/ip-lookup,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/maintenance-notices,C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/maintenance-notices/:id/cancel,C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/maintenance-notices/:id/notify,C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/me/mfa/disable,C01,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/me/mfa/enable,C01,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/me/mfa/setup,C01,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/me/password,C01,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/network/disconnect,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/notice-channels,C04; C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/notice-channels/:id/test,C04; C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/notice-rules,C04; C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/notice-rules/run,C04; C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/notice-templates,C04; C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/notifications/deliver,C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/notifications/test,C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/onus/:id/:action,C25,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/plans,C07,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/plans/:id/reapply,C07,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/plans/:id/versions,C07,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/pops,C42,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/portal/acceptances/:id/accept,C30; C39,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/portal/cpe/:contractId/wifi,C27; C39,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/portal/surveys/:id,C39,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/portal/tickets,C39,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/portal/tickets/:id/messages,C39,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/portal/trust-release,C39,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/radius/devices,C21,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/radius/devices/:id/secret,C21,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/radius/devices/:id/tunnel,C21; C22,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/resources/:id/:action,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/sla-policies,C15,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/stock/items,C17,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/stock/items/:id/movements,C17,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/stock/items/:id/units,C17,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/stock/units/:id/status,C17,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/stock/units/:id/transfer,C17,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/subscribers,C03,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/subscribers/:id/anonymize,C03; C05,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/subscribers/:id/documents,C03; C43,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/subscribers/:id/notes,C03,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/subscribers/:id/portal-access,C03,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/support/enter,C02,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/support/exit,C02,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/tags,,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/tenants,C02,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/tickets,C15,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/tickets/:id/messages,C15,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/tickets/:id/status,C15,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/users,C02; C14,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/webhook-deliveries/:id/retry,C33,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/webhook-endpoints,C33,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/webhook-endpoints/:id/rotate-secret,C33,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/webhook-endpoints/:id/test,C33,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/webhooks/gateway/:gateway,C11; C33,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/work-orders,C16,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/work-orders/:id/checklist,C16,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/work-orders/:id/checklist/:itemId,C16,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/work-orders/:id/helpers,C16,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/work-orders/:id/kit,C16; C18,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/work-orders/:id/materials,C16; C17,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/work-orders/:id/notes,C16,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/work-orders/:id/status,C16,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/api/work-orders/:id/units,C16; C17,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/public/v1/tickets,C33,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+POST,/public/v1/work-orders,C33,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/anatel/municipalities,C38,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/contracts/:id/company,C08; C13,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/contracts/:id/credit-restriction,C08; C31,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/contracts/:id/custom,C05; C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/contracts/:id/install-address,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/contracts/:id/location,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/contracts/:id/loyalty,C08; C09,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/contracts/:id/pop,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/contracts/:id/referral,C08; C09,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/contracts/:id/service-area,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/contracts/:id/tags,C08,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/finance/settings,C10,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/noc/settings,C28,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/notice-page,C04; C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/notifications/settings,C29,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/plans/:id/dunning,C07,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/plans/:id/loyalty,C07; C09,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/plans/:id/network,C07,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/plans/:id/technology,C07,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/pops/:id/location,C42,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/settings/retention,C40,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/subscribers/:id/contacts,C03; C04,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/subscribers/:id/custom,C03; C05,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.
+PUT,/api/users/:id/pops,C02; C14,Inventário de operações; existência não comprova execução nem contrato equivalente ao SGP.

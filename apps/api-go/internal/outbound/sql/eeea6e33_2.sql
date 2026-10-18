@@ -1,0 +1,1 @@
+update scheduled_changes set status = 'failed', error = $2 where id = $1

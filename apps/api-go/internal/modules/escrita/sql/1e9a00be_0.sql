@@ -1,0 +1,1 @@
+update ip_pools set name = coalesce($2, name), notes = case when $3 then $4 else notes end, device_id = case when $5 then $6 else device_id end where id = $1 returning *

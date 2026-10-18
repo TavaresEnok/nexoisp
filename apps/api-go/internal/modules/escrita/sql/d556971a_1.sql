@@ -1,0 +1,1 @@
+select name, cidr from ip_pools where cidr && $1::cidr limit 1

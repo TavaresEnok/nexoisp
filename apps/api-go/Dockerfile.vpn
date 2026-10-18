@@ -1,0 +1,10 @@
+FROM golang:1.27.2-alpine AS build
+WORKDIR /src
+COPY apps/api-go/go.mod apps/api-go/go.sum ./
+RUN go mod download
+COPY apps/api-go/ ./
+RUN CGO_ENABLED=0 go build -trimpath -o /out/nexo-vpn ./cmd/nexo-vpn
+FROM alpine:3.22
+RUN apk add --no-cache ca-certificates wireguard-tools-wg iproute2 strongswan xl2tpd ppp-daemon
+COPY --from=build /out/nexo-vpn /usr/local/bin/nexo-vpn
+ENTRYPOINT ["nexo-vpn"]

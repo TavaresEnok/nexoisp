@@ -1,0 +1,2 @@
+select r.id as resource_id, r.device_id, r.pppoe_username as username, r.desired_version, r.desired_policy as policy, r.desired_profile as profile
+         from service_resources r join devices d on d.id = r.device_id where d.agent_id = $1 and r.desired_version > 0

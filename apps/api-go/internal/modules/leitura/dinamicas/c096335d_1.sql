@@ -1,0 +1,2 @@
+select scheduled_for, estimated_minutes from work_orders
+         where assignee_id = $1 and status in ('open','analysis','awaiting_schedule','scheduled','en_route','in_progress') and scheduled_for >= $2 and scheduled_for < $3 order by scheduled_for

@@ -1,0 +1,1 @@
+select 1 from companies where id = $1 and active

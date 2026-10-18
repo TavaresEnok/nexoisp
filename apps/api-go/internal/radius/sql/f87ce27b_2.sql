@@ -1,0 +1,1 @@
+select 1 from radius_acct where tenant_id = $1 and username = $2 limit 1

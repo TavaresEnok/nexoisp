@@ -1,0 +1,1 @@
+update stock_items set serialized = $2 where id = $1

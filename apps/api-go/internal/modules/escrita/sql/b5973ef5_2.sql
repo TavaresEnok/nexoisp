@@ -1,0 +1,1 @@
+insert into sla_policies (tenant_id, name, applies_to, priority, kind, type_id, resolution_minutes, escalate_to, active) values ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning *

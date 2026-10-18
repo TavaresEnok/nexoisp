@@ -1,0 +1,1 @@
+select 1 from ip6_delegations where contract_id = $1

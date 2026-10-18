@@ -1,0 +1,2 @@
+insert into invoices (tenant_id, contract_id, subscriber_id, kind, due_date, amount_cents, agreement_id)
+       values ($1,$2,$3,'agreement', ($4::date + make_interval(months => $5::int - 1))::date, $6, $7) returning id, due_date::text as due_date, amount_cents

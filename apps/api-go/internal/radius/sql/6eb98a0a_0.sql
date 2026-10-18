@@ -1,0 +1,1 @@
+select tenant_id, agent_id from radius_internal_agents()

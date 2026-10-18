@@ -1,0 +1,1 @@
+update radius_nas set nas_ip = coalesce($2::inet, nas_ip), coa_host = case when $3 then $4 else coa_host end, coa_port = coalesce($5, coa_port) where device_id = $1

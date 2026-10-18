@@ -2,6 +2,10 @@
 
 Documento único de operação. O que está marcado **não exercitado** ainda precisa ser provado no ambiente do piloto.
 
+Consulte também [Arquitetura](arquitetura.md) para decisões técnicas e [Pendências](pendencias.md) para os bloqueios e homologações restantes.
+
+Desde 16/10/2026 o backend é Go: API, rotinas River, VPN e CLI. A aplicação não contém backend Node. O frontend React usa Node somente durante a compilação; a imagem entregue usa Caddy.
+
 ## 1. Instalação central (nuvem/servidor do SaaS)
 
 Requisitos: Linux com Docker e Docker Compose; domínio apontando para o host; portas 80/443 (painel) e 8443 (agentes).
@@ -11,13 +15,14 @@ cd infra/prod
 cp .env.example .env && chmod 600 .env      # gerar cada segredo NESTE host (comandos no próprio arquivo)
 # certificados da API de agentes: CA própria do operador + certificado do servidor
 NEXO_API_SAN=DNS:agentes.exemplo.com.br ../../scripts/dev-certs.sh init    # gera em infra/certs; copie ca.crt, server.crt, server.key para infra/prod/certs
-docker compose up -d --build
-docker compose exec -e NEXO_NEW_PASSWORD='<12+ caracteres>' api node apps/api/dist/cli.js create-operator voce@empresa.com "Seu Nome"
+cd ../..
+./nexo prod up
+NEXO_NEW_PASSWORD='<12+ caracteres>' ./nexo prod db create-operator voce@empresa.com "Seu Nome"
 ```
 
 - Produção sobe com `NEXO_DEMO_MODE=0`: sem dados sintéticos, sem driver/gateway de demonstração.
 - `NEXO_REQUIRE_ADMIN_MFA=1`: administradores e operadores só usam o sistema depois de ativar a verificação em duas etapas (Minha conta).
-- O banco tem dois papéis: `nexo_owner` (migrations, backup) e `nexo_app` (aplicação; sem superusuário, sem `BYPASSRLS`, não é dono das tabelas).
+- O banco usa `nexo_owner` apenas em administração/migrations, `nexo_go` na API/VPN (membro de `nexo_app`, sem superusuário, sem `BYPASSRLS` ou propriedade de tabelas), `nexo_radius` no FreeRADIUS e `nexo_replica` quando há réplica.
 - Sessão do painel em cookie `HttpOnly`/`SameSite=Strict`/`Secure` (`NEXO_COOKIE_SECURE=1`); o navegador nunca expõe o token ao JavaScript.
 - **Exercitado localmente em 10/10/2026** (`NEXO_DOMAIN=localhost`, portas alternativas): subida do zero, HTTPS pelo Caddy com redirecionamento, criação do operador,
   MFA obrigatório, criação de provedor, acesso de suporte, bloqueio do driver/gateway de demonstração, agente com mTLS, backup + `restore-check`, rotação da chave de segredos.
@@ -29,13 +34,14 @@ docker compose exec -e NEXO_NEW_PASSWORD='<12+ caracteres>' api node apps/api/di
 |---|---|---|
 | `NEXO_SECRET_KEY` | Cifra senhas PPPoE e segredos de MFA no banco | Perda: senhas PPPoE irrecuperáveis (redigitar). Vazamento/rotina: **rotacionar** (abaixo) |
 | `NEXO_OP_SIGNING_KEY` | Assina operações enviadas aos agentes | Troca: agentes recusam a nova chave até removerem o pin local (`kv.signing_public_key` no SQLite) — procedimento manual |
-| `POSTGRES_PASSWORD` / `NEXO_APP_DB_PASSWORD` | Banco | Trocar no `.env` e reiniciar (a senha do `nexo_app` é reaplicada na subida) |
+| `POSTGRES_PASSWORD` | Administração do banco | Em banco existente, alterar a senha do papel PostgreSQL e o `.env` de forma coordenada; mudar só a variável não troca a senha do banco |
+| `NEXO_GO_DB_PASSWORD` / `NEXO_APP_DB_PASSWORD` / `NEXO_RADIUS_DB_PASSWORD` | Papéis de execução | Atualizar no `.env`, executar `./nexo prod db prepare` e recriar os serviços dependentes com `./nexo prod up` em janela de manutenção |
 | Token + certificado de cada agente | Identidade do agente | Painel → Rede → Rotacionar token / Revogar |
 
 Guardar cópia de `.env` e de `infra/prod/certs` em cofre separado do backup do banco.
 
 **Rotação de `NEXO_SECRET_KEY`:** (1) backup; (2) no `.env`, mover a chave atual para `NEXO_SECRET_KEY_PREVIOUS` e gerar a nova em `NEXO_SECRET_KEY`; (3) `docker compose up -d api`;
-(4) `docker compose exec api node apps/api/dist/cli.js rotate-secrets` até mostrar "0 pendente(s)"; (5) remover `NEXO_SECRET_KEY_PREVIOUS` e reiniciar. A aplicação segue funcionando durante o processo.
+(4) `./nexo prod db rotate-secrets` até mostrar "0 pendente(s)"; (5) remover `NEXO_SECRET_KEY_PREVIOUS` e reiniciar. A aplicação segue funcionando durante o processo.
 
 ### Módulos por provedor
 
@@ -43,6 +49,20 @@ Um provedor novo nasce só com o núcleo: cadastro, planos, contratos, acesso PP
 Atendimentos/prospectos, ordens de serviço e estoque, avisos, avisos ao assinante (mensagens só de saída), NOC, rede óptica, IP/CGNAT e OLT são **módulos** que o operador do SaaS libera em
 Provedores → Módulos. Sem o módulo, o item some do menu **e o servidor recusa a chamada** (`module_disabled`). O módulo de OLT libera um driver
 não homologado em equipamento real: a conferência de produção avisa quando ele está ligado.
+
+### IPAM, CGNAT, estoque, atendimento e NOC
+
+| Área | Operação e limites |
+|---|---|
+| IPAM | Rede → Endereços IP: cadastrar blocos e reservar endereço ou vincular IP fixo ao contrato. Blocos do provedor não se sobrepõem. IPv6 é planejamento/registro; ainda não há entrega automática de prefixo pelo RADIUS |
+| CGNAT | Criar plano, conferir capacidade e gerar script RouterOS para revisão humana. O plano mantém a vigência histórica; mudanças exigem encerrar e criar outro. O sistema não aplica o script no roteador. Ao importar, revisar a interface de saída e a ordem em relação às regras existentes |
+| Rastreio | IP público + porta + data permitem consultar o plano vigente e cruzar com as sessões disponíveis. A consulta fica auditada; sem accounting ou sem porta, não presumir um titular único. Ver também Consulta de IP para ofício |
+| Estoque e OS | Materiais lançados na OS baixam estoque na mesma transação; devolução é limitada ao consumo da OS. Corrigir movimentos com ajuste justificado, sem apagar o histórico. Unidades com série registram técnico, contrato e histórico. Concluir uma OS não provisiona automaticamente o acesso |
+| Rede óptica | Caixas e portas têm vínculo ao contrato e coordenadas. A ocupação e o desenho cadastrado não substituem uma homologação da OLT nem representam automaticamente o trajeto real dos cabos |
+| CRM | Prospecto pode ser convertido em assinante, sem criar contrato automaticamente. Atendimentos têm protocolo e podem originar OS. Notas internas não são exibidas ao assinante |
+| NOC | Diagnóstico por regras sobre leituras datadas, sem alterar a rede. Limiares de sinal são configurados pelo provedor; falha coletiva é uma heurística. Desautorizar ONU ao encerrar contrato é uma regra opcional, desligada por padrão |
+
+A tela do técnico exige conexão. Exportação contábil gera CSV de conferência; não emite documento fiscal. Regras adicionais e limitações de homologação estão em [Pendências](pendencias.md).
 
 ### Avisos ao assinante (módulo `messages`)
 
@@ -142,7 +162,7 @@ O servidor de autenticação sobe junto com o sistema (`radius` no compose). O p
 
 - Defina `NEXO_REPLICA_PASSWORD` e suba com `--profile ha`: o serviço `db-replica` copia o primário na primeira vez (com slot de replicação próprio, para não
   perder o que ainda não recebeu) e segue recebendo tudo em tempo real. Só leitura. O primário passa a usar `infra/compose/db/pg_hba.conf` (acesso de replicação
-  só para o papel `nexo_replica`, com senha). `cli.js preflight` avisa se a réplica não está conectada ou está atrasada mais de 1 minuto.
+  só para o papel `nexo_replica`, com senha). `./nexo prod db preflight` avisa se a réplica não está conectada ou está atrasada mais de 1 minuto.
 - **Promover (o primário morreu):** 1) pare o que escreve no banco (`api`, `vpn`, `radius`, `radius2`); 2) `docker compose exec db-replica pg_ctl promote -D /var/lib/postgresql/data`;
   3) aponte `DATABASE_URL_*` e `RADIUS_DB_HOST` para `db-replica` (ou troque os volumes e suba `db` com os dados promovidos); 4) suba de novo e rode o preflight.
   Depois, recrie uma réplica nova a partir do novo primário (a antiga não volta sozinha). A promoção é manual: não há eleição automática.
@@ -170,7 +190,7 @@ A resposta depende do registro de sessões: mantenha o accounting ligado nos con
 ### Conferência antes de entrar em produção
 
 ```bash
-docker compose exec api node apps/api/dist/cli.js preflight
+./nexo prod db preflight
 ```
 
 Não altera nada. **FALHA** impede a entrada (modo demonstração ligado, MFA não obrigatório, cookie sem HTTPS, contas ou equipamentos de demonstração,
@@ -247,8 +267,21 @@ Não há envio nativo por e-mail/WhatsApp: use o webhook com o serviço escolhid
 ./nexo restore <arquivo> --yes      # substitui o banco principal (para a API durante a operação)
 ```
 
-Em produção use `scripts/backup.sh` com `NEXO_DB_CONTAINER=nexoisp-prod-db-1` e `NEXO_BACKUP_COPY=<comando ou script>` para levar cada backup para **fora do host**
+Em produção use `./nexo prod backup`, `./nexo prod restore-check <arquivo>` e `./nexo prod restore <arquivo> --yes`, com `NEXO_BACKUP_COPY=<comando ou script>` para levar cada backup para **fora do host**
 (o comando recebe o arquivo e o `.sha256`; se falhar, o script termina com erro para o agendador alertar). Sem ele o script avisa que o backup está no mesmo domínio de falha do banco.
+
+Defina também `NEXO_BACKUP_DIR` no `infra/prod/.env` (por exemplo, `/var/lib/nexoisp/backups`) e crie o diretório com permissão `700`. O comando de produção lê esses dois valores do arquivo de ambiente, sem executá-lo como script.
+
+Para agendar o backup diário, copie `infra/prod/systemd/nexoisp-backup.service` e `infra/prod/systemd/nexoisp-backup.timer` para `/etc/systemd/system/`, ajuste `/opt/nexoisp` para o diretório real da instalação e rode:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now nexoisp-backup.timer
+systemctl list-timers nexoisp-backup.timer
+```
+
+Antes de habilitar o agendamento, execute um backup manual e um `restore-check` do arquivo gerado. O timer só é considerado pronto quando a cópia externa também concluir sem erro.
+O wrapper Go pausa os escritores em execução (API, VPN e RADIUS), prepara os papéis/migrations do banco restaurado e reinicia os mesmos serviços. Usar o script de baixo nível diretamente exige fornecer os comandos de parada/retomada; ele não descobre serviços sozinho.
 Exercício feito em 10/10/2026 (ambiente local): backup → criação de um registro → `restore-check` → `restore` → registro posterior ausente, login e consultas funcionando, 31 políticas RLS presentes; arquivo adulterado recusado pela soma de verificação.
 
 - O backup do banco **não** inclui: `.env`, certificados, SQLite dos agentes e do RADIUS (ficam nos sites).
@@ -288,7 +321,7 @@ Todos os recursos abaixo ficam desligados até o provedor configurá-los em Pol�
 
 ## 6. Medição curta (volume sintético)
 
-Volume do piloto ainda desconhecido. Medição local única — ver números na seção de progresso do documento 04. Não representa SLA nem capacidade garantida.
+O volume do piloto ainda precisa ser definido. Medições anteriores usaram dados sintéticos em ambiente local; não representam SLA nem capacidade garantida. Medir com o volume e a infraestrutura do provedor antes de ampliar a operação.
 
 ## 7. Lista de entrada em produção (preencher com o provedor)
 

@@ -1,0 +1,1 @@
+update invoices set status = $2, status_note = $3, paid_at = case when $2 = 'paid' then now() else paid_at end where id = $1

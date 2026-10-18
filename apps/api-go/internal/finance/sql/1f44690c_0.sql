@@ -1,0 +1,1 @@
+select gateway_charge_tenant($1,$2) as t

@@ -1,0 +1,1 @@
+select b.name as box_name, x.port from ftth_drops x join ftth_boxes b on b.id = x.box_id where x.contract_id = $1

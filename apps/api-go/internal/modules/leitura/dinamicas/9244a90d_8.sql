@@ -1,0 +1,2 @@
+select n.id, n.created_at, n.body, n.alert, n.contract_id, u.name as by from subscriber_notes n left join users u on u.id = n.created_by
+         where n.subscriber_id = $1 order by n.created_at desc limit $2

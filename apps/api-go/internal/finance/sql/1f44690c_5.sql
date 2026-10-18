@@ -1,0 +1,1 @@
+update gateway_events set status = $2, note = $3, processed_at = now() where id = $1

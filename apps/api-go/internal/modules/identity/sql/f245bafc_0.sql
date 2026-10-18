@@ -1,0 +1,1 @@
+select session_set_support($1, null)

@@ -1,0 +1,1 @@
+insert into commission_rules (tenant_id, subject, os_kind, assignee_cents, helper_cents) values ($1,$2,$3,$4,$5) returning *

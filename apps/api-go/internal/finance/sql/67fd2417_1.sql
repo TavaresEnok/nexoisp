@@ -1,0 +1,1 @@
+update invoices set fee_cents = $2 where id = $1

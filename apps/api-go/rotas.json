@@ -1,0 +1,1389 @@
+{
+  "version": 1,
+  "routes": [
+    {
+      "method": "DELETE",
+      "path": "/api/api-tokens/:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/contracts/:id/addons/:addonId"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/contracts/:id/cpe/link"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/discounts/:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/documents/:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/ftth/boxes/:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/ftth/drops/:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/ipam/allocations/:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/ipam/delegations/:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/ipam/pools/:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/notice-channels/:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/notice-rules/:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/notice-templates/:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/scheduled-changes/:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/sla-policies/:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/tags/:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/webhook-endpoints/:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/work-orders/:id/helpers/:userId"
+    },
+    {
+      "method": "GET",
+      "path": "/api/acceptances/:id/evidence"
+    },
+    {
+      "method": "GET",
+      "path": "/api/acs/status"
+    },
+    {
+      "method": "GET",
+      "path": "/api/addons"
+    },
+    {
+      "method": "GET",
+      "path": "/api/agenda"
+    },
+    {
+      "method": "GET",
+      "path": "/api/agenda/free"
+    },
+    {
+      "method": "GET",
+      "path": "/api/agents"
+    },
+    {
+      "method": "GET",
+      "path": "/api/anatel/dici"
+    },
+    {
+      "method": "GET",
+      "path": "/api/anatel/municipalities"
+    },
+    {
+      "method": "GET",
+      "path": "/api/api-tokens"
+    },
+    {
+      "method": "GET",
+      "path": "/api/audit"
+    },
+    {
+      "method": "GET",
+      "path": "/api/catalogs"
+    },
+    {
+      "method": "GET",
+      "path": "/api/cgnat/plans"
+    },
+    {
+      "method": "GET",
+      "path": "/api/cgnat/plans/:id/lookup"
+    },
+    {
+      "method": "GET",
+      "path": "/api/cgnat/plans/:id/map"
+    },
+    {
+      "method": "GET",
+      "path": "/api/cgnat/plans/:id/script"
+    },
+    {
+      "method": "GET",
+      "path": "/api/cgnat/trace"
+    },
+    {
+      "method": "GET",
+      "path": "/api/commission-rules"
+    },
+    {
+      "method": "GET",
+      "path": "/api/companies"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/acceptances"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/addons"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/amendments"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/availability"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/cpe"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/cpe/candidates"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/diagnosis"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/discounts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/equipment"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/finance"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/ftth"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/install-address"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/ips"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/ipv6"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/onu"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/radius-log"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/scheduled-changes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/service"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/sessions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/states"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/termination-quote"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/trust-release"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/usage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/usage-series"
+    },
+    {
+      "method": "GET",
+      "path": "/api/crm/report"
+    },
+    {
+      "method": "GET",
+      "path": "/api/custom-fields"
+    },
+    {
+      "method": "GET",
+      "path": "/api/dashboard"
+    },
+    {
+      "method": "GET",
+      "path": "/api/dashboard/panels"
+    },
+    {
+      "method": "GET",
+      "path": "/api/devices"
+    },
+    {
+      "method": "GET",
+      "path": "/api/documents/:id/download"
+    },
+    {
+      "method": "GET",
+      "path": "/api/finance/export"
+    },
+    {
+      "method": "GET",
+      "path": "/api/finance/monthly"
+    },
+    {
+      "method": "GET",
+      "path": "/api/finance/reconciliation"
+    },
+    {
+      "method": "GET",
+      "path": "/api/finance/reports/aging"
+    },
+    {
+      "method": "GET",
+      "path": "/api/finance/reports/receipts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/finance/reports/to-cancel"
+    },
+    {
+      "method": "GET",
+      "path": "/api/finance/reports/without-invoice"
+    },
+    {
+      "method": "GET",
+      "path": "/api/finance/settings"
+    },
+    {
+      "method": "GET",
+      "path": "/api/finance/summary"
+    },
+    {
+      "method": "GET",
+      "path": "/api/ftth/boxes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/ftth/boxes/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/health"
+    },
+    {
+      "method": "GET",
+      "path": "/api/import/batches"
+    },
+    {
+      "method": "GET",
+      "path": "/api/import/batches/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/install-kits"
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/catalog"
+    },
+    {
+      "method": "GET",
+      "path": "/api/invoices"
+    },
+    {
+      "method": "GET",
+      "path": "/api/invoices/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/invoices/:id/due"
+    },
+    {
+      "method": "GET",
+      "path": "/api/ipam/pools"
+    },
+    {
+      "method": "GET",
+      "path": "/api/ipam/pools/:id/allocations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/ipam/pools/:id/delegations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/leads"
+    },
+    {
+      "method": "GET",
+      "path": "/api/leads/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/leads/summary"
+    },
+    {
+      "method": "GET",
+      "path": "/api/legal/ip-lookup/history"
+    },
+    {
+      "method": "GET",
+      "path": "/api/maintenance-notices"
+    },
+    {
+      "method": "GET",
+      "path": "/api/maintenance-notices/channels"
+    },
+    {
+      "method": "GET",
+      "path": "/api/map/coverage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/map/points"
+    },
+    {
+      "method": "GET",
+      "path": "/api/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/network/drift"
+    },
+    {
+      "method": "GET",
+      "path": "/api/network/health"
+    },
+    {
+      "method": "GET",
+      "path": "/api/network/online"
+    },
+    {
+      "method": "GET",
+      "path": "/api/noc/overview"
+    },
+    {
+      "method": "GET",
+      "path": "/api/noc/settings"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notice-channels"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notice-log"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notice-page"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notice-rules"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notice-templates"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications"
+    },
+    {
+      "method": "GET",
+      "path": "/api/olt/discoveries"
+    },
+    {
+      "method": "GET",
+      "path": "/api/onus"
+    },
+    {
+      "method": "GET",
+      "path": "/api/operations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/operations/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/plans"
+    },
+    {
+      "method": "GET",
+      "path": "/api/plans/:id/versions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/pops"
+    },
+    {
+      "method": "GET",
+      "path": "/api/portal/acceptances"
+    },
+    {
+      "method": "GET",
+      "path": "/api/portal/cpe"
+    },
+    {
+      "method": "GET",
+      "path": "/api/portal/overview"
+    },
+    {
+      "method": "GET",
+      "path": "/api/portal/surveys"
+    },
+    {
+      "method": "GET",
+      "path": "/api/portal/tickets"
+    },
+    {
+      "method": "GET",
+      "path": "/api/portal/tickets/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/portal/usage-series"
+    },
+    {
+      "method": "GET",
+      "path": "/api/radius/allowed-sources"
+    },
+    {
+      "method": "GET",
+      "path": "/api/radius/devices/:id/setup"
+    },
+    {
+      "method": "GET",
+      "path": "/api/radius/status"
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/commissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/referrals"
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/sla"
+    },
+    {
+      "method": "GET",
+      "path": "/api/search"
+    },
+    {
+      "method": "GET",
+      "path": "/api/settings/retention"
+    },
+    {
+      "method": "GET",
+      "path": "/api/sla-policies"
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff"
+    },
+    {
+      "method": "GET",
+      "path": "/api/stock/items"
+    },
+    {
+      "method": "GET",
+      "path": "/api/stock/items/:id/movements"
+    },
+    {
+      "method": "GET",
+      "path": "/api/stock/items/:id/units"
+    },
+    {
+      "method": "GET",
+      "path": "/api/stock/units"
+    },
+    {
+      "method": "GET",
+      "path": "/api/stock/units/:id/events"
+    },
+    {
+      "method": "GET",
+      "path": "/api/subscribers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/subscribers/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/subscribers/:id/contacts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/subscribers/:id/documents"
+    },
+    {
+      "method": "GET",
+      "path": "/api/subscribers/:id/lgpd-export"
+    },
+    {
+      "method": "GET",
+      "path": "/api/subscribers/:id/notes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/subscribers/:id/portal-access"
+    },
+    {
+      "method": "GET",
+      "path": "/api/subscribers/:id/timeline"
+    },
+    {
+      "method": "GET",
+      "path": "/api/surveys"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tags"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tenants"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tickets"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tickets/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/today"
+    },
+    {
+      "method": "GET",
+      "path": "/api/users"
+    },
+    {
+      "method": "GET",
+      "path": "/api/users/:id/pops"
+    },
+    {
+      "method": "GET",
+      "path": "/api/webhook-deliveries"
+    },
+    {
+      "method": "GET",
+      "path": "/api/webhook-endpoints"
+    },
+    {
+      "method": "GET",
+      "path": "/api/work-orders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/work-orders/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/work-orders/:id/helpers"
+    },
+    {
+      "method": "GET",
+      "path": "/aviso/:slug"
+    },
+    {
+      "method": "GET",
+      "path": "/public/v1"
+    },
+    {
+      "method": "GET",
+      "path": "/public/v1/contracts"
+    },
+    {
+      "method": "GET",
+      "path": "/public/v1/invoices"
+    },
+    {
+      "method": "GET",
+      "path": "/public/v1/subscribers"
+    },
+    {
+      "method": "GET",
+      "path": "/public/v1/subscribers/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/public/v1/work-orders/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/addons/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/agents/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/catalogs/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/companies/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/contracts/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/custom-fields/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/devices/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/ftth/boxes/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/install-kits/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/ipam/pools/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/leads/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/notes/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/notice-channels/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/notice-rules/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/plans/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/pops/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/radius/devices/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/resources/:id/mac"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/resources/:id/secret"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/sla-policies/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/stock/items/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/subscribers/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/tenants/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/tickets/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/users/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/webhook-endpoints/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/work-orders/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/attempts/:id/begin"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/attempts/:id/progress"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/attempts/:id/result"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/hello"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/observations"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/olt-report"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/poll"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/sessions-report"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/sync-done"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/usage-report"
+    },
+    {
+      "method": "POST",
+      "path": "/api/acceptances/:id/cancel"
+    },
+    {
+      "method": "POST",
+      "path": "/api/addons"
+    },
+    {
+      "method": "POST",
+      "path": "/api/agents"
+    },
+    {
+      "method": "POST",
+      "path": "/api/api-tokens"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/logout"
+    },
+    {
+      "method": "POST",
+      "path": "/api/catalogs"
+    },
+    {
+      "method": "POST",
+      "path": "/api/cgnat/plans"
+    },
+    {
+      "method": "POST",
+      "path": "/api/cgnat/plans/:id/retire"
+    },
+    {
+      "method": "POST",
+      "path": "/api/cgnat/plans/check"
+    },
+    {
+      "method": "POST",
+      "path": "/api/commission-rules"
+    },
+    {
+      "method": "POST",
+      "path": "/api/companies"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/acceptances"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/addons"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/agreement"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/amendments"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/cpe/link"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/cpe/reboot"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/cpe/refresh"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/cpe/wifi"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/discounts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/onu"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/scheduled-changes"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/service"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/trust-release"
+    },
+    {
+      "method": "POST",
+      "path": "/api/custom-fields"
+    },
+    {
+      "method": "POST",
+      "path": "/api/demo-gateway/pay"
+    },
+    {
+      "method": "POST",
+      "path": "/api/devices"
+    },
+    {
+      "method": "POST",
+      "path": "/api/devices/:id/convert-to-integrated"
+    },
+    {
+      "method": "POST",
+      "path": "/api/devices/:id/reapply"
+    },
+    {
+      "method": "POST",
+      "path": "/api/finance/generate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/finance/reconcile"
+    },
+    {
+      "method": "POST",
+      "path": "/api/finance/run-auto-suspend"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ftth/boxes"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ftth/boxes/:id/drops"
+    },
+    {
+      "method": "POST",
+      "path": "/api/import/apply"
+    },
+    {
+      "method": "POST",
+      "path": "/api/import/batches/:id/provision"
+    },
+    {
+      "method": "POST",
+      "path": "/api/import/preview"
+    },
+    {
+      "method": "POST",
+      "path": "/api/install-kits"
+    },
+    {
+      "method": "POST",
+      "path": "/api/invoices"
+    },
+    {
+      "method": "POST",
+      "path": "/api/invoices/:id/cancel"
+    },
+    {
+      "method": "POST",
+      "path": "/api/invoices/:id/manual-payment"
+    },
+    {
+      "method": "POST",
+      "path": "/api/invoices/:id/payments/:paymentId/reverse"
+    },
+    {
+      "method": "POST",
+      "path": "/api/invoices/:id/resolve"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ipam/pools"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ipam/pools/:id/allocations"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ipam/pools/:id/delegations"
+    },
+    {
+      "method": "POST",
+      "path": "/api/leads"
+    },
+    {
+      "method": "POST",
+      "path": "/api/leads/:id/convert"
+    },
+    {
+      "method": "POST",
+      "path": "/api/leads/:id/notes"
+    },
+    {
+      "method": "POST",
+      "path": "/api/leads/:id/stage"
+    },
+    {
+      "method": "POST",
+      "path": "/api/legal/ip-lookup"
+    },
+    {
+      "method": "POST",
+      "path": "/api/maintenance-notices"
+    },
+    {
+      "method": "POST",
+      "path": "/api/maintenance-notices/:id/cancel"
+    },
+    {
+      "method": "POST",
+      "path": "/api/maintenance-notices/:id/notify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/me/mfa/disable"
+    },
+    {
+      "method": "POST",
+      "path": "/api/me/mfa/enable"
+    },
+    {
+      "method": "POST",
+      "path": "/api/me/mfa/setup"
+    },
+    {
+      "method": "POST",
+      "path": "/api/me/password"
+    },
+    {
+      "method": "POST",
+      "path": "/api/network/disconnect"
+    },
+    {
+      "method": "POST",
+      "path": "/api/notice-channels"
+    },
+    {
+      "method": "POST",
+      "path": "/api/notice-channels/:id/test"
+    },
+    {
+      "method": "POST",
+      "path": "/api/notice-rules"
+    },
+    {
+      "method": "POST",
+      "path": "/api/notice-rules/run"
+    },
+    {
+      "method": "POST",
+      "path": "/api/notice-templates"
+    },
+    {
+      "method": "POST",
+      "path": "/api/notifications/deliver"
+    },
+    {
+      "method": "POST",
+      "path": "/api/notifications/test"
+    },
+    {
+      "method": "POST",
+      "path": "/api/onus/:id/:action"
+    },
+    {
+      "method": "POST",
+      "path": "/api/plans"
+    },
+    {
+      "method": "POST",
+      "path": "/api/plans/:id/reapply"
+    },
+    {
+      "method": "POST",
+      "path": "/api/plans/:id/versions"
+    },
+    {
+      "method": "POST",
+      "path": "/api/pops"
+    },
+    {
+      "method": "POST",
+      "path": "/api/portal/acceptances/:id/accept"
+    },
+    {
+      "method": "POST",
+      "path": "/api/portal/cpe/:contractId/wifi"
+    },
+    {
+      "method": "POST",
+      "path": "/api/portal/surveys/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/portal/tickets"
+    },
+    {
+      "method": "POST",
+      "path": "/api/portal/tickets/:id/messages"
+    },
+    {
+      "method": "POST",
+      "path": "/api/portal/trust-release"
+    },
+    {
+      "method": "POST",
+      "path": "/api/radius/devices"
+    },
+    {
+      "method": "POST",
+      "path": "/api/radius/devices/:id/secret"
+    },
+    {
+      "method": "POST",
+      "path": "/api/radius/devices/:id/tunnel"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/:id/:action"
+    },
+    {
+      "method": "POST",
+      "path": "/api/sla-policies"
+    },
+    {
+      "method": "POST",
+      "path": "/api/stock/items"
+    },
+    {
+      "method": "POST",
+      "path": "/api/stock/items/:id/movements"
+    },
+    {
+      "method": "POST",
+      "path": "/api/stock/items/:id/units"
+    },
+    {
+      "method": "POST",
+      "path": "/api/stock/units/:id/status"
+    },
+    {
+      "method": "POST",
+      "path": "/api/stock/units/:id/transfer"
+    },
+    {
+      "method": "POST",
+      "path": "/api/subscribers"
+    },
+    {
+      "method": "POST",
+      "path": "/api/subscribers/:id/anonymize"
+    },
+    {
+      "method": "POST",
+      "path": "/api/subscribers/:id/documents"
+    },
+    {
+      "method": "POST",
+      "path": "/api/subscribers/:id/notes"
+    },
+    {
+      "method": "POST",
+      "path": "/api/subscribers/:id/portal-access"
+    },
+    {
+      "method": "POST",
+      "path": "/api/support/enter"
+    },
+    {
+      "method": "POST",
+      "path": "/api/support/exit"
+    },
+    {
+      "method": "POST",
+      "path": "/api/tags"
+    },
+    {
+      "method": "POST",
+      "path": "/api/tenants"
+    },
+    {
+      "method": "POST",
+      "path": "/api/tickets"
+    },
+    {
+      "method": "POST",
+      "path": "/api/tickets/:id/messages"
+    },
+    {
+      "method": "POST",
+      "path": "/api/tickets/:id/status"
+    },
+    {
+      "method": "POST",
+      "path": "/api/users"
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhook-deliveries/:id/retry"
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhook-endpoints"
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhook-endpoints/:id/rotate-secret"
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhook-endpoints/:id/test"
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhooks/gateway/:gateway"
+    },
+    {
+      "method": "POST",
+      "path": "/api/work-orders"
+    },
+    {
+      "method": "POST",
+      "path": "/api/work-orders/:id/checklist"
+    },
+    {
+      "method": "POST",
+      "path": "/api/work-orders/:id/checklist/:itemId"
+    },
+    {
+      "method": "POST",
+      "path": "/api/work-orders/:id/helpers"
+    },
+    {
+      "method": "POST",
+      "path": "/api/work-orders/:id/kit"
+    },
+    {
+      "method": "POST",
+      "path": "/api/work-orders/:id/materials"
+    },
+    {
+      "method": "POST",
+      "path": "/api/work-orders/:id/notes"
+    },
+    {
+      "method": "POST",
+      "path": "/api/work-orders/:id/status"
+    },
+    {
+      "method": "POST",
+      "path": "/api/work-orders/:id/units"
+    },
+    {
+      "method": "POST",
+      "path": "/public/v1/tickets"
+    },
+    {
+      "method": "POST",
+      "path": "/public/v1/work-orders"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/anatel/municipalities"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/contracts/:id/company"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/contracts/:id/credit-restriction"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/contracts/:id/custom"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/contracts/:id/install-address"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/contracts/:id/location"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/contracts/:id/loyalty"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/contracts/:id/pop"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/contracts/:id/referral"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/contracts/:id/service-area"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/contracts/:id/tags"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/finance/settings"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/noc/settings"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notice-page"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notifications/settings"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/plans/:id/dunning"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/plans/:id/loyalty"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/plans/:id/network"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/plans/:id/technology"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/pops/:id/location"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/settings/retention"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/subscribers/:id/contacts"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/subscribers/:id/custom"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/users/:id/pops"
+    }
+  ]
+}

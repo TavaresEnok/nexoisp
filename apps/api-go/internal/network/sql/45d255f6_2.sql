@@ -1,0 +1,2 @@
+update service_resources set desired_version = $2, desired_policy = $3, desired_profile = $4, desired_reason = $5,
+            desired_at = case when $7 then desired_at else now() end, desired_stage = $6 where id = $1

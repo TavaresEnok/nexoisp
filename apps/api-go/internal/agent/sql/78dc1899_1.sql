@@ -1,0 +1,1 @@
+select id, name, driver, host, api_port, credential_ref, maintenance from devices where agent_id = $1

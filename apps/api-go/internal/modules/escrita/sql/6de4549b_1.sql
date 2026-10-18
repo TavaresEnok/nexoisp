@@ -1,0 +1,1 @@
+update work_orders set assignee_id = $2, scheduled_for = $3, status = $4, description = $5, estimated_minutes = $6, updated_at = now() where id = $1 returning *

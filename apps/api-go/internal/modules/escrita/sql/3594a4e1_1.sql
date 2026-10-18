@@ -1,0 +1,1 @@
+select 1 from operations o where o.device_id = $1 and o.status in ('PENDING','RESERVED','EXECUTING','VERIFYING','UNCERTAIN')

@@ -1,0 +1,1 @@
+select type from custom_fields where id = $1

@@ -1,0 +1,15 @@
+.data
+.git
+.claude
+backups
+bench/results
+bench/*.zip
+node_modules
+apps/*/node_modules
+docs/SGP
+tests/contrato/local
+apps/api-go/bin
+**/.env
+**/*.key
+infra/certs
+infra/prod/certs

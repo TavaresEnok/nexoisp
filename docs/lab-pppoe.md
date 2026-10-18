@@ -1,5 +1,7 @@
 # Roteiro de laboratório — PPPoE real (E3)
 
+Este documento preserva o roteiro reutilizável e as evidências das execuções indicadas. Os resultados de 10–13/10/2026 antecedem a migração do backend para Go; repetir no conjunto atual antes de homologar o piloto. Decisões ADR referenciadas aqui estão em [Arquitetura](arquitetura.md).
+
 **Situação: EXECUTADO em laboratório virtual em 10/10/2026 — os 12 casos passaram.**
 Ambiente: MikroTik CHR **RouterOS 7.24.5 (stable)** em QEMU/KVM, cliente PPPoE real (`pppd` 2.4.9), **FreeRADIUS 3.2.10**, autenticação CHAP.
 Reproduzir: `./nexo lab-up` (com o painel de demonstração rodando) e seguir a seção 3; `./nexo lab-down` remove tudo.
@@ -120,7 +122,7 @@ As contas locais do cenário continuaram autenticando sem o RADIUS; a senha do `
 | + | Segunda instância do RADIUS (`trio.sh radius-ha`) | ✅ Segunda instância sobre o mesmo banco (porta 1822) cadastrada no nó; principal parada; sessão derrubada; cliente reautenticou em menos de 25 s |
 | + | CGNAT determinístico (`trio.sh cgnat 2 3 4 5`) | ✅ 517 regras geradas pelo painel aplicadas pela API **antes** do NAT que o nó já tinha (a configuração do provedor tem CGNAT próprio para o mesmo bloco); 4 clientes com IP fixo, TCP e UDP: 19 traduções conferidas, 0 divergente; regras removidas ao final (NAT do nó voltou às 524 regras) |
 
-Segunda rodada no mesmo cenário (agente 0.4.0, 13/10/2026), para os recursos acrescentados a partir do comparativo com o SGP (`docs/07-comparativo-sgp.md`):
+Segunda rodada no mesmo cenário (agente 0.4.0, 13/10/2026), para suspensão por perfil, vínculo de MAC e consumo:
 
 | Caso | Como foi feito | Resultado no cenário |
 |---|---|---|
@@ -150,7 +152,7 @@ Diferenças em relação à seção 3, para não ler mais do que foi feito:
 
 ## Pendências conhecidas do driver
 
-- Suspensão implementada só na modalidade de demonstração "negar autenticação + derrubar sessão". Modalidade real (ex.: perfil restrito/aviso) depende da política comercial.
-- Sessão é lida pela API (`/ppp/active`); CoA/Disconnect-Request por RADIUS não é usado.
+- Suspensão pode negar autenticação ou aplicar perfil de bloqueio, conforme política. Perfil, pool e redirecionamento precisam de configuração e homologação no NAS do provedor.
+- No driver de site `mikrotik_radius`, sessão é lida e encerrada pela API do NAS (`/ppp/active`). O modo RADIUS integrado é separado e usa Disconnect-Request; consulte [Operação](operacao.md).
 - Com o NAS sem resposta, troca de plano, IP fixo e suspensão **não** são dadas como concluídas (a sessão é desconhecida); a operação fica como falha e a nova tentativa consulta antes de repetir. Só o primeiro provisionamento de uma conta conclui sem o NAS.
-- Segredo PPPoE fica em `Cleartext-Password` no SQLite local (exigido por CHAP/MS-CHAP). Proteção do arquivo: permissões 660 + disco do host; criptografia do SQLite **não** implementada (ADR-008).
+- No RADIUS do site, o padrão é `Cleartext-Password` (necessário para CHAP). Com `password_storage=nt_hash`, fica apenas o hash NT e o NAS precisa usar MS-CHAPv2. Ambas as opções exigem proteção do arquivo/disco; o produto não implementa criptografia do SQLite (ADR-008).

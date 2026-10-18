@@ -1,0 +1,1 @@
+delete from user_pops where user_id = $1

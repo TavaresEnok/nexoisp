@@ -1,0 +1,1 @@
+insert into ip_pools (tenant_id, name, cidr, kind, device_id, notes, delegation_len) values ($1,$2,$3,$4,$5,$6,$7) returning *

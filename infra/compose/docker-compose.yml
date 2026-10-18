@@ -7,19 +7,37 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: nexo
     ports: ["127.0.0.1:15432:5432"]
-    command: ["postgres", "-c", "hba_file=/etc/nexo/pg_hba.conf"]   # inclui o acesso da réplica
+    # Até 30 workers paralelos; 32 vagas de processos deixam margem para outros workers.
+    command: ["postgres", "-c", "hba_file=/etc/nexo/pg_hba.conf", "-c", "max_worker_processes=32", "-c", "max_parallel_workers=30", "-c", "max_parallel_workers_per_gather=30"]
     volumes: [dbdata:/var/lib/postgresql/data, "./db/pg_hba.conf:/etc/nexo/pg_hba.conf:ro"]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U nexo_owner -d nexo"]
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U nexo_owner -d nexo"]
       interval: 3s
       retries: 20
   api:
-    build: { context: ../.., dockerfile: infra/compose/Dockerfile.api }
+    build: { context: ../.., dockerfile: apps/api-go/Dockerfile }
     depends_on: { db: { condition: service_healthy } }
-    environment:
-      DATABASE_URL_OWNER: postgres://nexo_owner:${POSTGRES_PASSWORD}@db:5432/nexo
-      DATABASE_URL_APP: postgres://nexo_app:${NEXO_APP_DB_PASSWORD}@db:5432/nexo
-      NEXO_APP_DB_PASSWORD: ${NEXO_APP_DB_PASSWORD}
+    environment: &go_environment
+      NEXO_TRUST_PROXY: "1"
+      DATABASE_URL_GO: postgres://nexo_go:${NEXO_GO_DB_PASSWORD:?}@db:5432/nexo
+      NEXO_GO_ADDR: 0.0.0.0:8080
+      NEXO_GO_INTERNAL_ADDR: 0.0.0.0:9090
+      NEXO_GO_AGENT_ADDR: 0.0.0.0:8443
+      NEXO_GO_JOBS: "1"
+      NEXO_GO_JOB_BILLING: "1"
+      NEXO_GO_JOB_RECONCILE: "1"
+      NEXO_GO_JOB_NOTICES: "1"
+      NEXO_GO_JOB_SCHEDULED: "1"
+      NEXO_GO_JOB_SLA: "1"
+      NEXO_GO_JOB_PURGE: "1"
+      NEXO_GO_JOB_TRUST: "1"
+      NEXO_GO_JOB_SUSPEND: "1"
+      NEXO_GO_JOB_NOTIFICATIONS: "1"
+      NEXO_GO_JOB_WEBHOOKS: "1"
+      NEXO_GO_JOB_ALERTS: "1"
+      NEXO_GO_JOB_CLEANUP: "1"
+      NEXO_GO_JOB_RADIUS: "1"
+      NEXO_GO_JOB_RADIUS_SYNC: "1"
       NEXO_DEMO_MODE: ${NEXO_DEMO_MODE:-0}
       PORT: "8080"
       NEXO_OP_SIGNING_KEY: ${NEXO_OP_SIGNING_KEY}
@@ -28,8 +46,6 @@ services:
       NEXO_GATEWAY_WEBHOOK_SECRET: ${NEXO_GATEWAY_WEBHOOK_SECRET:-}
       NEXO_AGENT_TLS_DIR: /certs
       NEXO_RADIUS_KEY: ${NEXO_RADIUS_KEY:-}
-      NEXO_REPLICA_PASSWORD: ${NEXO_REPLICA_PASSWORD:-}           # papel de replicação (perfil ha)
-      NEXO_RADIUS_DB_PASSWORD: ${NEXO_RADIUS_DB_PASSWORD:-}
       NEXO_RADIUS_PUBLIC_HOST: ${NEXO_RADIUS_PUBLIC_HOST:-}     # endereço que os concentradores usam para chegar ao RADIUS (aparece nas instruções)
       NEXO_RADIUS_PORT: ${NEXO_RADIUS_PORT:-1812}
       NEXO_RADIUS_COA_RELAY: vpn:3798                           # a desconexão de sessão sai pelo serviço do túnel
@@ -41,19 +57,41 @@ services:
       NEXO_RADIUS_SECONDARY_HOST: ${NEXO_RADIUS_SECONDARY_HOST:-}
       NEXO_RADIUS_SECONDARY_PORT: ${NEXO_RADIUS_SECONDARY_PORT:-}
     volumes: ["../certs:/certs:ro"]
-    ports: ["${NEXO_PANEL_BIND:-127.0.0.1}:18080:8080", "127.0.0.1:18443:8443"]
-  # Túnel integrado (WireGuard): o concentrador disca para cá e a autenticação passa por dentro. Mesma imagem da API, outro comando.
+    ports: ["127.0.0.1:18443:8443"]
+  migrate:
+    build: { context: ../.., dockerfile: apps/api-go/Dockerfile }
+    profiles: [tools]
+    depends_on: { db: { condition: service_healthy } }
+    entrypoint: [nexo-db]
+    command: [prepare]
+    environment:
+      <<: *go_environment
+      DATABASE_URL_OWNER: postgres://nexo_owner:${POSTGRES_PASSWORD}@db:5432/nexo
+      NEXO_APP_DB_PASSWORD: ${NEXO_APP_DB_PASSWORD}
+      NEXO_GO_DB_PASSWORD: ${NEXO_GO_DB_PASSWORD:?}
+      NEXO_REPLICA_PASSWORD: ${NEXO_REPLICA_PASSWORD:-}
+      NEXO_RADIUS_DB_PASSWORD: ${NEXO_RADIUS_DB_PASSWORD:-}
+      NEXO_NEW_PASSWORD: ${NEXO_NEW_PASSWORD:-}
+    volumes: ["../certs:/certs:ro"]
+  caddy:
+    build: { context: ../.., dockerfile: infra/prod/caddy/Dockerfile }
+    depends_on: [api]
+    command: [caddy, run, --config, /etc/caddy/Caddyfile, --adapter, caddyfile]
+    environment:
+      NEXO_DOMAIN: ":8080"
+      NEXO_GO_UPSTREAM: api:8080
+    ports: ["${NEXO_PANEL_BIND:-127.0.0.1}:18080:8080"]
+  # Túnel integrado Go (WireGuard): o concentrador disca para cá e a autenticação passa por dentro.
   # O servidor RADIUS compartilha a rede deste serviço; por isso as portas dele são publicadas aqui.
   vpn:
-    build: { context: ../.., dockerfile: infra/compose/Dockerfile.api }
-    command: ["node", "apps/api/dist/vpn.js"]
+    build: { context: ../.., dockerfile: apps/api-go/Dockerfile.vpn }
     user: root
     cap_add: [NET_ADMIN]
     device_cgroup_rules: ["c 108:0 rwm"]   # /dev/ppp do L2TP (criado pelo serviço se faltar)
     restart: unless-stopped
     depends_on: { db: { condition: service_healthy }, api: { condition: service_started } }
     environment:
-      DATABASE_URL_APP: postgres://nexo_app:${NEXO_APP_DB_PASSWORD}@db:5432/nexo
+      DATABASE_URL_GO: postgres://nexo_go:${NEXO_GO_DB_PASSWORD:?}@db:5432/nexo
       NEXO_L2TP_PSK: ${NEXO_L2TP_PSK:-}
       NEXO_RADIUS_KEY: ${NEXO_RADIUS_KEY:-}                    # lê as senhas L2TP dos concentradores
     volumes: [vpnstate:/state]

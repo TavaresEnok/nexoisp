@@ -1,0 +1,1 @@
+select 1 from cgnat_plans where private_pool_id = $1 or public_pool_id = $1 limit 1

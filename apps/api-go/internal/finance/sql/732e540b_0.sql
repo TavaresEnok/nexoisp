@@ -1,0 +1,1 @@
+select subscriber_id, status from contracts where id = $1

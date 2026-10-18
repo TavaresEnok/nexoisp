@@ -1,0 +1,2 @@
+select t.id, t.granted_at, t.days, t.status, t.source, t.contract_id, u.name as by from trust_releases t join contracts k on k.id = t.contract_id
+           left join users u on u.id = t.requested_by where k.subscriber_id = $1 order by t.granted_at desc limit $2

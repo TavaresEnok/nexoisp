@@ -1,0 +1,1 @@
+delete from subscriber_contacts where subscriber_id = $1

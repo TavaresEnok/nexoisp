@@ -1,0 +1,1 @@
+select subscriber_id, amount_cents, paid_at from invoices where id = $1

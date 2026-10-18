@@ -1,0 +1,1 @@
+update plans set warn_after_days = $2, reduce_after_days = $3, block_after_days = $4, reduced_profile = $5 where id = $1 returning id, name, warn_after_days, reduce_after_days, block_after_days, reduced_profile

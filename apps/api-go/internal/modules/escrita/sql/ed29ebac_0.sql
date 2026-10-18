@@ -1,0 +1,1 @@
+delete from work_order_helpers where work_order_id = $1 and user_id = $2

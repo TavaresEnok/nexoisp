@@ -1,0 +1,1 @@
+delete from l2tp_peers where device_id = $1

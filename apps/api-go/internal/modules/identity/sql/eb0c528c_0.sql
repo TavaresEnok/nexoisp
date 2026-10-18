@@ -1,0 +1,1 @@
+insert into tenants (name, slug) values ($1,$2) returning *

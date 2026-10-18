@@ -1,0 +1,1 @@
+insert into work_order_helpers (tenant_id, work_order_id, user_id) values ($1,$2,$3) on conflict do nothing

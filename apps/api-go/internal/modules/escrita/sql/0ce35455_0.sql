@@ -1,0 +1,1 @@
+insert into devices (tenant_id, name, driver, host, api_port, credential_ref, agent_id, simultaneous_use, acct_interim_seconds) values ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning *

@@ -1,0 +1,1 @@
+insert into vpn_peers (device_id, tenant_id, tunnel_ip, public_key) values ($1,$2,$3,$4)

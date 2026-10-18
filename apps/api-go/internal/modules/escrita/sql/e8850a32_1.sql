@@ -1,0 +1,1 @@
+select id, name from devices where maintenance order by name

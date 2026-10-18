@@ -1,0 +1,2 @@
+select i.id, i.created_at, i.paid_at, i.canceled_at, i.kind, i.amount_cents, i.status, i.due_date, i.contract_id from invoices i
+           where i.subscriber_id = $1 order by i.created_at desc limit $2

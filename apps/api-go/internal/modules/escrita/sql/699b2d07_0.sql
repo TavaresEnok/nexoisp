@@ -1,0 +1,1 @@
+select name from subscribers where id = $1

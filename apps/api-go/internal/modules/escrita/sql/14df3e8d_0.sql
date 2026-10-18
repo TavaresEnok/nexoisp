@@ -1,0 +1,1 @@
+select count(*) as n from invoices where competence = $1 and kind = 'monthly'

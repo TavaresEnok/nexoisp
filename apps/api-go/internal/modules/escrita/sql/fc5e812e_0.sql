@@ -1,0 +1,1 @@
+select 1 from notice_templates where id = $1

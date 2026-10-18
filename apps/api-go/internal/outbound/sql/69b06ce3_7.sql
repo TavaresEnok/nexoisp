@@ -1,0 +1,1 @@
+update notice_log set status = $2, error = $3, message = null, created_at = now() where id = $1 and status = 'sending'

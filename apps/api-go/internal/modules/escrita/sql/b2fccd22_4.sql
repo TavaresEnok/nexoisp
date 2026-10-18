@@ -1,0 +1,1 @@
+update leads set stage = 'won', subscriber_id = $2, lost_reason = null, updated_at = now() where id = $1

@@ -1,0 +1,1 @@
+select 1 from onus where id = $1 and device_id = $2

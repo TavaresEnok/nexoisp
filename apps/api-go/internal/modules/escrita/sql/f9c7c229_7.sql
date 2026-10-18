@@ -1,0 +1,1 @@
+insert into ip6_delegations (tenant_id, pool_id, prefix, contract_id, created_by) values ($1,$2,$3,$4,$5) returning id, prefix

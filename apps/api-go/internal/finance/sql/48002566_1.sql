@@ -1,0 +1,1 @@
+select * from payments where id = $1 and invoice_id = $2

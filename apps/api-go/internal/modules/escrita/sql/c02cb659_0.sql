@@ -1,0 +1,1 @@
+select id, name, document, email, phone, address_street, address_number, address_district, address_city, address_state, address_zip, created_at from subscribers where id = $1

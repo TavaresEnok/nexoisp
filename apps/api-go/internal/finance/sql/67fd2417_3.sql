@@ -1,0 +1,1 @@
+update invoices set discount_cents = discount_cents + $2 where id = $1

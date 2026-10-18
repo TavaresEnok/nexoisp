@@ -1,0 +1,1 @@
+update devices set last_check_at = $3, last_check = $4 where id = $1 and agent_id = $2

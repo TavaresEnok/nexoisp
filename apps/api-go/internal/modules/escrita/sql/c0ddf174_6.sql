@@ -1,0 +1,1 @@
+update contracts set referred_by_subscriber_id = $2 where id = $1 and referred_by_subscriber_id is null and subscriber_id <> $2

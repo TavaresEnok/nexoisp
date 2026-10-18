@@ -1,0 +1,1 @@
+insert into devices (tenant_id, name, driver, vendor, host, agent_id) values ($1,$2,'radius',$3,$4,$5) returning id, name, driver, vendor

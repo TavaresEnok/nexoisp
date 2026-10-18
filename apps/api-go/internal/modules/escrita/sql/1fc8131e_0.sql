@@ -1,0 +1,1 @@
+update commission_rules set active = false where subject = $1 and coalesce(os_kind, '') = coalesce($2, '') and active

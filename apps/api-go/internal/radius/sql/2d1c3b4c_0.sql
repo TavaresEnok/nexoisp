@@ -1,0 +1,1 @@
+select now() - interval '5 seconds' as t

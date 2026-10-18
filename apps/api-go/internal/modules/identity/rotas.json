@@ -1,0 +1,150 @@
+[
+  {
+    "path": "helper:throttle",
+    "permission": "",
+    "file": "identity.ts",
+    "queries": [
+      "b1500ab0_0.sql"
+    ],
+    "sha256": "5688f82cc2104e5998601ec7ef9dd8f9d83c5dbc6c6644d378d995d6a37cdf4e"
+  },
+  {
+    "path": "helper:failed",
+    "permission": "",
+    "file": "identity.ts",
+    "queries": [
+      "a1d01108_0.sql"
+    ],
+    "sha256": "4ca4ee667c8015b2465e49fdcc49d34399afaf301ae273e44874755884744a40"
+  },
+  {
+    "path": "helper:cleared",
+    "permission": "",
+    "file": "identity.ts",
+    "queries": [
+      "83525d09_0.sql"
+    ],
+    "sha256": "373c6a80c0055bb4c207b9a54e314c32db9dfa6b0a05101d6b3d84bb12a7dd27"
+  },
+  {
+    "path": "POST /api/auth/login",
+    "permission": "",
+    "file": "identity.ts",
+    "queries": [
+      "7137dbb0_0.sql",
+      "7137dbb0_1.sql"
+    ],
+    "sha256": "f8d893ffe113dff197103eb4607b74c40bb1a447b9b60eccc49cc428871f7e0c"
+  },
+  {
+    "path": "POST /api/auth/logout",
+    "permission": "",
+    "file": "identity.ts",
+    "queries": [
+      "d2e7a02c_0.sql"
+    ],
+    "sha256": "f494f0c0b2e981fc85081ed8787f3237e264a8760748173e08493a6b3939d2e8"
+  },
+  {
+    "path": "POST /api/me/password",
+    "permission": "",
+    "file": "identity.ts",
+    "queries": [
+      "1b27339c_0.sql",
+      "1b27339c_1.sql",
+      "1b27339c_2.sql"
+    ],
+    "sha256": "e18c331d0e501619c427c815217cf58790043ddf36d7b5ba36456632413eaac8"
+  },
+  {
+    "path": "POST /api/me/mfa/setup",
+    "permission": "",
+    "file": "identity.ts",
+    "queries": [
+      "b61d1613_0.sql",
+      "b61d1613_1.sql"
+    ],
+    "sha256": "a44eb9eceaee53f9936b3cb727bb82e489c99da488f786cdbce878f2ed4b48ea"
+  },
+  {
+    "path": "POST /api/me/mfa/enable",
+    "permission": "",
+    "file": "identity.ts",
+    "queries": [
+      "484e6369_0.sql",
+      "484e6369_1.sql",
+      "484e6369_2.sql"
+    ],
+    "sha256": "e750b181c22da3c47d29d0be905e764d50631b9587a135383be93b24833f7154"
+  },
+  {
+    "path": "POST /api/me/mfa/disable",
+    "permission": "",
+    "file": "identity.ts",
+    "queries": [
+      "163265fc_0.sql",
+      "163265fc_1.sql"
+    ],
+    "sha256": "14c5dcbdfe61caa0f1ff5124afdd784d57257015713165fea707a21f1bf095ac"
+  },
+  {
+    "path": "POST /api/tenants",
+    "permission": "tenants:manage",
+    "file": "identity.ts",
+    "queries": [
+      "eb0c528c_0.sql",
+      "eb0c528c_1.sql",
+      "eb0c528c_2.sql"
+    ],
+    "sha256": "f1cc8340a46c9a673ad0e1f42a2f3ca0b3a4d2f9a6c977ba2b7382c9cad11f40"
+  },
+  {
+    "path": "PATCH /api/tenants/:id",
+    "permission": "tenants:manage",
+    "file": "identity.ts",
+    "queries": [
+      "8fa58e91_0.sql",
+      "8fa58e91_1.sql"
+    ],
+    "sha256": "df40c1c3ac6cf151388f70603ddaee01d2963a0990bff9816e7ce6b220a11b93"
+  },
+  {
+    "path": "POST /api/support/enter",
+    "permission": "tenants:manage",
+    "file": "identity.ts",
+    "queries": [
+      "60abb157_0.sql",
+      "60abb157_1.sql",
+      "60abb157_2.sql"
+    ],
+    "sha256": "1b7a7f63e9cc39567ae4d55b7e10894e949089aa45e5710fb08df47979b7b582"
+  },
+  {
+    "path": "POST /api/support/exit",
+    "permission": "",
+    "file": "identity.ts",
+    "queries": [
+      "f245bafc_0.sql"
+    ],
+    "sha256": "ad3a486778ecfb4bd2fe26672507e1711ccefd2484685a30f36d1ffb77f02747"
+  },
+  {
+    "path": "POST /api/users",
+    "permission": "users:manage",
+    "file": "identity.ts",
+    "queries": [
+      "03073188_0.sql"
+    ],
+    "sha256": "a127ecf6a3d3ca533013bfffeb9b89a16175a456a0314e57133eba9971b27d5d"
+  },
+  {
+    "path": "PATCH /api/users/:id",
+    "permission": "users:manage",
+    "file": "identity.ts",
+    "queries": [
+      "c9e638d3_0.sql",
+      "c9e638d3_1.sql"
+    ],
+    "sha256": "c12ccdf8ad140b0dee371503dc325d2fe79897a193ed40e6007331c4477ee2de"
+  }
+]

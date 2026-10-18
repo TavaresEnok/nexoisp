@@ -1,0 +1,1 @@
+update agents set last_seen_at = now(), version = $2, info = $3 where id = $1

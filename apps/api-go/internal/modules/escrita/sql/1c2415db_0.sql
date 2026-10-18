@@ -1,0 +1,1 @@
+delete from ip6_delegations where id = $1 returning prefix, contract_id

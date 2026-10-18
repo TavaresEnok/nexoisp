@@ -1,0 +1,1 @@
+select * from stock_units where id = $1 for update

@@ -1,0 +1,2 @@
+insert into plan_versions (tenant_id, plan_id, version, price_cents, down_kbps, up_kbps, profile_name)
+         select $1, $2, coalesce(max(version),0)+1, $3,$4,$5,$6 from plan_versions where plan_id = $2 returning *

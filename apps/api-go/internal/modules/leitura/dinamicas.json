@@ -1,0 +1,229 @@
+[
+  {
+    "path": "/api/search",
+    "permission": "subscribers:read",
+    "file": "atendimento.ts",
+    "queries": [
+      "48f11ad2_0.sql",
+      "48f11ad2_1.sql",
+      "48f11ad2_2.sql",
+      "48f11ad2_3.sql",
+      "48f11ad2_4.sql",
+      "48f11ad2_5.sql",
+      "48f11ad2_6.sql",
+      "48f11ad2_7.sql"
+    ],
+    "sha256": "dcf14fa139d9f754394f799c48e456fbb512ba1b59d5751eb1d5129a14e56557"
+  },
+  {
+    "path": "/api/subscribers/:id/timeline",
+    "permission": "subscribers:read",
+    "file": "atendimento.ts",
+    "queries": [
+      "9244a90d_0.sql",
+      "9244a90d_1.sql",
+      "9244a90d_2.sql",
+      "9244a90d_3.sql",
+      "9244a90d_4.sql",
+      "9244a90d_5.sql",
+      "9244a90d_6.sql",
+      "9244a90d_7.sql",
+      "9244a90d_8.sql"
+    ],
+    "sha256": "35f0d0e8c50ace424c05976b232151ad1eb7e2dc4934e41a0c534de83da64adf"
+  },
+  {
+    "path": "/api/contracts/:id/availability",
+    "permission": "network:read",
+    "file": "atendimento.ts",
+    "queries": [
+      "7ecfc6ee_0.sql",
+      "7ecfc6ee_1.sql",
+      "7ecfc6ee_2.sql"
+    ],
+    "sha256": "0709fc1a1b4e003717861f268675c71e37cf5c0780049b270c6c81639a773ddb"
+  },
+  {
+    "path": "helper:localToday",
+    "permission": "",
+    "file": "cadastro.ts",
+    "queries": [
+      "a78d7147_0.sql"
+    ],
+    "sha256": "8bdab1271f5fee3670fa1aea88cfe6a40a6d82c1847c7b3d98a3c848aac3e54c"
+  },
+  {
+    "path": "helper:terminationQuote",
+    "permission": "",
+    "file": "cadastro.ts",
+    "queries": [
+      "4facfb98_0.sql"
+    ],
+    "sha256": "5dea856c8ee7e76f24c663543f2526447157b1cbb5bc1a3611d5f3664d3f5a85"
+  },
+  {
+    "path": "/api/contracts/:id/termination-quote",
+    "permission": "contracts:read",
+    "file": "condicoes.ts",
+    "queries": [],
+    "sha256": "0d175221be921c2048d369347e38ace104b2b4e74d47619f9b7e215731d968ef"
+  },
+  {
+    "path": "/api/crm/report",
+    "permission": "crm:read",
+    "file": "crm.ts",
+    "queries": [
+      "5cb26b62_0.sql",
+      "5cb26b62_1.sql",
+      "5cb26b62_2.sql",
+      "5cb26b62_3.sql"
+    ],
+    "sha256": "2a1624406b550e57ebed11723e10f3844b49dc1a4bc941abd81f781ebf38e8fb"
+  },
+  {
+    "path": "/api/invoices",
+    "permission": "finance:read",
+    "file": "finance.ts",
+    "queries": [
+      "4a483e96_0.sql",
+      "4a483e96_1.sql",
+      "4a483e96_2.sql"
+    ],
+    "sha256": "bb90593f7ea4b680b223b0e98e60217c4677c73d8e907c5d6b07734dc850a585"
+  },
+  {
+    "path": "/api/reports/sla",
+    "permission": "subscribers:read",
+    "file": "fluxo-os.ts",
+    "queries": [
+      "ea35f084_0.sql"
+    ],
+    "sha256": "0482f25c765d933a1fb16fd1d93cbcb80f3aab4dcaac8dc0ee8a068f60eddc6a"
+  },
+  {
+    "path": "/api/agenda",
+    "permission": "os:read",
+    "file": "fluxo-os.ts",
+    "queries": [
+      "526b7604_0.sql",
+      "526b7604_1.sql"
+    ],
+    "sha256": "ab1d0a38c00888ba080515b289e99cf3af84359cd1f4f8f8482278c49f634856"
+  },
+  {
+    "path": "/api/agenda/free",
+    "permission": "os:read",
+    "file": "fluxo-os.ts",
+    "queries": [
+      "c096335d_0.sql",
+      "c096335d_1.sql"
+    ],
+    "sha256": "1da8f685394c195dd8220d0a8f0b3d9021e38a3961543b63328629b24fc721bc"
+  },
+  {
+    "path": "/api/cgnat/plans",
+    "permission": "network:read",
+    "file": "ipam.ts",
+    "queries": [
+      "ddaeec93_0.sql"
+    ],
+    "sha256": "a91f2deb92a08d90ea51b8b486baf01c15608bb2fe386b614a2d62a4c9953570"
+  },
+  {
+    "path": "helper:loadPlan",
+    "permission": "",
+    "file": "ipam.ts",
+    "queries": [
+      "5d584040_0.sql"
+    ],
+    "sha256": "f436b4ea5b26aec5a06567e64317bea168a6dcf8f922b138c9f3e3335b7d8927"
+  },
+  {
+    "path": "/api/cgnat/plans/:id/map",
+    "permission": "network:read",
+    "file": "ipam.ts",
+    "queries": [],
+    "sha256": "a77629a6c2d5aaa50fb53237ff89b775e0e7e558fccbb46133a852e45c833e4a"
+  },
+  {
+    "path": "/api/cgnat/plans/:id/lookup",
+    "permission": "network:read",
+    "file": "ipam.ts",
+    "queries": [],
+    "sha256": "51dd9622494a0d6d111bf97090a0a8c0e73a71b2c65ca69cc0f6f8b9a7ed85de"
+  },
+  {
+    "path": "/api/map/points",
+    "permission": "contracts:read",
+    "file": "mapa.ts",
+    "queries": [
+      "d93d0615_0.sql",
+      "d93d0615_1.sql",
+      "d93d0615_2.sql"
+    ],
+    "sha256": "0f51a6dc1b4751aee1ad7a7f88f8d278d8d40b5c10b8989d47d6cac701b152f6"
+  },
+  {
+    "path": "/api/today",
+    "permission": "subscribers:read",
+    "file": "noc.ts",
+    "queries": [
+      "8d9dae54_0.sql",
+      "8d9dae54_1.sql",
+      "8d9dae54_2.sql",
+      "8d9dae54_3.sql",
+      "8d9dae54_4.sql"
+    ],
+    "sha256": "44971baa09a6a9521d2486f5861b339693d4a7c9c9d3316a5cb9f49e533ff630"
+  },
+  {
+    "path": "helper:tunnelOf",
+    "permission": "",
+    "file": "radius.ts",
+    "queries": [
+      "c55ce55e_0.sql",
+      "c55ce55e_1.sql"
+    ],
+    "sha256": "31641b5eb3fc4897444b0c3e52f6218fc4f185e10c5ea08834c28d2cd2736149"
+  },
+  {
+    "path": "helper:nasOf",
+    "permission": "",
+    "file": "radius.ts",
+    "queries": [
+      "d5a9d94c_0.sql"
+    ],
+    "sha256": "caf5b810ca3fef6aa6068b907ab3272524df535502974de76104d7929d6e091d"
+  },
+  {
+    "path": "/api/radius/status",
+    "permission": "network:read",
+    "file": "radius.ts",
+    "queries": [
+      "32ff01f9_0.sql"
+    ],
+    "sha256": "9e9924946bffd41ce597e0cc6c2019943df9edecded2a947d1d36afdf1507930"
+  },
+  {
+    "path": "/api/radius/devices/:id/setup",
+    "permission": "network:read",
+    "file": "radius.ts",
+    "queries": [],
+    "sha256": "44fa7d357ce861fd9abf6012717ed4608978c79425d000dc6d56e027fa13dce3"
+  },
+  {
+    "path": "/api/dashboard/panels",
+    "permission": "network:read",
+    "file": "relatorios.ts",
+    "queries": [
+      "9603e721_0.sql",
+      "9603e721_1.sql",
+      "9603e721_2.sql",
+      "9603e721_3.sql",
+      "9603e721_4.sql",
+      "9603e721_5.sql",
+      "9603e721_6.sql"
+    ],
+    "sha256": "9048f533d11161e823c7439c137391cbd8ccb5202545ee50e0f86ab64b1a22d5"
+  }
+]

@@ -1,0 +1,1 @@
+update tickets set status = 'open', updated_at = now() where id = $1 returning number, subject

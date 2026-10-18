@@ -1,0 +1,3 @@
+/relatorios/*
+/local/
+!relatorios/.gitkeep

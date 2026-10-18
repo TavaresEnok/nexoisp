@@ -1,0 +1,1 @@
+update tickets set status = case when $2 then status else 'waiting' end, updated_at = now() where id = $1

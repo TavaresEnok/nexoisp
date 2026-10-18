@@ -1,0 +1,1 @@
+update operation_attempts set status = 'EXECUTING' where id = $1

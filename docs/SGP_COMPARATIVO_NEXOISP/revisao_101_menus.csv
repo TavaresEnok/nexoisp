@@ -1,0 +1,102 @@
+id,hierarquia,capacidade_tematica,decisao,limite_e_pendencia
+M001,Clientes,C03,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M004,Clientes → Cadastrar,C03,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M009,Clientes → Viabilidade,C06,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M013,Clientes → Pré-Cadastro,C06,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M014,Clientes → Pré-Cadastro → Listar,C06,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M016,Clientes → Pré-Cadastro → Cadastrar,C06,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M020,Clientes → CRM,C06,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M021,Clientes → CRM → Cadastrar Cliente,C03,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M027,Clientes → CRM → Relatórios,C06,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M033,Financeiro,C10,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M034,Financeiro → Cadastros,C10,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M048,Financeiro → Títulos,C10,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M050,Financeiro → Títulos → Gerar,C10,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M053,Financeiro → Títulos → Imprimir,C10,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M059,Financeiro → Títulos → Remessas,C11,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M065,Financeiro → Carnês,C10,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M066,Financeiro → Carnês → Gerar,C10,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M068,Financeiro → Carnês → Imprimir,C10,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M072,Financeiro → Protocolos,C10,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M075,Financeiro → Caixas,C10,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M076,Financeiro → Caixas → Lançamentos,C10,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M080,Financeiro → Caixas → Repasses,C10,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M083,Financeiro → Contas a Pagar,C10,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M087,Financeiro → Contas a Receber,C10,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M090,Financeiro → Declarações,C10,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M092,Financeiro → Acréscimos / Descontos em Lote,C10,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M094,Financeiro → Cobrança,C10,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M100,Financeiro → Cobrança → Cartas de Cobrança,C10,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M105,Financeiro → Pix,C11,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M108,Fiscal,C12,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M109,Fiscal → Cadastros,C12,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M116,Fiscal → Arquivos Fiscais,C12,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M121,Fiscal → Nota Fiscal 21/22,C12,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M124,Fiscal → Nota Fiscal 21/22 → Imprimir,C12,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M130,Fiscal → Nota Fiscal 55/65,C12,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M139,Fiscal → CT-e,C12,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M142,Fiscal → Nota Fiscal 62 (NFCom),C12,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M148,Fiscal → Nota Fiscal 62 (NFCom) → Imprimir,C12,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M152,Fiscal → Nota de Débito,C12,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M157,Fiscal → Nota de Serviço,C12,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M162,Fiscal → Código IBGE,C38,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M164,Estoque,C17,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M165,Estoque → Cadastros,C19,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M174,Estoque → Consultas,C17,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M178,Estoque → Movimentações,C17,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M179,Estoque → Movimentações → Compra,C19,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M184,Estoque → Movimentações → Venda,C19,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M187,Estoque → Movimentações → Comodato,C17,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M190,Estoque → Movimentações → Correção,C17,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M193,Estoque → Movimentações → Transferência,C19,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M197,Estoque → Veículo Lançamento,C20,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M199,Relatórios,C37,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M200,Relatórios → Financeiro,C37,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M201,Relatórios → Financeiro → Títulos,C37,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M205,Relatórios → Financeiro → Títulos → Recebidos (Resumo),C37,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M215,Relatórios → Financeiro → Títulos → Itens,C37,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M222,Relatórios → Financeiro → Carnês,C37,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M224,Relatórios → Financeiro → Caixa,C37,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M226,Relatórios → Financeiro → Plano de Contas,C37,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M236,Relatórios → Financeiro → Notas Fiscais,C37,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M245,Relatórios → Gráficos,C37,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M251,Relatórios → Mapas,C37,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M258,Relatórios → Contrato,C37,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M275,Relatórios → Contrato → Agendamentos,C37,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M284,Relatórios → Atendimento,C37,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M297,Relatórios → Técnico,C37,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M312,Relatórios → FTTH,C37,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M316,Relatórios → Estoque,C37,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M326,Relatórios → Comissão,C37,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M329,Relatórios → Frota,C37,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M333,Relatórios → Formulário,C37,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M335,Administração,C40,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M338,Administração → Frota,C20,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M343,Administração → Frota → Cadastros,C20,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M346,Administração → Cadastros,C40,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M350,Administração → Cadastros → CGNAT,C23,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M369,Administração → Cadastros → Automações,C05,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M371,Administração → Planos,C07,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M372,Administração → Planos → Consultar,C07,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M383,Administração → Integrações,C40,dispensar cópia do agrupador; manter avaliação do domínio,Escopo específico continua desconhecido. Associação é apenas temática; obter contrato/uso antes de implementar.
+M385,Aplicativos,C40,dispensar cópia do agrupador; manter avaliação do domínio,Escopo específico continua desconhecido. Associação é apenas temática; obter contrato/uso antes de implementar.
+M389,Assinaturas Eletrônicas,C30,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M393,Rede Neutra,C42,dispensar cópia do agrupador; manter avaliação do domínio,Escopo específico continua desconhecido. Associação é apenas temática; obter contrato/uso antes de implementar.
+M397,TSMX,C40,dispensar cópia do agrupador; manter avaliação do domínio,Escopo específico continua desconhecido. Associação é apenas temática; obter contrato/uso antes de implementar.
+M399,Sistema,C40,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M406,Sistema → Ferramentas,C40,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M414,Sistema → Ferramentas → Ocorrências e Ordens de servico,C16,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M416,Sistema → Ferramentas → Ocorrências e Ordens de servico → Alterar em lote,C16,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M419,Sistema → Gateways,C40,dispensar cópia do agrupador; manter avaliação do domínio,Escopo específico continua desconhecido. Associação é apenas temática; obter contrato/uso antes de implementar.
+M426,Sistema → Gateways → Gateway Telefonia,C32,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M431,Sistema → Gateways → Gateway Multimídia,C32,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M433,Sistema → Gateways → Gateway Outros,C40,dispensar cópia do agrupador; manter avaliação do domínio,Escopo específico continua desconhecido. Associação é apenas temática; obter contrato/uso antes de implementar.
+M435,Sistema → Gateways → Gateway Mapa,C44,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M440,Sistema → Gateways → Gateway Mailing,C29,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M444,Sistema → Gateways → Gateway Push,C44,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M450,Sistema → Backup,C35,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M453,Sistema → SMS,C29,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M458,Sistema → Email,C29,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M462,Sistema → Monitoramento,C28,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M468,Sistema → Dashboards,C34,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.
+M477,Sistema → Formulário,C05,dispensar cópia do agrupador; manter avaliação do domínio,Agrupador temático; não constitui operação adicional.

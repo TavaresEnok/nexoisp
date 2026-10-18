@@ -1,0 +1,32 @@
+{
+  "arquivos": {
+    "README.md": "cc8f818be8b0b96e8c17563cd8a1c2f723fa2e03638c4670c9b9c147ff2d6b0e",
+    "backlog.md": "d4eb2edc069e31e84f5676ea55145d13c4faef13cef767dcafec45ad433cf454",
+    "campos_44_formularios.csv": "5ff5b2542831572d72cf041f53ba8b6ce849b4f397ac37d0c59a032e640f60a4",
+    "consolidacao.md": "84c02e38aed7793dd5be1047ff883ccd54196cdb634165c629107d654f2f9bac",
+    "decisoes.md": "c36919873fc70d4420871972966c86eeb8d8ed230cbfb4da7b95232816bbb40e",
+    "diagnostico.md": "72acd798910f23a4ad85a397152cf2a6356453bfa1054b6172f884c374816e60",
+    "evidencias.md": "274eea9c2e8e4280256e89fc6b41e0a756476d0ac0ff41db1a3653400b95b8d5",
+    "evidencias_sanitizadas.json": "e0fef6e73eeeb69ba59c421f18d508e4f2fa2eb8d9d2c955b0724bb2385dba5e",
+    "execucao.json": "ea905bd44d0a418986ec438edf2faebec971eeaf079dabbb02e92f2bfa0a3799",
+    "fontes_sha256.json": "b0c35f04221bbeb5088d892a5417eed662151a1f6d477530892fee937a3376a7",
+    "formularios_revisados.json": "4c49fddffc836c84a1fd39c4eacf34c5f7262ecb6bcd9a1179863eea4460e5bd",
+    "matriz_capacidades.csv": "0c1fe456cf4eb5f3cb8c6a4664a08243ef78fc3794326f9c9cd8e2d01ddb3d7d",
+    "matriz_superficies.csv": "80149fa10fa14e7981dce5b6f02ea58cf3950f3e73c23bf57daa784b96ba017c",
+    "melhorias-e-validacao.md": "9dbd24668f4c1523dae562888b8e85490f53ebf707e7f99f4f15d032b7d66e0e",
+    "originais_inspecionados.json": "f48a032d01c22f2e05842003f6a8b22347b5fe592ededeb4872a6280b41ad084",
+    "resumo_inventario.json": "0455caff1006c4f0f51a0fd812f8faa1c70b88e891cc0f3d8fe2db5519d34f17",
+    "resumo_revisao_campos.json": "3618afdb9e641eafe0dd4178e6530415cacffe45bc0be794467e83624405c47c",
+    "retirada_fontes.json": "90abc1b7df1dd1d233c3cf40899b083b66be5776b0ba914dbf4b47f9caee62fe",
+    "revisao_101_menus.csv": "37218c1765657bd8379e110a2379650d8a9a9c06a7814c0c155041b31d44f8bd",
+    "rotas_nexo.csv": "f03199b35e6a394d5cd95ba24f605d5eadc308f8374386243a6fa9f484bfc2aa"
+  },
+  "revisao": {
+    "capacidades": 45,
+    "superficies": 1246,
+    "menus_revisados": 101,
+    "formularios": 44,
+    "controles_revisados": 956
+  },
+  "limite": "Integridade documental; não comprova homologação funcional ou regras desconhecidas."
+}

@@ -1,0 +1,1 @@
+update agents set cert_fingerprint = $2, cert_pinned_at = now() where id = $1 and cert_fingerprint is null

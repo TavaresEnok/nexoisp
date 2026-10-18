@@ -1,0 +1,1 @@
+select id, name, last_seen_at from agents where status = 'active' and (last_seen_at is null or last_seen_at <= now() - interval '30 seconds') order by name

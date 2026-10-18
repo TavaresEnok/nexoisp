@@ -1,0 +1,1 @@
+select status from subscribers where id = $1

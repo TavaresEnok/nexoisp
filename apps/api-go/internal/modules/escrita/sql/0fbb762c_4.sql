@@ -1,0 +1,1 @@
+update api_tokens set last_used_at = now() where id = $1

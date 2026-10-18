@@ -125,11 +125,11 @@ export function WorkOrderDetail({ id, onClose }: { id: string; onClose: () => vo
           {write && (
             <div className="row" style={{ margin: '10px 0' }}>
               {w.status === 'open' && <ActionButton onClick={status('analysis')}>Em análise</ActionButton>}
-              {['open', 'analysis', 'scheduled'].includes(w.status) && <ActionButton onClick={status('awaiting_schedule', undefined, res || undefined)}>Aguardando agendamento</ActionButton>}
+              {['open', 'analysis', 'scheduled'].includes(w.status) && <ActionButton disabled={!res.trim()} title="Informe o motivo no campo ao lado" onClick={status('awaiting_schedule', undefined, res)}>Aguardando agendamento</ActionButton>}
               {['open', 'analysis', 'scheduled'].includes(w.status) && <ActionButton disabled={!w.assignee_id} title={w.assignee_id ? '' : 'Defina o responsável antes'} onClick={status('en_route')}>Saí para o local</ActionButton>}
               {w.status !== 'in_progress' && w.status !== 'awaiting_schedule' && <ActionButton className="primary" onClick={status('in_progress')}>Iniciar execução</ActionButton>}
               {w.status === 'in_progress' && <ActionButton onClick={status('open')}>Devolver para a fila</ActionButton>}
-              <input style={{ flex: 1, minWidth: 220 }} value={res} onChange={(e) => setRes(e.target.value)} placeholder={w.status === 'in_progress' ? 'O que foi feito (para concluir) ou motivo (para cancelar)' : 'Motivo do cancelamento'} />
+              <input aria-label="Resultado ou motivo da alteração da OS" style={{ flex: 1, minWidth: 220 }} value={res} onChange={(e) => setRes(e.target.value)} placeholder={w.status === 'in_progress' ? 'O que foi feito (para concluir) ou motivo (para cancelar)' : 'Motivo para aguardar agendamento ou cancelar'} />
               {w.status === 'in_progress' && <ActionButton className="primary" disabled={!res.trim()} onClick={status('done', res)}>Concluir</ActionButton>}
               <ActionButton className="danger" disabled={!res.trim()} confirm="Cancelar esta ordem de serviço?" onClick={status('canceled', res)}>Cancelar OS</ActionButton>
             </div>

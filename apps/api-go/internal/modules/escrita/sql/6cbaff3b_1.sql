@@ -1,0 +1,1 @@
+delete from notice_templates where id = $1

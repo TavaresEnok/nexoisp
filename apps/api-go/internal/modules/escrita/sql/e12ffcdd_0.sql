@@ -1,0 +1,1 @@
+update plans set loyalty_months = $2, penalty_model = $3, penalty_cents = $4 where id = $1 returning id, name, loyalty_months, penalty_model, penalty_cents

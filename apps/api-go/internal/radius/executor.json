@@ -1,0 +1,82 @@
+[
+  {
+    "path": "helper:readAccount",
+    "permission": "",
+    "file": "executor.ts",
+    "queries": [
+      "db75486d_0.sql"
+    ],
+    "sha256": "4c04e2099f9ec6087f7859ac4f73cfdd21ed81b286e6178c65a35f78010c02d9"
+  },
+  {
+    "path": "helper:applyAccount",
+    "permission": "",
+    "file": "executor.ts",
+    "queries": [
+      "855eab1a_0.sql",
+      "855eab1a_1.sql",
+      "855eab1a_2.sql",
+      "855eab1a_3.sql"
+    ],
+    "sha256": "9df2814c02091ed38b01ff5cf1a215cf4ab46c4212db70e67dd0194cf1691128"
+  },
+  {
+    "path": "helper:openSessions",
+    "permission": "",
+    "file": "executor.ts",
+    "queries": [
+      "4950b503_0.sql"
+    ],
+    "sha256": "f1cb3832fb694af67b3bf7d80240eb5abdf3f231cd1caffb56008c6c83839da2"
+  },
+  {
+    "path": "helper:executeOne",
+    "permission": "",
+    "file": "executor.ts",
+    "queries": [
+      "f87ce27b_0.sql",
+      "f87ce27b_1.sql",
+      "f87ce27b_2.sql",
+      "f87ce27b_3.sql"
+    ],
+    "sha256": "e7e070b0f37744cc75d49bcfb5c584bbca17b2b48db585a393067d6220629540"
+  },
+  {
+    "path": "helper:syncAccounting",
+    "permission": "",
+    "file": "executor.ts",
+    "queries": [
+      "2d1c3b4c_0.sql",
+      "2d1c3b4c_1.sql",
+      "2d1c3b4c_2.sql",
+      "2d1c3b4c_3.sql",
+      "2d1c3b4c_4.sql",
+      "2d1c3b4c_5.sql",
+      "2d1c3b4c_6.sql"
+    ],
+    "sha256": "6d37e779c8160df5850971c64e6aaaf9274c13a4bcebbc869760d32b71cce019"
+  },
+  {
+    "path": "helper:purgeRadius",
+    "permission": "",
+    "file": "executor.ts",
+    "queries": [
+      "b2808f33_0.sql",
+      "b2808f33_1.sql",
+      "b2808f33_2.sql",
+      "b2808f33_3.sql",
+      "b2808f33_4.sql"
+    ],
+    "sha256": "a404caa523dee8228b0a688aae8f68ce66fa3eaf136e1efcc4c6dac1e05bb0a9"
+  },
+  {
+    "path": "helper:runHostedOnce",
+    "permission": "",
+    "file": "executor.ts",
+    "queries": [
+      "6eb98a0a_0.sql",
+      "6eb98a0a_1.sql"
+    ],
+    "sha256": "4dcebe5466eb0c6cb60da99b98a63a60052beb9787abae5a38eb07e179b8f3de"
+  }
+]

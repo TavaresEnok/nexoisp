@@ -1,0 +1,1 @@
+insert into service_resources (tenant_id, contract_id, device_id, pppoe_username, secret_enc, desired_profile, access_type) values ($1,$2,$3,$4,$5,$6,$7) returning id

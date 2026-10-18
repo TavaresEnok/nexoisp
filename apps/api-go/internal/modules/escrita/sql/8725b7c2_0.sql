@@ -1,0 +1,2 @@
+select r.id, r.desired_version, r.desired_policy, k.status, d.agent_id from service_resources r
+     join contracts k on k.id = r.contract_id join devices d on d.id = r.device_id where r.contract_id = $1

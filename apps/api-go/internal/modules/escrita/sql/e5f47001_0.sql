@@ -1,0 +1,1 @@
+update documents set content = null, deleted_at = now(), deleted_by = $2 where id = $1 and deleted_at is null returning subscriber_id

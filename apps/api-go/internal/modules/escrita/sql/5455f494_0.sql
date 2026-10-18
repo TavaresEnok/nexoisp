@@ -1,0 +1,1 @@
+update tickets set status = $2, closed_at = case when $2 = 'closed' then now() end, updated_at = now() where id = $1 returning *

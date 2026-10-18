@@ -1,0 +1,1 @@
+update invoices set status = 'reconciling', status_note = $2 where id = $1

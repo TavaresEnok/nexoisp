@@ -1,0 +1,2 @@
+select p.id, p.paid_at, p.amount_cents, p.kind, p.source, p.invoice_id, i.contract_id from payments p join invoices i on i.id = p.invoice_id
+           where i.subscriber_id = $1 order by p.paid_at desc limit $2

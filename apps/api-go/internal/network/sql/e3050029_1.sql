@@ -1,0 +1,1 @@
+select desired_version from onus where id = $1

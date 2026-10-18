@@ -1,0 +1,2 @@
+select ($2::date > t.today) as future, ($2::date <= t.today + 730) as near
+         from (select (now() at time zone coalesce((select timezone from tenant_settings where tenant_id = $1), 'America/Sao_Paulo'))::date as today) t

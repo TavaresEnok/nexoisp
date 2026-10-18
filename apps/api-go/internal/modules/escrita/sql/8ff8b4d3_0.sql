@@ -1,0 +1,1 @@
+select acs_device_id, serial, linked_at from cpe_links where contract_id = $1

@@ -1,0 +1,1 @@
+select role from users where id = $1 and tenant_id = $2 and role <> 'subscriber'

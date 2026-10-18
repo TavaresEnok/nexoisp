@@ -1,0 +1,1 @@
+delete from municipalities where state = $1 and norm_city(name) = norm_city($2)

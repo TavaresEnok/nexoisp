@@ -1,0 +1,178 @@
+[
+  {
+    "path": "helper:trustState",
+    "permission": "",
+    "file": "advanced.ts",
+    "queries": [
+      "5cfe4118_0.sql",
+      "5cfe4118_1.sql"
+    ],
+    "sha256": "6d93937de1ca026e9b596525860e123efcdd38940f37b3a63e881867642b1e4b"
+  },
+  {
+    "path": "helper:grantTrustRelease",
+    "permission": "",
+    "file": "advanced.ts",
+    "queries": [
+      "38bfbee6_0.sql",
+      "38bfbee6_1.sql"
+    ],
+    "sha256": "2fbc43e635b1b0840b039170e3e316875184ac48341a74d07337fcb7fa0c96e7"
+  },
+  {
+    "path": "helper:createAgreement",
+    "permission": "",
+    "file": "advanced.ts",
+    "queries": [
+      "732e540b_0.sql",
+      "732e540b_1.sql",
+      "732e540b_2.sql",
+      "732e540b_3.sql",
+      "732e540b_4.sql",
+      "732e540b_5.sql",
+      "732e540b_6.sql"
+    ],
+    "sha256": "642be5f63d3d8d566d71f9390e07e9a53baaac8b6b77f3dc176d214dc93b0122"
+  },
+  {
+    "path": "helper:sysAudit",
+    "permission": "",
+    "file": "core.ts",
+    "queries": [
+      "28045a03_0.sql"
+    ],
+    "sha256": "d93067c604c8b27206b8b464a02149db6810c92667181d4ea279fdeebc087c8f"
+  },
+  {
+    "path": "helper:generateMonthly",
+    "permission": "",
+    "file": "core.ts",
+    "queries": [
+      "027a5310_0.sql"
+    ],
+    "sha256": "c2ac8da6078997fb314061b3101d5d2e87a928d723e47dbf77403158b9024d00"
+  },
+  {
+    "path": "helper:ensureCharges",
+    "permission": "",
+    "file": "core.ts",
+    "queries": [
+      "5a7438b9_0.sql",
+      "5a7438b9_1.sql"
+    ],
+    "sha256": "9562279ea26a3d43ea36a844d9189668a7014815387bbd3033fba5e39166ff3e"
+  },
+  {
+    "path": "helper:applyGatewayPayment",
+    "permission": "",
+    "file": "core.ts",
+    "queries": [
+      "fdf4962a_0.sql",
+      "fdf4962a_1.sql"
+    ],
+    "sha256": "cc966ea1d1ad9cdcc0d0bab86e71c54ae38c5c1bb8166ab4033f766f46d2c5df"
+  },
+  {
+    "path": "helper:dueBreakdown",
+    "permission": "",
+    "file": "core.ts",
+    "queries": [
+      "c59c1801_0.sql"
+    ],
+    "sha256": "b84b1f8f4c3700a179063bfa5192645d78ca61b63f85202426d9c24e0cefbcf0"
+  },
+  {
+    "path": "helper:settle",
+    "permission": "",
+    "file": "core.ts",
+    "queries": [
+      "c810a196_0.sql",
+      "c810a196_1.sql",
+      "c810a196_2.sql"
+    ],
+    "sha256": "52514403b7fc4b5a3a9fc3cae588833af0bf68a8a03c5046bc9a0ec209c7d187"
+  },
+  {
+    "path": "helper:manualPayment",
+    "permission": "",
+    "file": "core.ts",
+    "queries": [
+      "67fd2417_0.sql",
+      "67fd2417_1.sql",
+      "67fd2417_2.sql",
+      "67fd2417_3.sql",
+      "67fd2417_4.sql",
+      "67fd2417_5.sql"
+    ],
+    "sha256": "9a01cd005051206524fd340c3694f60bccb9c5588fdc835da84c00109fcbdbe9"
+  },
+  {
+    "path": "helper:reversePayment",
+    "permission": "",
+    "file": "core.ts",
+    "queries": [
+      "48002566_0.sql",
+      "48002566_1.sql",
+      "48002566_2.sql",
+      "48002566_3.sql",
+      "48002566_4.sql"
+    ],
+    "sha256": "321b926fb59165b77d881799d0549b6768a5e95c82bbb08f95411a7f78cdd5e9"
+  },
+  {
+    "path": "helper:onInvoicePaid",
+    "permission": "",
+    "file": "core.ts",
+    "queries": [
+      "7d4be700_0.sql",
+      "7d4be700_1.sql",
+      "7d4be700_2.sql",
+      "7d4be700_3.sql",
+      "7d4be700_4.sql"
+    ],
+    "sha256": "3869d61e3b0e0ee365521018541c26f8b12e66e3183791de465b5a86e6b7ea29"
+  },
+  {
+    "path": "helper:autoSuspend",
+    "permission": "",
+    "file": "core.ts",
+    "queries": [
+      "f7267ee2_0.sql",
+      "f7267ee2_1.sql",
+      "f7267ee2_2.sql"
+    ],
+    "sha256": "fc72d7cd43d2e6ae122c25a85607985fb66d923c16f4b3dcb89362cb1638e47f"
+  },
+  {
+    "path": "helper:processGatewayEvent",
+    "permission": "",
+    "file": "core.ts",
+    "queries": [
+      "1f44690c_0.sql",
+      "1f44690c_1.sql",
+      "1f44690c_2.sql",
+      "1f44690c_3.sql",
+      "1f44690c_4.sql",
+      "1f44690c_5.sql"
+    ],
+    "sha256": "365ef4a76c964e5ecfda97baf0bc36484cafe5861373be2f6bb110f5d93d20cb"
+  },
+  {
+    "path": "helper:reconcile",
+    "permission": "",
+    "file": "core.ts",
+    "queries": [
+      "9e309fed_0.sql"
+    ],
+    "sha256": "2cc134536570781016d7c6079de77c4d72911d634a8ec4fc0df4b59e5bf59e38"
+  },
+  {
+    "path": "helper:currentCompetence",
+    "permission": "",
+    "file": "core.ts",
+    "queries": [
+      "e6e429a0_0.sql"
+    ],
+    "sha256": "c6582f0a19585f327f68e27653d73f04596b57c83d5bd3b563447861657e59b2"
+  }
+]

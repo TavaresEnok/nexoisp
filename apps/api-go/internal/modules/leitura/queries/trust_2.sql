@@ -1,0 +1,3 @@
+-- name: Trust2 :many
+select t.id, t.granted_at, t.expires_at, t.status, t.source, t.days, t.reason, u.name as requested_by_name
+     from trust_releases t left join users u on u.id = t.requested_by where t.contract_id = $1 order by t.granted_at desc limit 12;

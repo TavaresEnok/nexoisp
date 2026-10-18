@@ -1,0 +1,1 @@
+select title, body from contract_amendments where id = $1 and contract_id = $2

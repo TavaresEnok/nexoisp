@@ -1,0 +1,1 @@
+insert into catalog_items (tenant_id, kind, name) values ($1,$2,$3) returning *

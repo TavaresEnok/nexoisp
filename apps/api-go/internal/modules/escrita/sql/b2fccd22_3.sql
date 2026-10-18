@@ -1,0 +1,1 @@
+insert into subscribers (tenant_id, name, document, email, phone, address_street, address_number, address_district, address_city, address_state, address_zip, notes) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) returning id

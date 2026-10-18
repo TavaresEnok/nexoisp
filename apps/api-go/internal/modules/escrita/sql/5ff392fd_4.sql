@@ -1,0 +1,2 @@
+select host($2::cidr + g) as addr from generate_series($3::bigint, $4::bigint) g
+           where not exists (select 1 from ip_allocations a where a.pool_id = $1 and a.address = host($2::cidr + g)::inet) order by g limit 1

@@ -1,0 +1,655 @@
+[
+  {
+    "path": "/api/addons",
+    "permission": "plans:read",
+    "name": "Reade3cc3821",
+    "args": [],
+    "file": "adicionais.ts",
+    "filters": [],
+    "sha256": "8afd5be6541b0c1dccee43dd2429db742ba0b39044a1b3732cd46884bb3c47e4"
+  },
+  {
+    "path": "/api/agents",
+    "permission": "network:read",
+    "name": "Readf13e665a",
+    "args": [],
+    "file": "network.ts",
+    "filters": [],
+    "sha256": "b5e2af6b2c28a1338a382cbc34e2fbf74308e2e377b02a4017d73390732e2138"
+  },
+  {
+    "path": "/api/anatel/municipalities",
+    "permission": "settings:manage",
+    "name": "Read7fc57d78",
+    "args": [],
+    "file": "anatel.ts",
+    "filters": [],
+    "sha256": "b082101224efb47ac4caa70217fe29de2c24c88e1161cfb1dd7dc8f6778e3e6c"
+  },
+  {
+    "path": "/api/api-tokens",
+    "permission": "settings:manage",
+    "name": "Read8fdb68ff",
+    "args": [],
+    "file": "integracoes.ts",
+    "filters": [],
+    "sha256": "aae9fb27fc247815d8d5cb059ee8f3f313bcd533676373c7215f3d86b5680422"
+  },
+  {
+    "path": "/api/catalogs",
+    "permission": "subscribers:read",
+    "name": "Read0aa3e567",
+    "args": [
+      "query:kind",
+      "query:all"
+    ],
+    "file": "fluxo-os.ts",
+    "filters": [
+      {
+        "name": "kind",
+        "kind": "enum",
+        "choices": [
+          "ticket_type",
+          "classification",
+          "root_cause",
+          "origin",
+          "os_reason",
+          "end_reason",
+          "note_type"
+        ]
+      },
+      {
+        "name": "all",
+        "kind": "flag",
+        "choices": [
+          "1"
+        ]
+      }
+    ],
+    "sha256": "7845e6fe4d8ea683000a2dcc44f0afbadb595fe612d6b400ccd33b5ec3fa97a0"
+  },
+  {
+    "path": "/api/commission-rules",
+    "permission": "finance:read",
+    "name": "Read0180ec74",
+    "args": [],
+    "file": "produtividade.ts",
+    "filters": [],
+    "sha256": "e8a06916aac380db382cb61e39687f59b59a6f69c772bb657e4f398abd38a17b"
+  },
+  {
+    "path": "/api/companies",
+    "permission": "contracts:read",
+    "name": "Read6e3e4774",
+    "args": [],
+    "file": "empresas.ts",
+    "filters": [],
+    "sha256": "90cbdb4a84f1dc622283433463b55408bfe81cc6bb7516efdbb5357278c85f44"
+  },
+  {
+    "path": "/api/contracts/:id/acceptances",
+    "permission": "contracts:read",
+    "name": "Readce941923",
+    "args": [
+      "id"
+    ],
+    "file": "aceites.ts",
+    "filters": [],
+    "sha256": "f8c226b5a29c53d261eff802cea22936086b7cb870003bc791b519326763589c"
+  },
+  {
+    "path": "/api/contracts/:id/addons",
+    "permission": "contracts:read",
+    "name": "Readf5cf84a9",
+    "args": [
+      "id"
+    ],
+    "file": "adicionais.ts",
+    "filters": [],
+    "sha256": "9b663884c6666adf680b7f045bf95f366b8cd254bb2946a68600ee042855a478"
+  },
+  {
+    "path": "/api/contracts/:id/amendments",
+    "permission": "contracts:read",
+    "name": "Read5489df5a",
+    "args": [
+      "id"
+    ],
+    "file": "condicoes.ts",
+    "filters": [],
+    "sha256": "e7b915b1f1e1bfc659b350f755a270efa217c72ba2ea9603c206a84c43b8cf60"
+  },
+  {
+    "path": "/api/contracts/:id/discounts",
+    "permission": "contracts:read",
+    "name": "Read2a06e54b",
+    "args": [
+      "id"
+    ],
+    "file": "condicoes.ts",
+    "filters": [],
+    "sha256": "3b5820df96f58c4e7ff48907232294d77e25929d67dbc975f9fbe8e69183561d"
+  },
+  {
+    "path": "/api/contracts/:id/ftth",
+    "permission": "network:read",
+    "name": "Read3662e064",
+    "args": [
+      "id"
+    ],
+    "file": "field.ts",
+    "filters": [],
+    "sha256": "77972c167045942734e6537f258d1215d12a273dc21487d0f471bbb2a878cdc3",
+    "one": true,
+    "wrap": "drop"
+  },
+  {
+    "path": "/api/contracts/:id/install-address",
+    "permission": "contracts:read",
+    "name": "Reada08ddb18",
+    "args": [
+      "id"
+    ],
+    "file": "fluxo-os.ts",
+    "filters": [],
+    "sha256": "156319831d5898831f1e84d76944b921e289d42a6aeb531e40f3960d75d5b60b",
+    "one": true,
+    "missing": "contrato não encontrado"
+  },
+  {
+    "path": "/api/contracts/:id/ips",
+    "permission": "network:read",
+    "name": "Reade31004ef",
+    "args": [
+      "id"
+    ],
+    "file": "ipam.ts",
+    "filters": [],
+    "sha256": "f9aae09b90e06b2e3e1f990a5e5bbcb4ed2945260f08f7f47999f3e2736cabfb"
+  },
+  {
+    "path": "/api/contracts/:id/ipv6",
+    "permission": "network:read",
+    "name": "Read954ec190",
+    "args": [
+      "id"
+    ],
+    "file": "ipam.ts",
+    "filters": [],
+    "sha256": "2b03916e961331e9fe6c0330fc07548b9b6cb3779e7d98bb13fe7e90cda46df7",
+    "one": true,
+    "wrap": "delegation"
+  },
+  {
+    "path": "/api/contracts/:id/scheduled-changes",
+    "permission": "contracts:read",
+    "name": "Read156832aa",
+    "args": [
+      "id"
+    ],
+    "file": "condicoes.ts",
+    "filters": [],
+    "sha256": "2455d9e4751b341bcc514b3bf24b5b95e958e5eda9ed5e55a8ee54d327aa9342"
+  },
+  {
+    "path": "/api/contracts/:id/usage",
+    "permission": "network:read",
+    "name": "Read2527ac24",
+    "args": [
+      "id"
+    ],
+    "file": "network.ts",
+    "filters": [],
+    "sha256": "f37f5ec4a0f8c0fc89e7e9a9846b2dbe752b6757ce7598d798f03865c5361b85"
+  },
+  {
+    "path": "/api/custom-fields",
+    "permission": "subscribers:read",
+    "name": "Readf3833f73",
+    "args": [
+      "query:entity",
+      "query:all"
+    ],
+    "file": "produtividade.ts",
+    "filters": [
+      {
+        "name": "entity",
+        "kind": "enum",
+        "choices": [
+          "subscriber",
+          "contract"
+        ]
+      },
+      {
+        "name": "all",
+        "kind": "flag",
+        "choices": [
+          "1"
+        ]
+      }
+    ],
+    "sha256": "35e0fa1258743eb6f61b126fbe598bd51d8e4cf15a62905a3ba4602996084037"
+  },
+  {
+    "path": "/api/devices",
+    "permission": "network:read",
+    "name": "Read6349e7c2",
+    "args": [],
+    "file": "network.ts",
+    "filters": [],
+    "sha256": "5baf0e1b91a6b4ce33bd84e865e062617b24f93eca676c7e2ff15f9aaa506ab7"
+  },
+  {
+    "path": "/api/finance/summary",
+    "permission": "finance:read",
+    "name": "Readf038858e",
+    "args": [
+      "query:company_id"
+    ],
+    "file": "finance.ts",
+    "filters": [
+      {
+        "name": "company_id",
+        "kind": "uuid"
+      }
+    ],
+    "sha256": "b1c78f532b216525958d8ad446c1cf1b05973db27f18ec6c6ddd8af83c9d1198",
+    "one": true
+  },
+  {
+    "path": "/api/ftth/boxes",
+    "permission": "network:read",
+    "name": "Read19aa07b2",
+    "args": [],
+    "file": "field.ts",
+    "filters": [],
+    "sha256": "6ea88486fcf7170bab120fa4a58ad3f4b09cc77bd618787b7a00c81396e485da"
+  },
+  {
+    "path": "/api/import/batches",
+    "permission": "import:run",
+    "name": "Read20240638",
+    "args": [],
+    "file": "import.ts",
+    "filters": [],
+    "sha256": "23c6863df52794c5328d5ff8c2ca4e63a5096296b6f07e020a19faf98c3eb498"
+  },
+  {
+    "path": "/api/import/batches/:id",
+    "permission": "import:run",
+    "name": "Read470a0baa",
+    "args": [
+      "id"
+    ],
+    "file": "import.ts",
+    "filters": [],
+    "sha256": "4c55ed9ea6f4fc6ee3c8bd1adcafc9c164b820ef75a236885309d7a633191fbd"
+  },
+  {
+    "path": "/api/install-kits",
+    "permission": "stock:read",
+    "name": "Read95e5617d",
+    "args": [],
+    "file": "produtividade.ts",
+    "filters": [],
+    "sha256": "d114459a8f013c9bd23033c97e485f6bea479af04546e4b98a9dcbdddba6b1f0"
+  },
+  {
+    "path": "/api/ipam/pools",
+    "permission": "network:read",
+    "name": "Read76fa7bfd",
+    "args": [],
+    "file": "ipam.ts",
+    "filters": [],
+    "sha256": "764ce0d9e425463d139c093cd8b4e664d596ae8222fd70e4eae9374b4ba88e09"
+  },
+  {
+    "path": "/api/ipam/pools/:id/allocations",
+    "permission": "network:read",
+    "name": "Readfa6f181e",
+    "args": [
+      "id"
+    ],
+    "file": "ipam.ts",
+    "filters": [],
+    "sha256": "4b95b69d2a402d7159f6e816eef4ca7b121e6c26f868b826d96822b8235b9cb7"
+  },
+  {
+    "path": "/api/ipam/pools/:id/delegations",
+    "permission": "network:read",
+    "name": "Readc7f08457",
+    "args": [
+      "id"
+    ],
+    "file": "ipam.ts",
+    "filters": [],
+    "sha256": "a4b73f2905aca13ed10d81ab93cb35197985606f9162b4e0d38e26b31069fe39"
+  },
+  {
+    "path": "/api/leads/summary",
+    "permission": "crm:read",
+    "name": "Readdc4b19fa",
+    "args": [],
+    "file": "crm.ts",
+    "filters": [],
+    "sha256": "582c89c49d4e1d25dda49ff30fe384372b69d871b746d00d358e09fd706cbb5b",
+    "one": true
+  },
+  {
+    "path": "/api/legal/ip-lookup/history",
+    "permission": "legal:query",
+    "name": "Readb82e88ee",
+    "args": [],
+    "file": "consulta-ip.ts",
+    "filters": [],
+    "sha256": "3c0a16fe05bd4fbcb78c775ee09a93ad1f27fa3cc08080b8329c6039def40b30"
+  },
+  {
+    "path": "/api/maintenance-notices",
+    "permission": "network:read",
+    "name": "Read16a0e01f",
+    "args": [],
+    "file": "extras.ts",
+    "filters": [],
+    "sha256": "b9c49a8374f250ab88fa5c4e62a70551933c781c86b95b6018e956b48a0d2d8f"
+  },
+  {
+    "path": "/api/maintenance-notices/channels",
+    "permission": "network:write",
+    "name": "Read5dd8cb34",
+    "args": [],
+    "file": "extras.ts",
+    "filters": [],
+    "sha256": "7f5c23c373dbc265e81044db3cd972d40c586d265c6aa18944cb0e4aab4e9490"
+  },
+  {
+    "path": "/api/network/drift",
+    "permission": "network:read",
+    "name": "Readeb2aa8a1",
+    "args": [],
+    "file": "network.ts",
+    "filters": [],
+    "sha256": "77e17decaa71894d2576de5defb604b46728c9a4157a829c5d030284617ee324"
+  },
+  {
+    "path": "/api/notice-channels",
+    "permission": "settings:manage",
+    "name": "Readca6b07f3",
+    "args": [],
+    "file": "avisos-assinante.ts",
+    "filters": [],
+    "sha256": "bd191c319a9ebbae24c00a1f184ede4b5610b6387077995aff8993b5aed974ce"
+  },
+  {
+    "path": "/api/notice-log",
+    "permission": "settings:manage",
+    "name": "Read010e5cb3",
+    "args": [
+      "query:limit"
+    ],
+    "file": "avisos-assinante.ts",
+    "filters": [
+      {
+        "name": "limit",
+        "kind": "integer",
+        "fallback": 100,
+        "min": 1,
+        "max": 500
+      }
+    ],
+    "sha256": "e42a04244dcd0ed414747f09a91bab2f99b2e931c8748c2d0a6a38d5be15c1fe"
+  },
+  {
+    "path": "/api/notice-rules",
+    "permission": "settings:manage",
+    "name": "Readc502f577",
+    "args": [],
+    "file": "avisos-assinante.ts",
+    "filters": [],
+    "sha256": "66bef27dd2d70f6d3de8b1c6eee9a490bbed71620d0e2987c2b90a77d0ca9173"
+  },
+  {
+    "path": "/api/olt/discoveries",
+    "permission": "network:read",
+    "name": "Reade26b824f",
+    "args": [],
+    "file": "olt.ts",
+    "filters": [],
+    "sha256": "2a8c8b077fefee40b71e6f385212658b1afa8d6a726d01cb5ee91d339f58a821"
+  },
+  {
+    "path": "/api/onus",
+    "permission": "network:read",
+    "name": "Read222cfde9",
+    "args": [],
+    "file": "olt.ts",
+    "filters": [],
+    "sha256": "4c4717b87fec8aa96bba1fae53c5ee1742bc90bd622e08117d6f12b9cd00e273"
+  },
+  {
+    "path": "/api/pops",
+    "permission": "contracts:read",
+    "name": "Reade3d980a2",
+    "args": [],
+    "file": "atendimento.ts",
+    "filters": [],
+    "sha256": "05696b6fd5124c5b3309f44de2556681d4d04f700e61b4de189d4ceba00e494d"
+  },
+  {
+    "path": "/api/reports/referrals",
+    "permission": "finance:read",
+    "name": "Readc48b006d",
+    "args": [],
+    "file": "condicoes.ts",
+    "filters": [],
+    "sha256": "97b15dd592c8d2983d44169f1502fea27495fb84f41a5326aaad222263bed79f"
+  },
+  {
+    "path": "/api/sla-policies",
+    "permission": "subscribers:read",
+    "name": "Read6caaa707",
+    "args": [],
+    "file": "fluxo-os.ts",
+    "filters": [],
+    "sha256": "c157d3544671d821ae6e7319d0f15a301dad601e9ad7f05871a07699a930151c"
+  },
+  {
+    "path": "/api/staff",
+    "permission": "os:read",
+    "name": "Read7f60bf57",
+    "args": [],
+    "file": "field.ts",
+    "filters": [],
+    "sha256": "3f8f221089de72549c8175da4da1194058316b49082c4141bc1a52ab472ef34e"
+  },
+  {
+    "path": "/api/stock/items",
+    "permission": "stock:read",
+    "name": "Reada1bf9e6c",
+    "args": [],
+    "file": "field.ts",
+    "filters": [],
+    "sha256": "7c69f28606924999fdcd8a65bbf4329bf43db312191cb72c15ba9ed210dfc3b3"
+  },
+  {
+    "path": "/api/stock/items/:id/movements",
+    "permission": "stock:read",
+    "name": "Read43042eb4",
+    "args": [
+      "id"
+    ],
+    "file": "field.ts",
+    "filters": [],
+    "sha256": "001f97f9992819bc1f995a6a2ea7652def0c254f61ff38cdeb082598bf1db9e1"
+  },
+  {
+    "path": "/api/stock/items/:id/units",
+    "permission": "stock:read",
+    "name": "Readf00d22ef",
+    "args": [
+      "id"
+    ],
+    "file": "field.ts",
+    "filters": [],
+    "sha256": "9d3feee5e1f080ed2668f603ae4b5d3dd5f41a178589fd8e7eba51add0b82832"
+  },
+  {
+    "path": "/api/stock/units",
+    "permission": "stock:read",
+    "name": "Read8c08caec",
+    "args": [
+      "query:serial",
+      "query:holder",
+      "query:contract_id"
+    ],
+    "file": "field.ts",
+    "filters": [
+      {
+        "name": "serial",
+        "kind": "string",
+        "trim": true,
+        "min": 3,
+        "max": 40
+      },
+      {
+        "name": "holder",
+        "kind": "uuid"
+      },
+      {
+        "name": "contract_id",
+        "kind": "uuid"
+      }
+    ],
+    "sha256": "fd77e6b4bd90022bf2937cba46ef613c9ef14421175ca93410a44558ffcd296f"
+  },
+  {
+    "path": "/api/stock/units/:id/events",
+    "permission": "stock:read",
+    "name": "Readc15bf40d",
+    "args": [
+      "id"
+    ],
+    "file": "field.ts",
+    "filters": [],
+    "sha256": "b83719dee0fffe500d2f97f5b5b5ce3087aa2679fb3aeaae5a576cb14427cd99"
+  },
+  {
+    "path": "/api/subscribers/:id/contacts",
+    "permission": "subscribers:read",
+    "name": "Readb70df9cc",
+    "args": [
+      "id"
+    ],
+    "file": "atendimento.ts",
+    "filters": [],
+    "sha256": "7afa51b140dc01ffb7d1d5d5c76820bc8d25e884620760a4b4c4270d356c4187"
+  },
+  {
+    "path": "/api/subscribers/:id/documents",
+    "permission": "subscribers:read",
+    "name": "Read7b655443",
+    "args": [
+      "id"
+    ],
+    "file": "escopo-docs.ts",
+    "filters": [],
+    "sha256": "3f023972913d1c30cf846ab992771e74adca13087e3ab5fbdece2bc371cce15c"
+  },
+  {
+    "path": "/api/subscribers/:id/notes",
+    "permission": "subscribers:read",
+    "name": "Readc5037cb6",
+    "args": [
+      "id",
+      "query:archived"
+    ],
+    "file": "estados.ts",
+    "filters": [
+      {
+        "name": "archived",
+        "kind": "flag",
+        "choices": [
+          "1"
+        ]
+      }
+    ],
+    "sha256": "3862ad660b278763d4bcdfcdd900563c543a28c61bdf931ab2cc5e26f8abdc1f"
+  },
+  {
+    "path": "/api/tags",
+    "permission": "contracts:read",
+    "name": "Read0b9689ff",
+    "args": [],
+    "file": "extras.ts",
+    "filters": [],
+    "sha256": "93eaccfa1a3c9d4e2807468eafc41b28cf68b283c064f005e1b366a6cfe26242"
+  },
+  {
+    "path": "/api/users",
+    "permission": "users:manage",
+    "name": "Readc93de48d",
+    "args": [
+      "tenant"
+    ],
+    "file": "identity.ts",
+    "filters": [],
+    "sha256": "feb4b0a65af28d8061a91a5d0a39f2561a339b9273dbf2867b581bb01f6358d7"
+  },
+  {
+    "path": "/api/users/:id/pops",
+    "permission": "users:manage",
+    "name": "Read6b202e6c",
+    "args": [
+      "id"
+    ],
+    "file": "escopo-docs.ts",
+    "filters": [],
+    "sha256": "74f1e9cae465b81292870f4cb5813734acc0688fdc932c08609026760a2ff1d5"
+  },
+  {
+    "path": "/api/webhook-deliveries",
+    "permission": "settings:manage",
+    "name": "Read9d315143",
+    "args": [
+      "query:endpoint_id",
+      "query:status"
+    ],
+    "file": "integracoes.ts",
+    "filters": [
+      {
+        "name": "endpoint_id",
+        "kind": "uuid"
+      },
+      {
+        "name": "status",
+        "kind": "enum",
+        "choices": [
+          "pending",
+          "sent",
+          "failed"
+        ]
+      }
+    ],
+    "sha256": "2c95d2a00d64e51645e1e0a350457a73ca77ef0825fce639144f4b37a2bf88b4"
+  },
+  {
+    "path": "/api/webhook-endpoints",
+    "permission": "settings:manage",
+    "name": "Read22e53523",
+    "args": [],
+    "file": "integracoes.ts",
+    "filters": [],
+    "sha256": "a45d03722239ddd634b7bc29fcf6408d2d17c4d7dc09f17fba2073f399e5d151"
+  },
+  {
+    "path": "/api/work-orders/:id/helpers",
+    "permission": "os:read",
+    "name": "Read3115636e",
+    "args": [
+      "id"
+    ],
+    "file": "produtividade.ts",
+    "filters": [],
+    "sha256": "7136b19333db7fff2c369c8c24bec95ab0fc72e448b151134215523c6a2c6b50"
+  }
+]

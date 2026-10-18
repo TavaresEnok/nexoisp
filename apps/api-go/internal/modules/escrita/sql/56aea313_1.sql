@@ -1,0 +1,1 @@
+select id, amount_cents, due_date from invoices where external_source = $1 and external_id = $2

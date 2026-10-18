@@ -1,0 +1,1 @@
+select policy, profile, prev_profile, by_profile, applied_version, updated_at from radius_account where tenant_id = $1 and username = $2

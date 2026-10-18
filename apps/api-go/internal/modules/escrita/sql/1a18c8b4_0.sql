@@ -1,0 +1,1 @@
+select id, name, active, serialized from stock_items where id = $1 for update

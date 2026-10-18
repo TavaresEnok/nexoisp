@@ -1,0 +1,2 @@
+with recursive up as (select id, parent_id from ftth_boxes where id = $1 union all select b.id, b.parent_id from ftth_boxes b join up on b.id = up.parent_id)
+         select (select count(*) from up) as found, exists (select 1 from up where id = $2) as cycle

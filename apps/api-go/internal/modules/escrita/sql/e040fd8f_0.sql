@@ -1,0 +1,1 @@
+update radius_nas set secret = $2 where device_id = $1

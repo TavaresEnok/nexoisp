@@ -1,0 +1,1 @@
+select cpe_linked_anywhere($1) as t

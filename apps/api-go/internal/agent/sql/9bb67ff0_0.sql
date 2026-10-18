@@ -1,0 +1,1 @@
+select id from devices where id = $1 and agent_id = $2

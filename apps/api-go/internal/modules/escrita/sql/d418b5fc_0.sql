@@ -1,0 +1,1 @@
+select name, mime, content, subscriber_id from documents where id = $1 and deleted_at is null

@@ -1,0 +1,1 @@
+update stock_units set status = 'installed', holder_id = null, contract_id = $2, work_order_id = $3, contract_mode = $4, updated_at = now() where id = $1

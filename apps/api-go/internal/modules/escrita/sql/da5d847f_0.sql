@@ -1,0 +1,1 @@
+update subscribers set name = $2, document = $3, email = $4, phone = $5, address_street = $6, address_number = $7, address_district = $8, address_city = $9, address_state = $10, address_zip = $11, notes = $12, status = $13, birth_date = $14, rg = $15, rg_issuer = $16, mother_name = $17, trade_name = $18, updated_at = now() where id = $1 and anonymized_at is null returning *

@@ -1,0 +1,2 @@
+select (select count(*) from work_orders where contract_id = $1 and status in ('open','analysis','awaiting_schedule','scheduled','en_route','in_progress'))::int as work_orders,
+                (select count(*) from tickets t join contracts k2 on k2.subscriber_id = t.subscriber_id where k2.id = $1 and t.status <> 'closed')::int as tickets

@@ -1,0 +1,2 @@
+select host(a.address) as ip, a.created_at, k.id as contract_id, s.name from ip_allocations a join contracts k on k.id = a.contract_id
+         join subscribers s on s.id = k.subscriber_id where a.address = any($1::inet[])

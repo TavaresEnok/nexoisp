@@ -1,0 +1,1 @@
+select amount_cents, fee_cents, discount_cents from invoices where id = $1

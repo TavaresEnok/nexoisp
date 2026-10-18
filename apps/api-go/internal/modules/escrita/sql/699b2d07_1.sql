@@ -1,0 +1,1 @@
+select lgpd_anonymize_subscriber($1, $2, $3) as r

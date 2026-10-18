@@ -1,0 +1,1 @@
+select user_self_update($1,null,null,true)

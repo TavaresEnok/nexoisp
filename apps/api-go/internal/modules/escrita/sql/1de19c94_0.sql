@@ -1,0 +1,1 @@
+select k.status, k.end_date, s.name as subscriber_name from contracts k join subscribers s on s.id = k.subscriber_id where k.id = $1

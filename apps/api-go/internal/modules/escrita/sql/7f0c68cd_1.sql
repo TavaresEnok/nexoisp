@@ -1,0 +1,1 @@
+update service_resources set mac = $2 where id = $1

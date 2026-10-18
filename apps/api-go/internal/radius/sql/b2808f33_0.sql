@@ -1,0 +1,1 @@
+select retention_auth_log_days as a, retention_sessions_days as s, retention_notice_log_days as n from tenant_settings where tenant_id = $1

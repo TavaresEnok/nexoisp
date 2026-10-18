@@ -1,0 +1,1 @@
+update operations set status = 'PENDING', current_attempt_id = null, lease_until = null, updated_at = now(), note = 'reserva expirou antes de iniciar' where id = $1

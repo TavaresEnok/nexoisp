@@ -1,0 +1,1 @@
+select ($1::cidr <<= $2::cidr and masklen($1::cidr) = $3) as ok

@@ -1,0 +1,1 @@
+insert into cpe_links (tenant_id, contract_id, acs_device_id, serial, linked_by) values ($1,$2,$3,$4,$5)

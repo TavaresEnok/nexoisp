@@ -1,0 +1,1 @@
+insert into operation_attempts (tenant_id, operation_id, agent_id, recover) values ($1,$2,$3,$4) returning id

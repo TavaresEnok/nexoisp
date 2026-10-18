@@ -1,0 +1,1 @@
+delete from ip_pools where id = $1

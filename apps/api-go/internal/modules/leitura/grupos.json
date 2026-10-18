@@ -1,0 +1,197 @@
+[
+  {
+    "path": "/api/acceptances/:id/evidence",
+    "permission": "contracts:read",
+    "prefix": "Group29ec6441",
+    "queries": 1,
+    "file": "aceites.ts",
+    "sha256": "b429e443cda0fd16279b27a9d9725450f007dc1bb225f70ccec0ba91b7b6e40e"
+  },
+  {
+    "path": "/api/audit",
+    "permission": "audit:read",
+    "prefix": "Group3221ef10",
+    "queries": 1,
+    "file": "identity.ts",
+    "sha256": "0ee11fac59a86850a9062bc4e7994c6447930eb7051ccb3962555e2f1cb84a22"
+  },
+  {
+    "path": "/api/contracts/:id/equipment",
+    "permission": "stock:read",
+    "prefix": "Group3ea49f94",
+    "queries": 2,
+    "file": "field.ts",
+    "sha256": "d84cffa4913a1d684713bf005bda5e9f66ede693a18742e6693ecb2d977f665c"
+  },
+  {
+    "path": "/api/contracts/:id/finance",
+    "permission": "finance:read",
+    "prefix": "Groupc47037ac",
+    "queries": 1,
+    "file": "finance.ts",
+    "sha256": "15e7beba40da72233ecb5e219ce2405d8461aac569ebaf6e9ff7ab872e8c77ff"
+  },
+  {
+    "path": "/api/contracts/:id/radius-log",
+    "permission": "network:read",
+    "prefix": "Group35c41284",
+    "queries": 2,
+    "file": "radius.ts",
+    "sha256": "32aeb96977a9c4b0bedf1dded192668b62ad028e42f1cb9b17a1b4d124f70603"
+  },
+  {
+    "path": "/api/contracts/:id/states",
+    "permission": "contracts:read",
+    "prefix": "Groupf9e93af2",
+    "queries": 1,
+    "file": "estados.ts",
+    "sha256": "4fbd0699d80ef05240f930a251dbfe4e71e6e379e9b3742560f00fc597c37f33"
+  },
+  {
+    "path": "/api/finance/monthly",
+    "permission": "finance:read",
+    "prefix": "Group3a79e37d",
+    "queries": 1,
+    "file": "finance.ts",
+    "sha256": "6a90248563f4aa8f2bc3a3909fb3b83cb24866bc3dae5a8005d7a6ace447bb59"
+  },
+  {
+    "path": "/api/finance/reconciliation",
+    "permission": "finance:read",
+    "prefix": "Group152f5ccd",
+    "queries": 2,
+    "file": "finance.ts",
+    "sha256": "2a87354c17330f629d0ee25b01c63cc67b009584b87a5b39e77c2af4d56f3fb3"
+  },
+  {
+    "path": "/api/ftth/boxes/:id",
+    "permission": "network:read",
+    "prefix": "Group022be0fb",
+    "queries": 2,
+    "file": "field.ts",
+    "sha256": "b027d6d27ba854e4da71b8dae6134c5ce714faf8cd107cea71ecf2c39dca5999"
+  },
+  {
+    "path": "/api/invoices/:id",
+    "permission": "finance:read",
+    "prefix": "Group91a4cc44",
+    "queries": 4,
+    "file": "finance.ts",
+    "sha256": "b3d579c48e060076afa88f89169157bf879d18173b77f5ce499dd0a11ac5946e"
+  },
+  {
+    "path": "/api/leads",
+    "permission": "crm:read",
+    "prefix": "Groupcfbe5202",
+    "queries": 1,
+    "file": "crm.ts",
+    "sha256": "bb69739e814bffd7b45f5e2146a74503028355b085fa9e7b9531de3fd6db1c9a"
+  },
+  {
+    "path": "/api/leads/:id",
+    "permission": "crm:read",
+    "prefix": "Group775251e1",
+    "queries": 2,
+    "file": "crm.ts",
+    "sha256": "33adff6510765c77c91d95645bdf3ee3d27d771c4b6c162a9837f4d32b0a9b09"
+  },
+  {
+    "path": "/api/map/coverage",
+    "permission": "contracts:read",
+    "prefix": "Group7cd37661",
+    "queries": 3,
+    "file": "mapa.ts",
+    "sha256": "025a45a46bea99e0a4bde9128075180d64157977c4ffdcd3aab043baa546556b"
+  },
+  {
+    "path": "/api/notice-page",
+    "permission": "settings:manage",
+    "prefix": "Group84bb5302",
+    "queries": 1,
+    "file": "escopo-docs.ts",
+    "sha256": "608a3a1505282c5a829b271bdd9c4cbddf064bd47daabb90b7735a03f2dcbf70"
+  },
+  {
+    "path": "/api/notice-templates",
+    "permission": "settings:manage",
+    "prefix": "Groupf9f53cac",
+    "queries": 1,
+    "file": "avisos-assinante.ts",
+    "sha256": "a3f78f6f21e6e4cd3b40be9f0e8a969df2f4d955870403d4d64e8724515740e5"
+  },
+  {
+    "path": "/api/notifications",
+    "permission": "settings:manage",
+    "prefix": "Groupcc96ccc1",
+    "queries": 2,
+    "file": "crm.ts",
+    "sha256": "597efec2645b4b6ce9883ac96269c19b559404ba5944f02a0c78beea3626e9bf"
+  },
+  {
+    "path": "/api/radius/allowed-sources",
+    "permission": "network:read",
+    "prefix": "Groupb8b3464c",
+    "queries": 1,
+    "file": "radius.ts",
+    "sha256": "ab09b93c8fa7c9dd29e70c068123e95f45cf35f1270f6f9b10205394219601a0"
+  },
+  {
+    "path": "/api/settings/retention",
+    "permission": "settings:manage",
+    "prefix": "Groupb01b2491",
+    "queries": 1,
+    "file": "lgpd.ts",
+    "sha256": "69223c6d3cddd435c4a640ee06983afe1ed32c233515715da8bac420ab9efa4f"
+  },
+  {
+    "path": "/api/surveys",
+    "permission": "os:read",
+    "prefix": "Group9fb1f09c",
+    "queries": 2,
+    "file": "fluxo-os.ts",
+    "sha256": "679b4acb6b7b7437e0bc68a08bca5649f9d85ca6cffb0c6c3f9ee2ee83259353"
+  },
+  {
+    "path": "/api/tenants",
+    "permission": "tenants:manage",
+    "prefix": "Group98e9e79f",
+    "raw": [
+      "select t.*, (select count(*) from users u where u.tenant_id = t.id and u.role <> 'subscriber') as users,\n                h.agents, h.agents_offline, h.uncertain, h.failed_recent\n         from tenants t left join platform_health() h on h.tenant_id = t.id order by t.name"
+    ],
+    "queries": 1,
+    "file": "identity.ts",
+    "sha256": "75fe627d9114d9b1186f65ccc2db5222632b73746610c3aef479071164bd6183"
+  },
+  {
+    "path": "/api/tickets",
+    "permission": "crm:read",
+    "prefix": "Group729a2291",
+    "queries": 1,
+    "file": "crm.ts",
+    "sha256": "c7a4b339e8fe88660475eb57582b33bc82b0c118e26586e0f354ddb29d5370f9"
+  },
+  {
+    "path": "/api/tickets/:id",
+    "permission": "crm:read",
+    "prefix": "Group8a6c6828",
+    "queries": 3,
+    "file": "crm.ts",
+    "sha256": "50df0a3019e83a05843ffcd4c249b3038750cd293be462698a12bf555535efb6"
+  },
+  {
+    "path": "/api/work-orders",
+    "permission": "os:read",
+    "prefix": "Groupd4b13e4f",
+    "queries": 1,
+    "file": "field.ts",
+    "sha256": "8cb855919e04816687fe4561c186b4c17235194a61b7c33dc0b34318fd4fd819"
+  },
+  {
+    "path": "/api/work-orders/:id",
+    "permission": "os:read",
+    "prefix": "Group432d4bfb",
+    "queries": 5,
+    "file": "field.ts",
+    "sha256": "859d65c129d0abe76e7989d8ed4382c2dd677705d12e4ae88eaa596c1769cddc"
+  }
+]

@@ -15,8 +15,10 @@ e2e/node_modules
 # material de terceiro com dados de clientes e configuração real (espelho do SGP): nunca versionar
 docs/sgp_mirror.zip
 docs/sgp_mirror/
+docs/SGP/
 
 # saída das ferramentas de migração (dados pessoais): o padrão já é fora do repositório; isto é só proteção
 saida-sgp/
 nexo-sgp-saida/
 *.formato.json
+.claude/

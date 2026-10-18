@@ -1,0 +1,1 @@
+select 1 from notice_channels where id = $1

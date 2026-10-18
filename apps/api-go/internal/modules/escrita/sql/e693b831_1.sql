@@ -1,0 +1,2 @@
+update sla_policies set name = coalesce($2, name), resolution_minutes = coalesce($3, resolution_minutes),
+           escalate_to = case when $4 then $5 else escalate_to end, active = coalesce($6, active) where id = $1 returning *

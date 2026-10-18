@@ -1,0 +1,2 @@
+update subscriber_notes set alert = coalesce($3, alert),
+                archived_at = case when $2::boolean is null then archived_at when $2 then coalesce(archived_at, now()) end where id = $1 returning *

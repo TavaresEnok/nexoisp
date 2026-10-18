@@ -1,0 +1,1 @@
+select id, subscriber_id from contracts where external_source = $1 and external_id = $2

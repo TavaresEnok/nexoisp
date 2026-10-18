@@ -1,0 +1,1 @@
+update tenant_settings set retention_auth_log_days = $2, retention_sessions_days = $3, retention_notice_log_days = $4 where tenant_id = $1

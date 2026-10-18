@@ -1,0 +1,1 @@
+update leads set updated_at = now() where id = $1

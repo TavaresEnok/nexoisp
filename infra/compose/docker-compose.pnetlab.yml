@@ -10,6 +10,10 @@ networks:
 services:
   api:
     build: { network: host }
+  migrate:
+    build: { network: host }
+  caddy:
+    build: { network: host }
   agent-demo:
     build: { network: host }
     security_opt: ["seccomp=unconfined"]

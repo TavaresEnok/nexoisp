@@ -1,0 +1,2266 @@
+[
+  {
+    "path": "POST /api/contracts/:id/acceptances",
+    "permission": "contracts:write",
+    "file": "aceites.ts",
+    "queries": [
+      "31c69adc_0.sql",
+      "31c69adc_1.sql",
+      "31c69adc_2.sql",
+      "31c69adc_3.sql"
+    ],
+    "sha256": "a7700bda0cd2e76d6f50eace4375988682df2ab80f92cd7453ccada5741b9888"
+  },
+  {
+    "path": "POST /api/acceptances/:id/cancel",
+    "permission": "contracts:write",
+    "file": "aceites.ts",
+    "queries": [
+      "2f745bd5_0.sql"
+    ],
+    "sha256": "900a2281946c32ecd505469bde38ed75c0435382a680cb14362efd9b8fa1d9dc"
+  },
+  {
+    "path": "POST /api/portal/acceptances/:id/accept",
+    "permission": "portal:self",
+    "file": "aceites.ts",
+    "queries": [
+      "ca6cb5e5_0.sql",
+      "ca6cb5e5_1.sql"
+    ],
+    "sha256": "b6b3d4fc6a090e43ee11d7832d9bb04720381defe2e313aa228d366427b450f0"
+  },
+  {
+    "path": "POST /api/addons",
+    "permission": "plans:write",
+    "file": "adicionais.ts",
+    "queries": [
+      "e5827a9f_0.sql"
+    ],
+    "sha256": "9b8abd1cf611fc4862834535e654486b645ae600eac62a005682830d255164a2"
+  },
+  {
+    "path": "PATCH /api/addons/:id",
+    "permission": "plans:write",
+    "file": "adicionais.ts",
+    "queries": [
+      "55873348_0.sql"
+    ],
+    "sha256": "8de19343f86c68459c25c941949801dfb3729dcebbb64c339920e2cee44cbeb6"
+  },
+  {
+    "path": "POST /api/contracts/:id/addons",
+    "permission": "contracts:write",
+    "file": "adicionais.ts",
+    "queries": [
+      "9b027a97_0.sql",
+      "9b027a97_1.sql",
+      "9b027a97_2.sql",
+      "9b027a97_3.sql"
+    ],
+    "sha256": "fe938c3476abc1d6e115a7e9c4991303493d6af469a12b83156442abcd527736"
+  },
+  {
+    "path": "DELETE /api/contracts/:id/addons/:addonId",
+    "permission": "contracts:write",
+    "file": "adicionais.ts",
+    "queries": [
+      "0ac03453_0.sql",
+      "0ac03453_1.sql"
+    ],
+    "sha256": "859ad4520dd3434f3d9c2fe982d163b7e60de50472ae8c7db309e140810417eb"
+  },
+  {
+    "path": "GET /api/anatel/dici",
+    "permission": "settings:manage",
+    "file": "anatel.ts",
+    "queries": [
+      "eb3f219b_0.sql",
+      "eb3f219b_1.sql",
+      "eb3f219b_2.sql",
+      "eb3f219b_3.sql"
+    ],
+    "sha256": "f56089b2dfc7b3f5dd928a0ffb4433db1b4b56ff3f8517cc25ee5b48dbc1db20"
+  },
+  {
+    "path": "PUT /api/anatel/municipalities",
+    "permission": "settings:manage",
+    "file": "anatel.ts",
+    "queries": [
+      "e3eecff0_0.sql",
+      "e3eecff0_1.sql"
+    ],
+    "sha256": "ef0c026c7925a2b5cf60287d57e9a35bcb33f6098606c509fd12e9f34a8d393d"
+  },
+  {
+    "path": "PUT /api/plans/:id/technology",
+    "permission": "plans:write",
+    "file": "anatel.ts",
+    "queries": [
+      "f2ce5571_0.sql"
+    ],
+    "sha256": "6dfe6efbf778acdaf1e77b371b4be609e9eaff186ff57531a5f50b0dd09efe2b"
+  },
+  {
+    "path": "PUT /api/contracts/:id/service-area",
+    "permission": "contracts:write",
+    "file": "anatel.ts",
+    "queries": [
+      "acedbac8_0.sql"
+    ],
+    "sha256": "6aba899dde32efb6d9a4624bb9a8ff2cbc430006f277e426cb65565df9e90b2b"
+  },
+  {
+    "path": "GET /api/contracts/:id/sessions",
+    "permission": "network:read",
+    "file": "atendimento.ts",
+    "queries": [
+      "2dafff23_0.sql",
+      "2dafff23_1.sql",
+      "2dafff23_2.sql"
+    ],
+    "sha256": "82a8ff404273adf29ac9c73cf135d79c87885b71777815afa8b7f1b58ab6f563"
+  },
+  {
+    "path": "GET /api/network/online",
+    "permission": "network:read",
+    "file": "atendimento.ts",
+    "queries": [
+      "8fe402e6_0.sql"
+    ],
+    "sha256": "bde1d4de3d56d5d3382e4dbc86df21b9e96341970f8fdc626a11a8a78b39ee27"
+  },
+  {
+    "path": "POST /api/network/disconnect",
+    "permission": "network:operate",
+    "file": "atendimento.ts",
+    "queries": [],
+    "sha256": "c5479b19c0452054c080866d1dd8052ba1e770511dea82a80fe1b4a329bc5ec1"
+  },
+  {
+    "path": "PUT /api/subscribers/:id/contacts",
+    "permission": "subscribers:write",
+    "file": "atendimento.ts",
+    "queries": [
+      "efcb191a_0.sql",
+      "efcb191a_1.sql",
+      "efcb191a_2.sql",
+      "efcb191a_3.sql"
+    ],
+    "sha256": "6c76ea820c4608344c324bdc43c7c5492357c37ce076c13415047f6ad9186e0d"
+  },
+  {
+    "path": "POST /api/pops",
+    "permission": "network:write",
+    "file": "atendimento.ts",
+    "queries": [
+      "6950c738_0.sql"
+    ],
+    "sha256": "712c259fbaa9821528b3f8f112be423c4266823e092e66ed40549942b34a2717"
+  },
+  {
+    "path": "PATCH /api/pops/:id",
+    "permission": "network:write",
+    "file": "atendimento.ts",
+    "queries": [
+      "e3ed7569_0.sql"
+    ],
+    "sha256": "bcc8a278323084b11b8696de4a355c8ddb004e114ce3864be5bbb8254512ce15"
+  },
+  {
+    "path": "PUT /api/contracts/:id/pop",
+    "permission": "contracts:write",
+    "file": "atendimento.ts",
+    "queries": [
+      "5fb07410_0.sql",
+      "5fb07410_1.sql"
+    ],
+    "sha256": "d274c2d9f700734bb53858542c0450f407017afc530e2e73f6585b1c8fdca957"
+  },
+  {
+    "path": "POST /api/notice-channels",
+    "permission": "settings:manage",
+    "file": "avisos-assinante.ts",
+    "queries": [
+      "9e74d6e0_0.sql"
+    ],
+    "sha256": "68f2f65e532d7309fb40085e323ba88e7f8a24e3b3e46f002a117dcdaa05ec28"
+  },
+  {
+    "path": "PATCH /api/notice-channels/:id",
+    "permission": "settings:manage",
+    "file": "avisos-assinante.ts",
+    "queries": [
+      "8e2b6d3e_0.sql"
+    ],
+    "sha256": "c84a44296977b38aee6dc4252fe29a9baa611c9d6519777cbabb226cd1f22274"
+  },
+  {
+    "path": "DELETE /api/notice-channels/:id",
+    "permission": "settings:manage",
+    "file": "avisos-assinante.ts",
+    "queries": [
+      "58313faf_0.sql",
+      "58313faf_1.sql"
+    ],
+    "sha256": "8ff07f8b857eaf7f6a29e602e8c873448df191c06e427c0809eaaa4996c6c45f"
+  },
+  {
+    "path": "POST /api/notice-channels/:id/test",
+    "permission": "settings:manage",
+    "file": "avisos-assinante.ts",
+    "queries": [
+      "ecc86eff_0.sql",
+      "ecc86eff_1.sql"
+    ],
+    "sha256": "d8bf56dee022e4513962a6da469a20e2df5a479b7b971f4011b71cfaee17a774"
+  },
+  {
+    "path": "POST /api/notice-templates",
+    "permission": "settings:manage",
+    "file": "avisos-assinante.ts",
+    "queries": [
+      "30e189da_0.sql"
+    ],
+    "sha256": "941187459bab54c2581fc095c02f3944b0506ff0d7f3d6e78508635dba93b541"
+  },
+  {
+    "path": "DELETE /api/notice-templates/:id",
+    "permission": "settings:manage",
+    "file": "avisos-assinante.ts",
+    "queries": [
+      "6cbaff3b_0.sql",
+      "6cbaff3b_1.sql"
+    ],
+    "sha256": "5ad8c26f4d8907b4ac065965dc775a9f5ace3226e95511821b7283505a24c63e"
+  },
+  {
+    "path": "POST /api/notice-rules",
+    "permission": "settings:manage",
+    "file": "avisos-assinante.ts",
+    "queries": [
+      "fc5e812e_0.sql",
+      "fc5e812e_1.sql",
+      "fc5e812e_2.sql"
+    ],
+    "sha256": "aa2967062913c38f5453f8df9c23aeb3f9e3fafb32ae6e7b793620107660ad34"
+  },
+  {
+    "path": "PATCH /api/notice-rules/:id",
+    "permission": "settings:manage",
+    "file": "avisos-assinante.ts",
+    "queries": [
+      "c77acbc2_0.sql"
+    ],
+    "sha256": "a230d7ce95534fcacc49ec05c9d6028c1e2f9b257466f2ae9d2efd5fdf6af10e"
+  },
+  {
+    "path": "DELETE /api/notice-rules/:id",
+    "permission": "settings:manage",
+    "file": "avisos-assinante.ts",
+    "queries": [
+      "43f7a573_0.sql"
+    ],
+    "sha256": "534c0a786194b7fce81a96c46c387b1112cd5a54f98ba37d2c937f51933cdbbe"
+  },
+  {
+    "path": "POST /api/notice-rules/run",
+    "permission": "settings:manage",
+    "file": "avisos-assinante.ts",
+    "queries": [],
+    "sha256": "8302942f5b473020c94d23f1d6b1df4289506f2a8721e41dbb424984d7723c52"
+  },
+  {
+    "path": "helper:currentVersion",
+    "permission": "",
+    "file": "cadastro.ts",
+    "queries": [
+      "71537633_0.sql"
+    ],
+    "sha256": "b740c51e701848e2fd0214aea51c66b1a3b61993caaad6d1cbd329b117a3cc74"
+  },
+  {
+    "path": "helper:localToday",
+    "permission": "",
+    "file": "cadastro.ts",
+    "queries": [
+      "a78d7147_0.sql"
+    ],
+    "sha256": "8bdab1271f5fee3670fa1aea88cfe6a40a6d82c1847c7b3d98a3c848aac3e54c"
+  },
+  {
+    "path": "helper:terminationQuote",
+    "permission": "",
+    "file": "cadastro.ts",
+    "queries": [
+      "4facfb98_0.sql"
+    ],
+    "sha256": "5dea856c8ee7e76f24c663543f2526447157b1cbb5bc1a3611d5f3664d3f5a85"
+  },
+  {
+    "path": "helper:changeContract",
+    "permission": "",
+    "file": "cadastro.ts",
+    "queries": [
+      "b40070f3_0.sql",
+      "b40070f3_1.sql",
+      "b40070f3_2.sql",
+      "b40070f3_3.sql",
+      "b40070f3_4.sql",
+      "b40070f3_5.sql",
+      "b40070f3_6.sql",
+      "b40070f3_7.sql"
+    ],
+    "sha256": "975166216721d26228965ddeb252840db79d0c03e713f0d5bcb6b15b3c2ea2a5"
+  },
+  {
+    "path": "POST /api/subscribers",
+    "permission": "subscribers:write",
+    "file": "cadastro.ts",
+    "queries": [
+      "1b5d25f9_0.sql"
+    ],
+    "sha256": "fde28d2d8fe623fb904ae7b8e8c12bb7794aa03fcd2776cbd3e10646a50e6804"
+  },
+  {
+    "path": "PATCH /api/subscribers/:id",
+    "permission": "subscribers:write",
+    "file": "cadastro.ts",
+    "queries": [
+      "da5d847f_0.sql",
+      "da5d847f_1.sql"
+    ],
+    "sha256": "b20cf9ee64d3711198f61c90d5caf6f31516eeed8cff58a1b993204a7bedd335"
+  },
+  {
+    "path": "POST /api/plans",
+    "permission": "plans:write",
+    "file": "cadastro.ts",
+    "queries": [
+      "3980b46a_0.sql",
+      "3980b46a_1.sql"
+    ],
+    "sha256": "c341e87318aaeabfbd913e684e717bb012c43e6bda71e92a2ad17a76f13f3c37"
+  },
+  {
+    "path": "POST /api/plans/:id/versions",
+    "permission": "plans:write",
+    "file": "cadastro.ts",
+    "queries": [
+      "992ba2d9_0.sql",
+      "992ba2d9_1.sql"
+    ],
+    "sha256": "b37e24bba3afc137d43d813faee4cca99753cf6323fb8c9a52f5020b470418ac"
+  },
+  {
+    "path": "PUT /api/plans/:id/dunning",
+    "permission": "plans:write",
+    "file": "cadastro.ts",
+    "queries": [
+      "28f917b9_0.sql"
+    ],
+    "sha256": "b0211d6b021d68636937d617c54fb19c07d6332459ada27847298e619a9eacc8"
+  },
+  {
+    "path": "PATCH /api/plans/:id",
+    "permission": "plans:write",
+    "file": "cadastro.ts",
+    "queries": [
+      "ebcc9e12_0.sql"
+    ],
+    "sha256": "87c971383292ce07226d6c9c7292018566a8558f4f7be1bd9c41cf7d2b8ded56"
+  },
+  {
+    "path": "POST /api/contracts",
+    "permission": "contracts:write",
+    "file": "cadastro.ts",
+    "queries": [
+      "f1605dbe_0.sql",
+      "f1605dbe_1.sql",
+      "f1605dbe_2.sql",
+      "f1605dbe_3.sql"
+    ],
+    "sha256": "17c273f6a3f60500ceba727c32699f5ce05355a9d722ca58b4aaa06fa0d40dd8"
+  },
+  {
+    "path": "PATCH /api/contracts/:id",
+    "permission": "contracts:write",
+    "file": "cadastro.ts",
+    "queries": [
+      "4c186ecc_0.sql"
+    ],
+    "sha256": "b1d71d339180f791951f1b52c5784ba3815ec2a5650878fe043cc70d84e5b2dd"
+  },
+  {
+    "path": "PUT /api/plans/:id/loyalty",
+    "permission": "plans:write",
+    "file": "condicoes.ts",
+    "queries": [
+      "e12ffcdd_0.sql"
+    ],
+    "sha256": "d82da3002a16b07c49b5b5b438f9fe1af76ff98774d1e646f27b1399bcba4769"
+  },
+  {
+    "path": "PUT /api/contracts/:id/loyalty",
+    "permission": "contracts:write",
+    "file": "condicoes.ts",
+    "queries": [
+      "f10ad2f5_0.sql",
+      "f10ad2f5_1.sql"
+    ],
+    "sha256": "c96ed0be704b064039d2153fc381a887892fb8467d03595edfdc200e8ef8a6ca"
+  },
+  {
+    "path": "POST /api/contracts/:id/discounts",
+    "permission": "finance:write",
+    "file": "condicoes.ts",
+    "queries": [
+      "6289e228_0.sql",
+      "6289e228_1.sql"
+    ],
+    "sha256": "05bb1569d8bb7bbf716e52683220afb74436b850453198efaf8176c2ab7822b1"
+  },
+  {
+    "path": "DELETE /api/discounts/:id",
+    "permission": "finance:write",
+    "file": "condicoes.ts",
+    "queries": [
+      "faea2213_0.sql"
+    ],
+    "sha256": "e07e4db5ec546da8c169db7c4f9e5effedf5c3a6b931a5bca9045fb965cae2b3"
+  },
+  {
+    "path": "PUT /api/contracts/:id/referral",
+    "permission": "contracts:write",
+    "file": "condicoes.ts",
+    "queries": [
+      "92ebbb57_0.sql",
+      "92ebbb57_1.sql"
+    ],
+    "sha256": "e4453db456005f6233a4f9486e1b1b66c809ee8c923bbe2de98b60281ed3c3e8"
+  },
+  {
+    "path": "POST /api/contracts/:id/scheduled-changes",
+    "permission": "contracts:write",
+    "file": "condicoes.ts",
+    "queries": [
+      "b274e7a2_0.sql",
+      "b274e7a2_1.sql",
+      "b274e7a2_2.sql",
+      "b274e7a2_3.sql"
+    ],
+    "sha256": "2c4f9ea1a4c3ed6699ab6811a6f0ccbc2588779f4f54590064797c270662a595"
+  },
+  {
+    "path": "DELETE /api/scheduled-changes/:id",
+    "permission": "contracts:write",
+    "file": "condicoes.ts",
+    "queries": [
+      "76b3d366_0.sql"
+    ],
+    "sha256": "21ad0a4da088f39da18ea96ae551f6f740b62bae93fc401f208a6d37e47bc6bf"
+  },
+  {
+    "path": "POST /api/contracts/:id/amendments",
+    "permission": "contracts:write",
+    "file": "condicoes.ts",
+    "queries": [
+      "47cf576f_0.sql",
+      "47cf576f_1.sql",
+      "47cf576f_2.sql"
+    ],
+    "sha256": "a82bd5ba3fd8227944a223ca65a7af3213c1b367a4c10273d78c95924706fd5e"
+  },
+  {
+    "path": "POST /api/legal/ip-lookup",
+    "permission": "legal:query",
+    "file": "consulta-ip.ts",
+    "queries": [
+      "62a0bfbd_0.sql",
+      "62a0bfbd_1.sql",
+      "62a0bfbd_2.sql",
+      "62a0bfbd_3.sql",
+      "62a0bfbd_4.sql"
+    ],
+    "sha256": "2c2cf035d08bf0aa31db6c235618f8bec7fe05735f4b547616aa4d7589e1f29c"
+  },
+  {
+    "path": "helper:leadEvent",
+    "permission": "",
+    "file": "crm.ts",
+    "queries": [
+      "2f96d340_0.sql"
+    ],
+    "sha256": "d6d605fb709368e7121fbc560709a0273aefb545c7126ff38a6590339c21942b"
+  },
+  {
+    "path": "helper:openTicket",
+    "permission": "",
+    "file": "crm.ts",
+    "queries": [
+      "10fd0b37_0.sql",
+      "10fd0b37_1.sql",
+      "10fd0b37_2.sql"
+    ],
+    "sha256": "f1422cf28ea53e53bd90e2c432ac9bd72d3416e76f54afe462cee01cce657260"
+  },
+  {
+    "path": "POST /api/leads",
+    "permission": "crm:write",
+    "file": "crm.ts",
+    "queries": [
+      "197a5b5a_0.sql"
+    ],
+    "sha256": "37661ba9b4a3ddd8a7a18d9272a39fd1ffcdd0392ab65e702846bf40e5e932a3"
+  },
+  {
+    "path": "PATCH /api/leads/:id",
+    "permission": "crm:write",
+    "file": "crm.ts",
+    "queries": [
+      "532b574b_0.sql"
+    ],
+    "sha256": "9c8a7c152e67cf9829b3b23af115d336803743a9e8db49e3def58cb69a67c8d0"
+  },
+  {
+    "path": "POST /api/leads/:id/stage",
+    "permission": "crm:write",
+    "file": "crm.ts",
+    "queries": [
+      "ed1eca00_0.sql",
+      "ed1eca00_1.sql"
+    ],
+    "sha256": "0198c3d76c98a0c2bfb3c23997cdb5f8dddfd30de29175c192ccf31bcb6728d7"
+  },
+  {
+    "path": "POST /api/leads/:id/notes",
+    "permission": "crm:write",
+    "file": "crm.ts",
+    "queries": [
+      "439412df_0.sql"
+    ],
+    "sha256": "7694d1fd300f3c7273f854cae2f9abb49789cddd5c836002e46376fa3a2158fb"
+  },
+  {
+    "path": "POST /api/leads/:id/convert",
+    "permission": "crm:write",
+    "file": "crm.ts",
+    "queries": [
+      "b2fccd22_0.sql",
+      "b2fccd22_1.sql",
+      "b2fccd22_2.sql",
+      "b2fccd22_3.sql",
+      "b2fccd22_4.sql"
+    ],
+    "sha256": "885f68bb119b2e50ed559bcf139493b3a35042d741574e8d3e36c06606ae5d86"
+  },
+  {
+    "path": "POST /api/tickets",
+    "permission": "crm:write",
+    "file": "crm.ts",
+    "queries": [
+      "235585e8_0.sql",
+      "235585e8_1.sql"
+    ],
+    "sha256": "944fdfd11af83d06b6c85e9a6824d19bde1c855a91b14c7fc258046cb6af67ff"
+  },
+  {
+    "path": "PATCH /api/tickets/:id",
+    "permission": "crm:write",
+    "file": "crm.ts",
+    "queries": [
+      "0d1f3e4b_0.sql",
+      "0d1f3e4b_1.sql"
+    ],
+    "sha256": "a6094e8bb3c58ca135744e5770592b03adf29f181eaa75173cf60f8460b3c17e"
+  },
+  {
+    "path": "POST /api/tickets/:id/messages",
+    "permission": "crm:write",
+    "file": "crm.ts",
+    "queries": [
+      "9aa40c12_0.sql",
+      "9aa40c12_1.sql",
+      "9aa40c12_2.sql"
+    ],
+    "sha256": "dac51b8318e1a15ca55d39d7ae4ae26c0c8bb3cb2533fbae9aaa06c17a5ef6da"
+  },
+  {
+    "path": "POST /api/tickets/:id/status",
+    "permission": "crm:write",
+    "file": "crm.ts",
+    "queries": [
+      "5455f494_0.sql"
+    ],
+    "sha256": "fc9e7386717903fe65669db64e12081e7a5ee3db063f2562c034483620ba7bae"
+  },
+  {
+    "path": "PUT /api/notifications/settings",
+    "permission": "settings:manage",
+    "file": "crm.ts",
+    "queries": [
+      "4a7c5282_0.sql"
+    ],
+    "sha256": "91f058c7bd33f631ae8ae7b5e501bbb99082f8f334d40631699dc3cc569b45d5"
+  },
+  {
+    "path": "POST /api/notifications/test",
+    "permission": "settings:manage",
+    "file": "crm.ts",
+    "queries": [
+      "1d4720df_0.sql"
+    ],
+    "sha256": "ba60d1ed3264cba5c0bb04e1f47ae33769f57f5eda7048775943fc89752634f9"
+  },
+  {
+    "path": "POST /api/notifications/deliver",
+    "permission": "settings:manage",
+    "file": "crm.ts",
+    "queries": [],
+    "sha256": "a025a8925cb6e87e84d73d7fed9bc981b33eb361b3f77d571fa95f4c55f3ad3c"
+  },
+  {
+    "path": "POST /api/portal/tickets",
+    "permission": "portal:self",
+    "file": "crm.ts",
+    "queries": [
+      "3d8c9dc1_0.sql"
+    ],
+    "sha256": "9e3f62c971654664689faac7b6eb1c8826523427cef2ab99c2301202959b7bf3"
+  },
+  {
+    "path": "POST /api/portal/tickets/:id/messages",
+    "permission": "portal:self",
+    "file": "crm.ts",
+    "queries": [
+      "269293e1_0.sql",
+      "269293e1_1.sql",
+      "269293e1_2.sql"
+    ],
+    "sha256": "22ffb7d91f7884465c102b5fc699bc4857767757847237328aebc3d28c8e419c"
+  },
+  {
+    "path": "POST /api/companies",
+    "permission": "settings:manage",
+    "file": "empresas.ts",
+    "queries": [
+      "4c3674ad_0.sql",
+      "4c3674ad_1.sql",
+      "4c3674ad_2.sql"
+    ],
+    "sha256": "ac3709b503e6deb5397ce111c758bd9c1180af1217d067008ae5b78fd22fe859"
+  },
+  {
+    "path": "PATCH /api/companies/:id",
+    "permission": "settings:manage",
+    "file": "empresas.ts",
+    "queries": [
+      "51221ade_0.sql",
+      "51221ade_1.sql",
+      "51221ade_2.sql"
+    ],
+    "sha256": "7f908624875152873bdd2e7c1424a20d448195e8dc54e20cf7dd40315dfe8486"
+  },
+  {
+    "path": "PUT /api/contracts/:id/company",
+    "permission": "contracts:write",
+    "file": "empresas.ts",
+    "queries": [
+      "477cb51f_0.sql",
+      "477cb51f_1.sql"
+    ],
+    "sha256": "9207b6a5e298db3190476ac1ec11e6a2129b396c336e6299c2dd5423eabb9f2d"
+  },
+  {
+    "path": "PUT /api/users/:id/pops",
+    "permission": "users:manage",
+    "file": "escopo-docs.ts",
+    "queries": [
+      "deabbcdf_0.sql",
+      "deabbcdf_1.sql",
+      "deabbcdf_2.sql",
+      "deabbcdf_3.sql"
+    ],
+    "sha256": "a0d517fba4b779025eef8ecf02f8e1b06d7d7a51e8ced0e3eab0d9dfa8e84393"
+  },
+  {
+    "path": "PUT /api/notice-page",
+    "permission": "settings:manage",
+    "file": "escopo-docs.ts",
+    "queries": [
+      "747d26e6_0.sql"
+    ],
+    "sha256": "bc5c9f31e5ce7c68207ed0760b9655b6927a297dd897d64d1586033bb069928d"
+  },
+  {
+    "path": "POST /api/subscribers/:id/documents",
+    "permission": "subscribers:write",
+    "file": "escopo-docs.ts",
+    "queries": [
+      "ae931058_0.sql",
+      "ae931058_1.sql",
+      "ae931058_2.sql",
+      "ae931058_3.sql"
+    ],
+    "sha256": "37dd54a6e840a6bc48282b1f0aec7d6d9660c71269ba11848fe06ffa9317de5a"
+  },
+  {
+    "path": "GET /api/documents/:id/download",
+    "permission": "subscribers:write",
+    "file": "escopo-docs.ts",
+    "queries": [
+      "d418b5fc_0.sql"
+    ],
+    "sha256": "f7f813f7c9f85dde4a049ef01663e6cddc15ab3a403cf87c16fa474f803a7192"
+  },
+  {
+    "path": "DELETE /api/documents/:id",
+    "permission": "subscribers:write",
+    "file": "escopo-docs.ts",
+    "queries": [
+      "e5f47001_0.sql"
+    ],
+    "sha256": "843e41db36d61dd9579f9e0387aecf56a49425cfed75ff375b16ad803e5e1702"
+  },
+  {
+    "path": "PUT /api/contracts/:id/credit-restriction",
+    "permission": "finance:write",
+    "file": "estados.ts",
+    "queries": [
+      "0152c71b_0.sql",
+      "0152c71b_1.sql"
+    ],
+    "sha256": "ba7489416d898034fc28fbb4db9982bd93359553554ed5fb13616b0af675906d"
+  },
+  {
+    "path": "POST /api/subscribers/:id/notes",
+    "permission": "subscribers:write",
+    "file": "estados.ts",
+    "queries": [
+      "0b0c075d_0.sql",
+      "0b0c075d_1.sql",
+      "0b0c075d_2.sql"
+    ],
+    "sha256": "6352bc86302e9137a803464396666df0b72a9ef52f609720a120cf7cd85786b3"
+  },
+  {
+    "path": "PATCH /api/notes/:id",
+    "permission": "subscribers:write",
+    "file": "estados.ts",
+    "queries": [
+      "40a515a1_0.sql"
+    ],
+    "sha256": "9e5c0d692beed9f9ff556642b3d0d98ec2263fefc0a4e7368732891b374f72eb"
+  },
+  {
+    "path": "POST /api/tags",
+    "permission": "contracts:write",
+    "file": "extras.ts",
+    "queries": [
+      "4936f740_0.sql"
+    ],
+    "sha256": "50a74d571e81965dbe28c0757ce6dd6f7fc18604a3adfced5ba3efddb93939b3"
+  },
+  {
+    "path": "DELETE /api/tags/:id",
+    "permission": "contracts:write",
+    "file": "extras.ts",
+    "queries": [
+      "c4f32de2_0.sql"
+    ],
+    "sha256": "9989823c3f975ae31c0bb013d75e87d3a731134bef2649d2b82c32d30e052727"
+  },
+  {
+    "path": "PUT /api/contracts/:id/tags",
+    "permission": "contracts:write",
+    "file": "extras.ts",
+    "queries": [
+      "6d1c7b38_0.sql",
+      "6d1c7b38_1.sql",
+      "6d1c7b38_2.sql",
+      "6d1c7b38_3.sql",
+      "6d1c7b38_4.sql"
+    ],
+    "sha256": "ff2341f96642a92f8eb4d12a71058b7a69a9614f9c93ad6307eb0c95731f6ca7"
+  },
+  {
+    "path": "POST /api/maintenance-notices",
+    "permission": "network:write",
+    "file": "extras.ts",
+    "queries": [
+      "0603829e_0.sql",
+      "0603829e_1.sql",
+      "0603829e_2.sql"
+    ],
+    "sha256": "3ee4d732711e1c89357326e31626c54c5f24bdbcf4b4131d8e042f9fff2ca454"
+  },
+  {
+    "path": "POST /api/maintenance-notices/:id/cancel",
+    "permission": "network:write",
+    "file": "extras.ts",
+    "queries": [
+      "6668d625_0.sql"
+    ],
+    "sha256": "c5750d0d2d4552d4dc59af96faf51e1d24d6afa1b1c85814f5838d2ccdd5c401"
+  },
+  {
+    "path": "POST /api/maintenance-notices/:id/notify",
+    "permission": "network:write",
+    "file": "extras.ts",
+    "queries": [
+      "aee9567a_0.sql",
+      "aee9567a_1.sql",
+      "aee9567a_2.sql",
+      "aee9567a_3.sql",
+      "aee9567a_4.sql"
+    ],
+    "sha256": "e969f346811777aa698f9a0a2dc38a87e7be4d3da6d700ddf0dcca2a6f52a6ef"
+  },
+  {
+    "path": "helper:woEvent",
+    "permission": "",
+    "file": "field.ts",
+    "queries": [
+      "c3470877_0.sql"
+    ],
+    "sha256": "eb304d71ef4a69c3be25d5fe3e67d07f4d637e096963a264da75b2e6bf6dd3f1"
+  },
+  {
+    "path": "helper:staff",
+    "permission": "",
+    "file": "field.ts",
+    "queries": [
+      "bed34dd2_0.sql"
+    ],
+    "sha256": "020e98ff98ac1621af8e4575e71c0dc8b674b57664681c9e8ac974859d4f5bb3"
+  },
+  {
+    "path": "helper:stockMove",
+    "permission": "",
+    "file": "field.ts",
+    "queries": [
+      "1a18c8b4_0.sql",
+      "1a18c8b4_1.sql",
+      "1a18c8b4_2.sql"
+    ],
+    "sha256": "5b6e2d48cd9ba254fd264a81759f683a435cf5caa57b6cbbd239b729d7a63097"
+  },
+  {
+    "path": "helper:createWorkOrder",
+    "permission": "",
+    "file": "field.ts",
+    "queries": [
+      "a2c23a7e_0.sql",
+      "a2c23a7e_1.sql",
+      "a2c23a7e_2.sql",
+      "a2c23a7e_3.sql",
+      "a2c23a7e_4.sql",
+      "a2c23a7e_5.sql",
+      "a2c23a7e_6.sql"
+    ],
+    "sha256": "88805659b210ef96d8dd0ac692fbc01f5f3cf63a4ccdeafbe1325578b121392f"
+  },
+  {
+    "path": "POST /api/work-orders",
+    "permission": "os:write",
+    "file": "field.ts",
+    "queries": [],
+    "sha256": "cc1a59d542248e3752765b5f566cff743dd1a8a37221e9c4a127ff8b2ab08914"
+  },
+  {
+    "path": "PATCH /api/work-orders/:id",
+    "permission": "os:write",
+    "file": "field.ts",
+    "queries": [
+      "6de4549b_0.sql",
+      "6de4549b_1.sql"
+    ],
+    "sha256": "6c125a188237cdc6da21bdef9d0932edbfb6a52b8e2e861ec0d0a77149daf408"
+  },
+  {
+    "path": "POST /api/work-orders/:id/status",
+    "permission": "os:write",
+    "file": "field.ts",
+    "queries": [
+      "6e9c45f1_0.sql",
+      "6e9c45f1_1.sql",
+      "6e9c45f1_2.sql"
+    ],
+    "sha256": "0486111a01ab0a8029621ebf1ca5463e30b0a5e0fe5d701c0f49daee267ec110"
+  },
+  {
+    "path": "POST /api/work-orders/:id/notes",
+    "permission": "os:write",
+    "file": "field.ts",
+    "queries": [
+      "acdb47f7_0.sql"
+    ],
+    "sha256": "22a07948be8c00e7fbb3fd08898b8e589f991307085a3da8c72a8f3639838015"
+  },
+  {
+    "path": "POST /api/work-orders/:id/materials",
+    "permission": "os:write",
+    "file": "field.ts",
+    "queries": [
+      "b106e3aa_0.sql",
+      "b106e3aa_1.sql"
+    ],
+    "sha256": "66081c8fba2f0f0b60f6aae9b98dfe0e163a2bc97ca93a6f22d5d3bc8253dc7d"
+  },
+  {
+    "path": "POST /api/stock/items",
+    "permission": "stock:write",
+    "file": "field.ts",
+    "queries": [
+      "701d6334_0.sql"
+    ],
+    "sha256": "c0b7ac33f0e463e459276343497416e9cd13665ee45e7e80cf0159b684a31e82"
+  },
+  {
+    "path": "PATCH /api/stock/items/:id",
+    "permission": "stock:write",
+    "file": "field.ts",
+    "queries": [
+      "fdc7e7c0_0.sql",
+      "fdc7e7c0_1.sql",
+      "fdc7e7c0_2.sql",
+      "fdc7e7c0_3.sql"
+    ],
+    "sha256": "cc37dfb79d6d4a9ec71da436991dbeaebb56bab9b39644d7ffb3cf326f0417ff"
+  },
+  {
+    "path": "POST /api/stock/items/:id/movements",
+    "permission": "stock:write",
+    "file": "field.ts",
+    "queries": [],
+    "sha256": "3a8180104270ea0197c6602e8dfa4fac57e5deaef9903781a3d6fd52bf8727d9"
+  },
+  {
+    "path": "helper:unitEvent",
+    "permission": "",
+    "file": "field.ts",
+    "queries": [
+      "0e169b1c_0.sql"
+    ],
+    "sha256": "8081b846521456ae6c30c6327ed6f37dfd5cb064cc12128bb8151e68a3655989"
+  },
+  {
+    "path": "helper:lockUnit",
+    "permission": "",
+    "file": "field.ts",
+    "queries": [
+      "ab05d03e_0.sql"
+    ],
+    "sha256": "d8159844d8dece21194ff3d7bedb37211d25e65bbc455c7223637e468fef822b"
+  },
+  {
+    "path": "POST /api/stock/items/:id/units",
+    "permission": "stock:write",
+    "file": "field.ts",
+    "queries": [
+      "63b775c4_0.sql",
+      "63b775c4_1.sql"
+    ],
+    "sha256": "7095c2d6fead3f5087c90115863a7c83935637cd1f3758f73e5facfc984d4adf"
+  },
+  {
+    "path": "POST /api/stock/units/:id/transfer",
+    "permission": "stock:write",
+    "file": "field.ts",
+    "queries": [
+      "00e2b2d9_0.sql"
+    ],
+    "sha256": "c90b382000f06a33213ceb77f1a624449dcf021c70024a42a698980bca158a88"
+  },
+  {
+    "path": "POST /api/stock/units/:id/status",
+    "permission": "stock:write",
+    "file": "field.ts",
+    "queries": [
+      "fe71f8ac_0.sql"
+    ],
+    "sha256": "912c0c46cabd788d8675ad2687f66f70006a4a88c354eb5feb33a30ffd5b6956"
+  },
+  {
+    "path": "POST /api/work-orders/:id/checklist",
+    "permission": "os:write",
+    "file": "field.ts",
+    "queries": [
+      "e542b8f2_0.sql",
+      "e542b8f2_1.sql",
+      "e542b8f2_2.sql"
+    ],
+    "sha256": "ded94614bf52e5f906618efd5f37ae1fd0c5e47e4dc67dd4fb7d96f28dd945d7"
+  },
+  {
+    "path": "POST /api/work-orders/:id/checklist/:itemId",
+    "permission": "os:write",
+    "file": "field.ts",
+    "queries": [
+      "cd6a5779_0.sql",
+      "cd6a5779_1.sql"
+    ],
+    "sha256": "0fc9a2f8f60d44af5d08dad368c036d16fefc330cbe58e257bfd5cc4dc0c7d99"
+  },
+  {
+    "path": "POST /api/work-orders/:id/units",
+    "permission": "os:write",
+    "file": "field.ts",
+    "queries": [
+      "dd2c68f1_0.sql",
+      "dd2c68f1_1.sql"
+    ],
+    "sha256": "f7880cc61c027b66cc6698a4246012195acbbc80df88f9d6f6e4d098c6a43291"
+  },
+  {
+    "path": "helper:checkBox",
+    "permission": "",
+    "file": "field.ts",
+    "queries": [
+      "8f441d84_0.sql",
+      "8f441d84_1.sql"
+    ],
+    "sha256": "a6af1167c6f5afee8be1e0b9698c7ef44692401882c8d02b226d70890242d356"
+  },
+  {
+    "path": "POST /api/ftth/boxes",
+    "permission": "network:write",
+    "file": "field.ts",
+    "queries": [
+      "f97a8589_0.sql"
+    ],
+    "sha256": "5fd5eaa43de1a266e8d9b5607f6d7f2a150f7b79b5a1b19fbcd9ac3e5a7131de"
+  },
+  {
+    "path": "PATCH /api/ftth/boxes/:id",
+    "permission": "network:write",
+    "file": "field.ts",
+    "queries": [
+      "d519d1f2_0.sql",
+      "d519d1f2_1.sql",
+      "d519d1f2_2.sql"
+    ],
+    "sha256": "6a0567c9b1851556c46e57b3e546e9bf3d70c0d9fadb2a76dbd02f28a6a79381"
+  },
+  {
+    "path": "DELETE /api/ftth/boxes/:id",
+    "permission": "network:write",
+    "file": "field.ts",
+    "queries": [
+      "4b220f35_0.sql",
+      "4b220f35_1.sql"
+    ],
+    "sha256": "73ca3dfe14a4117eec9e56d49a4c57057ad378c99d492b069ba26bb7d7fff7c9"
+  },
+  {
+    "path": "POST /api/ftth/boxes/:id/drops",
+    "permission": "network:write",
+    "file": "field.ts",
+    "queries": [
+      "2c11d351_0.sql",
+      "2c11d351_1.sql",
+      "2c11d351_2.sql"
+    ],
+    "sha256": "729634a2e8c1f90ba085575d061cbdbe94b6e67bcc26aa4fbf928940474e18f8"
+  },
+  {
+    "path": "DELETE /api/ftth/drops/:id",
+    "permission": "network:write",
+    "file": "field.ts",
+    "queries": [
+      "f5bbdc35_0.sql"
+    ],
+    "sha256": "02cd82ac25aa9a719846a05dff62a614b747ccb931f3f152b04ab5c1350e7fee"
+  },
+  {
+    "path": "PUT /api/finance/settings",
+    "permission": "settings:manage",
+    "file": "finance.ts",
+    "queries": [
+      "42470332_0.sql"
+    ],
+    "sha256": "e69d45abcdadf8de654941f559244a8181b215926898cc0c95ac7c7f5e12102d"
+  },
+  {
+    "path": "POST /api/finance/generate",
+    "permission": "finance:write",
+    "file": "finance.ts",
+    "queries": [
+      "14df3e8d_0.sql"
+    ],
+    "sha256": "52f128fbcbbfcc7b10e609f2e94dbc658fed18b74e004334efcf042f654ecd7a"
+  },
+  {
+    "path": "POST /api/invoices",
+    "permission": "finance:write",
+    "file": "finance.ts",
+    "queries": [
+      "489801a4_0.sql",
+      "489801a4_1.sql",
+      "489801a4_2.sql"
+    ],
+    "sha256": "86de0bae6212de302f6e18e9b1ccf9496f39cd293d3635ea6f2c3a1707ffd852"
+  },
+  {
+    "path": "POST /api/invoices/:id/cancel",
+    "permission": "finance:write",
+    "file": "finance.ts",
+    "queries": [
+      "7e6eaffb_0.sql"
+    ],
+    "sha256": "69dd5776a032b816c41ffa30e032d21490ff54ee979bbff0f2cb7edb9d05df5a"
+  },
+  {
+    "path": "POST /api/invoices/:id/manual-payment",
+    "permission": "finance:write",
+    "file": "finance.ts",
+    "queries": [],
+    "sha256": "af45cd4d504b0dc9ad86369bf87a9eed93418d281f0615ea0097d054609b2229"
+  },
+  {
+    "path": "GET /api/invoices/:id/due",
+    "permission": "finance:read",
+    "file": "finance.ts",
+    "queries": [],
+    "sha256": "901b53cdca865f92a43adf9ccecac37d72e505d1429866f038c8e5eaae0c472f"
+  },
+  {
+    "path": "POST /api/invoices/:id/payments/:paymentId/reverse",
+    "permission": "finance:write",
+    "file": "finance.ts",
+    "queries": [],
+    "sha256": "197fb355263b00e220b4d497d2bbc7bfe350aea9171976c4e81c1a7b8dae4be2"
+  },
+  {
+    "path": "POST /api/contracts/:id/agreement",
+    "permission": "finance:write",
+    "file": "finance.ts",
+    "queries": [],
+    "sha256": "5d362f9138abe05d3c894e6e891309fee5c597ad0f6995bb2253d4e43bbe6bdd"
+  },
+  {
+    "path": "GET /api/contracts/:id/trust-release",
+    "permission": "contracts:read",
+    "file": "finance.ts",
+    "queries": [],
+    "sha256": "72cd7a21b0c4610a6119b96205a3842e59c6035bbc09cdc3166539776a955a2d"
+  },
+  {
+    "path": "POST /api/contracts/:id/trust-release",
+    "permission": "trust:grant",
+    "file": "finance.ts",
+    "queries": [],
+    "sha256": "1ed21c2c2bcee34f07680f0c4dcc2bc49e79170d4b0e3639f670ddd390462781"
+  },
+  {
+    "path": "POST /api/invoices/:id/resolve",
+    "permission": "finance:write",
+    "file": "finance.ts",
+    "queries": [
+      "539ae5b8_0.sql",
+      "539ae5b8_1.sql"
+    ],
+    "sha256": "f620f915331dcfaf448f3914f912cf2ef378c803abcef7f099a646de4b1ace9d"
+  },
+  {
+    "path": "GET /api/finance/export",
+    "permission": "finance:read",
+    "file": "finance.ts",
+    "queries": [
+      "c5014101_0.sql",
+      "c5014101_1.sql"
+    ],
+    "sha256": "890169df6c3e3a4a4ac7d0d5f096e4ca1ae27682c81bc2cca892f3b12cf3de5d"
+  },
+  {
+    "path": "POST /api/finance/reconcile",
+    "permission": "finance:write",
+    "file": "finance.ts",
+    "queries": [],
+    "sha256": "78abb0563aa1d415893fa32996892c96d67b300f342df0c652af58c67c5f9766"
+  },
+  {
+    "path": "POST /api/finance/run-auto-suspend",
+    "permission": "settings:manage",
+    "file": "finance.ts",
+    "queries": [],
+    "sha256": "e19162a7667e767adf99e4cb180288e03067089caa65ed66e37d0a493284e162"
+  },
+  {
+    "path": "POST /api/webhooks/gateway/:gateway",
+    "permission": "",
+    "file": "finance.ts",
+    "queries": [],
+    "sha256": "6a0b393bbd9e05a09ebdab0dd309dc50d493c93a0df27252e3a64e227c2371a9"
+  },
+  {
+    "path": "POST /api/demo-gateway/pay",
+    "permission": "finance:write",
+    "file": "finance.ts",
+    "queries": [
+      "a5156667_0.sql",
+      "a5156667_1.sql"
+    ],
+    "sha256": "ba7f73bd2067bb2d26b1efcc6edae4b4e682c8419179713075d24f18fb9a1cb6"
+  },
+  {
+    "path": "POST /api/catalogs",
+    "permission": "settings:manage",
+    "file": "fluxo-os.ts",
+    "queries": [
+      "0bca23e8_0.sql"
+    ],
+    "sha256": "d72ae3ed4857132704d7303f82bb6f4217480d05d83250536820d675daa23dc2"
+  },
+  {
+    "path": "PATCH /api/catalogs/:id",
+    "permission": "settings:manage",
+    "file": "fluxo-os.ts",
+    "queries": [
+      "1c6f94b7_0.sql"
+    ],
+    "sha256": "c2ea996ba5351847629dd656996b500ff2c714f6ee48df978e685fa07a46bf79"
+  },
+  {
+    "path": "POST /api/sla-policies",
+    "permission": "settings:manage",
+    "file": "fluxo-os.ts",
+    "queries": [
+      "b5973ef5_0.sql",
+      "b5973ef5_1.sql",
+      "b5973ef5_2.sql"
+    ],
+    "sha256": "e4cb14e0889c31e16a3d8a2ce9131c45ce8bb3d9d0f268d4de05990976349591"
+  },
+  {
+    "path": "PATCH /api/sla-policies/:id",
+    "permission": "settings:manage",
+    "file": "fluxo-os.ts",
+    "queries": [
+      "e693b831_0.sql",
+      "e693b831_1.sql"
+    ],
+    "sha256": "27f3c78616b38da5d73d84a19b30652e47e4a86ddb7e776ef495c2a9297eab26"
+  },
+  {
+    "path": "DELETE /api/sla-policies/:id",
+    "permission": "settings:manage",
+    "file": "fluxo-os.ts",
+    "queries": [
+      "30fcb2a0_0.sql",
+      "30fcb2a0_1.sql"
+    ],
+    "sha256": "2217cbfd0cd5d33d2a8d2b76be23669995a074e09cb51bc5a76c6f888c8f64b2"
+  },
+  {
+    "path": "PUT /api/contracts/:id/install-address",
+    "permission": "contracts:write",
+    "file": "fluxo-os.ts",
+    "queries": [
+      "aec44ac9_0.sql"
+    ],
+    "sha256": "99a776923dca07e33c46ecb8e8293c8874b3cb429d971bc13f2d49cf547d629f"
+  },
+  {
+    "path": "POST /api/portal/surveys/:id",
+    "permission": "portal:self",
+    "file": "fluxo-os.ts",
+    "queries": [
+      "15819c1c_0.sql"
+    ],
+    "sha256": "6db0ab98fd3b0fb28d87c298a52c740d96dd36f910a4bad7da3fde6953a0a9da"
+  },
+  {
+    "path": "helper:applyContractExtras",
+    "permission": "",
+    "file": "import.ts",
+    "queries": [
+      "c0ddf174_0.sql",
+      "c0ddf174_1.sql",
+      "c0ddf174_2.sql",
+      "c0ddf174_3.sql",
+      "c0ddf174_4.sql",
+      "c0ddf174_5.sql",
+      "c0ddf174_6.sql"
+    ],
+    "sha256": "e1af2555ad0d322bc98242df5eab705a5da03024a4bce37038c9767df56657a8"
+  },
+  {
+    "path": "helper:importInvoiceRow",
+    "permission": "",
+    "file": "import.ts",
+    "queries": [
+      "56aea313_0.sql",
+      "56aea313_1.sql",
+      "56aea313_2.sql",
+      "56aea313_3.sql",
+      "56aea313_4.sql",
+      "56aea313_5.sql"
+    ],
+    "sha256": "1be08b6599e81bd47b9b3841daf098af14f42a963875346168be0a6cfcb8d17f"
+  },
+  {
+    "path": "helper:importHistoryRow",
+    "permission": "",
+    "file": "import.ts",
+    "queries": [
+      "0991d6ec_0.sql",
+      "0991d6ec_1.sql",
+      "0991d6ec_2.sql",
+      "0991d6ec_3.sql",
+      "0991d6ec_4.sql",
+      "0991d6ec_5.sql",
+      "0991d6ec_6.sql",
+      "0991d6ec_7.sql"
+    ],
+    "sha256": "9ec13b0f5f2ef9a8bce9c0a7022c93100d0a59f5bb0140d7a928e85fbb6f5c26"
+  },
+  {
+    "path": "POST /api/import/preview",
+    "permission": "import:run",
+    "file": "import.ts",
+    "queries": [],
+    "sha256": "ecf632673d1385837fdf100e731c726abe902c11488327761e0d4126aacdc244"
+  },
+  {
+    "path": "POST /api/import/apply",
+    "permission": "import:run",
+    "file": "import.ts",
+    "queries": [],
+    "sha256": "8575b0656a2329885248eb31eb5ba1bade43f91aa896042c8aa7defd13ef2805"
+  },
+  {
+    "path": "POST /api/import/batches/:id/provision",
+    "permission": "import:run",
+    "file": "import.ts",
+    "queries": [
+      "3b7f6aa5_0.sql"
+    ],
+    "sha256": "61230d59f2d8d07496f7cd25f2a160cf6c1197ba41e375719040a79a2a638ce8"
+  },
+  {
+    "path": "POST /api/api-tokens",
+    "permission": "settings:manage",
+    "file": "integracoes.ts",
+    "queries": [
+      "feda02af_0.sql"
+    ],
+    "sha256": "d7f00d4e13f1fa1e7a3d9c24599f0058c0b745b20b2ed537a003e912f8d3cb23"
+  },
+  {
+    "path": "DELETE /api/api-tokens/:id",
+    "permission": "settings:manage",
+    "file": "integracoes.ts",
+    "queries": [
+      "97216c16_0.sql"
+    ],
+    "sha256": "6be3473dd4f3aa15a9739986893565e08dc8f9423a342664da3fac049edd5cfe"
+  },
+  {
+    "path": "POST /api/webhook-endpoints",
+    "permission": "settings:manage",
+    "file": "integracoes.ts",
+    "queries": [
+      "87effd0a_0.sql"
+    ],
+    "sha256": "51a4377fcd3792ad17af33c75159d4f71728096f709144f812720d1e506cd662"
+  },
+  {
+    "path": "PATCH /api/webhook-endpoints/:id",
+    "permission": "settings:manage",
+    "file": "integracoes.ts",
+    "queries": [
+      "e3687192_0.sql"
+    ],
+    "sha256": "1bc400f927e694540e40121e9230846465693d0035307a5500038aaaece5ab7c"
+  },
+  {
+    "path": "POST /api/webhook-endpoints/:id/rotate-secret",
+    "permission": "settings:manage",
+    "file": "integracoes.ts",
+    "queries": [
+      "48db1b09_0.sql"
+    ],
+    "sha256": "790d651a62ff438023c04a266c853f59047ad88fce0706fb5aa0ee686a40d84e"
+  },
+  {
+    "path": "DELETE /api/webhook-endpoints/:id",
+    "permission": "settings:manage",
+    "file": "integracoes.ts",
+    "queries": [
+      "70ec7dcf_0.sql"
+    ],
+    "sha256": "65bb053c5b49a1ed48ede701627144513568933967d5efb7bf11c78247f78727"
+  },
+  {
+    "path": "POST /api/webhook-endpoints/:id/test",
+    "permission": "settings:manage",
+    "file": "integracoes.ts",
+    "queries": [
+      "41ec0a00_0.sql"
+    ],
+    "sha256": "c314d6ed3c2cfae76ee27e00bbf333d8d783e870304fbb1a1020d5235dd1d6b0"
+  },
+  {
+    "path": "POST /api/webhook-deliveries/:id/retry",
+    "permission": "settings:manage",
+    "file": "integracoes.ts",
+    "queries": [
+      "f2912eb1_0.sql"
+    ],
+    "sha256": "29d9f3e5bb39f140f46219dfb7dfee5559d575aca3e7d16ba18d72a6e3e77346"
+  },
+  {
+    "path": "helper:reapplyFixedIp",
+    "permission": "",
+    "file": "ipam.ts",
+    "queries": [
+      "8725b7c2_0.sql"
+    ],
+    "sha256": "63e77a6ad991663b549c524da21caff9db5de2236f7de9193b7eecd5ea8f88f7"
+  },
+  {
+    "path": "POST /api/ipam/pools",
+    "permission": "network:write",
+    "file": "ipam.ts",
+    "queries": [
+      "d556971a_0.sql",
+      "d556971a_1.sql",
+      "d556971a_2.sql",
+      "d556971a_3.sql"
+    ],
+    "sha256": "57cf95c5df3e8734a4e5c77f84aad9edacb504e0fcf902471b6d0d1c682b6af0"
+  },
+  {
+    "path": "PATCH /api/ipam/pools/:id",
+    "permission": "network:write",
+    "file": "ipam.ts",
+    "queries": [
+      "1e9a00be_0.sql"
+    ],
+    "sha256": "d88025fce004846d6aa2e822d1c051519f01474f950dc585132aead75f4d92c7"
+  },
+  {
+    "path": "DELETE /api/ipam/pools/:id",
+    "permission": "network:write",
+    "file": "ipam.ts",
+    "queries": [
+      "1f910a58_0.sql",
+      "1f910a58_1.sql",
+      "1f910a58_2.sql"
+    ],
+    "sha256": "739db2f7dd460f6eb6d87f265f07a7109d004327beb6d4bcd822ca0fbcc82f51"
+  },
+  {
+    "path": "POST /api/ipam/pools/:id/allocations",
+    "permission": "network:write",
+    "file": "ipam.ts",
+    "queries": [
+      "5ff392fd_0.sql",
+      "5ff392fd_1.sql",
+      "5ff392fd_2.sql",
+      "5ff392fd_3.sql",
+      "5ff392fd_4.sql",
+      "5ff392fd_5.sql",
+      "5ff392fd_6.sql"
+    ],
+    "sha256": "992f4f47b13a1033e0c2dd0e0a00495b006d46a16368012d7ba1ff814502c56c"
+  },
+  {
+    "path": "DELETE /api/ipam/allocations/:id",
+    "permission": "network:write",
+    "file": "ipam.ts",
+    "queries": [
+      "d9a444eb_0.sql"
+    ],
+    "sha256": "5a1dc5f7b4b6ffd976de690d44dd15702b07fa34ead6609c718a4d9049c8c770"
+  },
+  {
+    "path": "POST /api/ipam/pools/:id/delegations",
+    "permission": "network:write",
+    "file": "ipam.ts",
+    "queries": [
+      "f9c7c229_0.sql",
+      "f9c7c229_1.sql",
+      "f9c7c229_2.sql",
+      "f9c7c229_3.sql",
+      "f9c7c229_4.sql",
+      "f9c7c229_5.sql",
+      "f9c7c229_6.sql",
+      "f9c7c229_7.sql"
+    ],
+    "sha256": "647324b8514126b9eaf606eae6a710c66ce41ea91a29f6447f8b5ec80d77e695"
+  },
+  {
+    "path": "DELETE /api/ipam/delegations/:id",
+    "permission": "network:write",
+    "file": "ipam.ts",
+    "queries": [
+      "1c2415db_0.sql"
+    ],
+    "sha256": "10d1ed1419c9b51e3d0a377b773c1612403f27405055e56e195e7bdf91d7306c"
+  },
+  {
+    "path": "helper:checkPlan",
+    "permission": "",
+    "file": "ipam.ts",
+    "queries": [
+      "8b25f770_0.sql"
+    ],
+    "sha256": "b256770e8cd971187c6509f5eb2cd2cb511a2ce609b5b3c429f6dfecee98522e"
+  },
+  {
+    "path": "POST /api/cgnat/plans/check",
+    "permission": "network:read",
+    "file": "ipam.ts",
+    "queries": [],
+    "sha256": "096d01639a3a80e83fdae8ea549a2110f12de0bf006faa565889cc01741e2d31"
+  },
+  {
+    "path": "POST /api/cgnat/plans",
+    "permission": "network:write",
+    "file": "ipam.ts",
+    "queries": [
+      "653c509f_0.sql",
+      "653c509f_1.sql"
+    ],
+    "sha256": "4224eed78713d2dea956987fa845a96fa3278c9b3c8c38cd1688dceed05221c9"
+  },
+  {
+    "path": "POST /api/cgnat/plans/:id/retire",
+    "permission": "network:write",
+    "file": "ipam.ts",
+    "queries": [
+      "76b1935a_0.sql"
+    ],
+    "sha256": "b9449974cf49d1f1b040565ec269808133ceb94b04b93e032eca2924d980e364"
+  },
+  {
+    "path": "helper:loadPlan",
+    "permission": "",
+    "file": "ipam.ts",
+    "queries": [
+      "5d584040_0.sql"
+    ],
+    "sha256": "f436b4ea5b26aec5a06567e64317bea168a6dcf8f922b138c9f3e3335b7d8927"
+  },
+  {
+    "path": "GET /api/cgnat/plans/:id/script",
+    "permission": "network:write",
+    "file": "ipam.ts",
+    "queries": [],
+    "sha256": "007432e273292d517836f80dd933f302e4beda0ee56519c0eb5b83887677f65f"
+  },
+  {
+    "path": "GET /api/cgnat/trace",
+    "permission": "network:read",
+    "file": "ipam.ts",
+    "queries": [
+      "20fdceb1_0.sql",
+      "20fdceb1_1.sql",
+      "20fdceb1_2.sql",
+      "20fdceb1_3.sql"
+    ],
+    "sha256": "9e5653f59048e7f7ce2f526dd16900bc47706cdab64e01e5b588928e20a935e4"
+  },
+  {
+    "path": "GET /api/subscribers/:id/lgpd-export",
+    "permission": "settings:manage",
+    "file": "lgpd.ts",
+    "queries": [
+      "425dc543_0.sql",
+      "425dc543_1.sql",
+      "425dc543_2.sql",
+      "425dc543_3.sql",
+      "425dc543_4.sql",
+      "425dc543_5.sql",
+      "425dc543_6.sql",
+      "425dc543_7.sql",
+      "425dc543_8.sql",
+      "425dc543_9.sql",
+      "425dc543_10.sql"
+    ],
+    "sha256": "4aa483fda63f14537eb69f6e6f8c37c4f4d21a5ac5e9e21cdf89caf646de28c8"
+  },
+  {
+    "path": "POST /api/subscribers/:id/anonymize",
+    "permission": "settings:manage",
+    "file": "lgpd.ts",
+    "queries": [
+      "699b2d07_0.sql",
+      "699b2d07_1.sql"
+    ],
+    "sha256": "e25cde4141913d9ec3901e69552eb5a448e121d174af22d7471b4976041a37bf"
+  },
+  {
+    "path": "PUT /api/settings/retention",
+    "permission": "settings:manage",
+    "file": "lgpd.ts",
+    "queries": [
+      "f19cd305_0.sql",
+      "f19cd305_1.sql"
+    ],
+    "sha256": "1e74982b3a880329781b48446b2385960de04b21d869490dc78003d801a57fd1"
+  },
+  {
+    "path": "PUT /api/contracts/:id/location",
+    "permission": "contracts:write",
+    "file": "mapa.ts",
+    "queries": [
+      "4a829312_0.sql"
+    ],
+    "sha256": "471d537c5b19a1a8f9f36f9e79b59cd901b85313a03f6a76f63628d182402e08"
+  },
+  {
+    "path": "PUT /api/pops/:id/location",
+    "permission": "network:write",
+    "file": "mapa.ts",
+    "queries": [
+      "df7a5b83_0.sql"
+    ],
+    "sha256": "471d537c5b19a1a8f9f36f9e79b59cd901b85313a03f6a76f63628d182402e08"
+  },
+  {
+    "path": "POST /api/agents",
+    "permission": "network:write",
+    "file": "network.ts",
+    "queries": [
+      "705ec22d_0.sql"
+    ],
+    "sha256": "17a119fd9e394d9de436956228ade2332bd21e23fc0a1d885197f1f37d196ead"
+  },
+  {
+    "path": "PATCH /api/agents/:id",
+    "permission": "network:write",
+    "file": "network.ts",
+    "queries": [
+      "bfc4d77d_0.sql"
+    ],
+    "sha256": "5c3a9839aa04040be0577fbf4b1065432215c8f93939510faf6ba7ee10123683"
+  },
+  {
+    "path": "POST /api/devices",
+    "permission": "network:write",
+    "file": "network.ts",
+    "queries": [
+      "0ce35455_0.sql"
+    ],
+    "sha256": "aee2af470ed5ef3fa6ce434489ce91723867c1f52ea2263caade503a7b3b651e"
+  },
+  {
+    "path": "PATCH /api/devices/:id",
+    "permission": "network:write",
+    "file": "network.ts",
+    "queries": [
+      "04acb5aa_0.sql",
+      "04acb5aa_1.sql"
+    ],
+    "sha256": "401d36ab0ec8fe2818477ff423c19b97ca78b3c4040d4bc6a4d9b161fa65f88c"
+  },
+  {
+    "path": "POST /api/devices/:id/reapply",
+    "permission": "network:write",
+    "file": "network.ts",
+    "queries": [
+      "7275bae5_0.sql"
+    ],
+    "sha256": "897427fd13dc92560abb6426d1743a8bdd68640ce0adba4d822a0ef4b7251956"
+  },
+  {
+    "path": "GET /api/contracts/:id/service",
+    "permission": "network:read",
+    "file": "network.ts",
+    "queries": [
+      "54a01dc1_0.sql",
+      "54a01dc1_1.sql"
+    ],
+    "sha256": "bbebbbcec01971654d425b9edd199603507ab1908ce0deda27d934b22daec5b9"
+  },
+  {
+    "path": "POST /api/contracts/:id/service",
+    "permission": "network:operate",
+    "file": "network.ts",
+    "queries": [
+      "599d4c06_0.sql",
+      "599d4c06_1.sql",
+      "599d4c06_2.sql"
+    ],
+    "sha256": "762661fb819dfaa59e5928194d6ac4730e1fc0a33399dc8ad68834414094927d"
+  },
+  {
+    "path": "POST /api/resources/:id/:action",
+    "permission": "network:operate",
+    "file": "network.ts",
+    "queries": [],
+    "sha256": "f9179fbfbe1805ca4ba4c78b7a261970800668ff760f2f431dacec8e9e63a568"
+  },
+  {
+    "path": "PUT /api/plans/:id/network",
+    "permission": "network:write",
+    "file": "network.ts",
+    "queries": [
+      "ea0a3743_0.sql",
+      "ea0a3743_1.sql"
+    ],
+    "sha256": "25c4749ba997137368af385c118b8edae1f62761172f17cd910711ecb8bfe096"
+  },
+  {
+    "path": "POST /api/plans/:id/reapply",
+    "permission": "network:operate",
+    "file": "network.ts",
+    "queries": [
+      "26d6fbdb_0.sql"
+    ],
+    "sha256": "eee4b6458968061d12234218734a3720e5d6f52b4f90cb06ee3dde2903b499b3"
+  },
+  {
+    "path": "PATCH /api/resources/:id/mac",
+    "permission": "network:operate",
+    "file": "network.ts",
+    "queries": [
+      "7f0c68cd_0.sql",
+      "7f0c68cd_1.sql"
+    ],
+    "sha256": "0fc7385268a1b0bc38c843d1bc150fcd7bd0d5b835de898aa7fe182ff36e135a"
+  },
+  {
+    "path": "PATCH /api/resources/:id/secret",
+    "permission": "network:operate",
+    "file": "network.ts",
+    "queries": [
+      "b12cc394_0.sql"
+    ],
+    "sha256": "69e42e5e1fd5b03e040fd1d78b635e3845b27c8c55ecda8b00abfbf13d05d1a9"
+  },
+  {
+    "path": "GET /api/operations",
+    "permission": "network:read",
+    "file": "network.ts",
+    "queries": [
+      "7469bf29_0.sql"
+    ],
+    "sha256": "c8723fe17187bea2e55b203b2a8d20053355a77f14969a3ac1dac8cc16dd1b15"
+  },
+  {
+    "path": "GET /api/operations/:id",
+    "permission": "network:read",
+    "file": "network.ts",
+    "queries": [
+      "9987cf12_0.sql",
+      "9987cf12_1.sql"
+    ],
+    "sha256": "88cbcd1ba68afafddd3345b3c01074dac09691b4fe7fbaea8a658def2b64f5c2"
+  },
+  {
+    "path": "GET /api/network/health",
+    "permission": "network:read",
+    "file": "network.ts",
+    "queries": [
+      "e44640f5_0.sql"
+    ],
+    "sha256": "6d04132be556e2c3d04aa047737da9f8f1545af8ab820d211981b2bdba191b70"
+  },
+  {
+    "path": "helper:nocSettings",
+    "permission": "",
+    "file": "noc.ts",
+    "queries": [
+      "3e6f2188_0.sql"
+    ],
+    "sha256": "33b9a5d0b9ca7674c69413d1160b2cd8898c2dca2e595559f308b4f23634f9aa"
+  },
+  {
+    "path": "PUT /api/noc/settings",
+    "permission": "network:write",
+    "file": "noc.ts",
+    "queries": [
+      "c40b50eb_0.sql"
+    ],
+    "sha256": "a400878736169f14f9fd3c0040495ec9864956e9fbfc1eb0d68ee447a40926c2"
+  },
+  {
+    "path": "GET /api/noc/overview",
+    "permission": "network:read",
+    "file": "noc.ts",
+    "queries": [
+      "e8850a32_0.sql",
+      "e8850a32_1.sql",
+      "e8850a32_2.sql",
+      "e8850a32_3.sql",
+      "e8850a32_4.sql",
+      "e8850a32_5.sql",
+      "e8850a32_6.sql",
+      "e8850a32_7.sql"
+    ],
+    "sha256": "993e35d969c3dcb78e8ef21d10f8644d08fd83234fcb1cc6a8839ab0dd9cc680"
+  },
+  {
+    "path": "GET /api/contracts/:id/diagnosis",
+    "permission": "network:read",
+    "file": "noc.ts",
+    "queries": [
+      "1de19c94_0.sql",
+      "1de19c94_1.sql",
+      "1de19c94_2.sql",
+      "1de19c94_3.sql",
+      "1de19c94_4.sql",
+      "1de19c94_5.sql",
+      "1de19c94_6.sql",
+      "1de19c94_7.sql"
+    ],
+    "sha256": "d15cf12aef38f2651228866f5fb49b81925052c6e04496706ab9f258edb71d55"
+  },
+  {
+    "path": "GET /api/contracts/:id/onu",
+    "permission": "network:read",
+    "file": "olt.ts",
+    "queries": [
+      "aaaa9bce_0.sql",
+      "aaaa9bce_1.sql"
+    ],
+    "sha256": "8f601f699b84ce287b17ec73272336cdcdd33b94105c251ab22f5b2e94e45e88"
+  },
+  {
+    "path": "POST /api/contracts/:id/onu",
+    "permission": "network:operate",
+    "file": "olt.ts",
+    "queries": [
+      "1b1abe5e_0.sql",
+      "1b1abe5e_1.sql",
+      "1b1abe5e_2.sql",
+      "1b1abe5e_3.sql",
+      "1b1abe5e_4.sql"
+    ],
+    "sha256": "192ada386a503bdf683cdf80d90294481627a3dec8540bd9e98cdfc332d7a20e"
+  },
+  {
+    "path": "POST /api/onus/:id/:action",
+    "permission": "network:operate",
+    "file": "olt.ts",
+    "queries": [],
+    "sha256": "1dd9371568e1737449a9b939a10db904158eff064d369f6740668a5d257362bb"
+  },
+  {
+    "path": "POST /api/subscribers/:id/portal-access",
+    "permission": "subscribers:write",
+    "file": "portal.ts",
+    "queries": [
+      "9999c9cd_0.sql",
+      "9999c9cd_1.sql"
+    ],
+    "sha256": "0d3f4dfc7dcdecff960e3d43293b6efe699528e9f247db2cc40cd1e7a5751486"
+  },
+  {
+    "path": "POST /api/portal/trust-release",
+    "permission": "portal:self",
+    "file": "portal.ts",
+    "queries": [
+      "c56b06a6_0.sql"
+    ],
+    "sha256": "fd862e1c010de6aab26889c9f2aa6d97ee9e921cc1a5beb9bc73b27c08cc2370"
+  },
+  {
+    "path": "POST /api/custom-fields",
+    "permission": "settings:manage",
+    "file": "produtividade.ts",
+    "queries": [
+      "ac494bae_0.sql"
+    ],
+    "sha256": "0ff1f75248261b786b85b14ad698fb0b6a0f3de30f8e76af7c1f5fbee9d7b5ae"
+  },
+  {
+    "path": "PATCH /api/custom-fields/:id",
+    "permission": "settings:manage",
+    "file": "produtividade.ts",
+    "queries": [
+      "870d545e_0.sql",
+      "870d545e_1.sql"
+    ],
+    "sha256": "4acd5362fabe017aabd3eb3cc0a004d5360b98dde5a5003e13d23b9d0fc9ee25"
+  },
+  {
+    "path": "POST /api/install-kits",
+    "permission": "stock:write",
+    "file": "produtividade.ts",
+    "queries": [
+      "a201e98c_0.sql",
+      "a201e98c_1.sql",
+      "a201e98c_2.sql"
+    ],
+    "sha256": "05603e312f4d936274531ae4eb508e64f2ec81c15555ea615696364e4923a99e"
+  },
+  {
+    "path": "PATCH /api/install-kits/:id",
+    "permission": "stock:write",
+    "file": "produtividade.ts",
+    "queries": [
+      "ae43f5d2_0.sql"
+    ],
+    "sha256": "1ff1be2b770a00fa62469fa23ccf88edbc25a155589672b558c162528d60d136"
+  },
+  {
+    "path": "POST /api/work-orders/:id/kit",
+    "permission": "os:write",
+    "file": "produtividade.ts",
+    "queries": [
+      "b2bae4f8_0.sql",
+      "b2bae4f8_1.sql",
+      "b2bae4f8_2.sql",
+      "b2bae4f8_3.sql"
+    ],
+    "sha256": "62a26a3eed51555146e1b9133c995ea5df41f13cd27c7039fdc480e92155c6a1"
+  },
+  {
+    "path": "POST /api/work-orders/:id/helpers",
+    "permission": "os:write",
+    "file": "produtividade.ts",
+    "queries": [
+      "7ff0344d_0.sql",
+      "7ff0344d_1.sql",
+      "7ff0344d_2.sql",
+      "7ff0344d_3.sql"
+    ],
+    "sha256": "e19b10e6fd0d687da00d2496078b552de3d086c82fe6f06c52e268caf438a3b8"
+  },
+  {
+    "path": "DELETE /api/work-orders/:id/helpers/:userId",
+    "permission": "os:write",
+    "file": "produtividade.ts",
+    "queries": [
+      "ed29ebac_0.sql",
+      "ed29ebac_1.sql"
+    ],
+    "sha256": "adccbcc99ddef350f2393dd33bf8f926c1e3144390de1c98eb1ed23634e1d8a5"
+  },
+  {
+    "path": "POST /api/commission-rules",
+    "permission": "settings:manage",
+    "file": "produtividade.ts",
+    "queries": [
+      "1fc8131e_0.sql",
+      "1fc8131e_1.sql"
+    ],
+    "sha256": "c4a15433586827a8de558592eb23627055fcdd2921efda394695bce2281b7e3d"
+  },
+  {
+    "path": "GET /api/reports/commissions",
+    "permission": "finance:read",
+    "file": "produtividade.ts",
+    "queries": [
+      "118e4fa8_0.sql",
+      "118e4fa8_1.sql",
+      "118e4fa8_2.sql"
+    ],
+    "sha256": "73f2db66cd729a25a5eb5d1c66d1213ca5024cf7f271fbddb28ec1b3afa10bb9"
+  },
+  {
+    "path": "helper:guardApi",
+    "permission": "",
+    "file": "public-api.ts",
+    "queries": [
+      "0fbb762c_0.sql",
+      "0fbb762c_1.sql",
+      "0fbb762c_2.sql",
+      "0fbb762c_3.sql",
+      "0fbb762c_4.sql"
+    ],
+    "sha256": "ec6d7e26e3182805a04c4f3de4bd7a7261453e8e9172bd5b48f8fd720faaf280"
+  },
+  {
+    "path": "helper:idempotent",
+    "permission": "",
+    "file": "public-api.ts",
+    "queries": [
+      "a9776b81_0.sql",
+      "a9776b81_1.sql",
+      "a9776b81_2.sql"
+    ],
+    "sha256": "0d3865089eb583fd5c0155d73a1372fa60571c88d2da719c63dff9dfb3162b82"
+  },
+  {
+    "path": "GET /public/v1",
+    "permission": "",
+    "file": "public-api.ts",
+    "queries": [],
+    "sha256": "56230b9dae6b95559f6efefbff0867f82ba3a58a370ceedc56e566eabfa90a20"
+  },
+  {
+    "path": "GET /public/v1/subscribers",
+    "permission": "",
+    "file": "public-api.ts",
+    "queries": [
+      "5cf1a39a_0.sql"
+    ],
+    "sha256": "8f6c9f27ed9a9ca973998a462e8139616d586bd916b0cb0e83c815ff991bba69"
+  },
+  {
+    "path": "GET /public/v1/subscribers/:id",
+    "permission": "",
+    "file": "public-api.ts",
+    "queries": [
+      "c02cb659_0.sql"
+    ],
+    "sha256": "13a3707afaa8322a69089efd5602ef9ec2093f15c00a851b1e262f04398eaddc"
+  },
+  {
+    "path": "GET /public/v1/contracts",
+    "permission": "",
+    "file": "public-api.ts",
+    "queries": [
+      "fb43bde4_0.sql"
+    ],
+    "sha256": "a7641d3b911e54dd25d80fbcf7bf4183d94cf538de37d3f94f1c245580296c01"
+  },
+  {
+    "path": "GET /public/v1/invoices",
+    "permission": "",
+    "file": "public-api.ts",
+    "queries": [
+      "4c26a410_0.sql"
+    ],
+    "sha256": "97a1e8f0efca9217291d90cae8c151031b04018b907c628312eec1eafbd96c89"
+  },
+  {
+    "path": "POST /public/v1/tickets",
+    "permission": "",
+    "file": "public-api.ts",
+    "queries": [
+      "e2d366ea_0.sql",
+      "e2d366ea_1.sql"
+    ],
+    "sha256": "1e3fdd7e3c8414f3d41cbff95f97b46176968979b6b96b625075a7b9113d8353"
+  },
+  {
+    "path": "POST /public/v1/work-orders",
+    "permission": "",
+    "file": "public-api.ts",
+    "queries": [],
+    "sha256": "d2c9885322fa107811222f2f7277413a776cf7ad329a2ee5f9372b0d4407f760"
+  },
+  {
+    "path": "GET /public/v1/work-orders/:id",
+    "permission": "",
+    "file": "public-api.ts",
+    "queries": [
+      "122e8271_0.sql"
+    ],
+    "sha256": "ffba7aa30c8c132aecd8f315d3ce00eea2322c2bafb3a59a3f4c7418c13274e5"
+  },
+  {
+    "path": "helper:newTunnel",
+    "permission": "",
+    "file": "radius.ts",
+    "queries": [
+      "bd5fac53_0.sql",
+      "bd5fac53_1.sql",
+      "bd5fac53_2.sql",
+      "bd5fac53_3.sql",
+      "bd5fac53_4.sql"
+    ],
+    "sha256": "caf7f81f90d4b53d474e7f9097f4d30b931622fac0c3e928da892fab136a0b6c"
+  },
+  {
+    "path": "helper:newL2tp",
+    "permission": "",
+    "file": "radius.ts",
+    "queries": [
+      "3682dd50_0.sql",
+      "3682dd50_1.sql",
+      "3682dd50_2.sql",
+      "3682dd50_3.sql"
+    ],
+    "sha256": "ae711f8c805446d8bdf1bbfaa590c83289a3e2884794c9494f4912296624bd8d"
+  },
+  {
+    "path": "helper:nasOf",
+    "permission": "",
+    "file": "radius.ts",
+    "queries": [
+      "d5a9d94c_0.sql"
+    ],
+    "sha256": "caf5b810ca3fef6aa6068b907ab3272524df535502974de76104d7929d6e091d"
+  },
+  {
+    "path": "POST /api/radius/devices",
+    "permission": "network:write",
+    "file": "radius.ts",
+    "queries": [
+      "9cdace9e_0.sql",
+      "9cdace9e_1.sql",
+      "9cdace9e_2.sql"
+    ],
+    "sha256": "ff355f986480a9eae20b17100d43c948db3751eb211bab2665580081957fbfac"
+  },
+  {
+    "path": "PATCH /api/radius/devices/:id",
+    "permission": "network:write",
+    "file": "radius.ts",
+    "queries": [
+      "c9d03c3d_0.sql",
+      "c9d03c3d_1.sql",
+      "c9d03c3d_2.sql"
+    ],
+    "sha256": "aa461a4159ef82432810c21dd18a47d528f83e6622f9beb8bda0a453361e1827"
+  },
+  {
+    "path": "POST /api/radius/devices/:id/secret",
+    "permission": "network:write",
+    "file": "radius.ts",
+    "queries": [
+      "e040fd8f_0.sql"
+    ],
+    "sha256": "b97655e363236f75add5267445579c7d26de4f012bc835c8b6335b700aa49b61"
+  },
+  {
+    "path": "POST /api/radius/devices/:id/tunnel",
+    "permission": "network:write",
+    "file": "radius.ts",
+    "queries": [
+      "823245ad_0.sql",
+      "823245ad_1.sql"
+    ],
+    "sha256": "d165993a25e73e8c9b2b986ce8050ba44e3358d8940fcdf42a69f39de979fa6b"
+  },
+  {
+    "path": "POST /api/devices/:id/convert-to-integrated",
+    "permission": "network:write",
+    "file": "radius.ts",
+    "queries": [
+      "3594a4e1_0.sql",
+      "3594a4e1_1.sql",
+      "3594a4e1_2.sql",
+      "3594a4e1_3.sql",
+      "3594a4e1_4.sql",
+      "3594a4e1_5.sql"
+    ],
+    "sha256": "7e7c52181dfe803c1c1c53a348be6fe037437def9b6e3761e72f65d3c4153c09"
+  },
+  {
+    "path": "GET /api/finance/reports/aging",
+    "permission": "finance:read",
+    "file": "relatorios.ts",
+    "queries": [
+      "d634dac7_0.sql",
+      "d634dac7_1.sql"
+    ],
+    "sha256": "7253f5e73f9c60035cb47ddfdb054b4972515af5a35f18ed82f7723f80689f11"
+  },
+  {
+    "path": "GET /api/finance/reports/receipts",
+    "permission": "finance:read",
+    "file": "relatorios.ts",
+    "queries": [
+      "b92a2082_0.sql",
+      "b92a2082_1.sql"
+    ],
+    "sha256": "bf81729fb736e3029e971f07faa4917b125f612d130e853443c4661cbbaefd2e"
+  },
+  {
+    "path": "GET /api/finance/reports/without-invoice",
+    "permission": "finance:read",
+    "file": "relatorios.ts",
+    "queries": [
+      "80b88cd9_0.sql"
+    ],
+    "sha256": "ad8fe1a687bf4eabbdd8a4069169a27a0f3241b9deeaecf252d5b0320e02b20d"
+  },
+  {
+    "path": "GET /api/finance/reports/to-cancel",
+    "permission": "finance:read",
+    "file": "relatorios.ts",
+    "queries": [
+      "dafcc056_0.sql",
+      "dafcc056_1.sql"
+    ],
+    "sha256": "7a8f26c9f0bae87a3a9d61717dc70d6a8bcb54c1b86a82845eb862a4f12caa6a"
+  },
+  {
+    "path": "helper:linkOf",
+    "permission": "",
+    "file": "tr069.ts",
+    "queries": [
+      "8ff8b4d3_0.sql"
+    ],
+    "sha256": "b4bb7dc99414f0350d9cfafe6839c0242f2403a5bf19b7dac30c6b3e1f852af8"
+  },
+  {
+    "path": "GET /api/contracts/:id/cpe",
+    "permission": "network:read",
+    "file": "tr069.ts",
+    "queries": [
+      "7a320fe6_0.sql"
+    ],
+    "sha256": "401c431711a4044a2bcfed16cc38c304062c0dcdc427a5d074e4185ed0fc9983"
+  },
+  {
+    "path": "GET /api/contracts/:id/cpe/candidates",
+    "permission": "network:operate",
+    "file": "tr069.ts",
+    "queries": [
+      "db5f5c04_0.sql",
+      "db5f5c04_1.sql",
+      "db5f5c04_2.sql"
+    ],
+    "sha256": "85e09314c52bcee833a7368b45e41c5946ec337ddb05d009053b5c4655163251"
+  },
+  {
+    "path": "POST /api/contracts/:id/cpe/link",
+    "permission": "network:operate",
+    "file": "tr069.ts",
+    "queries": [
+      "38bfc648_0.sql",
+      "38bfc648_1.sql",
+      "38bfc648_2.sql",
+      "38bfc648_3.sql"
+    ],
+    "sha256": "9bf2540c64eea70e700c83282277f90056ce856b4ec17b9519c3e05e71c1e110"
+  },
+  {
+    "path": "DELETE /api/contracts/:id/cpe/link",
+    "permission": "network:operate",
+    "file": "tr069.ts",
+    "queries": [
+      "a5ce4cba_0.sql"
+    ],
+    "sha256": "470747313836b648bb0cf346bcbf7bab56a133ade20763a93361068584c9727a"
+  },
+  {
+    "path": "POST /api/contracts/:id/cpe/wifi",
+    "permission": "network:operate",
+    "file": "tr069.ts",
+    "queries": [],
+    "sha256": "14f99143af27fcc153a3a1a4a6126416863fe890e1f6fe9e101c390aaa8bbddf"
+  },
+  {
+    "path": "POST /api/contracts/:id/cpe/reboot",
+    "permission": "network:operate",
+    "file": "tr069.ts",
+    "queries": [],
+    "sha256": "6c14cf2f53faa4cc2ea16a6f069eb23d21c5d4161e190a3aee62212305bbb167"
+  },
+  {
+    "path": "POST /api/contracts/:id/cpe/refresh",
+    "permission": "network:operate",
+    "file": "tr069.ts",
+    "queries": [],
+    "sha256": "6c14cf2f53faa4cc2ea16a6f069eb23d21c5d4161e190a3aee62212305bbb167"
+  },
+  {
+    "path": "GET /api/portal/cpe",
+    "permission": "portal:self",
+    "file": "tr069.ts",
+    "queries": [
+      "53488122_0.sql"
+    ],
+    "sha256": "88c07cee79bde2e053cc50d6eacb5027e84efc97188f8a00a15422fe92fdb6a0"
+  },
+  {
+    "path": "POST /api/portal/cpe/:contractId/wifi",
+    "permission": "portal:self",
+    "file": "tr069.ts",
+    "queries": [
+      "ade88e84_0.sql"
+    ],
+    "sha256": "75fa7c82ef5d36ab11bf7fa6226563b2931f5cf0fd44a9d61f4afd90d043da30"
+  }
+]

@@ -1,0 +1,2 @@
+select h.at, h.event, h.detail, h.contract_id, u.name as by from contract_history h join contracts k on k.id = h.contract_id left join users u on u.id = h.actor_id
+         where k.subscriber_id = $1 order by h.at desc limit $2

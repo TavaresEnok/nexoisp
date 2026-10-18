@@ -1,0 +1,1 @@
+insert into install_kits (tenant_id, name) values ($1,$2) returning id, name, active

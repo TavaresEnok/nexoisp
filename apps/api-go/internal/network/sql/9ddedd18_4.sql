@@ -1,0 +1,2 @@
+insert into operations (id, tenant_id, onu_id, device_id, agent_id, action, desired_version, parameters, idempotency_key, valid_until, authorization_ref, envelope, signature, reason)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) returning *
