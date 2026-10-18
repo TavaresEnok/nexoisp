@@ -14,7 +14,7 @@ import (
 	"nexoisp/api-go/internal/jsonx"
 	"nexoisp/api-go/internal/validate"
 	"regexp"
-	"strconv"
+	"time"
 	"unicode/utf16"
 )
 
@@ -35,6 +35,22 @@ func registerCustom(api huma.API, registry *endpoint.Registry, s Service) {
 			}
 			var result any
 			e = s.DB.WithScope(ctx, auth.From(ctx).Scope, func(tx *db.Tx) error {
+				// Serialize against anonymization and other edits. RLS determines
+				// visibility before any validation or persistence of custom values.
+				columns := "id"
+				if entity.singular == "subscriber" {
+					columns += ", anonymized_at"
+				}
+				current, e := tx.Objects(ctx, "select "+columns+" from "+entity.table+" where id = $1 for update", id)
+				if e != nil {
+					return e
+				}
+				if len(current) == 0 {
+					return apierr.New(404, "registro não encontrado")
+				}
+				if current[0].Get("anonymized_at") != nil {
+					return apierr.New(409, "titular anonimizado: o cadastro não pode mais ser alterado")
+				}
 				defs, e := tx.Objects(ctx, "select * from custom_fields where entity = $1 and active", entity.singular)
 				if e != nil {
 					return e
@@ -66,6 +82,9 @@ func registerCustom(api huma.API, registry *endpoint.Registry, s Service) {
 							bad = !ok || len(utf16.Encode([]rune(text))) > 300
 							message = "texto de até 300 caracteres"
 							v = validate.Trim(text)
+							if d.Get("required") == true && v == "" {
+								return apierr.New(400, fmt.Sprintf("\"%s\" é obrigatório", label))
+							}
 						case "number":
 							n, ok := v.(float64)
 							bad = !ok || math.IsNaN(n) || math.IsInf(n, 0)
@@ -131,7 +150,6 @@ func customDate(value string) bool {
 	if !regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`).MatchString(value) {
 		return false
 	}
-	month, _ := strconv.Atoi(value[5:7])
-	day, _ := strconv.Atoi(value[8:10])
-	return month >= 1 && month <= 12 && day >= 1 && day <= 31
+	date, err := time.Parse("2006-01-02", value)
+	return err == nil && date.Year() > 0
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 // A sessão fica em cookie HttpOnly definido pelo servidor: o JavaScript da página não tem acesso ao token.
 async function request(path: string, opts: { method?: string; body?: unknown } = {}) {
@@ -34,49 +34,51 @@ export async function download(path: string, filename: string) {
 export const PAGE_SIZE = 50;
 /** Lista paginada no servidor (?limit/offset + X-Total-Count). `path` já pode conter filtros. */
 export function usePaged<T = any>(path: string, refreshMs?: number) {
-  const [page, setPage] = useState(0);
-  const [state, setState] = useState<{ rows?: T[]; total: number; error: string | null; loading: boolean }>({ total: 0, error: null, loading: true });
-  useEffect(() => setPage(0), [path]);
+  const [selection, setSelection] = useState({ path, page: 0 });
+  const page = selection.path === path ? selection.page : 0;
+  useEffect(() => setSelection(current => current.path === path ? current : { path, page: 0 }), [path]);
+  const setPage = (next: number) => setSelection({ path, page: Math.max(0, next) });
+  const generation = useRef(0);
+  const key = `${path}\n${page}`;
+  const [state, setState] = useState<{ key: string; rows?: T[]; total: number; error: string | null; loading: boolean }>({ key, total: 0, error: null, loading: true });
   const reload = useCallback(async () => {
+    const current = ++generation.current;
     try {
       const r = await request(`${path}${path.includes('?') ? '&' : '?'}limit=${PAGE_SIZE}&offset=${page * PAGE_SIZE}`);
-      setState({ rows: r.data, total: Number.isNaN(r.total) ? r.data.length : r.total, error: null, loading: false });
+      if (current === generation.current) setState({ key, rows: r.data, total: Number.isNaN(r.total) ? r.data.length : r.total, error: null, loading: false });
     } catch (e: any) {
-      setState((s) => ({ ...s, error: e.message, loading: false }));
+      if (current === generation.current) setState((s) => ({ ...s, rows: s.key === key ? s.rows : undefined, total: s.key === key ? s.total : 0, key, error: e.message, loading: false }));
     }
-  }, [path, page]);
+  }, [path, page, key]);
   useEffect(() => {
     reload();
-    if (!refreshMs) return;
-    const id = setInterval(reload, refreshMs);
-    return () => clearInterval(id);
+    const id = refreshMs ? setInterval(reload, refreshMs) : undefined;
+    return () => { generation.current++; clearInterval(id); };
   }, [reload, refreshMs]);
-  return { ...state, data: state.rows, page, setPage, pages: Math.max(1, Math.ceil(state.total / PAGE_SIZE)), reload };
+  const visible = state.key === key ? state : { rows: undefined, total: 0, error: null, loading: true };
+  return { ...visible, data: visible.rows, page, setPage, pages: Math.max(1, Math.ceil(visible.total / PAGE_SIZE)), reload };
 }
 
 export function useLoad<T = any>(path: string | null, refreshMs?: number) {
-  const [data, setData] = useState<T | undefined>();
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(!!path);
+  const generation = useRef(0);
+  const [state, setState] = useState<{ path: string | null; data?: T; error: string | null; loading: boolean }>({ path, error: null, loading: !!path });
   const reload = useCallback(async () => {
     if (!path) return;
+    const current = ++generation.current;
     try {
-      setData(await api<T>(path));
-      setError(null);
+      const data = await api<T>(path);
+      if (current === generation.current) setState({ path, data, error: null, loading: false });
     } catch (e: any) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
+      if (current === generation.current) setState((s) => ({ ...s, data: s.path === path ? s.data : undefined, path, error: e.message, loading: false }));
     }
   }, [path]);
   useEffect(() => {
-    setLoading(!!path);
     reload();
-    if (!refreshMs) return;
-    const id = setInterval(reload, refreshMs);
-    return () => clearInterval(id);
+    const id = refreshMs ? setInterval(reload, refreshMs) : undefined;
+    return () => { generation.current++; clearInterval(id); };
   }, [reload, refreshMs, path]);
-  return { data, error, loading, reload };
+  const visible = path && state.path === path ? state : { data: undefined, error: null, loading: !!path };
+  return { ...visible, reload };
 }
 
 export const money = (cents: number | null | undefined) =>

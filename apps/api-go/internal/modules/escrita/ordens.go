@@ -140,6 +140,16 @@ func (s Service) updateWork(ctx context.Context, tx *db.Tx, id string, b map[str
 				return nil, err
 			}
 			name = u.Get("name")
+			// Promotion must not count the same person as assignee and helper.
+			n, err := tx.Affected(ctx, query("DELETE /api/work-orders/:id/helpers/:userId", 0), id, b["assignee_id"])
+			if err != nil {
+				return nil, err
+			}
+			if n > 0 {
+				if err = workEvent(ctx, tx, id, "helper_removed", map[string]any{"user_id": b["assignee_id"], "reason": "promoted_to_assignee"}); err != nil {
+					return nil, err
+				}
+			}
 		}
 		cur.Set("assignee_id", b["assignee_id"])
 		if err = workEvent(ctx, tx, id, "assigned", map[string]any{"to": name}); err != nil {

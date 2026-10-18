@@ -21,12 +21,12 @@ func (s Service) operations() map[string]operation {
 	subscriber := subscriberSchema()
 	operations := map[string]operation{
 		"POST /api/subscribers":                     {s.createSubscriber, obj(subscriber)},
-		"PATCH /api/subscribers/:id":                {s.updateSubscriber, obj(subscriber)},
+		"PATCH /api/subscribers/:id":                {s.updateSubscriber, obj(partialSchema(subscriber))},
 		"POST /api/plans":                           {s.createPlan, obj(object(append(append([]validate.Field{}, version...), f("name", name(2, 100)))...))},
 		"POST /api/plans/:id/versions":              {s.createVersion, obj(object(version...))},
 		"PATCH /api/plans/:id":                      {s.updatePlan, obj(object(f("name", name(2, 100).Opt()), f("active", boolean().Opt())))},
 		"PUT /api/plans/:id/dunning":                {s.planDunning, obj(object(f("warn_after_days", duration), f("reduce_after_days", duration), f("block_after_days", duration), f("reduced_profile", str().Trimmed().Pattern(`^[A-Za-z0-9_.-]{1,60}$`, "perfil: letras, números, _ . - (até 60)").Null())))},
-		"POST /api/contracts":                       {s.createContract, obj(object(f("subscriber_id", uuid), f("plan_id", uuid), f("due_day", number().Int().Min(1).Max(28)), f("start_date", str().Pattern(`^\d{4}-\d{2}-\d{2}$`, "data inválida").Opt()), f("notes", text(2000).Nullish())))},
+		"POST /api/contracts":                       {s.createContract, obj(object(f("subscriber_id", uuid), f("plan_id", uuid), f("due_day", number().Int().Min(1).Max(28)), f("start_date", str().Refine(func(v any) bool { return customDate(v.(string)) }, "data inválida").Opt()), f("notes", text(2000).Nullish())))},
 		"POST /api/tags":                            {s.createTag, obj(object(f("name", name(2, 40))))},
 		"DELETE /api/tags/:id":                      {s.deleteTag, nil},
 		"PUT /api/contracts/:id/tags":               {s.contractTags, obj(object(f("tag_ids", validate.Array(uuid).Max(30))))},
@@ -68,6 +68,18 @@ func (s Service) operations() map[string]operation {
 }
 
 func digits(s string) string { return regexp.MustCompile(`[^0-9]`).ReplaceAllString(s, "") }
+
+// Omitted fields in PATCH must remain omitted, including nullable transforms
+// and defaults from the corresponding create schema.
+func partialSchema(schema validate.Rule) validate.Rule {
+	fields := make([]validate.Field, 0, len(schema.Fields))
+	for _, field := range schema.Fields {
+		rule := field.Rule.Opt()
+		rule.TransformMissing = false
+		fields = append(fields, validate.F(field.Name, rule))
+	}
+	return validate.Object(fields...)
+}
 func validEmail(s string) bool {
 	return !strings.HasPrefix(s, ".") && !strings.Contains(s, "..") && regexp.MustCompile(`(?i)^([A-Z0-9_'+.\-]*)[A-Z0-9_+\-]@([A-Z0-9][A-Z0-9\-]*\.)+[A-Z]{2,}$`).MatchString(s)
 }
@@ -136,7 +148,7 @@ func subscriberSchema() validate.Rule {
 		subscriber = append(subscriber, f(field.name, text(field.max).Nullish().Then(nilEmpty, true)))
 	}
 	subscriber = append(subscriber,
-		f("status", enum("active", "inactive").Def("active")), f("birth_date", str().Pattern(`^\d{4}-\d{2}-\d{2}$`, "data de nascimento inválida").Nullish().OrEmpty().Then(nilEmpty, true)),
+		f("status", enum("active", "inactive").Def("active")), f("birth_date", str().Refine(func(v any) bool { return customDate(v.(string)) }, "data de nascimento inválida").Nullish().OrEmpty().Then(nilEmpty, true)),
 		f("rg", str().Trimmed().Pattern(`^[0-9A-Za-z.\- /]{3,20}$`, "RG inválido").Nullish().OrEmpty().Then(nilEmpty, true)),
 		f("rg_issuer", text(20).Nullish().Then(nilEmpty, true)), f("mother_name", text(200).Nullish().Then(nilEmpty, true)), f("trade_name", text(200).Nullish().Then(nilEmpty, true)))
 	return validate.Object(subscriber...)

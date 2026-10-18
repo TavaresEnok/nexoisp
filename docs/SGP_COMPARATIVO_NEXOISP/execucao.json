@@ -1,0 +1,98 @@
+{
+  "data_utc": "2026-10-17",
+  "base_git": "945ccd7, com alterações locais; não corresponde a uma versão implantada",
+  "ambiente": "API Go e PostgreSQL sintéticos; navegador local; nenhuma escrita em produção",
+  "resultados": [
+    {
+      "comando": "python3 scripts/auditoria-sgp.py",
+      "resultado": "aprovado",
+      "escopo": "45 capacidades; 1246 superfícies; 44 formulários e 956 ocorrências de campos; leitura estrutural de 286 HTML",
+      "limite": "Triagem não é homologação. As 101 entradas sem vínculo são títulos/hierarquias sem rota. Regras individuais dos campos não foram aprovadas."
+    },
+    {
+      "comando": "python3 scripts/auditoria-sgp.py --check",
+      "resultado": "aprovado",
+      "escopo": "1207 arquivos nas três pastas preservados byte a byte segundo inventário SHA-256 inicial"
+    },
+    {
+      "comando": "NEXO_GO_BIN=/tmp/nexo-go-tools.y3GotK/go/bin/go python3 tests/contrato/sgp_auditoria.py",
+      "resultado": "aprovado",
+      "grupos": 6,
+      "ids": [
+        "AUD-01",
+        "AUD-02",
+        "AUD-03",
+        "AUD-04",
+        "AUD-05",
+        "AUD-07"
+      ],
+      "escopo": "Compilação API/CLI; nascimento, contrato e fatura; ano zero/formato/data impossível; custom, anonimização, tenant/papel; auxiliares/atribuição/estado final/concorrência; material/kit/devolução; PATCH parcial e null explícito",
+      "relatorio_local_ignorado": "tests/contrato/relatorios/sgp-auditoria.json"
+    },
+    {
+      "comando": "BASE=http://127.0.0.1:18894 node sgp-auditoria.mjs (diretório e2e; Vite local ativo)",
+      "resultado": "aprovado",
+      "id": "AUD-06",
+      "playwright": "1.55.1",
+      "viewport": "390x844",
+      "escopo": "Último filtro prevalece; offset reinicia inclusive ao retornar ao filtro; erro não conserva linhas/totais anteriores; detalhe antigo oculto; resposta antiga ignorada; null limpa detalhe; sem pageerror",
+      "limite": "Hooks reais com HTTP interceptado apenas no navegador de teste; não homologa responsividade de todo o painel"
+    },
+    {
+      "comando": "CGO_ENABLED=0 /tmp/nexo-go-tools.y3GotK/go/bin/go vet ./... (diretório apps/api-go)",
+      "resultado": "aprovado"
+    },
+    {
+      "comando": "npm -w apps/web run typecheck && npm -w apps/web run build (raiz do repositório)",
+      "resultado": "aprovado",
+      "observacao": "Build emite aviso de chunk principal maior que 500 kB; nenhum orçamento de desempenho foi homologado nesta auditoria"
+    },
+    {
+      "comando": "NEXO_GO_BIN=/tmp/nexo-go-tools.y3GotK/go/bin/go python3 tests/contrato/nativo.py",
+      "resultado": "aprovado",
+      "grupos": 12,
+      "escopo": "Instalação/seed idempotentes, papéis, operador, financeiro concorrente entre duas réplicas, River/outbox, rollback e rotação de chaves",
+      "limite": "A igualdade de 336 operações OpenAPI/manifest é um check de inventário, não execução das 336 operações",
+      "relatorio_local_ignorado": "tests/contrato/relatorios/nativo.json"
+    },
+    {
+      "comando": "NEXO_GO_BIN=/tmp/nexo-go-tools.y3GotK/go/bin/go python3 tests/contrato/e2e.py",
+      "resultado": "aprovado",
+      "playwright": "1.55.1",
+      "imagem": "mcr.microsoft.com/playwright:v1.55.1-jammy",
+      "grupos": 13,
+      "escopo": "Build do painel; Caddy com API real e seed fictício; login inválido/válido, menus, assinantes, contratos, faturas, confirmações, NOC/operações, tema, novas telas, mapa, aceite/ANATEL/adicionais, papel financeiro e portal móvel",
+      "limite": "Fumaça de fluxos selecionados; não cobre todas as transições ou equipamentos físicos. Executada antes do ajuste final de limpeza do total em erro; esse ajuste teve ensaio dirigido e tipos/build próprios.",
+      "log_local_ignorado": "tests/contrato/local/e2e-final.log"
+    },
+    {
+      "comando": "npm audit --omit=dev (diretório e2e)",
+      "resultado": "aprovado",
+      "id": "AUD-08",
+      "escopo": "Zero vulnerabilidades reportadas no lockfile e2e após Playwright 1.55.1",
+      "fonte": "https://github.com/microsoft/playwright/security/advisories/GHSA-gx27-2j22-qcx8",
+      "limite": "Não é auditoria de todas as dependências Go/Python/npm nem garantia contra vulnerabilidades desconhecidas"
+    }
+  ],
+  "incidentes_de_execucao_resolvidos": [
+    "npm ci da primeira fumaça encontrou node_modules locais criados como root por Docker; permissões dos diretórios de dependências/build foram corrigidas e a fumaça passou.",
+    "Primeiro pull do Playwright falhou por resolução DNS do daemon; repetição concluiu sem alterar a configuração da máquina.",
+    "Primeira tentativa de hooks com Vite dentro do container não tinha o mesmo caminho absoluto da fixture host; ensaio final executado com Vite e fixture locais.",
+    "Um comando de tipos foi disparado a partir de e2e, que não é workspace; comando corrigido para a raiz."
+  ],
+  "nao_executado": [
+    "Alteração de produção, cobrança real, emissão fiscal, envio de comunicação ou comando de rede real",
+    "Autenticação no SGP ou uso de dados pessoais, cookies e segredos dos originais",
+    "Homologação de equipamento físico, gateway, emissor fiscal ou conectores externos",
+    "Certificação de equivalência funcional integral com SGP"
+  ],
+  "registro_historico": "Ensaios da auditoria antes da retirada. O comportamento atual de auditoria-sgp.py valida o dossiê sanitizado; a conferência das fontes foi preservada no recibo de arquivamento.",
+  "consolidacao_documental": {
+    "menus_revisados": 101,
+    "controles_revisados": 956,
+    "formularios": 44,
+    "efeito_no_produto": "nenhum; alterações somente documentais e scripts de manutenção",
+    "verificacao": "scripts/auditoria-sgp.py; vínculos e manifesto conferidos sem dependência dos espelhos",
+    "limite": "Não acrescenta homologação funcional, aprovação fiscal/comercial ou paridade."
+  }
+}

@@ -38,7 +38,7 @@ def main():
             assert "frame-ancestors 'none'" in r['headers']['content-security-policy']
         command(['docker','run','--rm','--network','host','--ipc=host','--security-opt','seccomp=unconfined',
                  '-v',str(ROOT/'e2e')+':/e2e','-w','/e2e','-e','BASE=http://127.0.0.1:18380',
-                 'mcr.microsoft.com/playwright:v1.49.1-jammy','node','smoke.mjs'])
+                 'mcr.microsoft.com/playwright:v1.55.1-jammy','node','smoke.mjs'])
     finally:
         api.terminate()
         try:api.wait(timeout=15)

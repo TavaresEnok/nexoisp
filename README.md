@@ -1,7 +1,7 @@
 # NexoISP
 
-ERP SaaS para provedores de internet (MVP). Documentos em `docs/`; estado atual e pendências na seção **Progresso** de
-`docs/04-etapas-e-prompts-de-desenvolvimento.md`.
+ERP SaaS para provedores de internet. Consulte o [índice da documentação](docs/README.md), a
+[arquitetura atual](docs/arquitetura.md) e as [pendências para produção](docs/pendencias.md).
 
 ## Rodar localmente (demonstração)
 
@@ -42,8 +42,8 @@ samples                 CSVs sintéticos do importador
 
 Produção: `./nexo prod up`, após configurar `infra/prod/.env` e os certificados. Administração: `./nexo prod db create-operator <email> <nome>` (senha em `NEXO_NEW_PASSWORD`), `./nexo prod db preflight` e `./nexo prod db rotate-secrets`. Consulte a [operação](docs/operacao.md) para implantação e recuperação.
 
-Expansões pós-MVP: OLT/ONU (`docs/expansao-olt-onu.md`); IPAM/CGNAT, ordens de serviço, estoque, FTTH, CRM e NOC (`docs/expansoes-2-a-5.md`).
-O que ficou para depois, em ordem de prioridade: `docs/05-prioridades-pos-projeto.md`.
+Configuração dos módulos: [operação](docs/operacao.md). Driver e homologação de OLT/ONU: [guia OLT](docs/expansao-olt-onu.md).
+Bloqueios do lançamento e evolução ainda necessária: [pendências](docs/pendencias.md).
 
 Simulado x real: os drivers `demo` e `olt_demo` e o gateway `demo` são simulações identificadas na interface e bloqueadas fora do modo
 demonstração. A integração MikroTik/PPPoE foi validada em laboratório virtual (CHR 7.24.5), não no equipamento do piloto, e não há gateway de pagamento real integrado.

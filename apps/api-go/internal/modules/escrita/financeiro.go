@@ -17,7 +17,7 @@ import (
 func (s Service) financeOperations(ops map[string]operation) {
 	f, o, str, n, b, e := validate.F, validate.Object, validate.String, validate.Number, validate.Boolean, validate.Enum
 	uuid := str().UUID()
-	date := str().Pattern(`^\d{4}-\d{2}-\d{2}$`, "data inválida")
+	date := str().Refine(func(v any) bool { return customDate(v.(string)) }, "data inválida")
 	ops["POST /api/demo-gateway/pay"] = operation{s.demoPay, obj(o(f("invoice_id", uuid), f("mode", e("webhook", "lost", "duplicate", "divergent"))))}
 	ops["POST /api/portal/trust-release"] = operation{s.portalTrust, obj(o(f("contract_id", uuid)))}
 	ops["POST /api/finance/generate"] = operation{s.generateInvoices, obj(o(f("competence", str().Pattern(`^\d{4}-(0[1-9]|1[0-2])$`, "Invalid").Opt())))}

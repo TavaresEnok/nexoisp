@@ -28,6 +28,8 @@ jobs:
           npm -w apps/web run build
       - name: Instalação, administração, financeiro e outbox com duas réplicas Go
         run: python3 tests/contrato/nativo.py
+      - name: Integridade de cadastro, campos personalizados, equipe e estoque
+        run: python3 tests/contrato/sgp_auditoria.py
       - name: Painel real contra Go
         run: python3 tests/contrato/e2e.py
       - name: Imagem da VPN Go

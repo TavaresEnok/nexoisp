@@ -34,7 +34,7 @@ Adivinhar nomes de campo geraria um importador que parece funcionar e grava erra
 - Quantos clientes têm **mais de um contrato ou serviço**? O CSV intermediário trata um contrato por cliente; o exportador avisa a contagem.
 - Como o SGP representa **situação do contrato** (1 ativo, 2 inativo, 3 cancelado, 4 suspenso, 5 inviabilidade, 6 novo, 7 ativo com velocidade reduzida)? O exemplo mapeia 1 e 7 para "ativo" e o resto para "inativo": **confirmar com o provedor**, em especial suspensos.
 - **Títulos**: o filtro `abertos` devolve também os parcialmente pagos e os de acordo? Isso muda o saldo importado.
-- Como o SGP guarda o **IP fixo**, o **MAC** e a **etiqueta** de cada serviço? O NexoISP tem esses três (IP fixo, vínculo de MAC, etiquetas), mas o CSV intermediário ainda não os traz.
+- Como o SGP guarda o **IP fixo**, o **MAC** e a **etiqueta** de cada serviço? O CSV intermediário já aceita MAC e etiquetas; IP fixo ainda exige vínculo ao pool no IPAM. Confirmar os campos de origem antes de mapear.
 
 ## 4. Camada de compatibilidade: por que ainda não, e como será
 

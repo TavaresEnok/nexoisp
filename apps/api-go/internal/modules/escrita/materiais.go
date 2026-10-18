@@ -64,6 +64,9 @@ func (s Service) addHelper(ctx context.Context, tx *db.Tx, id string, b map[stri
 	if w.Get("assignee_id") == b["user_id"] {
 		return nil, apierr.New(400, "o responsável da OS não é auxiliar dela")
 	}
+	if finished(w.Get("status")) {
+		return nil, apierr.New(400, "ordem de serviço encerrada não aceita alterações de auxiliares")
+	}
 	user, err := one(ctx, tx, key, 1, b["user_id"])
 	if err != nil {
 		return nil, err
@@ -71,14 +74,25 @@ func (s Service) addHelper(ctx context.Context, tx *db.Tx, id string, b map[stri
 	if user == nil {
 		return nil, apierr.New(400, "usuário não encontrado neste provedor")
 	}
-	if err = tx.Exec(ctx, query(key, 2), auth.From(ctx).TenantID, id, b["user_id"]); err != nil {
+	n, err := tx.Affected(ctx, query(key, 2), auth.From(ctx).TenantID, id, b["user_id"])
+	if err != nil {
 		return nil, err
+	}
+	if n == 0 {
+		return map[string]any{"ok": true}, nil
 	}
 	return map[string]any{"ok": true}, history(ctx, tx, key, 3, id, map[string]any{"name": user.Get("name")})
 }
 func (s Service) deleteHelper(ctx context.Context, tx *db.Tx, id string, _ map[string]any) (any, error) {
 	const key = "DELETE /api/work-orders/:id/helpers/:userId"
 	user := parameter(ctx, "userId")
+	w, err := mustRow(ctx, tx, "PATCH /api/work-orders/:id", 0, "ordem de serviço não encontrada", id)
+	if err != nil {
+		return nil, err
+	}
+	if finished(w.Get("status")) {
+		return nil, apierr.New(400, "ordem de serviço encerrada não aceita alterações de auxiliares")
+	}
 	n, err := tx.Affected(ctx, query(key, 0), id, user)
 	if err != nil {
 		return nil, err

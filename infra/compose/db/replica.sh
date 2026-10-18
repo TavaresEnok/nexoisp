@@ -14,4 +14,4 @@ if [ ! -s "$PGDATA/PG_VERSION" ]; then
   chmod 700 "$PGDATA"
   echo "réplica: cópia concluída; entrando em espera"
 fi
-exec postgres -c hot_standby=on
+exec postgres -c hot_standby=on -c max_worker_processes=32 -c max_parallel_workers=30 -c max_parallel_workers_per_gather=30

@@ -2,6 +2,8 @@
 
 Documento único de operação. O que está marcado **não exercitado** ainda precisa ser provado no ambiente do piloto.
 
+Consulte também [Arquitetura](arquitetura.md) para decisões técnicas e [Pendências](pendencias.md) para os bloqueios e homologações restantes.
+
 Desde 16/10/2026 o backend é Go: API, rotinas River, VPN e CLI. A aplicação não contém backend Node. O frontend React usa Node somente durante a compilação; a imagem entregue usa Caddy.
 
 ## 1. Instalação central (nuvem/servidor do SaaS)
@@ -32,7 +34,8 @@ NEXO_NEW_PASSWORD='<12+ caracteres>' ./nexo prod db create-operator voce@empresa
 |---|---|---|
 | `NEXO_SECRET_KEY` | Cifra senhas PPPoE e segredos de MFA no banco | Perda: senhas PPPoE irrecuperáveis (redigitar). Vazamento/rotina: **rotacionar** (abaixo) |
 | `NEXO_OP_SIGNING_KEY` | Assina operações enviadas aos agentes | Troca: agentes recusam a nova chave até removerem o pin local (`kv.signing_public_key` no SQLite) — procedimento manual |
-| `POSTGRES_PASSWORD` / `NEXO_APP_DB_PASSWORD` | Banco | Trocar no `.env` e reiniciar (a senha do `nexo_app` é reaplicada na subida) |
+| `POSTGRES_PASSWORD` | Administração do banco | Em banco existente, alterar a senha do papel PostgreSQL e o `.env` de forma coordenada; mudar só a variável não troca a senha do banco |
+| `NEXO_GO_DB_PASSWORD` / `NEXO_APP_DB_PASSWORD` / `NEXO_RADIUS_DB_PASSWORD` | Papéis de execução | Atualizar no `.env`, executar `./nexo prod db prepare` e recriar os serviços dependentes com `./nexo prod up` em janela de manutenção |
 | Token + certificado de cada agente | Identidade do agente | Painel → Rede → Rotacionar token / Revogar |
 
 Guardar cópia de `.env` e de `infra/prod/certs` em cofre separado do backup do banco.
@@ -46,6 +49,20 @@ Um provedor novo nasce só com o núcleo: cadastro, planos, contratos, acesso PP
 Atendimentos/prospectos, ordens de serviço e estoque, avisos, avisos ao assinante (mensagens só de saída), NOC, rede óptica, IP/CGNAT e OLT são **módulos** que o operador do SaaS libera em
 Provedores → Módulos. Sem o módulo, o item some do menu **e o servidor recusa a chamada** (`module_disabled`). O módulo de OLT libera um driver
 não homologado em equipamento real: a conferência de produção avisa quando ele está ligado.
+
+### IPAM, CGNAT, estoque, atendimento e NOC
+
+| Área | Operação e limites |
+|---|---|
+| IPAM | Rede → Endereços IP: cadastrar blocos e reservar endereço ou vincular IP fixo ao contrato. Blocos do provedor não se sobrepõem. IPv6 é planejamento/registro; ainda não há entrega automática de prefixo pelo RADIUS |
+| CGNAT | Criar plano, conferir capacidade e gerar script RouterOS para revisão humana. O plano mantém a vigência histórica; mudanças exigem encerrar e criar outro. O sistema não aplica o script no roteador. Ao importar, revisar a interface de saída e a ordem em relação às regras existentes |
+| Rastreio | IP público + porta + data permitem consultar o plano vigente e cruzar com as sessões disponíveis. A consulta fica auditada; sem accounting ou sem porta, não presumir um titular único. Ver também Consulta de IP para ofício |
+| Estoque e OS | Materiais lançados na OS baixam estoque na mesma transação; devolução é limitada ao consumo da OS. Corrigir movimentos com ajuste justificado, sem apagar o histórico. Unidades com série registram técnico, contrato e histórico. Concluir uma OS não provisiona automaticamente o acesso |
+| Rede óptica | Caixas e portas têm vínculo ao contrato e coordenadas. A ocupação e o desenho cadastrado não substituem uma homologação da OLT nem representam automaticamente o trajeto real dos cabos |
+| CRM | Prospecto pode ser convertido em assinante, sem criar contrato automaticamente. Atendimentos têm protocolo e podem originar OS. Notas internas não são exibidas ao assinante |
+| NOC | Diagnóstico por regras sobre leituras datadas, sem alterar a rede. Limiares de sinal são configurados pelo provedor; falha coletiva é uma heurística. Desautorizar ONU ao encerrar contrato é uma regra opcional, desligada por padrão |
+
+A tela do técnico exige conexão. Exportação contábil gera CSV de conferência; não emite documento fiscal. Regras adicionais e limitações de homologação estão em [Pendências](pendencias.md).
 
 ### Avisos ao assinante (módulo `messages`)
 
@@ -304,7 +321,7 @@ Todos os recursos abaixo ficam desligados até o provedor configurá-los em Pol�
 
 ## 6. Medição curta (volume sintético)
 
-Volume do piloto ainda desconhecido. Medição local única — ver números na seção de progresso do documento 04. Não representa SLA nem capacidade garantida.
+O volume do piloto ainda precisa ser definido. Medições anteriores usaram dados sintéticos em ambiente local; não representam SLA nem capacidade garantida. Medir com o volume e a infraestrutura do provedor antes de ampliar a operação.
 
 ## 7. Lista de entrada em produção (preencher com o provedor)
 

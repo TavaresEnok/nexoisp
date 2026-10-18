@@ -1,0 +1,19 @@
+{
+  "total": 956,
+  "formularios": 44,
+  "por_decisao": {
+    "preservar capacidade nativa; correspondência parcial": 25,
+    "especificar antes de implementar": 328,
+    "especificar acesso ou segredo; nunca importar valor": 38,
+    "aguardar especificação fiscal": 152,
+    "dispensar representação técnica da origem": 52,
+    "aguardar decisão de escopo RH": 50,
+    "especificar catálogo/compras e vínculos": 51,
+    "aguardar decisão de escopo frota": 16,
+    "substituir comando/template livre por operação tipada": 31,
+    "aguardar regra comercial aprovada": 31,
+    "aguardar fornecedor/contrato ou especificação do conector": 99,
+    "dispensar editor genérico; especificar configuração tipada": 83
+  },
+  "limite": "Revisão de destinação dos controles concluída; decisões comerciais/fiscais/externas continuam propostas, não aprovadas."
+}

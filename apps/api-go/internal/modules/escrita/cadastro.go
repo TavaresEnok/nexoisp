@@ -27,18 +27,25 @@ func (s Service) createSubscriber(ctx context.Context, tx *db.Tx, _ string, b ma
 }
 func (s Service) updateSubscriber(ctx context.Context, tx *db.Tx, id string, b map[string]any) (any, error) {
 	const key = "PATCH /api/subscribers/:id"
-	row, err := one(ctx, tx, key, 0, subscriberArgs(id, b)...)
+	current, err := mustRow(ctx, tx, key, 1, "assinante não encontrado", id)
+	if err != nil {
+		return nil, err
+	}
+	if current.Get("anonymized_at") != nil {
+		return nil, apierr.New(409, "titular anonimizado: o cadastro não pode mais ser alterado")
+	}
+	merged := make(map[string]any, len(subscriberColumns))
+	for _, col := range subscriberColumns {
+		merged[col] = current.Get(col)
+	}
+	for col, value := range b {
+		merged[col] = value
+	}
+	row, err := one(ctx, tx, key, 0, subscriberArgs(id, merged)...)
 	if err != nil {
 		return nil, err
 	}
 	if row == nil {
-		current, err := one(ctx, tx, key, 1, id)
-		if err != nil {
-			return nil, err
-		}
-		if current != nil {
-			return nil, apierr.New(409, "titular anonimizado: o cadastro não pode mais ser alterado")
-		}
 		return nil, apierr.New(404, "assinante não encontrado")
 	}
 	return row, record(ctx, tx, "subscriber.update", "subscriber", id, nil)

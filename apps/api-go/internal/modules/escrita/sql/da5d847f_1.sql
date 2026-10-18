@@ -1,1 +1,1 @@
-select 1 from subscribers where id = $1
+select * from subscribers where id = $1 for update

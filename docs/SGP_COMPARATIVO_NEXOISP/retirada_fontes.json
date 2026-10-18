@@ -1,0 +1,16 @@
+{
+  "data_utc": "2026-10-17T08:22:56.284804+00:00",
+  "estado": "fontes removidas do projeto após consolidação e backup verificado",
+  "origem_historica": "docs/SGP/",
+  "backup_local_privado": "/home/enok/Documentos/arquivos-restritos/NexoISP/sgp-originais-20261017T082228Z.tar.gz",
+  "backup_sha256": "1cab148e71a079443d8e61dbac90537b401cb07a24cec8b9dcc5c202f3c7cf6f",
+  "arquivos": 1207,
+  "tamanho_backup_bytes": 21531291,
+  "permissao_diretorio": "0700",
+  "permissao_arquivo": "0600",
+  "criptografado": false,
+  "verificacao": "SHA-256 de cada um dos 1207 arquivos igual ao inventário inicial; arquivo tar lido integralmente, sem extrair",
+  "limite": "Cópia local externa ao projeto; não é backup remoto nem prova de paridade funcional.",
+  "remocao_utc": "2026-10-17T08:25:03.955418+00:00",
+  "pasta_origem_ausente": true
+}

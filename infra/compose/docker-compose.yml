@@ -7,7 +7,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: nexo
     ports: ["127.0.0.1:15432:5432"]
-    command: ["postgres", "-c", "hba_file=/etc/nexo/pg_hba.conf"]   # inclui o acesso da réplica
+    # Até 30 workers paralelos; 32 vagas de processos deixam margem para outros workers.
+    command: ["postgres", "-c", "hba_file=/etc/nexo/pg_hba.conf", "-c", "max_worker_processes=32", "-c", "max_parallel_workers=30", "-c", "max_parallel_workers_per_gather=30"]
     volumes: [dbdata:/var/lib/postgresql/data, "./db/pg_hba.conf:/etc/nexo/pg_hba.conf:ro"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U nexo_owner -d nexo"]

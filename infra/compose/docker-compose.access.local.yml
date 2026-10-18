@@ -1,0 +1,11 @@
+# Sobreposição local para iniciar a pilha Go sem tocar na instância já em uso.
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.30.251.0/24
+
+services:
+  caddy:
+    ports: !override
+      - "0.0.0.0:18081:8080"
