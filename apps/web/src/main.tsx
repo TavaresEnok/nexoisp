@@ -1,20 +1,14 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import { App } from './App';
-import '@fontsource-variable/atkinson-hyperlegible-next';
-import '@fontsource-variable/atkinson-hyperlegible-mono';
-import './styles.css';
-import { DialogHost } from './ui';
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import "@fontsource-variable/geist/wght.css";
+import "@fontsource-variable/geist-mono/wght.css";
+import "./globals.css";
+import "./fonts.css";
+import { App } from "./app";
+import { routerBasename } from "@/platform/execution";
+import "./erp.css";
 
-// tema: o escolhido pelo usuário; sem escolha, o do sistema
-document.documentElement.dataset.theme = localStorage.getItem('nexo_theme') ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-
-createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <App />
-      <DialogHost />
-    </BrowserRouter>
-  </React.StrictMode>,
+createRoot(document.getElementById("root")!).render(
+  <StrictMode><BrowserRouter basename={routerBasename}><App /></BrowserRouter></StrictMode>,
 );

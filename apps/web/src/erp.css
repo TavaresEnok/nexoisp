@@ -1,0 +1,21 @@
+/* Extensões operacionais sobre os tokens e componentes oficiais do v0. */
+.erp-stack { display: flex; flex-direction: column; gap: var(--section-gap); }
+.erp-source { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; color: var(--muted-foreground); font-size: var(--text-caption); }
+.erp-field { display: flex; flex-direction: column; align-items: stretch; gap: 8px; line-height: 1.5; }
+.erp-field small { font-weight: 400; }
+.erp-form, .erp-form fieldset { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.erp-form fieldset { border: 0; padding: 0; margin: 0; }
+.erp-form footer { display: flex; justify-content: flex-end; gap: 8px; padding-top: 16px; border-top: 1px solid var(--border); }
+.erp-columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 16px; }
+.erp-editor { width: min(760px, calc(100vw - 32px)); max-width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh - 40px); overflow-y: auto; padding: 24px; }
+.erp-login { min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; padding: 32px 16px; background: var(--background); }
+.erp-login > .nexo-panel { width: min(100%, 440px); }
+.erp-login-brand { display: flex; align-items: center; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 440px; color: var(--primary); }
+.erp-login-brand p { flex-basis: 100%; text-align: center; font-size: var(--text-body); color: var(--muted-foreground); }
+.erp-demo-accounts { display: flex; flex-direction: column; align-items: stretch; gap: 4px; margin: 20px 0; font-size: var(--text-caption); }
+.erp-banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--info-bg); color: var(--foreground); font-size: var(--text-caption); flex-wrap: wrap; }
+.erp-pagination { display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 12px; padding: 16px 20px; color: var(--muted-foreground); font-size: var(--text-caption); }
+.erp-inline-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.erp-contract-card { display: flex; flex-direction: column; gap: 12px; padding: 16px; border: 1px solid var(--border); border-radius: var(--surface-radius); }
+.erp-contract-card > header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+@media (max-width: 600px) { .erp-editor { padding: 20px 16px; } .erp-source { gap: 8px; } }

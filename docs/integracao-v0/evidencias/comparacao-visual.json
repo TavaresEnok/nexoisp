@@ -1,0 +1,26 @@
+[
+  {
+    "name": "assinantes-desktop-claro",
+    "identical": true,
+    "reference": "aa2c1b93532cab2937d4ea29935d270302c53fe050d58e65986e6f7592f551bb",
+    "official": "aa2c1b93532cab2937d4ea29935d270302c53fe050d58e65986e6f7592f551bb"
+  },
+  {
+    "name": "assinantes-desktop-escuro",
+    "identical": true,
+    "reference": "91077f9d9777b9f0a15041ac3dd00f463463de33012a59b210db30019ce7e3f7",
+    "official": "91077f9d9777b9f0a15041ac3dd00f463463de33012a59b210db30019ce7e3f7"
+  },
+  {
+    "name": "assinantes-celular",
+    "identical": true,
+    "reference": "718303ee1cdc1b9cf77cf12ba14a13815a49e23eb04f860cb9f1b2f4512d5aaa",
+    "official": "718303ee1cdc1b9cf77cf12ba14a13815a49e23eb04f860cb9f1b2f4512d5aaa"
+  },
+  {
+    "name": "ficha-desktop",
+    "identical": true,
+    "reference": "ce16656e87b3c51328e76cf743fb1329fab7f80bc4e88c8576a1a574af78547c",
+    "official": "ce16656e87b3c51328e76cf743fb1329fab7f80bc4e88c8576a1a574af78547c"
+  }
+]

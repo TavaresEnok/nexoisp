@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)" />
+    <meta name="description" content="Seu provedor, em sintonia. Consultas demonstrativas de assinantes, financeiro, atendimento, campo e rede, sem operações reais." />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <title>Visão geral · NexoISP</title>
+    <script>
+      const appearance = document.cookie.match(/(?:^|;\s*)nexo-appearance=(dark|light)(?:;|$)/)?.[1];
+      document.documentElement.classList.toggle('dark', appearance ? appearance === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches);
+    </script>
+  </head>
+  <body class="antialiased">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

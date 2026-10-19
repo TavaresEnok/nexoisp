@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "checks": [
+    "Troca de senha preserva a sessão atual e revoga outra sessão",
+    "Configuração e ativação TOTP pelo frontend e Go reais",
+    "Logout e novo login com desafio TOTP",
+    "Desativação TOTP exige senha e código reais",
+    "Expiração da sessão remove dados e retorna ao login sem fallback"
+  ]
+}

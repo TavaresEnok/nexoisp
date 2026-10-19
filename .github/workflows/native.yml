@@ -25,6 +25,7 @@ jobs:
         run: |
           npm ci
           npm -w apps/web run typecheck
+          npm -w apps/web test
           npm -w apps/web run build
       - name: Instalação, administração, financeiro e outbox com duas réplicas Go
         run: python3 tests/contrato/nativo.py

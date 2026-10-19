@@ -1,0 +1,41 @@
+{
+  "checkpoint": "audit-remediation-2026-10-18",
+  "completion": "partial",
+  "previousEvidence": "tests/checkpoint.json",
+  "findings": [
+    { "id": 1, "status": "blocked", "area": "Identidade e autorização", "remaining": "BETTER_AUTH_SECRET ausente no inventário confirmado da integração. Implementar sessão verificada, empresa, membros e papéis antes de permitir escrita. Não foi criada autenticação simulada." },
+    { "id": 2, "status": "pending", "area": "Integração entre interface e comandos", "remaining": "Conectar comandos somente depois da identidade verificada, com adaptador explícito de centavos, estados e relógio de operação. Nenhuma rota de escrita pública adicionada." },
+    { "id": 3, "status": "verified", "area": "Destinos de alertas de rede", "evidence": ["tests/consolidation.test.ts", "Percurso no navegador: alerta óptico -> /rede/equipamentos?filtro=atencao -> aba Atenção selecionada"] },
+    { "id": 4, "status": "partial", "area": "Reprodução do banco", "evidence": ["scripts/prepare-database.sql inclui catálogo técnico", "scripts/demo-database.ts inclui seed do catálogo e recusa sobrescrita divergente", "Seed e consulta agora compartilham lib/workspace-schema.ts", "pnpm db:check aprovado com 82 registros e catálogo técnico"], "remaining": "Execução integral de preparação em um banco novo ainda não verificada nesta etapa." },
+    { "id": 5, "status": "corrected", "area": "Matriz de evidências", "evidence": ["Planos e contratos com componentes próprios", "Variante ativa NetworkOnline incluída", "Critérios separados de interface, regras, persistência autorizada e percurso", "Decisões de reorganização explicitadas", "Testes confrontam evidências com componentes usados pelas rotas"], "remaining": "Equivalência integral das nove origens permanece não certificada; nenhum escopo foi promovido artificialmente a completo." },
+    { "id": 6, "status": "pending", "area": "Escalabilidade do agregado JSONB", "remaining": "Não foi feita migração especulativa sem medições. Rever persistência por entidade, histórico e concorrência antes de uso colaborativo em volume." },
+    { "id": 7, "status": "corrected", "area": "Carregamento e validação", "evidence": ["Layout não aguarda banco", "Shell e páginas informativas independentes da consulta", "WorkspaceDataBoundary com carregamento, falha e recuperação", "Catálogos técnicos usam sua própria data e rodapé", "Validação Zod de payloads e vínculos no servidor e no cliente", "Falhas 503 da API não recebem cache público"], "remaining": "Consultas operacionais ainda carregam a amostra delimitada inteira. Paginação por domínio deve acompanhar a implementação operacional, não uma medição fictícia de gargalo." },
+    { "id": 8, "status": "corrected", "area": "Semântica de indicadores e histórico", "evidence": ["Rodapé diferencia atualização, falha e última consulta", "Indicadores neutros preservados sem setas", "Faixa artificial de disponibilidade removida", "Histórico ordena marcos por data e explicita vencimentos", "OS sem data ficam separadas, sem data inventada"] },
+    { "id": 9, "status": "corrected", "area": "Busca e contexto", "evidence": ["Busca compartilhada por nome, código, documento, telefone, e-mail, PPPoE, IP, MAC e serial", "Filtros das consultas principais e técnicas sincronizados com URL", "Ficha e aba reabrem após recarregar", "Tema persistido por cookie sem localStorage"], "remaining": "Busca somente nos campos realmente disponíveis; dados de acesso ausentes não são inventados." }
+  ],
+  "interface": {
+    "preserved": ["Paleta grafite e neutros", "Geist e Geist Mono", "Navegação hierárquica", "Leituras técnicas sem comandos remotos"],
+    "changed": ["Títulos diretos nas rotinas", "Faixa de escopo sem repetir breadcrumb", "Cabeçalho redundante da consulta online removido", "Abas da ficha móvel quebram em linhas visíveis"],
+    "remaining": ["Extração progressiva do CSS global e revisão ampla de acessibilidade não certificadas", "Personalização por função e densidade são melhorias opcionais, não entregas alegadas"]
+  },
+  "validation": {
+    "typecheck": "passed",
+    "unitTests": { "command": "pnpm verify", "passed": 94, "failed": 0 },
+    "databaseCheck": { "command": "pnpm db:check", "result": "passed", "scope": "public-demo", "records": 82, "technicalCatalog": "valid" },
+    "productionBuild": { "command": "pnpm build", "result": "passed", "projectEnvironmentLoaded": true },
+    "frozenLockfile": { "command": "pnpm install --frozen-lockfile", "result": "passed", "packageManager": "pnpm@12.3.4", "supplyChainPolicy": "passed" },
+    "diffWhitespace": "passed",
+    "e2e": { "command": "pnpm test:e2e", "spec": "tests/e2e/audit-fixes.spec.ts", "casesVersioned": 7, "result": "blocked", "reason": "Chromium baixado, mas o sandbox não fornece libnspr4.so. Tentativa de playwright install-deps chromium bloqueada pela ausência de apt-get. Nenhuma asserção de percurso foi certificada por essa suíte." }
+  },
+  "browser": {
+    "tool": "agent-browser",
+    "mode": "development",
+    "theme": "dark",
+    "desktop": { "width": 1342, "height": 805 },
+    "mobile": { "width": 390, "height": 844 },
+    "passed": ["Composição do panorama em desktop", "Abas visíveis na ficha móvel", "Recarregamento da ficha na aba Histórico e fechamento removendo contexto", "Busca global por telefone sem formatação encontra Mariana Oliveira", "Busca e situação da lista de assinantes sobrevivem ao recarregamento", "Tema claro sobrevive ao recarregamento e tema escuro é restaurado", "Alerta óptico chega ao NOC filtrado em Atenção", "Catálogo Core Network carrega sem exigir dados globais e preserva busca após recarregar", "Falha 503 controlada somente na sessão do navegador mostra Consulta indisponível sem derrubar o shell", "Restaurar a consulta real e acionar Tentar novamente recupera o panorama"],
+    "performanceSample": { "route": "/acompanhamento", "ttfbMs": 287.5, "fcpMs": 412, "lcpMs": 768, "cls": 0, "inp": null, "note": "Amostra de laboratório em desenvolvimento; não é comparação antes/depois nem dado de produção." }
+  },
+  "security": "Cenário público permanece sintético e somente leitura. Nenhum dado privado, papel ou sessão é simulado. Nenhum serviço bancário, canal de comunicação ou equipamento foi conectado. Preferências de aparência usam cookie não sensível; credenciais não foram escritas no repositório.",
+  "nextRequiredInput": "Configurar BETTER_AUTH_SECRET pelo formulário seguro do v0 para prosseguir com autenticação e autorização."
+}

@@ -22,3 +22,8 @@ saida-sgp/
 nexo-sgp-saida/
 *.formato.json
 .claude/
+
+# artefatos locais da compilação TypeScript e do navegador
+*.tsbuildinfo
+**/test-results/
+**/playwright-report/

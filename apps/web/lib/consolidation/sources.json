@@ -1,0 +1,821 @@
+{
+  "archiveSha256": "2da67b5c7edb910ea441fa7cd97b55e785e6dcd6097f30a42c839af27614c663",
+  "totalFiles": 418,
+  "additionalFiles": [
+    {
+      "path": "MAPA_PORTAS_NEXOISP.md",
+      "sha256": "33b623616bc0bbb24a0e5bde21375cbc4abf0beacf6dfe59d35674196129c7f0"
+    },
+    {
+      "path": "iniciar_todos.ps1",
+      "sha256": "8e5aed7e1c47dd9b6f161e6390beb5f7e6a2268aaa096bf83054086628124f55"
+    },
+    {
+      "path": "parar_todos.ps1",
+      "sha256": "6e50cb336c576c498f837967e77c3fe7269a26b43edbf7d08d9f27cc8a96d77c"
+    },
+    {
+      "path": "portal_central.html",
+      "sha256": "ae7fbb170a9e25f58782dca1c3fa67a2724e9d0d81f24fac4bfa920593a71ce7"
+    },
+    {
+      "path": "server_manager.js",
+      "sha256": "72a1853d7df8f0ebb4404f032d806cce1efd27362ff22bc16540df8e6acf412f"
+    },
+    {
+      "path": "status_todos.ps1",
+      "sha256": "ca735041b38fd80976afd215373811258487b4743cc7cec78696bfbff3d0ad8b"
+    }
+  ],
+  "method": "Inspeção estática dos arquivos. Hash de árvore: SHA-256 das linhas caminho:sha256, ordenadas e separadas por LF. Não comprova equivalência funcional ou visual.",
+  "projects": [
+    {
+      "id": "8001",
+      "name": "nexoisp8001",
+      "fileCount": 79,
+      "treeSha256": "db184f0443048787da38be2f0e3901da2a59cfb5e7da567a43934dcfd6e6f729",
+      "evidence": [
+        {
+          "path": "app/(painel)/[...modulo]/page.tsx",
+          "sha256": "ecd6ecad19eb8444f196271a013cae5ae78a195245ae86c5b19111a17ffdcd5a"
+        },
+        {
+          "path": "app/(painel)/assinantes/[id]/page.tsx",
+          "sha256": "c382a6d2c9b97cdc4ab02bb91378b86cb7a12709d0092ac573e6c46c3c4fc889"
+        },
+        {
+          "path": "app/(painel)/assinantes/page.tsx",
+          "sha256": "60ec7d7dd73d0ad4631e60fb254584304ecbb9ab5ab84b73415a641cca2107be"
+        },
+        {
+          "path": "app/(painel)/design-system/page.tsx",
+          "sha256": "c203a7088f4c338e8a2764d49a0ac83a9b6bd3883b6981d9e8e887752d086a02"
+        },
+        {
+          "path": "app/(painel)/fila/page.tsx",
+          "sha256": "f0eb6521be200808e043fcad022b8ea2a10a69ba5d14435d452ee8e8b02a7801"
+        },
+        {
+          "path": "app/(painel)/inicio/page.tsx",
+          "sha256": "1aa8e0a918374ee0ffe83c6dbb1533688a62c626e583c320d576443b025374bd"
+        },
+        {
+          "path": "app/(painel)/layout.tsx",
+          "sha256": "e1218b900a3061fcee51d801cc8ef50fe4f4d5d6426e02263fcaaf38c0e2dc6c"
+        },
+        {
+          "path": "app/globals.css",
+          "sha256": "cd61f47407a8481f97eacdf0ce4252f565c6ab1c696abc8c90459ce6b85931f3"
+        },
+        {
+          "path": "app/layout.tsx",
+          "sha256": "c1d6439daa3e8587caa56d281196217239fe7aea8137823b3799c17c880fd315"
+        },
+        {
+          "path": "app/login/page.tsx",
+          "sha256": "533212ac708eb9566caa73a3c1863199975ef216f3d50dfd1798ef88f5dd6a37"
+        },
+        {
+          "path": "app/page.tsx",
+          "sha256": "7d23f0a625117b3b1142a67906811cef968a928080d76d433a1cf9899d31308e"
+        },
+        {
+          "path": "components/assinantes/subscriber-hero.tsx",
+          "sha256": "7f665c2d92ae37eb9c7b93d3db0b43339496600cf31b5542e3ad914bb85a4880"
+        },
+        {
+          "path": "components/assinantes/subscriber-preview.tsx",
+          "sha256": "9382363db1d6d19c4f29a91d8a04d03d3ef5eee78a9502af18761513e124cdd4"
+        },
+        {
+          "path": "components/assinantes/subscriber-tabs.tsx",
+          "sha256": "0b64d79941a16fd0809b3e07901565569ec305c0ffe186d2d52060bf8d55495d"
+        },
+        {
+          "path": "components/assinantes/subscribers-table.tsx",
+          "sha256": "47c1532f1bd8b76cd6bbdd0e8de313a46cf2b6cb42a506af3d86b87fb2bbfa2a"
+        },
+        {
+          "path": "components/auth/login-form.tsx",
+          "sha256": "89fd28b949cb28d7361f134dd810e1c51748eea970f398a095af46a500b4f01d"
+        },
+        {
+          "path": "components/fila/queue-board.tsx",
+          "sha256": "e5010ddcd9e7547bfda88571c55d102ef00359cfc14d10245c0edba94e3e7393"
+        },
+        {
+          "path": "components/fila/queue-list.tsx",
+          "sha256": "ef930b162ddebd276c348280960873d3bbf6b11214fd058c9c8bf4be1c12f756"
+        },
+        {
+          "path": "components/inicio/activity-feed.tsx",
+          "sha256": "54cc1f8bf889167d656e64f366bce34d2c1b7ff6e47f422ba92c41e5c0cfccd8"
+        },
+        {
+          "path": "components/inicio/network-health.tsx",
+          "sha256": "ade76bdc2f007c552fa5aaaad00275b1a15b6bf933f79b6a7585e2d4f0bb066b"
+        },
+        {
+          "path": "components/inicio/revenue-chart.tsx",
+          "sha256": "e0895c8c8747f3a885dce764261d8e08956f1e7e541b5ea8b041e8dc47ab165d"
+        },
+        {
+          "path": "components/nexo/logo.tsx",
+          "sha256": "606dbf5ddc42ae795ec00b63af3a292c722440933f09abaa6ffaca63509eaf88"
+        },
+        {
+          "path": "components/nexo/signal-meter.tsx",
+          "sha256": "cef4fa369c0c449efcad7b72e032403040737233c1fd6af2d8560c59d7ee8f66"
+        },
+        {
+          "path": "components/nexo/status-pill.tsx",
+          "sha256": "d2e7bcc709d586ddd0576acdf11d3fdbab4488796f05138c95f4e2977dab4147"
+        },
+        {
+          "path": "components/patterns/kpi-card.tsx",
+          "sha256": "b644e48625a6f0eba4f8192e0eb961711cdbfd36c336f1e27095590b79e1b6e8"
+        },
+        {
+          "path": "components/patterns/page-header.tsx",
+          "sha256": "675b4fc3c2a128491aa2122d5cc4446c68a42307d1c10a55cea6409bafb52e31"
+        },
+        {
+          "path": "components/patterns/panel.tsx",
+          "sha256": "bddde513681a2fb390f81aada1f4aa6f6df4c80449faaf4fc27b546f9e09ee67"
+        },
+        {
+          "path": "components/shell/app-shell.tsx",
+          "sha256": "c245b400c690d535a2b1eeeb6d9e7ddccbe8e7193c05ed223346a1f58afd83aa"
+        },
+        {
+          "path": "components/shell/app-sidebar.tsx",
+          "sha256": "0c9b9383f4fb8bc8d0fd5683ce81ed5bd267b990c29c009b4493acae1c91977a"
+        },
+        {
+          "path": "components/shell/command-palette.tsx",
+          "sha256": "6da14dba3d14caf2d58d09943bef75cd90e4688805c6aa01dc85a485a65a77d1"
+        },
+        {
+          "path": "components/shell/topbar.tsx",
+          "sha256": "3bdabf76847c103d8ce6c873ef11d88ecfea64f611269069a8d8200a93c6ea40"
+        },
+        {
+          "path": "components/theme-provider.tsx",
+          "sha256": "68717094ad8c651fea2ec256db0c9026810a44299e4a85f423ada28b0a3ecc81"
+        },
+        {
+          "path": "lib/demo-data.ts",
+          "sha256": "4d4448c3b22e03f8975e9c7d93b4166ed8a9a0e4b5f775b0e018580338c7ab4f"
+        },
+        {
+          "path": "lib/format.ts",
+          "sha256": "9d8f79931adfbb516ff464bd4f015ef256698d973e78ae11a7dff1acbf35a3a4"
+        },
+        {
+          "path": "lib/navigation.ts",
+          "sha256": "9ef3a49115a3e2a0551dab2797dc188dacf87c2067d48c4f32dc542eedf833ea"
+        },
+        {
+          "path": "lib/utils.ts",
+          "sha256": "e46429536f43f5910f5b2b0c50bb2769b510a4558bb4b5d20a3b0a9091dbf7c3"
+        }
+      ]
+    },
+    {
+      "id": "8002",
+      "name": "nexoisp8002",
+      "fileCount": 61,
+      "treeSha256": "90ca2b41d5948edce9fd5a9f5bf2f908aee4305062ef308d644b0037a2d12af1",
+      "evidence": [
+        {
+          "path": "app/[module]/[[...path]]/page.tsx",
+          "sha256": "1bf1be29bfb722886826eefa447e7ed261eb5bed2ea3367f669cdd5250c86578"
+        },
+        {
+          "path": "app/busca/page.tsx",
+          "sha256": "3bed79c21c8369320c9372bdcabd6deaeb14a8ca126d1a6e773600cc14fc42a3"
+        },
+        {
+          "path": "app/globals.css",
+          "sha256": "a6bd798e86650661cb8018a77f4b40cda4608302adb55384ac5c39682e9f644c"
+        },
+        {
+          "path": "app/layout.tsx",
+          "sha256": "e48a844bc1de663d63ccb89f2b03273adac8f2444f755f352bf68a3ee1d1a19f"
+        },
+        {
+          "path": "app/login/page.tsx",
+          "sha256": "c3824c63a1449142773a9b95fc718f522a82d2423984398389840b9d8baae9fe"
+        },
+        {
+          "path": "app/not-found.tsx",
+          "sha256": "c3d9de23b598ee180122030b854b19eb97cdb756f617ba4dff06b840e80f81f9"
+        },
+        {
+          "path": "app/page.tsx",
+          "sha256": "45ac3ee5bb30b345389e26c042ec19c4f898e81794653d91adf4abddce7a1ee8"
+        },
+        {
+          "path": "components/nexo/charts.tsx",
+          "sha256": "c293215c8a759e9fadeed24a404bad6daa7ff16d3aead4f341e1baae8d76695c"
+        },
+        {
+          "path": "components/nexo/dashboard.tsx",
+          "sha256": "0b919b0db2b79b7fd8e7fdf4349540c5adbd29c539ee921712830b92fbc1f74d"
+        },
+        {
+          "path": "components/nexo/feature-views.tsx",
+          "sha256": "5e26e4d1ccf4f8329f7cf49f38693c6e9f9d430bb3ad0880f3a67bdd29d58ade"
+        },
+        {
+          "path": "components/nexo/module-page.tsx",
+          "sha256": "515a53d3da8f435231d6ce847026781be2405385059a488f77f372c8556159e4"
+        },
+        {
+          "path": "components/nexo/primitives.tsx",
+          "sha256": "b1091e1965131ad675985fcabf41efe45e60c16176dee16a4baefb09ffd8cfdf"
+        },
+        {
+          "path": "components/nexo/record-page.tsx",
+          "sha256": "41e12b8722a6193db48f7a9548a4749c1a774b97fb47c467f98c9e78db5102ca"
+        },
+        {
+          "path": "components/nexo/search-page.tsx",
+          "sha256": "b76bf5329d0d501ff5e15c1bf1d10e8faeb2eb0beecd36764dbe6be0f785c39f"
+        },
+        {
+          "path": "components/nexo/search-results.tsx",
+          "sha256": "e1a4ab90ee1e597c756c16e9e452e5f504e4475e92c40b8fd448ec83752015fa"
+        },
+        {
+          "path": "components/nexo/shared.tsx",
+          "sha256": "77d10c68681a0ac5035945df6a0ce3640f23f9e7ca690064a92b0dc41ddd56fd"
+        },
+        {
+          "path": "components/nexo/shell.tsx",
+          "sha256": "4d7f94b9cc30bacba1bd4028c37fb61a19838b55f2b15f76e6e6a1b6cfa05467"
+        },
+        {
+          "path": "components/nexo/special-pages.tsx",
+          "sha256": "9c08f83dd3fa434300736b8f3493c016090a469543424bcc0794803eb2f2214c"
+        },
+        {
+          "path": "components/nexo/specialized-record.tsx",
+          "sha256": "ebcae370206e3dc1449dbc4f7d809b4572a385615dbe0742af11a7eebc848794"
+        },
+        {
+          "path": "components/nexo/subscriber-detail.tsx",
+          "sha256": "20943837428e241b2a684aa54a8a57cefa199bb6068ca86352d2eefb3a895731"
+        },
+        {
+          "path": "components/nexo/subscribers.tsx",
+          "sha256": "f226426fbefacb9d1b23933dfceaa25c900750b3a54ce3422b3543b804ff01eb"
+        },
+        {
+          "path": "components/nexo/workspace.tsx",
+          "sha256": "fe4d3361f7a7c434bc867ae4e0b097160b27f92c0f319ca636785dad596b860c"
+        },
+        {
+          "path": "lib/demo-data.ts",
+          "sha256": "913158e398bbf8eb3fcf684f62211f9a43c2dd9859f0611551ae2c2eaf68dab9"
+        },
+        {
+          "path": "lib/nexo-data.ts",
+          "sha256": "0c570b786cf3efd8cb968b7fd444a79e0539f969a7f8bfca7fcc9dde68d64fa3"
+        },
+        {
+          "path": "lib/nexo-routes.ts",
+          "sha256": "214efcb4b81b8b26b2cddceac8ff09154e7978f20f091f2e2d529553c0bb82d0"
+        },
+        {
+          "path": "lib/nexo-search.ts",
+          "sha256": "168e6f5aee1c6be2e7c3b1d8389dc1da43132af8a7c2324520a21fec3f8261bb"
+        },
+        {
+          "path": "lib/nexo-views.ts",
+          "sha256": "2d73e422fc57e9e2855c86b2b53bcbfcf186639fe86daf038c4cdb663231799a"
+        },
+        {
+          "path": "lib/utils.ts",
+          "sha256": "e46429536f43f5910f5b2b0c50bb2769b510a4558bb4b5d20a3b0a9091dbf7c3"
+        }
+      ]
+    },
+    {
+      "id": "8004",
+      "name": "nexoisp8004",
+      "fileCount": 59,
+      "treeSha256": "8d11c63bba4dc4cf7f5716560f8825f5c4e805d053cdff102cf2dfa88555a076",
+      "evidence": [
+        {
+          "path": "app/[module]/[[...path]]/page.tsx",
+          "sha256": "1bf1be29bfb722886826eefa447e7ed261eb5bed2ea3367f669cdd5250c86578"
+        },
+        {
+          "path": "app/busca/page.tsx",
+          "sha256": "3bed79c21c8369320c9372bdcabd6deaeb14a8ca126d1a6e773600cc14fc42a3"
+        },
+        {
+          "path": "app/globals.css",
+          "sha256": "39b40849ff6d2b24683b8565367fa7ae3b65f77158474b97b1d6e6e867eecc38"
+        },
+        {
+          "path": "app/layout.tsx",
+          "sha256": "b5e3d277a4a37ca6265b4bf982dde79f4972f27c5960e0fbb51f136de50449f0"
+        },
+        {
+          "path": "app/login/page.tsx",
+          "sha256": "c3824c63a1449142773a9b95fc718f522a82d2423984398389840b9d8baae9fe"
+        },
+        {
+          "path": "app/not-found.tsx",
+          "sha256": "c3d9de23b598ee180122030b854b19eb97cdb756f617ba4dff06b840e80f81f9"
+        },
+        {
+          "path": "app/page.tsx",
+          "sha256": "45ac3ee5bb30b345389e26c042ec19c4f898e81794653d91adf4abddce7a1ee8"
+        },
+        {
+          "path": "components/nexo/charts.tsx",
+          "sha256": "c293215c8a759e9fadeed24a404bad6daa7ff16d3aead4f341e1baae8d76695c"
+        },
+        {
+          "path": "components/nexo/dashboard-activity.tsx",
+          "sha256": "01acd6af9aa7f8295750dd2f74b37b793e7cc2abfa05fa2dac6df1d2e1404d20"
+        },
+        {
+          "path": "components/nexo/dashboard-overview.tsx",
+          "sha256": "5306c552e91168f2ae0fdde257033e40d2d292c10f721d6b7165395c4da2a9f2"
+        },
+        {
+          "path": "components/nexo/dashboard.tsx",
+          "sha256": "6ff5808b1a3fbd117c0e654c43d5ddb3fcad3c8d4da64e7ebcd0610d6ba48381"
+        },
+        {
+          "path": "components/nexo/feature-views.tsx",
+          "sha256": "5e26e4d1ccf4f8329f7cf49f38693c6e9f9d430bb3ad0880f3a67bdd29d58ade"
+        },
+        {
+          "path": "components/nexo/module-page.tsx",
+          "sha256": "1bca4fdef204c5cc34ff5d4cb0cc218d36326828579d30d4ee228034ab56de57"
+        },
+        {
+          "path": "components/nexo/primitives.tsx",
+          "sha256": "582a9c1ab95f16c5ba80d872fe13e1849072410924932dddfe668f36e84e343f"
+        },
+        {
+          "path": "components/nexo/record-page.tsx",
+          "sha256": "41e12b8722a6193db48f7a9548a4749c1a774b97fb47c467f98c9e78db5102ca"
+        },
+        {
+          "path": "components/nexo/search-page.tsx",
+          "sha256": "b76bf5329d0d501ff5e15c1bf1d10e8faeb2eb0beecd36764dbe6be0f785c39f"
+        },
+        {
+          "path": "components/nexo/search-results.tsx",
+          "sha256": "e1a4ab90ee1e597c756c16e9e452e5f504e4475e92c40b8fd448ec83752015fa"
+        },
+        {
+          "path": "components/nexo/shell.tsx",
+          "sha256": "124726f2d29db322948297a945bfaa731ee37d57303d40618f0653a9df4932a1"
+        },
+        {
+          "path": "components/nexo/specialized-record.tsx",
+          "sha256": "ebcae370206e3dc1449dbc4f7d809b4572a385615dbe0742af11a7eebc848794"
+        },
+        {
+          "path": "components/nexo/subscriber-detail.tsx",
+          "sha256": "20943837428e241b2a684aa54a8a57cefa199bb6068ca86352d2eefb3a895731"
+        },
+        {
+          "path": "components/nexo/subscriber-overview.tsx",
+          "sha256": "ec97243a8ae7ff403670f634593a47407cfea83e751337143ddbffc2010c2fc8"
+        },
+        {
+          "path": "components/nexo/workspace-navigation.tsx",
+          "sha256": "4640e8e0ccf23bc448ceb2dcefcf941899bb5aa0321f7c43362205e5fca86c49"
+        },
+        {
+          "path": "lib/nexo-data.ts",
+          "sha256": "0c570b786cf3efd8cb968b7fd444a79e0539f969a7f8bfca7fcc9dde68d64fa3"
+        },
+        {
+          "path": "lib/nexo-routes.ts",
+          "sha256": "214efcb4b81b8b26b2cddceac8ff09154e7978f20f091f2e2d529553c0bb82d0"
+        },
+        {
+          "path": "lib/nexo-search.ts",
+          "sha256": "168e6f5aee1c6be2e7c3b1d8389dc1da43132af8a7c2324520a21fec3f8261bb"
+        },
+        {
+          "path": "lib/nexo-views.ts",
+          "sha256": "2d73e422fc57e9e2855c86b2b53bcbfcf186639fe86daf038c4cdb663231799a"
+        },
+        {
+          "path": "lib/utils.ts",
+          "sha256": "e46429536f43f5910f5b2b0c50bb2769b510a4558bb4b5d20a3b0a9091dbf7c3"
+        }
+      ]
+    },
+    {
+      "id": "8006",
+      "name": "nexoisp8006",
+      "fileCount": 50,
+      "treeSha256": "211e1a1955fd45ba2c203e51485eb4a320e33f6bad2f0b0efbcf936b96d58b68",
+      "evidence": [
+        {
+          "path": "app/globals.css",
+          "sha256": "107d9c6e8c0d606e2050b34d9042b2244d2f1ba9c880bf7bd1fadcdc582434ef"
+        },
+        {
+          "path": "app/layout.tsx",
+          "sha256": "51ee27fd0e6a566001540db307a8d9908646225cf87e7b61ed01777fcfc4d1f4"
+        },
+        {
+          "path": "app/page.tsx",
+          "sha256": "de7f10407659f91bdee45d4b2bd4af2ef482071b6c3280b87c8810f7ac56335f"
+        },
+        {
+          "path": "components/nexo/contract-access.tsx",
+          "sha256": "ec0a0b8032c2efbe6370c070ec0601633a00c6bb6407d6b58fb9a2fcb67d9eef"
+        },
+        {
+          "path": "components/nexo/contract-detail.tsx",
+          "sha256": "6c24556c4c1ba43b965da85ae665e0d10a1a5d0ac8f9f67c67c23a5bfc32a10d"
+        },
+        {
+          "path": "components/nexo/contract-dialog.tsx",
+          "sha256": "dc1e77c44c9783237a76474fc2189a0ec50e810d9f3c09225bd2934b361cd606"
+        },
+        {
+          "path": "components/nexo/contract-sections.tsx",
+          "sha256": "3d97266f6fbac72b69fe6afee32ce8d6d8dab26fe549707e881847d283985ce4"
+        },
+        {
+          "path": "components/nexo/contracts.tsx",
+          "sha256": "61a7f9fb62e2641fbd082af914e732f471bad3840968832c0b942ea18c13161d"
+        },
+        {
+          "path": "components/nexo/dashboard.tsx",
+          "sha256": "a2e89340667badf8615bd71bdb7556976025845e2548832e3f762698c461e19d"
+        },
+        {
+          "path": "components/nexo/module-page.tsx",
+          "sha256": "4a08477d36eacccaf85d1a1fe009812132428b5c5b8a73ade6f949667a6e87fc"
+        },
+        {
+          "path": "components/nexo/shared.tsx",
+          "sha256": "77d10c68681a0ac5035945df6a0ce3640f23f9e7ca690064a92b0dc41ddd56fd"
+        },
+        {
+          "path": "components/nexo/special-pages.tsx",
+          "sha256": "9c08f83dd3fa434300736b8f3493c016090a469543424bcc0794803eb2f2214c"
+        },
+        {
+          "path": "components/nexo/subscribers.tsx",
+          "sha256": "ba7b0065b5f0f830146c5cb61a431c3484b8a45c19c33c401c6de7781a3119ca"
+        },
+        {
+          "path": "components/nexo/workspace.tsx",
+          "sha256": "f6546679cb036199ee00b369fec519a72d2fc5fc4f64c9807d9d188a6a367f41"
+        },
+        {
+          "path": "lib/contract-demo.ts",
+          "sha256": "dbe7e7e178943b8968939ff84c5c50540caa4fca3c9b3f0e145d8190e21ac117"
+        },
+        {
+          "path": "lib/demo-data.ts",
+          "sha256": "913158e398bbf8eb3fcf684f62211f9a43c2dd9859f0611551ae2c2eaf68dab9"
+        },
+        {
+          "path": "lib/utils.ts",
+          "sha256": "e46429536f43f5910f5b2b0c50bb2769b510a4558bb4b5d20a3b0a9091dbf7c3"
+        }
+      ]
+    },
+    {
+      "id": "8008",
+      "name": "nexoisp8008",
+      "fileCount": 32,
+      "treeSha256": "e0309eb7f830910410c3765d848ed20c6879ac2a7559d9eb122baf8fe06580ce",
+      "evidence": [
+        {
+          "path": "app/globals.css",
+          "sha256": "26b03c433cf8ae26b17637911c5911e5d15edc7fd4c471ab17dce9c19467cbea"
+        },
+        {
+          "path": "app/layout.tsx",
+          "sha256": "78d81c33722b998cf5f4cf2567267dd0e05a622100e21abc685cea1c8f5dfd36"
+        },
+        {
+          "path": "app/page.tsx",
+          "sha256": "4e9c4054aac0bb5367fd5f18a333397e5434f6daa2f9ea462a9408cf4b502a56"
+        },
+        {
+          "path": "components/dashboard.tsx",
+          "sha256": "acd195a062160d9ddf6cbb962d65b3059d85608cfe66056a2261688930c45cae"
+        },
+        {
+          "path": "components/module-view.tsx",
+          "sha256": "6579e599259e50b37fb1c32eccf3e2dce047cdde4fd4c03682681dea6d6c3e7e"
+        },
+        {
+          "path": "components/nexo-app.tsx",
+          "sha256": "03d1ba326aa510c595a25029a4d47da66d6c84196ebba4c18578cd882d5f172e"
+        },
+        {
+          "path": "lib/demo-data.ts",
+          "sha256": "b6fa2452bee4375a64ba55b6d224d8931529807df7fe6f9b3c409d33195ab223"
+        },
+        {
+          "path": "lib/utils.ts",
+          "sha256": "e46429536f43f5910f5b2b0c50bb2769b510a4558bb4b5d20a3b0a9091dbf7c3"
+        }
+      ]
+    },
+    {
+      "id": "8015",
+      "name": "nexoisp8015",
+      "fileCount": 28,
+      "treeSha256": "8ba6cf7433a9f6eb7c1d9b52130b1aee53548b79b3addd3c27db5c968d951d41",
+      "evidence": [
+        {
+          "path": "app/globals.css",
+          "sha256": "adf6cb76ae09f344aabc7edf9af21487b7d7cf82ad46d885cebc9b5d3b488789"
+        },
+        {
+          "path": "app/layout.tsx",
+          "sha256": "a9beae8d3684a487966fdf087163578986cedd08e2cb92ea4a3ed2d951e2a7e1"
+        },
+        {
+          "path": "app/page.tsx",
+          "sha256": "2186b7d62a76e1a19a9a25692395eb1cdbc2951ef5fc93493cf5cd6dee4e4483"
+        },
+        {
+          "path": "components/nexo-app.tsx",
+          "sha256": "d4174a8ccf692028964c26b11b559123902ae81c5e0f0e24cebf3cb4eb49beae"
+        },
+        {
+          "path": "components/pages/financial.tsx",
+          "sha256": "9b6b8712b8c0a3ddac32dc6a5c699088256a99f1a55c65332423aefb340b22a9"
+        },
+        {
+          "path": "components/pages/network.tsx",
+          "sha256": "274f840cc43393545f79a3b1aad763bf0f7a720b5fc5b219ac023fa2a366cba9"
+        },
+        {
+          "path": "components/pages/orders.tsx",
+          "sha256": "e23dcbd99b8723478d6393288e5b2da827a5a483d751a45f125be042b644dc0a"
+        },
+        {
+          "path": "components/pages/overview.tsx",
+          "sha256": "d9bec76fb332a7c01c068b566ff1afda4155f2cd51e7a87c69c3fe6c79ccf274"
+        },
+        {
+          "path": "components/pages/stock.tsx",
+          "sha256": "54ef7bf8c1883bccaa3dc0245e1f5cec9436adcf819038bcf28ca207d6baced6"
+        },
+        {
+          "path": "components/pages/subscribers.tsx",
+          "sha256": "f4d90d04f879839572f64834144a8e0029ffa6abd541908815693217e1858445"
+        },
+        {
+          "path": "components/pages/support.tsx",
+          "sha256": "da3f37448838aafd306740564f14098c8250b11e1928bce0d153b7498650ae74"
+        },
+        {
+          "path": "lib/data.ts",
+          "sha256": "d215c816835d2cd109d0d578310835953b1a3aa590cf5f5142d99c20317c1dc9"
+        },
+        {
+          "path": "lib/utils.ts",
+          "sha256": "e46429536f43f5910f5b2b0c50bb2769b510a4558bb4b5d20a3b0a9091dbf7c3"
+        }
+      ]
+    },
+    {
+      "id": "8021",
+      "name": "nexoisp8021",
+      "fileCount": 28,
+      "treeSha256": "68a73c5adb2282eefc8f147b7d4a5add8bad17638477316b4347a084750951c7",
+      "evidence": [
+        {
+          "path": "app/[[...path]]/page.tsx",
+          "sha256": "0911d19db7bca3782be3e22657a37a882d6c833e13ecb3d9b85aad6d403ddf2f"
+        },
+        {
+          "path": "app/clean.css",
+          "sha256": "569031a06d699e2e511ac006880529c94608cc4a1ac5bf3e2b314bd14b590a86"
+        },
+        {
+          "path": "app/globals.css",
+          "sha256": "be4ac5c2b4c6e2e4576ec0ce15f22190428998fdd33d7ea7fcc5d35995f68eed"
+        },
+        {
+          "path": "app/layout.tsx",
+          "sha256": "4a2d37f79723483d557cdc8c8c522d8970a295bf293d71b0edb09cfd2bf3be9f"
+        },
+        {
+          "path": "app/modules.css",
+          "sha256": "2534b621da0313effe6c785d67a8df92cb9be1c45d7c4e13dad6ffc5cfdc8404"
+        },
+        {
+          "path": "components/charts.tsx",
+          "sha256": "36ae528c6eeb3ae07f14dd08ec4b7d5b143526a91253222bcc5274307be3d65a"
+        },
+        {
+          "path": "components/overlays.tsx",
+          "sha256": "b73afc7991396ce67792e83b9bafb0b3681b01ed14a9bbf9a6fab9483efeed07"
+        },
+        {
+          "path": "components/pages/customers.tsx",
+          "sha256": "d8200de14f4665463f25f1f9e165be5325bd9ff7df8932319d593746e00b6c33"
+        },
+        {
+          "path": "components/pages/dashboard.tsx",
+          "sha256": "92717814fbef54f061dc05d4aabfdc69839f5f1c420941e062c34c4b60d16c4e"
+        },
+        {
+          "path": "components/pages/finance.tsx",
+          "sha256": "7f6495576c21d46634e122806effbfb0ef11961c4e292113438b19721f81e671"
+        },
+        {
+          "path": "components/pages/management.tsx",
+          "sha256": "79f3482b328cfe3d62083392ab33ca1f1ae6b49e48838c8eb1b616f1cc86e938"
+        },
+        {
+          "path": "components/pages/network.tsx",
+          "sha256": "61c572524cf5e59239321e28d3e81d5042f7296122158bd467a71e7ceddd794f"
+        },
+        {
+          "path": "components/pages/portal.tsx",
+          "sha256": "29e32a154a287f31b2d5bb0166cc3724a0c2e69fd521576467ad2b820f8324b7"
+        },
+        {
+          "path": "components/pages/service.tsx",
+          "sha256": "befa80a6e6efe1a9de4a8285495f2a9e54e6f6ee8018aa3cc970963b350bd6bb"
+        },
+        {
+          "path": "components/shell.tsx",
+          "sha256": "5702a958998f90f867200ea155f179135d238e7da4a5dab9588b3577ad22cd7e"
+        },
+        {
+          "path": "components/ui.tsx",
+          "sha256": "d475468fe0573889479a00c09eb52ffd0954beaa3af888ec4df831a09334c418"
+        },
+        {
+          "path": "components/workspace.tsx",
+          "sha256": "96d9eccd5988388aa91ab73a72a4ba5152bcc98f1d28f115eae0f9ec79001db7"
+        },
+        {
+          "path": "lib/data.ts",
+          "sha256": "acfc8df50454d194a284a7791ddeff52ec17ca1754d0b1684e13fe43056790c6"
+        },
+        {
+          "path": "lib/store.tsx",
+          "sha256": "40d6dfdbc7091563babbf36ad37d967e2c609afe75c355bfdc0707aacd1693ba"
+        }
+      ]
+    },
+    {
+      "id": "8022",
+      "name": "nexoisp8022",
+      "fileCount": 42,
+      "treeSha256": "5fb0a021185677191abd69405a6c731dfac80e63ffe4fa75a1f6bdf11503e3fc",
+      "evidence": [
+        {
+          "path": "app/[...slug]/page.tsx",
+          "sha256": "19194bc3115b16aa787d4818bbba0aed2b91f771235348bc198e876a5b29efaf"
+        },
+        {
+          "path": "app/globals.css",
+          "sha256": "d5526fcf42fc211f7c65ae402fdefd5221492e079380f1cf2624cffddf01fce2"
+        },
+        {
+          "path": "app/layout.tsx",
+          "sha256": "724bf5ccd16ac82ec0981fc0a419da1defa775f94d0e5c42fde66b70cbfe4a66"
+        },
+        {
+          "path": "app/page.tsx",
+          "sha256": "5b8ec5b101a763c624301bfac05562264c877bf9f790c6056d98f8aa6bedb346"
+        },
+        {
+          "path": "components/nexo/app.tsx",
+          "sha256": "97389814c4eb7e4110d531035151ec295873e9995576ecbff8aedaa5831637aa"
+        },
+        {
+          "path": "components/nexo/context.tsx",
+          "sha256": "8d56618f5f2fa11f8d721a8beefc7ac7b9d83f41171321a2da2ec3faed3857cc"
+        },
+        {
+          "path": "components/nexo/link.tsx",
+          "sha256": "b9a88d0eeeec88dd65c781e1fce9160ee60d1b7fc25df35a53640f8113c954b8"
+        },
+        {
+          "path": "components/nexo/nav.ts",
+          "sha256": "0b37095a0a441417017314e670600a7d8f0882844434634bf3e7309498cc3e69"
+        },
+        {
+          "path": "components/nexo/pages/contracts.tsx",
+          "sha256": "f63ac73bb0f9d60aabb51d927b3bdc13895e1673c462da88ad3b709150333f4c"
+        },
+        {
+          "path": "components/nexo/pages/generic.tsx",
+          "sha256": "c06c19d229af730dc4c2af0f31552e7f910c311cbf319a8ab0508a4ff56cc3b4"
+        },
+        {
+          "path": "components/nexo/pages/home.tsx",
+          "sha256": "281f1aa89d0d05f7abdc0c25b25e04ccf9e1e4554697487dab93b9d44001748f"
+        },
+        {
+          "path": "components/nexo/pages/invoices.tsx",
+          "sha256": "eca2d0727389835375d9e26111733dad9b6c7f83cc02a6015352e75e38708827"
+        },
+        {
+          "path": "components/nexo/pages/login.tsx",
+          "sha256": "00183409aaf2e294e9ce1a0e4839c56771de21d68fcce091214e3821732df124"
+        },
+        {
+          "path": "components/nexo/pages/noc.tsx",
+          "sha256": "e3f13dfa54a7ebcafe8802c5a6b4679654b3aec493d139a57f8942e7176b112c"
+        },
+        {
+          "path": "components/nexo/pages/portal.tsx",
+          "sha256": "a6be4d82fcecc5ea0bf4676970b9e2cb341227c642af26c23488b9d4f1a2f85b"
+        },
+        {
+          "path": "components/nexo/pages/subscribers.tsx",
+          "sha256": "f3c2a433faa72c5d6d9c7ef63b2cf747d1872b1e20a51757cf15a2ad0b66830c"
+        },
+        {
+          "path": "components/nexo/ui.tsx",
+          "sha256": "e1000c6ff7716db7172c525798ffba71605855ad838eb63026f3359ea0102ed3"
+        },
+        {
+          "path": "lib/format.ts",
+          "sha256": "6a427fff182fe7964842ec343991441bdabcb4b78d315ef461fe36c213aeb0c5"
+        },
+        {
+          "path": "lib/mock.ts",
+          "sha256": "02170a7e7d96ee53a1f2e2b7388abbe79cf8b566a715ca5ed96d3f3db11b6617"
+        },
+        {
+          "path": "lib/permissions.ts",
+          "sha256": "5e300abce4b27c0c11e964a180429998cf883842290016256837c346b95b482a"
+        },
+        {
+          "path": "lib/types.ts",
+          "sha256": "959fccfd1840d79fd7f56fc8b215bd15bf2d557dfff98b3f60c746e96e29e264"
+        },
+        {
+          "path": "lib/utils.ts",
+          "sha256": "e46429536f43f5910f5b2b0c50bb2769b510a4558bb4b5d20a3b0a9091dbf7c3"
+        }
+      ]
+    },
+    {
+      "id": "8026",
+      "name": "nexoisp8026",
+      "fileCount": 33,
+      "treeSha256": "c7690fb626c8b989186a8a3260a985826ca80b6a6b9bbff1863f56b89d29eeaf",
+      "evidence": [
+        {
+          "path": "app/globals.css",
+          "sha256": "563092e1330a9ce999e5b493911cb2a034c2d69d47ed2d17c8775c8584f21f32"
+        },
+        {
+          "path": "app/layout.tsx",
+          "sha256": "35b4c41d6caae84c22b8efd066104b072c84470bdaa68ae6867960109ee8427e"
+        },
+        {
+          "path": "app/page.tsx",
+          "sha256": "2186b7d62a76e1a19a9a25692395eb1cdbc2951ef5fc93493cf5cd6dee4e4483"
+        },
+        {
+          "path": "components/nexo-app.tsx",
+          "sha256": "eabffcc2f9afaf29df817903b475174b7d2c1b85e534df2c388989d4766f638c"
+        },
+        {
+          "path": "components/operations.tsx",
+          "sha256": "63fac486b8173a28fef1c6557dd1308eab5510e3aac076196a6c830dec7db2ae"
+        },
+        {
+          "path": "components/overview.tsx",
+          "sha256": "f13513f3ac200cfe9307d9d9622124888f210e137e989a6385c672e9b90008ce"
+        },
+        {
+          "path": "components/subscribers.tsx",
+          "sha256": "09612851761f4761bf49f85fe9d91e9417aa221cb6890dd811b18e1c75a23c9a"
+        },
+        {
+          "path": "lib/demo-data.ts",
+          "sha256": "e6842a7d8110eee3cb8a631a3707ed421040a3e86cff2daeed850866360a9ba1"
+        },
+        {
+          "path": "lib/utils.ts",
+          "sha256": "e46429536f43f5910f5b2b0c50bb2769b510a4558bb4b5d20a3b0a9091dbf7c3"
+        }
+      ]
+    }
+  ]
+}

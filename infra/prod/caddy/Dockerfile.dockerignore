@@ -10,3 +10,5 @@
 !infra/prod/caddy/**
 **/node_modules/
 apps/web/dist/
+
+**/*.tsbuildinfo

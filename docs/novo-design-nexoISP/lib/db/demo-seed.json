@@ -1,0 +1,1757 @@
+{
+  "format": 1,
+  "scope": "public-demo",
+  "records": [
+    {
+      "id": "activity-1",
+      "kind": "activity",
+      "payload": {
+        "time": "09:38",
+        "type": "payment",
+        "title": "Pagamento conciliado",
+        "description": "Mariana Oliveira · R$ 149,90 via Pix",
+        "subscriberId": "sub-1"
+      },
+      "createdAt": "2026-10-17T16:33:40.864Z"
+    },
+    {
+      "id": "activity-2",
+      "kind": "activity",
+      "payload": {
+        "time": "09:30",
+        "type": "order",
+        "title": "Instalação concluída",
+        "description": "OS #2841 · Lucas Ferreira",
+        "subscriberId": "sub-3"
+      },
+      "createdAt": "2026-10-17T16:33:40.864Z"
+    },
+    {
+      "id": "activity-3",
+      "kind": "activity",
+      "payload": {
+        "time": "09:24",
+        "type": "network",
+        "title": "Sinal óptico em atenção",
+        "description": "POP Norte · 12 ONUs afetadas"
+      },
+      "createdAt": "2026-10-17T16:33:40.864Z"
+    },
+    {
+      "id": "activity-4",
+      "kind": "activity",
+      "payload": {
+        "time": "09:18",
+        "type": "ticket",
+        "title": "Atendimento resolvido",
+        "description": "#1047 · Ana Beatriz Santos",
+        "subscriberId": "sub-2"
+      },
+      "createdAt": "2026-10-17T16:33:40.864Z"
+    },
+    {
+      "id": "activity-5",
+      "kind": "activity",
+      "payload": {
+        "time": "09:12",
+        "type": "subscriber",
+        "title": "Novo contrato ativado",
+        "description": "Carlos Eduardo · Fibra 600 Mega",
+        "subscriberId": "sub-4"
+      },
+      "createdAt": "2026-10-17T16:33:40.864Z"
+    },
+    {
+      "id": "inv-1",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-1",
+        "due": "2026-10-20",
+        "code": "FAT-8401",
+        "name": "Mariana Oliveira",
+        "amount": 149.9,
+        "method": "Pix",
+        "status": "Paga",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-1"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-10",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-10",
+        "due": "2026-10-20",
+        "code": "FAT-8410",
+        "name": "Gustavo Pereira",
+        "amount": 149.9,
+        "method": "Pix",
+        "status": "Paga",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-10"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-11",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-11",
+        "due": "2026-10-10",
+        "code": "FAT-8411",
+        "name": "Fernanda Rocha",
+        "amount": 119.9,
+        "method": "Pix",
+        "status": "Vencida",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-11"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-12",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-12",
+        "due": "2026-10-20",
+        "code": "FAT-8412",
+        "name": "Ricardo Fernandes",
+        "amount": 179.9,
+        "method": "Boleto",
+        "status": "Em conciliação",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-12"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-13",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-13",
+        "due": "2026-10-20",
+        "code": "FAT-8413",
+        "name": "Letícia Carvalho",
+        "amount": 149.9,
+        "method": "Pix",
+        "status": "Em aberto",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-13"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-14",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-14",
+        "due": "2026-10-20",
+        "code": "FAT-8414",
+        "name": "Bruno Mendes",
+        "amount": 119.9,
+        "method": "Pix",
+        "status": "Paga",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-14"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-15",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-15",
+        "due": "2026-10-20",
+        "code": "FAT-8415",
+        "name": "Amanda Ribeiro",
+        "amount": 179.9,
+        "method": "Boleto",
+        "status": "Paga",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-15"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-16",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-16",
+        "due": "2026-10-20",
+        "code": "FAT-8416",
+        "name": "Felipe Barbosa",
+        "amount": 149.9,
+        "method": "Pix",
+        "status": "Em aberto",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-16"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-17",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-17",
+        "due": "2026-10-10",
+        "code": "FAT-8417",
+        "name": "Larissa Gomes",
+        "amount": 119.9,
+        "method": "Pix",
+        "status": "Vencida",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-17"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-18",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-18",
+        "due": "2026-10-17",
+        "code": "FAT-8418",
+        "name": "André Nascimento",
+        "amount": 179.9,
+        "method": "Boleto",
+        "status": "Em aberto",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-18"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-19",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-19",
+        "due": "2026-10-20",
+        "code": "FAT-8419",
+        "name": "Isabela Dias",
+        "amount": 149.9,
+        "method": "Pix",
+        "status": "Paga",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-19"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-2",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-2",
+        "due": "2026-10-10",
+        "code": "FAT-8402",
+        "name": "Ana Beatriz Santos",
+        "amount": 119.9,
+        "method": "Pix",
+        "status": "Vencida",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-2"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-20",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-20",
+        "due": "2026-10-20",
+        "code": "FAT-8420",
+        "name": "Thiago Moreira",
+        "amount": 119.9,
+        "method": "Pix",
+        "status": "Paga",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-20"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-21",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-21",
+        "due": "2026-10-20",
+        "code": "FAT-8421",
+        "name": "Patrícia Azevedo",
+        "amount": 179.9,
+        "method": "Boleto",
+        "status": "Paga",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-21"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-22",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-22",
+        "due": "2026-10-20",
+        "code": "FAT-8422",
+        "name": "Diego Cardoso",
+        "amount": 149.9,
+        "method": "Pix",
+        "status": "Paga",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-22"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-23",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-23",
+        "due": "2026-10-20",
+        "code": "FAT-8423",
+        "name": "Natália Teixeira",
+        "amount": 119.9,
+        "method": "Pix",
+        "status": "Paga",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-23"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-24",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-24",
+        "due": "2026-10-20",
+        "code": "FAT-8424",
+        "name": "Vinícius Lopes",
+        "amount": 179.9,
+        "method": "Boleto",
+        "status": "Paga",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-24"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-3",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-3",
+        "due": "2026-10-20",
+        "code": "FAT-8403",
+        "name": "Lucas Ferreira",
+        "amount": 179.9,
+        "method": "Boleto",
+        "status": "Paga",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-3"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-4",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-4",
+        "due": "2026-10-17",
+        "code": "FAT-8404",
+        "name": "Carlos Eduardo Lima",
+        "amount": 149.9,
+        "method": "Pix",
+        "status": "Em conciliação",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-4"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-5",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-5",
+        "due": "2026-10-10",
+        "code": "FAT-8405",
+        "name": "Juliana Almeida",
+        "amount": 119.9,
+        "method": "Pix",
+        "status": "Vencida",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-5"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-6",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-6",
+        "due": "2026-10-20",
+        "code": "FAT-8406",
+        "name": "Pedro Henrique Costa",
+        "amount": 179.9,
+        "method": "Boleto",
+        "status": "Paga",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-6"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-7",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-7",
+        "due": "2026-10-10",
+        "code": "FAT-8407",
+        "name": "Camila Rodrigues",
+        "amount": 149.9,
+        "method": "Pix",
+        "status": "Vencida",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-7"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-8",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-8",
+        "due": "2026-10-20",
+        "code": "FAT-8408",
+        "name": "Rafael Martins",
+        "amount": 119.9,
+        "method": "Pix",
+        "status": "Em aberto",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-8"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "inv-9",
+      "kind": "invoice",
+      "payload": {
+        "id": "inv-9",
+        "due": "2026-10-17",
+        "code": "FAT-8409",
+        "name": "Beatriz Souza",
+        "amount": 179.9,
+        "method": "Boleto",
+        "status": "Em aberto",
+        "reference": "Outubro / 2026",
+        "subscriberId": "sub-9"
+      },
+      "createdAt": "2026-10-17T16:34:26.734Z"
+    },
+    {
+      "id": "node-1",
+      "kind": "node",
+      "payload": {
+        "id": "node-1",
+        "ip": "10.0.1.1",
+        "cpu": 26,
+        "pop": "POP Centro",
+        "name": "BRAS-CENTRO-01",
+        "type": "Concentrador",
+        "status": "Operacional",
+        "vendor": "MikroTik",
+        "latency": 1.5,
+        "traffic": 2.8,
+        "capacity": 5400,
+        "lastRead": "2026-10-17T09:42:00-03:00",
+        "sessions": 5238
+      },
+      "createdAt": "2026-10-17T16:35:28.758Z"
+    },
+    {
+      "id": "node-2",
+      "kind": "node",
+      "payload": {
+        "id": "node-2",
+        "ip": "10.0.2.1",
+        "cpu": 29,
+        "pop": "POP Norte",
+        "name": "BRAS-NORTE-01",
+        "type": "Concentrador",
+        "status": "Operacional",
+        "vendor": "MikroTik",
+        "latency": 1.8,
+        "traffic": 3.2,
+        "capacity": 2734,
+        "lastRead": "2026-10-17T09:42:00-03:00",
+        "sessions": 2654
+      },
+      "createdAt": "2026-10-17T16:35:28.758Z"
+    },
+    {
+      "id": "node-3",
+      "kind": "node",
+      "payload": {
+        "id": "node-3",
+        "ip": "10.0.3.1",
+        "cpu": 32,
+        "pop": "POP Centro",
+        "name": "OLT-CENTRO-01",
+        "type": "OLT",
+        "status": "Operacional",
+        "vendor": "Huawei",
+        "latency": 2.1,
+        "traffic": 3.6,
+        "capacity": 1024,
+        "lastRead": "2026-10-17T09:42:00-03:00",
+        "sessions": 0
+      },
+      "createdAt": "2026-10-17T16:35:28.758Z"
+    },
+    {
+      "id": "node-4",
+      "kind": "node",
+      "payload": {
+        "id": "node-4",
+        "ip": "10.0.4.1",
+        "cpu": 78,
+        "pop": "POP Norte",
+        "name": "OLT-NORTE-01",
+        "type": "OLT",
+        "status": "Atenção",
+        "vendor": "Huawei",
+        "latency": 8.7,
+        "traffic": 6.8,
+        "capacity": 1024,
+        "lastRead": "2026-10-17T09:42:00-03:00",
+        "sessions": 0
+      },
+      "createdAt": "2026-10-17T16:35:28.758Z"
+    },
+    {
+      "id": "node-5",
+      "kind": "node",
+      "payload": {
+        "id": "node-5",
+        "ip": "10.0.5.1",
+        "cpu": 38,
+        "pop": "POP Sul",
+        "name": "OLT-SUL-01",
+        "type": "OLT",
+        "status": "Operacional",
+        "vendor": "Huawei",
+        "latency": 2.7,
+        "traffic": 4.4,
+        "capacity": 1024,
+        "lastRead": "2026-10-17T09:42:00-03:00",
+        "sessions": 0
+      },
+      "createdAt": "2026-10-17T16:35:28.758Z"
+    },
+    {
+      "id": "node-6",
+      "kind": "node",
+      "payload": {
+        "id": "node-6",
+        "ip": "10.0.6.1",
+        "cpu": 0,
+        "pop": "POP Leste",
+        "name": "OLT-LESTE-01",
+        "type": "OLT",
+        "status": "Offline",
+        "vendor": "Huawei",
+        "latency": 0,
+        "traffic": 0,
+        "capacity": 1024,
+        "lastRead": "2026-10-17T09:42:00-03:00",
+        "sessions": 0
+      },
+      "createdAt": "2026-10-17T16:35:28.758Z"
+    },
+    {
+      "id": "node-7",
+      "kind": "node",
+      "payload": {
+        "id": "node-7",
+        "ip": "10.0.7.1",
+        "cpu": 44,
+        "pop": "POP Centro",
+        "name": "SW-CORE-01",
+        "type": "Switch",
+        "status": "Operacional",
+        "vendor": "Juniper",
+        "latency": 3.3,
+        "traffic": 5.2,
+        "capacity": 1024,
+        "lastRead": "2026-10-17T09:42:00-03:00",
+        "sessions": 0
+      },
+      "createdAt": "2026-10-17T16:35:28.758Z"
+    },
+    {
+      "id": "node-8",
+      "kind": "node",
+      "payload": {
+        "id": "node-8",
+        "ip": "10.0.8.1",
+        "cpu": 47,
+        "pop": "POP Centro",
+        "name": "EDGE-BGP-01",
+        "type": "Roteador de borda",
+        "status": "Operacional",
+        "vendor": "Juniper",
+        "latency": 3.6,
+        "traffic": 5.6,
+        "capacity": 1024,
+        "lastRead": "2026-10-17T09:42:00-03:00",
+        "sessions": 0
+      },
+      "createdAt": "2026-10-17T16:35:28.758Z"
+    },
+    {
+      "id": "order-1",
+      "kind": "order",
+      "payload": {
+        "id": "order-1",
+        "code": 2842,
+        "name": "Mariana Oliveira",
+        "time": "08:00",
+        "type": "Instalação",
+        "notes": "Confirmar disponibilidade do assinante antes do deslocamento.",
+        "status": "Concluída",
+        "duration": 90,
+        "technician": "Rafael Costa",
+        "neighborhood": "Centro",
+        "subscriberId": "sub-1"
+      },
+      "createdAt": "2026-10-17T16:34:26.597Z"
+    },
+    {
+      "id": "order-2",
+      "kind": "order",
+      "payload": {
+        "id": "order-2",
+        "code": 2843,
+        "name": "Ana Beatriz Santos",
+        "time": "08:30",
+        "type": "Reparo de fibra",
+        "notes": "Verificar sinal óptico. Possível correlação com o incidente no POP Norte.",
+        "status": "Em execução",
+        "duration": 90,
+        "technician": "Diego Alves",
+        "neighborhood": "Jardim América",
+        "subscriberId": "sub-2"
+      },
+      "createdAt": "2026-10-17T16:34:26.597Z"
+    },
+    {
+      "id": "order-3",
+      "kind": "order",
+      "payload": {
+        "id": "order-3",
+        "code": 2844,
+        "name": "Lucas Ferreira",
+        "time": "09:00",
+        "type": "Instalação",
+        "notes": "Confirmar disponibilidade do assinante antes do deslocamento.",
+        "status": "Concluída",
+        "duration": 90,
+        "technician": "Rafael Costa",
+        "neighborhood": "Centro",
+        "subscriberId": "sub-3"
+      },
+      "createdAt": "2026-10-17T16:34:26.597Z"
+    },
+    {
+      "id": "order-4",
+      "kind": "order",
+      "payload": {
+        "id": "order-4",
+        "code": 2845,
+        "name": "Carlos Eduardo Lima",
+        "time": "10:30",
+        "type": "Mudança de endereço",
+        "notes": "Confirmar disponibilidade do assinante antes do deslocamento.",
+        "status": "Atrasada",
+        "duration": 90,
+        "technician": "Diego Alves",
+        "neighborhood": "Centro",
+        "subscriberId": "sub-4"
+      },
+      "createdAt": "2026-10-17T16:34:26.597Z"
+    },
+    {
+      "id": "order-5",
+      "kind": "order",
+      "payload": {
+        "id": "order-5",
+        "code": 2846,
+        "name": "Juliana Almeida",
+        "time": "11:00",
+        "type": "Visita técnica",
+        "notes": "Confirmar disponibilidade do assinante antes do deslocamento.",
+        "status": "Atrasada",
+        "duration": 90,
+        "technician": "Pedro Santos",
+        "neighborhood": "Centro",
+        "subscriberId": "sub-5"
+      },
+      "createdAt": "2026-10-17T16:34:26.597Z"
+    },
+    {
+      "id": "order-6",
+      "kind": "order",
+      "payload": {
+        "id": "order-6",
+        "code": 2847,
+        "name": "Pedro Henrique Costa",
+        "time": "13:00",
+        "type": "Visita técnica",
+        "notes": "Confirmar disponibilidade do assinante antes do deslocamento.",
+        "status": "Agendada",
+        "duration": 90,
+        "technician": "Pedro Santos",
+        "neighborhood": "Centro",
+        "subscriberId": "sub-6"
+      },
+      "createdAt": "2026-10-17T16:34:26.597Z"
+    },
+    {
+      "id": "order-7",
+      "kind": "order",
+      "payload": {
+        "id": "order-7",
+        "code": 2848,
+        "name": "Camila Rodrigues",
+        "time": "14:00",
+        "type": "Reparo de fibra",
+        "notes": "Verificar sinal óptico. Possível correlação com o incidente no POP Norte.",
+        "status": "Agendada",
+        "duration": 90,
+        "technician": "Rafael Costa",
+        "neighborhood": "Jardim América",
+        "subscriberId": "sub-7"
+      },
+      "createdAt": "2026-10-17T16:34:26.597Z"
+    },
+    {
+      "id": "order-8",
+      "kind": "order",
+      "payload": {
+        "id": "order-8",
+        "code": 2849,
+        "name": "Rafael Martins",
+        "time": "15:30",
+        "type": "Instalação",
+        "notes": "Confirmar disponibilidade do assinante antes do deslocamento.",
+        "status": "Agendada",
+        "duration": 90,
+        "technician": "Diego Alves",
+        "neighborhood": "Centro",
+        "subscriberId": "sub-8"
+      },
+      "createdAt": "2026-10-17T16:34:26.597Z"
+    },
+    {
+      "id": "snapshot",
+      "kind": "snapshot",
+      "payload": {
+        "mrr": 284950,
+        "asOf": "2026-10-17T09:42:00-03:00",
+        "active": 8247,
+        "billed": 284950,
+        "online": 7892,
+        "series": [
+          {
+            "day": "01 out",
+            "current": 12,
+            "previous": 10
+          },
+          {
+            "day": "02 out",
+            "current": 22,
+            "previous": 16
+          },
+          {
+            "day": "03 out",
+            "current": 25,
+            "previous": 24
+          },
+          {
+            "day": "04 out",
+            "current": 42,
+            "previous": 35
+          },
+          {
+            "day": "05 out",
+            "current": 55,
+            "previous": 43
+          },
+          {
+            "day": "06 out",
+            "current": 61,
+            "previous": 51
+          },
+          {
+            "day": "07 out",
+            "current": 84,
+            "previous": 61
+          },
+          {
+            "day": "08 out",
+            "current": 96,
+            "previous": 74
+          },
+          {
+            "day": "09 out",
+            "current": 110,
+            "previous": 89
+          },
+          {
+            "day": "10 out",
+            "current": 118,
+            "previous": 95
+          },
+          {
+            "day": "11 out",
+            "current": 143,
+            "previous": 110
+          },
+          {
+            "day": "12 out",
+            "current": 151,
+            "previous": 128
+          },
+          {
+            "day": "13 out",
+            "current": 159,
+            "previous": 141
+          },
+          {
+            "day": "14 out",
+            "current": 181,
+            "previous": 152
+          },
+          {
+            "day": "15 out",
+            "current": 189,
+            "previous": 168
+          },
+          {
+            "day": "16 out",
+            "current": 207,
+            "previous": 179
+          },
+          {
+            "day": "17 out",
+            "current": 218.42,
+            "previous": 193.63
+          }
+        ],
+        "latency": 3.2,
+        "overdue": 17800,
+        "waiting": 8,
+        "accounts": 8134,
+        "provider": "Conecta Fibra",
+        "received": 218420,
+        "ordersLate": 2,
+        "delinquency": 6.2,
+        "ordersToday": 8,
+        "ticketsOpen": 24,
+        "availability": 99.98,
+        "onusDegraded": 12,
+        "openInvoices": 408,
+        "equipmentTotal": 48,
+        "newSubscribers": 378,
+        "reconciliation": 3,
+        "equipmentOnline": 47
+      },
+      "createdAt": "2026-10-17T16:33:40.864Z"
+    },
+    {
+      "id": "sub-1",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-1",
+        "nas": "BRAS-CENTRO-01",
+        "onu": "HWTC00000291",
+        "pop": "POP Centro",
+        "code": "01001",
+        "name": "Mariana Oliveira",
+        "plan": "Fibra 600 Mega",
+        "email": "assinante1@example.com",
+        "phone": "(11) 90000-0001",
+        "price": 149.9,
+        "since": "2024-03-12",
+        "speed": 600,
+        "dueDay": 10,
+        "signal": -20.2,
+        "status": "Ativo",
+        "address": "Rua das Acácias, 17 · São Paulo, SP",
+        "contract": "CT-4201",
+        "document": "***.***.***-01",
+        "connection": "Online",
+        "neighborhood": "Centro"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-10",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-10",
+        "nas": "BRAS-CENTRO-01",
+        "onu": "HWTC000019AA",
+        "pop": "POP Centro",
+        "code": "01010",
+        "name": "Gustavo Pereira",
+        "plan": "Fibra 600 Mega",
+        "email": "assinante10@example.com",
+        "phone": "(11) 90000-0010",
+        "price": 149.9,
+        "since": "2024-03-12",
+        "speed": 600,
+        "dueDay": 10,
+        "signal": -19.2,
+        "status": "Ativo",
+        "address": "Rua das Acácias, 170 · São Paulo, SP",
+        "contract": "CT-4210",
+        "document": "***.***.***-10",
+        "connection": "Online",
+        "neighborhood": "Santa Luzia"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-11",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-11",
+        "nas": "BRAS-CENTRO-01",
+        "onu": "HWTC00001C3B",
+        "pop": "POP Centro",
+        "code": "01011",
+        "name": "Fernanda Rocha",
+        "plan": "Fibra 400 Mega",
+        "email": "assinante11@example.com",
+        "phone": "(11) 90000-0011",
+        "price": 119.9,
+        "since": "2024-03-12",
+        "speed": 400,
+        "dueDay": 10,
+        "signal": -20.2,
+        "status": "Suspenso",
+        "address": "Rua das Acácias, 187 · São Paulo, SP",
+        "contract": "CT-4211",
+        "document": "***.***.***-11",
+        "connection": "Bloqueado",
+        "neighborhood": "Parque das Flores"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-12",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-12",
+        "nas": "BRAS-CENTRO-01",
+        "onu": "HWTC00001ECC",
+        "pop": "POP Centro",
+        "code": "01012",
+        "name": "Ricardo Fernandes",
+        "plan": "Fibra 800 Mega",
+        "email": "assinante12@example.com",
+        "phone": "(11) 90000-0012",
+        "price": 179.9,
+        "since": "2024-03-12",
+        "speed": 800,
+        "dueDay": 10,
+        "signal": -21.2,
+        "status": "Ativo",
+        "address": "Rua das Acácias, 204 · São Paulo, SP",
+        "contract": "CT-4212",
+        "document": "***.***.***-12",
+        "connection": "Online",
+        "neighborhood": "Jardim São Paulo"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-13",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-13",
+        "nas": "BRAS-NORTE-01",
+        "onu": "HWTC0000215D",
+        "pop": "POP Norte",
+        "code": "01013",
+        "name": "Letícia Carvalho",
+        "plan": "Fibra 600 Mega",
+        "email": "assinante13@example.com",
+        "phone": "(11) 90000-0013",
+        "price": 149.9,
+        "since": "2024-03-12",
+        "speed": 600,
+        "dueDay": 10,
+        "signal": -28.4,
+        "status": "Ativo",
+        "address": "Rua das Acácias, 221 · São Paulo, SP",
+        "contract": "CT-4213",
+        "document": "***.***.***-13",
+        "connection": "Offline",
+        "neighborhood": "Centro"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-14",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-14",
+        "nas": "BRAS-CENTRO-01",
+        "onu": "HWTC000023EE",
+        "pop": "POP Centro",
+        "code": "01014",
+        "name": "Bruno Mendes",
+        "plan": "Fibra 400 Mega",
+        "email": "assinante14@example.com",
+        "phone": "(11) 90000-0014",
+        "price": 119.9,
+        "since": "2024-03-12",
+        "speed": 400,
+        "dueDay": 10,
+        "signal": -23.2,
+        "status": "Ativo",
+        "address": "Rua das Acácias, 238 · São Paulo, SP",
+        "contract": "CT-4214",
+        "document": "***.***.***-14",
+        "connection": "Online",
+        "neighborhood": "Jardim América"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-15",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-15",
+        "nas": "BRAS-CENTRO-01",
+        "onu": "HWTC0000267F",
+        "pop": "POP Centro",
+        "code": "01015",
+        "name": "Amanda Ribeiro",
+        "plan": "Fibra 800 Mega",
+        "email": "assinante15@example.com",
+        "phone": "(11) 90000-0015",
+        "price": 179.9,
+        "since": "2024-03-12",
+        "speed": 800,
+        "dueDay": 10,
+        "signal": -19.2,
+        "status": "Ativo",
+        "address": "Rua das Acácias, 255 · São Paulo, SP",
+        "contract": "CT-4215",
+        "document": "***.***.***-15",
+        "connection": "Online",
+        "neighborhood": "Vila Nova"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-16",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-16",
+        "nas": "BRAS-CENTRO-01",
+        "onu": "HWTC00002910",
+        "pop": "POP Centro",
+        "code": "01016",
+        "name": "Felipe Barbosa",
+        "plan": "Fibra 600 Mega",
+        "email": "assinante16@example.com",
+        "phone": "(11) 90000-0016",
+        "price": 149.9,
+        "since": "2024-03-12",
+        "speed": 600,
+        "dueDay": 10,
+        "signal": -20.2,
+        "status": "Em instalação",
+        "address": "Rua das Acácias, 272 · São Paulo, SP",
+        "contract": "CT-4216",
+        "document": "***.***.***-16",
+        "connection": "Não provisionado",
+        "neighborhood": "Santa Luzia"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-17",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-17",
+        "nas": "BRAS-CENTRO-01",
+        "onu": "HWTC00002BA1",
+        "pop": "POP Centro",
+        "code": "01017",
+        "name": "Larissa Gomes",
+        "plan": "Fibra 400 Mega",
+        "email": "assinante17@example.com",
+        "phone": "(11) 90000-0017",
+        "price": 119.9,
+        "since": "2024-03-12",
+        "speed": 400,
+        "dueDay": 10,
+        "signal": -21.2,
+        "status": "Suspenso",
+        "address": "Rua das Acácias, 289 · São Paulo, SP",
+        "contract": "CT-4217",
+        "document": "***.***.***-17",
+        "connection": "Bloqueado",
+        "neighborhood": "Parque das Flores"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-18",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-18",
+        "nas": "BRAS-CENTRO-01",
+        "onu": "HWTC00002E32",
+        "pop": "POP Centro",
+        "code": "01018",
+        "name": "André Nascimento",
+        "plan": "Fibra 800 Mega",
+        "email": "assinante18@example.com",
+        "phone": "(11) 90000-0018",
+        "price": 179.9,
+        "since": "2024-03-12",
+        "speed": 800,
+        "dueDay": 10,
+        "signal": -22.2,
+        "status": "Ativo",
+        "address": "Rua das Acácias, 306 · São Paulo, SP",
+        "contract": "CT-4218",
+        "document": "***.***.***-18",
+        "connection": "Online",
+        "neighborhood": "Jardim São Paulo"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-19",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-19",
+        "nas": "BRAS-CENTRO-01",
+        "onu": "HWTC000030C3",
+        "pop": "POP Centro",
+        "code": "01019",
+        "name": "Isabela Dias",
+        "plan": "Fibra 600 Mega",
+        "email": "assinante19@example.com",
+        "phone": "(11) 90000-0019",
+        "price": 149.9,
+        "since": "2024-03-12",
+        "speed": 600,
+        "dueDay": 10,
+        "signal": -23.2,
+        "status": "Ativo",
+        "address": "Rua das Acácias, 323 · São Paulo, SP",
+        "contract": "CT-4219",
+        "document": "***.***.***-19",
+        "connection": "Online",
+        "neighborhood": "Centro"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-2",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-2",
+        "nas": "BRAS-NORTE-01",
+        "onu": "HWTC00000522",
+        "pop": "POP Norte",
+        "code": "01002",
+        "name": "Ana Beatriz Santos",
+        "plan": "Fibra 400 Mega",
+        "email": "assinante2@example.com",
+        "phone": "(11) 90000-0002",
+        "price": 119.9,
+        "since": "2024-03-12",
+        "speed": 400,
+        "dueDay": 10,
+        "signal": -28.4,
+        "status": "Ativo",
+        "address": "Rua das Acácias, 34 · São Paulo, SP",
+        "contract": "CT-4202",
+        "document": "***.***.***-02",
+        "connection": "Offline",
+        "neighborhood": "Jardim América"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-20",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-20",
+        "nas": "BRAS-CENTRO-01",
+        "onu": "HWTC00003354",
+        "pop": "POP Centro",
+        "code": "01020",
+        "name": "Thiago Moreira",
+        "plan": "Fibra 400 Mega",
+        "email": "assinante20@example.com",
+        "phone": "(11) 90000-0020",
+        "price": 119.9,
+        "since": "2024-03-12",
+        "speed": 400,
+        "dueDay": 10,
+        "signal": -19.2,
+        "status": "Ativo",
+        "address": "Rua das Acácias, 340 · São Paulo, SP",
+        "contract": "CT-4220",
+        "document": "***.***.***-20",
+        "connection": "Online",
+        "neighborhood": "Jardim América"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-21",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-21",
+        "nas": "BRAS-CENTRO-01",
+        "onu": "HWTC000035E5",
+        "pop": "POP Centro",
+        "code": "01021",
+        "name": "Patrícia Azevedo",
+        "plan": "Fibra 800 Mega",
+        "email": "assinante21@example.com",
+        "phone": "(11) 90000-0021",
+        "price": 179.9,
+        "since": "2024-03-12",
+        "speed": 800,
+        "dueDay": 10,
+        "signal": -20.2,
+        "status": "Ativo",
+        "address": "Rua das Acácias, 357 · São Paulo, SP",
+        "contract": "CT-4221",
+        "document": "***.***.***-21",
+        "connection": "Online",
+        "neighborhood": "Vila Nova"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-22",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-22",
+        "nas": "BRAS-CENTRO-01",
+        "onu": "HWTC00003876",
+        "pop": "POP Centro",
+        "code": "01022",
+        "name": "Diego Cardoso",
+        "plan": "Fibra 600 Mega",
+        "email": "assinante22@example.com",
+        "phone": "(11) 90000-0022",
+        "price": 149.9,
+        "since": "2024-03-12",
+        "speed": 600,
+        "dueDay": 10,
+        "signal": -21.2,
+        "status": "Ativo",
+        "address": "Rua das Acácias, 374 · São Paulo, SP",
+        "contract": "CT-4222",
+        "document": "***.***.***-22",
+        "connection": "Online",
+        "neighborhood": "Santa Luzia"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-23",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-23",
+        "nas": "BRAS-CENTRO-01",
+        "onu": "HWTC00003B07",
+        "pop": "POP Centro",
+        "code": "01023",
+        "name": "Natália Teixeira",
+        "plan": "Fibra 400 Mega",
+        "email": "assinante23@example.com",
+        "phone": "(11) 90000-0023",
+        "price": 119.9,
+        "since": "2024-03-12",
+        "speed": 400,
+        "dueDay": 10,
+        "signal": -22.2,
+        "status": "Ativo",
+        "address": "Rua das Acácias, 391 · São Paulo, SP",
+        "contract": "CT-4223",
+        "document": "***.***.***-23",
+        "connection": "Online",
+        "neighborhood": "Parque das Flores"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-24",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-24",
+        "nas": "BRAS-CENTRO-01",
+        "onu": "HWTC00003D98",
+        "pop": "POP Centro",
+        "code": "01024",
+        "name": "Vinícius Lopes",
+        "plan": "Fibra 800 Mega",
+        "email": "assinante24@example.com",
+        "phone": "(11) 90000-0024",
+        "price": 179.9,
+        "since": "2024-03-12",
+        "speed": 800,
+        "dueDay": 10,
+        "signal": -23.2,
+        "status": "Ativo",
+        "address": "Rua das Acácias, 408 · São Paulo, SP",
+        "contract": "CT-4224",
+        "document": "***.***.***-24",
+        "connection": "Online",
+        "neighborhood": "Jardim São Paulo"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-3",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-3",
+        "nas": "BRAS-CENTRO-01",
+        "onu": "HWTC000007B3",
+        "pop": "POP Centro",
+        "code": "01003",
+        "name": "Lucas Ferreira",
+        "plan": "Fibra 800 Mega",
+        "email": "assinante3@example.com",
+        "phone": "(11) 90000-0003",
+        "price": 179.9,
+        "since": "2024-03-12",
+        "speed": 800,
+        "dueDay": 10,
+        "signal": -22.2,
+        "status": "Ativo",
+        "address": "Rua das Acácias, 51 · São Paulo, SP",
+        "contract": "CT-4203",
+        "document": "***.***.***-03",
+        "connection": "Online",
+        "neighborhood": "Vila Nova"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-4",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-4",
+        "nas": "BRAS-CENTRO-01",
+        "onu": "HWTC00000A44",
+        "pop": "POP Centro",
+        "code": "01004",
+        "name": "Carlos Eduardo Lima",
+        "plan": "Fibra 600 Mega",
+        "email": "assinante4@example.com",
+        "phone": "(11) 90000-0004",
+        "price": 149.9,
+        "since": "2024-03-12",
+        "speed": 600,
+        "dueDay": 10,
+        "signal": -23.2,
+        "status": "Ativo",
+        "address": "Rua das Acácias, 68 · São Paulo, SP",
+        "contract": "CT-4204",
+        "document": "***.***.***-04",
+        "connection": "Online",
+        "neighborhood": "Santa Luzia"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-5",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-5",
+        "nas": "BRAS-CENTRO-01",
+        "onu": "HWTC00000CD5",
+        "pop": "POP Centro",
+        "code": "01005",
+        "name": "Juliana Almeida",
+        "plan": "Fibra 400 Mega",
+        "email": "assinante5@example.com",
+        "phone": "(11) 90000-0005",
+        "price": 119.9,
+        "since": "2024-03-12",
+        "speed": 400,
+        "dueDay": 10,
+        "signal": -19.2,
+        "status": "Suspenso",
+        "address": "Rua das Acácias, 85 · São Paulo, SP",
+        "contract": "CT-4205",
+        "document": "***.***.***-05",
+        "connection": "Bloqueado",
+        "neighborhood": "Parque das Flores"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-6",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-6",
+        "nas": "BRAS-CENTRO-01",
+        "onu": "HWTC00000F66",
+        "pop": "POP Centro",
+        "code": "01006",
+        "name": "Pedro Henrique Costa",
+        "plan": "Fibra 800 Mega",
+        "email": "assinante6@example.com",
+        "phone": "(11) 90000-0006",
+        "price": 179.9,
+        "since": "2024-03-12",
+        "speed": 800,
+        "dueDay": 10,
+        "signal": -20.2,
+        "status": "Ativo",
+        "address": "Rua das Acácias, 102 · São Paulo, SP",
+        "contract": "CT-4206",
+        "document": "***.***.***-06",
+        "connection": "Online",
+        "neighborhood": "Jardim São Paulo"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-7",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-7",
+        "nas": "BRAS-NORTE-01",
+        "onu": "HWTC000011F7",
+        "pop": "POP Norte",
+        "code": "01007",
+        "name": "Camila Rodrigues",
+        "plan": "Fibra 600 Mega",
+        "email": "assinante7@example.com",
+        "phone": "(11) 90000-0007",
+        "price": 149.9,
+        "since": "2024-03-12",
+        "speed": 600,
+        "dueDay": 10,
+        "signal": -28.4,
+        "status": "Ativo",
+        "address": "Rua das Acácias, 119 · São Paulo, SP",
+        "contract": "CT-4207",
+        "document": "***.***.***-07",
+        "connection": "Offline",
+        "neighborhood": "Centro"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-8",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-8",
+        "nas": "BRAS-CENTRO-01",
+        "onu": "HWTC00001488",
+        "pop": "POP Centro",
+        "code": "01008",
+        "name": "Rafael Martins",
+        "plan": "Fibra 400 Mega",
+        "email": "assinante8@example.com",
+        "phone": "(11) 90000-0008",
+        "price": 119.9,
+        "since": "2024-03-12",
+        "speed": 400,
+        "dueDay": 10,
+        "signal": -22.2,
+        "status": "Em instalação",
+        "address": "Rua das Acácias, 136 · São Paulo, SP",
+        "contract": "CT-4208",
+        "document": "***.***.***-08",
+        "connection": "Não provisionado",
+        "neighborhood": "Jardim América"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "sub-9",
+      "kind": "subscriber",
+      "payload": {
+        "id": "sub-9",
+        "nas": "BRAS-CENTRO-01",
+        "onu": "HWTC00001719",
+        "pop": "POP Centro",
+        "code": "01009",
+        "name": "Beatriz Souza",
+        "plan": "Fibra 800 Mega",
+        "email": "assinante9@example.com",
+        "phone": "(11) 90000-0009",
+        "price": 179.9,
+        "since": "2024-03-12",
+        "speed": 800,
+        "dueDay": 10,
+        "signal": -23.2,
+        "status": "Ativo",
+        "address": "Rua das Acácias, 153 · São Paulo, SP",
+        "contract": "CT-4209",
+        "document": "***.***.***-09",
+        "connection": "Online",
+        "neighborhood": "Vila Nova"
+      },
+      "createdAt": "2026-10-17T16:34:01.036Z"
+    },
+    {
+      "id": "ticket-1",
+      "kind": "ticket",
+      "payload": {
+        "id": "ticket-1",
+        "sla": "No prazo",
+        "code": 1049,
+        "name": "Mariana Oliveira",
+        "wait": 3,
+        "agent": "Camila Martins",
+        "opened": "2026-10-17T08:03:00-03:00",
+        "status": "Em atendimento",
+        "channel": "WhatsApp",
+        "subject": "Lentidão na conexão",
+        "category": "Suporte técnico",
+        "priority": "Normal",
+        "subscriberId": "sub-1"
+      },
+      "createdAt": "2026-10-17T16:34:26.599Z"
+    },
+    {
+      "id": "ticket-10",
+      "kind": "ticket",
+      "payload": {
+        "id": "ticket-10",
+        "sla": "No prazo",
+        "code": 1058,
+        "name": "Gustavo Pereira",
+        "wait": 30,
+        "agent": "Camila Martins",
+        "opened": "2026-10-17T08:30:00-03:00",
+        "status": "Em atendimento",
+        "channel": "WhatsApp",
+        "subject": "Oscilação de velocidade",
+        "category": "Suporte técnico",
+        "priority": "Normal",
+        "subscriberId": "sub-10"
+      },
+      "createdAt": "2026-10-17T16:34:26.599Z"
+    },
+    {
+      "id": "ticket-11",
+      "kind": "ticket",
+      "payload": {
+        "id": "ticket-11",
+        "sla": "No prazo",
+        "code": 1059,
+        "name": "Fernanda Rocha",
+        "wait": 33,
+        "agent": "Não atribuído",
+        "opened": "2026-10-17T08:33:00-03:00",
+        "status": "Aguardando",
+        "channel": "WhatsApp",
+        "subject": "Negociação de débitos",
+        "category": "Financeiro",
+        "priority": "Média",
+        "subscriberId": "sub-11"
+      },
+      "createdAt": "2026-10-17T16:34:26.599Z"
+    },
+    {
+      "id": "ticket-12",
+      "kind": "ticket",
+      "payload": {
+        "id": "ticket-12",
+        "sla": "No prazo",
+        "code": 1060,
+        "name": "Ricardo Fernandes",
+        "wait": 36,
+        "agent": "Pedro Santos",
+        "opened": "2026-10-17T08:36:00-03:00",
+        "status": "Resolvido",
+        "channel": "Telefone",
+        "subject": "Troca de plano",
+        "category": "Comercial",
+        "priority": "Normal",
+        "subscriberId": "sub-12"
+      },
+      "createdAt": "2026-10-17T16:34:26.599Z"
+    },
+    {
+      "id": "ticket-2",
+      "kind": "ticket",
+      "payload": {
+        "id": "ticket-2",
+        "sla": "Em risco",
+        "code": 1050,
+        "name": "Ana Beatriz Santos",
+        "wait": 6,
+        "agent": "Não atribuído",
+        "opened": "2026-10-17T08:06:00-03:00",
+        "status": "Aguardando",
+        "channel": "WhatsApp",
+        "subject": "Sem conexão desde esta manhã",
+        "category": "Suporte técnico",
+        "priority": "Alta",
+        "subscriberId": "sub-2"
+      },
+      "createdAt": "2026-10-17T16:34:26.599Z"
+    },
+    {
+      "id": "ticket-3",
+      "kind": "ticket",
+      "payload": {
+        "id": "ticket-3",
+        "sla": "No prazo",
+        "code": 1051,
+        "name": "Lucas Ferreira",
+        "wait": 9,
+        "agent": "Camila Martins",
+        "opened": "2026-10-17T08:09:00-03:00",
+        "status": "Em atendimento",
+        "channel": "Telefone",
+        "subject": "Alteração de endereço",
+        "category": "Instalação",
+        "priority": "Normal",
+        "subscriberId": "sub-3"
+      },
+      "createdAt": "2026-10-17T16:34:26.599Z"
+    },
+    {
+      "id": "ticket-4",
+      "kind": "ticket",
+      "payload": {
+        "id": "ticket-4",
+        "sla": "No prazo",
+        "code": 1052,
+        "name": "Carlos Eduardo Lima",
+        "wait": 12,
+        "agent": "Não atribuído",
+        "opened": "2026-10-17T08:12:00-03:00",
+        "status": "Aguardando",
+        "channel": "WhatsApp",
+        "subject": "Dúvida sobre a fatura",
+        "category": "Financeiro",
+        "priority": "Normal",
+        "subscriberId": "sub-4"
+      },
+      "createdAt": "2026-10-17T16:34:26.599Z"
+    },
+    {
+      "id": "ticket-5",
+      "kind": "ticket",
+      "payload": {
+        "id": "ticket-5",
+        "sla": "No prazo",
+        "code": 1053,
+        "name": "Juliana Almeida",
+        "wait": 15,
+        "agent": "Não atribuído",
+        "opened": "2026-10-17T08:15:00-03:00",
+        "status": "Aguardando",
+        "channel": "WhatsApp",
+        "subject": "Solicitação de desbloqueio",
+        "category": "Financeiro",
+        "priority": "Média",
+        "subscriberId": "sub-5"
+      },
+      "createdAt": "2026-10-17T16:34:26.599Z"
+    },
+    {
+      "id": "ticket-6",
+      "kind": "ticket",
+      "payload": {
+        "id": "ticket-6",
+        "sla": "No prazo",
+        "code": 1054,
+        "name": "Pedro Henrique Costa",
+        "wait": 18,
+        "agent": "Camila Martins",
+        "opened": "2026-10-17T08:18:00-03:00",
+        "status": "Em atendimento",
+        "channel": "Telefone",
+        "subject": "Configuração do roteador",
+        "category": "Suporte técnico",
+        "priority": "Normal",
+        "subscriberId": "sub-6"
+      },
+      "createdAt": "2026-10-17T16:34:26.599Z"
+    },
+    {
+      "id": "ticket-7",
+      "kind": "ticket",
+      "payload": {
+        "id": "ticket-7",
+        "sla": "Em risco",
+        "code": 1055,
+        "name": "Camila Rodrigues",
+        "wait": 21,
+        "agent": "Não atribuído",
+        "opened": "2026-10-17T08:21:00-03:00",
+        "status": "Aguardando",
+        "channel": "WhatsApp",
+        "subject": "Sinal óptico degradado",
+        "category": "Suporte técnico",
+        "priority": "Alta",
+        "subscriberId": "sub-7"
+      },
+      "createdAt": "2026-10-17T16:34:26.599Z"
+    },
+    {
+      "id": "ticket-8",
+      "kind": "ticket",
+      "payload": {
+        "id": "ticket-8",
+        "sla": "No prazo",
+        "code": 1056,
+        "name": "Rafael Martins",
+        "wait": 24,
+        "agent": "Pedro Santos",
+        "opened": "2026-10-17T08:24:00-03:00",
+        "status": "Resolvido",
+        "channel": "WhatsApp",
+        "subject": "Agendamento de instalação",
+        "category": "Instalação",
+        "priority": "Normal",
+        "subscriberId": "sub-8"
+      },
+      "createdAt": "2026-10-17T16:34:26.599Z"
+    },
+    {
+      "id": "ticket-9",
+      "kind": "ticket",
+      "payload": {
+        "id": "ticket-9",
+        "sla": "No prazo",
+        "code": 1057,
+        "name": "Beatriz Souza",
+        "wait": 27,
+        "agent": "Não atribuído",
+        "opened": "2026-10-17T08:27:00-03:00",
+        "status": "Aguardando",
+        "channel": "Telefone",
+        "subject": "Segunda via da fatura",
+        "category": "Financeiro",
+        "priority": "Normal",
+        "subscriberId": "sub-9"
+      },
+      "createdAt": "2026-10-17T16:34:26.599Z"
+    }
+  ]
+}

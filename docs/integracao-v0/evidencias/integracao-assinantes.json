@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "backend": "Go isolado, dados sintéticos",
+  "checks": [
+    "Login por cookie HttpOnly/SameSite; nenhum token em localStorage",
+    "Exportação CSV autenticada do cadastro",
+    "Cadastro valida CPF no Go e abre a ficha pelo UUID real",
+    "Contrato criado pela ficha com versão do plano e evento na linha do tempo",
+    "Edição e inativação persistidas no Go; ficha/aba restauradas pela URL",
+    "Campo personalizado do assinante salvo e relido do servidor",
+    "Contatos/consentimento e criação/arquivamento de anotação persistidos",
+    "Acesso ao portal criado no backend existente",
+    "Upload, download, exclusão de documento e exportação de dados pessoais",
+    "Anonimização efetiva validada pelo Go em titular sem pendências",
+    "Paginação no servidor, filtros persistidos e reinício da página ao buscar",
+    "Falha operacional exibida sem fallback para seeds",
+    "Lista conectada verificada no desktop e celular",
+    "Perfil financeiro sem ações de escrita cadastral e sem acesso direto à rede",
+    "Isolamento entre provedores aplicado pelo Go",
+    "Demonstração e ficha preservadas sob /demonstracao sem qualquer chamada operacional"
+  ]
+}

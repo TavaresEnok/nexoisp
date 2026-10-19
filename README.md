@@ -3,6 +3,10 @@
 ERP SaaS para provedores de internet. Consulte o [índice da documentação](docs/README.md), a
 [arquitetura atual](docs/arquitetura.md) e as [pendências para produção](docs/pendencias.md).
 
+A interface oficial está em migração para o frontend do v0. A [matriz funcional](docs/integracao-v0/MATRIZ_FUNCIONAL.md) registra a cobertura efetiva; recursos ainda pendentes são identificados na interface. O [plano e a validação](docs/integracao-v0/PLANO.md) documentam as sete etapas. A referência original e o frontend anterior foram preservados.
+
+Desenvolvimento do novo frontend: `npm ci` e `API_URL=http://127.0.0.1:18081 npm -w apps/web run dev`. O endereço de `API_URL` deve apontar para o Go do seu ambiente. A aplicação abre em http://127.0.0.1:3000; a demonstração visual independente está em http://127.0.0.1:3000/demonstracao/.
+
 ## Rodar localmente (demonstração)
 
 Requisitos: Docker + Docker Compose, `openssl`. API, rotinas, VPN e ferramentas administrativas usam Go. O frontend React usa Node somente no build; o agente de rede permanece Python.
@@ -31,7 +35,8 @@ cd e2e && npm i && npx playwright install chromium && BASE=http://localhost:1808
 ```
 apps/api-go             Backend Go: API, identidade, rede, financeiro, importação, IPAM, campo, CRM, NOC, River, VPN e CLI
 db/migrations           Migrations goose (fonte única do schema)
-apps/web                React + Vite (painel e portal do assinante)
+apps/web                Frontend oficial v0: React + Vite, integrado progressivamente ao Go
+apps/web-legacy         Frontend anterior preservado para consulta de comportamentos
 services/network-agent  Agente Python (SQLite, drivers demo e mikrotik_radius)
 infra/compose           Ambiente local      infra/site  Agente + RADIUS no provedor      infra/prod  Instalação central
 e2e                     Teste de fumaça da interface em navegador (Playwright)

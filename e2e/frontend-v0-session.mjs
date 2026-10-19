@@ -1,0 +1,27 @@
+import { chromium } from 'playwright';
+import { createHmac } from 'node:crypto';
+import { mkdir, writeFile } from 'node:fs/promises';
+import assert from 'node:assert/strict';
+const base = process.env.BASE ?? 'http://127.0.0.1:3000';
+const output = new URL('../docs/integracao-v0/evidencias/', import.meta.url);
+function totp(secret) {
+ const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'; let bits = ''; for (const char of secret.toUpperCase().replace(/=+$/, '')) bits += alphabet.indexOf(char).toString(2).padStart(5, '0');
+ const key = Buffer.from((bits.match(/.{8}/g) ?? []).map(binary => parseInt(binary, 2))); const counter = Buffer.alloc(8); counter.writeBigUInt64BE(BigInt(Math.floor(Date.now() / 30000))); const hash = createHmac('sha1', key).update(counter).digest(); const offset = hash.at(-1) & 15; return String((hash.readUInt32BE(offset) & 0x7fffffff) % 1000000).padStart(6, '0');
+}
+const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
+const setup = await browser.newContext(); const account = await browser.newContext(); const page = await account.newPage(); page.setDefaultTimeout(12000); const checks = [];
+try {
+ assert.equal((await setup.request.post(`${base}/api/auth/login`, { data: { email: 'admin@alfa.demo', password: 'demo1234' } })).ok(), true);
+ const email = `sessao-v0-${Date.now()}@example.invalid`;
+ assert.equal((await setup.request.post(`${base}/api/users`, { headers: { 'X-Nexo-CSRF': '1' }, data: { name: 'Validação de sessão v0', email, role: 'attendant', password: 'demo1234' } })).ok(), true);
+ await page.goto(`${base}/login`); await page.getByLabel('E-mail', { exact: true }).fill(email); await page.getByLabel('Senha', { exact: true }).fill('demo1234'); await page.getByRole('button', { name: 'Entrar', exact: true }).click(); await page.waitForURL(url => url.pathname !== '/login');
+ const parallel = await browser.newContext(); assert.equal((await parallel.request.post(`${base}/api/auth/login`, { data: { email, password: 'demo1234' } })).ok(), true);
+ await page.goto(`${base}/conta`); await page.getByLabel('Senha atual', { exact: true }).fill('demo1234'); await page.getByLabel('Nova senha', { exact: true }).fill('nova-senha-v0-1234'); await page.getByRole('button', { name: 'Alterar senha', exact: true }).click(); await page.getByRole('status').filter({ hasText: 'Senha alterada.' }).waitFor();
+ assert.equal((await parallel.request.get(`${base}/api/me`)).status(), 401); assert.equal((await account.request.get(`${base}/api/me`)).status(), 200); await parallel.close(); checks.push('Troca de senha preserva a sessão atual e revoga outra sessão');
+ await page.getByRole('button', { name: 'Configurar autenticação', exact: true }).click(); const secret = await page.getByLabel('Chave de configuração', { exact: true }).inputValue(); await page.getByLabel('Código do aplicativo', { exact: true }).fill(totp(secret)); await page.getByRole('button', { name: 'Ativar verificação', exact: true }).click(); await page.getByRole('button', { name: 'Desativar verificação', exact: true }).waitFor(); checks.push('Configuração e ativação TOTP pelo frontend e Go reais');
+ await page.getByRole('button', { name: 'Minha conta', exact: true }).click(); await page.getByRole('menuitem', { name: 'Sair', exact: true }).click(); await page.waitForURL(/\/login$/);
+ await page.getByLabel('E-mail', { exact: true }).fill(email); await page.getByLabel('Senha', { exact: true }).fill('nova-senha-v0-1234'); await page.getByRole('button', { name: 'Entrar', exact: true }).click(); await page.getByLabel('Código do aplicativo autenticador', { exact: true }).waitFor(); await page.getByLabel('Código do aplicativo autenticador', { exact: true }).fill(totp(secret)); await page.getByRole('button', { name: 'Entrar', exact: true }).click(); await page.waitForURL(url => url.pathname !== '/login'); checks.push('Logout e novo login com desafio TOTP');
+ await page.goto(`${base}/conta`); const panel = page.locator('.nexo-panel').filter({ has: page.getByRole('heading', { name: 'Verificação em duas etapas', exact: true }) }); await panel.getByLabel('Senha atual', { exact: true }).fill('nova-senha-v0-1234'); await panel.getByLabel('Código do aplicativo', { exact: true }).fill(totp(secret)); await page.getByRole('button', { name: 'Desativar verificação', exact: true }).click(); await page.getByRole('button', { name: 'Configurar autenticação', exact: true }).waitFor(); checks.push('Desativação TOTP exige senha e código reais');
+ await page.goto(`${base}/assinantes`); await page.getByRole('button', { name: /Abrir ficha de/ }).first().waitFor(); await account.request.post(`${base}/api/auth/logout`, { headers: { 'X-Nexo-CSRF': '1' } }); await page.getByRole('textbox', { name: 'Buscar assinantes', exact: true }).fill('sessão-expirada'); await page.waitForURL(/\/login$/); assert.equal(await page.getByRole('button', { name: /Abrir ficha de/ }).count(), 0); checks.push('Expiração da sessão remove dados e retorna ao login sem fallback');
+ await mkdir(output, { recursive: true }); await writeFile(new URL('integracao-sessao.json', output), JSON.stringify({ ok: true, checks }, null, 2) + '\n'); console.log(JSON.stringify({ ok: true, checks }));
+} finally { await setup.close(); await account.close(); await browser.close(); }

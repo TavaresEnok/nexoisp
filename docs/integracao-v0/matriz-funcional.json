@@ -1,0 +1,1949 @@
+[
+  {
+    "id": "AC-01",
+    "backendState": "Implementada",
+    "entry": "/login",
+    "functionality": "Autenticar e encerrar sessão",
+    "behavior": "E-mail/senha; solicitação de código TOTP; mostrar senha. Credencial válida cria sessão; logout a invalida. Sem autocadastro ou recuperação pública de senha identificados.",
+    "endpoints": "POST /api/auth/login; POST /api/auth/logout; GET /api/me; GET /api/health",
+    "evidence": "P/Login.tsx; W/App.tsx; I/service.go; G/cryptox/crypto.go",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-session.mjs"
+    ]
+  },
+  {
+    "id": "AC-02",
+    "backendState": "Demonstrativa",
+    "entry": "/login",
+    "functionality": "Preenchimento com contas de demonstração",
+    "behavior": "Lista de seis contas sintéticas somente se health informa demo; preenche e-mail/senha, não contorna autenticação.",
+    "endpoints": "GET /api/health; POST /api/auth/login",
+    "evidence": "P/Login.tsx; G/db/demo.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AC-03",
+    "backendState": "Implementada",
+    "entry": "Shell e /busca?q=...",
+    "functionality": "Busca unificada e abertura de fichas",
+    "behavior": "Termo mínimo de dois caracteres; Go agrega correspondências de cadastro, login, IP, MAC, ONU e OS; dados financeiros/rede são condicionados ao perfil. Resultado abre assinante/contrato; sem pager visual.",
+    "endpoints": "GET /api/search",
+    "evidence": "P/Atendimento.tsx (SearchBox/Busca); L/search.go",
+    "integrationState": "partial",
+    "validation": [
+      "Fluxo parcial implementado; conferir o plano para os escopos restantes."
+    ]
+  },
+  {
+    "id": "AC-04",
+    "backendState": "Implementada",
+    "entry": "Shell",
+    "functionality": "Menu, tema, navegação móvel e suporte visível",
+    "behavior": "Filtrar menu, Enter para primeiro destino, recolher áreas, persistir preferências em localStorage; alternar tema; banners demo/suporte e encerrar suporte. Estado visual é local; suporte tem operação Go.",
+    "endpoints": "POST /api/support/exit; GET /api/me",
+    "evidence": "W/App.tsx; W/main.tsx; I/self.go",
+    "integrationState": "partial",
+    "validation": [
+      "Fluxo parcial implementado; conferir o plano para os escopos restantes."
+    ]
+  },
+  {
+    "id": "AC-05",
+    "backendState": "Implementada",
+    "entry": "/",
+    "functionality": "Visão inicial e prioridades pessoais",
+    "behavior": "Contadores de assinantes/contratos/planos/MRR; today monta pendências e links conforme papel, módulos e contexto. Consulta real; seed demo pode tornar conteúdo sintético.",
+    "endpoints": "GET /api/dashboard; GET /api/today",
+    "evidence": "P/Dashboard.tsx; L/today.go; L/service.go; L/queries/dashboard_0.sql",
+    "integrationState": "partial",
+    "validation": [
+      "Fluxo parcial implementado; conferir o plano para os escopos restantes."
+    ]
+  },
+  {
+    "id": "AC-06",
+    "backendState": "Implementada",
+    "entry": "/",
+    "functionality": "Painéis de operação e caixa",
+    "behavior": "Faixas offline, distribuição RX, ativações/encerramentos em 12 meses, últimas operações; caixa líquido e sem-fatura somente quando permitido. Componente exige network:read; dados dependem de observações/accounting.",
+    "endpoints": "GET /api/dashboard/panels",
+    "evidence": "P/Cobranca.tsx (Panels); L/agenda.go; L/dinamicas.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AC-07",
+    "backendState": "Implementada",
+    "entry": "/conta",
+    "functionality": "Trocar senha própria",
+    "behavior": "Senha atual e próxima com mínimo de oito caracteres; preserva sessão corrente e encerra outras conforme SQL. Portal não oferece essa tela no seu layout.",
+    "endpoints": "POST /api/me/password",
+    "evidence": "P/Account.tsx; I/self.go; I/sql/",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-session.mjs"
+    ]
+  },
+  {
+    "id": "AC-08",
+    "backendState": "Implementada",
+    "entry": "/conta",
+    "functionality": "Gerenciar TOTP",
+    "behavior": "Setup gera segredo/otpauth; enable valida código; disable exige senha e código. Sem QR gráfico ou códigos de recuperação nesta tela. Administrador com MFA pendente fica limitado a conta.",
+    "endpoints": "POST /api/me/mfa/setup; POST /api/me/mfa/enable; POST /api/me/mfa/disable",
+    "evidence": "P/Account.tsx; I/self.go; G/cryptox/totp.go; M/00005_mfa.sql",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-session.mjs"
+    ]
+  },
+  {
+    "id": "AS-01",
+    "backendState": "Implementada",
+    "entry": "/assinantes",
+    "functionality": "Listar, buscar e exportar cadastro",
+    "behavior": "Pesquisa q, tabela com contato/cidade/contratos ativos/status; paginação 50; CSV com limite solicitado 5000 e auditoria da exportação. subscribers:read.",
+    "endpoints": "GET /api/subscribers",
+    "evidence": "P/Subscribers.tsx; G/modules/cadastro/routes.go; G/modules/cadastro/service.go; G/modules/cadastro/queries/list.sql",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0.mjs"
+    ]
+  },
+  {
+    "id": "AS-02",
+    "backendState": "Implementada",
+    "entry": "/assinantes e /assinantes/:id",
+    "functionality": "Cadastrar/editar/inativar assinante",
+    "behavior": "Modal: nome/razão, CPF/CNPJ, e-mail, telefone, nascimento/abertura, RG/emissor, mãe/fantasia, endereço completo e notas; status ao editar. Go valida documento, datas e campos; PATCH preserva omitidos; bloqueia titular anonimizado. Não há exclusão genérica.",
+    "endpoints": "POST /api/subscribers; PATCH /api/subscribers/:id; GET /api/subscribers/:id",
+    "evidence": "P/Subscribers.tsx; E/cadastro.go; E/schemas.go; G/modules/cadastro/service.go",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0.mjs"
+    ]
+  },
+  {
+    "id": "AS-03",
+    "backendState": "Implementada",
+    "entry": "/assinantes/:id",
+    "functionality": "Ficha e contratos do titular",
+    "behavior": "Exibe cadastro, data/status, observações, acesso ao portal e tabela de contratos com plano/versão/preço/início/vencimento; abre contrato ou modal de novo contrato.",
+    "endpoints": "GET /api/subscribers/:id; GET /api/subscribers/:id/portal-access; POST /api/contracts",
+    "evidence": "P/Subscribers.tsx; P/Contracts.tsx; G/modules/cadastro/service.go; E/cadastro.go",
+    "integrationState": "partial",
+    "validation": [
+      "Fluxo parcial implementado; conferir o plano para os escopos restantes."
+    ]
+  },
+  {
+    "id": "AS-04",
+    "backendState": "Implementada",
+    "entry": "/assinantes/:id",
+    "functionality": "Criar/redefinir acesso de portal",
+    "behavior": "Modal com e-mail e senha; grava usuário de papel subscriber ligado ao titular. Exige subscribers:write; não é reset por e-mail e não equivale a senha PPPoE.",
+    "endpoints": "GET /api/subscribers/:id/portal-access; POST /api/subscribers/:id/portal-access",
+    "evidence": "P/Subscribers.tsx; E/acessos.go (portalAccess)",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0.mjs"
+    ]
+  },
+  {
+    "id": "AS-05",
+    "backendState": "Implementada",
+    "entry": "/assinantes/:id",
+    "functionality": "Manter contatos e consentimento",
+    "behavior": "Coleção de até 20: celular/WhatsApp/fixo/e-mail/responsável, finalidade geral/cobrança/técnico, consentimento. PUT substitui coleção em transação; remover linha só se efetiva ao salvar. Campo label existe no Go, não tem editor dedicado no formulário.",
+    "endpoints": "GET /api/subscribers/:id/contacts; PUT /api/subscribers/:id/contacts",
+    "evidence": "P/Atendimento.tsx (Contacts); E/config.go; M/00025_sessoes_contatos_pops.sql",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0.mjs"
+    ]
+  },
+  {
+    "id": "AS-06",
+    "backendState": "Implementada",
+    "entry": "/assinantes/:id",
+    "functionality": "Anotações estruturadas",
+    "behavior": "Criar texto/tipo/alerta; alertas destacados; autor/data; arquivar. Go permite vincular contrato e alterar flag de alerta; interface usa criação e arquivamento, não edição de texto.",
+    "endpoints": "GET /api/subscribers/:id/notes; POST /api/subscribers/:id/notes; PATCH /api/notes/:id",
+    "evidence": "P/Atendimento.tsx (SubscriberNotes); E/condicoes.go; M/00030_estados_motivos_anotacoes.sql",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0.mjs"
+    ]
+  },
+  {
+    "id": "AS-07",
+    "backendState": "Implementada",
+    "entry": "/assinantes/:id",
+    "functionality": "Anexar, baixar e excluir documentos",
+    "behavior": "PDF/JPEG/PNG/WebP até 5 MiB por arquivo; tipo identidade/endereço/contrato/foto/outro, nome, tamanho e autor. Upload base64, conteúdo persistido no banco e MIME conferido; download e exclusão exigem subscribers:write e têm auditoria.",
+    "endpoints": "GET /api/subscribers/:id/documents; POST /api/subscribers/:id/documents; GET /api/documents/:id/download; DELETE /api/documents/:id",
+    "evidence": "P/Atendimento.tsx (SubscriberDocuments); E/documentos.go; E/relatorios.go; M/00034_escopo_pop_aviso_documentos.sql",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0.mjs"
+    ]
+  },
+  {
+    "id": "AS-08",
+    "backendState": "Implementada",
+    "entry": "/assinantes/:id",
+    "functionality": "Linha do tempo consolidada",
+    "behavior": "Eventos de contrato/rede/fatura/pagamento/OS/atendimento com autor e links; UI mostra até 80 e Go aplica permissões por fonte. Não é o log técnico completo de todas as entidades.",
+    "endpoints": "GET /api/subscribers/:id/timeline",
+    "evidence": "P/Atendimento.tsx (Timeline); L/timeline.go",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0.mjs"
+    ]
+  },
+  {
+    "id": "AS-09",
+    "backendState": "Implementada",
+    "entry": "/assinantes/:id",
+    "functionality": "Exportar dados pessoais",
+    "behavior": "Download JSON de cadastro, contatos, contratos, títulos, chamados, OS, notas, metadados de documentos, aceites, conexões e acesso portal, sem segredos. settings:manage; exportação auditada.",
+    "endpoints": "GET /api/subscribers/:id/lgpd-export",
+    "evidence": "P/Subscribers.tsx (Privacy); E/relatorios.go (lgpdExport)",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0.mjs"
+    ]
+  },
+  {
+    "id": "AS-10",
+    "backendState": "Implementada",
+    "entry": "/assinantes/:id",
+    "functionality": "Anonimizar titular",
+    "behavior": "Motivo/protocolo e nome para confirmar; valida contratos encerrados e ausência de pendências financeiras; remove dados pessoais abrangidos e acesso portal, preserva registros comerciais/legais definidos pelo código. Ação definitiva, sem botão desfazer.",
+    "endpoints": "POST /api/subscribers/:id/anonymize",
+    "evidence": "P/Subscribers.tsx; E/documentos.go (anonymize); M/00045_lgpd_titular.sql",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0.mjs"
+    ]
+  },
+  {
+    "id": "CO-01",
+    "backendState": "Implementada",
+    "entry": "/planos",
+    "functionality": "Catálogo e versão comercial",
+    "behavior": "Criar nome/preço/velocidades/perfil; consultar contratos ativos; ativar/desativar; criar versão de preço/velocidade sem reescrever versões já contratadas; histórico em modal. plans:write para mutações.",
+    "endpoints": "GET /api/plans; POST /api/plans; PATCH /api/plans/:id; GET /api/plans/:id/versions; POST /api/plans/:id/versions",
+    "evidence": "P/Plans.tsx; E/cadastro.go; L/service.go; M/00001_identidade_cadastro.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CO-02",
+    "backendState": "Implementada",
+    "entry": "/planos",
+    "functionality": "Degraus de inadimplência",
+    "behavior": "Modal com aviso/redução/bloqueio em dias e perfil reduzido; valida ordem crescente; vazio herda política. Ação automática exige configuração do tenant e workers, não ocorre ao editar o plano.",
+    "endpoints": "PUT /api/plans/:id/dunning",
+    "evidence": "P/Plans.tsx; P/Cobranca.tsx; E/cadastro.go; G/finance/gateway.go; M/00026_degraus_por_plano.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CO-03",
+    "backendState": "Implementada",
+    "entry": "/planos",
+    "functionality": "Fidelidade padrão",
+    "behavior": "Meses 1–60 ou null, multa fixa/por mês restante e valor; aplica a novos contratos. Fidelidade específica do contrato é outra operação.",
+    "endpoints": "PUT /api/plans/:id/loyalty",
+    "evidence": "P/Plans.tsx; E/comercial.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CO-04",
+    "backendState": "Implementada",
+    "entry": "/planos",
+    "functionality": "Parâmetros de rede e reaplicação por plano",
+    "behavior": "Rate-limit no formato MikroTik e pool opcional; salvar não altera imediatamente todas as contas. Reaplicar solicita operações, até 500 por chamada, e informa recusas; salvar exige network:write, reaplicar network:operate.",
+    "endpoints": "PUT /api/plans/:id/network; POST /api/plans/:id/reapply",
+    "evidence": "P/Plans.tsx; E/rede.go; G/network/engine.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CO-05",
+    "backendState": "Implementada",
+    "entry": "/adicionais",
+    "functionality": "Catálogo de adicionais recorrentes",
+    "behavior": "Criar nome/preço, consultar uso, alterar preço, ativar/desativar. Preço novo não reescreve preço congelado nos contratos. Sem integração de ativação TV/telefonia identificada.",
+    "endpoints": "GET /api/addons; POST /api/addons; PATCH /api/addons/:id",
+    "evidence": "P/Adicionais.tsx; E/comercial.go; M/00044_produtos_adicionais.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CO-06",
+    "backendState": "Implementada",
+    "entry": "/contratos",
+    "functionality": "Pesquisar, listar e exportar contratos",
+    "behavior": "q e status active/ended/todos; paginação; CSV; assinante, plano/versão, etiquetas, preço e vencimento. Criação parte da ficha do assinante; lista não oferece criação autônoma.",
+    "endpoints": "GET /api/contracts",
+    "evidence": "P/Contracts.tsx; L/contracts.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CO-07",
+    "backendState": "Implementada",
+    "entry": "/assinantes/:id → Novo contrato",
+    "functionality": "Criar vínculo comercial",
+    "behavior": "Plano ativo, assinante ativo e dia 1–28; Go fixa versão do plano e fidelidade vigente, grava histórico. Backend aceita start_date/notes; modal só envia assinante/plano/vencimento.",
+    "endpoints": "POST /api/contracts",
+    "evidence": "P/Contracts.tsx (ContractForm); E/cadastro.go; E/schemas.go",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0.mjs"
+    ]
+  },
+  {
+    "id": "CO-08",
+    "backendState": "Implementada",
+    "entry": "/contratos/:id",
+    "functionality": "Ficha e alteração de plano/vencimento",
+    "behavior": "Consulta vínculos e histórico; modal troca para versão atual do plano; atualiza acesso conforme estado, solicita provisionamento quando aplicável. Contrato encerrado não é editável nem reativável por essa operação.",
+    "endpoints": "GET /api/contracts/:id; PATCH /api/contracts/:id",
+    "evidence": "P/Contracts.tsx; G/modules/cadastro/service.go; E/contratos.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CO-09",
+    "backendState": "Implementada",
+    "entry": "/contratos/:id → Encerrar",
+    "functionality": "Encerrar contrato com decisão sobre multa",
+    "behavior": "Motivo de catálogo, observação, cotação da multa e débitos; cobrar gera fatura de multa, dispensar requer justificativa. Encerra comercial e solicita suspensão; pode solicitar remoção ONU se opção do tenant estiver ligada. Faturas existentes permanecem.",
+    "endpoints": "GET /api/contracts/:id/termination-quote; PATCH /api/contracts/:id",
+    "evidence": "P/Contracts.tsx; E/contratos.go; L/dinamicas.go; M/00031_condicoes_contrato.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CO-10",
+    "backendState": "Implementada",
+    "entry": "/contratos/:id → Restrição de crédito",
+    "functionality": "Marcar/liberar restrição comercial",
+    "behavior": "PUT restricted e motivo; exige finance:write; não bloqueia acesso por si. Cabeçalho visual também exige contrato ativo e contracts:write.",
+    "endpoints": "PUT /api/contracts/:id/credit-restriction",
+    "evidence": "P/Contracts.tsx; E/condicoes.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CO-11",
+    "backendState": "Implementada",
+    "entry": "/contratos/:id → indicadores",
+    "functionality": "Separar comercial, acesso e velocidade",
+    "behavior": "GET computa vigente/encerrado/restrito, acesso não provisionado/liberado/bloqueado, redução, causa/modo/data e confirmação técnica; não equipara intenção a efeito observado.",
+    "endpoints": "GET /api/contracts/:id/states",
+    "evidence": "P/Atendimento.tsx (ContractStates); L/grupos.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CO-12",
+    "backendState": "Implementada",
+    "entry": "/contratos/:id → Contrato",
+    "functionality": "Etiquetas",
+    "behavior": "Consultar/criar etiqueta; selecionar conjunto e salvar no contrato; até 30 IDs. Sem tela de excluir etiqueta global na UI; existe DELETE backend.",
+    "endpoints": "GET /api/tags; POST /api/tags; PUT /api/contracts/:id/tags",
+    "evidence": "P/Extras.tsx (ContractTags); E/empresas_tags.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CO-13",
+    "backendState": "Implementada",
+    "entry": "/contratos/:id → Contrato",
+    "functionality": "Vincular POP",
+    "behavior": "Selecionar POP ativo ou limpar; contrato deve estar ativo na UI. Vínculo afeta organização e escopo de acesso.",
+    "endpoints": "GET /api/pops; PUT /api/contracts/:id/pop",
+    "evidence": "P/Atendimento.tsx (ContractPop); E/config.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CO-14",
+    "backendState": "Implementada",
+    "entry": "/contratos/:id → Contrato",
+    "functionality": "Empresa faturadora e área",
+    "behavior": "Selecionar empresa ou padrão; novas faturas herdam empresa, antigas preservam vínculo; definir urbana/rural para coleta. Empresa só aparece se houver cadastro.",
+    "endpoints": "GET /api/companies; PUT /api/contracts/:id/company; PUT /api/contracts/:id/service-area",
+    "evidence": "P/Empresas.tsx; P/Anatel.tsx; E/empresas_tags.go; E/condicoes.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CO-15",
+    "backendState": "Implementada",
+    "entry": "/contratos/:id → Contrato",
+    "functionality": "Contratar/encerrar adicionais",
+    "behavior": "Produto ativo e quantidade 1–99; congela descrição/preço; início padrão próximo mês; encerramento deixa de cobrar em competência futura. Histórico de adicionais e total mensal; não provisiona serviço externo.",
+    "endpoints": "GET /api/contracts/:id/addons; POST /api/contracts/:id/addons; DELETE /api/contracts/:id/addons/:addonId",
+    "evidence": "P/Adicionais.tsx (ContractAddons); E/comercial.go; E/documentos.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CO-16",
+    "backendState": "Implementada",
+    "entry": "/contratos/:id → Contrato",
+    "functionality": "Equipamentos e recolhimento",
+    "behavior": "Tabela de unidades/série/modalidade/OS e alerta de comodato a recolher em contrato encerrado. Instalação/retirada efetivas são feitas nos módulos OS/estoque, não neste cartão.",
+    "endpoints": "GET /api/contracts/:id/equipment",
+    "evidence": "P/Extras.tsx (ContractEquipment); L/grupos.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CO-17",
+    "backendState": "Implementada",
+    "entry": "/contratos/:id → Condições",
+    "functionality": "Fidelidade e cotação de rescisão",
+    "behavior": "Definir/remover meses/modelo/valor; visualizar vigência, meses restantes, multa hoje e faturas abertas. Registro real; cálculo não equivale a validação jurídica da regra.",
+    "endpoints": "PUT /api/contracts/:id/loyalty; GET /api/contracts/:id/termination-quote",
+    "evidence": "P/Condicoes.tsx; E/comercial.go; L/dinamicas.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CO-18",
+    "backendState": "Implementada",
+    "entry": "/contratos/:id → Condições",
+    "functionality": "Desconto recorrente",
+    "behavior": "Percentual até 100 ou valor fixo; motivo, início e número de meses/opcional; consultar vigência e cancelar. Afeta geração futura; faturas existentes não são recalculadas ao cancelar.",
+    "endpoints": "GET /api/contracts/:id/discounts; POST /api/contracts/:id/discounts; DELETE /api/discounts/:id",
+    "evidence": "P/Condicoes.tsx; E/comercial.go; G/finance/sql/",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CO-19",
+    "backendState": "Implementada",
+    "entry": "/contratos/:id → Condições",
+    "functionality": "Mudança agendada",
+    "behavior": "Agendar plano/vencimento/encerramento com data futura; decisão de multa; consultar pending/applied/canceled/failed e erro; cancelar pendente. Aplicação depende da rotina SCHEDULED.",
+    "endpoints": "GET /api/contracts/:id/scheduled-changes; POST /api/contracts/:id/scheduled-changes; DELETE /api/scheduled-changes/:id",
+    "evidence": "P/Condicoes.tsx; E/comercial.go; E/rotinas.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CO-20",
+    "backendState": "Implementada",
+    "entry": "/contratos/:id → Condições",
+    "functionality": "Registrar aditivo",
+    "behavior": "Tipo endereço/titularidade/plano/condição/outro, título/texto e vigência; tabela de registros. O tipo titularidade não transfere o contrato nem muda cadastro por si; texto de aditivo não é assinatura.",
+    "endpoints": "GET /api/contracts/:id/amendments; POST /api/contracts/:id/amendments",
+    "evidence": "P/Condicoes.tsx; E/comercial.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CO-21",
+    "backendState": "Implementada",
+    "entry": "/contratos/:id → Condições",
+    "functionality": "Solicitar e comprovar aceite simples",
+    "behavior": "Texto livre ou snapshot de aditivo; publicar no portal; cancelar pendente; evidência aceita com texto, usuário, e-mail, IP, agente de navegador, datas e hashes; Go recalcula conferência; impressão pelo navegador. Não é assinatura qualificada.",
+    "endpoints": "GET /api/contracts/:id/acceptances; POST /api/contracts/:id/acceptances; POST /api/acceptances/:id/cancel; GET /api/acceptances/:id/evidence",
+    "evidence": "P/Condicoes.tsx; E/acessos.go; L/grupos.go; M/00042_aceite_eletronico.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CO-22",
+    "backendState": "Implementada",
+    "entry": "/contratos/:id → Histórico",
+    "functionality": "Histórico comercial",
+    "behavior": "Eventos de criação, plano, vencimento, encerramento, fidelidade e restrições existem no banco; tabela apresenta autor/data e parte dos detalhes. Tipos fora do mapa de rótulos aparecem com nome técnico; não há filtro próprio.",
+    "endpoints": "GET /api/contracts/:id",
+    "evidence": "P/Contracts.tsx; G/modules/cadastro/queries/history.sql; E/contratos.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CO-23",
+    "backendState": "Implementada",
+    "entry": "Ficha de assinante/contrato",
+    "functionality": "Valores de campos personalizados",
+    "behavior": "Ler definições ativas; editor text/number/date/boolean/select; só envia alterações e null limpa opcionais; Go valida tipo, opção, tamanho, data e texto obrigatório; não basta cadastrar a definição.",
+    "endpoints": "GET /api/custom-fields; PUT /api/subscribers/:id/custom; PUT /api/contracts/:id/custom",
+    "evidence": "P/Atendimento.tsx (CustomValues); E/custom.go; M/00032_campos_kits_comissao.sql",
+    "integrationState": "partial",
+    "validation": [
+      "Fluxo parcial implementado; conferir o plano para os escopos restantes."
+    ]
+  },
+  {
+    "id": "CR-01",
+    "backendState": "Implementada",
+    "entry": "/prospectos",
+    "functionality": "Funil, listagem e ficha de prospecto",
+    "behavior": "Indicadores novos/contatados/proposta e ganhos/perdidos no mês; busca nome/telefone/e-mail, etapa/abertos/todos, paginação, detalhe em modal com histórico.",
+    "endpoints": "GET /api/leads; GET /api/leads/summary; GET /api/leads/:id",
+    "evidence": "P/Crm.tsx; L/grupos.go; L/paged.go; L/queries/group775251e1_0.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CR-02",
+    "backendState": "Implementada",
+    "entry": "/prospectos → Novo/Editar",
+    "functionality": "Manter dados do prospecto",
+    "behavior": "Nome, telefone, e-mail, documento opcional, endereço completo, origem, plano de interesse, observações; CRM write. Plano não cria contrato automaticamente; cadastro ganho tem restrições de edição.",
+    "endpoints": "POST /api/leads; PATCH /api/leads/:id",
+    "evidence": "P/Crm.tsx (LeadForm); E/crm.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CR-03",
+    "backendState": "Implementada",
+    "entry": "/prospectos → Detalhe",
+    "functionality": "Etapas e contatos",
+    "behavior": "Marcar novo/contatado/proposta/perdido, motivo de perda; anotações de contato e eventos datados. Ganho ocorre por conversão; não há exclusão física no painel.",
+    "endpoints": "POST /api/leads/:id/stage; POST /api/leads/:id/notes",
+    "evidence": "P/Crm.tsx (LeadDetail); E/crm.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CR-04",
+    "backendState": "Implementada",
+    "entry": "/prospectos → Converter",
+    "functionality": "Converter em assinante",
+    "behavior": "Cria cadastro a partir do lead, registra relação e ganho, abre ficha; interface exige subscribers:write além da edição CRM, Go verifica regra. Backend também aceita indicar assinante existente, sem seletor correspondente na UI.",
+    "endpoints": "POST /api/leads/:id/convert",
+    "evidence": "P/Crm.tsx; E/crm.go (convertLead)",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CR-05",
+    "backendState": "Implementada",
+    "entry": "/atendimentos e ficha do assinante",
+    "functionality": "Listar e abrir chamados",
+    "behavior": "Pesquisa assinante/assunto/protocolo; pendentes/abertos/aguardando/encerrados/todos; só os meus; subscriber_id na ficha; paginação e atualização periódica.",
+    "endpoints": "GET /api/tickets; GET /api/tickets/:id",
+    "evidence": "P/Crm.tsx (TicketList/TicketDetail); L/grupos.go; L/paged.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CR-06",
+    "backendState": "Implementada",
+    "entry": "Atendimento → Novo",
+    "functionality": "Abrir protocolo",
+    "behavior": "Assinante e contrato opcional, assunto, categoria técnica/financeira/comercial/outro, prioridade baixa/normal/alta, relato; origem provedor; cria mensagem inicial e eventos/notificações.",
+    "endpoints": "POST /api/tickets",
+    "evidence": "P/Crm.tsx (TicketForm); E/crm.go; M/00012_crm_atendimento.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CR-07",
+    "backendState": "Implementada",
+    "entry": "Atendimento → Detalhe",
+    "functionality": "Responsável, conversa, notas e estado",
+    "behavior": "Atribuir/remover responsável quando staff acessível; responder público ou nota interna; encerrar com confirmação, reabrir; notas internas não vão ao portal. Mensagem pode mudar estado de espera. Backend permite outros campos de classificação descritos adiante.",
+    "endpoints": "PATCH /api/tickets/:id; POST /api/tickets/:id/messages; POST /api/tickets/:id/status",
+    "evidence": "P/Crm.tsx; E/crm.go; L/service.go (ticket)",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CR-08",
+    "backendState": "Implementada",
+    "entry": "Atendimento → Detalhe → Nova OS",
+    "functionality": "Criar OS vinculada ao atendimento",
+    "behavior": "Reusa WorkOrderForm com assinante/contrato/ticket; mostra OS associadas por número e situação. Exige os:write e módulo field no servidor.",
+    "endpoints": "POST /api/work-orders; GET /api/tickets/:id",
+    "evidence": "P/Crm.tsx; P/Field.tsx; E/ordens.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "CR-09",
+    "backendState": "Implementada",
+    "entry": "/relatorios-atendimento",
+    "functionality": "Relatório CRM por período",
+    "behavior": "Datas inicial/final; leads por origem/conversão; chamados por categoria/origem portal/primeira resposta/resolução; OS por natureza/conclusão se permitido. Médias em horas corridas; sem exportação própria nesta tela.",
+    "endpoints": "GET /api/crm/report",
+    "evidence": "P/Crm.tsx (CrmReport); L/dinamicas.go; L/dinamicas/",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "OS-01",
+    "backendState": "Implementada",
+    "entry": "/ordens-servico e fichas",
+    "functionality": "Listagem de OS",
+    "behavior": "Busca nome/descrição/número, situação/pendentes/todos, só as minhas; subscriber_id/contract_id nas fichas; paginação; destaca agendamento vencido. Modal compartilhado acessível da agenda e Meu trabalho.",
+    "endpoints": "GET /api/work-orders; GET /api/work-orders/:id",
+    "evidence": "P/Field.tsx; L/grupos.go; L/paged.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "OS-02",
+    "backendState": "Implementada",
+    "entry": "Nova OS [modal]",
+    "functionality": "Cadastrar OS e endereço de atendimento",
+    "behavior": "Natureza instalação/reparo/mudança/retirada/outro; assinante, contrato/ticket opcionais; técnico, agendamento, motivo, duração 5–1440 min, descrição; endereço do cadastro/contrato/manual. Registra evento, SLA e avisos quando aplicáveis.",
+    "endpoints": "POST /api/work-orders",
+    "evidence": "P/Field.tsx (WorkOrderForm); E/ordens.go; M/00011_os_estoque_ftth.sql; M/00028_fluxo_os_catalogos_sla.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "OS-03",
+    "backendState": "Implementada",
+    "entry": "OS → Detalhe",
+    "functionality": "Atribuir responsável e agendamento",
+    "behavior": "Selecionar técnico/remover; editar data por blur; visualizar endereço resolvido, telefone, origem e SLA. Go impede mudanças incompatíveis em OS finalizada e remove auxiliar promovido a responsável.",
+    "endpoints": "PATCH /api/work-orders/:id; GET /api/staff",
+    "evidence": "P/Field.tsx; E/ordens.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "OS-04",
+    "backendState": "Implementada",
+    "entry": "OS → Detalhe",
+    "functionality": "Fluxo de execução e conclusão",
+    "behavior": "Transições validadas por estado: open/analysis/awaiting_schedule/scheduled/en_route/in_progress/done/canceled. Deslocamento exige responsável; agendada exige data; conclusão/cancelamento exigem resolução; UI exige motivo para aguardar. done cria pesquisa de satisfação; histórico e evento webhook.",
+    "endpoints": "POST /api/work-orders/:id/status",
+    "evidence": "P/Field.tsx; E/operacoes.go (workStatus); M/00028_fluxo_os_catalogos_sla.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "OS-05",
+    "backendState": "Implementada",
+    "entry": "OS → Detalhe",
+    "functionality": "Auxiliares, kit e checklist",
+    "behavior": "Adicionar/remover auxiliar distinto do responsável; aplicar kit ativo de itens não serializados com baixa transacional; adicionar itens de checklist e marcar feitos com autor/data. OS encerrada não aceita essas alterações.",
+    "endpoints": "POST /api/work-orders/:id/helpers; DELETE /api/work-orders/:id/helpers/:userId; POST /api/work-orders/:id/kit; POST /api/work-orders/:id/checklist; POST /api/work-orders/:id/checklist/:itemId",
+    "evidence": "P/Field.tsx (KitAndHelpers); P/Extras.tsx; E/materiais.go; E/estoque.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "OS-06",
+    "backendState": "Implementada",
+    "entry": "OS → Material utilizado",
+    "functionality": "Lançar e devolver material",
+    "behavior": "Escolhe item não serializado ativo e quantidade; negativa devolve; registra estoque/material/autor e evento OS; impede saldo e devolução incompatíveis segundo handlers. Não altera movimento histórico.",
+    "endpoints": "POST /api/work-orders/:id/materials",
+    "evidence": "P/Field.tsx; E/materiais.go; E/estoque.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "OS-07",
+    "backendState": "Implementada",
+    "entry": "OS → Material utilizado",
+    "functionality": "Instalar equipamento por série",
+    "behavior": "Busca a partir de três caracteres, até cinco candidatos disponíveis; instala unidade in_stock/with_tech em contrato da OS e retira do saldo. UI usa comodato padrão; backend aceita venda via mode=sale.",
+    "endpoints": "GET /api/stock/units; POST /api/work-orders/:id/units",
+    "evidence": "P/Field.tsx; E/operacoes.go (installUnit); M/00015_estoque_series.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "OS-08",
+    "backendState": "Implementada",
+    "entry": "OS → Histórico",
+    "functionality": "Anotações e eventos",
+    "behavior": "Anotar, consultar mudanças/atribuição/agendamento/material e autor/data. Notas podem ser lançadas por os:write mesmo quando controles de execução já estão ocultos; sem edição/exclusão de evento no painel.",
+    "endpoints": "POST /api/work-orders/:id/notes; GET /api/work-orders/:id",
+    "evidence": "P/Field.tsx; E/materiais.go; L/grupos.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "OS-09",
+    "backendState": "Implementada",
+    "entry": "/meu-trabalho",
+    "functionality": "Operação móvel do técnico",
+    "behavior": "Até 50 OS pendentes atribuídas, atualização 30 s, cartões com dados/telefone, mapa externo OSM e modal Abrir/Continuar. Requer conexão; não há fila offline/sincronização móvel implementada.",
+    "endpoints": "GET /api/work-orders",
+    "evidence": "P/Field.tsx (MyWork); L/paged.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "OS-10",
+    "backendState": "Implementada",
+    "entry": "/agenda",
+    "functionality": "Agenda por técnico, conflitos e janelas",
+    "behavior": "Dia e 1/3/7 dias; detecta sobreposição conforme duração; horas livres por técnico para janela de 60 min entre 8h–18h; fila aguardando agendamento; abrir OS. Sem arrastar agendamento no calendário.",
+    "endpoints": "GET /api/agenda; GET /api/agenda/free",
+    "evidence": "P/Agenda.tsx; L/agenda.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "OS-11",
+    "backendState": "Implementada",
+    "entry": "/estoque",
+    "functionality": "Catálogo de materiais",
+    "behavior": "Criar/editar nome, SKU, unidade, mínimo e flag de série; ativar/desativar; saldo e estoque baixo; bloqueio de mudança de serialização após movimentos. stock:write para mutações; sem pesquisa/pager visual nesta tela.",
+    "endpoints": "GET /api/stock/items; POST /api/stock/items; PATCH /api/stock/items/:id",
+    "evidence": "P/Field.tsx (Stock/ItemForm); E/estoque.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "OS-12",
+    "backendState": "Implementada",
+    "entry": "/estoque → Movimentos",
+    "functionality": "Entradas, saídas, ajustes e consulta",
+    "behavior": "Quantidade positiva em entrada/saída; ajuste assinado com justificativa; controle de saldo e eventos imutáveis. Itens serializados remetem à gestão de unidades, não aceitam lançamento comum pela UI.",
+    "endpoints": "GET /api/stock/items/:id/movements; POST /api/stock/items/:id/movements",
+    "evidence": "P/Field.tsx (Movements); E/estoque.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "OS-13",
+    "backendState": "Implementada",
+    "entry": "/estoque → Unidades",
+    "functionality": "Receber lote e distribuir unidades",
+    "behavior": "Entrada por séries separadas por linha/espaço/vírgula; localizar unidade, situação e detentor; transferir técnico↔almoxarifado; não instala por transferência, instalação vem da OS.",
+    "endpoints": "GET /api/stock/items/:id/units; POST /api/stock/items/:id/units; POST /api/stock/units/:id/transfer",
+    "evidence": "P/Field.tsx (Units); E/estoque.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "OS-14",
+    "backendState": "Implementada",
+    "entry": "/estoque → Unidades",
+    "functionality": "Retirada, defeito, conserto, baixa e histórico",
+    "behavior": "Retirar instalada para estoque; marcar defeito; consertada retorna; baixa definitiva exige motivo; histórico por unidade. Há restrições de transição/saldo no Go; não é inventário contábil depreciável.",
+    "endpoints": "POST /api/stock/units/:id/status; GET /api/stock/units/:id/events",
+    "evidence": "P/Field.tsx; E/estoque.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "FI-01",
+    "backendState": "Implementada",
+    "entry": "/faturas",
+    "functionality": "Listagem, filtros e visão financeira",
+    "behavior": "q, status abertas/vencidas/pagas/em conciliação/canceladas, empresa, paginação, CSV; indicadores aberto/vencido/recebido/mês/conciliação. Sumário por empresa; gráfico mensal é consulta própria e não recebe automaticamente esse filtro.",
+    "endpoints": "GET /api/invoices; GET /api/finance/summary; GET /api/finance/monthly",
+    "evidence": "P/Finance.tsx; L/dinamicas.go; L/auxiliares.go; L/grupos.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "FI-02",
+    "backendState": "Implementada",
+    "entry": "/faturas → Gerar mensalidades",
+    "functionality": "Geração idempotente por competência",
+    "behavior": "Competência AAAA-MM; Go aplica contrato vigente, versão, proporcional do primeiro mês se configurado, descontos e adicionais em linhas próprias; restrição de unicidade evita duplicação. Texto antigo da tela diz que não aplica regras, contrariando SQL atual.",
+    "endpoints": "POST /api/finance/generate",
+    "evidence": "P/Finance.tsx; E/financeiro.go; G/finance/core.go; G/finance/sql/; M/00021_financeiro_avancado.sql; M/00031_condicoes_contrato.sql; M/00044_produtos_adicionais.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "FI-03",
+    "backendState": "Implementada",
+    "entry": "Fatura [modal]",
+    "functionality": "Consulta detalhada e saldo devido",
+    "behavior": "Itens, principal/recebido/status/competência/datas; pagamentos e estornos; eventos do gateway; breakdown multa/juros/desconto/saldo. Endpoints reais; meios externos dependem do gateway separado.",
+    "endpoints": "GET /api/invoices/:id; GET /api/invoices/:id/due",
+    "evidence": "P/Finance.tsx (InvoiceModal); L/grupos.go; L/auxiliares.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "FI-04",
+    "backendState": "Implementada",
+    "entry": "Fatura → Baixa manual",
+    "functionality": "Recebimento integral/parcial, taxas e desconto",
+    "behavior": "Valor em centavos, data, meio, observação; marcar parcial mantém saldo; opcional aplicar multa e juros calculados, desconto com motivo. Exige finance:write; saldo divergente pode ir à conciliação; baixa pode gerar evento/reativação conforme política.",
+    "endpoints": "POST /api/invoices/:id/manual-payment",
+    "evidence": "P/Finance.tsx; E/financeiro.go; G/finance/core.go (Manual/settle/Paid)",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "FI-05",
+    "backendState": "Implementada",
+    "entry": "Fatura → Pagamentos → Estornar",
+    "functionality": "Estorno de baixa manual",
+    "behavior": "Selecionar pagamento manual ainda não estornado, motivo mínimo de cinco caracteres; lança reversão e recalcula título, preserva histórico. Não é devolução bancária; não suspende imediatamente o acesso já reativado.",
+    "endpoints": "POST /api/invoices/:id/payments/:paymentId/reverse",
+    "evidence": "P/Finance.tsx; E/financeiro.go; G/finance/core.go (Reverse)",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "FI-06",
+    "backendState": "Implementada",
+    "entry": "Fatura → Cancelar",
+    "functionality": "Cancelamento de título com motivo",
+    "behavior": "UI oferece para open; Go valida estado/restrições e registra cancelamento. Não há conector bancário para cancelar boleto real.",
+    "endpoints": "POST /api/invoices/:id/cancel",
+    "evidence": "P/Finance.tsx; E/financeiro.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "FI-07",
+    "backendState": "Implementada",
+    "entry": "Fatura → Resolver conciliação",
+    "functionality": "Decisão manual de divergência",
+    "behavior": "Escolher paga/aberta com justificativa mínima; registra decisão, reconcilia estado e pode disparar processamento de quitação. Não homologa gateway.",
+    "endpoints": "POST /api/invoices/:id/resolve",
+    "evidence": "P/Finance.tsx; E/financeiro.go; G/finance/core.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "FI-08",
+    "backendState": "Implementada",
+    "entry": "/contratos/:id → Financeiro",
+    "functionality": "Extrato financeiro do contrato",
+    "behavior": "Resumo de aberto/vencido/conciliação e tabela; abre mesmo modal de fatura; layout em Acesso para quem lê rede e em Contrato para os demais; finance:read.",
+    "endpoints": "GET /api/contracts/:id/finance",
+    "evidence": "P/Finance.tsx (ContractFinance); L/grupos.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "FI-09",
+    "backendState": "Implementada",
+    "entry": "Contrato → Financeiro → Acordo",
+    "functionality": "Renegociar títulos",
+    "behavior": "Selecionar abertas, até 24 títulos; parcelas 1–24, primeiro vencimento, desconto, taxas e justificativa; usa saldo líquido de parciais; cancela originais e cria parcelas; pode pedir religamento. Não movimenta dinheiro externo.",
+    "endpoints": "POST /api/contracts/:id/agreement",
+    "evidence": "P/Finance.tsx (AgreementModal); G/finance/advanced.go (Agreement); E/financeiro.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "FI-10",
+    "backendState": "Implementada",
+    "entry": "Contrato → Liberação por confiança",
+    "functionality": "Conceder prazo e consultar histórico",
+    "behavior": "Elegibilidade por contrato/estado, política/prazo/intervalo e histórico; equipe informa dias e motivo, trust:grant. Registra liberação e operação de reativação; expiração depende das rotinas e da política de suspensão.",
+    "endpoints": "GET /api/contracts/:id/trust-release; POST /api/contracts/:id/trust-release",
+    "evidence": "P/Finance.tsx; G/finance/advanced.go; L/service.go; E/financeiro.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "FI-11",
+    "backendState": "Implementada",
+    "entry": "/politica-cobranca",
+    "functionality": "Configurar regras de cobrança",
+    "behavior": "settings:manage grava gateway none/demo, billing_auto, auto_suspend/dias, auto_resume, rejeição/perfil, confiança/dias/gap, multa percentual, juros mensais e proporcional primeiro mês. finance:read consulta. Jobs só atuam se habilitados.",
+    "endpoints": "GET /api/finance/settings; PUT /api/finance/settings; POST /api/finance/run-auto-suspend",
+    "evidence": "P/Finance.tsx; E/ordens.go (financeSettings); E/financeiro.go; G/finance/gateway.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "FI-12",
+    "backendState": "Implementada",
+    "entry": "Política → Página de aviso",
+    "functionality": "Configurar página pública de bloqueio/redução",
+    "behavior": "Título, textos, telefone, WhatsApp e botão portal; salvar ou page=null desativa; mostra URL pública. Gera HTML real; o redirecionamento do NAS exige configuração externa e não é implantado por este formulário.",
+    "endpoints": "GET /api/notice-page; PUT /api/notice-page; GET /aviso/:slug",
+    "evidence": "P/Finance.tsx (NoticePageCard); E/config.go; L/notice.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "FI-13",
+    "backendState": "Implementada",
+    "entry": "/faturas → Contabilidade",
+    "functionality": "Exportar CSV contábil",
+    "behavior": "Tipo recebimentos/faturas e datas; backend também aceita company_id; planilha com valores/dados de conferência e registro de auditoria. Não gera NFSe/NFCom ou arquivo fiscal homologado.",
+    "endpoints": "GET /api/finance/export",
+    "evidence": "P/Finance.tsx (AccountingExport); E/relatorios.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "FI-14",
+    "backendState": "Implementada",
+    "entry": "/relatorios-cobranca",
+    "functionality": "Quatro relatórios e CSV",
+    "behavior": "Aging por faixa; recebido por plano/meio líquido de estornos e datas; contrato sem fatura do mês; candidatos a cancelar por dias. Links para contrato, sem cancelamento automático. Go oferece filtros plan_id/pop_id/tag no aging além da UI.",
+    "endpoints": "GET /api/finance/reports/aging; GET /api/finance/reports/receipts; GET /api/finance/reports/without-invoice; GET /api/finance/reports/to-cancel",
+    "evidence": "P/Cobranca.tsx; E/relatorios.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "FI-15",
+    "backendState": "Demonstrativa",
+    "entry": "/conciliacao",
+    "functionality": "Conciliação automática com gateway demo",
+    "behavior": "Consulta cobranças fictícias, recupera pagamento perdido, trata duplicidade e valor divergente; lista eventos e faturas para decisão manual. chargePayments só implementa demo; none não consulta instituição financeira.",
+    "endpoints": "GET /api/finance/reconciliation; POST /api/finance/reconcile",
+    "evidence": "P/Finance.tsx; G/finance/gateway.go (chargePayments/Reconcile); E/financeiro.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "FI-16",
+    "backendState": "Demonstrativa",
+    "entry": "Fatura → Simular pagador",
+    "functionality": "Simulação de pagamento e cobrança",
+    "behavior": "Modos webhook/duplicate/lost/divergent; persiste pagamento de teste em demo_gateway_charges; códigos Pix/boleto explicitamente não pagáveis. Requer modo demo e gateway demo.",
+    "endpoints": "POST /api/demo-gateway/pay",
+    "evidence": "P/Finance.tsx; E/gateway.go; G/finance/core.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "FI-17",
+    "backendState": "Não confirmado",
+    "entry": "Sem interface de gateway real",
+    "functionality": "Cobrança bancária real, Pix/boleto pagável",
+    "behavior": "Não foi localizado conector de gateway além de none/demo; emissão real, extrato real, reembolso e homologação dependem de implementação/fornecedor. Este item registra ausência de comprovação, não uma capacidade disponível.",
+    "endpoints": "—",
+    "evidence": "G/finance/core.go (Charges/Demo); G/finance/gateway.go (chargePayments); E/gateway.go; E/ordens.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "RE-01",
+    "backendState": "Implementada",
+    "entry": "/rede → Saúde",
+    "functionality": "Indicadores e inventário de agentes/equipamentos",
+    "behavior": "Agentes offline, falhas recentes, divergências e operações em espera; atualização periódica. Lista equipamentos e vínculo com agente, estado e manutenção. Sujeito a network:read e disponibilidade dos relatos.",
+    "endpoints": "GET /api/network/health; GET /api/agents; GET /api/devices",
+    "evidence": "P/Network.tsx; E/rede.go; L/consultas_generated.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "RE-02",
+    "backendState": "Implementada",
+    "entry": "/rede → Agentes",
+    "functionality": "Cadastrar e administrar agente",
+    "behavior": "Nome, criação, rotação de token, revogação/reativação e limpeza da associação de certificado; token e chave pública de assinatura exibidos no momento da emissão. Certificado e situação de sincronização são acompanhados.",
+    "endpoints": "POST /api/agents; PATCH /api/agents/:id",
+    "evidence": "P/Network.tsx; E/rede.go; G/agent/; M/00002_rede_operacoes.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "RE-03",
+    "backendState": "Implementada",
+    "entry": "/rede → Equipamentos",
+    "functionality": "Cadastrar equipamento conectado a agente",
+    "behavior": "Nome, driver, host, porta, referência de credencial e agente. Credenciais de equipamentos ficam na configuração local do agente; configuração demo é limitada pelo ambiente. Operação depende de comunicação com agente.",
+    "endpoints": "POST /api/devices; PATCH /api/devices/:id",
+    "evidence": "P/Network.tsx; E/rede.go; services/network-agent/nexo_agent/agent.py",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "RE-04",
+    "backendState": "Implementada",
+    "entry": "/rede → Concentradores",
+    "functionality": "Adicionar NAS RADIUS integrado",
+    "behavior": "Dados do NAS, fabricante, endereço/forma de conexão, segredo, instruções e estado. Modos de conexão, incluindo túnel, dependem das opções suportadas; comandos copiados não configuram o equipamento automaticamente. Segredo é mostrado na criação/rotação.",
+    "endpoints": "POST /api/radius/devices; GET /api/radius/status; GET /api/radius/devices/:id/setup",
+    "evidence": "P/Concentradores.tsx; E/radius.go; L/radius_setup.go; G/radius/; M/00036_radius_integrado.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "RE-05",
+    "backendState": "Implementada",
+    "entry": "Concentrador → Configuração",
+    "functionality": "Parâmetros, segredo, túnel e reaplicação",
+    "behavior": "Alterar parâmetros de sessões simultâneas e intervalo de accounting; rodar novo segredo/túnel, inspecionar handshake e reaplicar contas. Operações não demonstram conectividade real por si só.",
+    "endpoints": "PATCH /api/radius/devices/:id; POST /api/radius/devices/:id/secret; POST /api/radius/devices/:id/tunnel; POST /api/devices/:id/reapply",
+    "evidence": "P/Concentradores.tsx; E/radius.go; E/rede.go; G/vpn/vpn.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "RE-06",
+    "backendState": "Implementada",
+    "entry": "/rede → Conversão",
+    "functionality": "Converter concentrador legado ao integrado",
+    "behavior": "Ação para dispositivo compatível, com aviso das contas que precisam de segredo/reaplicação. Alterar cadastro não garante configuração remota do NAS.",
+    "endpoints": "POST /api/devices/:id/convert-to-integrated",
+    "evidence": "P/Concentradores.tsx; E/radius.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "RE-07",
+    "backendState": "Implementada",
+    "entry": "Contrato → Acesso",
+    "functionality": "Criar acesso e manter credenciais",
+    "behavior": "Escolher concentrador, PPPoE/hotspot com login e senha ou IPoE com MAC conforme compatibilidade; senha gerada ou fornecida; atualizar senha/MAC, remover associação MAC e reaplicar. Credenciais não são redisponibilizadas como texto pela ficha.",
+    "endpoints": "GET /api/contracts/:id/service; POST /api/contracts/:id/service; PATCH /api/resources/:id/mac; PATCH /api/resources/:id/secret",
+    "evidence": "P/Service.tsx; E/rede.go; E/acessos.go; G/network/",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "RE-08",
+    "backendState": "Implementada",
+    "entry": "Contrato → Acesso",
+    "functionality": "Provisionar, suspender, reativar e desconectar",
+    "behavior": "Botões disparam operações assinadas e versionadas; controle por network:operate, dispositivo, estado desejado e política. Resultado depende do agente ou executor RADIUS e da rede real.",
+    "endpoints": "POST /api/resources/:id/:action; GET /api/operations/:id",
+    "evidence": "P/Service.tsx; E/rede.go; G/network/engine.go; G/radius/",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "RE-09",
+    "backendState": "Implementada",
+    "entry": "/operacoes e detalhes",
+    "functionality": "Inspecionar fila e evidências de operações",
+    "behavior": "Lista e modal mostram estado, tentativas, etapas, datas, validade, chave de idempotência, resultado e comparação desejado/observado; recuperação de resultado incerto é controlada pelo motor.",
+    "endpoints": "GET /api/operations; GET /api/operations/:id",
+    "evidence": "P/Network.tsx; E/rede.go; G/network/attempts.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "RE-10",
+    "backendState": "Implementada",
+    "entry": "/online",
+    "functionality": "Consultar sessões e solicitar desconexão",
+    "behavior": "Busca, seleção em lote até 200, CSV e motivo; servidor processa recursos individualmente e informa aceitos/recusados. Visão é baseada no accounting disponível, não garante sessão em tempo real.",
+    "endpoints": "GET /api/network/online; POST /api/network/disconnect",
+    "evidence": "P/Atendimento.tsx; E/operacoes.go; E/relatorios.go; G/radius/",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "RE-11",
+    "backendState": "Implementada",
+    "entry": "Contrato → Acesso → Sessões e autenticações",
+    "functionality": "Consultar sessões, tráfego e tentativas",
+    "behavior": "Histórico de accounting, início/fim, IP/NAS, aceites/rejeições e MAC conforme origem; horários e totais dependem de dados enviados ao RADIUS/relatórios do agente.",
+    "endpoints": "GET /api/contracts/:id/sessions; GET /api/contracts/:id/radius-log",
+    "evidence": "P/Service.tsx; P/Concentradores.tsx; P/Atendimento.tsx; E/relatorios.go; L/usage.go; M/00036_radius_integrado.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "RE-12",
+    "backendState": "Implementada",
+    "entry": "Contrato → CPE",
+    "functionality": "Vincular equipamento e administrar Wi-Fi",
+    "behavior": "Busca candidatos no ACS, vincula/desvincula, mostra dados, atualiza parâmetros, reinicia e configura rede Wi-Fi quando o dispositivo expõe os parâmetros. Envia tarefas ao ACS; execução assíncrona e compatibilidade por modelo não são comprovadas pela simples aceitação da tarefa.",
+    "endpoints": "GET /api/contracts/:id/cpe; GET /api/contracts/:id/cpe/candidates; POST /api/contracts/:id/cpe/link; DELETE /api/contracts/:id/cpe/link; POST /api/contracts/:id/cpe/wifi; POST /api/contracts/:id/cpe/reboot; POST /api/contracts/:id/cpe/refresh",
+    "evidence": "P/Cpe.tsx; E/cpe.go; G/acs/",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "RE-13",
+    "backendState": "Demonstrativa",
+    "entry": "/rede e /onus em ambiente demo",
+    "functionality": "Equipamentos e observações simuladas",
+    "behavior": "Drivers e contas sintéticas existem para demonstração; o driver real do agente e o RADIUS integrado são caminhos distintos. Não interpreta a execução demo como equipamento físico.",
+    "endpoints": "POST /api/devices; POST /api/resources/:id/:action",
+    "evidence": "P/Network.tsx; services/network-agent/nexo_agent/drivers/; G/config/",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "RE-14",
+    "backendState": "Implementada",
+    "entry": "Contrato → Acesso → Consumo e disponibilidade",
+    "functionality": "Visualizar uso e disponibilidade estimada",
+    "behavior": "Consumo mensal e série por hora/dia/semana/ano; disponibilidade por 7, 15 ou 30 dias calculada com sessões de accounting. A estimativa não é monitoramento direto de enlace e depende dos registros recebidos.",
+    "endpoints": "GET /api/contracts/:id/usage; GET /api/contracts/:id/usage-series; GET /api/contracts/:id/availability",
+    "evidence": "P/Extras.tsx; P/Atendimento.tsx; L/usage.go; L/dinamicas.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "IN-01",
+    "backendState": "Implementada",
+    "entry": "/onus e Contrato → ONU",
+    "functionality": "Descobrir e vincular ONU ao contrato",
+    "behavior": "Lista descobertas do agente; serial/PON, estado, sinal RX/TX e vínculo; cadastro escolhe OLT, serial ou descoberta, porta PON, perfis e VLAN. Validação de serial e requisitos Huawei são aplicados; cada contrato ativo tem limite de vínculo segundo o backend.",
+    "endpoints": "GET /api/contracts/:id/onu; POST /api/contracts/:id/onu",
+    "evidence": "P/Olt.tsx; E/olt.go; G/agent/; M/00008_olt_onu.sql; M/00009_olt_huawei.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "IN-02",
+    "backendState": "Implementada",
+    "entry": "ONU → Autorizar/desautorizar",
+    "functionality": "Enviar comandos e acompanhar execução",
+    "behavior": "Solicita autorização ou remoção ao agente, registra estados desejado/observado, tentativas e evidências; substituição requer estado anterior compatível. O driver Huawei usa SSH/CLI; integração real depende da configuração e homologação do equipamento.",
+    "endpoints": "POST /api/onus/:id/:action; GET /api/operations/:id",
+    "evidence": "P/Olt.tsx; E/olt.go; services/network-agent/nexo_agent/drivers/",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "IN-03",
+    "backendState": "Parcial",
+    "entry": "/onus",
+    "functionality": "Cobertura de equipamentos OLT",
+    "behavior": "Há implementação específica Huawei e driver de demonstração, sem evidência de suporte genérico a todos os fabricantes/modelos. Código do driver informa necessidade de validação em ambiente real; ausência de homologação não implica que o driver seja fictício.",
+    "endpoints": "POST /api/contracts/:id/onu; POST /api/onus/:id/:action",
+    "evidence": "E/olt.go; services/network-agent/nexo_agent/drivers/",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "IN-04",
+    "backendState": "Implementada",
+    "entry": "/ftth → Caixas",
+    "functionality": "Cadastrar e manter CTO/CEO",
+    "behavior": "Nome, tipo, capacidade, endereço/coordenadas, caixa pai, OLT/PON e observações; editar/excluir conforme restrições, inclusive prevenção de ciclos e uso existente; visualização de ligações entre caixas.",
+    "endpoints": "GET /api/ftth/boxes; POST /api/ftth/boxes; PATCH /api/ftth/boxes/:id; DELETE /api/ftth/boxes/:id",
+    "evidence": "P/Field.tsx; E/infraestrutura.go; M/00011_os_estoque_ftth.sql; M/00040_mapa_coordenadas.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "IN-05",
+    "backendState": "Implementada",
+    "entry": "Caixa FTTH → Portas",
+    "functionality": "Reservar e liberar porta",
+    "behavior": "Selecionar porta, contrato ou anotação; impedir conflitos de porta/contrato segundo regras; remover reserva. Exibe uso e vínculo à ficha correspondente.",
+    "endpoints": "POST /api/ftth/boxes/:id/drops; DELETE /api/ftth/drops/:id",
+    "evidence": "P/Field.tsx; E/infraestrutura.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "IN-06",
+    "backendState": "Parcial",
+    "entry": "/ftth e /mapa",
+    "functionality": "Projeto físico completo da rede óptica",
+    "behavior": "Existe mapa esquemático e gestão de caixas/portas, mas não foram identificados cadastro de traçado completo de fibra, fusões, OTDR ou importação de projeto GIS. O desenho não prova conectividade física.",
+    "endpoints": "GET /api/ftth/boxes; GET /api/map/points",
+    "evidence": "P/Field.tsx; P/Mapa.tsx; E/infraestrutura.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "IN-07",
+    "backendState": "Implementada",
+    "entry": "/noc",
+    "functionality": "Visão operacional e configurações",
+    "behavior": "Indicadores de agentes, ONUs, falhas de operações, divergências, OS e SLA; alertas derivados de dados armazenados; parâmetros de RX, limiar de falhas por PON e remoção de ONU ao encerrar contrato. Permissão e módulo NOC aplicam-se.",
+    "endpoints": "GET /api/noc/overview; PUT /api/noc/settings",
+    "evidence": "P/Noc.tsx; E/noc.go; G/jobs/; M/00013_noc.sql; M/00014_onu_encerramento.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "IN-08",
+    "backendState": "Implementada",
+    "entry": "Contrato → Diagnóstico",
+    "functionality": "Diagnóstico baseado em regras e evidências",
+    "behavior": "Mostra achados, severidade, evidências e sugestões a partir de estados disponíveis de rede/serviço/ONU; não executa teste de cabo, ping ou OTDR apenas por abrir o diagnóstico.",
+    "endpoints": "GET /api/contracts/:id/diagnosis",
+    "evidence": "P/Noc.tsx; E/noc.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "IN-09",
+    "backendState": "Implementada",
+    "entry": "/mapa",
+    "functionality": "Mapa de contratos, POPs e caixas",
+    "behavior": "Camadas e filtros; pan/zoom e busca; pontos limitados por área e truncamento informado; alterar coordenadas de contrato/POP quando permitido. Usa mapas externos no navegador; não faz geocodificação automática.",
+    "endpoints": "GET /api/map/points; PUT /api/contracts/:id/location; PUT /api/pops/:id/location",
+    "evidence": "P/Mapa.tsx; E/infraestrutura.go; L/dinamicas.go; M/00040_mapa_coordenadas.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "IN-10",
+    "backendState": "Implementada",
+    "entry": "/ipam → Pools e alocações",
+    "functionality": "Manter pools e reservas IPv4/IPv6 individuais",
+    "behavior": "Criar/excluir pool CIDR, tipo e parâmetros; reservar endereço manualmente ou selecionar próximo IPv4 livre dentro dos limites do algoritmo; associar contrato ou descrever reserva e liberar. Aplicação do IPv4 no acesso depende de compatibilidade e reaplicação.",
+    "endpoints": "GET /api/ipam/pools; POST /api/ipam/pools; DELETE /api/ipam/pools/:id; POST /api/ipam/pools/:id/allocations; DELETE /api/ipam/allocations/:id",
+    "evidence": "P/Ipam.tsx; E/ipam.go; E/infraestrutura.go; M/00010_ipam_cgnat.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "IN-11",
+    "backendState": "Parcial",
+    "entry": "/ipam → Delegações IPv6",
+    "functionality": "Reservar prefixo para contrato",
+    "behavior": "Cria/libera delegação manual ou automática com comprimento permitido e unicidade; o código RADIUS examinado não entrega automaticamente prefixo IPv6 ao NAS. Portanto o ciclo de provisionamento IPv6 não está completo.",
+    "endpoints": "POST /api/ipam/pools/:id/delegations; DELETE /api/ipam/delegations/:id",
+    "evidence": "P/Ipam.tsx; E/ipam.go; G/radius/vendor.go; M/00017_ipv6_delegacao.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "IN-12",
+    "backendState": "Implementada",
+    "entry": "/ipam → CGNAT",
+    "functionality": "Planejar blocos de portas e gerar script",
+    "behavior": "Valida faixa privada/pública, quantidade de portas e capacidade; cria plano determinístico, visualiza mapa, gera script RouterOS e retira plano preservando histórico. O script precisa ser aplicado externamente.",
+    "endpoints": "POST /api/cgnat/plans/check; POST /api/cgnat/plans; POST /api/cgnat/plans/:id/retire; GET /api/cgnat/plans/:id/map; GET /api/cgnat/plans/:id/script",
+    "evidence": "P/Ipam.tsx; E/ipam.go; L/cgnat.go; M/00010_ipam_cgnat.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "IN-13",
+    "backendState": "Parcial",
+    "entry": "/ipam → Rastrear CGNAT",
+    "functionality": "Encontrar o responsável em um instante",
+    "behavior": "Busca IP público e porta, com horário opcional; backend inclui titulares históricos, mas a tela apresenta dados atuais e não exibe a coleção holders_at. A resposta visual isolada pode não comprovar titularidade histórica.",
+    "endpoints": "GET /api/cgnat/trace",
+    "evidence": "P/Ipam.tsx; E/ipam.go; M/00010_ipam_cgnat.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "IN-14",
+    "backendState": "Implementada",
+    "entry": "/consulta-ip",
+    "functionality": "Pesquisa legal por IP e período",
+    "behavior": "IP, porta opcional, intervalo, fuso e margem; retorna candidatos e sessões de accounting/CGNAT, permite impressão e CSV quando há sessões e mantém histórico auditável. Janela e quantidade têm limites no servidor.",
+    "endpoints": "POST /api/legal/ip-lookup",
+    "evidence": "P/ConsultaIp.tsx; E/ipam.go; M/00010_ipam_cgnat.sql; M/00025_sessoes_contatos_pops.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "IN-15",
+    "backendState": "Parcial",
+    "entry": "/consulta-ip → IPv6 histórico",
+    "functionality": "Identificar titular IPv6 anterior",
+    "behavior": "A consulta usa delegações registradas e sua data de criação; não foi encontrada manutenção completa de titulares de delegação anteriores após liberação. Resultados históricos exigem conferência das fontes existentes.",
+    "endpoints": "POST /api/legal/ip-lookup",
+    "evidence": "E/ipam.go; M/00017_ipv6_delegacao.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "IN-16",
+    "backendState": "Implementada",
+    "entry": "/manutencoes",
+    "functionality": "Comunicar manutenção programada",
+    "behavior": "Cadastrar aviso, período/abrangência, consultar, cancelar e disparar notificações; avisos chegam ao portal conforme vínculo e regras. Envio externo depende de canais configurados.",
+    "endpoints": "POST /api/maintenance-notices; POST /api/maintenance-notices/:id/cancel; POST /api/maintenance-notices/:id/notify",
+    "evidence": "P/Extras.tsx; E/condicoes.go; E/rotinas.go; M/00022_cadastro_manutencao_campo.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "IN-17",
+    "backendState": "Implementada",
+    "entry": "Contrato → Acesso → Infraestrutura",
+    "functionality": "Consultar endereços, prefixos e caixa",
+    "behavior": "Cartão consulta IPv4, delegações IPv6 e caixa/porta vinculados ao contrato; cadastro e liberação são feitos nas telas IPAM e FTTH.",
+    "endpoints": "GET /api/contracts/:id/ips; GET /api/contracts/:id/ipv6; GET /api/contracts/:id/ftth",
+    "evidence": "P/Noc.tsx; L/consultas.go; L/grupos.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AD-01",
+    "backendState": "Implementada",
+    "entry": "/usuarios",
+    "functionality": "Cadastro e gestão da equipe",
+    "behavior": "Criar nome/e-mail/perfil/senha; trocar perfil, ativar/bloquear outro usuário, redefinir MFA e associar POPs; restrições para ações sobre o próprio usuário. Não há editor visual de permissões arbitrárias.",
+    "endpoints": "GET /api/users; POST /api/users; PATCH /api/users/:id; PUT /api/users/:id/pops",
+    "evidence": "P/Users.tsx; G/auth/permissions.go; I/; M/00034_escopo_pop_aviso_documentos.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AD-02",
+    "backendState": "Parcial",
+    "entry": "/usuarios",
+    "functionality": "Redefinição de senha de outro usuário",
+    "behavior": "O backend permite atualização da senha pelo endpoint de administração, mas não foi encontrado controle correspondente na tela de usuários, embora o texto de ajuda de login sugira procurar o administrador.",
+    "endpoints": "PATCH /api/users/:id",
+    "evidence": "P/Users.tsx; P/Login.tsx; I/",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AD-03",
+    "backendState": "Implementada",
+    "entry": "/provedores",
+    "functionality": "Provedores e módulos de produto",
+    "behavior": "Operador SaaS cria provedor e administrador, altera status e módulos disponíveis; entra em suporte com motivo e sai pelo banner. Operações são separadas do contexto comum do provedor.",
+    "endpoints": "GET /api/tenants; POST /api/tenants; PATCH /api/tenants/:id; POST /api/support/enter; POST /api/support/exit",
+    "evidence": "P/Tenants.tsx; I/; G/tenancy/; M/00018_modulos.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AD-04",
+    "backendState": "Implementada",
+    "entry": "/empresas e Contrato → Empresa",
+    "functionality": "Empresas de faturamento",
+    "behavior": "Cadastrar nome/CNPJ, definir padrão, ativar/inativar respeitando restrição da padrão e associar ao contrato; filtro em faturas. Não constitui emissão fiscal automática.",
+    "endpoints": "GET /api/companies; POST /api/companies; PATCH /api/companies/:id; PUT /api/contracts/:id/company",
+    "evidence": "P/Empresas.tsx; E/empresas_tags.go; M/00041_empresas.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AD-05",
+    "backendState": "Implementada",
+    "entry": "/pops",
+    "functionality": "Cadastrar e administrar POPs",
+    "behavior": "Nome, cidade e estado, contagens de contratos; ativar/inativar e associar a usuários/contratos. Edição de dados cadastrais existe no servidor, mas não foi localizada na tela.",
+    "endpoints": "GET /api/pops; POST /api/pops; PATCH /api/pops/:id; PUT /api/contracts/:id/pop",
+    "evidence": "P/Atendimento.tsx; E/config.go; M/00025_sessoes_contatos_pops.sql; M/00034_escopo_pop_aviso_documentos.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AD-06",
+    "backendState": "Implementada",
+    "entry": "/avisos",
+    "functionality": "Notificações do provedor via webhook",
+    "behavior": "Salvar/remover URL, testar entrega e executar pendentes; histórico de estados e tentativas. Mensagens saem via HTTP; integração depende do destinatário, rede e configuração segura.",
+    "endpoints": "GET /api/notifications; PUT /api/notifications/settings; POST /api/notifications/test; POST /api/notifications/deliver",
+    "evidence": "P/Notices.tsx; E/integracoes.go; G/outbound/; M/00016_avisos.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AD-07",
+    "backendState": "Implementada",
+    "entry": "/avisos-assinante → Canais",
+    "functionality": "Cadastrar e testar canais de mensagem",
+    "behavior": "Nome, URL, nomes dos campos de telefone e mensagem e autorização opcional; ativar, desativar, excluir, enviar teste; segredo protegido no backend. É um adaptador HTTP genérico, não um conector universal homologado para WhatsApp.",
+    "endpoints": "GET /api/notice-channels; POST /api/notice-channels; PATCH /api/notice-channels/:id; DELETE /api/notice-channels/:id; POST /api/notice-channels/:id/test",
+    "evidence": "P/AvisosAssinante.tsx; E/avisos.go; E/integracoes.go; G/outbound/; M/00027_avisos_ao_assinante.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AD-08",
+    "backendState": "Implementada",
+    "entry": "/avisos-assinante → Modelos",
+    "functionality": "Criar e excluir textos com variáveis",
+    "behavior": "Modelo parametrizado de mensagem e catálogo de variáveis; exclusão sujeita ao uso. A tela não oferece edição de modelo existente.",
+    "endpoints": "GET /api/notice-templates; POST /api/notice-templates; DELETE /api/notice-templates/:id",
+    "evidence": "P/AvisosAssinante.tsx; E/avisos.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AD-09",
+    "backendState": "Implementada",
+    "entry": "/avisos-assinante → Régua e histórico",
+    "functionality": "Disparar mensagens de cobrança",
+    "behavior": "Regra por dias em relação ao vencimento, janela, canal, modelo e plano opcional; criar, pausar, ativar, excluir e executar agora. Enfileiramento considera consentimento e deduplicação; histórico não é caixa de entrada ou conversa.",
+    "endpoints": "GET /api/notice-rules; POST /api/notice-rules; PATCH /api/notice-rules/:id; DELETE /api/notice-rules/:id; POST /api/notice-rules/run",
+    "evidence": "P/AvisosAssinante.tsx; E/avisos.go; G/jobs/; M/00035_fila_de_avisos.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AD-10",
+    "backendState": "Implementada",
+    "entry": "/integracoes → Tokens",
+    "functionality": "Credenciais para API pública",
+    "behavior": "Criar token com nome, escopos, limite e expiração, exibir segredo uma vez, consultar prefixo/uso e revogar. API pública tem escopos e rate limit próprios.",
+    "endpoints": "GET /api/api-tokens; POST /api/api-tokens; DELETE /api/api-tokens/:id",
+    "evidence": "P/Integracoes.tsx; E/acessos.go; E/integracoes.go; E/public.go; M/00029_api_publica_webhooks.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AD-11",
+    "backendState": "Implementada",
+    "entry": "/integracoes → Webhooks",
+    "functionality": "Destinos, assinatura e entregas",
+    "behavior": "Criar URL/eventos/segredo, ativar/desativar, excluir, rotacionar segredo, testar, consultar histórico e solicitar repetição de falha. Assinatura HMAC e validação de destino são feitas no servidor; sucesso depende do receptor.",
+    "endpoints": "GET /api/webhook-endpoints; POST /api/webhook-endpoints; PATCH /api/webhook-endpoints/:id; DELETE /api/webhook-endpoints/:id; POST /api/webhook-endpoints/:id/rotate-secret; POST /api/webhook-endpoints/:id/test; POST /api/webhook-deliveries/:id/retry",
+    "evidence": "P/Integracoes.tsx; E/integracoes.go; G/outbound/; G/jobs/",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AD-12",
+    "backendState": "Implementada",
+    "entry": "/qualidade → Catálogos",
+    "functionality": "Tipos, classificações, causas e motivos",
+    "behavior": "Criar e ativar/desativar itens de atendimento, OS e anotações; sem edição do nome na UI, embora PATCH aceite alteração no backend.",
+    "endpoints": "GET /api/catalogs; POST /api/catalogs; PATCH /api/catalogs/:id",
+    "evidence": "P/Qualidade.tsx; E/config.go; M/00028_fluxo_os_catalogos_sla.sql; M/00030_estados_motivos_anotacoes.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AD-13",
+    "backendState": "Implementada",
+    "entry": "/qualidade → SLA",
+    "functionality": "Políticas e acompanhamento de prazo",
+    "behavior": "Criar para atendimento ou OS por prioridade/tipo, prazo em minutos e responsável de escalonamento; ativar/desativar/excluir quando permitido; relatório de violações e tempos corridos. Alterações completas de política não estão expostas na tela.",
+    "endpoints": "GET /api/sla-policies; POST /api/sla-policies; PATCH /api/sla-policies/:id; DELETE /api/sla-policies/:id; GET /api/reports/sla",
+    "evidence": "P/Qualidade.tsx; E/config.go; L/dinamicas.go; G/jobs/",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AD-14",
+    "backendState": "Implementada",
+    "entry": "/qualidade → Satisfação",
+    "functionality": "Consultar pesquisas de OS",
+    "behavior": "Lista situação, notas e comentários e consolida média e proporção de avaliações positivas; pesquisas são geradas na conclusão da OS e respondidas pelo portal.",
+    "endpoints": "GET /api/surveys; POST /api/portal/surveys/:id",
+    "evidence": "P/Qualidade.tsx; P/Portal.tsx; E/operacoes.go; E/config.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AD-15",
+    "backendState": "Implementada",
+    "entry": "/qualidade → Campos personalizados",
+    "functionality": "Definir e usar campos de assinante/contrato",
+    "behavior": "Nome/chave, tipo texto/número/data/booleano/seleção, opções e obrigatoriedade; criar e ativar/desativar; valores editados nas fichas. Servidor permite atualizar mais propriedades do que a tela expõe.",
+    "endpoints": "GET /api/custom-fields; POST /api/custom-fields; PATCH /api/custom-fields/:id",
+    "evidence": "P/Qualidade.tsx; P/Extras.tsx; E/config.go; E/custom.go; M/00032_campos_kits_comissao.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AD-16",
+    "backendState": "Implementada",
+    "entry": "/qualidade → Kits",
+    "functionality": "Criar kits de materiais",
+    "behavior": "Nome e itens não serializados com quantidade; ativar/desativar e aplicar em OS para baixa transacional. A UI não oferece editor posterior dos itens de um kit.",
+    "endpoints": "GET /api/install-kits; POST /api/install-kits; PATCH /api/install-kits/:id; POST /api/work-orders/:id/kit",
+    "evidence": "P/Qualidade.tsx; P/Field.tsx; E/documentos.go; E/estoque.go; E/materiais.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AD-17",
+    "backendState": "Parcial",
+    "entry": "/qualidade → Comissões",
+    "functionality": "Regras e relatório de comissões",
+    "behavior": "Regras de venda/OS, natureza e valores de responsável/auxiliar; relatório por período e técnico. Apuração usa regras atuais para registros históricos e não há folha, pagamento ou liquidação de comissão.",
+    "endpoints": "GET /api/commission-rules; POST /api/commission-rules; GET /api/reports/commissions",
+    "evidence": "P/Qualidade.tsx; E/documentos.go; E/relatorios.go; M/00032_campos_kits_comissao.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AD-18",
+    "backendState": "Parcial",
+    "entry": "/anatel",
+    "functionality": "Dados DICI por competência",
+    "behavior": "Consulta agregada por empresa/CNPJ, município, tecnologia, área e velocidade; configuração de tecnologia e código municipal e exportação CSV. Não foi identificada transmissão automática nem comprovada adequação do arquivo a leiaute oficial vigente.",
+    "endpoints": "GET /api/anatel/dici; PUT /api/anatel/municipalities; PUT /api/plans/:id/technology; PUT /api/contracts/:id/service-area",
+    "evidence": "P/Anatel.tsx; E/relatorios.go; E/condicoes.go; M/00049_anatel_dici.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AD-19",
+    "backendState": "Implementada",
+    "entry": "/importacao",
+    "functionality": "Importar CSV em lotes e conferir erros",
+    "behavior": "Selecionar tipo/arquivo, mapear colunas e planos, pré-visualizar com rollback, importar e consultar linhas/avisos; cadastros, contratos, contas, faturas e históricos disponíveis conforme tipo. Provisionamento é etapa separada; contas sem senha exigem tratamento.",
+    "endpoints": "POST /api/import/preview; POST /api/import/apply; GET /api/import/batches; GET /api/import/batches/:id; POST /api/import/batches/:id/provision",
+    "evidence": "P/Import.tsx; E/importacao.go; M/00004_portal_importacao.sql; M/00050_importacao_historico.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AD-20",
+    "backendState": "Parcial",
+    "entry": "/importacao e ferramentas SGP",
+    "functionality": "Migração automatizada de qualquer instalação SGP",
+    "behavior": "Há cliente e ferramentas auxiliares de leitura/exportação e importador CSV mapeado, sem evidência de conector universal com mapeamento completo e corte automático; senhas/relacionamentos e dados reais exigem conferência.",
+    "endpoints": "POST /api/import/preview; POST /api/import/apply",
+    "evidence": "P/Import.tsx; E/importacao.go; tools/sgp-migracao/",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "AD-21",
+    "backendState": "Implementada",
+    "entry": "/auditoria",
+    "functionality": "Consultar eventos e retenção",
+    "behavior": "Lista eventos de auditoria, usuários e ações; ajustar retenção de autenticação, sessões e avisos, com limites. Aplicação de limpeza depende de job habilitado; registro financeiro não é apagado por esse controle.",
+    "endpoints": "GET /api/audit; GET /api/settings/retention; PUT /api/settings/retention",
+    "evidence": "P/Audit.tsx; E/config.go; G/audit/; G/jobs/; M/00053_retencao.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "PO-01",
+    "backendState": "Implementada",
+    "entry": "Portal → Início",
+    "functionality": "Situação dos planos e acesso",
+    "behavior": "Saudação, planos, velocidade, mensalidade, vencimento e acesso desejado/observado; manutenção ativa ou agendada e dados cadastrais de leitura. Saída encerra sessão.",
+    "endpoints": "GET /api/portal/overview; POST /api/auth/logout",
+    "evidence": "P/Portal.tsx; L/service.go; G/auth/",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "PO-02",
+    "backendState": "Implementada",
+    "entry": "Portal → Minhas faturas",
+    "functionality": "Consultar títulos e abrir meios de pagamento",
+    "behavior": "Mostra competência, vencimento, valor e situação; botão abre modal com códigos copiáveis se disponíveis. Em gateway demo são códigos fictícios; nenhum gateway real foi encontrado.",
+    "endpoints": "GET /api/portal/overview",
+    "evidence": "P/Portal.tsx; L/service.go; G/finance/core.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "PO-03",
+    "backendState": "Implementada",
+    "entry": "Portal → Religar internet",
+    "functionality": "Liberação temporária por confiança",
+    "behavior": "Exibe elegibilidade ou prazo ativo; confirmação solicita liberação do próprio contrato segundo política e limites do provedor.",
+    "endpoints": "POST /api/portal/trust-release",
+    "evidence": "P/Portal.tsx; E/financeiro.go; G/finance/advanced.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "PO-04",
+    "backendState": "Implementada",
+    "entry": "Portal → Meu consumo",
+    "functionality": "Resumo e série temporal de uso",
+    "behavior": "Totais e série por hora/dia/semana/ano quando houver dados; gráfico detalhado usa o primeiro contrato ativo, sem seletor entre vários contratos. Depende de accounting disponível.",
+    "endpoints": "GET /api/portal/overview; GET /api/portal/usage-series",
+    "evidence": "P/Portal.tsx; P/Extras.tsx; L/usage.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "PO-05",
+    "backendState": "Implementada",
+    "entry": "Portal → Wi-Fi",
+    "functionality": "Alterar Wi-Fi do próprio CPE",
+    "behavior": "Exibe dados disponíveis do equipamento vinculado e formulário de Wi-Fi; envia tarefa ao ACS para o próprio contrato. Disponibilidade e sucesso dependem de suporte do CPE e do ACS.",
+    "endpoints": "GET /api/portal/cpe; POST /api/portal/cpe/:contractId/wifi",
+    "evidence": "P/Cpe.tsx; E/cpe.go; G/acs/",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "PO-06",
+    "backendState": "Implementada",
+    "entry": "Portal → Atendimento",
+    "functionality": "Abrir chamado e responder",
+    "behavior": "Criar chamado e consultar conversa dos próprios atendimentos, enviar mensagem pública; notas internas de equipe não são expostas. Exige módulo CRM.",
+    "endpoints": "GET /api/portal/tickets; GET /api/portal/tickets/:id; POST /api/portal/tickets; POST /api/portal/tickets/:id/messages",
+    "evidence": "P/Crm.tsx; E/crm.go; L/service.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "PO-07",
+    "backendState": "Implementada",
+    "entry": "Portal → Pesquisa de satisfação",
+    "functionality": "Responder sobre OS concluída",
+    "behavior": "Nota de 1 a 5 e comentário opcional para pesquisa pendente; exige módulo campo. Servidor valida vínculo e situação.",
+    "endpoints": "GET /api/portal/surveys; POST /api/portal/surveys/:id",
+    "evidence": "P/Portal.tsx; E/avisos.go; L/consultas_generated.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "PO-08",
+    "backendState": "Implementada",
+    "entry": "Portal → Documentos para aceitar",
+    "functionality": "Ler e aceitar solicitação",
+    "behavior": "Modal exibe texto e exige marcação de concordância; aceite registra conteúdo, data e evidências de acesso; é possível fechar para decidir depois.",
+    "endpoints": "GET /api/portal/acceptances; POST /api/portal/acceptances/:id/accept",
+    "evidence": "P/Portal.tsx; E/acessos.go; M/00042_aceite_eletronico.sql",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "PO-09",
+    "backendState": "Parcial",
+    "entry": "Portal → Pagamento online real",
+    "functionality": "Quitar fatura em instituição financeira",
+    "behavior": "O botão mostra meios disponibilizados pelo backend; hoje a geração localizada é demonstrativa ou ausente. Não foi encontrada operação real de Pix/boleto no código do gateway.",
+    "endpoints": "GET /api/portal/overview",
+    "evidence": "P/Portal.tsx; G/finance/core.go; G/finance/gateway.go",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "BE-01",
+    "backendState": "Somente backend",
+    "entry": "API pública /public/v1",
+    "functionality": "Catálogo e consultas externas autorizadas",
+    "behavior": "Consulta assinantes, detalhe de assinante, contratos, faturas e OS por token, escopos, módulo API e limite; contexto isolado por provedor.",
+    "endpoints": "GET /public/v1; GET /public/v1/subscribers; GET /public/v1/subscribers/:id; GET /public/v1/contracts; GET /public/v1/invoices; GET /public/v1/work-orders/:id",
+    "evidence": "E/public.go; E/integracoes.go; M/00029_api_publica_webhooks.sql",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-02",
+    "backendState": "Somente backend",
+    "entry": "API pública /public/v1",
+    "functionality": "Criar atendimento e OS por integração",
+    "behavior": "Cria atendimento ou OS com escopo de escrita; chave de idempotência opcional guarda resultado para repetição controlada.",
+    "endpoints": "POST /public/v1/tickets; POST /public/v1/work-orders",
+    "evidence": "E/public.go; E/crm.go; E/ordens.go; M/00029_api_publica_webhooks.sql",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-03",
+    "backendState": "Somente backend",
+    "entry": "API de contratos",
+    "functionality": "Endereço de instalação específico",
+    "behavior": "Atualizar o endereço de instalação associado ao contrato; não foi encontrado editor correspondente na ficha de contrato, apesar de a OS poder usar o endereço do contrato.",
+    "endpoints": "PUT /api/contracts/:id/install-address",
+    "evidence": "E/config.go; M/00028_fluxo_os_catalogos_sla.sql",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-04",
+    "backendState": "Somente backend",
+    "entry": "API de contratos",
+    "functionality": "Indicação de outro contrato",
+    "behavior": "Gravar ou remover referência de indicação entre contratos conforme validações; não foi encontrado controle na ficha.",
+    "endpoints": "PUT /api/contracts/:id/referral",
+    "evidence": "E/comercial.go; M/00031_condicoes_contrato.sql",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-05",
+    "backendState": "Somente backend",
+    "entry": "API CRM",
+    "functionality": "Campos adicionais de atendimento e conversão de lead",
+    "behavior": "PATCH aceita campos estruturados de classificação conforme schema; conversão do prospecto pode vincular assinante existente, além do fluxo de criar assinante apresentado na UI.",
+    "endpoints": "PATCH /api/tickets/:id; POST /api/leads/:id/convert",
+    "evidence": "E/crm.go; E/schemas.go; P/Crm.tsx",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-06",
+    "backendState": "Somente backend",
+    "entry": "API administrativa",
+    "functionality": "Atualização de senha de usuário, dados de POP/empresa e parâmetros de qualidade",
+    "behavior": "Handlers aceitam campos que as telas não expõem: senha de terceiro, edição cadastral de POP/empresa, rótulos de catálogo e propriedades de SLA e campos personalizados. Sujeitos à permissão do endpoint.",
+    "endpoints": "PATCH /api/users/:id; PATCH /api/pops/:id; PATCH /api/companies/:id; PATCH /api/catalogs/:id; PATCH /api/sla-policies/:id; PATCH /api/custom-fields/:id",
+    "evidence": "I/service.go; E/config.go; E/empresas_tags.go; E/config.go; E/config.go; E/custom.go",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-07",
+    "backendState": "Somente backend",
+    "entry": "API de equipamentos e IPAM",
+    "functionality": "Editar propriedades além dos controles visuais",
+    "behavior": "PATCH de equipamento e pool suporta campos cadastrais além dos botões de manutenção e exclusão exibidos; as mesmas validações e permissões do servidor continuam aplicáveis.",
+    "endpoints": "PATCH /api/devices/:id; PATCH /api/ipam/pools/:id",
+    "evidence": "E/rede.go; E/ipam.go; E/infraestrutura.go; P/Network.tsx; P/Ipam.tsx",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-08",
+    "backendState": "Somente backend",
+    "entry": "API CGNAT",
+    "functionality": "Consultar bloco por IP privado e titulares históricos",
+    "behavior": "Lookup do plano por endereço e resposta holders_at no rastreamento fornecem dados que não aparecem integralmente na tela de busca do IP público.",
+    "endpoints": "GET /api/cgnat/plans/:id/lookup; GET /api/cgnat/trace",
+    "evidence": "L/cgnat.go; E/ipam.go; P/Ipam.tsx",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-09",
+    "backendState": "Somente backend",
+    "entry": "API financeira",
+    "functionality": "Filtros adicionais de relatório/exportação",
+    "behavior": "Aging aceita plano, POP e tag; exportação contábil aceita empresa. A UI utiliza um subconjunto dos parâmetros.",
+    "endpoints": "GET /api/finance/reports/aging; GET /api/finance/export",
+    "evidence": "E/relatorios.go; P/Cobranca.tsx; P/Finance.tsx",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-10",
+    "backendState": "Somente backend",
+    "entry": "Protocolo de agente /agent/v1",
+    "functionality": "Autenticar, sincronizar e despachar operações",
+    "behavior": "Hello, confirmação de sincronização, poll, início/progresso/resultado, observações e relatórios de OLT, uso e sessões; token, certificado mTLS, identidade e validação de propriedade do equipamento. Escuta e configuração do serviço são independentes da UI.",
+    "endpoints": "POST /agent/v1/hello; POST /agent/v1/sync-done; POST /agent/v1/poll; POST /agent/v1/attempts/:id/begin; POST /agent/v1/attempts/:id/progress; POST /agent/v1/attempts/:id/result; POST /agent/v1/observations; POST /agent/v1/olt-report; POST /agent/v1/usage-report; POST /agent/v1/sessions-report",
+    "evidence": "G/agent/; G/network/; apps/api-go/cmd/api/main.go",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-11",
+    "backendState": "Somente backend",
+    "entry": "Motor de rede",
+    "functionality": "Fila, assinatura e recuperação de operações",
+    "behavior": "Outbox transacional/River, envelope Ed25519, expiração, idempotência, versões desejada/observada, reserva de tentativa e tratamento de resultado incerto. Aplicação efetiva depende do executor e estado externo.",
+    "endpoints": "GET /api/operations; GET /api/operations/:id",
+    "evidence": "G/network/engine.go; G/network/attempts.go; G/jobs/; M/00002_rede_operacoes.sql",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-12",
+    "backendState": "Somente backend",
+    "entry": "RADIUS integrado",
+    "functionality": "Autorização, accounting e desconexão",
+    "behavior": "Persistência de contas e atributos por fabricante; FreeRADIUS externo consulta PostgreSQL e envia accounting; executor Go sincroniza dados e solicita Disconnect RFC 5176. Não há entrega automática de prefixo IPv6 demonstrada.",
+    "endpoints": "—",
+    "evidence": "G/radius/; infra/radius/; M/00036_radius_integrado.sql; M/00038_escala_radius.sql",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-13",
+    "backendState": "Somente backend",
+    "entry": "Agente de rede Python",
+    "functionality": "Executar comandos e relatar observações",
+    "behavior": "Agente Python mantém credenciais locais e diário SQLite, valida envelope, aplica driver e relata progresso/resultado; há drivers Mikrotik RADIUS local e Huawei OLT, além de demo. Necessita instalação e configuração no ambiente de rede.",
+    "endpoints": "POST /agent/v1/poll; POST /agent/v1/attempts/:id/result; POST /agent/v1/observations",
+    "evidence": "services/network-agent/nexo_agent/agent.py; services/network-agent/nexo_agent/executor.py; services/network-agent/nexo_agent/store.py; services/network-agent/nexo_agent/drivers/",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-14",
+    "backendState": "Somente backend",
+    "entry": "Serviço Go de VPN",
+    "functionality": "Gerir configuração e túneis dos NAS",
+    "behavior": "Processo nexo-vpn sincroniza peers/configuração e estado, chama ferramentas do sistema para WireGuard e L2TP/IPsec e auxilia desconexão. É serviço distinto; depende de pacotes, privilégios e rede do host.",
+    "endpoints": "—",
+    "evidence": "apps/api-go/cmd/nexo-vpn/; G/vpn/vpn.go; infra/prod/",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-15",
+    "backendState": "Somente backend",
+    "entry": "Serviço ACS externo",
+    "functionality": "Integrar CPE TR-069 via HTTP",
+    "behavior": "Cliente Go conversa com API GenieACS, interpreta parâmetros comuns TR-098/TR-181 e agenda tarefas. GenieACS é serviço externo, não reimplementado em Go; atendimento real depende de modelo e configuração.",
+    "endpoints": "—",
+    "evidence": "G/acs/; E/cpe.go; infra/compose/",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-16",
+    "backendState": "Somente backend",
+    "entry": "Processamento periódico",
+    "functionality": "Cobrança, suspensão, confiança e reconciliação",
+    "behavior": "Rotinas geram mensalidade, atualizam condições agendadas, expiram confiança, avaliam suspensão e conciliam gateway. Execução depende das flags dos jobs e configuração financeira; conciliação automatizada atual usa demo.",
+    "endpoints": "—",
+    "evidence": "G/jobs/; G/finance/; E/rotinas.go; apps/api-go/cmd/api/main.go",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-17",
+    "backendState": "Somente backend",
+    "entry": "Processamento periódico",
+    "functionality": "Avisos, webhooks, SLA, alertas e limpeza",
+    "behavior": "Workers executam filas de notificações, tentativas de webhooks, avaliação/escalonamento de SLA, alerta de saúde e retenção; parâmetros, flags e entrega externa são condicionantes.",
+    "endpoints": "—",
+    "evidence": "G/jobs/; E/rotinas.go; G/outbound/; M/00029_api_publica_webhooks.sql; M/00053_retencao.sql",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-18",
+    "backendState": "Somente backend",
+    "entry": "Processamento periódico",
+    "functionality": "Sincronização e agregação de RADIUS",
+    "behavior": "Jobs drenam operações do RADIUS, sincronizam accounting e agregam consumo; disponibilidade dos resultados depende de accounting e agendamento configurados.",
+    "endpoints": "—",
+    "evidence": "G/jobs/; G/radius/; M/00023_consumo.sql; M/00043_consumo_diario.sql; M/00047_consumo_por_hora.sql",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-19",
+    "backendState": "Somente backend",
+    "entry": "Operação de banco",
+    "functionality": "Preparação, migrações e diagnóstico operacional",
+    "behavior": "Executável nexo-db oferece preparação/bootstrap, baseline, aplicação de migrations e jobs, verificação, operador, rotação de segredos, preflight, demo e TOTP conforme comando e configuração. Não foi executado neste inventário.",
+    "endpoints": "—",
+    "evidence": "apps/api-go/cmd/nexo-db/; G/db/; db/migrations/",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-20",
+    "backendState": "Somente backend",
+    "entry": "Segurança e isolamento",
+    "functionality": "Sessão, CSRF, MFA, escopo e auditoria",
+    "behavior": "Sessão com token armazenado em hash, cookies e CSRF, MFA TOTP opcional/configurável, limite de login, permissões fixas, escopo de provedor/POP, RLS e auditoria. Cookies seguros/MFA obrigatória dependem de configuração.",
+    "endpoints": "POST /api/auth/login; POST /api/auth/logout; GET /api/me; POST /api/me/mfa/setup; POST /api/me/mfa/enable; POST /api/me/mfa/disable",
+    "evidence": "G/auth/; I/; G/tenancy/; G/db/; M/00005_mfa.sql; M/00019_limite_login.sql; M/00034_escopo_pop_aviso_documentos.sql",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-21",
+    "backendState": "Somente backend",
+    "entry": "Observabilidade",
+    "functionality": "Saúde, métricas e especificação interna",
+    "behavior": "Logs estruturados, métricas Prometheus e OpenTelemetry conforme configuração; listener interno disponibiliza health, métricas e OpenAPI. Endereços e exposição dependem da implantação.",
+    "endpoints": "GET /healthz; GET /metrics; GET /openapi.json",
+    "evidence": "apps/api-go/cmd/api/main.go; G/config/",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-22",
+    "backendState": "Somente backend",
+    "entry": "Infraestrutura e scripts",
+    "functionality": "Backup, cópia e restauração",
+    "behavior": "Scripts produzem backup e checksum, podem copiar para destino configurado e verificar restauração em ambiente temporário; execução, agendamento e cópia externa não foram comprovados aqui.",
+    "endpoints": "—",
+    "evidence": "scripts/backup.sh; infra/prod/; infra/compose/",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-23",
+    "backendState": "Parcial",
+    "entry": "Diretório de células",
+    "functionality": "Distribuição em múltiplas células de dados",
+    "behavior": "Há tabelas e diretório para células, porém a implementação de escopo inspecionada limita o acesso à célula c1. Migração e operação distribuída entre células não estão completas.",
+    "endpoints": "—",
+    "evidence": "M/00056_diretorio_celulas.sql; G/db/; G/tenancy/",
+    "integrationState": "pending",
+    "validation": []
+  },
+  {
+    "id": "BE-24",
+    "backendState": "Somente backend",
+    "entry": "API de relatórios",
+    "functionality": "Consultar indicações",
+    "behavior": "Consulta de indicações cadastradas em contratos, protegida por finance:read; não foi encontrada página ou botão correspondente.",
+    "endpoints": "GET /api/reports/referrals",
+    "evidence": "L/consultas.go; L/consultas_generated.go; E/comercial.go",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-25",
+    "backendState": "Somente backend",
+    "entry": "API RADIUS",
+    "functionality": "Consultar origens de NAS autorizadas",
+    "behavior": "Retorna a relação de origens autorizadas para uso interno da integração RADIUS; não foi localizado controle visual dedicado.",
+    "endpoints": "GET /api/radius/allowed-sources",
+    "evidence": "L/grupos.go; L/grupos_generated.go; G/radius/",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-26",
+    "backendState": "Somente backend",
+    "entry": "API financeira",
+    "functionality": "Criar cobrança avulsa",
+    "behavior": "Cria fatura para contrato com descrição, valor positivo e vencimento; não foi encontrado formulário de criação avulsa genérica no painel. Multa rescisória utiliza outro fluxo.",
+    "endpoints": "POST /api/invoices",
+    "evidence": "E/financeiro.go; G/finance/core.go; P/Finance.tsx",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  },
+  {
+    "id": "BE-27",
+    "backendState": "Somente backend",
+    "entry": "API de etiquetas",
+    "functionality": "Excluir etiqueta do catálogo",
+    "behavior": "Exclusão da etiqueta global com validações do servidor; o formulário de etiquetas da ficha oferece criar e vincular, sem controle global de exclusão.",
+    "endpoints": "DELETE /api/tags/:id",
+    "evidence": "E/empresas_tags.go; P/Extras.tsx",
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ]
+  }
+]

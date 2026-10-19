@@ -1,0 +1,320 @@
+{
+  "format": 1,
+  "scope": "public-demo",
+  "id": "technical-reference-v1",
+  "payload": {
+    "nas": [
+      {
+        "id": "nas-01",
+        "host": "10.255.0.1",
+        "name": "BRAS-LAB-CENTRO",
+        "notes": "NAS fictício, sem integração com o inventário operacional. Segredo RADIUS não armazenado no catálogo público.",
+        "popId": "pop-01",
+        "active": true,
+        "driver": "NE8000",
+        "status": "Online",
+        "vendor": "Huawei",
+        "timeout": 10,
+        "acctPort": 1813,
+        "authPort": 1812,
+        "sessions": 190,
+        "snmpPort": 161,
+        "suspended": 12
+      },
+      {
+        "id": "nas-02",
+        "host": "10.255.0.2",
+        "name": "BRAS-LAB-NORTE",
+        "notes": "Último estado sintético. Não é resultado de ping ou autenticação atual.",
+        "popId": "pop-02",
+        "active": true,
+        "driver": "RouterOS API",
+        "status": "Offline",
+        "vendor": "MikroTik",
+        "timeout": 10,
+        "acctPort": 1813,
+        "authPort": 1812,
+        "sessions": 0,
+        "snmpPort": 161,
+        "suspended": 4
+      }
+    ],
+    "asOf": "2026-10-17T12:42:00.000Z",
+    "pops": [
+      {
+        "id": "pop-01",
+        "uf": "PE",
+        "city": "Recife",
+        "name": "POP LAB Centro",
+        "users": [
+          "Analista NOC",
+          "Suporte nível 2"
+        ],
+        "active": true,
+        "contracts": {
+          "active": 182,
+          "inactive": 2,
+          "cancelled": 24,
+          "suspended": 12
+        },
+        "population": null
+      },
+      {
+        "id": "pop-02",
+        "uf": "PE",
+        "city": "Paulista",
+        "name": "POP LAB Norte",
+        "users": [
+          "Analista NOC"
+        ],
+        "active": true,
+        "contracts": {
+          "active": 96,
+          "inactive": 0,
+          "cancelled": 16,
+          "suspended": 4
+        },
+        "population": null
+      }
+    ],
+    "vpns": [
+      {
+        "id": "vpn-01",
+        "ip": "172.16.224.10",
+        "type": "L2TP",
+        "inUse": true,
+        "nasId": "nas-01",
+        "routes": [
+          "10.255.0.0/24"
+        ],
+        "status": "Online",
+        "uptime": "3 dias · 03h29m",
+        "username": "lab-centro"
+      },
+      {
+        "id": "vpn-02",
+        "ip": "172.16.224.11",
+        "type": "WireGuard",
+        "inUse": false,
+        "nasId": "nas-02",
+        "routes": [
+          "10.255.1.0/24"
+        ],
+        "status": "Offline",
+        "uptime": null,
+        "username": "lab-norte"
+      }
+    ],
+    "cgnat": [
+      {
+        "id": "nat-01",
+        "icmp": true,
+        "name": "Plano Centro · 1.024 portas",
+        "nasId": "nas-01",
+        "active": true,
+        "lastPort": 65535,
+        "protocol": "TCP/UDP",
+        "strategy": "Vertical",
+        "firstPort": 1024,
+        "interface": "vlan100-out",
+        "portsPerIp": 1024,
+        "publicRange": "192.0.2.10-192.0.2.13",
+        "privateRange": "100.64.0.0/24"
+      },
+      {
+        "id": "nat-02",
+        "icmp": true,
+        "name": "Plano Norte · 512 portas",
+        "nasId": "nas-02",
+        "active": true,
+        "lastPort": 65535,
+        "protocol": "TCP/UDP",
+        "strategy": "Vertical",
+        "firstPort": 1024,
+        "interface": "vlan200-out",
+        "portsPerIp": 512,
+        "publicRange": "198.51.100.10-198.51.100.13",
+        "privateRange": "100.64.1.0/24"
+      }
+    ],
+    "pools": [
+      {
+        "id": "pool-01",
+        "free": 66,
+        "name": "CGNAT · Centro",
+        "fixed": 4,
+        "lease": 8,
+        "nasId": "nas-01",
+        "notes": "Ocupação sintética. As categorias são exclusivas neste cenário; não equivalem a uma leitura RADIUS.",
+        "online": 178,
+        "ranges": "100.64.0.0/24",
+        "nextPoolId": "pool-02",
+        "radiusAttribute": "Framed-Pool"
+      },
+      {
+        "id": "pool-02",
+        "free": 156,
+        "name": "CGNAT · Norte",
+        "fixed": 2,
+        "lease": 4,
+        "nasId": "nas-02",
+        "notes": "Faixa de contingência demonstrativa.",
+        "online": 94,
+        "ranges": "100.64.1.0/24",
+        "nextPoolId": "",
+        "radiusAttribute": "Framed-Pool"
+      },
+      {
+        "id": "pool-03",
+        "free": 244,
+        "name": "Isolamento · bloqueados",
+        "fixed": 0,
+        "lease": 0,
+        "nasId": "nas-01",
+        "notes": "Exemplo de pool para isolamento. Nenhum bloqueio é executado.",
+        "online": 12,
+        "ranges": "10.24.0.0/24",
+        "nextPoolId": "",
+        "radiusAttribute": "Framed-Pool"
+      },
+      {
+        "id": "pool-04",
+        "free": 4,
+        "name": "Endereços de documentação",
+        "fixed": 2,
+        "lease": 0,
+        "nasId": "nas-01",
+        "notes": "RFC 5737. Endereços não roteáveis na Internet; uso exclusivo em exemplos.",
+        "online": 2,
+        "ranges": "192.0.2.10-192.0.2.13\n198.51.100.10-198.51.100.13",
+        "nextPoolId": "",
+        "radiusAttribute": "Framed-IP-Address"
+      }
+    ],
+    "models": [
+      {
+        "id": "onu-01",
+        "code": "HG8310M",
+        "mode": "Bridge",
+        "wifi": "Sem Wi-Fi",
+        "notes": "Perfil de referência. Confirmar firmware e service profile antes do provisionamento.",
+        "ports": "1 GE",
+        "vendor": "Huawei",
+        "profile": "HG8010-1",
+        "description": "ONU GPON Bridge · 1 porta Gigabit",
+        "compatibleOlts": [
+          "Huawei MA5800",
+          "Huawei MA5608T"
+        ]
+      },
+      {
+        "id": "onu-02",
+        "code": "F601 V7",
+        "mode": "Bridge",
+        "wifi": "Sem Wi-Fi",
+        "notes": "Associação por modelo; não representa homologação de firmware.",
+        "ports": "1 GE",
+        "vendor": "ZTE",
+        "profile": "ZTE-F601",
+        "description": "ONT GPON Bridge · porta única",
+        "compatibleOlts": [
+          "ZTE C320",
+          "ZTE C600"
+        ]
+      },
+      {
+        "id": "onu-03",
+        "code": "110B",
+        "mode": "Bridge",
+        "wifi": "Sem Wi-Fi",
+        "notes": "Verificar modo óptico negociado e compatibilidade OMCI.",
+        "ports": "1 GE",
+        "vendor": "Intelbras",
+        "profile": "Dual mode",
+        "description": "ONU híbrida GPON / EPON",
+        "compatibleOlts": [
+          "Intelbras 8820"
+        ]
+      },
+      {
+        "id": "onu-04",
+        "code": "F673A",
+        "mode": "Router",
+        "wifi": "Wi-Fi 5 · dual band",
+        "notes": "WAN e voz dependem de perfil compatível com a versão de firmware.",
+        "ports": "4 GE + 1 POTS",
+        "vendor": "ZTE",
+        "profile": "ZTE-F673A",
+        "description": "ONT AC1200 · voz e dados",
+        "compatibleOlts": [
+          "ZTE C320",
+          "ZTE C600"
+        ]
+      },
+      {
+        "id": "onu-05",
+        "code": "HG8245Q2",
+        "mode": "Router",
+        "wifi": "Wi-Fi 5 · dual band",
+        "notes": "Referência de catálogo, sem associação presumida a assinantes.",
+        "ports": "4 GE + 2 POTS",
+        "vendor": "Huawei",
+        "profile": "HG8245Q2",
+        "description": "ONT dual band · serviços integrados",
+        "compatibleOlts": [
+          "Huawei MA5800"
+        ]
+      }
+    ],
+    "version": 1,
+    "templates": [
+      {
+        "id": "tpl-01",
+        "wan": "",
+        "gpon": "{\n  \"serviceprofile\": \"200\",\n  \"ontprofile\": \"100\",\n  \"vlan\": \"%vlan%\",\n  \"slot\": \"%slot%\",\n  \"pon\": \"%pon%\",\n  \"serial\": \"%sn%\"\n}",
+        "mode": "Bridge",
+        "name": "Bridge · VLAN por contrato",
+        "notes": "Parâmetros de intenção em JSON. Não é um comando executável de OLT.",
+        "vendor": "Huawei",
+        "modelIds": [
+          "onu-01"
+        ],
+        "compatibleOlts": [
+          "Huawei MA5800",
+          "Huawei MA5608T"
+        ]
+      },
+      {
+        "id": "tpl-02",
+        "wan": "{\n  \"wanMode\": \"DHCP\",\n  \"vlan\": \"%vlan%\"\n}",
+        "gpon": "{\n  \"profile\": \"ZTE-F673A\",\n  \"vlan\": \"%vlan%\",\n  \"slot\": \"%slot%\",\n  \"pon\": \"%pon%\",\n  \"serial\": \"%sn%\"\n}",
+        "mode": "Router",
+        "name": "Router · WAN por DHCP",
+        "notes": "Intenção WAN DHCP para validação local. Sem envio OMCI / CLI.",
+        "vendor": "ZTE",
+        "modelIds": [
+          "onu-04"
+        ],
+        "compatibleOlts": [
+          "ZTE C320",
+          "ZTE C600"
+        ]
+      },
+      {
+        "id": "tpl-03",
+        "wan": "{\n  \"wanMode\": \"PPPoE\",\n  \"username\": \"%login%\",\n  \"vlan\": \"%vlan%\"\n}",
+        "gpon": "{\n  \"profile\": \"HG8245Q2\",\n  \"vlan\": \"%vlan%\",\n  \"serial\": \"%sn%\"\n}",
+        "mode": "Router",
+        "name": "Router · identificação PPPoE",
+        "notes": "Não contém senha. Credenciais e aplicação exigem integração autenticada.",
+        "vendor": "Huawei",
+        "modelIds": [
+          "onu-05"
+        ],
+        "compatibleOlts": [
+          "Huawei MA5800"
+        ]
+      }
+    ]
+  }
+}

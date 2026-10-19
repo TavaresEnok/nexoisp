@@ -1,0 +1,43 @@
+{
+  "checkpoint": "private-persistence-2026-10-17",
+  "historicalEvidence": true,
+  "latestRemediation": "tests/audit-remediation.json",
+  "completion": "partial",
+  "commands": [
+    { "command": "pnpm verify", "result": "passed", "tests": 40, "failed": 0, "includes": ["typecheck", "26 testes de regras de negócio", "6 testes de envelopes privados", "5 testes do inventário", "3 testes do seed"] },
+    { "command": "pnpm test:db", "result": "passed", "tests": 17, "failed": 0, "database": "Neon conectado", "cleanup": "Transação externa revertida; ausência dos workspaces e recibos de teste confirmada após rollback" },
+    { "command": "pnpm exec tsx --test tests/consolidation.test.ts", "result": "passed", "tests": 5, "reason": "Nova evidência de persistência adicionada à matriz após pnpm verify" },
+    { "command": "pnpm install --frozen-lockfile", "result": "passed", "packageManager": "pnpm@12.3.4", "supplyChainPolicy": "passed" },
+    { "command": "set -a && source /vercel/share/.env.project && set +a && pnpm build", "result": "passed", "note": "Primeira tentativa sem carregar as variáveis de produção falhou; corrigida carregando o ambiente do projeto, sem alterar a aplicação" }
+  ],
+  "persistence": {
+    "tables": ["public.nexo_private_workspaces", "public.nexo_private_commands"],
+    "passed": ["Inicialização vazia e repetível", "Escopo de leitura e comandos por identificador recebido do servidor", "Recusa de public-demo e identidade forjada no envelope", "Estado, evento e recibo no mesmo limite transacional", "Revisão antiga rejeitada sem alteração", "Tentativa idêntica não duplica plano nem baixa", "Chave repetida com conteúdo diferente é rejeitada", "Repetição antiga retorna snapshot atual", "ID de plano de outro workspace é rejeitado", "Cadastro integrado de assinante, contrato, fatura e operação", "Persistência de atendimento, nota e agenda", "Falha de regra preserva estado e revisão", "Payload inconsistente é recusado na leitura", "82 registros públicos comparados antes e depois, sem alterações"],
+    "notVerified": ["Disputa simultânea entre conexões distintas", "Sessões reais de dois usuários", "Gravação pelo navegador"],
+    "access": "Repositório interno server-only; sem Server Action ou Route Handler de escrita. O userId ainda precisa ser obtido de uma sessão verificada pelo futuro chamador."
+  },
+  "browser": {
+    "route": "/acompanhamento",
+    "mode": "development",
+    "theme": "dark",
+    "desktop": { "width": 1350, "height": 857 },
+    "method": "snapshot e leitura de texto; alterações somente de conteúdo",
+    "passed": ["Explicação distingue persistência testada de autenticação pendente", "Busca por C01 retorna um escopo", "Detalhe expandido apresenta repositório, schemas e teste de integração entregues", "Aviso mantém explícitos ausência de sessão e de rota pública de comandos"]
+  },
+  "previousCheckpointEvidence": {
+    "checkpoint": "core-preparation-2026-10-17",
+    "databaseCheck": { "command": "pnpm db:check", "result": "passed", "scope": "public-demo", "records": 82 },
+    "browser": { "desktop": { "width": 1350, "height": 808 }, "mobile": { "width": 390, "height": 844, "pageHorizontalOverflow": false }, "passed": ["Filtro Núcleo preparado retorna 11 escopos", "Busca sem correspondência mostra estado vazio", "Limpar filtros restaura os 49 escopos", "Composição desktop e móvel inspecionada"] }
+  },
+  "sourceInspection": { "projects": 9, "filesInProjects": 412, "additionalFiles": 6, "totalFiles": 418, "method": "static", "manifest": "lib/consolidation/sources.json" },
+  "notCompleted": [
+    "Autenticação: BETTER_AUTH_SECRET ausente no inventário de variáveis do projeto",
+    "Ligar identidade e autorização do repositório à sessão autenticada",
+    "Formulários e ações de escrita ligados às telas",
+    "Teste de preparação do seed em um banco novo; somente exportação, integridade e consulta do banco atual foram executadas",
+    "Verificação de equivalência visual e funcional das nove origens",
+    "Integrações bancárias, de equipamentos e comunicação",
+    "Consolidação integral dos 49 escopos"
+  ],
+  "security": "Nenhuma rota pública de escrita foi adicionada. Os identificadores sintéticos nos testes comprovam escopo do repositório, não autenticação nem autorização por sessão. Dados privados de teste foram revertidos; cenário público preservado."
+}

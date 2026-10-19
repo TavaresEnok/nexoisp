@@ -5,6 +5,8 @@ Documentação de referência e de operação. Planos já executados, prompts de
 | Documento | Quando consultar |
 |---|---|
 | [Arquitetura](arquitetura.md) | Componentes atuais, decisões técnicas e garantias que devem ser preservadas |
+| [Integração do frontend v0](integracao-v0/PLANO.md) | Sete etapas, regra obrigatória de UI/UX, preservação e situação da integração |
+| [Matriz funcional da integração](integracao-v0/MATRIZ_FUNCIONAL.md) | Cobertura das 169 unidades identificadas no inventário Go |
 | [Pendências](pendencias.md) | Bloqueios de produção, homologações e evolução ainda necessária |
 | [Auditoria comparativa SGP](SGP_COMPARATIVO_NEXOISP/README.md) | Evidências, diferenças, backlog, melhorias implementadas e validação rastreável |
 | [Operação](operacao.md) | Instalação, segurança, configuração dos módulos, monitoramento, backup e recuperação |
