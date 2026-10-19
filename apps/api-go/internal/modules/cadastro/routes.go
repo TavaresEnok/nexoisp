@@ -2,6 +2,7 @@ package cadastro
 
 import (
 	"context"
+	"nexoisp/api-go/internal/apierr"
 	"nexoisp/api-go/internal/audit"
 	"nexoisp/api-go/internal/auth"
 	"nexoisp/api-go/internal/csvx"
@@ -52,7 +53,11 @@ func Register(api huma.API, s Service, a audit.Writer) {
 		formats := r.URL.Query()["format"]
 		csvFormat := len(formats) == 1 && formats[0] == "csv"
 		csv := csvFormat && r.Method == "GET"
-		rows, total, err := s.List(ctx, p, csvFormat)
+		order := r.URL.Query()["order"]
+		if len(order) > 1 || (len(order) == 1 && order[0] != "asc" && order[0] != "desc") {
+			return nil, apierr.New(400, "order: use asc ou desc")
+		}
+		rows, total, err := s.List(ctx, p, csvFormat, len(order) == 1 && order[0] == "desc")
 		if err != nil {
 			return nil, err
 		}

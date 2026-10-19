@@ -72,7 +72,7 @@ func (s Service) Contract(ctx context.Context, id string) (jsonx.Object, error) 
 	})
 	return result, err
 }
-func (s Service) List(ctx context.Context, p validate.Page, csv bool) ([]jsonx.Object, int64, error) {
+func (s Service) List(ctx context.Context, p validate.Page, csv bool, descending bool) ([]jsonx.Object, int64, error) {
 	var result []jsonx.Object
 	var total int64
 	cap := 500
@@ -100,7 +100,11 @@ func (s Service) List(ctx context.Context, p validate.Page, csv bool) ([]jsonx.O
 	params := []any{q, digits, status}
 	err := s.DB.WithScope(ctx, auth.From(ctx).Scope, func(tx *db.Tx) error {
 		var err error
-		result, err = tx.Objects(ctx, fmt.Sprintf("select x.* from (%s) x limit %d offset %s", sql, limit, strconv.FormatFloat(p.Offset, 'f', -1, 64)), params...)
+		order := ""
+		if descending {
+			order = " order by x.name desc, x.id desc"
+		}
+		result, err = tx.Objects(ctx, fmt.Sprintf("select x.* from (%s) x%s limit %d offset %s", sql, order, limit, strconv.FormatFloat(p.Offset, 'f', -1, 64)), params...)
 		if err != nil {
 			return err
 		}
