@@ -2,9 +2,11 @@
 
 ## Resultado
 
+Aceite revisado em 19/10/2026 após resolver e validar R01–R06. Consulte o [relatório de correções](CORRECOES-REVISAO.md) e a [revisão histórica](REVISAO-ARQUITETURA-E-CHECKUP.md).
+
 As sete etapas estão concluídas no código e na validação da integração. A aplicação oficial em `apps/web` utiliza o frontend do v0 e cobre as funcionalidades disponíveis no NexoISP Go, respeitando suas limitações existentes.
 
-O fechamento registra **139 unidades integradas e validadas**, **30 capacidades internas ou limitações de backend preservadas**, **zero pendentes** e **zero parciais de integração**. Esses estados descrevem a adaptação da interface; não transformam uma capacidade parcial do backend em capacidade completa. A matriz mantém separadamente o estado original do Go.
+O fechamento registra **149 unidades integradas e validadas**, **20 serviços internos, contratos externos ou limitações de backend preservados**, **zero pendentes** e **zero parciais de integração**. Esses estados descrevem a adaptação da interface; não transformam uma capacidade parcial do backend em capacidade completa. A matriz mantém separadamente o estado original do Go.
 
 Evidências: [fechamento das sete etapas](evidencias/fechamento-sete-etapas.json), [matriz funcional](MATRIZ_FUNCIONAL.md), [validações por incremento](VALIDACAO.md) e [execução e operação](OPERACAO.md).
 
@@ -35,9 +37,10 @@ Componentes v0 → consultas e comandos tipados por funcionalidade → adaptador
 ## Verificações finais
 
 - TypeScript e build Vite aprovados.
-- **152 testes locais aprovados**, incluindo preservação visual e paridade das rotas estáticas anteriores.
-- **25 cenários operacionais sequenciais aprovados** na base descartável de regressão, com continuação após corrigir esperas assíncronas dos testes; CPE, Wi-Fi do portal e túnel/certificado têm cenários dirigidos adicionais.
+- **153 testes locais aprovados**, incluindo preservação visual e paridade das rotas estáticas anteriores.
+- **26 cenários operacionais aprovados** na base descartável, em dois segmentos: 14 iniciais e 12 restantes, após corrigir o preenchimento de segundos zero no teste CGNAT; CPE, Wi-Fi do portal e túnel/certificado têm cenários dirigidos adicionais.
 - Mutações, consultas e permissões conferidas com Go/PostgreSQL reais e registros sintéticos. Incrementos também validados em imagens locais Node 22/Caddy com a CSP existente.
+- Seis referências visuais operacionais conferem lista clara/escura/celular, ficha com alerta e contratos múltiplos, vazio e erro de API. Três novas comparações demonstrativas são idênticas à referência original.
 - Comparações visuais preservam o v0 em desktop claro/escuro, celular e fichas; os ativos originais não foram substituídos.
 
 ## Limites de conclusão

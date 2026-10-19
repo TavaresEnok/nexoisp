@@ -1,0 +1,77 @@
+{
+  "reviewedAt": "2026-10-19T16:12:26.294Z",
+  "base": "http://127.0.0.1:18393",
+  "scope": "Imagem Caddy; Go/PostgreSQL exclusivos da revisão; dados sintéticos; jobs desligados",
+  "checks": [
+    {
+      "name": "Cookie HttpOnly/SameSite Strict e comando sem CSRF recusado",
+      "passed": true
+    },
+    {
+      "name": "Demonstração isolada sem chamadas operacionais",
+      "passed": true
+    },
+    {
+      "name": "Assinantes no celular sem transbordamento horizontal",
+      "passed": true
+    },
+    {
+      "name": "Erro operacional sem seleção automática de seeds",
+      "passed": true
+    },
+    {
+      "name": "Isolamento entre provedores: titular de outro provedor retorna 404",
+      "passed": true
+    }
+  ],
+  "findings": [
+    {
+      "id": "R01",
+      "path": "/rede/equipamentos/concentradores",
+      "actual": "Recurso planejado; texto afirma ausência do backend",
+      "devicesAvailable": 0,
+      "backendStatus": 200,
+      "parentHasRealConcentratorCreation": true
+    },
+    {
+      "id": "R04",
+      "businessCapability": "Registrar indicação e consultar relatório de indicações",
+      "referralWriteSucceeded": true,
+      "referralReportStatus": 200,
+      "referralReportRows": 1,
+      "matrixIds": [
+        "BE-04",
+        "BE-24"
+      ],
+      "frontendConsumersFound": false
+    },
+    {
+      "id": "R02",
+      "initialAlertVisible": false,
+      "alertVisibleOnCadastro": true,
+      "noteFlagFromApi": true
+    },
+    {
+      "id": "R03",
+      "modules": [],
+      "equipmentStatus": 403,
+      "equipmentBody": {
+        "error": "este recurso não está liberado para o provedor",
+        "code": "module_disabled"
+      },
+      "slaTabVisible": true,
+      "slaResponses": [
+        {
+          "url": "/api/sla-policies",
+          "status": 403
+        },
+        {
+          "url": "/api/reports/sla",
+          "status": 403
+        }
+      ]
+    }
+  ],
+  "runtimeErrors": [],
+  "completed": true
+}

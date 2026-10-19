@@ -197,3 +197,12 @@ A regressão conjunta aprovou os **25 cenários da fumaça oficial**, usando um 
 A cobertura final é **139 unidades integradas e validadas, 30 capacidades internas/limitações preservadas, zero unidades de integração parciais ou pendentes**. Todos os caminhos de teste/evidência da matriz existem; observações foram separadas dos caminhos e as notas antigas de trabalho pendente foram atualizadas. O teste de paridade verifica que cada destino estático do frontend anterior possui uma apresentação operacional oficial.
 
 As sete etapas ficam concluídas no escopo de integração e validação. O frontend antigo continua preservado somente para consulta. A aplicação oficial e a imagem usam exclusivamente `apps/web`; a referência v0 permanece íntegra. A imagem de fechamento é registrada em `evidencias/fechamento-sete-etapas.json`. Essa imagem foi validada localmente; não houve publicação em servidor externo ou alegação de homologação física.
+
+
+## Correções da revisão arquitetural — R01–R06
+
+Checkpoint anterior: `97d47cc`; o aceite foi reaberto após a revisão e reconciliado pelas correções descritas em [CORRECOES-REVISAO.md](CORRECOES-REVISAO.md). A triagem individual de capacidades está em [CAPACIDADES-BACKEND.md](CAPACIDADES-BACKEND.md).
+
+TypeScript, 153 testes locais, estilo, build Vite/Node 22 e imagem Caddy passaram. A regressão cobriu os 26 cenários em dois segmentos: 14 iniciais e 12 restantes após corrigir o input de segundos zero no teste CGNAT. Foram acrescentadas 13 verificações compostas de navegação, alertas, capacidades comerciais, permissões, isolamento por provedor e módulos. A imagem final passou novamente nos 13 casos e nas seis comparações visuais operacionais, no mesmo contêiner de navegador da CI. Três comparações demonstrativas são idênticas à referência original. A contraprova com a imagem antiga falha no caso R01.
+
+A matriz atual registra 149 unidades validadas e 20 preservadas: 14 serviços internos, dois contratos externos e quatro limitações. Sem unidades de integração pendentes ou parciais, sem mudar o estado original das limitações do Go. Evidências, logs e hashes estão em [correcoes/resumo-tecnico.json](evidencias/correcoes/resumo-tecnico.json) e no fechamento atualizado. O backend do usuário não recebeu escritas de teste; não houve implantação externa ou execução da CI remota.

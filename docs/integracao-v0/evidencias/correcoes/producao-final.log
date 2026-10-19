@@ -1,0 +1,26 @@
+R01: submenus NAS e OLT abrem equipamento operacional em vez de planejado
+R02: alerta aparece pela lista e URL direta na aba inicial; anotação comum não vira alerta
+Captura operacional: assinantes-desktop-claro
+Captura aprovada: assinantes-desktop-claro
+Captura operacional: assinantes-desktop-escuro
+Captura aprovada: assinantes-desktop-escuro
+Captura operacional: assinantes-celular
+Captura aprovada: assinantes-celular
+Captura operacional: ficha-alerta-multiplos-contratos
+Captura aprovada: ficha-alerta-multiplos-contratos
+Captura operacional: assinantes-vazio
+Captura aprovada: assinantes-vazio
+Captura operacional: assinantes-erro
+Captura aprovada: assinantes-erro
+R02: arquivamento atualiza também o alerta global da ficha
+R04: indicação cadastrada pela interface, persistida e apresentada no relatório real
+R04: financeiro consulta sem poder alterar; outro provedor não altera indicação
+R04: remoção da indicação pela interface preserva o contrato
+R04/BE-27: exclusão global de etiqueta confirmada e persistida
+R04/BE-05: prospecto convertido para assinante existente sem duplicar cadastro
+R04/BE-05: causa-raiz e prioridade editadas na interface e relidas no Go
+R04/BE-09: filtros de carteira e empresa na exportação contábil chegam ao Go
+R04/BE-07: propriedades do equipamento editadas e relidas sem comando em hardware
+R05: perfis atendimento e NOC respeitam escrita de indicação e leitura financeira
+R03/R05: matriz nenhum módulo / CRM / campo respeita controles e consultas, com habilitação positiva
+{"ok":true,"checks":["R01: submenus NAS e OLT abrem equipamento operacional em vez de planejado","R02: alerta aparece pela lista e URL direta na aba inicial; anotação comum não vira alerta","R02: arquivamento atualiza também o alerta global da ficha","R04: indicação cadastrada pela interface, persistida e apresentada no relatório real","R04: financeiro consulta sem poder alterar; outro provedor não altera indicação","R04: remoção da indicação pela interface preserva o contrato","R04/BE-27: exclusão global de etiqueta confirmada e persistida","R04/BE-05: prospecto convertido para assinante existente sem duplicar cadastro","R04/BE-05: causa-raiz e prioridade editadas na interface e relidas no Go","R04/BE-09: filtros de carteira e empresa na exportação contábil chegam ao Go","R04/BE-07: propriedades do equipamento editadas e relidas sem comando em hardware","R05: perfis atendimento e NOC respeitam escrita de indicação e leitura financeira","R03/R05: matriz nenhum módulo / CRM / campo respeita controles e consultas, com habilitação positiva"],"visuals":[{"name":"assinantes-desktop-claro","identical":true,"actual":"3aa528362b9df9e44044c2aaddaf47547e3fff1b27cf01cd4de6b308ba9b7951","expected":"3aa528362b9df9e44044c2aaddaf47547e3fff1b27cf01cd4de6b308ba9b7951"},{"name":"assinantes-desktop-escuro","identical":true,"actual":"8e1942d196791ecc5f5957bb5b0498d994f77e3dca3e12075dc17a8e076180fa","expected":"8e1942d196791ecc5f5957bb5b0498d994f77e3dca3e12075dc17a8e076180fa"},{"name":"assinantes-celular","identical":true,"actual":"5a2ebe479bb8b3a8abb35cb257d0379539e43c84be73454d09d4575ab362289f","expected":"5a2ebe479bb8b3a8abb35cb257d0379539e43c84be73454d09d4575ab362289f"},{"name":"ficha-alerta-multiplos-contratos","identical":true,"actual":"ef9187520c83dfd9293d2dccb28eda3a5f6c3c2461cc39afceec1bb6f96217f5","expected":"ef9187520c83dfd9293d2dccb28eda3a5f6c3c2461cc39afceec1bb6f96217f5"},{"name":"assinantes-vazio","identical":true,"actual":"54982792434b15db950fa43e1eee4dc8f1666bad6556ff0c9009a36a4ad57944","expected":"54982792434b15db950fa43e1eee4dc8f1666bad6556ff0c9009a36a4ad57944"},{"name":"assinantes-erro","identical":true,"actual":"ae326dbc46e0edd488e2589ba647465c2b27ad9c0321e74dcc39ee81c3a41e2e","expected":"ae326dbc46e0edd488e2589ba647465c2b27ad9c0321e74dcc39ee81c3a41e2e"}]}

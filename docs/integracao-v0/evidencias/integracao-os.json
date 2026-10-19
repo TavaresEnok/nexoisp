@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "base": "http://127.0.0.1:3005",
-  "verified_at": "2026-10-19T15:45:12.211Z",
+  "base": "http://127.0.0.1:3006",
+  "verified_at": "2026-10-19T16:37:54.989Z",
   "backend": "Go isolado, dados sintéticos",
   "checks": [
     "OS criada pela interface v0 com titular, contrato e endereço específico reais",

@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "base": "http://127.0.0.1:3005",
-  "verified_at": "2026-10-19T15:47:21.519Z",
+  "base": "http://127.0.0.1:3006",
+  "verified_at": "2026-10-19T16:41:12.069Z",
   "backend": "Go/PostgreSQL isolados; accounting sintético, script não aplicado em rede física",
   "checks": [
     "UI consulta capacidade no Go, cria plano imutável, apresenta mapa/lookup e exporta script sem aplicá-lo ao NAS",

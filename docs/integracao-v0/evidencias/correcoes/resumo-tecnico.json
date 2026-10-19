@@ -1,0 +1,46 @@
+{
+  "ok": true,
+  "verified_at": "2026-10-19T16:59:39.076767+00:00",
+  "resolved": [
+    "R01",
+    "R02",
+    "R03",
+    "R04",
+    "R05",
+    "R06"
+  ],
+  "frontend_tests": {
+    "passed": 153,
+    "failed": 0
+  },
+  "typescript": "passed",
+  "vite_build": "passed",
+  "docker_image": "sha256:21028f2bd4b6a5a5a54063ef1ea7a48f48455a53722929f03907b57a4b9c0fdd",
+  "format": "passed",
+  "features": {
+    "files": 125,
+    "lines_over_500": 2,
+    "remaining_long_lines": "Strings HTML de impressão; JSX formatado."
+  },
+  "regression_scenarios": 26,
+  "regression_execution": "26 cenários cobertos em dois segmentos sequenciais: 14 primeiros aprovados; continuação CGNAT até correções (12) após corrigir serialização de segundos zero no input datetime-local do teste. Continuação com exit 0. Não é uma única execução ininterrupta.",
+  "production_checks": 13,
+  "operational_visuals": 6,
+  "demo_visuals_identical": 3,
+  "coverage": {
+    "total": 169,
+    "validated": 149,
+    "backend_preserved_or_limited": 20,
+    "partial": 0,
+    "pending": 0,
+    "internal_services": 14,
+    "external_api_contracts": 2,
+    "backend_limitations": 4
+  },
+  "original_reference_files": 231,
+  "user_backend_test_writes": false,
+  "remote_ci_run": false,
+  "external_deployment": false,
+  "implementation_commit": "10e1a5f98189e0e8158f648ba037f9bb81b3319a",
+  "temporary_correction_lab": "Caddy 18394, API 18887, PostgreSQL 15455 e referência 3008 encerrados após coleta. Banco anterior 15454 desta correção também removido."
+}

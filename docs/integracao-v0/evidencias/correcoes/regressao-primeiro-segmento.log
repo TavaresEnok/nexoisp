@@ -1,0 +1,194 @@
+{"ok":true,"checks":["Login por cookie HttpOnly/SameSite; nenhum token em localStorage","Exportação CSV autenticada do cadastro","Cadastro valida CPF no Go e abre a ficha pelo UUID real","Contrato criado pela ficha com versão do plano e evento na linha do tempo","Edição e inativação persistidas no Go; ficha/aba restauradas pela URL","Campo personalizado do assinante salvo e relido do servidor","Contatos/consentimento e criação/arquivamento de anotação persistidos","Acesso ao portal criado no backend existente","Upload, download, exclusão de documento e exportação de dados pessoais","Anonimização efetiva validada pelo Go em titular sem pendências","Paginação no servidor, filtros persistidos e reinício da página ao buscar","Falha operacional exibida sem fallback para seeds","Lista conectada verificada no desktop e celular","Perfil financeiro sem ações de escrita cadastral e sem acesso direto à rede","Isolamento entre provedores aplicado pelo Go","Demonstração e ficha preservadas sob /demonstracao sem qualquer chamada operacional"]}
+{"ok":true,"checks":["Troca de senha preserva a sessão atual e revoga outra sessão","Configuração e ativação TOTP pelo frontend e Go reais","Logout e novo login com desafio TOTP","Desativação TOTP exige senha e código reais","Expiração da sessão remove dados e retorna ao login sem fallback"]}
+{"ok":true,"checks":["Plano criado pela UI; nova versão mantém o preço e a versão do contrato existente","Políticas de cobrança/fidelidade e parâmetros de rede salvos; reaplicação reporta solicitações reais","Filtros de plano/titular aplicados no Go com contagem correta e UUID inválido rejeitado","Troca para versão atual do plano, vencimento e restrição de crédito persistidos","Área, endereço específico e etiquetas do contrato salvos pelo layout v0","Fidelidade/cotação, desconto e cancelamento, agendamento/cancelamento, aditivo e solicitação/cancelamento de aceite","Adicional criado, contratado com quantidade e preço preservado após alteração do catálogo; encerramento registrado","Encerramento definitivo em duas etapas, com multa dispensada e justificativa registrada pelo Go","Isolamento entre provedores mantido nos detalhes e novos filtros comerciais","Paginação, busca que reinicia a página, filtro de situação e exportação CSV comercial"]}
+{"ok":true,"checks":["Geração pela UI repetida preserva uma mensalidade por contrato/competência","Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor","Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento","Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI","Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos","Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada","Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido","Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go","Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis","Faturas isoladas entre provedores e ações financeiras restritas pelo perfil"]}
+{"ok":true,"checks":["Prospecto valida contato obrigatório no Go; cadastro, edição e ficha usam UUID real","Etapas, motivo da perda, retomada e contato persistidos com histórico","Conversão cria assinante relacionado ao prospecto, marca ganho e abre a ficha","Protocolo com titular/contrato/prioridade e mensagem inicial, sem incidente fictício ou SLA presumido","Responsável atribuído; nota interna e resposta pública preservam visibilidade e estado do protocolo","OS real criada pelo atendimento, preservando protocolo, titular, contrato e endereço informado","Encerramento e reabertura persistidos; URL restaura a ficha após recarregar","Fila do titular abre o mesmo protocolo e fecha preservando a ficha do assinante","Busca e exportação reais de atendimentos; relatório CRM por período carrega dados do Go","Prospectos usam paginação do servidor e busca reinicia a página sem navegação tardia","Nota interna permanece ausente no portal; perfil financeiro não oferece ações de equipe técnica","Prospectos e protocolos isolados entre provedores"]}
+OS criada pela interface v0 com titular, contrato e endereço específico reais
+Atribuição e agendamento persistem no Go, com conversão correta do horário local
+Agenda em fuso do provedor mostra sobreposição, janela livre real, fila de espera e abre a ficha compartilhada
+Meu trabalho exibe a fila real do responsável no celular, com telefone, mapa e abertura da OS
+Fichas do titular e do contrato consultam apenas as OS do vínculo e preservam o contexto ao fechar
+Auxiliar adicionado/removido e checklist concluído com registro do autor
+Go rejeita saída sem saldo e devolução superior ao consumo da OS sem alterar o estoque
+Material lançado, devolvido e kit aplicado com saldos reais e históricos preservados
+Instalação por série vincula equipamento ao contrato em comodato
+Espera, reagendamento, deslocamento, execução e conclusão registram datas; OS finalizada preserva anotações sem reabrir controles
+Ficha A4 usa os registros do ERP, indica o contrato e exclui descrição/anotações internas
+Filtro por técnico validado no Go e exportação CSV operacional
+Cancelamento exige motivo e atribuir somente responsável preserva a situação de espera
+Listagem pagina oito registros no servidor e reinicia página junto à busca, mantendo o filtro do titular
+Falha operacional exibe erro de consulta sem introduzir ordens demonstrativas
+Contrato encerrado mostra o equipamento em comodato a recolher
+Perfil Técnico/NOC usa sua fila pessoal; Financeiro não acessa OS nem executa comandos
+OS e filtro por responsável mantêm o isolamento entre provedores
+{"ok":true,"checks":["OS criada pela interface v0 com titular, contrato e endereço específico reais","Atribuição e agendamento persistem no Go, com conversão correta do horário local","Agenda em fuso do provedor mostra sobreposição, janela livre real, fila de espera e abre a ficha compartilhada","Meu trabalho exibe a fila real do responsável no celular, com telefone, mapa e abertura da OS","Fichas do titular e do contrato consultam apenas as OS do vínculo e preservam o contexto ao fechar","Auxiliar adicionado/removido e checklist concluído com registro do autor","Go rejeita saída sem saldo e devolução superior ao consumo da OS sem alterar o estoque","Material lançado, devolvido e kit aplicado com saldos reais e históricos preservados","Instalação por série vincula equipamento ao contrato em comodato","Espera, reagendamento, deslocamento, execução e conclusão registram datas; OS finalizada preserva anotações sem reabrir controles","Ficha A4 usa os registros do ERP, indica o contrato e exclui descrição/anotações internas","Filtro por técnico validado no Go e exportação CSV operacional","Cancelamento exige motivo e atribuir somente responsável preserva a situação de espera","Listagem pagina oito registros no servidor e reinicia página junto à busca, mantendo o filtro do titular","Falha operacional exibe erro de consulta sem introduzir ordens demonstrativas","Contrato encerrado mostra o equipamento em comodato a recolher","Perfil Técnico/NOC usa sua fila pessoal; Financeiro não acessa OS nem executa comandos","OS e filtro por responsável mantêm o isolamento entre provedores"]}
+Catálogo cadastra material com código, unidade e mínimo; alerta usa saldo real
+Entradas, saídas e ajuste com sinal preservam os três movimentos e saldo calculado pelo Go
+Edição, ativação e mínimo persistem; Go bloqueia mudar serialização após movimento
+Lote normaliza séries no Go e duplicidade desfaz toda a entrada, sem unidade ou saldo parcial
+Distribuição ao técnico e retorno ao almoxarifado preservam saldo e atualizam custódia
+Contrato mostra série, comodato e OS; retirada confirmada devolve a unidade ao saldo e encerra a pendência de recolhimento
+Defeito e conserto mantêm a unidade rastreável; baixa exige motivo, reduz saldo e não pode ser desfeita
+Histórico por série preserva entrada, custódia, instalação, retirada, defeito, conserto, baixa, autor e data
+Catálogo operacional permanece navegável no celular com a tabela oficial do v0
+Atendimento consulta unidades e histórico sem controles nem autorização para movimentar estoque
+Catálogo, histórico e comandos por série mantêm isolamento entre provedores
+Erro na consulta de estoque não introduz catálogo ou saldos demonstrativos
+{"ok":true,"checks":["Catálogo cadastra material com código, unidade e mínimo; alerta usa saldo real","Entradas, saídas e ajuste com sinal preservam os três movimentos e saldo calculado pelo Go","Edição, ativação e mínimo persistem; Go bloqueia mudar serialização após movimento","Lote normaliza séries no Go e duplicidade desfaz toda a entrada, sem unidade ou saldo parcial","Distribuição ao técnico e retorno ao almoxarifado preservam saldo e atualizam custódia","Contrato mostra série, comodato e OS; retirada confirmada devolve a unidade ao saldo e encerra a pendência de recolhimento","Defeito e conserto mantêm a unidade rastreável; baixa exige motivo, reduz saldo e não pode ser desfeita","Histórico por série preserva entrada, custódia, instalação, retirada, defeito, conserto, baixa, autor e data","Catálogo operacional permanece navegável no celular com a tabela oficial do v0","Atendimento consulta unidades e histórico sem controles nem autorização para movimentar estoque","Catálogo, histórico e comandos por série mantêm isolamento entre provedores","Erro na consulta de estoque não introduz catálogo ou saldos demonstrativos"]}
+Agente criado no Go; token e chave pública exibidos na emissão, sem token na consulta posterior
+Rotação invalida token anterior; revogação bloqueia o agente; hello e sincronização sintéticos registram versão e contato após reativação
+Equipamento usa agente e referência local reais; ausência de telemetria permanece explícita e sem incidente demonstrativo
+Parâmetros e manutenção são gravados no Go; mudanças de intenção não são apresentadas como confirmação do NAS
+Concentrador emite segredo mesmo com falha de atualização do inventário; instruções posteriores não recuperam o segredo
+Rotação do segredo exige confirmação e emite outro valor apenas na janela de emissão
+Go bloqueia conversão com operação em aberto; relato sintético encerra a tentativa sem acessar NAS físico
+Reaplicação solicita uma conta sem pendência e ignora conta já em operação; conversão preserva a conta e emite configuração integrada sem afirmar conectividade física
+Fila e ficha de operações exibem intenção, idempotência, tentativa e evidências reais, com filtro e restauração pela URL
+Inventário oficial mantém navegação e consulta no celular
+Permissões de consulta/escrita e isolamento entre provedores são aplicados pelo Go
+Falha no inventário operacional exibe erro sem equipamentos demonstrativos
+{"ok":true,"checks":["Agente criado no Go; token e chave pública exibidos na emissão, sem token na consulta posterior","Rotação invalida token anterior; revogação bloqueia o agente; hello e sincronização sintéticos registram versão e contato após reativação","Equipamento usa agente e referência local reais; ausência de telemetria permanece explícita e sem incidente demonstrativo","Parâmetros e manutenção são gravados no Go; mudanças de intenção não são apresentadas como confirmação do NAS","Concentrador emite segredo mesmo com falha de atualização do inventário; instruções posteriores não recuperam o segredo","Rotação do segredo exige confirmação e emite outro valor apenas na janela de emissão","Go bloqueia conversão com operação em aberto; relato sintético encerra a tentativa sem acessar NAS físico","Reaplicação solicita uma conta sem pendência e ignora conta já em operação; conversão preserva a conta e emite configuração integrada sem afirmar conectividade física","Fila e ficha de operações exibem intenção, idempotência, tentativa e evidências reais, com filtro e restauração pela URL","Inventário oficial mantém navegação e consulta no celular","Permissões de consulta/escrita e isolamento entre provedores são aplicados pelo Go","Falha no inventário operacional exibe erro sem equipamentos demonstrativos"]}
+Provisionamento pela ficha usa equipamento real, emite senha apenas uma vez e mantém intenção separada da leitura ausente
+Troca de senha valida tamanho, solicita reaplicação e vínculo MAC é normalizado pelo Go
+Suspensão, reativação, reaplicação e desconexão geram operações no Go sem inventar confirmação do NAS
+Evidências preservam a ficha e a seção Conexão do titular consulta o mesmo acesso real
+Consulta de conexões usa o endpoint operacional e não trata intenção ativa sem leitura como sessão online
+Relatos sintéticos do agente alimentam sessão, consumo mensal, exportação, séries e disponibilidade sem estimar tráfego ausente
+Consulta de sessão observada permite busca, CSV e desconexão selecionada com motivo registrado no Go
+Desconexão recusada pelo Go permanece explícita e não é apresentada como execução bem-sucedida
+RADIUS integrado oferece IPoE por MAC sem senha e Hotspot com credencial; ambos preservam o tipo de acesso no Go
+Driver demonstrativo criado pela UI somente no servidor de demonstração identifica explicitamente a leitura sintética, sem acesso a NAS físico
+Conta financeira sem permissão de rede não recebe a seção de conexão; Go nega alterações e acesso entre provedores
+Erro de consulta de serviço exibe falha e não oferece criar um acesso substituto
+Descoberta relatada pelo agente é vinculada pela UI ao contrato, PON, perfis e VLAN; driver Huawei mantém a limitação de homologação explícita
+Relato sintético da tentativa confirma versão e potências; reaplicação solicita nova operação sem alegar homologação física
+NOC consulta contadores, alertas e PON reais; limiares são definidos pelo provedor e gravados pelo Go
+Diagnóstico apresenta conclusão, limites e evidências datadas do Go sem executar teste remoto
+Desautorização exige confirmação e só permite substituição após ausência confirmada pela OLT sintética
+Falha de consulta, permissões do NOC e isolamento das ONUs entre provedores são preservados
+Cadastro, edição, normalização de UF e ativação/inativação de POP persistem no Go
+Manutenção valida intervalo, grava público por concentrador e calcula dois assinantes atingidos no Go
+Avisos de início e normalização exigem confirmação e consentimento; somente o contato sintético autorizado entra na fila do canal local
+Cancelamento retira o aviso do portal e a consulta mantém a apresentação no celular
+Atendimento consulta avisos sem receber comandos administrativos; o Go nega cancelamento sem permissão
+Contas sintéticas só aparecem com health.demo; preencher uma conta não cria sessão nem contorna o login Go
+Busca operacional encontra nome, login, IP, MAC, ONU e OS e abre fichas reais de assinante e contrato
+Busca do shell preserva a composição v0 e encaminha ao resultado completo com o termo na URL
+Visão inicial usa indicadores, caixa, ativações/encerramentos e prioridades do Go; o alerta abre o NOC correspondente
+Tema persiste após recarga e navegação móvel utiliza o shell oficial
+Resultados respeitam a apresentação por perfil; suporte mantém provedor visível e saída real restaura a conta SaaS
+Falha na busca operacional não seleciona registros demonstrativos
+Cadastro CEO/CTO, coordenadas em conjunto, hierarquia, OLT/PON e edição persistem no Go
+Reserva e vínculo a contrato ocupam portas reais; o Go impede ocupação concorrente da mesma porta
+Ficha de portas restaura pela URL e liberação confirmada devolve reserva e contrato à capacidade livre
+Go bloqueia ciclos de hierarquia e exclusão de caixa com derivadas
+Esquema por coordenadas usa tokens v0, permite teclado e explicita que linhas não são traçado físico da fibra
+Caixas sem dependências podem ser excluídas; consulta preserva isolamento por provedor
+Cadastro e edição de pool IPv4 preservam CIDR; reserva automática ignora endereço de rede e grava descrição no Go
+Reserva a contrato, unicidade do IP e restauração da ficha pela URL seguem o Go
+Delegação automática /56 é registrada no contrato com aviso explícito de que o backend não entrega IPv6 ao NAS
+Reserva e liberação de IPv6 individual exigem endereço explícito e não se confundem com delegação de prefixo
+Liberação de prefixo e endereços atualiza a ocupação e permite excluir blocos sem vínculos
+UI consulta capacidade no Go, cria plano imutável, apresenta mapa/lookup e exporta script sem aplicá-lo ao NAS
+Rastreio exibe holders_at do accounting no instante consultado e distingue reservas e sessão atual
+Encerramento preserva rastreabilidade histórica e o Go impede apagar blocos usados por planos encerrados
+[
+  'UI consulta capacidade no Go, cria plano imutável, apresenta mapa/lookup e exporta script sem aplicá-lo ao NAS',
+  'Rastreio exibe holders_at do accounting no instante consultado e distingue reservas e sessão atual',
+  'Encerramento preserva rastreabilidade histórica e o Go impede apagar blocos usados por planos encerrados'
+]
+Pular para o conteúdo
+nexo
+isp
+WORKSPACE
+Pa
+Provedor alfa (demo)
+Administrador
+Buscar qualquer coisa
+⌘ K
+Painel inicial
+(conectado ao ERP)
+
+ÁREAS DO PROVEDOR
+
+Assinantes
+Relatório
+Mapa
+(conectado ao ERP)
+Consultar ONU
+(conectado ao ERP)
+Online agora
+(conectado ao ERP)
+Consulta de IP
+(conectado ao ERP)
+Financeiro
+Rede / FTTx
+Atendimento
+Administração
+Acesso e páginas públicas
+
+GESTÃO DO WORKSPACE
+
+Assistente
+Configurações
+Mapa de páginas
+Consolidação e evidências
+aa
+admin alfa
+Administrador
+Central de ajuda
+Workspace
+/
+Consulta de IP
+Buscar em todo o workspace
+⌘ K
+aa
+Ambiente demonstrativo do servidor · dados sintéticos e integrações simuladas identificadas nas páginas.
+
+RELATÓRIO · CONSULTA DE IP
+
+Rastreabilidade de IP
+
+Accounting, porta CGNAT e intervalo informado na requisição, com registro de auditoria.
+
+Dados da requisição
+No CGNAT, informe a porta para restringir o IP privado; sem porta, o resultado abrange todos os que compartilharam o IP. Até 92 dias por consulta.
+Endereço IP da requisição
+Porta de origem da requisição
+Número do ofício ou processo
+Início do período consultado
+Fim do período consultado
+Em branco: mesmo instante do início.
+Fuso da requisição
+Brasília · UTC−3
+UTC / GMT
+Fernando de Noronha · UTC−2
+Manaus / Cuiabá · UTC−4
+Acre · UTC−5
+Margem em minutos
+Aplicada para mais e para menos; zero conserva exatamente o período.
+Pesquisar IP e período
+Consultas anteriores
+Histórico da consulta legal
+0
+
+Requisição, responsável e período registrados pela auditoria do Go.
+
+QUANDO	QUEM	REFERÊNCIA	IP / PORTA	PERÍODO	ASSINANTES	AÇÕES
+
+Nenhum registro encontrado.
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+locator.fill: Error: Malformed value
+Call log:
+[2m  - waiting for getByLabel('Início do período consultado', { exact: true })[22m
+[2m    - locator resolved to <input step="1" value="" id="_r_2m_" required="" data-slot="input" type="datetime-local" aria-labelledby="_r_2m_-label" class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cur…/>[22m
+[2m    - fill("2026-10-19T16:40:00")[22m
+[2m  - attempting fill action[22m
+[2m    - waiting for element to be visible, enabled and editable[22m
+
+    at /home/enok/Documentos/projetos/NexoISP/e2e/frontend-v0-cgnat-legal.mjs:10:472
+
+Node.js v20.20.2

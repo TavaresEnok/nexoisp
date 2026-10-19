@@ -1,0 +1,8 @@
+{
+  "ok": true,
+  "expected_failure": true,
+  "previous_image": "sha256:fea42e8e6e476a3ca98449f3f3b6f2a5854b3f3b24b9e53565492e916ed7fcf3",
+  "case": "R01: submenu concentradores deve apresentar Monitoramento de rede",
+  "observed": "Timeout aguardando título operacional na imagem anterior; página planejada não atende o teste.",
+  "evidence": "contraprova-imagem-anterior.log"
+}

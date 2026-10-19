@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "verified_at": "2026-10-19T15:49:59.346595+00:00",
+  "verified_at": "2026-10-19T16:59:39.076767+00:00",
   "stages_completed": [
     1,
     2,
@@ -12,23 +12,26 @@
   ],
   "coverage": {
     "total": 169,
-    "validated": 139,
-    "backend_preserved_or_limited": 30,
+    "validated": 149,
+    "backend_preserved_or_limited": 20,
     "partial": 0,
-    "pending": 0
+    "pending": 0,
+    "internal_services": 14,
+    "external_api_contracts": 2,
+    "backend_limitations": 4
   },
   "local_tests": {
-    "passed": 152,
+    "passed": 153,
     "failed": 0
   },
   "typescript": "passed",
   "vite_build": "passed",
-  "docker_image": "nexo-v0-frontend:validation",
-  "docker_image_id": "sha256:fea42e8e6e476a3ca98449f3f3b6f2a5854b3f3b24b9e53565492e916ed7fcf3",
+  "docker_image": "nexo-v0-frontend:corrections",
+  "docker_image_id": "sha256:21028f2bd4b6a5a5a54063ef1ea7a48f48455a53722929f03907b57a4b9c0fdd",
   "reference_files_preserved": 231,
   "original_ui_global_css_fonts": "identical",
   "sequential_regression": {
-    "base": "http://127.0.0.1:3005",
+    "base": "http://127.0.0.1:3006",
     "backend": "Go/PostgreSQL descartáveis e exclusivos desta regressão; jobs desligados",
     "scenarios": [
       {
@@ -155,9 +158,18 @@
         "script": "e2e/frontend-v0-finance-access.mjs",
         "evidence": "docs/integracao-v0/evidencias/integracao-cobranca-acesso.json",
         "checks": 4
+      },
+      {
+        "script": "e2e/frontend-v0-remediation.mjs",
+        "evidence": "docs/integracao-v0/evidencias/correcoes/regressao.json",
+        "checks": 13
       }
     ],
-    "execution": "Primeiros quatro cenários aprovados; continuação a partir de CRM após corrigir verificações de espera pela resposta da API, encerrada com código 0. As alterações foram somente nas verificações assíncronas dos testes."
+    "execution": "26 cenários cobertos em dois segmentos sequenciais: 14 primeiros aprovados; continuação CGNAT até correções (12) após corrigir serialização de segundos zero no input datetime-local do teste. Continuação com exit 0. Não é uma única execução ininterrupta.",
+    "logs": [
+      "docs/integracao-v0/evidencias/correcoes/regressao-primeiro-segmento.log",
+      "docs/integracao-v0/evidencias/correcoes/regressao-continuacao.log"
+    ]
   },
   "additional_scenarios": [
     "integracao-cpe.json",
@@ -167,12 +179,41 @@
     "integracao-rede-complementar.json",
     "producao-rede-complementar.json"
   ],
-  "visual": "comparacao-visual.json e comparacao-visual-administracao-portal.json",
+  "visual": "Histórico: comparacao-visual.json e comparacao-visual-administracao-portal.json. Correção: correcoes/demonstracao/comparacao-visual.json (3 pares idênticos) e correcoes/regressao.json (6 capturas operacionais idênticas).",
   "production_scope": "Imagem Caddy local; não é declaração de publicação em servidor externo nem homologação física de integrações. Evidências de cada incremento registram o ambiente usado.",
   "limitations": "Limites existentes preservados: gateway real ausente; migração universal ausente; Huawei não homologado em OLT física; CGNAT de laboratório; IPv6/delegações e histórico limitados; célula c1. Ver matriz e OPERACAO.md.",
   "local_application": {
-    "frontend": "http://127.0.0.1:3000",
-    "upstream": "http://127.0.0.1:18081",
-    "verification": "Página de login e health HTTP 200, sem erros de execução e sem escritas de teste no backend do projeto."
+    "documented_frontend": "http://127.0.0.1:3000",
+    "documented_upstream": "http://127.0.0.1:18081",
+    "note": "Configuração de desenvolvimento; não é declaração de processo ativo. O backend operacional não recebeu escritas de teste."
+  },
+  "previous_checkpoint": {
+    "commit": "97d47ccee074bf4137751e02e73770fcd65689b4",
+    "validated": 139,
+    "backend_preserved_or_limited": 30,
+    "acceptance": "Reaberto pelos achados R01–R06; reconciliado nesta evidência."
+  },
+  "corrections": {
+    "findings_resolved": [
+      "R01",
+      "R02",
+      "R03",
+      "R04",
+      "R05",
+      "R06"
+    ],
+    "report": "docs/integracao-v0/CORRECOES-REVISAO.md",
+    "backend_triage": "docs/integracao-v0/CAPACIDADES-BACKEND.md",
+    "production_base": "http://127.0.0.1:18394",
+    "production_backend": "http://127.0.0.1:18887",
+    "production_database_port": 15455,
+    "production_checks": 13,
+    "operational_visual_comparisons": 6,
+    "reference_visual_comparisons": 3,
+    "visual_browser": "mcr.microsoft.com/playwright:v1.55.1-jammy",
+    "evidence": "docs/integracao-v0/evidencias/correcoes/regressao.json",
+    "negative_control": "docs/integracao-v0/evidencias/correcoes/contraprova.json",
+    "user_backend_test_writes": false,
+    "implementation_commit": "10e1a5f98189e0e8158f648ba037f9bb81b3319a"
   }
 }

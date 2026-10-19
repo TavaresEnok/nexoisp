@@ -11,7 +11,8 @@
     "validation": [
       "e2e/frontend-v0-session.mjs",
       "docs/integracao-v0/evidencias/integracao-sessao.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AC-02",
@@ -26,7 +27,8 @@
       "e2e/frontend-v0-workspace.mjs",
       "docs/integracao-v0/evidencias/integracao-workspace.json",
       "docs/integracao-v0/evidencias/producao-workspace.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AC-03",
@@ -41,7 +43,8 @@
       "e2e/frontend-v0-workspace.mjs",
       "docs/integracao-v0/evidencias/integracao-workspace.json",
       "docs/integracao-v0/evidencias/producao-workspace.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AC-04",
@@ -56,7 +59,8 @@
       "e2e/frontend-v0-workspace.mjs",
       "docs/integracao-v0/evidencias/integracao-workspace.json",
       "docs/integracao-v0/evidencias/producao-workspace.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AC-05",
@@ -71,7 +75,8 @@
       "e2e/frontend-v0-workspace.mjs",
       "docs/integracao-v0/evidencias/integracao-workspace.json",
       "docs/integracao-v0/evidencias/producao-workspace.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AC-06",
@@ -86,7 +91,8 @@
       "e2e/frontend-v0-workspace.mjs",
       "docs/integracao-v0/evidencias/integracao-workspace.json",
       "docs/integracao-v0/evidencias/producao-workspace.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AC-07",
@@ -100,7 +106,8 @@
     "validation": [
       "e2e/frontend-v0-session.mjs",
       "docs/integracao-v0/evidencias/integracao-sessao.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AC-08",
@@ -114,7 +121,8 @@
     "validation": [
       "e2e/frontend-v0-session.mjs",
       "docs/integracao-v0/evidencias/integracao-sessao.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AS-01",
@@ -128,7 +136,8 @@
     "validation": [
       "e2e/frontend-v0.mjs",
       "docs/integracao-v0/evidencias/integracao-assinantes.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AS-02",
@@ -142,7 +151,8 @@
     "validation": [
       "e2e/frontend-v0.mjs",
       "docs/integracao-v0/evidencias/integracao-assinantes.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AS-03",
@@ -157,7 +167,8 @@
       "e2e/frontend-v0-finance-access.mjs",
       "docs/integracao-v0/evidencias/integracao-cobranca-acesso.json",
       "docs/integracao-v0/evidencias/producao-cobranca-acesso.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AS-04",
@@ -171,7 +182,8 @@
     "validation": [
       "e2e/frontend-v0.mjs",
       "docs/integracao-v0/evidencias/integracao-assinantes.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AS-05",
@@ -185,7 +197,8 @@
     "validation": [
       "e2e/frontend-v0.mjs",
       "docs/integracao-v0/evidencias/integracao-assinantes.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AS-06",
@@ -199,7 +212,8 @@
     "validation": [
       "e2e/frontend-v0.mjs",
       "docs/integracao-v0/evidencias/integracao-assinantes.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AS-07",
@@ -213,7 +227,8 @@
     "validation": [
       "e2e/frontend-v0.mjs",
       "docs/integracao-v0/evidencias/integracao-assinantes.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AS-08",
@@ -227,7 +242,8 @@
     "validation": [
       "e2e/frontend-v0.mjs",
       "docs/integracao-v0/evidencias/integracao-assinantes.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AS-09",
@@ -241,7 +257,8 @@
     "validation": [
       "e2e/frontend-v0.mjs",
       "docs/integracao-v0/evidencias/integracao-assinantes.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AS-10",
@@ -255,7 +272,8 @@
     "validation": [
       "e2e/frontend-v0.mjs",
       "docs/integracao-v0/evidencias/integracao-assinantes.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-01",
@@ -269,7 +287,8 @@
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
       "docs/integracao-v0/evidencias/integracao-comercial.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-02",
@@ -283,7 +302,8 @@
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
       "docs/integracao-v0/evidencias/integracao-comercial.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-03",
@@ -297,7 +317,8 @@
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
       "docs/integracao-v0/evidencias/integracao-comercial.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-04",
@@ -311,7 +332,8 @@
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
       "docs/integracao-v0/evidencias/integracao-comercial.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-05",
@@ -325,7 +347,8 @@
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
       "docs/integracao-v0/evidencias/integracao-comercial.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-06",
@@ -339,7 +362,8 @@
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
       "docs/integracao-v0/evidencias/integracao-comercial.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-07",
@@ -353,7 +377,8 @@
     "validation": [
       "e2e/frontend-v0.mjs",
       "docs/integracao-v0/evidencias/integracao-assinantes.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-08",
@@ -367,7 +392,8 @@
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
       "docs/integracao-v0/evidencias/integracao-comercial.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-09",
@@ -381,7 +407,8 @@
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
       "docs/integracao-v0/evidencias/integracao-comercial.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-10",
@@ -395,7 +422,8 @@
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
       "docs/integracao-v0/evidencias/integracao-comercial.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-11",
@@ -409,7 +437,8 @@
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
       "docs/integracao-v0/evidencias/integracao-comercial.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-12",
@@ -423,7 +452,8 @@
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
       "docs/integracao-v0/evidencias/integracao-comercial.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-13",
@@ -437,7 +467,8 @@
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
       "docs/integracao-v0/evidencias/integracao-comercial.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-14",
@@ -451,7 +482,8 @@
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
       "docs/integracao-v0/evidencias/integracao-comercial.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-15",
@@ -465,7 +497,8 @@
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
       "docs/integracao-v0/evidencias/integracao-comercial.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-16",
@@ -485,7 +518,8 @@
       "docs/integracao-v0/evidencias/integracao-comercial.json",
       "docs/integracao-v0/evidencias/integracao-os.json",
       "docs/integracao-v0/evidencias/producao-os.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-17",
@@ -499,7 +533,8 @@
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
       "docs/integracao-v0/evidencias/integracao-comercial.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-18",
@@ -513,7 +548,8 @@
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
       "docs/integracao-v0/evidencias/integracao-comercial.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-19",
@@ -527,7 +563,8 @@
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
       "docs/integracao-v0/evidencias/integracao-comercial.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-20",
@@ -541,7 +578,8 @@
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
       "docs/integracao-v0/evidencias/integracao-comercial.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-21",
@@ -558,7 +596,8 @@
       "docs/integracao-v0/evidencias/integracao-comercial.json",
       "docs/integracao-v0/evidencias/integracao-portal.json",
       "docs/integracao-v0/evidencias/producao-portal.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-22",
@@ -572,7 +611,8 @@
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
       "docs/integracao-v0/evidencias/integracao-comercial.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CO-23",
@@ -588,7 +628,8 @@
       "e2e/frontend-v0.mjs",
       "docs/integracao-v0/evidencias/integracao-comercial.json",
       "docs/integracao-v0/evidencias/integracao-assinantes.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CR-01",
@@ -603,7 +644,8 @@
       "e2e/frontend-v0-crm.mjs",
       "docs/integracao-v0/evidencias/integracao-crm.json",
       "docs/integracao-v0/evidencias/producao-crm.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CR-02",
@@ -618,7 +660,8 @@
       "e2e/frontend-v0-crm.mjs",
       "docs/integracao-v0/evidencias/integracao-crm.json",
       "docs/integracao-v0/evidencias/producao-crm.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CR-03",
@@ -633,7 +676,8 @@
       "e2e/frontend-v0-crm.mjs",
       "docs/integracao-v0/evidencias/integracao-crm.json",
       "docs/integracao-v0/evidencias/producao-crm.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CR-04",
@@ -648,7 +692,8 @@
       "e2e/frontend-v0-crm.mjs",
       "docs/integracao-v0/evidencias/integracao-crm.json",
       "docs/integracao-v0/evidencias/producao-crm.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CR-05",
@@ -663,7 +708,8 @@
       "e2e/frontend-v0-crm.mjs",
       "docs/integracao-v0/evidencias/integracao-crm.json",
       "docs/integracao-v0/evidencias/producao-crm.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CR-06",
@@ -678,7 +724,8 @@
       "e2e/frontend-v0-crm.mjs",
       "docs/integracao-v0/evidencias/integracao-crm.json",
       "docs/integracao-v0/evidencias/producao-crm.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CR-07",
@@ -693,7 +740,8 @@
       "e2e/frontend-v0-crm.mjs",
       "docs/integracao-v0/evidencias/integracao-crm.json",
       "docs/integracao-v0/evidencias/producao-crm.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CR-08",
@@ -708,7 +756,8 @@
       "e2e/frontend-v0-crm.mjs",
       "docs/integracao-v0/evidencias/integracao-crm.json",
       "docs/integracao-v0/evidencias/producao-crm.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "CR-09",
@@ -723,7 +772,8 @@
       "e2e/frontend-v0-crm.mjs",
       "docs/integracao-v0/evidencias/integracao-crm.json",
       "docs/integracao-v0/evidencias/producao-crm.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "OS-01",
@@ -738,7 +788,8 @@
       "e2e/frontend-v0-field.mjs",
       "docs/integracao-v0/evidencias/integracao-os.json",
       "docs/integracao-v0/evidencias/producao-os.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "OS-02",
@@ -756,7 +807,8 @@
       "e2e/frontend-v0-crm.mjs",
       "docs/integracao-v0/evidencias/integracao-crm.json",
       "docs/integracao-v0/evidencias/producao-crm.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "OS-03",
@@ -771,7 +823,8 @@
       "e2e/frontend-v0-field.mjs",
       "docs/integracao-v0/evidencias/integracao-os.json",
       "docs/integracao-v0/evidencias/producao-os.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "OS-04",
@@ -786,7 +839,8 @@
       "e2e/frontend-v0-field.mjs",
       "docs/integracao-v0/evidencias/integracao-os.json",
       "docs/integracao-v0/evidencias/producao-os.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "OS-05",
@@ -801,7 +855,8 @@
       "e2e/frontend-v0-field.mjs",
       "docs/integracao-v0/evidencias/integracao-os.json",
       "docs/integracao-v0/evidencias/producao-os.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "OS-06",
@@ -816,7 +871,8 @@
       "e2e/frontend-v0-field.mjs",
       "docs/integracao-v0/evidencias/integracao-os.json",
       "docs/integracao-v0/evidencias/producao-os.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "OS-07",
@@ -831,7 +887,8 @@
       "e2e/frontend-v0-field.mjs",
       "docs/integracao-v0/evidencias/integracao-os.json",
       "docs/integracao-v0/evidencias/producao-os.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "OS-08",
@@ -846,7 +903,8 @@
       "e2e/frontend-v0-field.mjs",
       "docs/integracao-v0/evidencias/integracao-os.json",
       "docs/integracao-v0/evidencias/producao-os.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "OS-09",
@@ -861,7 +919,8 @@
       "e2e/frontend-v0-field.mjs",
       "docs/integracao-v0/evidencias/integracao-os.json",
       "docs/integracao-v0/evidencias/producao-os.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "OS-10",
@@ -876,7 +935,8 @@
       "e2e/frontend-v0-field.mjs",
       "docs/integracao-v0/evidencias/integracao-os.json",
       "docs/integracao-v0/evidencias/producao-os.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "OS-11",
@@ -891,7 +951,8 @@
       "e2e/frontend-v0-stock.mjs",
       "docs/integracao-v0/evidencias/integracao-estoque.json",
       "docs/integracao-v0/evidencias/producao-estoque.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "OS-12",
@@ -906,7 +967,8 @@
       "e2e/frontend-v0-stock.mjs",
       "docs/integracao-v0/evidencias/integracao-estoque.json",
       "docs/integracao-v0/evidencias/producao-estoque.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "OS-13",
@@ -921,7 +983,8 @@
       "e2e/frontend-v0-stock.mjs",
       "docs/integracao-v0/evidencias/integracao-estoque.json",
       "docs/integracao-v0/evidencias/producao-estoque.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "OS-14",
@@ -936,7 +999,8 @@
       "e2e/frontend-v0-stock.mjs",
       "docs/integracao-v0/evidencias/integracao-estoque.json",
       "docs/integracao-v0/evidencias/producao-estoque.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "FI-01",
@@ -950,7 +1014,8 @@
     "validation": [
       "e2e/frontend-v0-finance.mjs",
       "docs/integracao-v0/evidencias/integracao-financeiro.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "FI-02",
@@ -964,7 +1029,8 @@
     "validation": [
       "e2e/frontend-v0-finance.mjs",
       "docs/integracao-v0/evidencias/integracao-financeiro.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "FI-03",
@@ -978,7 +1044,8 @@
     "validation": [
       "e2e/frontend-v0-finance.mjs",
       "docs/integracao-v0/evidencias/integracao-financeiro.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "FI-04",
@@ -992,7 +1059,8 @@
     "validation": [
       "e2e/frontend-v0-finance.mjs",
       "docs/integracao-v0/evidencias/integracao-financeiro.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "FI-05",
@@ -1006,7 +1074,8 @@
     "validation": [
       "e2e/frontend-v0-finance.mjs",
       "docs/integracao-v0/evidencias/integracao-financeiro.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "FI-06",
@@ -1020,7 +1089,8 @@
     "validation": [
       "e2e/frontend-v0-finance.mjs",
       "docs/integracao-v0/evidencias/integracao-financeiro.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "FI-07",
@@ -1034,7 +1104,8 @@
     "validation": [
       "e2e/frontend-v0-finance.mjs",
       "docs/integracao-v0/evidencias/integracao-financeiro.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "FI-08",
@@ -1048,7 +1119,8 @@
     "validation": [
       "e2e/frontend-v0-finance.mjs",
       "docs/integracao-v0/evidencias/integracao-financeiro.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "FI-09",
@@ -1062,7 +1134,8 @@
     "validation": [
       "e2e/frontend-v0-finance.mjs",
       "docs/integracao-v0/evidencias/integracao-financeiro.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "FI-10",
@@ -1078,7 +1151,8 @@
       "docs/integracao-v0/evidencias/integracao-cobranca-acesso.json",
       "docs/integracao-v0/evidencias/producao-cobranca-acesso.json"
     ],
-    "integrationNote": "Concessão pela equipe e pelo portal, histórico, bloqueio de repetição e efeito de intenção validados. Liberação ativa protege contra auto-suspensão; validade expirada e nova suspensão dependem dos jobs e da política existente. Não comprova mudança física no NAS."
+    "integrationNote": "Concessão pela equipe e pelo portal, histórico, bloqueio de repetição e efeito de intenção validados. Liberação ativa protege contra auto-suspensão; validade expirada e nova suspensão dependem dos jobs e da política existente. Não comprova mudança física no NAS.",
+    "integrationClassification": "business-ui"
   },
   {
     "id": "FI-11",
@@ -1096,7 +1170,8 @@
       "docs/integracao-v0/evidencias/integracao-cobranca-acesso.json",
       "docs/integracao-v0/evidencias/producao-cobranca-acesso.json"
     ],
-    "integrationNote": "Configurações e verificação explícita de inadimplência validadas com o Go. Pagamento retoma suspensão automática e preserva suspensão manual; rotinas periódicas continuam dependentes dos jobs habilitados."
+    "integrationNote": "Configurações e verificação explícita de inadimplência validadas com o Go. Pagamento retoma suspensão automática e preserva suspensão manual; rotinas periódicas continuam dependentes dos jobs habilitados.",
+    "integrationClassification": "business-ui"
   },
   {
     "id": "FI-12",
@@ -1110,7 +1185,8 @@
     "validation": [
       "e2e/frontend-v0-finance.mjs",
       "docs/integracao-v0/evidencias/integracao-financeiro.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "FI-13",
@@ -1124,7 +1200,8 @@
     "validation": [
       "e2e/frontend-v0-finance.mjs",
       "docs/integracao-v0/evidencias/integracao-financeiro.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "FI-14",
@@ -1138,7 +1215,8 @@
     "validation": [
       "e2e/frontend-v0-finance.mjs",
       "docs/integracao-v0/evidencias/integracao-financeiro.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "FI-15",
@@ -1152,7 +1230,8 @@
     "validation": [
       "e2e/frontend-v0-finance.mjs",
       "docs/integracao-v0/evidencias/integracao-financeiro.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "FI-16",
@@ -1166,7 +1245,8 @@
     "validation": [
       "e2e/frontend-v0-finance.mjs",
       "docs/integracao-v0/evidencias/integracao-financeiro.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "FI-17",
@@ -1180,6 +1260,10 @@
     "validation": [],
     "validationNotes": [
       "Limitação existente preservada: nenhum gateway real localizado; não é capacidade disponível nem promessa de homologação."
+    ],
+    "integrationClassification": "backend-limitation",
+    "integrationNotes": [
+      "Capacidade indisponível/incompleta no Go; não é completada por controles de frontend. Ver limites em CAPACIDADES-BACKEND.md."
     ]
   },
   {
@@ -1195,7 +1279,8 @@
       "e2e/frontend-v0-network.mjs",
       "docs/integracao-v0/evidencias/integracao-rede.json",
       "docs/integracao-v0/evidencias/producao-rede.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "RE-02",
@@ -1214,7 +1299,8 @@
       "docs/integracao-v0/evidencias/integracao-rede-complementar.json",
       "docs/integracao-v0/evidencias/producao-rede-complementar.json"
     ],
-    "integrationNote": "Cadastro, token e status validados no cenário de rede; remoção de fingerprint fixado foi validada com associação preparada no banco descartável. Este teste não homologa certificado ou handshake físico de agente."
+    "integrationNote": "Cadastro, token e status validados no cenário de rede; remoção de fingerprint fixado foi validada com associação preparada no banco descartável. Este teste não homologa certificado ou handshake físico de agente.",
+    "integrationClassification": "business-ui"
   },
   {
     "id": "RE-03",
@@ -1229,7 +1315,8 @@
       "e2e/frontend-v0-network.mjs",
       "docs/integracao-v0/evidencias/integracao-rede.json",
       "docs/integracao-v0/evidencias/producao-rede.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "RE-04",
@@ -1244,7 +1331,8 @@
       "e2e/frontend-v0-network.mjs",
       "docs/integracao-v0/evidencias/integracao-rede.json",
       "docs/integracao-v0/evidencias/producao-rede.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "RE-05",
@@ -1263,7 +1351,8 @@
       "docs/integracao-v0/evidencias/integracao-rede-complementar.json",
       "docs/integracao-v0/evidencias/producao-rede-complementar.json"
     ],
-    "integrationNote": "Parâmetros, segredo e reaplicação validados; emissão/rotação WireGuard e L2TP e leitura de handshake sintético validadas em harness separado. Chaves privadas aparecem na emissão e consultas posteriores usam marcadores. Nenhum túnel físico foi aberto."
+    "integrationNote": "Parâmetros, segredo e reaplicação validados; emissão/rotação WireGuard e L2TP e leitura de handshake sintético validadas em harness separado. Chaves privadas aparecem na emissão e consultas posteriores usam marcadores. Nenhum túnel físico foi aberto.",
+    "integrationClassification": "business-ui"
   },
   {
     "id": "RE-06",
@@ -1278,7 +1367,8 @@
       "e2e/frontend-v0-network.mjs",
       "docs/integracao-v0/evidencias/integracao-rede.json",
       "docs/integracao-v0/evidencias/producao-rede.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "RE-07",
@@ -1293,7 +1383,8 @@
       "e2e/frontend-v0-access.mjs",
       "docs/integracao-v0/evidencias/integracao-acesso.json",
       "docs/integracao-v0/evidencias/producao-acesso.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "RE-08",
@@ -1308,7 +1399,8 @@
       "e2e/frontend-v0-access.mjs",
       "docs/integracao-v0/evidencias/integracao-acesso.json",
       "docs/integracao-v0/evidencias/producao-acesso.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "RE-09",
@@ -1323,7 +1415,8 @@
       "e2e/frontend-v0-network.mjs",
       "docs/integracao-v0/evidencias/integracao-rede.json",
       "docs/integracao-v0/evidencias/producao-rede.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "RE-10",
@@ -1338,7 +1431,8 @@
       "e2e/frontend-v0-access.mjs",
       "docs/integracao-v0/evidencias/integracao-acesso.json",
       "docs/integracao-v0/evidencias/producao-acesso.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "RE-11",
@@ -1353,7 +1447,8 @@
       "e2e/frontend-v0-access.mjs",
       "docs/integracao-v0/evidencias/integracao-acesso.json",
       "docs/integracao-v0/evidencias/producao-acesso.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "RE-12",
@@ -1371,7 +1466,8 @@
     ],
     "validationNotes": [
       "ACS sintético TR-098/TR-181: vínculo, leitura, Wi-Fi aplicado/enfileirado, reinício, releitura e desvínculo; sem roteador físico."
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "RE-13",
@@ -1386,7 +1482,8 @@
       "e2e/frontend-v0-access.mjs",
       "docs/integracao-v0/evidencias/integracao-acesso.json",
       "docs/integracao-v0/evidencias/producao-acesso.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "RE-14",
@@ -1401,7 +1498,8 @@
       "e2e/frontend-v0-access.mjs",
       "docs/integracao-v0/evidencias/integracao-acesso.json",
       "docs/integracao-v0/evidencias/producao-acesso.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "IN-01",
@@ -1419,7 +1517,8 @@
     ],
     "validationNotes": [
       "Protocolo sintético do agente validado; driver Huawei segue sem homologação em OLT física. Nenhum fabricante adicional foi presumido."
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "IN-02",
@@ -1437,7 +1536,8 @@
     ],
     "validationNotes": [
       "Protocolo sintético do agente validado; driver Huawei segue sem homologação em OLT física. Nenhum fabricante adicional foi presumido."
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "IN-03",
@@ -1455,7 +1555,8 @@
     ],
     "validationNotes": [
       "Protocolo sintético do agente validado; driver Huawei segue sem homologação em OLT física. Nenhum fabricante adicional foi presumido."
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "IN-04",
@@ -1470,7 +1571,8 @@
       "e2e/frontend-v0-ftth.mjs",
       "docs/integracao-v0/evidencias/integracao-ftth.json",
       "docs/integracao-v0/evidencias/producao-ftth.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "IN-05",
@@ -1485,7 +1587,8 @@
       "e2e/frontend-v0-ftth.mjs",
       "docs/integracao-v0/evidencias/integracao-ftth.json",
       "docs/integracao-v0/evidencias/producao-ftth.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "IN-06",
@@ -1503,7 +1606,8 @@
     ],
     "validationNotes": [
       "Capacidades existentes de caixas, portas e esquema por coordenadas integradas. Traçado físico completo, fusões, OTDR e importação GIS não existem no backend e não foram inventados."
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "IN-07",
@@ -1518,7 +1622,8 @@
       "e2e/frontend-v0-optical.mjs",
       "docs/integracao-v0/evidencias/integracao-optica.json",
       "docs/integracao-v0/evidencias/producao-optica.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "IN-08",
@@ -1533,7 +1638,8 @@
       "e2e/frontend-v0-optical.mjs",
       "docs/integracao-v0/evidencias/integracao-optica.json",
       "docs/integracao-v0/evidencias/producao-optica.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "IN-09",
@@ -1551,7 +1657,8 @@
     ],
     "validationNotes": [
       "Contratos, POPs, caixas, filtro por região/camada/situação, coordenadas exatas, clique para mover, remoção, cobertura, celular e RLS. Blocos OSM interceptados somente na validação."
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "IN-10",
@@ -1566,7 +1673,8 @@
       "e2e/frontend-v0-ipam.mjs",
       "docs/integracao-v0/evidencias/integracao-ipam.json",
       "docs/integracao-v0/evidencias/producao-ipam.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "IN-11",
@@ -1584,7 +1692,8 @@
     ],
     "validationNotes": [
       "Reserva e liberação de prefixo validadas; a entrega automática IPv6 ao NAS não existe no backend e permanece explícita na interface."
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "IN-12",
@@ -1599,7 +1708,8 @@
       "e2e/frontend-v0-cgnat-legal.mjs",
       "docs/integracao-v0/evidencias/integracao-cgnat-legal.json",
       "docs/integracao-v0/evidencias/producao-cgnat-legal.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "IN-13",
@@ -1614,7 +1724,8 @@
       "e2e/frontend-v0-cgnat-legal.mjs",
       "docs/integracao-v0/evidencias/integracao-cgnat-legal.json",
       "docs/integracao-v0/evidencias/producao-cgnat-legal.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "IN-14",
@@ -1629,7 +1740,8 @@
       "e2e/frontend-v0-cgnat-legal.mjs",
       "docs/integracao-v0/evidencias/integracao-cgnat-legal.json",
       "docs/integracao-v0/evidencias/producao-cgnat-legal.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "IN-15",
@@ -1647,7 +1759,8 @@
     ],
     "validationNotes": [
       "Consulta IPv6 apresenta delegação cadastrada e a ausência de histórico completo após liberação. Não presume titularidade anterior."
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "IN-16",
@@ -1662,7 +1775,8 @@
       "e2e/frontend-v0-maintenance.mjs",
       "docs/integracao-v0/evidencias/integracao-manutencoes-pops.json",
       "docs/integracao-v0/evidencias/producao-manutencoes-pops.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "IN-17",
@@ -1683,7 +1797,8 @@
     ],
     "validationNotes": [
       "porta da caixa positiva consultada na ficha do contrato."
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AD-01",
@@ -1698,7 +1813,8 @@
       "e2e/frontend-v0-admin-team.mjs",
       "docs/integracao-v0/evidencias/integracao-equipe-empresas.json",
       "docs/integracao-v0/evidencias/producao-equipe-empresas.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AD-02",
@@ -1714,7 +1830,8 @@
       "docs/integracao-v0/evidencias/integracao-equipe-empresas.json",
       "docs/integracao-v0/evidencias/producao-equipe-empresas.json"
     ],
-    "integrationNote": "A interface oficial oferece redefinição de senha de outro usuário; senha antiga e nova foram verificadas por autenticação real, sem recuperar a senha atual."
+    "integrationNote": "A interface oficial oferece redefinição de senha de outro usuário; senha antiga e nova foram verificadas por autenticação real, sem recuperar a senha atual.",
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AD-03",
@@ -1729,7 +1846,8 @@
       "e2e/frontend-v0-saas.mjs",
       "docs/integracao-v0/evidencias/integracao-saas.json",
       "docs/integracao-v0/evidencias/producao-saas.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AD-04",
@@ -1744,7 +1862,8 @@
       "e2e/frontend-v0-admin-team.mjs",
       "docs/integracao-v0/evidencias/integracao-equipe-empresas.json",
       "docs/integracao-v0/evidencias/producao-equipe-empresas.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AD-05",
@@ -1759,7 +1878,8 @@
       "e2e/frontend-v0-maintenance.mjs",
       "docs/integracao-v0/evidencias/integracao-manutencoes-pops.json",
       "docs/integracao-v0/evidencias/producao-manutencoes-pops.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AD-06",
@@ -1774,7 +1894,8 @@
       "e2e/frontend-v0-messages.mjs",
       "docs/integracao-v0/evidencias/integracao-avisos.json",
       "docs/integracao-v0/evidencias/producao-avisos.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AD-07",
@@ -1789,7 +1910,8 @@
       "e2e/frontend-v0-messages.mjs",
       "docs/integracao-v0/evidencias/integracao-avisos.json",
       "docs/integracao-v0/evidencias/producao-avisos.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AD-08",
@@ -1804,7 +1926,8 @@
       "e2e/frontend-v0-messages.mjs",
       "docs/integracao-v0/evidencias/integracao-avisos.json",
       "docs/integracao-v0/evidencias/producao-avisos.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AD-09",
@@ -1819,7 +1942,8 @@
       "e2e/frontend-v0-messages.mjs",
       "docs/integracao-v0/evidencias/integracao-avisos.json",
       "docs/integracao-v0/evidencias/producao-avisos.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AD-10",
@@ -1834,7 +1958,8 @@
       "e2e/frontend-v0-integrations.mjs",
       "docs/integracao-v0/evidencias/integracao-integracoes.json",
       "docs/integracao-v0/evidencias/producao-integracoes.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AD-11",
@@ -1849,7 +1974,8 @@
       "e2e/frontend-v0-integrations.mjs",
       "docs/integracao-v0/evidencias/integracao-integracoes.json",
       "docs/integracao-v0/evidencias/producao-integracoes.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AD-12",
@@ -1864,7 +1990,8 @@
       "e2e/frontend-v0-quality.mjs",
       "docs/integracao-v0/evidencias/integracao-qualidade.json",
       "docs/integracao-v0/evidencias/producao-qualidade.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AD-13",
@@ -1879,7 +2006,8 @@
       "e2e/frontend-v0-quality.mjs",
       "docs/integracao-v0/evidencias/integracao-qualidade.json",
       "docs/integracao-v0/evidencias/producao-qualidade.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AD-14",
@@ -1894,7 +2022,8 @@
       "e2e/frontend-v0-quality.mjs",
       "docs/integracao-v0/evidencias/integracao-qualidade.json",
       "docs/integracao-v0/evidencias/producao-qualidade.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AD-15",
@@ -1909,7 +2038,8 @@
       "e2e/frontend-v0-quality.mjs",
       "docs/integracao-v0/evidencias/integracao-qualidade.json",
       "docs/integracao-v0/evidencias/producao-qualidade.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AD-16",
@@ -1924,7 +2054,8 @@
       "e2e/frontend-v0-quality.mjs",
       "docs/integracao-v0/evidencias/integracao-qualidade.json",
       "docs/integracao-v0/evidencias/producao-qualidade.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AD-17",
@@ -1940,7 +2071,8 @@
       "docs/integracao-v0/evidencias/integracao-qualidade.json",
       "docs/integracao-v0/evidencias/producao-qualidade.json"
     ],
-    "integrationNote": "Regras e apuração existentes integradas; regras vigentes alteram a apuração histórica. Não há pagamento nem liquidação de comissão no backend."
+    "integrationNote": "Regras e apuração existentes integradas; regras vigentes alteram a apuração histórica. Não há pagamento nem liquidação de comissão no backend.",
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AD-18",
@@ -1956,7 +2088,8 @@
       "docs/integracao-v0/evidencias/integracao-auditoria-anatel.json",
       "docs/integracao-v0/evidencias/producao-auditoria-anatel.json"
     ],
-    "integrationNote": "Prévia, correções IBGE/tecnologia e CSV integrados. Não transmite declaração à ANATEL; conferir leiaute continua responsabilidade operacional do provedor."
+    "integrationNote": "Prévia, correções IBGE/tecnologia e CSV integrados. Não transmite declaração à ANATEL; conferir leiaute continua responsabilidade operacional do provedor.",
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AD-19",
@@ -1971,7 +2104,8 @@
       "e2e/frontend-v0-import.mjs",
       "docs/integracao-v0/evidencias/integracao-importacao.json",
       "docs/integracao-v0/evidencias/producao-importacao.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "AD-20",
@@ -1987,7 +2121,11 @@
       "docs/integracao-v0/evidencias/integracao-importacao.json",
       "docs/integracao-v0/evidencias/producao-importacao.json"
     ],
-    "integrationNote": "Importador CSV intermediário existente foi integrado com mapeamento, prévia transacional, aplicação, histórico e provisionamento separado. Migração universal direta de SGP/MK-Auth não é capacidade disponível no backend; exige conversão da exportação e validação por instalação."
+    "integrationNote": "Importador CSV intermediário existente foi integrado com mapeamento, prévia transacional, aplicação, histórico e provisionamento separado. Migração universal direta de SGP/MK-Auth não é capacidade disponível no backend; exige conversão da exportação e validação por instalação.",
+    "integrationClassification": "backend-limitation",
+    "integrationNotes": [
+      "Capacidade indisponível/incompleta no Go; não é completada por controles de frontend. Ver limites em CAPACIDADES-BACKEND.md."
+    ]
   },
   {
     "id": "AD-21",
@@ -2002,7 +2140,8 @@
       "e2e/frontend-v0-admin-reports.mjs",
       "docs/integracao-v0/evidencias/integracao-auditoria-anatel.json",
       "docs/integracao-v0/evidencias/producao-auditoria-anatel.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "PO-01",
@@ -2017,7 +2156,8 @@
       "e2e/frontend-v0-portal.mjs",
       "docs/integracao-v0/evidencias/integracao-portal.json",
       "docs/integracao-v0/evidencias/producao-portal.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "PO-02",
@@ -2032,7 +2172,8 @@
       "e2e/frontend-v0-portal.mjs",
       "docs/integracao-v0/evidencias/integracao-portal.json",
       "docs/integracao-v0/evidencias/producao-portal.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "PO-03",
@@ -2047,7 +2188,8 @@
       "e2e/frontend-v0-portal.mjs",
       "docs/integracao-v0/evidencias/integracao-portal.json",
       "docs/integracao-v0/evidencias/producao-portal.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "PO-04",
@@ -2062,7 +2204,8 @@
       "e2e/frontend-v0-portal.mjs",
       "docs/integracao-v0/evidencias/integracao-portal.json",
       "docs/integracao-v0/evidencias/producao-portal.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "PO-05",
@@ -2077,7 +2220,8 @@
       "e2e/frontend-v0-portal-wifi.mjs",
       "docs/integracao-v0/evidencias/integracao-portal-wifi.json",
       "docs/integracao-v0/evidencias/producao-portal-wifi.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "PO-06",
@@ -2092,7 +2236,8 @@
       "e2e/frontend-v0-portal.mjs",
       "docs/integracao-v0/evidencias/integracao-portal.json",
       "docs/integracao-v0/evidencias/producao-portal.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "PO-07",
@@ -2107,7 +2252,8 @@
       "e2e/frontend-v0-portal.mjs",
       "docs/integracao-v0/evidencias/integracao-portal.json",
       "docs/integracao-v0/evidencias/producao-portal.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "PO-08",
@@ -2122,7 +2268,8 @@
       "e2e/frontend-v0-portal.mjs",
       "docs/integracao-v0/evidencias/integracao-portal.json",
       "docs/integracao-v0/evidencias/producao-portal.json"
-    ]
+    ],
+    "integrationClassification": "business-ui"
   },
   {
     "id": "PO-09",
@@ -2138,7 +2285,11 @@
       "docs/integracao-v0/evidencias/integracao-portal.json",
       "docs/integracao-v0/evidencias/producao-portal.json"
     ],
-    "integrationNote": "Meios ausentes e códigos explicitamente simulados validados no portal. Pix/boleto real não é uma capacidade disponível no gateway Go atual."
+    "integrationNote": "Meios ausentes e códigos explicitamente simulados validados no portal. Pix/boleto real não é uma capacidade disponível no gateway Go atual.",
+    "integrationClassification": "backend-limitation",
+    "integrationNotes": [
+      "Capacidade indisponível/incompleta no Go; não é completada por controles de frontend. Ver limites em CAPACIDADES-BACKEND.md."
+    ]
   },
   {
     "id": "BE-01",
@@ -2152,6 +2303,10 @@
     "validation": [],
     "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ],
+    "integrationClassification": "external-api",
+    "integrationNotes": [
+      "Contrato HTTP para consumidores externos; gestão de tokens e escopos integrada na administração. Não se duplica uma API pública em outra página. Protocolo externo não revalidado nesta correção."
     ]
   },
   {
@@ -2166,6 +2321,10 @@
     "validation": [],
     "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ],
+    "integrationClassification": "external-api",
+    "integrationNotes": [
+      "Contrato HTTP para consumidores externos; gestão de tokens e escopos integrada na administração. Não se duplica uma API pública em outra página. Protocolo externo não revalidado nesta correção."
     ]
   },
   {
@@ -2176,10 +2335,17 @@
     "behavior": "Atualizar o endereço de instalação associado ao contrato; não foi encontrado editor correspondente na ficha de contrato, apesar de a OS poder usar o endereço do contrato.",
     "endpoints": "PUT /api/contracts/:id/install-address",
     "evidence": "E/config.go; M/00028_fluxo_os_catalogos_sla.sql",
-    "integrationState": "backend-preserved",
-    "validation": [],
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json"
+    ],
     "validationNotes": [
-      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+      "Comportamento original inventariado preservado acima; a apresentação atual está descrita em integrationNotes e CAPACIDADES-BACKEND.md."
+    ],
+    "integrationClassification": "business-ui",
+    "integrationNotes": [
+      "Endereço de instalação na seção comercial do contrato."
     ]
   },
   {
@@ -2190,10 +2356,17 @@
     "behavior": "Gravar ou remover referência de indicação entre contratos conforme validações; não foi encontrado controle na ficha.",
     "endpoints": "PUT /api/contracts/:id/referral",
     "evidence": "E/comercial.go; M/00031_condicoes_contrato.sql",
-    "integrationState": "backend-preserved",
-    "validation": [],
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-remediation.mjs",
+      "docs/integracao-v0/evidencias/correcoes/regressao.json"
+    ],
     "validationNotes": [
-      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+      "Comportamento original inventariado preservado acima; a apresentação atual está descrita em integrationNotes e CAPACIDADES-BACKEND.md."
+    ],
+    "integrationClassification": "business-ui",
+    "integrationNotes": [
+      "Indicação: selecionar titular real, gravar, remover e rejeitar autoindicação na ficha do contrato."
     ]
   },
   {
@@ -2204,10 +2377,17 @@
     "behavior": "PATCH aceita campos estruturados de classificação conforme schema; conversão do prospecto pode vincular assinante existente, além do fluxo de criar assinante apresentado na UI.",
     "endpoints": "PATCH /api/tickets/:id; POST /api/leads/:id/convert",
     "evidence": "E/crm.go; E/schemas.go; P/Crm.tsx",
-    "integrationState": "backend-preserved",
-    "validation": [],
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-remediation.mjs",
+      "docs/integracao-v0/evidencias/correcoes/regressao.json"
+    ],
     "validationNotes": [
-      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+      "Comportamento original inventariado preservado acima; a apresentação atual está descrita em integrationNotes e CAPACIDADES-BACKEND.md."
+    ],
+    "integrationClassification": "business-ui",
+    "integrationNotes": [
+      "Editor de classificação estruturada do atendimento e conversão de prospecto para assinante existente, sem duplicar cadastro."
     ]
   },
   {
@@ -2218,10 +2398,19 @@
     "behavior": "Handlers aceitam campos que as telas não expõem: senha de terceiro, edição cadastral de POP/empresa, rótulos de catálogo e propriedades de SLA e campos personalizados. Sujeitos à permissão do endpoint.",
     "endpoints": "PATCH /api/users/:id; PATCH /api/pops/:id; PATCH /api/companies/:id; PATCH /api/catalogs/:id; PATCH /api/sla-policies/:id; PATCH /api/custom-fields/:id",
     "evidence": "I/service.go; E/config.go; E/empresas_tags.go; E/config.go; E/config.go; E/custom.go",
-    "integrationState": "backend-preserved",
-    "validation": [],
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-admin-team.mjs",
+      "docs/integracao-v0/evidencias/integracao-equipe-empresas.json",
+      "e2e/frontend-v0-quality.mjs",
+      "docs/integracao-v0/evidencias/integracao-qualidade.json"
+    ],
     "validationNotes": [
-      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+      "Comportamento original inventariado preservado acima; a apresentação atual está descrita em integrationNotes e CAPACIDADES-BACKEND.md."
+    ],
+    "integrationClassification": "business-ui",
+    "integrationNotes": [
+      "Redefinição de senha de usuário e edição de POP/empresa, catálogos, SLA e campos adicionais nas telas administrativas."
     ]
   },
   {
@@ -2232,10 +2421,19 @@
     "behavior": "PATCH de equipamento e pool suporta campos cadastrais além dos botões de manutenção e exclusão exibidos; as mesmas validações e permissões do servidor continuam aplicáveis.",
     "endpoints": "PATCH /api/devices/:id; PATCH /api/ipam/pools/:id",
     "evidence": "E/rede.go; E/ipam.go; E/infraestrutura.go; P/Network.tsx; P/Ipam.tsx",
-    "integrationState": "backend-preserved",
-    "validation": [],
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-remediation.mjs",
+      "docs/integracao-v0/evidencias/correcoes/regressao.json",
+      "e2e/frontend-v0-ipam.mjs",
+      "docs/integracao-v0/evidencias/integracao-ipam.json"
+    ],
     "validationNotes": [
-      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+      "Comportamento original inventariado preservado acima; a apresentação atual está descrita em integrationNotes e CAPACIDADES-BACKEND.md."
+    ],
+    "integrationClassification": "business-ui",
+    "integrationNotes": [
+      "Editor de nome, driver, host, porta, referência de credencial e agente do equipamento; editor de pool IPAM existente."
     ]
   },
   {
@@ -2246,10 +2444,17 @@
     "behavior": "Lookup do plano por endereço e resposta holders_at no rastreamento fornecem dados que não aparecem integralmente na tela de busca do IP público.",
     "endpoints": "GET /api/cgnat/plans/:id/lookup; GET /api/cgnat/trace",
     "evidence": "L/cgnat.go; E/ipam.go; P/Ipam.tsx",
-    "integrationState": "backend-preserved",
-    "validation": [],
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-cgnat-legal.mjs",
+      "docs/integracao-v0/evidencias/integracao-cgnat-legal.json"
+    ],
     "validationNotes": [
-      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+      "Comportamento original inventariado preservado acima; a apresentação atual está descrita em integrationNotes e CAPACIDADES-BACKEND.md."
+    ],
+    "integrationClassification": "business-ui",
+    "integrationNotes": [
+      "Consulta CGNAT por IP privado e titulares históricos, com limites de laboratório explícitos."
     ]
   },
   {
@@ -2260,10 +2465,17 @@
     "behavior": "Aging aceita plano, POP e tag; exportação contábil aceita empresa. A UI utiliza um subconjunto dos parâmetros.",
     "endpoints": "GET /api/finance/reports/aging; GET /api/finance/export",
     "evidence": "E/relatorios.go; P/Cobranca.tsx; P/Finance.tsx",
-    "integrationState": "backend-preserved",
-    "validation": [],
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-remediation.mjs",
+      "docs/integracao-v0/evidencias/correcoes/regressao.json"
+    ],
     "validationNotes": [
-      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+      "Comportamento original inventariado preservado acima; a apresentação atual está descrita em integrationNotes e CAPACIDADES-BACKEND.md."
+    ],
+    "integrationClassification": "business-ui",
+    "integrationNotes": [
+      "Carteira por plano/POP/etiqueta e exportação CSV filtrada; empresa na exportação contábil."
     ]
   },
   {
@@ -2278,6 +2490,10 @@
     "validation": [],
     "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ],
+    "integrationClassification": "internal-service",
+    "integrationNotes": [
+      "Protocolo, worker, segurança ou ferramenta de infraestrutura: preservado no Go/serviço existente; não é uma ação de negócio excluída da interface. Ver triagem individual em CAPACIDADES-BACKEND.md."
     ]
   },
   {
@@ -2292,6 +2508,10 @@
     "validation": [],
     "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ],
+    "integrationClassification": "internal-service",
+    "integrationNotes": [
+      "Protocolo, worker, segurança ou ferramenta de infraestrutura: preservado no Go/serviço existente; não é uma ação de negócio excluída da interface. Ver triagem individual em CAPACIDADES-BACKEND.md."
     ]
   },
   {
@@ -2306,6 +2526,10 @@
     "validation": [],
     "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ],
+    "integrationClassification": "internal-service",
+    "integrationNotes": [
+      "Protocolo, worker, segurança ou ferramenta de infraestrutura: preservado no Go/serviço existente; não é uma ação de negócio excluída da interface. Ver triagem individual em CAPACIDADES-BACKEND.md."
     ]
   },
   {
@@ -2320,6 +2544,10 @@
     "validation": [],
     "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ],
+    "integrationClassification": "internal-service",
+    "integrationNotes": [
+      "Protocolo, worker, segurança ou ferramenta de infraestrutura: preservado no Go/serviço existente; não é uma ação de negócio excluída da interface. Ver triagem individual em CAPACIDADES-BACKEND.md."
     ]
   },
   {
@@ -2334,6 +2562,10 @@
     "validation": [],
     "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ],
+    "integrationClassification": "internal-service",
+    "integrationNotes": [
+      "Protocolo, worker, segurança ou ferramenta de infraestrutura: preservado no Go/serviço existente; não é uma ação de negócio excluída da interface. Ver triagem individual em CAPACIDADES-BACKEND.md."
     ]
   },
   {
@@ -2348,6 +2580,10 @@
     "validation": [],
     "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ],
+    "integrationClassification": "internal-service",
+    "integrationNotes": [
+      "Protocolo, worker, segurança ou ferramenta de infraestrutura: preservado no Go/serviço existente; não é uma ação de negócio excluída da interface. Ver triagem individual em CAPACIDADES-BACKEND.md."
     ]
   },
   {
@@ -2362,6 +2598,10 @@
     "validation": [],
     "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ],
+    "integrationClassification": "internal-service",
+    "integrationNotes": [
+      "Protocolo, worker, segurança ou ferramenta de infraestrutura: preservado no Go/serviço existente; não é uma ação de negócio excluída da interface. Ver triagem individual em CAPACIDADES-BACKEND.md."
     ]
   },
   {
@@ -2376,6 +2616,10 @@
     "validation": [],
     "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ],
+    "integrationClassification": "internal-service",
+    "integrationNotes": [
+      "Protocolo, worker, segurança ou ferramenta de infraestrutura: preservado no Go/serviço existente; não é uma ação de negócio excluída da interface. Ver triagem individual em CAPACIDADES-BACKEND.md."
     ]
   },
   {
@@ -2390,6 +2634,10 @@
     "validation": [],
     "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ],
+    "integrationClassification": "internal-service",
+    "integrationNotes": [
+      "Protocolo, worker, segurança ou ferramenta de infraestrutura: preservado no Go/serviço existente; não é uma ação de negócio excluída da interface. Ver triagem individual em CAPACIDADES-BACKEND.md."
     ]
   },
   {
@@ -2404,6 +2652,10 @@
     "validation": [],
     "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ],
+    "integrationClassification": "internal-service",
+    "integrationNotes": [
+      "Protocolo, worker, segurança ou ferramenta de infraestrutura: preservado no Go/serviço existente; não é uma ação de negócio excluída da interface. Ver triagem individual em CAPACIDADES-BACKEND.md."
     ]
   },
   {
@@ -2418,6 +2670,10 @@
     "validation": [],
     "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ],
+    "integrationClassification": "internal-service",
+    "integrationNotes": [
+      "Protocolo, worker, segurança ou ferramenta de infraestrutura: preservado no Go/serviço existente; não é uma ação de negócio excluída da interface. Ver triagem individual em CAPACIDADES-BACKEND.md."
     ]
   },
   {
@@ -2432,6 +2688,10 @@
     "validation": [],
     "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ],
+    "integrationClassification": "internal-service",
+    "integrationNotes": [
+      "Protocolo, worker, segurança ou ferramenta de infraestrutura: preservado no Go/serviço existente; não é uma ação de negócio excluída da interface. Ver triagem individual em CAPACIDADES-BACKEND.md."
     ]
   },
   {
@@ -2446,6 +2706,10 @@
     "validation": [],
     "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ],
+    "integrationClassification": "internal-service",
+    "integrationNotes": [
+      "Protocolo, worker, segurança ou ferramenta de infraestrutura: preservado no Go/serviço existente; não é uma ação de negócio excluída da interface. Ver triagem individual em CAPACIDADES-BACKEND.md."
     ]
   },
   {
@@ -2460,6 +2724,10 @@
     "validation": [],
     "validationNotes": [
       "Limitação existente confirmada em apps/api-go/internal/db/db.go: células diferentes de c1 não têm conexão disponível. O frontend não cria roteamento ou migração distribuída paralela."
+    ],
+    "integrationClassification": "backend-limitation",
+    "integrationNotes": [
+      "Capacidade indisponível/incompleta no Go; não é completada por controles de frontend. Ver limites em CAPACIDADES-BACKEND.md."
     ]
   },
   {
@@ -2470,10 +2738,17 @@
     "behavior": "Consulta de indicações cadastradas em contratos, protegida por finance:read; não foi encontrada página ou botão correspondente.",
     "endpoints": "GET /api/reports/referrals",
     "evidence": "L/consultas.go; L/consultas_generated.go; E/comercial.go",
-    "integrationState": "backend-preserved",
-    "validation": [],
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-remediation.mjs",
+      "docs/integracao-v0/evidencias/correcoes/regressao.json"
+    ],
     "validationNotes": [
-      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+      "Comportamento original inventariado preservado acima; a apresentação atual está descrita em integrationNotes e CAPACIDADES-BACKEND.md."
+    ],
+    "integrationClassification": "business-ui",
+    "integrationNotes": [
+      "Relatório /relatorios/indicacoes, acessível no menu Financeiro e pela ficha; dados reais limitados à resposta do Go e a finance:read."
     ]
   },
   {
@@ -2488,6 +2763,10 @@
     "validation": [],
     "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+    ],
+    "integrationClassification": "internal-service",
+    "integrationNotes": [
+      "Protocolo, worker, segurança ou ferramenta de infraestrutura: preservado no Go/serviço existente; não é uma ação de negócio excluída da interface. Ver triagem individual em CAPACIDADES-BACKEND.md."
     ]
   },
   {
@@ -2498,10 +2777,17 @@
     "behavior": "Cria fatura para contrato com descrição, valor positivo e vencimento; não foi encontrado formulário de criação avulsa genérica no painel. Multa rescisória utiliza outro fluxo.",
     "endpoints": "POST /api/invoices",
     "evidence": "E/financeiro.go; G/finance/core.go; P/Finance.tsx",
-    "integrationState": "backend-preserved",
-    "validation": [],
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-finance.mjs",
+      "docs/integracao-v0/evidencias/integracao-financeiro.json"
+    ],
     "validationNotes": [
-      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+      "Comportamento original inventariado preservado acima; a apresentação atual está descrita em integrationNotes e CAPACIDADES-BACKEND.md."
+    ],
+    "integrationClassification": "business-ui",
+    "integrationNotes": [
+      "Formulário de fatura avulsa para contrato, descrição, valor e vencimento; validações no Go."
     ]
   },
   {
@@ -2512,10 +2798,17 @@
     "behavior": "Exclusão da etiqueta global com validações do servidor; o formulário de etiquetas da ficha oferece criar e vincular, sem controle global de exclusão.",
     "endpoints": "DELETE /api/tags/:id",
     "evidence": "E/empresas_tags.go; P/Extras.tsx",
-    "integrationState": "backend-preserved",
-    "validation": [],
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-remediation.mjs",
+      "docs/integracao-v0/evidencias/correcoes/regressao.json"
+    ],
     "validationNotes": [
-      "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
+      "Comportamento original inventariado preservado acima; a apresentação atual está descrita em integrationNotes e CAPACIDADES-BACKEND.md."
+    ],
+    "integrationClassification": "business-ui",
+    "integrationNotes": [
+      "Exclusão global de etiqueta com confirmação e atualização dos vínculos exibidos."
     ]
   }
 ]

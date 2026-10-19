@@ -1,0 +1,92 @@
+Executando ./frontend-v0-cgnat-legal.mjs
+UI consulta capacidade no Go, cria plano imutável, apresenta mapa/lookup e exporta script sem aplicá-lo ao NAS
+Rastreio exibe holders_at do accounting no instante consultado e distingue reservas e sessão atual
+Encerramento preserva rastreabilidade histórica e o Go impede apagar blocos usados por planos encerrados
+Consulta legal aplica fuso explícito, IP/porta e referência auditada; CSV e impressão isolada contêm o mesmo resultado
+Consulta direta de IP usa sessões históricas sem exigir porta CGNAT
+Consulta IPv6 expõe o prefixo cadastrado e a limitação histórica existente em vez de presumir titulares anteriores
+Executando ./frontend-v0-map.mjs
+Localização do contrato é gravada pelo endpoint Go, sem geocodificação nem aproximação de endereço
+Mapa e lista consultam contratos, POPs e caixas com coordenadas reais; caixa abre a ocupação de portas
+Clique no mapa move o contrato com coordenadas exatas e confirmação do Go
+Remoção de coordenadas exige confirmação; camadas e situação alteram a consulta sem inventar pontos
+Mapa mantém consulta no celular, isolamento por provedor e CSP; blocos OSM foram interceptados apenas no teste
+Executando ./frontend-v0-admin-team.mjs
+Usuário criado pela UI autentica no Go; perfil é atualizado sem expor senha na listagem
+Administrador redefine senha real e remove MFA com confirmação; senha antiga deixa de autenticar
+Escopo por POP restringe contratos de outro POP e conserva contratos do POP selecionado e sem POP
+Bloqueio e desbloqueio afetam login; remoção do próprio acesso de administrador é impedida no Go
+Empresas são cadastradas, ativadas e definidas como padrão; o Go conserva uma única padrão e impede inativá-la
+Empresa do contrato usa cadastro real e filtro de faturas conserva o vínculo na URL
+Administração mantém permissões do Go e isolamento de usuários e empresas por provedor
+Executando ./frontend-v0-quality.mjs
+Catálogo criado, renomeado e desativado/reativado; seleções operacionais respeitam itens ativos
+SLA com tipo, prioridade e escalonamento aplica prazo real ao atendimento; edição, ativação e relatório preservam política em uso
+SLA de OS aceita filtro por natureza e exclusão confirmada apenas quando não utilizado
+Definições de campo conservam tipo e identificador; opções, ordem, valores e ativação usam o Go
+Kit criado na UI exclui itens serializados; aplicação em OS baixa quantidades reais do estoque e conserva ativação
+Regra de comissão mantém centavos e apura OS concluída com responsável real; relatório explicita regras vigentes sem executar pagamento
+Pesquisa nasce da conclusão da OS; resposta autenticada do assinante aparece na administração com nota e comentário
+Cadastros e configurações respeitam permissões e isolamento por provedor
+Executando ./frontend-v0-admin-reports.mjs
+Auditoria pagina registros reais e exibe detalhes; retenção salva no Go e rejeita prazo de conexão abaixo do limite
+Prazos vazios retornam aos padrões da instalação, preservando faturas, pagamentos, aceites e auditoria
+Coleta DICI usa competência, empresa e contrato reais; correções de IBGE e tecnologia alimentam prévia e CSV sem transmissão externa
+Tipo de ocorrência selecionado na UI de atendimento aplica a política específica de SLA no Go
+Coleta respeita isolamento por provedor e configuração de qualidade permanece acessível no celular
+Executando ./frontend-v0-saas.mjs
+Novo provedor e primeiro administrador criados na UI autenticam no Go com contexto próprio
+Nome e módulos são atualizados na plataforma; o Go libera CRM e campo e conserva NOC bloqueado
+Suspensão confirmada impede acesso e login; reativação restaura autenticação do administrador
+Entrada de suporte exige motivo, identifica o contexto e audita ações; saída restaura a plataforma sem permitir gestão SaaS dentro do provedor
+Administrador de provedor não acessa catálogo ou gestão de provedores
+Executando ./frontend-v0-portal.mjs
+Portal consulta somente cadastro, contratos e faturas próprios; plano sem provisionamento e manutenção são apresentados sem supor conexão online
+Fatura sem cobrança informa ausência de meio online; gateway demo exibe somente códigos reais retornados pelo Go e indicação de simulação
+Aceite autenticado registra texto e prova com hashes conferidos; comprovante na ficha imprime somente o documento, sem executar texto informado
+Chamado e mensagens do titular chegam ao Go; respostas públicas aparecem, notas internas permanecem ocultas e protocolo encerrado não permite nova mensagem
+Pesquisa de OS é respondida pela UI do portal e registrada uma única vez na administração
+Confiança solicitada com confirmação respeita elegibilidade e intervalo no Go; gera intenção de reativação sem alegar execução no NAS
+Consumo mensal exibe accounting recebido do agente; séries consultam o contrato escolhido e conservam ausência de dados explícita
+Titulares do mesmo provedor permanecem isolados em protocolos, consumo e aceite; portal mantém destinos de navegação, encerra sessão e é utilizável em tela de celular
+Executando ./frontend-v0-messages.mjs
+Webhook da equipe é configurado pela UI, recebe teste e entrega aviso real originado por chamado do portal no receptor local
+Canal guarda autorização sem expô-la e envia teste com campos corretos; ativação usa o backend
+Modelo com variáveis é criado e a prévia ilustrativa é renderizada pelo Go sem disparar mensagens
+Régua filtra plano e data, respeita consentimento e não repete envio do mesmo título/regra; modelo em uso não é excluído
+Histórico conserva envio e recusa por consentimento; regras, modelos e canais podem ser excluídos após remover referências
+Avisos mantêm isolamento do provedor sem usar serviços de mensagem externos
+Executando ./frontend-v0-integrations.mjs
+Token criado na UI aparece uma vez, autentica a API pública e respeita escopo, validade e limite de chamadas do Go
+Revogação confirmada invalida imediatamente o token na API pública
+Destino criado envia evento assinado real ao receptor local e distingue HTTP 200 de falha HTTP 500
+Rotação mostra novo segredo uma vez; edição, pausa e ativação conservam a assinatura correta no próximo teste
+Evento real gera entrega pendente e histórico filtrado; reenvio de falha exige fixture explícita em banco descartável
+Exclusão confirmada remove destino e histórico; outro provedor não pode excluir o webhook
+Executando ./frontend-v0-import.mjs
+CSV é lido, campos e plano são mapeados; prévia valida erros e senha ausente sem gravar assinantes e exige nova simulação após alterar mapa
+Aplicação grava somente linhas válidas e registra lote/avisos; contas importadas ficam sem provisionamento e conta sem senha continua bloqueada
+Provisionamento explícito solicita operação somente para conta com senha; reimportação da mesma origem não duplica assinantes nem contas
+Títulos importados preservam centavos, pagamento parcial e cancelamento; titular inexistente é erro explícito e título aberto não recebe cobrança automática
+Histórico mantém datas originais, importa atendimento/OS/anotação sem abrir SLA nem disparar avisos e não duplica registros na reimportação
+Lotes e provisionamento respeitam isolamento e permissões; importação preserva layout do v0 no celular
+Executando ./frontend-v0-finance-access.mjs
+Política salva na UI executa verificação real de inadimplência e solicita suspensão no Go sem inventar confirmação de equipamento
+Confiança concedida pela equipe registra autor, dias e motivo; liberação ativa impede suspensão por cobrança e o Go rejeita repetição
+Baixa quita a confiança e retoma suspensão automática; suspensão manual é preservada pelo Go, sem afirmar aplicação física no NAS
+Ficha do titular conserva cadastro, versão e preço dos contratos; novo contrato é criado na ficha e abre sua consulta operacional
+Executando ./frontend-v0-remediation.mjs
+R01: submenus NAS e OLT abrem equipamento operacional em vez de planejado
+R02: alerta aparece pela lista e URL direta na aba inicial; anotação comum não vira alerta
+R02: arquivamento atualiza também o alerta global da ficha
+R04: indicação cadastrada pela interface, persistida e apresentada no relatório real
+R04: financeiro consulta sem poder alterar; outro provedor não altera indicação
+R04: remoção da indicação pela interface preserva o contrato
+R04/BE-27: exclusão global de etiqueta confirmada e persistida
+R04/BE-05: prospecto convertido para assinante existente sem duplicar cadastro
+R04/BE-05: causa-raiz e prioridade editadas na interface e relidas no Go
+R04/BE-09: filtros de carteira e empresa na exportação contábil chegam ao Go
+R04/BE-07: propriedades do equipamento editadas e relidas sem comando em hardware
+R05: perfis atendimento e NOC respeitam escrita de indicação e leitura financeira
+R03/R05: matriz nenhum módulo / CRM / campo respeita controles e consultas, com habilitação positiva
+{"ok":true,"checks":["R01: submenus NAS e OLT abrem equipamento operacional em vez de planejado","R02: alerta aparece pela lista e URL direta na aba inicial; anotação comum não vira alerta","R02: arquivamento atualiza também o alerta global da ficha","R04: indicação cadastrada pela interface, persistida e apresentada no relatório real","R04: financeiro consulta sem poder alterar; outro provedor não altera indicação","R04: remoção da indicação pela interface preserva o contrato","R04/BE-27: exclusão global de etiqueta confirmada e persistida","R04/BE-05: prospecto convertido para assinante existente sem duplicar cadastro","R04/BE-05: causa-raiz e prioridade editadas na interface e relidas no Go","R04/BE-09: filtros de carteira e empresa na exportação contábil chegam ao Go","R04/BE-07: propriedades do equipamento editadas e relidas sem comando em hardware","R05: perfis atendimento e NOC respeitam escrita de indicação e leitura financeira","R03/R05: matriz nenhum módulo / CRM / campo respeita controles e consultas, com habilitação positiva"],"visuals":[]}

@@ -1,0 +1,926 @@
+
+> @nexo/web@0.1.0 test
+> tsx --test tests/*.test.ts tests/*.test.tsx
+
+TAP version 13
+# Subtest: núcleo puro e leitores demo não dependem de React, Next, Node, banco ou navegador
+ok 1 - núcleo puro e leitores demo não dependem de React, Next, Node, banco ou navegador
+  ---
+  duration_ms: 7.426156
+  type: 'test'
+  ...
+# Subtest: componentes do workspace não importam mais Next diretamente
+ok 2 - componentes do workspace não importam mais Next diretamente
+  ---
+  duration_ms: 6.751689
+  type: 'test'
+  ...
+# Subtest: CSV usa BOM, escaping, quebras e bloqueio de fórmulas inclusive com espaços
+ok 3 - CSV usa BOM, escaping, quebras e bloqueio de fórmulas inclusive com espaços
+  ---
+  duration_ms: 5.854732
+  type: 'test'
+  ...
+# Subtest: clipboard só confirma sucesso após resolver e propaga recusa
+ok 4 - clipboard só confirma sucesso após resolver e propaga recusa
+  ---
+  duration_ms: 2.894742
+  type: 'test'
+  ...
+# Subtest: impressão foca o documento e propaga indisponibilidade
+ok 5 - impressão foca o documento e propaga indisponibilidade
+  ---
+  duration_ms: 2.869078
+  type: 'test'
+  ...
+# Subtest: converte valores comerciais em centavos sem arredondar frações ocultas
+ok 6 - converte valores comerciais em centavos sem arredondar frações ocultas
+  ---
+  duration_ms: 2.256822
+  type: 'test'
+  ...
+# Subtest: planos e contratos usam views independentes
+ok 7 - planos e contratos usam views independentes
+  ---
+  duration_ms: 2.370381
+  type: 'test'
+  ...
+# Subtest: catálogo legado não inventa preço, upload ou disponibilidade
+ok 8 - catálogo legado não inventa preço, upload ou disponibilidade
+  ---
+  duration_ms: 2.4577
+  type: 'test'
+  ...
+# Subtest: leitura aceita dois contratos de um titular e adicionais sem duplicá-lo
+ok 9 - leitura aceita dois contratos de um titular e adicionais sem duplicá-lo
+  ---
+  duration_ms: 1.028782
+  type: 'test'
+  ...
+# Subtest: contratação adicional mantém titular, contratos antigos e endereço independente
+ok 10 - contratação adicional mantém titular, contratos antigos e endereço independente
+  ---
+  duration_ms: 41.461513
+  type: 'test'
+  ...
+# Subtest: IPTV tem contrato próprio sem velocidade de internet fictícia
+ok 11 - IPTV tem contrato próprio sem velocidade de internet fictícia
+  ---
+  duration_ms: 5.46446
+  type: 'test'
+  ...
+# Subtest: inventário preserva os 49 escopos da primeira consolidação sem contar menus como conclusão
+ok 12 - inventário preserva os 49 escopos da primeira consolidação sem contar menus como conclusão
+  ---
+  duration_ms: 2.23714
+  type: 'test'
+  ...
+# Subtest: manifesto identifica as nove origens, 418 arquivos e hashes verificáveis
+ok 13 - manifesto identifica as nove origens, 418 arquivos e hashes verificáveis
+  ---
+  duration_ms: 2.392199
+  type: 'test'
+  ...
+# Subtest: capacidade só referencia origem conhecida e tela realmente existente
+ok 14 - capacidade só referencia origem conhecida e tela realmente existente
+  ---
+  duration_ms: 1.637628
+  type: 'test'
+  ...
+# Subtest: evidências de implementação e de testes apontam para arquivos entregues
+ok 15 - evidências de implementação e de testes apontam para arquivos entregues
+  ---
+  duration_ms: 25.154266
+  type: 'test'
+  ...
+# Subtest: atalhos de rede não dependem do apelido /rede, que abre Online agora
+ok 16 - atalhos de rede não dependem do apelido /rede, que abre Online agora
+  ---
+  duration_ms: 17.83042
+  type: 'test'
+  ...
+# Subtest: matriz acompanha os componentes realmente renderizados em planos, contratos e sessões
+ok 17 - matriz acompanha os componentes realmente renderizados em planos, contratos e sessões
+  ---
+  duration_ms: 4.156508
+  type: 'test'
+  ...
+# Subtest: conclusão exige quatro evidências e preserva decisões de navegação
+ok 18 - conclusão exige quatro evidências e preserva decisões de navegação
+  ---
+  duration_ms: 1.753117
+  type: 'test'
+  ...
+# Subtest: filtros combinam etapa, identificador, origem e busca sem acentos
+ok 19 - filtros combinam etapa, identificador, origem e busca sem acentos
+  ---
+  duration_ms: 2.252123
+  type: 'test'
+  ...
+# Subtest: protocolo usa o estado real e não inventa prazo, espera ou incidente
+ok 20 - protocolo usa o estado real e não inventa prazo, espera ou incidente
+  ---
+  duration_ms: 8.188014
+  type: 'test'
+  ...
+# Subtest: entradas do assistente demo apresentam título semântico sem iniciar o agente
+ok 21 - entradas do assistente demo apresentam título semântico sem iniciar o agente
+  ---
+  duration_ms: 24.58067
+  type: 'test'
+  ...
+# Subtest: leitores locais validam os 82 registros e os 20 itens sem alterar sementes
+ok 22 - leitores locais validam os 82 registros e os 20 itens sem alterar sementes
+  ---
+  duration_ms: 90.580234
+  type: 'test'
+  ...
+# Subtest: cenário inválido falha explicitamente e leitor corrigido recupera sem fallback remoto
+ok 23 - cenário inválido falha explicitamente e leitor corrigido recupera sem fallback remoto
+  ---
+  duration_ms: 16.088861
+  type: 'test'
+  ...
+# Subtest: modo não depende de credenciais e seleção desconhecida não muda silenciosamente
+ok 24 - modo não depende de credenciais e seleção desconhecida não muda silenciosamente
+  ---
+  duration_ms: 0.400684
+  type: 'test'
+  ...
+# Subtest: metadados distinguem panorama, amostra, seleção e unidade monetária
+ok 25 - metadados distinguem panorama, amostra, seleção e unidade monetária
+  ---
+  duration_ms: 7.647455
+  type: 'test'
+  ...
+# Subtest: seed reproduz os 82 registros públicos sem credenciais de banco ou autenticação
+ok 26 - seed reproduz os 82 registros públicos sem credenciais de banco ou autenticação
+  ---
+  duration_ms: 54.481594
+  type: 'test'
+  ...
+# Subtest: seed recusa escopo privado, snapshot ausente e IDs duplicados
+ok 27 - seed recusa escopo privado, snapshot ausente e IDs duplicados
+  ---
+  duration_ms: 9.78551
+  type: 'test'
+  ...
+# Subtest: seed e consulta compartilham validação dos campos do payload
+ok 28 - seed e consulta compartilham validação dos campos do payload
+  ---
+  duration_ms: 7.325021
+  type: 'test'
+  ...
+# Subtest: seed recusa cobranças, chamados e ordens sem assinante correspondente
+ok 29 - seed recusa cobranças, chamados e ordens sem assinante correspondente
+  ---
+  duration_ms: 20.556586
+  type: 'test'
+  ...
+# Subtest: permissões e módulos protegem URLs diretas e mantêm os significados do Go
+ok 30 - permissões e módulos protegem URLs diretas e mantêm os significados do Go
+  ---
+  duration_ms: 1.977513
+  type: 'test'
+  ...
+# Subtest: MFA pendente restringe navegação; portal e plataforma exigem contextos próprios
+ok 31 - MFA pendente restringe navegação; portal e plataforma exigem contextos próprios
+  ---
+  duration_ms: 0.333787
+  type: 'test'
+  ...
+# Subtest: escopo de cache muda com identidade, provedor, suporte e permissões
+ok 32 - escopo de cache muda com identidade, provedor, suporte e permissões
+  ---
+  duration_ms: 0.394572
+  type: 'test'
+  ...
+# Subtest: comandos usam cookie e CSRF sem expor token e preservam contagem paginada
+ok 33 - comandos usam cookie e CSRF sem expor token e preservam contagem paginada
+  ---
+  duration_ms: 106.613567
+  type: 'test'
+  ...
+# Subtest: 401 em consulta e download invalida sessão; login incorreto permanece no formulário
+ok 34 - 401 em consulta e download invalida sessão; login incorreto permanece no formulário
+  ---
+  duration_ms: 4.08746
+  type: 'test'
+  ...
+# Subtest: falha de rede propaga erro e não substitui dados por demonstração
+ok 35 - falha de rede propaga erro e não substitui dados por demonstração
+  ---
+  duration_ms: 1.01069
+  type: 'test'
+  ...
+# Subtest: cadastro aceita informação ausente e vários contratos sem fabricar plano ou telemetria
+ok 36 - cadastro aceita informação ausente e vários contratos sem fabricar plano ou telemetria
+  ---
+  duration_ms: 13.184583
+  type: 'test'
+  ...
+# Subtest: domínio canônico não volta a depender das fachadas lib nem da plataforma
+ok 37 - domínio canônico não volta a depender das fachadas lib nem da plataforma
+  ---
+  duration_ms: 95.904975
+  type: 'test'
+  ...
+# Subtest: hooks de query e contexto de navegação não acessam globais de navegador
+ok 38 - hooks de query e contexto de navegação não acessam globais de navegador
+  ---
+  duration_ms: 0.388844
+  type: 'test'
+  ...
+# Subtest: catálogo visual é síncrono, recebe dados e não seleciona uma fonte
+ok 39 - catálogo visual é síncrono, recebe dados e não seleciona uma fonte
+  ---
+  duration_ms: 2.256906
+  type: 'test'
+  ...
+# Subtest: as sementes continuam com uma única origem física e leitores não fazem requisições
+ok 40 - as sementes continuam com uma única origem física e leitores não fazem requisições
+  ---
+  duration_ms: 0.651614
+  type: 'test'
+  ...
+# Subtest: assinantes: filtros combinados, ordenação e vazio não alteram a amostra
+ok 41 - assinantes: filtros combinados, ordenação e vazio não alteram a amostra
+  ---
+  duration_ms: 60.315645
+  type: 'test'
+  ...
+# Subtest: financeiro: total acompanha a seleção em reais, não o snapshot agregado
+ok 42 - financeiro: total acompanha a seleção em reais, não o snapshot agregado
+  ---
+  duration_ms: 3.478565
+  type: 'test'
+  ...
+# Subtest: atendimento e OS preservam SLA, técnico, busca e reset
+ok 43 - atendimento e OS preservam SLA, técnico, busca e reset
+  ---
+  duration_ms: 8.350815
+  type: 'test'
+  ...
+# Subtest: contratos e planos: agrupamento, seleção vazia e ordenação não inventam catálogo
+ok 44 - contratos e planos: agrupamento, seleção vazia e ordenação não inventam catálogo
+  ---
+  duration_ms: 7.270913
+  type: 'test'
+  ...
+# Subtest: rede e relatórios preservam recortes, ausências e datas do cenário
+ok 45 - rede e relatórios preservam recortes, ausências e datas do cenário
+  ---
+  duration_ms: 24.008506
+  type: 'test'
+  ...
+# Subtest: política normaliza percentuais numeric do PostgreSQL antes de salvar novamente
+ok 46 - política normaliza percentuais numeric do PostgreSQL antes de salvar novamente
+  ---
+  duration_ms: 10.459734
+  type: 'test'
+  ...
+# Subtest: fatura sem cobrança emitida aceita gateway nulo e preserva o status do servidor
+ok 47 - fatura sem cobrança emitida aceita gateway nulo e preserva o status do servidor
+  ---
+  duration_ms: 5.797167
+  type: 'test'
+  ...
+# Subtest: todos os destinos estáticos do ERP anterior possuem apresentação operacional no frontend oficial
+ok 48 - todos os destinos estáticos do ERP anterior possuem apresentação operacional no frontend oficial
+  ---
+  duration_ms: 2.074149
+  type: 'test'
+  ...
+# Subtest: componentes leem localização e navegam com adaptador sem Next
+ok 49 - componentes leem localização e navegam com adaptador sem Next
+  ---
+  duration_ms: 17.123543
+  type: 'test'
+  ...
+# Subtest: filtros, updates funcionais e ficha usam só o adaptador e compõem a URL mais recente
+ok 50 - filtros, updates funcionais e ficha usam só o adaptador e compõem a URL mais recente
+  ---
+  duration_ms: 3.953616
+  type: 'test'
+  ...
+# Subtest: busca paginada reinicia a página na mesma navegação e preserva a ficha aberta em seguida
+ok 51 - busca paginada reinicia a página na mesma navegação e preserva a ficha aberta em seguida
+  ---
+  duration_ms: 1.648098
+  type: 'test'
+  ...
+# Subtest: os 420 destinos preservam classificação, identidade, trilha e resolução com barra final
+ok 52 - os 420 destinos preservam classificação, identidade, trilha e resolução com barra final
+  ---
+  duration_ms: 12.694876
+  type: 'test'
+  ...
+# Subtest: aliases com e sem barra final mantêm consulta, menu ativo e trilha canônica
+ok 53 - aliases com e sem barra final mantêm consulta, menu ativo e trilha canônica
+  ---
+  duration_ms: 0.664102
+  type: 'test'
+  ...
+# Subtest: páginas especiais mantêm entradas específicas, sem promover escopos
+ok 54 - páginas especiais mantêm entradas específicas, sem promover escopos
+  ---
+  duration_ms: 0.550852
+  type: 'test'
+  ...
+# Subtest: rotas do assistente continuam reservadas às entradas com sessão, sem carregar auth ou agente
+ok 55 - rotas do assistente continuam reservadas às entradas com sessão, sem carregar auth ou agente
+  ---
+  duration_ms: 0.585222
+  type: 'test'
+  ...
+# Subtest: caminhos desconhecidos e propriedades herdadas não viram rotas nem títulos de módulos
+ok 56 - caminhos desconhecidos e propriedades herdadas não viram rotas nem títulos de módulos
+  ---
+  duration_ms: 0.495384
+  type: 'test'
+  ...
+# Subtest: registro cobre todas as views com componente, modo, import e fronteira originais (análise estrutural, não renderização)
+ok 57 - registro cobre todas as views com componente, modo, import e fronteira originais (análise estrutural, não renderização)
+  ---
+  duration_ms: 3.326412
+  type: 'test'
+  ...
+# Subtest: início e catch-all usam o mesmo registro, preservando escopos, busca, limites e 404
+ok 58 - início e catch-all usam o mesmo registro, preservando escopos, busca, limites e 404
+  ---
+  duration_ms: 17.627305
+  type: 'test'
+  ...
+# Subtest: navegação preserva todos os módulos e descendentes dos requisitos
+ok 59 - navegação preserva todos os módulos e descendentes dos requisitos
+  ---
+  duration_ms: 6.755268
+  type: 'test'
+  ...
+# Subtest: todas as áreas possuem destino e o menu cobre cada módulo
+ok 60 - todas as áreas possuem destino e o menu cobre cada módulo
+  ---
+  duration_ms: 0.711038
+  type: 'test'
+  ...
+# Subtest: rotas antigas preservam a consulta sem confundir operações de campo e rede
+ok 61 - rotas antigas preservam a consulta sem confundir operações de campo e rede
+  ---
+  duration_ms: 0.464764
+  type: 'test'
+  ...
+# Subtest: rede óptica e relatórios seguem a nova estrutura sem menus removidos
+ok 62 - rede óptica e relatórios seguem a nova estrutura sem menus removidos
+  ---
+  duration_ms: 5.122157
+  type: 'test'
+  ...
+# Subtest: áreas seguem ordem solicitada e preservam rotas de consulta
+ok 63 - áreas seguem ordem solicitada e preservam rotas de consulta
+  ---
+  duration_ms: 12.84533
+  type: 'test'
+  ...
+# Subtest: busca encontra caminhos profundos e múltiplas palavras sem acentos
+ok 64 - busca encontra caminhos profundos e múltiplas palavras sem acentos
+  ---
+  duration_ms: 18.37896
+  type: 'test'
+  ...
+# Subtest: módulos pendentes e escopos isolados não recebem uma consulta funcional fictícia
+ok 65 - módulos pendentes e escopos isolados não recebem uma consulta funcional fictícia
+  ---
+  duration_ms: 0.968759
+  type: 'test'
+  ...
+# Subtest: agente online e conta cadastrada não comprovam conectividade nem telemetria do NAS
+ok 66 - agente online e conta cadastrada não comprovam conectividade nem telemetria do NAS
+  ---
+  duration_ms: 1.232001
+  type: 'test'
+  ...
+# Subtest: visibilidade do mapa é serializada e recuperável após reload
+ok 67 - visibilidade do mapa é serializada e recuperável após reload
+  ---
+  duration_ms: 7.828819
+  type: 'test'
+  ...
+# Subtest: booleanos inválidos não se tornam false e enum inválido mantém padrão
+ok 68 - booleanos inválidos não se tornam false e enum inválido mantém padrão
+  ---
+  duration_ms: 0.996738
+  type: 'test'
+  ...
+# Subtest: consulta combina estado, endereço, POP e login
+ok 69 - consulta combina estado, endereço, POP e login
+  ---
+  duration_ms: 5.614611
+  type: 'test'
+  ...
+# Subtest: CIDR compara limites e rejeita endereços inválidos
+ok 70 - CIDR compara limites e rejeita endereços inválidos
+  ---
+  duration_ms: 1.819673
+  type: 'test'
+  ...
+# Subtest: não presume valores ausentes nem IPv6 falso
+ok 71 - não presume valores ausentes nem IPv6 falso
+  ---
+  duration_ms: 0.877143
+  type: 'test'
+  ...
+# Subtest: geolocalização valida limites e não fabrica coordenadas
+ok 72 - geolocalização valida limites e não fabrica coordenadas
+  ---
+  duration_ms: 0.632313
+  type: 'test'
+  ...
+# Subtest: opções de NAS respeitam POP e PON respeita OLT
+ok 73 - opções de NAS respeitam POP e PON respeita OLT
+  ---
+  duration_ms: 3.644326
+  type: 'test'
+  ...
+# Subtest: todos os componentes ui e os estilos oficiais preservam o código original do v0
+ok 74 - todos os componentes ui e os estilos oficiais preservam o código original do v0
+  ---
+  duration_ms: 6.892359
+  type: 'test'
+  ...
+# Subtest: código da referência original continua integralmente preservado
+ok 75 - código da referência original continua integralmente preservado
+  ---
+  duration_ms: 18.398908
+  type: 'test'
+  ...
+# Subtest: aplicação oficial não importa páginas, componentes ou estilos do frontend antigo
+ok 76 - aplicação oficial não importa páginas, componentes ou estilos do frontend antigo
+  ---
+  duration_ms: 21.758053
+  type: 'test'
+  ...
+# Subtest: workspace começa vazio, sem identidade ou permissão simulada
+ok 77 - workspace começa vazio, sem identidade ou permissão simulada
+  ---
+  duration_ms: 9.756669
+  type: 'test'
+  ...
+# Subtest: cadastro cria assinante, contrato, fatura e operação em uma alteração imutável
+ok 78 - cadastro cria assinante, contrato, fatura e operação em uma alteração imutável
+  ---
+  duration_ms: 15.839918
+  type: 'test'
+  ...
+# Subtest: vencimento hoje não é deslocado e dezembro avança para janeiro
+ok 79 - vencimento hoje não é deslocado e dezembro avança para janeiro
+  ---
+  duration_ms: 3.319622
+  type: 'test'
+  ...
+# Subtest: duplicidade de identificador é rejeitada sem mutar o estado
+ok 80 - duplicidade de identificador é rejeitada sem mutar o estado
+  ---
+  duration_ms: 1.91322
+  type: 'test'
+  ...
+# Subtest: plano inexistente ou indisponível impede cadastro
+ok 81 - plano inexistente ou indisponível impede cadastro
+  ---
+  duration_ms: 2.300862
+  type: 'test'
+  ...
+# Subtest: entrada rejeita documento real, valores fracionários, vencimento inválido e comandos desconhecidos
+ok 82 - entrada rejeita documento real, valores fracionários, vencimento inválido e comandos desconhecidos
+  ---
+  duration_ms: 4.10558
+  type: 'test'
+  ...
+# Subtest: edição e notas preservam contrato e não substituem autoria do servidor
+ok 83 - edição e notas preservam contrato e não substituem autoria do servidor
+  ---
+  duration_ms: 15.145386
+  type: 'test'
+  ...
+# Subtest: revisão cria versão sem reprecificar contratos e faturas antigos
+ok 84 - revisão cria versão sem reprecificar contratos e faturas antigos
+  ---
+  duration_ms: 2.926933
+  type: 'test'
+  ...
+# Subtest: baixa usa valor emitido, atualiza indicadores e impede segunda baixa
+ok 85 - baixa usa valor emitido, atualiza indicadores e impede segunda baixa
+  ---
+  duration_ms: 4.204838
+  type: 'test'
+  ...
+# Subtest: pagamento solicita reativação mas não inventa conexão observada
+ok 86 - pagamento solicita reativação mas não inventa conexão observada
+  ---
+  duration_ms: 13.932497
+  type: 'test'
+  ...
+# Subtest: outra fatura vencida impede reativação automática
+ok 87 - outra fatura vencida impede reativação automática
+  ---
+  duration_ms: 7.280766
+  type: 'test'
+  ...
+# Subtest: confirmação exige verificação e evidência, com alvo e estado observados separados
+ok 88 - confirmação exige verificação e evidência, com alvo e estado observados separados
+  ---
+  duration_ms: 2.766998
+  type: 'test'
+  ...
+# Subtest: resultado incerto preserva observado e exige verificar antes de confirmar
+ok 89 - resultado incerto preserva observado e exige verificar antes de confirmar
+  ---
+  duration_ms: 3.019261
+  type: 'test'
+  ...
+# Subtest: mudança de intenção torna operações antigas obsoletas
+ok 90 - mudança de intenção torna operações antigas obsoletas
+  ---
+  duration_ms: 1.565642
+  type: 'test'
+  ...
+# Subtest: agendamento aplica vigência sem alterar faturas emitidas ou perfil observado
+ok 91 - agendamento aplica vigência sem alterar faturas emitidas ou perfil observado
+  ---
+  duration_ms: 4.492154
+  type: 'test'
+  ...
+# Subtest: mudança de vencimento não dispara operação de rede
+ok 92 - mudança de vencimento não dispara operação de rede
+  ---
+  duration_ms: 2.266545
+  type: 'test'
+  ...
+# Subtest: cancelamento remove mudança e bloqueio conserva agendamento para revisão
+ok 93 - cancelamento remove mudança e bloqueio conserva agendamento para revisão
+  ---
+  duration_ms: 5.809966
+  type: 'test'
+  ...
+# Subtest: atendimento tem ciclo completo com autoria, resolução e reabertura
+ok 94 - atendimento tem ciclo completo com autoria, resolução e reabertura
+  ---
+  duration_ms: 8.795295
+  type: 'test'
+  ...
+# Subtest: notas internas e respostas demonstrativas não se confundem
+ok 95 - notas internas e respostas demonstrativas não se confundem
+  ---
+  duration_ms: 4.252979
+  type: 'test'
+  ...
+# Subtest: agenda impede sobreposição e aceita visitas consecutivas
+ok 96 - agenda impede sobreposição e aceita visitas consecutivas
+  ---
+  duration_ms: 4.487985
+  type: 'test'
+  ...
+# Subtest: reagendamento valida intervalo ignorando apenas a própria ordem
+ok 97 - reagendamento valida intervalo ignorando apenas a própria ordem
+  ---
+  duration_ms: 2.976228
+  type: 'test'
+  ...
+# Subtest: ordem exige início, horário e evidência para concluir, sem alterar conexão
+ok 98 - ordem exige início, horário e evidência para concluir, sem alterar conexão
+  ---
+  duration_ms: 6.018829
+  type: 'test'
+  ...
+# Subtest: cancelamento libera intervalo e impede conclusão posterior
+ok 99 - cancelamento libera intervalo e impede conclusão posterior
+  ---
+  duration_ms: 3.303356
+  type: 'test'
+  ...
+# Subtest: IDs ausentes do estado são recusados; isso não substitui autorização no servidor
+ok 100 - IDs ausentes do estado são recusados; isso não substitui autorização no servidor
+  ---
+  duration_ms: 2.003955
+  type: 'test'
+  ...
+# Subtest: invariantes detectam duplicidade, vínculo inválido e mensalidade repetida
+ok 101 - invariantes detectam duplicidade, vínculo inválido e mensalidade repetida
+  ---
+  duration_ms: 0.916306
+  type: 'test'
+  ...
+# Subtest: autor é obrigatório e falha nunca modifica o estado anterior
+ok 102 - autor é obrigatório e falha nunca modifica o estado anterior
+  ---
+  duration_ms: 1.169844
+  type: 'test'
+  ...
+# Subtest: PONs exigem caminho completo e não presumem slot ou OLT pelo POP
+ok 103 - PONs exigem caminho completo e não presumem slot ou OLT pelo POP
+  ---
+  duration_ms: 2.332741
+  type: 'test'
+  ...
+# Subtest: caminhos diferentes não compartilham portas
+ok 104 - caminhos diferentes não compartilham portas
+  ---
+  duration_ms: 29.50831
+  type: 'test'
+  ...
+# Subtest: RX médio usa apenas ONUs online com leitura negativa válida
+ok 105 - RX médio usa apenas ONUs online com leitura negativa válida
+  ---
+  duration_ms: 0.921838
+  type: 'test'
+  ...
+# Subtest: IP valida entradas, limite, duplicatas e CIDR antes de pesquisar
+ok 106 - IP valida entradas, limite, duplicatas e CIDR antes de pesquisar
+  ---
+  duration_ms: 3.91143
+  type: 'test'
+  ...
+# Subtest: vínculos atuais não inventam IPs nem ignoram filtro online
+ok 107 - vínculos atuais não inventam IPs nem ignoram filtro online
+  ---
+  duration_ms: 1.702123
+  type: 'test'
+  ...
+# Subtest: cada aba apresenta quatro indicadores próprios e destinos válidos
+ok 108 - cada aba apresenta quatro indicadores próprios e destinos válidos
+  ---
+  duration_ms: 41.449937
+  type: 'test'
+  ...
+# Subtest: gráficos de rede e atendimento refletem somente os registros disponíveis
+ok 109 - gráficos de rede e atendimento refletem somente os registros disponíveis
+  ---
+  duration_ms: 1.235721
+  type: 'test'
+  ...
+# Subtest: indicadores de atendimento excluem chamados resolvidos dos alertas
+ok 110 - indicadores de atendimento excluem chamados resolvidos dos alertas
+  ---
+  duration_ms: 2.347312
+  type: 'test'
+  ...
+# Subtest: percentuais permanecem válidos quando não há faturamento ou assinantes
+ok 111 - percentuais permanecem válidos quando não há faturamento ou assinantes
+  ---
+  duration_ms: 6.652496
+  type: 'test'
+  ...
+# Subtest: persistência privada recusa cenário público, espaços e identificadores vazios
+ok 112 - persistência privada recusa cenário público, espaços e identificadores vazios
+  ---
+  duration_ms: 2.83769
+  type: 'test'
+  ...
+# Subtest: chave de requisição deve ser UUID e revisão inteira não negativa
+ok 113 - chave de requisição deve ser UUID e revisão inteira não negativa
+  ---
+  duration_ms: 9.655312
+  type: 'test'
+  ...
+# Subtest: cliente não pode enviar autoria, estado completo ou identidade no envelope
+ok 114 - cliente não pode enviar autoria, estado completo ou identidade no envelope
+  ---
+  duration_ms: 1.511013
+  type: 'test'
+  ...
+# Subtest: envelope preserva validação estrita de preços do núcleo
+ok 115 - envelope preserva validação estrita de preços do núcleo
+  ---
+  duration_ms: 1.255279
+  type: 'test'
+  ...
+# Subtest: normalização estabiliza comandos para tentativas repetidas
+ok 116 - normalização estabiliza comandos para tentativas repetidas
+  ---
+  duration_ms: 3.783628
+  type: 'test'
+  ...
+# Subtest: conflitos distinguem revisão antiga de reutilização indevida de chave
+ok 117 - conflitos distinguem revisão antiga de reutilização indevida de chave
+  ---
+  duration_ms: 0.350967
+  type: 'test'
+  ...
+# Subtest: queries preservam contexto independente, hash, alias e escaping
+ok 118 - queries preservam contexto independente, hash, alias e escaping
+  ---
+  duration_ms: 2.785952
+  type: 'test'
+  ...
+# Subtest: enum inválido usa fallback sem deixar painel sem correspondência
+ok 119 - enum inválido usa fallback sem deixar painel sem correspondência
+  ---
+  duration_ms: 0.432988
+  type: 'test'
+  ...
+# Subtest: serviços aceitam fontes injetadas e devolvem leituras validadas independentes
+ok 120 - serviços aceitam fontes injetadas e devolvem leituras validadas independentes
+  ---
+  duration_ms: 88.848278
+  type: 'test'
+  ...
+# Subtest: falhas da fonte e corrupção não acionam fallback nem retornam sucesso
+ok 121 - falhas da fonte e corrupção não acionam fallback nem retornam sucesso
+  ---
+  duration_ms: 12.755553
+  type: 'test'
+  ...
+# Subtest: envelopes recusam tipos desconhecidos, IDs divergentes e duplicados entre entidades
+ok 122 - envelopes recusam tipos desconhecidos, IDs divergentes e duplicados entre entidades
+  ---
+  duration_ms: 2.246268
+  type: 'test'
+  ...
+# Subtest: exports legados apontam para os mesmos schemas, não cópias divergentes
+ok 123 - exports legados apontam para os mesmos schemas, não cópias divergentes
+  ---
+  duration_ms: 0.212577
+  type: 'test'
+  ...
+# Subtest: a consulta de serviço isola chamados, OS e registros pelo assinante
+ok 124 - a consulta de serviço isola chamados, OS e registros pelo assinante
+  ---
+  duration_ms: 6.929082
+  type: 'test'
+  ...
+# Subtest: busca ignora acentuação, espaços externos e combina situação sem alterar totais
+ok 125 - busca ignora acentuação, espaços externos e combina situação sem alterar totais
+  ---
+  duration_ms: 1.196567
+  type: 'test'
+  ...
+# Subtest: a impressão usa dados da OS sem incluir notas internas, senhas ou vínculos presumidos
+ok 126 - a impressão usa dados da OS sem incluir notas internas, senhas ou vínculos presumidos
+  ---
+  duration_ms: 58.440039
+  type: 'test'
+  ...
+# Subtest: a ficha escapa conteúdo HTML de todos os campos e rejeita outro assinante
+ok 127 - a ficha escapa conteúdo HTML de todos os campos e rejeita outro assinante
+  ---
+  duration_ms: 4.632805
+  type: 'test'
+  ...
+# Subtest: a ficha operacional distingue o endereço do serviço e não presume dados técnicos ausentes
+ok 128 - a ficha operacional distingue o endereço do serviço e não presume dados técnicos ausentes
+  ---
+  duration_ms: 1.554572
+  type: 'test'
+  ...
+# Subtest: Huawei interpreta óptica, estado e serial hexadecimal equivalente
+ok 129 - Huawei interpreta óptica, estado e serial hexadecimal equivalente
+  ---
+  duration_ms: 3.238697
+  type: 'test'
+  ...
+# Subtest: Huawei recusa outra ONU, identidade ausente e coletas conflitantes
+ok 130 - Huawei recusa outra ONU, identidade ausente e coletas conflitantes
+  ---
+  duration_ms: 1.496041
+  type: 'test'
+  ...
+# Subtest: Huawei não transforma campos ausentes em zero nem limiares em métricas
+ok 131 - Huawei não transforma campos ausentes em zero nem limiares em métricas
+  ---
+  duration_ms: 0.327434
+  type: 'test'
+  ...
+# Subtest: bloco Huawei contém somente navegação e consultas com números validados
+ok 132 - bloco Huawei contém somente navegação e consultas com números validados
+  ---
+  duration_ms: 3.824279
+  type: 'test'
+  ...
+# Subtest: RADIUS valida, ordena e preserva a perspectiva dos contadores
+ok 133 - RADIUS valida, ordena e preserva a perspectiva dos contadores
+  ---
+  duration_ms: 10.820848
+  type: 'test'
+  ...
+# Subtest: RADIUS recusa outro login, duplicidade, IP, tempo, contadores e identificadores inválidos
+ok 134 - RADIUS recusa outro login, duplicidade, IP, tempo, contadores e identificadores inválidos
+  ---
+  duration_ms: 4.830504
+  type: 'test'
+  ...
+# Subtest: formatadores distinguem ausência de zero
+ok 135 - formatadores distinguem ausência de zero
+  ---
+  duration_ms: 25.544514
+  type: 'test'
+  ...
+# Subtest: a ficha considera somente registros do assinante e separa conciliação de recebimento
+ok 136 - a ficha considera somente registros do assinante e separa conciliação de recebimento
+  ---
+  duration_ms: 33.543483
+  type: 'test'
+  ...
+# Subtest: a consulta gera exclusivamente comando de leitura e normaliza o serial
+ok 137 - a consulta gera exclusivamente comando de leitura e normaliza o serial
+  ---
+  duration_ms: 0.582601
+  type: 'test'
+  ...
+# Subtest: a consulta rejeita comandos e caracteres injetados no serial
+ok 138 - a consulta rejeita comandos e caracteres injetados no serial
+  ---
+  duration_ms: 1.351328
+  type: 'test'
+  ...
+# Subtest: faixas IPv4 contam total bruto sem perda de precisão
+ok 139 - faixas IPv4 contam total bruto sem perda de precisão
+  ---
+  duration_ms: 1.910804
+  type: 'test'
+  ...
+# Subtest: faixas inválidas, sobrepostas ou invertidas são rejeitadas
+ok 140 - faixas inválidas, sobrepostas ou invertidas são rejeitadas
+  ---
+  duration_ms: 0.628336
+  type: 'test'
+  ...
+# Subtest: CGNAT usa blocos inteiros e identifica déficit sem duplicar TCP/UDP
+ok 141 - CGNAT usa blocos inteiros e identifica déficit sem duplicar TCP/UDP
+  ---
+  duration_ms: 1.662449
+  type: 'test'
+  ...
+# Subtest: testador substitui apenas variáveis reconhecidas e todas as ocorrências
+ok 142 - testador substitui apenas variáveis reconhecidas e todas as ocorrências
+  ---
+  duration_ms: 0.627489
+  type: 'test'
+  ...
+# Subtest: testador bloqueia variáveis desconhecidas, parâmetros ausentes e injeção
+ok 143 - testador bloqueia variáveis desconhecidas, parâmetros ausentes e injeção
+  ---
+  duration_ms: 0.803664
+  type: 'test'
+  ...
+# Subtest: rotas técnicas apontam para consultas sem habilitar ações remotas
+ok 144 - rotas técnicas apontam para consultas sem habilitar ações remotas
+  ---
+  duration_ms: 0.350666
+  type: 'test'
+  ...
+# Subtest: visualização de OS corresponde aos painéis reais board e agenda, nunca list
+ok 145 - visualização de OS corresponde aos painéis reais board e agenda, nunca list
+  ---
+  duration_ms: 4.204711
+  type: 'test'
+  ...
+# Subtest: contratos preservam alternância real por contrato ou titular
+ok 146 - contratos preservam alternância real por contrato ou titular
+  ---
+  duration_ms: 0.416874
+  type: 'test'
+  ...
+# Subtest: todos os destinos têm demanda coerente sem consultar dados em escopos
+ok 147 - todos os destinos têm demanda coerente sem consultar dados em escopos
+  ---
+  duration_ms: 5.461883
+  type: 'test'
+  ...
+# Subtest: aliases, especiais e ficha usam a mesma política que o resolvedor
+ok 148 - aliases, especiais e ficha usam a mesma política que o resolvedor
+  ---
+  duration_ms: 0.603673
+  type: 'test'
+  ...
+# Subtest: consulta valida os 82 registros públicos e preserva valores em reais
+ok 149 - consulta valida os 82 registros públicos e preserva valores em reais
+  ---
+  duration_ms: 1.475813
+  type: 'test'
+  ...
+# Subtest: consulta recusa payloads inválidos sem inventar valores de fallback
+ok 150 - consulta recusa payloads inválidos sem inventar valores de fallback
+  ---
+  duration_ms: 32.181363
+  type: 'test'
+  ...
+# Subtest: busca global cobre documento, telefone, PPPoE, IP, MAC e serial
+ok 151 - busca global cobre documento, telefone, PPPoE, IP, MAC e serial
+  ---
+  duration_ms: 0.712566
+  type: 'test'
+  ...
+# Subtest: histórico ordena os dias e separa OS sem data sem usar vencimento como data de pagamento
+ok 152 - histórico ordena os dias e separa OS sem data sem usar vencimento como data de pagamento
+  ---
+  duration_ms: 21.671929
+  type: 'test'
+  ...
+1..152
+# tests 152
+# suites 0
+# pass 152
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2344.477666

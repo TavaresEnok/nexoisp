@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "base": "http://127.0.0.1:3005",
-  "verified_at": "2026-10-19T15:48:31.373Z",
+  "base": "http://127.0.0.1:3006",
+  "verified_at": "2026-10-19T16:42:23.795Z",
   "backend": "Go/PostgreSQL isolados; receptor HTTP local; telefones e mensagens sintéticos",
   "checks": [
     "Webhook da equipe é configurado pela UI, recebe teste e entrega aviso real originado por chamado do portal no receptor local",

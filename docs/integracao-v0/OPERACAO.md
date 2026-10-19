@@ -27,3 +27,13 @@ A execução dirigida `test:network-final` usa `NEXO_V0_NETWORK=1` em outro harn
 A integração de interface não homologa equipamento ou serviço externo: driver Huawei, CGNAT de laboratório, entrega IPv6, histórico de prefixos, gateway financeiro real e distribuição multicélula mantêm os limites do Go documentados na matriz. Migração direta universal de SGP/MK-Auth não existe: o importador aceita CSV intermediário e faz prévia, mapeamento, aplicação e provisionamento separado. Jobs de cobrança, limpeza, avisos e expiração só executam quando habilitados no backend.
 
 Tarefas de rede exibem intenção, observação e resultado incerto separadamente. Não use a presença de uma operação ou instrução emitida como prova de execução no equipamento.
+
+## Regressão das correções R01–R06
+
+A fumaça agora exige `BASE` explicitamente e inclui `frontend-v0-remediation.mjs` (26 cenários). `BASE` deve apontar para frontend conectado ao harness descartável; nunca aponte a execução de escrita ao Go operacional do usuário. O teste novo cria um provedor exclusivo e confirma o modo de laboratório antes de executar.
+
+`BASE=http://127.0.0.1:18394 npm -w apps/web run test:remediation` executa os 13 casos compostos dirigidos. `npm -w apps/web run format:check` verifica os módulos formatados.
+
+A comparação operacional exige `V0_OPERATIONAL_VISUAL=1`. Para reprodução exata, use o contêiner `mcr.microsoft.com/playwright:v1.55.1-jammy` da CI, rede host, `/e2e` montado e a pasta de evidências montada em `/docs/integracao-v0/evidencias`, como em `tests/contrato/e2e.py`. Fontes de sistema de outros hosts podem renderizar o atalho de teclado de forma diferente. Seis PNGs de referência ficam em `e2e/visual-baselines/operacional`; o teste compara hashes e falha sem atualizar arquivos. `UPDATE_V0_OPERATIONAL_VISUAL=1` é reservado à geração explícita de referências após revisão visual; não deve ser habilitado na CI.
+
+As capturas normalizam apenas datas variáveis e mascaram identificadores. Persistência e autorização são verificadas por comandos e leituras reais, independentemente das capturas. A evidência final está no [relatório das seis correções](CORRECOES-REVISAO.md).

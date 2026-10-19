@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "base": "http://127.0.0.1:3005",
-  "verified_at": "2026-10-19T15:48:47.496Z",
+  "base": "http://127.0.0.1:3006",
+  "verified_at": "2026-10-19T16:42:38.741Z",
   "backend": "Go/PostgreSQL isolados; CSV intermediário e contas sintéticos, sem migração de produção nem NAS físico",
   "checks": [
     "CSV é lido, campos e plano são mapeados; prévia valida erros e senha ausente sem gravar assinantes e exige nova simulação após alterar mapa",

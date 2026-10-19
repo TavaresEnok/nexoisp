@@ -1,0 +1,72 @@
+{
+  "reviewed_at": "2026-10-19T16:16:35.836837+00:00",
+  "commit": "97d47ccee074bf4137751e02e73770fcd65689b4",
+  "decision": "Aceite de conclusão integral requer reabertura; arquitetura mantida",
+  "findings": {
+    "high": [
+      "R04"
+    ],
+    "medium": [
+      "R01",
+      "R02",
+      "R03",
+      "R05"
+    ],
+    "low": [
+      "R06"
+    ],
+    "status": "open"
+  },
+  "frontend_tests": {
+    "runtime": "Node 22.23.3, imagem node:22-alpine",
+    "passed": 152,
+    "failed": 0,
+    "evidence": "frontend-testes.log"
+  },
+  "production_build": {
+    "passed": true,
+    "typescript": "passed as part of Dockerfile build",
+    "image": "nexo-v0-frontend:review",
+    "image_id": "sha256:fea42e8e6e476a3ca98449f3f3b6f2a5854b3f3b24b9e53565492e916ed7fcf3",
+    "evidence": "docker-build.log"
+  },
+  "go_tests": {
+    "passed_packages": [
+      "internal/auth",
+      "internal/modules/leitura",
+      "internal/validate",
+      "internal/apierr",
+      "internal/csvx",
+      "internal/jsonx"
+    ],
+    "runner": "tests/contrato/lib.py go helper; Go 1.27.2 Docker image",
+    "result": "all six packages passed"
+  },
+  "browser": {
+    "checks": 5,
+    "runtime_errors": [],
+    "reproduced_findings": [
+      "R01",
+      "R04",
+      "R02",
+      "R03"
+    ],
+    "evidence": "checkup.json"
+  },
+  "visual": {
+    "mode": "demonstracao",
+    "comparisons": 3,
+    "identical": 3,
+    "evidence": "comparacao-visual.json",
+    "connected_views_pixel_comparison": "not performed"
+  },
+  "previous_25_scenarios": "historical evidence inspected; full suite not rerun during this review",
+  "reference_assets": {
+    "files": 231,
+    "integrity_test": "passed"
+  },
+  "product_changes": "none; only report and review evidence added",
+  "user_environment_18081": "no test writes",
+  "preexisting_user_deletion": "docs/pilha-tecnologica.md preserved",
+  "review_lab_cleanup": "Caddy, Go, PostgreSQL e servidores temporários da referência encerrados após a coleta"
+}

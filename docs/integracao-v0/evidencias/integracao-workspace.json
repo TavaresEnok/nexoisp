@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "base": "http://127.0.0.1:3005",
-  "verified_at": "2026-10-19T15:46:52.404Z",
+  "base": "http://127.0.0.1:3006",
+  "verified_at": "2026-10-19T16:39:35.403Z",
   "backend": "Go/PostgreSQL isolados; recursos e observações sintéticos",
   "checks": [
     "Contas sintéticas só aparecem com health.demo; preencher uma conta não cria sessão nem contorna o login Go",

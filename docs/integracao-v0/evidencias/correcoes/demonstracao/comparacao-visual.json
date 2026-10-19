@@ -1,0 +1,20 @@
+[
+  {
+    "name": "inicio-desktop-claro",
+    "identical": true,
+    "reference": "cf9c58af3f5a27fc0ecdefebe41f943858b718485e2736a185b89574ad7a8926",
+    "official": "cf9c58af3f5a27fc0ecdefebe41f943858b718485e2736a185b89574ad7a8926"
+  },
+  {
+    "name": "inicio-desktop-escuro",
+    "identical": true,
+    "reference": "9b8153228c29f3d3e8bebe99fdba92e667312493a5309ba9915edb90faade282",
+    "official": "9b8153228c29f3d3e8bebe99fdba92e667312493a5309ba9915edb90faade282"
+  },
+  {
+    "name": "assinantes-celular",
+    "identical": true,
+    "reference": "718303ee1cdc1b9cf77cf12ba14a13815a49e23eb04f860cb9f1b2f4512d5aaa",
+    "official": "718303ee1cdc1b9cf77cf12ba14a13815a49e23eb04f860cb9f1b2f4512d5aaa"
+  }
+]

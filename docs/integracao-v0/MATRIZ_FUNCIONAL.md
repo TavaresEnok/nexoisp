@@ -2,7 +2,7 @@
 
 Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades parciais, demonstrativas e internas; os estados do backend são preservados. O JSON correspondente mantém endpoints, restrições e evidências. A situação de cada unidade é independente da presença de uma página ou de um menu.
 
-| ID | Estado no backend | Funcionalidade | Integração |
+| ID | Estado histórico no backend | Funcionalidade | Integração |
 |---|---|---|---|
 | AC-01 | Implementada | Autenticar e encerrar sessão | Integrada e validada |
 | AC-02 | Demonstrativa | Preenchimento com contas de demonstração | Integrada e validada |
@@ -148,13 +148,13 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | PO-09 | Parcial | Quitar fatura em instituição financeira | Backend preservado / limitação |
 | BE-01 | Somente backend | Catálogo e consultas externas autorizadas | Backend preservado / limitação |
 | BE-02 | Somente backend | Criar atendimento e OS por integração | Backend preservado / limitação |
-| BE-03 | Somente backend | Endereço de instalação específico | Backend preservado / limitação |
-| BE-04 | Somente backend | Indicação de outro contrato | Backend preservado / limitação |
-| BE-05 | Somente backend | Campos adicionais de atendimento e conversão de lead | Backend preservado / limitação |
-| BE-06 | Somente backend | Atualização de senha de usuário, dados de POP/empresa e parâmetros de qualidade | Backend preservado / limitação |
-| BE-07 | Somente backend | Editar propriedades além dos controles visuais | Backend preservado / limitação |
-| BE-08 | Somente backend | Consultar bloco por IP privado e titulares históricos | Backend preservado / limitação |
-| BE-09 | Somente backend | Filtros adicionais de relatório/exportação | Backend preservado / limitação |
+| BE-03 | Somente backend | Endereço de instalação específico | Integrada e validada |
+| BE-04 | Somente backend | Indicação de outro contrato | Integrada e validada |
+| BE-05 | Somente backend | Campos adicionais de atendimento e conversão de lead | Integrada e validada |
+| BE-06 | Somente backend | Atualização de senha de usuário, dados de POP/empresa e parâmetros de qualidade | Integrada e validada |
+| BE-07 | Somente backend | Editar propriedades além dos controles visuais | Integrada e validada |
+| BE-08 | Somente backend | Consultar bloco por IP privado e titulares históricos | Integrada e validada |
+| BE-09 | Somente backend | Filtros adicionais de relatório/exportação | Integrada e validada |
 | BE-10 | Somente backend | Autenticar, sincronizar e despachar operações | Backend preservado / limitação |
 | BE-11 | Somente backend | Fila, assinatura e recuperação de operações | Backend preservado / limitação |
 | BE-12 | Somente backend | Autorização, accounting e desconexão | Backend preservado / limitação |
@@ -169,11 +169,9 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | BE-21 | Somente backend | Saúde, métricas e especificação interna | Backend preservado / limitação |
 | BE-22 | Somente backend | Backup, cópia e restauração | Backend preservado / limitação |
 | BE-23 | Parcial | Distribuição em múltiplas células de dados | Backend preservado / limitação |
-| BE-24 | Somente backend | Consultar indicações | Backend preservado / limitação |
+| BE-24 | Somente backend | Consultar indicações | Integrada e validada |
 | BE-25 | Somente backend | Consultar origens de NAS autorizadas | Backend preservado / limitação |
-| BE-26 | Somente backend | Criar cobrança avulsa | Backend preservado / limitação |
-| BE-27 | Somente backend | Excluir etiqueta do catálogo | Backend preservado / limitação |
+| BE-26 | Somente backend | Criar cobrança avulsa | Integrada e validada |
+| BE-27 | Somente backend | Excluir etiqueta do catálogo | Integrada e validada |
 
-Cobertura de interface: **139 unidades integradas e validadas**, sem unidade operacional pendente ou parcial. As outras **30 unidades** correspondem a capacidades internas e limitações preservadas do backend. Cada registro do JSON aponta arquivos de teste e evidências existentes; observações são mantidas separadamente dos caminhos de validação.
-
-A migração não acrescenta gateway financeiro real, migração universal de SGP/MK-Auth, entrega automática de IPv6, histórico completo de prefixos ou homologação física de OLT/NAS. Consulte as restrições por unidade e as evidências de laboratório. A revisão conjunta final está registrada em `VALIDACAO.md`.
+Cobertura de interface: **149 unidades integradas e validadas**, sem unidade operacional pendente ou parcial. As **20 unidades preservadas** são 14 serviços internos, dois contratos de API externa e quatro limitações existentes. A [triagem individual](CAPACIDADES-BACKEND.md) explica a classificação; o JSON mantém os comportamentos históricos e acrescenta notas sobre a apresentação atual, sem alterar o estado original do backend.

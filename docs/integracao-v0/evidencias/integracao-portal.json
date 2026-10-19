@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "base": "http://127.0.0.1:3005",
-  "verified_at": "2026-10-19T15:48:19.887Z",
+  "base": "http://127.0.0.1:3006",
+  "verified_at": "2026-10-19T16:42:12.216Z",
   "backend": "Go/PostgreSQL isolados; gateway e relatos de rede sintéticos; sem NAS físico",
   "checks": [
     "Portal consulta somente cadastro, contratos e faturas próprios; plano sem provisionamento e manutenção são apresentados sem supor conexão online",
