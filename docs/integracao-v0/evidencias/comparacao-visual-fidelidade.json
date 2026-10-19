@@ -1,0 +1,134 @@
+[
+  {
+    "name": "inicio-desktop-claro",
+    "identical": true,
+    "reference": "42242fe381d5db8e855acaab0d1e917c8d7a4b8b8f19723135cf636fa998255a",
+    "official": "42242fe381d5db8e855acaab0d1e917c8d7a4b8b8f19723135cf636fa998255a"
+  },
+  {
+    "name": "inicio-desktop-escuro",
+    "identical": true,
+    "reference": "fe4f4863e4b69f5d53193617c31dc8b7f25a5ae9101f3efeb9e236d2800bc65c",
+    "official": "fe4f4863e4b69f5d53193617c31dc8b7f25a5ae9101f3efeb9e236d2800bc65c"
+  },
+  {
+    "name": "inicio-celular",
+    "identical": true,
+    "reference": "3dbfab1340dc6518ab15f01944899daf079a1650f0e7a9bb3bd5d4e2fa0b2ab1",
+    "official": "3dbfab1340dc6518ab15f01944899daf079a1650f0e7a9bb3bd5d4e2fa0b2ab1"
+  },
+  {
+    "name": "inicio-rede",
+    "identical": true,
+    "reference": "7408233c23821974be4bb5a5cb2c0fe8b9f3b7b950db1d4030aac095181ff408",
+    "official": "7408233c23821974be4bb5a5cb2c0fe8b9f3b7b950db1d4030aac095181ff408"
+  },
+  {
+    "name": "assinantes-desktop-claro",
+    "identical": true,
+    "reference": "dcbb6b9cb49bbdc356fe9beac724a7a221b4eb054726ef563d3de19cdd76b854",
+    "official": "dcbb6b9cb49bbdc356fe9beac724a7a221b4eb054726ef563d3de19cdd76b854"
+  },
+  {
+    "name": "assinantes-desktop-escuro",
+    "identical": true,
+    "reference": "6cc767e0cde40f49bd5f252c9a4cc8325e1833aa2502757f2fbab2595e1814e9",
+    "official": "6cc767e0cde40f49bd5f252c9a4cc8325e1833aa2502757f2fbab2595e1814e9"
+  },
+  {
+    "name": "assinantes-celular",
+    "identical": true,
+    "reference": "718303ee1cdc1b9cf77cf12ba14a13815a49e23eb04f860cb9f1b2f4512d5aaa",
+    "official": "718303ee1cdc1b9cf77cf12ba14a13815a49e23eb04f860cb9f1b2f4512d5aaa"
+  },
+  {
+    "name": "ficha-desktop",
+    "identical": true,
+    "reference": "456f6876f0011ea51ea78560531ea51e2ba51fb063735b8317493b851df3edb5",
+    "official": "456f6876f0011ea51ea78560531ea51e2ba51fb063735b8317493b851df3edb5"
+  },
+  {
+    "name": "rede-online-desktop",
+    "identical": true,
+    "reference": "d32903bf4c53e7ccf4b630b90172f7d447df45b2e73f2e5ff00c1c1cef73ee4f",
+    "official": "d32903bf4c53e7ccf4b630b90172f7d447df45b2e73f2e5ff00c1c1cef73ee4f"
+  },
+  {
+    "name": "rede-online-celular",
+    "identical": true,
+    "reference": "da41203047b68a2d74e5a6e80c9bd9d594acc0e5a70578d4a1601e36c26d4fc6",
+    "official": "da41203047b68a2d74e5a6e80c9bd9d594acc0e5a70578d4a1601e36c26d4fc6"
+  },
+  {
+    "name": "rede-inventario",
+    "identical": true,
+    "reference": "54af141cad024f40f4da2db8e8241e8d4ed06bff1c5bb5eb711d549d47daa9bc",
+    "official": "54af141cad024f40f4da2db8e8241e8d4ed06bff1c5bb5eb711d549d47daa9bc"
+  },
+  {
+    "name": "rede-ficha",
+    "identical": true,
+    "reference": "a46477cdb5d2ce9bbfe4adcaf24434981ee8a4b91e91fc377e49025319b1fc02",
+    "official": "a46477cdb5d2ce9bbfe4adcaf24434981ee8a4b91e91fc377e49025319b1fc02"
+  },
+  {
+    "name": "ordens-quadro",
+    "identical": true,
+    "reference": "6c2b1c37b77331068a59c5b54c52224428030f24f237b9d38950e415d4930d40",
+    "official": "6c2b1c37b77331068a59c5b54c52224428030f24f237b9d38950e415d4930d40"
+  },
+  {
+    "name": "ordem-ficha",
+    "identical": true,
+    "reference": "dd665a6275c9655a714b5907f6f1bc6a2bd0c836d5eb628a68cfceb6236872a9",
+    "official": "dd665a6275c9655a714b5907f6f1bc6a2bd0c836d5eb628a68cfceb6236872a9"
+  },
+  {
+    "name": "atendimentos-desktop",
+    "identical": true,
+    "reference": "080fd3a0c4aca3888120a81a70d16c8c81e64ec0644c20d144c077eb803ff188",
+    "official": "080fd3a0c4aca3888120a81a70d16c8c81e64ec0644c20d144c077eb803ff188"
+  },
+  {
+    "name": "atendimento-ficha",
+    "identical": true,
+    "reference": "da568f6ac3c3a28efafa5b2f6d48f61f7bbde6df4fef5e79b5ce6ad08e2d9a99",
+    "official": "da568f6ac3c3a28efafa5b2f6d48f61f7bbde6df4fef5e79b5ce6ad08e2d9a99"
+  },
+  {
+    "name": "faturas-desktop",
+    "identical": true,
+    "reference": "4cb1b1c7f728d5d0e8f5f549e039e7db793d2ff3cb87c7b9bf5f8228d0841799",
+    "official": "4cb1b1c7f728d5d0e8f5f549e039e7db793d2ff3cb87c7b9bf5f8228d0841799"
+  },
+  {
+    "name": "fatura-detalhes",
+    "identical": true,
+    "reference": "214a027cc9f60bea816f3bc2c8ea841ff0d5f83c2630ba01fb0226a68426e9ad",
+    "official": "214a027cc9f60bea816f3bc2c8ea841ff0d5f83c2630ba01fb0226a68426e9ad"
+  },
+  {
+    "name": "planos-desktop",
+    "identical": true,
+    "reference": "0e2d2f51459270447b5da97174477a0c9a5683ac1ede8cfc410278e48249ccfa",
+    "official": "0e2d2f51459270447b5da97174477a0c9a5683ac1ede8cfc410278e48249ccfa"
+  },
+  {
+    "name": "plano-configuracao",
+    "identical": true,
+    "reference": "7ff8c34574fa04d9f9a80d14a5eb47e2880ccf2c7565f1b3a1e5b4ed9c87cfe9",
+    "official": "7ff8c34574fa04d9f9a80d14a5eb47e2880ccf2c7565f1b3a1e5b4ed9c87cfe9"
+  },
+  {
+    "name": "contratos-desktop",
+    "identical": true,
+    "reference": "6be71c69eea2ba525187e350f42e0b32820875a5e952595a145181f3fa453aa7",
+    "official": "6be71c69eea2ba525187e350f42e0b32820875a5e952595a145181f3fa453aa7"
+  },
+  {
+    "name": "contrato-ficha",
+    "identical": true,
+    "reference": "78fdce46ea284ad7338fc26fc77384686e4552c747dd65a1c071cbc0e0de8631",
+    "official": "78fdce46ea284ad7338fc26fc77384686e4552c747dd65a1c071cbc0e0de8631"
+  }
+]

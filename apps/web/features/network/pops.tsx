@@ -1,7 +1,10 @@
 import { useState } from "react";
 import useSWR from "swr";
 import { z } from "zod";
-import { PageHeading, Panel } from "@/components/workspace-ui";
+import { useNavigate } from "react-router-dom";
+import { Panel } from "@/components/workspace-ui";
+import { CoreNetworkFrame } from "@/components/core-network";
+import { coreTabs } from "./core-tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -31,6 +34,7 @@ const popSchema = z.object({
 type Pop = z.infer<typeof popSchema>;
 export function NetworkPops() {
   const { me } = useSession();
+  const navigate = useNavigate();
   const result = useSWR("erp-pops", async () =>
     z.array(popSchema).parse(await api("/pops")),
   );
@@ -38,14 +42,16 @@ export function NetworkPops() {
   const write = can(me, "network:write");
   const editing = editor && editor !== "create" ? editor : null;
   return (
-    <>
-      <PageHeading
-        title="Pontos de presença"
-        description="POPs e vínculos comerciais do provedor."
-        actions={
-          write && <Button onClick={() => setEditor("create")}>Novo POP</Button>
-        }
-      />
+    <CoreNetworkFrame
+      tab="pops"
+      tabs={coreTabs(me)}
+      onTab={navigate}
+      title="Pontos de presença"
+      description="POPs e vínculos comerciais do provedor."
+      actions={
+        write && <Button onClick={() => setEditor("create")}>Novo POP</Button>
+      }
+    >
       <Panel title="POPs cadastrados">
         <QueryBoundary
           loading={result.isLoading}
@@ -156,6 +162,6 @@ export function NetworkPops() {
           }}
         />
       )}
-    </>
+    </CoreNetworkFrame>
   );
 }

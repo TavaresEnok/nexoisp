@@ -50,9 +50,13 @@ export function OverviewContextSummary({ area, data }: { area: "financial" | "su
     { label: "Compromissos de hoje", value: number(s.ordersToday), href: "/operacoes" },
     { label: "Visitas fora do horário", value: number(s.ordersLate), href: "/operacoes?filtro=atrasadas" },
   ];
-  return <Panel title={financial ? "O financeiro, em dia." : "O próximo passo está aqui"} description={financial ? "Pequenas ações. Operação em dia." : "Prioridades que conectam o alerta à ação"} className="overview-context-panel">
-    <div className="overview-context-score"><strong>{financial ? `${received.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%` : number(s.waiting)}</strong><span>{financial ? "do faturamento já recebido" : "clientes esperando sua resposta"}</span></div>
+  return <OverviewContextPanel title={financial ? "O financeiro, em dia." : "O próximo passo está aqui"} description={financial ? "Pequenas ações. Operação em dia." : "Prioridades que conectam o alerta à ação"} score={financial ? `${received.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%` : number(s.waiting)} scoreNote={financial ? "do faturamento já recebido" : "clientes esperando sua resposta"} rows={rows} link={{ href: financial ? "/financeiro" : "/atendimentos", label: financial ? "Explorar financeiro" : "Organizar minha operação" }} />;
+}
+
+export function OverviewContextPanel({ title, description, score, scoreNote, rows, link }: { title: string; description: string; score: string; scoreNote: string; rows: { label: string; value: string; href: string }[]; link: { href: string; label: string } }) {
+  return <Panel title={title} description={description} className="overview-context-panel">
+    <div className="overview-context-score"><strong>{score}</strong><span>{scoreNote}</span></div>
     <dl className="overview-context-rows">{rows.map(row => <div key={row.label}><dt><Link href={row.href}>{row.label}</Link></dt><dd>{row.value}</dd></div>)}</dl>
-    <TextLink href={financial ? "/financeiro" : "/atendimentos"}>{financial ? "Explorar financeiro" : "Organizar minha operação"}</TextLink>
+    <TextLink href={link.href}>{link.label}</TextLink>
   </Panel>;
 }

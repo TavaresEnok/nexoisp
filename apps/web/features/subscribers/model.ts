@@ -40,6 +40,11 @@ export const subscriberRecordSchema = z.object({
   status: z.enum(["active", "inactive"]),
   created_at: z.string(),
   active_contracts: z.coerce.number().optional(),
+  active_plan_names: optionalText,
+  active_base_cents: z.preprocess(
+    (value) => (value === null || value === undefined ? null : Number(value)),
+    z.number().nullable(),
+  ),
   anonymized_at: optionalText,
   anonymized_reason: optionalText,
   custom: z.record(z.string(), z.unknown()).nullable().optional(),
@@ -56,6 +61,10 @@ export const subscriberContractSchema = z.object({
   due_day: z.coerce.number(),
   start_date: z.string(),
   status: z.string(),
+  install_street: optionalText,
+  install_number: optionalText,
+  install_district: optionalText,
+  install_city: optionalText,
 });
 export const subscriberDetailSchema = subscriberRecordSchema.extend({
   contracts: z.array(subscriberContractSchema),

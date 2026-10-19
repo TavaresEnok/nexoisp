@@ -19,7 +19,7 @@ export function OperationalOrders() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const [creating, setCreating] = useState(false);
-  const { page, setPage } = useUrlPage();
+  const { page, setPage, size, setSize } = useUrlPage();
   const label = params.get("situacao") ?? "Pendentes";
   const status =
     Object.entries(orderStates).find(([, value]) => value === label)?.[0] ??
@@ -39,7 +39,7 @@ export function OperationalOrders() {
       : {}),
     ...(params.get("contrato") ? { contract_id: params.get("contrato")! } : {}),
   });
-  const path = `/work-orders?${filters}&limit=8&offset=${page * 8}`;
+  const path = `/work-orders?${filters}&limit=${size}&offset=${page * size}`;
   const result = useSWR(
     ["erp-orders", path],
     async ([, path]) => {
@@ -146,6 +146,8 @@ export function OperationalOrders() {
           <ServerPager
             page={page}
             setPage={setPage}
+            size={size}
+            setSize={setSize}
             total={result.data?.total ?? 0}
             loading={result.isLoading}
           />

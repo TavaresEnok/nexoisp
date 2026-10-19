@@ -1,12 +1,12 @@
 import { useState } from "react";
 import useSWR from "swr";
 import { z } from "zod";
-import { toast } from "sonner";
 import { Panel } from "@/components/workspace-ui";
 import { Button } from "@/components/ui/button";
 import { RecordEditor } from "@/features/shared/record-editor";
 import { QueryBoundary } from "@/features/shared/feedback";
 import { api } from "@/platform/erp-client";
+import { notifyAcs } from "@/features/network/acs-notice";
 const wifi = z.object({ index: z.string(), ssid: z.string().nullable() });
 const cpe = z.object({
   contract_id: z.string(),
@@ -86,7 +86,7 @@ export function PortalWifi() {
               );
             if (!values.ssid && !values.password)
               throw new Error("Informe um nome ou uma nova senha.");
-            const response = await api<{ note: string }>(
+            const response = await api<{ note?: string; result?: string }>(
               `/portal/cpe/${editing.contract}/wifi`,
               {
                 body: {
@@ -96,7 +96,7 @@ export function PortalWifi() {
                 },
               },
             );
-            toast.success(response.note);
+            notifyAcs(response);
             setEditing(null);
             await result.mutate();
           }}

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { InventoryNode } from "@/components/network-equipment-table";
+import type { InventoryNode } from "@/components/network-center";
 export const agentSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),

@@ -57,8 +57,8 @@ export function OperationalLeads() {
   const [query, setQuery] = useQueryState("busca", "", undefined, {
     resetPage: true,
   });
-  const { page, setPage } = useUrlPage();
-  const path = `/leads?${new URLSearchParams({ stage, q: query, limit: "8", offset: String(page * 8) })}`;
+  const { page, setPage, size, setSize } = useUrlPage();
+  const path = `/leads?${new URLSearchParams({ stage, q: query, limit: String(size), offset: String(page * size) })}`;
   const list = useSWR(["erp-leads", path], async ([, path]) => {
     const result = await erpClient.request(path);
     if (result.total === null)
@@ -208,6 +208,8 @@ export function OperationalLeads() {
         <ServerPager
           page={page}
           setPage={setPage}
+          size={size}
+          setSize={setSize}
           total={list.data?.total ?? 0}
           loading={list.isLoading}
         />

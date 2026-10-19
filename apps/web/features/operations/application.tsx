@@ -15,6 +15,8 @@ import {
 } from "react-router-dom";
 import NotFound from "@/src/not-found";
 import { AppShell } from "@/components/app-shell";
+import { ShellProvider } from "@/components/shell-context";
+import { useOperationalShell } from "./shell";
 import { OperationalWorkspaceProvider } from "./workspace-provider";
 import { PageHeading, Panel } from "@/components/workspace-ui";
 import { Button } from "@/components/ui/button";
@@ -27,6 +29,7 @@ import { QueryBoundary } from "@/features/shared/feedback";
 import { SubscriberDirectory } from "@/features/subscribers/directory";
 import { OperationalSubscriberSheet } from "@/features/subscribers/sheet";
 import { canAccessPath, erpAliases, canonicalErpPath } from "./navigation";
+import { returnPath } from "./return-path";
 import { operationalTitle } from "./status";
 import { ErpOverview } from "./overview";
 import { OperationalContracts } from "@/features/contracts/directory";
@@ -244,6 +247,7 @@ const OperationalOrderOverlay = lazy(() =>
 );
 export function OperationalApplication() {
   const session = useSession();
+  const shell = useOperationalShell();
   const location = useLocation();
   useEffect(() => {
     const path = canonicalErpPath(location.pathname);
@@ -283,7 +287,16 @@ export function OperationalApplication() {
     return (
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to="/login"
+              replace
+              state={{ from: `${location.pathname}${location.search}` }}
+            />
+          }
+        />
       </Routes>
     );
   const me = session.me;
@@ -297,172 +310,194 @@ export function OperationalApplication() {
   const allowed = canAccessPath(me, location.pathname);
   return (
     <OperationalWorkspaceProvider>
-      <AppShell initialAppearance={readAppearance()}>
-        {location.pathname === "/login" ? (
-          <Navigate to={home} replace />
-        ) : me.mfa_pending && !location.pathname.startsWith("/conta") ? (
-          <Navigate to="/conta" replace />
-        ) : !allowed ? (
-          <AccessDenied />
-        ) : (
-          <Suspense fallback={<QueryBoundary loading>{null}</QueryBoundary>}>
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  me.role === "subscriber" || !me.tenant ? (
-                    <Navigate to={home} replace />
-                  ) : (
-                    <ErpOverview />
-                  )
-                }
-              />
-              <Route
-                path="/relatorios/indicacoes"
-                element={<ReferralReport />}
-              />
-              <Route path="/configuracoes" element={<OperationalSettings />} />
-              <Route
-                path="/administracao/importacao"
-                element={<DataImport />}
-              />
-              <Route
-                path="/administracao/integracoes"
-                element={<Integrations />}
-              />
-              <Route path="/administracao/avisos" element={<TeamNotices />} />
-              <Route
-                path="/administracao/avisos-assinante"
-                element={<SubscriberMessages />}
-              />
-              <Route path="/portal/sair" element={<PortalSignOut />} />
-              <Route path="/portal/*" element={<PortalHome />} />
-              <Route path="/provedores" element={<TenantDirectory />} />
-              <Route
-                path="/administracao/anatel"
-                element={<AnatelCollection />}
-              />
-              <Route path="/auditoria" element={<AuditDirectory />} />
-              <Route
-                path="/administracao/catalogos-sla"
-                element={<QualityAdministration />}
-              />
-              <Route path="/busca" element={<OperationalSearch />} />
-              <Route
-                path="/administracao/usuarios"
-                element={<TeamDirectory />}
-              />
-              <Route
-                path="/administracao/empresas"
-                element={<CompanyDirectory />}
-              />
-              <Route path="/rede/mapa" element={<NetworkMap />} />
-              <Route path="/rede/consulta-ip" element={<LegalIpLookup />} />
-              <Route
-                path="/rede/enderecos-ip/planos-de-cgnat"
-                element={<CgnatDirectory />}
-              />
-              <Route path="/rede/enderecos-ip" element={<AddressDirectory />} />
-              <Route
-                path="/rede/enderecos-ip/blocos-de-enderecos"
-                element={<AddressDirectory />}
-              />
-              <Route path="/rede/ftth" element={<FiberDirectory />} />
-              <Route path="/rede/ftth/fttx-cto" element={<FiberDirectory />} />
-              <Route path="/pops" element={<NetworkPops />} />
-              <Route
-                path="/rede/manutencoes"
-                element={<NetworkMaintenance />}
-              />
-              <Route path="/rede/onus" element={<NetworkOnus />} />
-              <Route path="/rede/ftth/fttx-onu" element={<NetworkOnus />} />
-              <Route path="/noc" element={<NetworkNoc />} />
-              <Route path="/rede/online" element={<OnlineConnections />} />
-              <Route path="/rede/operacoes" element={<NetworkOperations />} />
-              <Route path="/rede/equipamentos" element={<NetworkDirectory />} />
-              <Route path="/estoque" element={<StockCatalog />} />
-              <Route path="/agenda" element={<OperationalAgenda />} />
-              <Route path="/meu-trabalho" element={<MyWork />} />
-              <Route
-                path="/ordens-de-servico"
-                element={<OperationalOrders />}
-              />
-              <Route path="/prospectos" element={<OperationalLeads />} />
-              <Route path="/atendimentos" element={<OperationalTickets />} />
-              <Route path="/relatorios/atendimento" element={<CrmReport />} />
-              <Route
-                path="/relatorios/cobranca"
-                element={<CollectionReports />}
-              />
-              <Route
-                path="/financeiro/politica-de-cobranca"
-                element={<FinancePolicy />}
-              />
-              <Route
-                path="/financeiro/conciliacao"
-                element={<FinanceReconciliation />}
-              />
-              <Route
-                path="/financeiro/faturas"
-                element={<OperationalInvoices />}
-              />
-              <Route path="/contratos" element={<OperationalContracts />} />
-              <Route
-                path="/contratos/:id"
-                element={<RecordLink base="/contratos" param="contrato" />}
-              />
-              <Route path="/produtos-adicionais" element={<AddonCatalog />} />
-              <Route path="/planos" element={<OperationalPlans />} />
-              <Route path="/conta/*" element={<Account />} />
-              <Route path="/assinantes" element={<SubscriberDirectory />} />
-              <Route
-                path="/assinantes/:id"
-                element={<RecordLink base="/assinantes" param="ficha" />}
-              />
-              {Object.entries(erpAliases).map(([from, to]) => (
+      <ShellProvider value={shell}>
+        <AppShell initialAppearance={readAppearance()}>
+          {location.pathname === "/login" ? (
+            <Navigate to={returnPath(me, location.state) ?? home} replace />
+          ) : me.mfa_pending && !location.pathname.startsWith("/conta") ? (
+            <Navigate to="/conta" replace />
+          ) : !allowed ? (
+            <AccessDenied />
+          ) : (
+            <Suspense fallback={<QueryBoundary loading>{null}</QueryBoundary>}>
+              <Routes>
                 <Route
-                  key={from}
-                  path={from}
-                  element={<Navigate to={`${to}${location.search}`} replace />}
+                  path="/"
+                  element={
+                    me.role === "subscriber" || !me.tenant ? (
+                      <Navigate to={home} replace />
+                    ) : (
+                      <ErpOverview />
+                    )
+                  }
                 />
-              ))}
-              <Route path="/estrutura" element={<OperationalDirectory />} />
-              <Route path="*" element={<CatalogueDestination />} />
-            </Routes>
-          </Suspense>
-        )}
-        {allowed &&
-          me.tenant &&
-          me.role !== "subscriber" &&
-          !me.mfa_pending && <OperationalSubscriberSheet />}
-        {allowed &&
-          me.tenant &&
-          me.role !== "subscriber" &&
-          !me.mfa_pending &&
-          new URLSearchParams(location.search).has("protocolo") && (
-            <Suspense fallback={<QueryBoundary loading>{null}</QueryBoundary>}>
-              <OperationalTicketOverlay />
+                <Route
+                  path="/relatorios/indicacoes"
+                  element={<ReferralReport />}
+                />
+                <Route
+                  path="/configuracoes"
+                  element={<OperationalSettings />}
+                />
+                <Route
+                  path="/administracao/importacao"
+                  element={<DataImport />}
+                />
+                <Route
+                  path="/administracao/integracoes"
+                  element={<Integrations />}
+                />
+                <Route path="/administracao/avisos" element={<TeamNotices />} />
+                <Route
+                  path="/administracao/avisos-assinante"
+                  element={<SubscriberMessages />}
+                />
+                <Route path="/portal/sair" element={<PortalSignOut />} />
+                <Route path="/portal/*" element={<PortalHome />} />
+                <Route path="/provedores" element={<TenantDirectory />} />
+                <Route
+                  path="/administracao/anatel"
+                  element={<AnatelCollection />}
+                />
+                <Route path="/auditoria" element={<AuditDirectory />} />
+                <Route
+                  path="/administracao/catalogos-sla"
+                  element={<QualityAdministration />}
+                />
+                <Route path="/busca" element={<OperationalSearch />} />
+                <Route
+                  path="/administracao/usuarios"
+                  element={<TeamDirectory />}
+                />
+                <Route
+                  path="/administracao/empresas"
+                  element={<CompanyDirectory />}
+                />
+                <Route path="/rede/mapa" element={<NetworkMap />} />
+                <Route path="/rede/consulta-ip" element={<LegalIpLookup />} />
+                <Route
+                  path="/rede/enderecos-ip/planos-de-cgnat"
+                  element={<CgnatDirectory />}
+                />
+                <Route
+                  path="/rede/enderecos-ip"
+                  element={<AddressDirectory />}
+                />
+                <Route
+                  path="/rede/enderecos-ip/blocos-de-enderecos"
+                  element={<AddressDirectory />}
+                />
+                <Route path="/rede/ftth" element={<FiberDirectory />} />
+                <Route
+                  path="/rede/ftth/fttx-cto"
+                  element={<FiberDirectory />}
+                />
+                <Route path="/pops" element={<NetworkPops />} />
+                <Route
+                  path="/rede/manutencoes"
+                  element={<NetworkMaintenance />}
+                />
+                <Route path="/rede/onus" element={<NetworkOnus />} />
+                <Route path="/rede/ftth/fttx-onu" element={<NetworkOnus />} />
+                <Route path="/noc" element={<NetworkNoc />} />
+                <Route path="/rede/online" element={<OnlineConnections />} />
+                <Route path="/rede/operacoes" element={<NetworkOperations />} />
+                <Route
+                  path="/rede/equipamentos"
+                  element={<NetworkDirectory />}
+                />
+                <Route path="/estoque" element={<StockCatalog />} />
+                <Route path="/agenda" element={<OperationalAgenda />} />
+                <Route path="/meu-trabalho" element={<MyWork />} />
+                <Route
+                  path="/ordens-de-servico"
+                  element={<OperationalOrders />}
+                />
+                <Route path="/prospectos" element={<OperationalLeads />} />
+                <Route path="/atendimentos" element={<OperationalTickets />} />
+                <Route path="/relatorios/atendimento" element={<CrmReport />} />
+                <Route
+                  path="/relatorios/cobranca"
+                  element={<CollectionReports />}
+                />
+                <Route
+                  path="/financeiro/politica-de-cobranca"
+                  element={<FinancePolicy />}
+                />
+                <Route
+                  path="/financeiro/conciliacao"
+                  element={<FinanceReconciliation />}
+                />
+                <Route
+                  path="/financeiro/faturas"
+                  element={<OperationalInvoices />}
+                />
+                <Route path="/contratos" element={<OperationalContracts />} />
+                <Route
+                  path="/contratos/:id"
+                  element={<RecordLink base="/contratos" param="contrato" />}
+                />
+                <Route path="/produtos-adicionais" element={<AddonCatalog />} />
+                <Route path="/planos" element={<OperationalPlans />} />
+                <Route path="/conta/*" element={<Account />} />
+                <Route path="/assinantes" element={<SubscriberDirectory />} />
+                <Route
+                  path="/assinantes/:id"
+                  element={<RecordLink base="/assinantes" param="ficha" />}
+                />
+                {Object.entries(erpAliases).map(([from, to]) => (
+                  <Route
+                    key={from}
+                    path={from}
+                    element={
+                      <Navigate to={`${to}${location.search}`} replace />
+                    }
+                  />
+                ))}
+                <Route path="/estrutura" element={<OperationalDirectory />} />
+                <Route path="*" element={<CatalogueDestination />} />
+              </Routes>
             </Suspense>
           )}
-        {allowed &&
-          me.tenant &&
-          me.role !== "subscriber" &&
-          !me.mfa_pending &&
-          new URLSearchParams(location.search).has("ordem") && (
-            <Suspense fallback={<QueryBoundary loading>{null}</QueryBoundary>}>
-              <OperationalOrderOverlay />
-            </Suspense>
-          )}
-        {allowed &&
-          me.tenant &&
-          me.role !== "subscriber" &&
-          !me.mfa_pending &&
-          new URLSearchParams(location.search).has("operacao") && (
-            <Suspense fallback={<QueryBoundary loading>{null}</QueryBoundary>}>
-              <OperationalOperationOverlay />
-            </Suspense>
-          )}
-      </AppShell>
+          {allowed &&
+            me.tenant &&
+            me.role !== "subscriber" &&
+            !me.mfa_pending && <OperationalSubscriberSheet />}
+          {allowed &&
+            me.tenant &&
+            me.role !== "subscriber" &&
+            !me.mfa_pending &&
+            new URLSearchParams(location.search).has("protocolo") && (
+              <Suspense
+                fallback={<QueryBoundary loading>{null}</QueryBoundary>}
+              >
+                <OperationalTicketOverlay />
+              </Suspense>
+            )}
+          {allowed &&
+            me.tenant &&
+            me.role !== "subscriber" &&
+            !me.mfa_pending &&
+            new URLSearchParams(location.search).has("ordem") && (
+              <Suspense
+                fallback={<QueryBoundary loading>{null}</QueryBoundary>}
+              >
+                <OperationalOrderOverlay />
+              </Suspense>
+            )}
+          {allowed &&
+            me.tenant &&
+            me.role !== "subscriber" &&
+            !me.mfa_pending &&
+            new URLSearchParams(location.search).has("operacao") && (
+              <Suspense
+                fallback={<QueryBoundary loading>{null}</QueryBoundary>}
+              >
+                <OperationalOperationOverlay />
+              </Suspense>
+            )}
+        </AppShell>
+      </ShellProvider>
     </OperationalWorkspaceProvider>
   );
 }

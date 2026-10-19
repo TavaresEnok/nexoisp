@@ -27,14 +27,14 @@ export function OperationalContracts() {
     ] ?? "";
   const plan = params.get("plano") ?? "";
   const subscriber = params.get("assinante") ?? "";
-  const { page, setPage } = useUrlPage();
+  const { page, setPage, size, setSize } = useUrlPage();
   const filters = new URLSearchParams({
     q: query,
     ...(status ? { status } : {}),
     ...(plan ? { plan_id: plan } : {}),
     ...(subscriber ? { subscriber_id: subscriber } : {}),
   });
-  const path = `/contracts?${filters}&limit=8&offset=${page * 8}`;
+  const path = `/contracts?${filters}&limit=${size}&offset=${page * size}`;
   const contracts = useSWR(["erp-contracts", path], async ([, path]) => {
     const result = await erpClient.request<unknown>(path);
     if (result.total === null)
@@ -91,6 +91,8 @@ export function OperationalContracts() {
           <ServerPager
             page={page}
             setPage={setPage}
+            size={size}
+            setSize={setSize}
             total={contracts.data?.total ?? 0}
             loading={contracts.isLoading}
           />

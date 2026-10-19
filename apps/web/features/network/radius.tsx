@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { Panel } from "@/components/workspace-ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -25,7 +24,7 @@ import { ActionButton } from "@/features/shared/action";
 import { useSession } from "@/features/session/provider";
 import { can } from "@/features/session/model";
 import { api } from "@/platform/erp-client";
-import { copyText } from "@/platform/browser";
+import { CodePreview } from "@/components/technical-ui";
 import { vendors, stamp, type Device } from "./models";
 import { useNetworkRefresh } from "./queries";
 const statusSchema = z.object({
@@ -450,24 +449,12 @@ function RadiusSetup({
             e exige reconfiguração.
           </p>
         )}
-        <FormField label="Comandos do concentrador">
-          <Textarea
-            readOnly
-            className="mono"
-            rows={12}
-            value={setup.commands}
-            onFocus={(event) => event.currentTarget.select()}
-          />
-        </FormField>
+        <CodePreview
+          title="Comandos do concentrador"
+          code={setup.commands}
+          filename="nexoisp-concentrador.rsc"
+        />
         <div className="erp-inline-actions">
-          <ActionButton
-            onClick={async () => {
-              await copyText(setup.commands);
-              toast.success("Comandos copiados.");
-            }}
-          >
-            Copiar comandos
-          </ActionButton>
           <Button onClick={onClose}>
             {value.secret ? "Já guardei o segredo" : "Fechar instruções"}
           </Button>

@@ -51,7 +51,7 @@ import { money, date, scenarioDate, exportCsv } from "@/lib/format";
 import { revenueTrend } from "@/lib/overview";
 import type { Invoice } from "@/lib/types";
 import { selectInvoices } from "@/application/selectors/financial";
-import { QueryBoundary } from "@/features/shared/feedback";
+import { QueryBoundary } from "@/components/query-boundary";
 import { EmptyState, ContextCallout } from "@/components/workspace-feedback";
 
 export function Financial() {

@@ -1,7 +1,5 @@
-import { searchOperationalNavigation } from "@/features/operations/catalogue";
 "use client";
 
-import { integrationStatus, operationalTitle } from "@/features/operations/status";
 
 import {
   useState,
@@ -67,18 +65,15 @@ import { searchNavigation } from '@/lib/navigation';
 import { resolveNavigationRoute } from '@/lib/navigation-route';
 import { saveAppearance, subscribeSystemAppearance, systemIsDark } from "@/platform/appearance";
 import { isDemoMode } from "@/application/execution-mode";
-import { useSession } from "@/features/session/provider";
-import { canAccessPath } from "@/features/operations/navigation";
-import { api } from "@/platform/erp-client";
-import { roleLabels } from "@/features/session/model";
-import { initials } from "@/lib/format";
-import useSWR from "swr";
+import { useShell, useNoRecordSearch, useNoAttention } from "@/components/shell-context";
 import { toast } from "sonner";
 import { LogOut } from "lucide-react";
 
 export function AppShell({ children, initialAppearance }: { children: ReactNode; initialAppearance: "light" | "dark" | null }) {
   const pathname = usePathname();
-  const { operational, me, logout, reload } = useSession();
+  const shell = useShell();
+  const operational = Boolean(shell);
+  const account = shell?.account ?? null;
   const router = useRouter();
   const { data, error, requestData, openSubscriber } = useWorkspaceStatus();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -99,7 +94,7 @@ export function AppShell({ children, initialAppearance }: { children: ReactNode;
     () => false,
   );
   const dark = appearance ? appearance === "dark" : systemDark;
-  const label = (operational ? operationalTitle(pathname) : undefined) ?? resolveNavigationRoute(pathname).title;
+  const label = shell?.title(pathname) ?? resolveNavigationRoute(pathname).title;
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
@@ -134,8 +129,9 @@ export function AppShell({ children, initialAppearance }: { children: ReactNode;
         )
         .slice(0, 3)
     : [];
-  const search = useSWR(operational && me && !me.mfa_pending && me.tenant && me.role !== "subscriber" && query.trim().length >= 2 ? ["erp-search", query.trim()] : null, ([, text]) => api<{ results: { subscriber_id: string; subscriber_name: string; contract_id?: string; plan_name?: string; document?: string }[] }>(`/search?q=${encodeURIComponent(text)}`));
-  const allPageResults = (operational ? searchOperationalNavigation(query) : searchNavigation(query)).filter(page => !operational || canAccessPath(me, page.href));
+  const search = (shell?.useRecordSearch ?? useNoRecordSearch)(query);
+  const attention = (shell?.useAttention ?? useNoAttention)();
+  const allPageResults = (shell ? shell.searchPages(query).filter(page => shell.canAccess(page.href)) : searchNavigation(query));
   const pageResults = allPageResults.slice(0, query.trim() ? 18 : 8);
   return (
     <div className={cn("app-frame", collapsed && "sidebar-collapsed")}>
@@ -207,12 +203,12 @@ export function AppShell({ children, initialAppearance }: { children: ReactNode;
                 }
               >
                 <Bell />
-                {!operational && <i />}
+                {(!operational || attention.items.length > 0) && <i />}
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="notifications-menu">
                 <DropdownMenuGroup>
                   <DropdownMenuLabel>Seu centro de atenção</DropdownMenuLabel>
-                  {operational ? <p className="menu-footnote">Os indicadores operacionais estão disponíveis nas páginas autorizadas.</p> : <><DropdownMenuItem onClick={() => go("/rede/equipamentos?filtro=atencao")}>
+                  {operational ? <>{attention.items.map(item => <DropdownMenuItem key={item.id} onClick={() => go(item.href)}>{item.area === "network" ? <Radio /> : item.area === "field" ? <Wrench /> : <Headphones />}{item.title}</DropdownMenuItem>)}{!attention.items.length && <p className="menu-footnote">{attention.loading ? "Consultando pendências…" : attention.error ? attention.error.message : "Nenhuma pendência para você agora."}</p>}</> : <><DropdownMenuItem onClick={() => go("/rede/equipamentos?filtro=atencao")}>
                     <Radio />
                     12 ONUs com sinal degradado
                   </DropdownMenuItem>
@@ -229,22 +225,22 @@ export function AppShell({ children, initialAppearance }: { children: ReactNode;
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <p className="menu-footnote">
-                  {operational ? "Ambiente do provedor" : "Cenário fictício · 17 out., 09:42"}
+                  {operational ? "Pendências do seu perfil · atualizadas a cada 30 s" : "Cenário fictício · 17 out., 09:42"}
                 </p>
               </DropdownMenuContent>
             </DropdownMenu>
             <span className="topbar-separator" />
             <DropdownMenu>
               <DropdownMenuTrigger className="profile-trigger" aria-label={operational ? "Minha conta" : "Perfil de demonstração"}>
-                <span className="profile-avatar">{operational && me ? initials(me.name) : "GA"}</span>
+                <span className="profile-avatar">{account ? account.initials : "GA"}</span>
                 <ChevronDown size={13} />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuGroup>
                   <DropdownMenuLabel>
-                    {operational && me ? `${me.name} · ${roleLabels[me.role]}` : "Gabriel Almeida · perfil demonstrativo"}
+                    {account ? `${account.name} · ${account.role}` : "Gabriel Almeida · perfil demonstrativo"}
                   </DropdownMenuLabel>
-                  {(!operational || canAccessPath(me,"/configuracoes")) && <DropdownMenuItem onClick={() => go("/configuracoes")}>
+                  {(!shell || shell.canAccess("/configuracoes")) && <DropdownMenuItem onClick={() => go("/configuracoes")}>
                     <Settings2 />
                     Configurações do workspace
                   </DropdownMenuItem>}
@@ -252,14 +248,14 @@ export function AppShell({ children, initialAppearance }: { children: ReactNode;
                     <HelpCircle />
                     {operational ? "Sobre o NexoISP" : "Sobre esta demonstração"}
                   </DropdownMenuItem>
-                  {operational && <><DropdownMenuItem onClick={() => go("/conta")}><ShieldCheck />Minha conta</DropdownMenuItem><DropdownMenuItem onClick={async () => { try { await logout(); go("/login"); } catch (error) { toast.error((error as Error).message); } }}><LogOut />Sair</DropdownMenuItem></>}
+                  {operational && <><DropdownMenuItem onClick={() => go("/conta")}><ShieldCheck />Minha conta</DropdownMenuItem><DropdownMenuItem onClick={async () => { try { await shell?.logout(); go("/login"); } catch (error) { toast.error((error as Error).message); } }}><LogOut />Sair</DropdownMenuItem></>}
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </header>
-        {operational && me?.demo && <div className="erp-banner">Ambiente demonstrativo do servidor · dados sintéticos e integrações simuladas identificadas nas páginas.</div>}
-        {operational && me?.support && <div className="erp-banner"><span>Acesso de suporte a <strong>{me.tenant?.name}</strong> · ações auditadas</span><Button variant="outline" size="sm" onClick={async () => { try { await api("/support/exit", { method: "POST" }); await reload(); go("/provedores"); } catch (error) { toast.error((error as Error).message); } }}>Encerrar suporte</Button></div>}
+        {account?.demo && <div className="erp-banner">Ambiente demonstrativo do servidor · dados sintéticos e integrações simuladas identificadas nas páginas.</div>}
+        {account?.support && <div className="erp-banner"><span>Acesso de suporte a <strong>{account.tenant}</strong> · ações auditadas</span><Button variant="outline" size="sm" onClick={async () => { try { await shell?.exitSupport(); go("/provedores"); } catch (error) { toast.error((error as Error).message); } }}>Encerrar suporte</Button></div>}
         <main id="main-content" className="page-content" tabIndex={-1}>
           {children}
         </main>
@@ -285,10 +281,10 @@ export function AppShell({ children, initialAppearance }: { children: ReactNode;
           </div>
           <div className="command-results">
             {!operational && !data && <p className="command-empty" role="status">{error ? "Dados operacionais indisponíveis. A busca de páginas continua disponível." : "Carregando assinantes e atendimentos…"}</p>}
-            {operational && search.error && <p role="alert" className="command-empty">{search.error.message}</p>}
-            {operational && search.isLoading && <p role="status" className="command-empty">Consultando o provedor…</p>}
-            {operational && search.data?.results.map(result => <button key={result.contract_id ?? result.subscriber_id} onClick={() => { setSearchOpen(false); go(`/assinantes?ficha=${encodeURIComponent(result.subscriber_id)}`); }}><Users size={17} /><span>{result.subscriber_name}<small>{result.plan_name ?? result.document ?? "Cadastro"}</small></span><ArrowUpRight size={15} /></button>)}
-            {operational && query.trim().length>=2 && canAccessPath(me,"/busca") && <button onClick={()=>{setSearchOpen(false);go(`/busca?q=${encodeURIComponent(query.trim())}`);}}><Search size={17} /><span>Ver resultados completos<small>Assinantes, contratos e correspondências da rede</small></span><ArrowUpRight size={15} /></button>}
+            {search.error && <p role="alert" className="command-empty">{search.error.message}</p>}
+            {search.loading && <p role="status" className="command-empty">Consultando o provedor…</p>}
+            {search.results?.map(result => <button key={result.id} onClick={() => { setSearchOpen(false); go(result.href); }}><Users size={17} /><span>{result.title}<small>{result.detail}</small></span><ArrowUpRight size={15} /></button>)}
+            {shell && query.trim().length>=2 && shell.canAccess("/busca") && <button onClick={()=>{setSearchOpen(false);go(`/busca?q=${encodeURIComponent(query.trim())}`);}}><Search size={17} /><span>Ver resultados completos<small>Assinantes, contratos e correspondências da rede</small></span><ArrowUpRight size={15} /></button>}
             {!operational && results.length > 0 && (
               <>
                 <p className="nav-label">ASSINANTES</p>
@@ -336,7 +332,7 @@ export function AppShell({ children, initialAppearance }: { children: ReactNode;
                 {pageResults.map((page) => (
                   <button key={page.href} onClick={() => go(page.href)}>
                     <ListTree size={17} />
-                    <span>{page.label}<small>{page.trail.slice(0, -1).join(" / ")} · {operational ? integrationStatus(page.href)==="connected"?"Conectado ao ERP":"Integração pendente" : page.view ? "Consulta parcial" : "Pendente"}</small></span>
+                    <span>{page.label}<small>{page.trail.slice(0, -1).join(" / ")} · {shell ? shell.connected(page.href)?"Conectado ao ERP":"Integração pendente" : page.view ? "Consulta parcial" : "Pendente"}</small></span>
                     <ArrowRight size={15} />
                   </button>
                 ))}
@@ -345,7 +341,7 @@ export function AppShell({ children, initialAppearance }: { children: ReactNode;
             )}
             {results.length === 0 &&
               ticketResults.length === 0 &&
-              pageResults.length === 0 && (!operational || (!search.isLoading && !search.error && !search.data?.results.length)) && (
+              pageResults.length === 0 && (!operational || (!search.loading && !search.error && !search.results?.length)) && (
                 <p className="command-empty">
                   {operational ? "Nenhum destino encontrado. Busque por nome ou documento." : "Nenhum resultado. Tente um nome, como Mariana."}
                 </p>
@@ -372,8 +368,8 @@ export function AppShell({ children, initialAppearance }: { children: ReactNode;
               <Building2 size={20} />
             </span>
             <div>
-<strong>{operational ? me?.tenant?.name ?? "Operação do SaaS" : "Conecta Fibra"}</strong>
-              <p>{operational && me ? roleLabels[me.role] : "Workspace demonstrativo"}</p>
+<strong>{operational ? account?.tenant ?? "Operação do SaaS" : "Conecta Fibra"}</strong>
+              <p>{account ? account.role : "Workspace demonstrativo"}</p>
             </div>
             <Check size={18} />
           </div>

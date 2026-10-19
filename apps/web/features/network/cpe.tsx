@@ -18,6 +18,7 @@ import { can } from "@/features/session/model";
 import { api } from "@/platform/erp-client";
 import { stamp } from "./models";
 import { duration } from "./telemetry";
+import { notifyAcs } from "./acs-notice";
 export const cpeDeviceSchema = z.object({
   id: z.string(),
   manufacturer: z.string().nullable(),
@@ -67,10 +68,11 @@ export function ContractCpe({ id }: { id: string }) {
   );
   const d = result.data?.device;
   const action = async (kind: string) => {
-    const response = await api<{ note: string }>(`${path}/${kind}`, {
-      method: "POST",
-    });
-    toast.success(response.note);
+    const response = await api<{ note?: string; result?: string }>(
+      `${path}/${kind}`,
+      { method: "POST" },
+    );
+    notifyAcs(response);
     await result.mutate();
   };
   return (
@@ -282,14 +284,17 @@ export function ContractCpe({ id }: { id: string }) {
           onSubmit={async (values) => {
             if (values.password && values.password.length < 8)
               throw new Error("A senha deve ter pelo menos oito caracteres.");
-            const response = await api<{ note: string }>(`${path}/wifi`, {
-              body: {
-                index: wifi.index,
-                ...(values.ssid ? { ssid: values.ssid } : {}),
-                ...(values.password ? { password: values.password } : {}),
+            const response = await api<{ note?: string; result?: string }>(
+              `${path}/wifi`,
+              {
+                body: {
+                  index: wifi.index,
+                  ...(values.ssid ? { ssid: values.ssid } : {}),
+                  ...(values.password ? { password: values.password } : {}),
+                },
               },
-            });
-            toast.success(response.note);
+            );
+            notifyAcs(response);
             setWifi(null);
             await result.mutate();
           }}

@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import {
   NetworkOnlineView,
   type OnlineIdentity,
-} from "@/components/network-online-view";
+} from "@/components/network-online";
 import { Button } from "@/components/ui/button";
 import { QueryBoundary } from "@/features/shared/feedback";
 import { RecordEditor } from "@/features/shared/record-editor";

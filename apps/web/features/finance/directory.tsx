@@ -57,14 +57,14 @@ export function OperationalInvoices() {
       } as Record<string, string>
     )[statusLabel] ?? "";
   const company = params.get("empresa") ?? "";
-  const { page, setPage } = useUrlPage();
+  const { page, setPage, size, setSize } = useUrlPage();
   const filters = new URLSearchParams({
     q: query,
     ...(status ? { status } : {}),
     ...(company ? { company_id: company } : {}),
   });
   const list = useSWR(
-    ["erp-invoices", `${filters}&limit=8&offset=${page * 8}`],
+    ["erp-invoices", `${filters}&limit=${size}&offset=${page * size}`],
     async ([, filters]) => {
       const response = await erpClient.request(`/invoices?${filters}`);
       if (response.total === null)
@@ -167,6 +167,8 @@ export function OperationalInvoices() {
           <ServerPager
             page={page}
             setPage={setPage}
+            size={size}
+            setSize={setSize}
             total={list.data?.total ?? 0}
             loading={list.isLoading}
           />

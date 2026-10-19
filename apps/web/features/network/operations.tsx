@@ -55,11 +55,11 @@ export function NetworkOperations() {
   const { me } = useSession();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
-  const { page, setPage } = useUrlPage();
+  const { page, setPage, size, setSize } = useUrlPage();
   const filter = ["all", "open", "problem"].includes(params.get("filter") ?? "")
     ? params.get("filter")!
     : "all";
-  const path = `/operations?filter=${filter}&limit=8&offset=${page * 8}`;
+  const path = `/operations?filter=${filter}&limit=${size}&offset=${page * size}`;
   const result = useSWR(
     ["erp-operations", path],
     async ([, path]) => {
@@ -259,6 +259,8 @@ export function NetworkOperations() {
           <ServerPager
             page={page}
             setPage={setPage}
+            size={size}
+            setSize={setSize}
             total={result.data?.total ?? 0}
             loading={result.isLoading}
           />

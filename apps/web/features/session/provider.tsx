@@ -77,7 +77,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       window.removeEventListener(sessionExpiredEvent, expire);
     };
   }, [reload]);
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await api("/auth/logout", { method: "POST" });
     generation.current++;
     setState((previous) => ({
@@ -86,7 +86,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       error: null,
       revision: previous.revision + 1,
     }));
-  };
+  }, []);
   const key = state.me
     ? `${sessionScope(state.me)}:${state.revision}`
     : `anonymous:${state.revision}`;

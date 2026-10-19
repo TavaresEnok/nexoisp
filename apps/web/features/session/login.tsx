@@ -6,7 +6,8 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { returnPath } from "@/features/operations/return-path";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Panel } from "@/components/workspace-ui";
@@ -24,6 +25,7 @@ const demoAccounts = [
 export function Login() {
   const { reload } = useSession();
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
@@ -67,11 +69,12 @@ export function Login() {
             navigate(
               me.mfa_pending
                 ? "/conta"
-                : me.role === "saas_operator" && !me.support
-                  ? "/provedores"
-                  : me.role === "subscriber"
-                    ? "/portal"
-                    : "/",
+                : (returnPath(me, location.state) ??
+                    (me.role === "saas_operator" && !me.support
+                      ? "/provedores"
+                      : me.role === "subscriber"
+                        ? "/portal"
+                        : "/")),
               { replace: true },
             );
           }}

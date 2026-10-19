@@ -2,7 +2,9 @@ import { useState } from "react";
 import useSWR from "swr";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
-import { PageHeading, Panel } from "@/components/workspace-ui";
+import { Panel } from "@/components/workspace-ui";
+import { CoreNetworkFrame } from "@/components/core-network";
+import { coreTabs } from "./core-tabs";
 import { OperationalCatalog } from "@/components/operational-catalog";
 import {
   ProfileFacts,
@@ -55,6 +57,7 @@ const blockSchema = z.object({
 });
 export function CgnatDirectory() {
   const { me } = useSession();
+  const navigate = useNavigate();
   const plans = useSWR("erp-cgnat-plans", async () =>
     z.array(planSchema).parse(await api("/cgnat/plans")),
   );
@@ -66,19 +69,18 @@ export function CgnatDirectory() {
   const [mapped, setMapped] = useState<Plan | null>(null);
   const write = can(me, "network:write");
   return (
-    <div className={styles.page}>
-      <PageHeading
-        eyebrow="REDE / FTTx · CORE NETWORK"
-        title="Planos de CGNAT"
-        description="Planejamento de endereços e portas com cálculo e rastreio no Go."
-        actions={
-          write && (
-            <Button onClick={() => setCreating(true)}>
-              Novo plano de CGNAT
-            </Button>
-          )
-        }
-      />
+    <CoreNetworkFrame
+      tab="cgnat"
+      tabs={coreTabs(me)}
+      onTab={navigate}
+      title="Planos de CGNAT"
+      description="Planejamento de endereços e portas com cálculo e rastreio no servidor."
+      actions={
+        write && (
+          <Button onClick={() => setCreating(true)}>Novo plano de CGNAT</Button>
+        )
+      }
+    >
       <p className="profile-footnote">
         O script RouterOS exige revisão e aplicação manual pela equipe de rede.
         O backend não aplica regras ao equipamento; a validação existente é de
@@ -177,7 +179,7 @@ export function CgnatDirectory() {
         />
       )}
       {mapped && <PlanMap plan={mapped} onClose={() => setMapped(null)} />}
-    </div>
+    </CoreNetworkFrame>
   );
 }
 function PlanEditor({

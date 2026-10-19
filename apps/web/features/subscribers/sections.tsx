@@ -34,7 +34,7 @@ export function SubscriberSections({
   refresh,
 }: {
   subscriber: SubscriberDetail;
-  section: "cadastro" | "documentos" | "historico";
+  section: "cadastro" | "documentos";
   refresh: () => Promise<void>;
 }) {
   return (
@@ -53,7 +53,6 @@ export function SubscriberSections({
           <Privacy subscriber={subscriber} refresh={refresh} />
         </>
       )}
-      {section === "historico" && <Timeline id={subscriber.id} />}
     </div>
   );
 }
@@ -622,58 +621,6 @@ function Privacy({
           </DialogContent>
         </Dialog>
       )}
-    </ProfileSection>
-  );
-}
-function Timeline({ id }: { id: string }) {
-  const events = useSWR(["erp-timeline", id], ([, id]) =>
-    api<
-      {
-        kind: string;
-        title: string;
-        detail?: string;
-        at: string;
-        by?: string;
-        contract_id?: string;
-      }[]
-    >(`/subscribers/${id}/timeline`),
-  );
-  return (
-    <ProfileSection
-      title="Linha do tempo"
-      caption="Eventos disponíveis conforme suas permissões."
-    >
-      <QueryBoundary
-        loading={events.isLoading}
-        error={events.error}
-        retry={() => events.mutate()}
-      >
-        <div className="profile-recent">
-          {events.data?.slice(0, 80).map((event, index) => (
-            <div key={index}>
-              <span className="timeline-dot" />
-              <div>
-                <strong>{event.title}</strong>
-                <p>{event.detail}</p>
-                <small>
-                  {date(event.at)} · {event.by ?? "Sistema"}
-                </small>
-                {event.contract_id && (
-                  <a
-                    className="profile-text-action"
-                    href={`/contratos/${event.contract_id}`}
-                  >
-                    Abrir contrato
-                  </a>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-        {!events.data?.length && (
-          <p className="profile-footnote">Nenhum evento disponível.</p>
-        )}
-      </QueryBoundary>
     </ProfileSection>
   );
 }

@@ -16,6 +16,7 @@ import { useSession } from "@/features/session/provider";
 import { can, hasModule } from "@/features/session/model";
 import { api } from "@/platform/erp-client";
 import styles from "@/components/network-explorer.module.css";
+import { MapExplorerFrame, MapListPanel } from "@/components/network-explorer";
 const MapCanvas = lazy(() => import("./map-canvas"));
 const point = z.object({
   id: z.string().uuid(),
@@ -186,71 +187,62 @@ export function NetworkMap() {
       : kind === "pops" && can(me, "network:write");
   const initial = coverage.data?.contracts;
   return (
-    <section className={styles.page}>
-      <header className={styles.header}>
-        <div>
-          <p className={styles.overline}>
-            RELATÓRIO <span>/</span> GEOLOCALIZAÇÃO
-          </p>
-          <h1>Sua rede, no mapa.</h1>
-          <p>
-            Localize contratos, caixas ópticas e POPs com coordenadas
-            registradas.
-          </p>
-        </div>
-        <div className={styles.actions}>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => navigate("/rede/online")}
-          >
-            <Radio />
-            Online agora
-          </Button>
-        </div>
-      </header>
-      <div className="erp-inline-actions">
-        {(["contracts", "boxes", "pops"] as const)
-          .filter((key) => key !== "boxes" || hasModule(me, "ftth"))
-          .map((key) => (
-            <label key={key} className="erp-inline-actions">
-              <input
-                type="checkbox"
-                checked={layers[key]}
-                onChange={(event) =>
-                  setLayers((previous) => ({
-                    ...previous,
-                    [key]: event.target.checked,
-                  }))
-                }
-              />
-              {
+    <MapExplorerFrame
+      description="Localize contratos, caixas ópticas e POPs com coordenadas registradas."
+      actions={
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => navigate("/rede/online")}
+        >
+          <Radio />
+          Online agora
+        </Button>
+      }
+      controls={
+        <div className="erp-inline-actions">
+          {(["contracts", "boxes", "pops"] as const)
+            .filter((key) => key !== "boxes" || hasModule(me, "ftth"))
+            .map((key) => (
+              <label key={key} className="erp-inline-actions">
+                <input
+                  type="checkbox"
+                  checked={layers[key]}
+                  onChange={(event) =>
+                    setLayers((previous) => ({
+                      ...previous,
+                      [key]: event.target.checked,
+                    }))
+                  }
+                />
                 {
-                  contracts: "Contratos",
-                  boxes: "Caixas ópticas",
-                  pops: "POPs",
-                }[key]
-              }
-            </label>
-          ))}
-        <FormField label="Situação dos contratos no mapa">
-          <select
-            className="commercial-select"
-            value={status}
-            onChange={(event) => {
-              setStatus(event.target.value);
-              setSelected(null);
-            }}
-          >
-            <option value="">Todas as situações</option>
-            <option value="active">Vigentes</option>
-            <option value="suspended">Suspensos</option>
-            <option value="ended">Encerrados</option>
-          </select>
-        </FormField>
-      </div>
-      <div className={styles.mapShell}>
-        <div className={styles.mapToolbar}>
+                  {
+                    contracts: "Contratos",
+                    boxes: "Caixas ópticas",
+                    pops: "POPs",
+                  }[key]
+                }
+              </label>
+            ))}
+          <FormField label="Situação dos contratos no mapa">
+            <select
+              className="commercial-select"
+              value={status}
+              onChange={(event) => {
+                setStatus(event.target.value);
+                setSelected(null);
+              }}
+            >
+              <option value="">Todas as situações</option>
+              <option value="active">Vigentes</option>
+              <option value="suspended">Suspensos</option>
+              <option value="ended">Encerrados</option>
+            </select>
+          </FormField>
+        </div>
+      }
+      toolbar={
+        <>
           <div className={styles.search}>
             <Search size={15} />
             <span>{rows.length} ponto(s) na área consultada</span>
@@ -262,49 +254,44 @@ export function NetworkMap() {
           >
             {list ? "Ocultar lista" : "Ver pontos no mapa"}
           </Button>
-        </div>
-        <div className={styles.mapCanvas}>
-          <Suspense fallback={<QueryBoundary loading>{null}</QueryBoundary>}>
-            <MapCanvas
-              rows={rows}
-              selectedId={selected?.id ?? null}
-              bounds={
-                initial?.south != null &&
-                initial.north != null &&
-                initial.west != null &&
-                initial.east != null
-                  ? {
-                      south: initial.south,
-                      north: initial.north,
-                      west: initial.west,
-                      east: initial.east,
-                    }
-                  : null
-              }
-              onBounds={setBounds}
-              onSelect={setSelected}
-              placing={placing}
-              onPlace={async (lat, lng) => {
-                if (placing) await saveLocation(placing, lat, lng);
-              }}
-            />
-          </Suspense>
+        </>
+      }
+      canvas={
+        <Suspense fallback={<QueryBoundary loading>{null}</QueryBoundary>}>
+          <MapCanvas
+            rows={rows}
+            selectedId={selected?.id ?? null}
+            bounds={
+              initial?.south != null &&
+              initial.north != null &&
+              initial.west != null &&
+              initial.east != null
+                ? {
+                    south: initial.south,
+                    north: initial.north,
+                    west: initial.west,
+                    east: initial.east,
+                  }
+                : null
+            }
+            onBounds={setBounds}
+            onSelect={setSelected}
+            placing={placing}
+            onPlace={async (lat, lng) => {
+              if (placing) await saveLocation(placing, lat, lng);
+            }}
+          />
+        </Suspense>
+      }
+      list={
+        <>
           {list && (
-            <aside
-              className={styles.mapList}
-              aria-label="Pontos da rede encontrados"
+            <MapListPanel
+              heading={`${rows.length} ponto(s)`}
+              label="Pontos da rede encontrados"
+              closeLabel="Fechar lista de pontos"
+              onClose={() => setList(false)}
             >
-              <div className={styles.listHeading}>
-                <strong>{rows.length} ponto(s)</strong>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label="Fechar lista de pontos"
-                  onClick={() => setList(false)}
-                >
-                  <X />
-                </Button>
-              </div>
               {rows.map((row) => (
                 <button
                   key={`${row.kind}/${row.id}`}
@@ -319,8 +306,12 @@ export function NetworkMap() {
                   </span>
                 </button>
               ))}
-            </aside>
+            </MapListPanel>
           )}
+        </>
+      }
+      overlay={
+        <>
           {placing && (
             <div className={styles.legend}>
               <span>Clique no mapa para posicionar {placing.name}</span>
@@ -333,12 +324,15 @@ export function NetworkMap() {
               </Button>
             </div>
           )}
-        </div>
-        <footer className={styles.mapFooter}>
+        </>
+      }
+      footer={
+        <>
           <span>Arraste para mover · use + e − para aproximar</span>
           <span>Coordenadas cadastradas · sem geocodificação automática</span>
-        </footer>
-      </div>
+        </>
+      }
+    >
       <QueryBoundary
         loading={points.isLoading}
         error={points.error}
@@ -601,6 +595,6 @@ export function NetworkMap() {
           }}
         />
       )}
-    </section>
+    </MapExplorerFrame>
   );
 }

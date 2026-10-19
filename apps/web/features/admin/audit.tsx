@@ -37,8 +37,8 @@ const retentionLabels: Record<string, string> = {
 };
 export function AuditDirectory() {
   const { me } = useSession();
-  const { page, setPage } = useUrlPage();
-  const path = `/audit?limit=8&offset=${page * 8}`;
+  const { page, setPage, size, setSize } = useUrlPage();
+  const path = `/audit?limit=${size}&offset=${page * size}`;
   const result = useSWR(["erp-audit", path], async ([, path]) => {
     const response = await erpClient.request(path);
     if (response.total === null)
@@ -99,6 +99,8 @@ export function AuditDirectory() {
           <ServerPager
             page={page}
             setPage={setPage}
+            size={size}
+            setSize={setSize}
             total={result.data?.total ?? 0}
             loading={result.isLoading}
           />

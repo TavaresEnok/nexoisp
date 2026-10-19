@@ -6,7 +6,7 @@ import { latLngBounds } from "leaflet";
 import { LocateFixed, Layers, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hasLocation, type NetworkSubscriber } from "@/lib/network-query";
-import { useWorkspace } from "@/components/workspace-provider";
+import { useWorkspace } from "@/features/workspace/context";
 import "leaflet/dist/leaflet.css";
 import styles from "./network-explorer.module.css";
 

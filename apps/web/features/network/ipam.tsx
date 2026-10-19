@@ -3,7 +3,8 @@ import useSWR, { useSWRConfig } from "swr";
 import { z } from "zod";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Network, Users, Workflow, Shield } from "lucide-react";
-import { PageHeading } from "@/components/workspace-ui";
+import { CoreNetworkFrame } from "@/components/core-network";
+import { coreTabs } from "./core-tabs";
 import { OpticalMetrics } from "@/components/optical-ui";
 import { OperationalCatalog } from "@/components/operational-catalog";
 import {
@@ -95,6 +96,7 @@ export function useIpamRefresh() {
 }
 export function AddressDirectory() {
   const { me } = useSession();
+  const navigate = useNavigate();
   const result = useSWR("erp-pools", async () =>
     z.array(poolSchema).parse(await api("/ipam/pools")),
   );
@@ -126,26 +128,20 @@ export function AddressDirectory() {
       { replace: true },
     );
   return (
-    <div className={styles.page}>
-      <PageHeading
-        eyebrow="REDE / FTTx · CORE NETWORK"
-        title="Endereçamento sob controle."
-        description="Blocos IPv4 e IPv6, reservas individuais e prefixos dos contratos."
-        actions={
-          write && (
-            <Button onClick={() => setEditor("create")}>
-              Novo bloco de endereços
-            </Button>
-          )
-        }
-      />
+    <CoreNetworkFrame
+      tab="pools"
+      tabs={coreTabs(me)}
+      onTab={navigate}
+      description="Blocos IPv4 e IPv6, reservas individuais e prefixos dos contratos."
+      actions={
+        write && (
+          <Button onClick={() => setEditor("create")}>
+            Novo bloco de endereços
+          </Button>
+        )
+      }
+    >
       <div className="erp-inline-actions">
-        <a
-          className="profile-text-action"
-          href="/rede/enderecos-ip/planos-de-cgnat"
-        >
-          Planos de CGNAT
-        </a>
         <a className="profile-text-action" href="/rede/consulta-ip">
           Consulta legal de IP
         </a>
@@ -266,7 +262,7 @@ export function AddressDirectory() {
         />
       )}
       {selected && <PoolReservations pool={selected} onClose={close} />}
-    </div>
+    </CoreNetworkFrame>
   );
 }
 function PoolEditor({

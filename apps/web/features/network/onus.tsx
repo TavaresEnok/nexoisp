@@ -3,7 +3,7 @@ import useSWR, { useSWRConfig } from "swr";
 import { z } from "zod";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { PageHeading, Panel } from "@/components/workspace-ui";
-import { OpticalNavigation } from "@/components/optical-ui";
+import { OpticalPage } from "@/components/optical-network";
 import {
   ProfileSection,
   ProfileFacts,
@@ -125,19 +125,18 @@ export function NetworkOnus() {
   } | null>(null);
   const refresh = useOnuRefresh();
   return (
-    <>
-      <PageHeading
-        title="ONUs e autorizações"
-        description="Descobertas e vínculos reportados pelas OLTs do provedor."
-        actions={
-          operate && (
-            <Button onClick={() => setAuthorization({})}>
-              Autorizar por serial
-            </Button>
-          )
-        }
-      />
-      <OpticalNavigation mode="onu" />
+    <OpticalPage
+      title="ONUs e autorizações"
+      description="Descobertas e vínculos reportados pelas OLTs do provedor."
+      mode="onu"
+      actions={
+        operate && (
+          <Button onClick={() => setAuthorization({})}>
+            Autorizar por serial
+          </Button>
+        )
+      }
+    >
       <div className="erp-stack">
         <Panel
           title="Aguardando autorização"
@@ -289,7 +288,7 @@ export function NetworkOnus() {
           }}
         />
       )}
-    </>
+    </OpticalPage>
   );
 }
 export function ContractOnu({ id, status }: { id: string; status: string }) {

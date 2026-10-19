@@ -3,7 +3,7 @@ import useSWR from "swr";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Activity, Network, Server, AlertTriangle } from "lucide-react";
 import { PageHeading } from "@/components/workspace-ui";
-import { NetworkEquipmentTable } from "@/components/network-equipment-table";
+import { NetworkEquipmentTable } from "@/components/network-center";
 import { Button } from "@/components/ui/button";
 import { QueryBoundary, ConnectedNotice } from "@/features/shared/feedback";
 import { useSession } from "@/features/session/provider";

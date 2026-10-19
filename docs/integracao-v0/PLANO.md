@@ -4,6 +4,8 @@
 
 Aceite revisado em 19/10/2026 após resolver e validar R01–R06. Consulte o [relatório de correções](CORRECOES-REVISAO.md) e a [revisão histórica](REVISAO-ARQUITETURA-E-CHECKUP.md).
 
+Depois de uma auditoria independente, as telas de maior destaque (painel inicial, lista e ficha de assinantes, rede) passaram a usar os componentes originais do v0 em vez de reescritas, com travas automáticas de fidelidade: veja [Fidelidade ao frontend v0](FIDELIDADE-V0.md).
+
 As sete etapas estão concluídas no código e na validação da integração. A aplicação oficial em `apps/web` utiliza o frontend do v0 e cobre as funcionalidades disponíveis no NexoISP Go, respeitando suas limitações existentes.
 
 O fechamento registra **149 unidades integradas e validadas**, **20 serviços internos, contratos externos ou limitações de backend preservados**, **zero pendentes** e **zero parciais de integração**. Esses estados descrevem a adaptação da interface; não transformam uma capacidade parcial do backend em capacidade completa. A matriz mantém separadamente o estado original do Go.

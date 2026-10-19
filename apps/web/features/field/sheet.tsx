@@ -135,10 +135,17 @@ function LiveOrder({ id, onClose }: { id: string; onClose: () => void }) {
                     `${stamp(order.created_at)} · ${order.created_by_name ?? "Sistema"}`,
                   ],
                   ["Motivo do serviço", order.reason_name || "Não informado"],
-                  ["Contrato", order.contract_id ?? "Sem contrato específico"],
+                  [
+                    "Contrato",
+                    order.contract_id
+                      ? `Contrato #${order.contract_id.slice(0, 8)}`
+                      : "Sem contrato específico",
+                  ],
                   [
                     "Protocolo de origem",
-                    order.ticket_id ?? "Sem protocolo vinculado",
+                    order.ticket_id
+                      ? `Atendimento #${order.ticket_id.slice(0, 8)}`
+                      : "Sem protocolo vinculado",
                   ],
                 ]}
               />

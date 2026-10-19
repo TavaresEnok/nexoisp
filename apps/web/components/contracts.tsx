@@ -17,7 +17,7 @@ import { ContractDetails } from "@/components/contract-details";
 import { contractMonthlyTotal, getCommercialData, type ServiceContract } from "@/lib/commercial";
 import { exportCsv, money } from "@/lib/format";
 import { filterContractCatalog } from "@/application/selectors/commercial";
-import { QueryBoundary } from "@/features/shared/feedback";
+import { QueryBoundary } from "@/components/query-boundary";
 import { contractViews } from "@/domain/view-states";
 
 export function Contracts() {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useNetworkFilters } from "@/lib/use-network-filters";
 import { useQueryState } from "@/lib/use-query-state";
 import Link from "@/platform/navigation/link";
@@ -8,7 +8,7 @@ import { Search, SlidersHorizontal, MapPin, ArrowUpRight, Radio, X, LocateOff, L
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { useWorkspace } from "@/components/workspace-provider";
+import { useWorkspace } from "@/features/workspace/context";
 import { NetworkQueryDialog } from "@/components/network-query-dialog";
 import { NetworkOnline } from "@/components/network-online";
 import { hasLocation, filterLabels, type NetworkFilters, type QueryKey } from "@/lib/network-query";
@@ -50,3 +50,21 @@ function NetworkMapExplorer() {
     {dialog && <NetworkQueryDialog open={dialog} onOpenChange={setDialog} filters={filters} subscribers={data.subscribers} map={map} onApply={value => { setFilters(value); setQuery(""); }} />}
   </section>;
 }
+
+// Moldura do mapa do v0 para camadas conectadas: cabeçalho, barra, tela, lista e rodapé.
+export function MapExplorerFrame({ description, actions, controls, toolbar, canvas, list, overlay, footer, children }: { description: string; actions?: ReactNode; controls?: ReactNode; toolbar: ReactNode; canvas: ReactNode; list?: ReactNode; overlay?: ReactNode; footer: ReactNode; children?: ReactNode }) {
+  return <section className={styles.page}>
+    <header className={styles.header}><div><p className={styles.overline}>RELATÓRIO <span>/</span> GEOLOCALIZAÇÃO</p><h1>Sua rede, no mapa.</h1><p>{description}</p></div><div className={styles.actions}>{actions}</div></header>
+    {controls}
+    <div className={styles.mapShell}>
+      <div className={styles.mapToolbar}>{toolbar}</div>
+      <div className={styles.mapCanvas}>{canvas}{list}{overlay}</div>
+      <footer className={styles.mapFooter}>{footer}</footer>
+    </div>
+    {children}
+  </section>;
+}
+export function MapListPanel({ heading, label, closeLabel, onClose, children }: { heading: string; label: string; closeLabel: string; onClose: () => void; children: ReactNode }) {
+  return <aside className={styles.mapList} aria-label={label}><div className={styles.listHeading}><strong>{heading}</strong><Button variant="ghost" size="icon-sm" aria-label={closeLabel} onClick={onClose}><X /></Button></div>{children}</aside>;
+}
+export const mapExplorerStyles = styles;

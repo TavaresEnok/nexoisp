@@ -4,7 +4,8 @@ import { z } from "zod";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Cable, Users, Workflow, Signal } from "lucide-react";
 import { PageHeading, Panel } from "@/components/workspace-ui";
-import { OpticalNavigation, OpticalMetrics } from "@/components/optical-ui";
+import { OpticalMetrics } from "@/components/optical-ui";
+import { OpticalPage } from "@/components/optical-network";
 import {
   ProfileSection,
   ProfileFacts,
@@ -117,20 +118,16 @@ export function FiberDirectory() {
       { replace: true },
     );
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeading
-        eyebrow="INFRAESTRUTURA · REDE / FTTx"
-        title="Caixas de terminação óptica"
-        description="Organização de caixas, portas e assinantes da rede FTTH."
-        actions={
-          write && (
-            <Button onClick={() => setEditor("create")}>
-              Nova caixa óptica
-            </Button>
-          )
-        }
-      />
-      <OpticalNavigation mode="cto" />
+    <OpticalPage
+      title="Caixas de terminação óptica"
+      description="Organização de caixas, portas e assinantes da rede FTTH."
+      mode="cto"
+      actions={
+        write && (
+          <Button onClick={() => setEditor("create")}>Nova caixa óptica</Button>
+        )
+      }
+    >
       <QueryBoundary
         loading={result.isLoading}
         error={result.error}
@@ -291,7 +288,7 @@ export function FiberDirectory() {
       {params.get("caixa") && (
         <BoxPorts id={params.get("caixa")!} onClose={close} />
       )}
-    </div>
+    </OpticalPage>
   );
 }
 function BoxEditor({

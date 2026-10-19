@@ -19,7 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { CodePreview } from "@/components/technical-ui";
 import { ProfileFacts } from "@/components/subscriber-profile-sections";
 import { RecordEditor } from "@/features/shared/record-editor";
 import { FormField } from "@/features/shared/form";
@@ -247,14 +247,10 @@ export function AgentDirectory() {
                 onFocus={(event) => event.currentTarget.select()}
               />
             </FormField>
-            <FormField label="Chave pública de assinatura">
-              <Textarea
-                readOnly
-                className="mono"
-                value={credential.signing_public_key}
-                onFocus={(event) => event.currentTarget.select()}
-              />
-            </FormField>
+            <CodePreview
+              title="Chave pública de assinatura"
+              code={credential.signing_public_key}
+            />
             <Button onClick={() => setCredential(null)}>
               Já guardei as credenciais
             </Button>

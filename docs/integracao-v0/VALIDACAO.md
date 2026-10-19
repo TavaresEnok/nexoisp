@@ -206,3 +206,19 @@ Checkpoint anterior: `97d47cc`; o aceite foi reaberto após a revisão e reconci
 TypeScript, 153 testes locais, estilo, build Vite/Node 22 e imagem Caddy passaram. A regressão cobriu os 26 cenários em dois segmentos: 14 iniciais e 12 restantes após corrigir o input de segundos zero no teste CGNAT. Foram acrescentadas 13 verificações compostas de navegação, alertas, capacidades comerciais, permissões, isolamento por provedor e módulos. A imagem final passou novamente nos 13 casos e nas seis comparações visuais operacionais, no mesmo contêiner de navegador da CI. Três comparações demonstrativas são idênticas à referência original. A contraprova com a imagem antiga falha no caso R01.
 
 A matriz atual registra 149 unidades validadas e 20 preservadas: 14 serviços internos, dois contratos externos e quatro limitações. Sem unidades de integração pendentes ou parciais, sem mudar o estado original das limitações do Go. Evidências, logs e hashes estão em [correcoes/resumo-tecnico.json](evidencias/correcoes/resumo-tecnico.json) e no fechamento atualizado. O backend do usuário não recebeu escritas de teste; não houve implantação externa ou execução da CI remota.
+
+## Fidelidade v0
+
+19/10/2026, depois da [adaptação dos componentes originais](FIDELIDADE-V0.md). Go/PostgreSQL descartáveis (API 18901, banco 15461, jobs desligados) e frontend gerado com `vite build`.
+
+| Verificação | Resultado |
+|---|---|
+| TypeScript, formatação e build Vite | Aprovados |
+| Testes locais do frontend | **163 aprovados**, incluindo as travas de fidelidade, isolamento da demonstração, retorno pós-login e os 420 nós do catálogo |
+| Fumaça operacional (26 cenários) | Aprovada em três segmentos: a primeira execução revelou a linha do tempo da ficha sem revalidação (corrigido) e um seletor antigo de paginação no teste de operações (atualizado); o CGNAT falhou uma vez pelo horário de borda já conhecido e passou ao repetir |
+| Demonstração contra o v0 original | **22 de 22 telas idênticas** por hash, comparadas com um build de `docs/novo-design-nexoISP`; `plano-configuracao` divergiu uma vez por estado transitório e foi idêntica em duas repetições ([evidência](evidencias/comparacao-visual-fidelidade.json)) |
+| Referências visuais operacionais | As seis referências foram regeneradas no contêiner canônico, revisadas e conferidas novamente sem atualização |
+| Go | `go vet` e testes de `leitura`, `auth` e `validate` aprovados; lista de assinantes conferida com ordenação, recusa de `order` inválido (400) e novas colunas no CSV |
+
+Limites: não houve execução da CI remota, homologação de equipamento nem publicação em servidor. O mapa operacional mantém seu próprio canvas Leaflet (o do v0 usa tiles ArcGIS fora da CSP de produção) dentro da moldura original.
+

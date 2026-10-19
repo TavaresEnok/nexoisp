@@ -57,7 +57,7 @@ import type { Ticket } from "@/lib/types";
 import { EmptyState, ContextCallout } from "@/components/workspace-feedback";
 import { cn } from "@/lib/utils";
 import styles from "./operations.module.css";
-import { QueryBoundary } from "@/features/shared/feedback";
+import { QueryBoundary } from "@/components/query-boundary";
 import { selectTickets } from "@/application/selectors/operations";
 
 export function Support() {

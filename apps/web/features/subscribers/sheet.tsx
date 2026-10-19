@@ -1,36 +1,40 @@
-import { useRef, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
-  Maximize2,
-  Minimize2,
-  Pencil,
-  ShieldCheck,
   ArrowUpRight,
-  Phone,
-  Mail,
-  FileText,
+  CircleDollarSign,
+  ClipboardList,
+  Download,
+  Headphones,
+  Network,
+  Pencil,
+  ShieldAlert,
+  ShieldCheck,
 } from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Status, PersonAvatar } from "@/components/workspace-ui";
+import { Status } from "@/components/workspace-ui";
 import {
-  ProfileSection,
+  FinancialTotals,
   ProfileFacts,
+  ProfileSection,
 } from "@/components/subscriber-profile-sections";
-import { EmptyState } from "@/components/workspace-feedback";
+import { SubscriberContractList } from "@/components/subscriber-contracts";
+import { HistoryTimeline } from "@/components/subscriber-history";
+import {
+  SubscriberExpandButton,
+  SubscriberOverview,
+  SubscriberSheetHeader,
+  SubscriberSheetTabs,
+} from "@/components/subscriber-sheet-parts";
 import { QueryBoundary } from "@/features/shared/feedback";
 import { can, hasModule } from "@/features/session/model";
 import { useSession } from "@/features/session/provider";
 import { readSubscriber } from "@/data/erp/subscribers";
-import { date, money } from "@/lib/format";
+import { api, erpClient } from "@/platform/erp-client";
+import { date, exportCsv, money } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { SubscriberEditor } from "./form";
 import { CreateContract } from "@/features/contracts/create";
@@ -40,6 +44,34 @@ import { LazySubscriberTickets } from "@/features/crm/lazy";
 import { LazyContractService } from "@/features/network/lazy";
 import { SubscriberSections } from "./sections";
 import { SubscriberAlerts } from "./notes";
+import type { SubscriberDetail } from "./model";
+
+type ContractInvoice = {
+  status: "open" | "paid" | "canceled" | "reconciling";
+  overdue: boolean;
+  amount_cents: number;
+  paid_cents: number;
+  due_date: string;
+};
+type AccessState = {
+  commercial: { state: string; credit_restricted_at: string | null };
+  access: { state: string };
+};
+type TimelineEvent = {
+  kind: string;
+  title: string;
+  detail?: string;
+  at: string;
+  by?: string;
+  contract_id?: string;
+};
+
+const accessLabel: Record<string, string> = {
+  active: "Ativo",
+  blocked: "Bloqueado",
+  no_account: "Não provisionado",
+};
+
 export function OperationalSubscriberSheet() {
   const [params, setParams] = useSearchParams();
   const id = params.get("ficha");
@@ -82,6 +114,33 @@ export function OperationalSubscriberSheet() {
     </Sheet>
   );
 }
+
+async function count(path: string) {
+  const response = await erpClient.request<unknown>(path);
+  if (response.total === null)
+    throw new Error("O servidor não informou a contagem de registros.");
+  return response.total;
+}
+
+function contractAddress(
+  contract: SubscriberDetail["contracts"][number],
+  subscriber: SubscriberDetail,
+) {
+  const own = [contract.install_street, contract.install_number]
+    .filter(Boolean)
+    .join(", ");
+  if (own)
+    return [own, contract.install_district, contract.install_city]
+      .filter(Boolean)
+      .join(" · ");
+  const registered = [subscriber.address_street, subscriber.address_number]
+    .filter(Boolean)
+    .join(", ");
+  return registered
+    ? `${registered} · endereço cadastral`
+    : "Endereço de instalação não informado";
+}
+
 function SubscriberDetails({
   id,
   expanded,
@@ -96,22 +155,68 @@ function SubscriberDetails({
   const [params, setParams] = useSearchParams();
   const [editing, setEditing] = useState(false);
   const [creatingContract, setCreatingContract] = useState(false);
-  const scroll = useRef<HTMLDivElement>(null);
   const { mutate } = useSWRConfig();
   const subscriber = useSWR(["erp-subscriber", id], ([, id]) =>
     readSubscriber(id),
   );
   const s = subscriber.data;
+  const finance = can(me, "finance:read");
+  const network = can(me, "network:read");
+  const crm = can(me, "crm:read") && hasModule(me, "crm");
+  const field = can(me, "os:read") && hasModule(me, "field");
+  const contractIds = s?.contracts.map((contract) => contract.id) ?? [];
+  const activeContracts =
+    s?.contracts.filter((contract) => contract.status === "active") ?? [];
+  const invoices = useSWR(
+    s && finance && contractIds.length
+      ? ["erp-contract-finance", "subscriber", ...contractIds]
+      : null,
+    async () =>
+      (
+        await Promise.all(
+          contractIds.map((contractId) =>
+            api<{ invoices: ContractInvoice[] }>(
+              `/contracts/${contractId}/finance`,
+            ),
+          ),
+        )
+      ).flatMap((result) => result.invoices),
+  );
+  const states = useSWR(
+    s && activeContracts.length
+      ? [
+          "erp-contract-states",
+          "subscriber",
+          ...activeContracts.map((c) => c.id),
+        ]
+      : null,
+    async () =>
+      Promise.all(
+        activeContracts.map((contract) =>
+          api<AccessState>(`/contracts/${contract.id}/states`),
+        ),
+      ),
+  );
+  const openTickets = useSWR(crm ? ["erp-tickets", "count", id] : null, () =>
+    count(
+      `/tickets?${new URLSearchParams({ subscriber_id: id, status: "pending" })}&limit=1`,
+    ),
+  );
+  const openOrders = useSWR(field ? ["erp-orders", "count", id] : null, () =>
+    count(
+      `/work-orders?${new URLSearchParams({ subscriber_id: id, status: "pending" })}&limit=1`,
+    ),
+  );
+  const timeline = useSWR(s ? ["erp-timeline", id] : null, ([, id]) =>
+    api<TimelineEvent[]>(`/subscribers/${id}/timeline`),
+  );
   const tabs = [
     ["resumo", "Visão geral"],
     ["cadastro", "Cadastro"],
     ["contrato", "Contratos"],
-    ...(can(me, "finance:read") ? [["financeiro", "Financeiro"]] : []),
-    ...(can(me, "network:read") ? [["conexao", "Conexão"]] : []),
-    ...((can(me, "crm:read") && hasModule(me, "crm")) ||
-    (can(me, "os:read") && hasModule(me, "field"))
-      ? [["atendimento", "Atendimento e OS"]]
-      : []),
+    ...(finance ? [["financeiro", "Financeiro"]] : []),
+    ...(network ? [["conexao", "Conexão"]] : []),
+    ...(crm || field ? [["atendimento", "Atendimento e OS"]] : []),
     ["documentos", "Documentos e privacidade"],
     ["historico", "Histórico"],
   ];
@@ -129,50 +234,176 @@ function SubscriberDetails({
       },
       { replace: true },
     );
-  useLayoutEffect(() => {
-    const selected = scroll.current?.querySelector<HTMLElement>(
-      '[data-slot="tabs-trigger"][data-active]',
-    );
-    selected?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  const revalidateSummary = () =>
+    Promise.all([
+      timeline.mutate(),
+      invoices.mutate(),
+      states.mutate(),
+      openTickets.mutate(),
+      openOrders.mutate(),
+    ]);
+  // Ações nas abas geram eventos e mudam totais; cada troca de aba relê o resumo.
+  useEffect(() => {
+    void revalidateSummary();
   }, [tab]);
   const refresh = async () => {
     await Promise.all([
       subscriber.mutate(),
       mutate((key) => Array.isArray(key) && key[0] === "erp-subscribers"),
+      revalidateSummary(),
     ]);
   };
-  const months =
-    s?.contracts
-      .filter((contract) => contract.status === "active")
-      .reduce((sum, contract) => sum + contract.price_cents, 0) ?? 0;
+  const remaining = (invoice: ContractInvoice) =>
+    Math.max(0, invoice.amount_cents - invoice.paid_cents);
+  const sum = (rows: ContractInvoice[], value = remaining) =>
+    rows.reduce((total, invoice) => total + value(invoice), 0);
+  const rows = invoices.data ?? [];
+  const overdue = rows.filter((i) => i.status === "open" && i.overdue);
+  const pending = rows.filter((i) => i.status === "open" && !i.overdue);
+  const reconciling = rows.filter((i) => i.status === "reconciling");
+  const paid = rows.filter((i) => i.status === "paid");
+  const overdueCents = sum(overdue);
+  const oldestOverdue = overdue.map((i) => i.due_date).sort()[0];
+  const overdueDays = oldestOverdue
+    ? Math.max(
+        0,
+        Math.floor(
+          (Date.now() -
+            new Date(
+              `${oldestOverdue.slice(0, 10)}T00:00:00-03:00`,
+            ).getTime()) /
+            86400000,
+        ),
+      )
+    : 0;
+  const monthly =
+    activeContracts.reduce(
+      (total, contract) => total + contract.price_cents,
+      0,
+    ) / 100;
+  const accessStates = states.data ?? [];
+  const blocked = accessStates.filter(
+    (state) => state.access.state === "blocked",
+  );
+  const unprovisioned = accessStates.filter(
+    (state) => state.access.state === "no_account",
+  );
+  const restricted = accessStates.filter(
+    (state) => state.commercial.state === "credit_restricted",
+  );
+  const exportProfile = () =>
+    s &&
+    exportCsv(
+      `nexo-ficha-${s.id.slice(0, 8)}`,
+      [
+        "Código",
+        "Nome",
+        "Documento",
+        "E-mail",
+        "Telefone",
+        "Endereço",
+        "Bairro",
+        "Cidade",
+        "Contratos vigentes",
+        "Planos",
+        "Mensalidade base",
+        "Situação cadastral",
+      ],
+      [
+        [
+          s.id,
+          s.name,
+          s.document ?? "",
+          s.email ?? "",
+          s.phone ?? "",
+          [s.address_street, s.address_number].filter(Boolean).join(", "),
+          s.address_district ?? "",
+          [s.address_city, s.address_state].filter(Boolean).join(" / "),
+          activeContracts.length,
+          activeContracts.map((contract) => contract.plan_name).join("; "),
+          monthly,
+          s.status === "active" ? "Ativo" : "Inativo",
+        ],
+      ],
+    );
+  const contractList = s && (
+    <SubscriberContractList
+      count={s.contracts.length}
+      total={monthly}
+      totalLabel="Mensalidade base dos contratos vigentes"
+      empty="O titular ainda não possui contratos."
+      onConsult={() =>
+        navigate(`/contratos?busca=${encodeURIComponent(s.name)}`)
+      }
+      contracts={s.contracts.map((contract) => ({
+        id: contract.id,
+        title: `${contract.plan_name} · ${contract.id.slice(0, 8)}`,
+        status: contract.status === "active" ? "Vigente" : "Encerrado",
+        plan: `${contract.plan_name} v${contract.plan_version} · ${contract.down_kbps / 1000} / ${contract.up_kbps / 1000} Mbps`,
+        address: contractAddress(contract, s),
+        monthly: contract.price_cents / 100,
+        dueDay: contract.due_day,
+        action: (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate(`/contratos/${contract.id}`)}
+          >
+            Abrir contrato
+            <ArrowUpRight data-icon="inline-end" />
+          </Button>
+        ),
+      }))}
+    />
+  );
   return (
     <>
-      <SheetHeader className="subscriber-sheet-header">
-        <div className="eyebrow">
-          FICHA DO ASSINANTE <span className="mono">#{id.slice(0, 8)}</span>
-        </div>
-        <div className="subscriber-identity">
-          <PersonAvatar name={s?.name ?? "Assinante"} />
-          <div>
-            <SheetTitle>{s?.name ?? "Carregando assinante…"}</SheetTitle>
-            <SheetDescription>
-              {s
-                ? `${s.contracts.length} contrato(s) · Cliente desde ${date(s.created_at)}`
-                : "Consulta ao cadastro do provedor"}
-            </SheetDescription>
-          </div>
-        </div>
-        {s && (
-          <div className="subscriber-statuses">
-            <Status value={s.status === "active" ? "Ativo" : "Inativo"} />
-            <span className="subscriber-context">
-              <ShieldCheck size={13} />
-              Cadastro conectado ao ERP
-            </span>
-          </div>
-        )}
-      </SheetHeader>
+      {s ? (
+        <SubscriberSheetHeader
+          code={id.slice(0, 8)}
+          name={s.name}
+          description={[
+            `${s.contracts.length} contrato(s)`,
+            `Cliente desde ${date(s.created_at)}`,
+            s.address_district || s.address_city,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+          statuses={[s.status === "active" ? "Ativo" : "Inativo"]}
+          context="Cadastro conectado ao ERP"
+        />
+      ) : (
+        <SubscriberSheetHeader
+          code={id.slice(0, 8)}
+          name={
+            subscriber.error
+              ? "Assinante não encontrado"
+              : "Carregando assinante…"
+          }
+          description="Consulta ao cadastro do provedor"
+          statuses={[]}
+          context="Cadastro conectado ao ERP"
+        />
+      )}
       <div className="subscriber-quick-actions">
+        {s && crm && (
+          <Button
+            variant="outline"
+            onClick={() =>
+              navigate(`/atendimentos?busca=${encodeURIComponent(s.name)}`)
+            }
+          >
+            <Headphones data-icon="inline-start" />
+            Atendimentos
+            <ArrowUpRight data-icon="inline-end" />
+          </Button>
+        )}
+        {s && (
+          <Button variant="outline" onClick={exportProfile}>
+            <Download data-icon="inline-start" />
+            Exportar ficha
+          </Button>
+        )}
         {s && s.status === "active" && can(me, "contracts:write") && (
           <Button variant="outline" onClick={() => setCreatingContract(true)}>
             Novo contrato
@@ -180,14 +411,11 @@ function SubscriberDetails({
         )}
         {s && can(me, "subscribers:write") && !s.anonymized_at && (
           <Button variant="outline" onClick={() => setEditing(true)}>
-            <Pencil />
+            <Pencil data-icon="inline-start" />
             Editar cadastro
           </Button>
         )}
-        <Button variant="ghost" className="profile-expand" onClick={onExpand}>
-          {expanded ? <Minimize2 /> : <Maximize2 />}
-          {expanded ? "Recolher ficha" : "Ampliar ficha"}
-        </Button>
+        <SubscriberExpandButton expanded={expanded} onExpand={onExpand} />
       </div>
       {s && <SubscriberAlerts id={id} />}
       <QueryBoundary
@@ -196,100 +424,208 @@ function SubscriberDetails({
         retry={() => subscriber.mutate()}
       >
         {s && (
-          <Tabs
-            className="subscriber-tabs"
+          <SubscriberSheetTabs
             value={tab}
-            onValueChange={(value) => setTab(String(value))}
+            onChange={setTab}
+            tabs={tabs.map(([value, label]) => ({
+              value,
+              label,
+              alert: value === "financeiro" && overdue.length > 0,
+              count:
+                value === "atendimento" && openTickets.data
+                  ? openTickets.data
+                  : undefined,
+            }))}
           >
-            <div ref={scroll} className="profile-tab-scroll">
-              <TabsList
-                variant="line"
-                aria-label="Seções da ficha do assinante"
-              >
-                {tabs.map(([value, label]) => (
-                  <TabsTrigger key={value} value={value}>
-                    {label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </div>
             <TabsContent value="resumo">
-              <div className="sheet-content-body">
-                <div className="profile-kpis">
-                  <button onClick={() => setTab("contrato")}>
-                    <span>Mensalidade dos contratos vigentes</span>
-                    <strong>{money(months / 100)}</strong>
-                    <small>
-                      Condições comerciais dos contratos
-                      <ArrowUpRight size={12} />
-                    </small>
-                  </button>
-                  <button onClick={() => setTab("contrato")}>
-                    <span>Contratos do titular</span>
-                    <strong>{s.contracts.length}</strong>
-                    <small>
-                      {
-                        s.contracts.filter(
-                          (contract) => contract.status === "active",
-                        ).length
-                      }{" "}
-                      vigente(s)
-                      <ArrowUpRight size={12} />
-                    </small>
-                  </button>
-                </div>
-                <div className="profile-two-columns">
-                  <ProfileSection
-                    title="Contato e endereço cadastral"
-                    caption="Informações principais do titular."
-                  >
-                    <div className="profile-contact-links">
-                      {s.phone && (
-                        <a href={`tel:${s.phone.replace(/[^+\d]/g, "")}`}>
-                          <Phone size={15} />
-                          {s.phone}
-                        </a>
-                      )}
-                      {s.email && (
-                        <a href={`mailto:${s.email}`}>
-                          <Mail size={15} />
-                          {s.email}
-                        </a>
-                      )}
-                    </div>
-                    <ProfileFacts
-                      items={[
-                        ["Documento", s.document || "—"],
-                        [
-                          "Endereço",
-                          [s.address_street, s.address_number]
-                            .filter(Boolean)
-                            .join(", ") || "—",
-                        ],
-                        ["Bairro", s.address_district || "—"],
-                        [
-                          "Cidade/UF",
-                          [s.address_city, s.address_state]
-                            .filter(Boolean)
-                            .join(" / ") || "—",
-                        ],
-                      ]}
-                    />
-                  </ProfileSection>
-                  <ContractCards subscriber={s} navigate={navigate} />
-                </div>
-              </div>
+              <SubscriberOverview
+                kpis={[
+                  {
+                    label: "Mensalidade total do titular",
+                    value: money(monthly),
+                    detail: `${activeContracts.length} contrato(s) · vigentes`,
+                    onClick: () => setTab("contrato"),
+                  },
+                  {
+                    label: "Saldo vencido registrado",
+                    value: finance
+                      ? invoices.data
+                        ? money(overdueCents / 100)
+                        : "…"
+                      : "—",
+                    danger: overdueCents > 0,
+                    detail: !finance
+                      ? "Disponível para perfis financeiros"
+                      : overdue.length
+                        ? `${overdue.length} título(s) · até ${overdueDays} dias`
+                        : "Sem títulos vencidos registrados",
+                    onClick: finance ? () => setTab("financeiro") : undefined,
+                  },
+                  {
+                    label: "Atendimentos em aberto",
+                    value: crm
+                      ? String(openTickets.data ?? 0).padStart(2, "0")
+                      : "—",
+                    detail: crm
+                      ? "Pendentes neste titular"
+                      : "Módulo de atendimento indisponível",
+                    onClick:
+                      crm || field ? () => setTab("atendimento") : undefined,
+                  },
+                  {
+                    label: "Ordens de serviço pendentes",
+                    value: field
+                      ? String(openOrders.data ?? 0).padStart(2, "0")
+                      : "—",
+                    detail: field
+                      ? "Pendentes neste titular"
+                      : "Módulo de campo indisponível",
+                    onClick:
+                      crm || field ? () => setTab("atendimento") : undefined,
+                  },
+                ]}
+                attention={[
+                  ...(blocked.length
+                    ? [
+                        {
+                          icon: Network,
+                          title: `${blocked.length} contrato(s) com acesso bloqueado`,
+                          detail:
+                            "Estado desejado registrado no ERP. Confira causa e confirmação no equipamento.",
+                          onClick: () =>
+                            setTab(network ? "conexao" : "contrato"),
+                        },
+                      ]
+                    : []),
+                  ...(overdue.length
+                    ? [
+                        {
+                          icon: CircleDollarSign,
+                          title: `${money(overdueCents / 100)} em títulos vencidos`,
+                          detail:
+                            "Confira as cobranças antes de tratar uma suspensão como falha técnica.",
+                          onClick: () => setTab("financeiro"),
+                        },
+                      ]
+                    : []),
+                  ...(restricted.length
+                    ? [
+                        {
+                          icon: ShieldAlert,
+                          title: "Restrição de crédito registrada",
+                          detail:
+                            "A restrição é comercial e não bloqueia o acesso por si.",
+                          onClick: () => setTab("contrato"),
+                        },
+                      ]
+                    : []),
+                  ...(unprovisioned.length
+                    ? [
+                        {
+                          icon: ClipboardList,
+                          title: `${unprovisioned.length} contrato(s) sem acesso provisionado`,
+                          detail:
+                            "Confira a OS de instalação e o provisionamento do acesso.",
+                          onClick: () =>
+                            setTab(field || crm ? "atendimento" : "contrato"),
+                        },
+                      ]
+                    : []),
+                ]}
+                contracts={contractList}
+                contact={{
+                  phone: s.phone,
+                  email: s.email,
+                  caption: "Informação útil no primeiro atendimento.",
+                  facts: [
+                    [
+                      "Endereço",
+                      [s.address_street, s.address_number]
+                        .filter(Boolean)
+                        .join(", ") || "—",
+                    ],
+                    ["Bairro", s.address_district || "—"],
+                    ["Documento", s.document || "—"],
+                    [
+                      "Cidade / UF",
+                      [s.address_city, s.address_state]
+                        .filter(Boolean)
+                        .join(" / ") || "—",
+                    ],
+                  ],
+                  onOpen: () => setTab("cadastro"),
+                }}
+                technical={{
+                  caption:
+                    "Estado de acesso registrado no ERP para os contratos vigentes.",
+                  facts: [
+                    [
+                      "Acesso registrado",
+                      accessStates.length ? (
+                        <Status
+                          key="access"
+                          value={
+                            accessLabel[accessStates[0].access.state] ??
+                            accessStates[0].access.state
+                          }
+                        />
+                      ) : activeContracts.length ? (
+                        "Consultando…"
+                      ) : (
+                        "Sem contrato vigente"
+                      ),
+                    ],
+                    [
+                      "Contratos liberados",
+                      accessStates.length
+                        ? `${accessStates.filter((state) => state.access.state === "active").length} de ${accessStates.length}`
+                        : "—",
+                    ],
+                    [
+                      "Velocidade contratada",
+                      activeContracts[0]
+                        ? `${activeContracts[0].down_kbps / 1000} / ${activeContracts[0].up_kbps / 1000} Mbps`
+                        : "—",
+                    ],
+                    ["Plano principal", activeContracts[0]?.plan_name ?? "—"],
+                  ],
+                  footnote:
+                    "É a intenção registrada no ERP. A confirmação no equipamento fica na aba Conexão.",
+                  onOpen: network ? () => setTab("conexao") : undefined,
+                }}
+                recent={{
+                  items: (timeline.data ?? [])
+                    .slice(0, 3)
+                    .map((event, index) => ({
+                      id: `${event.at}-${index}`,
+                      title: event.title,
+                      description: event.detail,
+                      meta: `${date(event.at)} · ${event.by ?? "Sistema"}`,
+                    })),
+                  loading: timeline.isLoading,
+                  empty: timeline.error
+                    ? "Não foi possível consultar os eventos."
+                    : "Nenhum evento registrado.",
+                  onAll: () => setTab("historico"),
+                }}
+                footnote="Resumo dos registros do ERP conforme suas permissões. Não é monitoramento em tempo real."
+              />
             </TabsContent>
             <TabsContent value="cadastro">
               <div className="sheet-content-body">
                 <div className="profile-two-columns">
-                  <ProfileSection title="Identificação e contato">
+                  <ProfileSection
+                    title="Identificação e contato"
+                    caption="Dados do titular disponíveis no cadastro."
+                  >
                     <ProfileFacts
                       items={[
                         ["Nome / Razão social", s.name],
-                        ["CPF/CNPJ", s.document || "—"],
-                        ["E-mail", s.email || "—"],
-                        ["Telefone", s.phone || "—"],
+                        ["CPF / CNPJ", s.document || "—"],
+                        ["Código do assinante", s.id.slice(0, 8)],
+                        ["Cliente desde", date(s.created_at)],
+                        ["E-mail principal", s.email || "—"],
+                        ["Telefone principal", s.phone || "—"],
                         [
                           "Nascimento / abertura",
                           s.birth_date ? date(s.birth_date) : "—",
@@ -304,7 +640,10 @@ function SubscriberDetails({
                       ]}
                     />
                   </ProfileSection>
-                  <ProfileSection title="Endereço cadastral">
+                  <ProfileSection
+                    title="Endereço cadastral"
+                    caption="Endereço do titular; cada contrato pode ter o seu."
+                  >
                     <ProfileFacts
                       items={[
                         ["Logradouro", s.address_street || "—"],
@@ -327,17 +666,52 @@ function SubscriberDetails({
             </TabsContent>
             <TabsContent value="contrato">
               <div className="sheet-content-body">
-                <ContractCards subscriber={s} navigate={navigate} />
+                {contractList}
+                <p className="profile-footnote">
+                  Fidelidade, descontos, adicionais e aceite ficam na ficha de
+                  cada contrato.
+                </p>
               </div>
             </TabsContent>
-            {can(me, "finance:read") && (
+            {finance && (
               <TabsContent value="financeiro">
                 <div className="sheet-content-body">
+                  <QueryBoundary
+                    loading={invoices.isLoading}
+                    error={invoices.error}
+                    retry={() => invoices.mutate()}
+                  >
+                    <FinancialTotals
+                      items={[
+                        [
+                          "Vencido",
+                          money(overdueCents / 100),
+                          `${overdue.length} título(s)`,
+                        ],
+                        [
+                          "A vencer",
+                          money(sum(pending) / 100),
+                          `${pending.length} título(s)`,
+                        ],
+                        [
+                          "Em conciliação",
+                          money(sum(reconciling) / 100),
+                          "Baixa não confirmada",
+                        ],
+                        [
+                          "Pago nos títulos listados",
+                          money(sum(paid, (i) => i.paid_cents) / 100),
+                          `${paid.length} título(s)`,
+                        ],
+                      ]}
+                    />
+                  </QueryBoundary>
                   {s.contracts.length ? (
                     s.contracts.map((contract) => (
                       <ProfileSection
                         key={contract.id}
                         title={`${contract.plan_name} · ${contract.id.slice(0, 8)}`}
+                        caption="Títulos, acordos e liberação por confiança deste contrato."
                       >
                         <ContractFinance id={contract.id} />
                       </ProfileSection>
@@ -347,22 +721,22 @@ function SubscriberDetails({
                       O titular ainda não possui contratos.
                     </p>
                   )}
+                  <p className="profile-footnote">
+                    Pagamento em conciliação não é considerado recebido. Multa,
+                    juros e saldo devido são calculados pelo servidor.
+                  </p>
                 </div>
               </TabsContent>
             )}
-            {(can(me, "crm:read") || can(me, "os:read")) && (
+            {(crm || field) && (
               <TabsContent value="atendimento">
                 <div className="sheet-content-body erp-stack">
-                  {can(me, "crm:read") && hasModule(me, "crm") && (
-                    <LazySubscriberTickets id={s.id} />
-                  )}
-                  {can(me, "os:read") && hasModule(me, "field") && (
-                    <LazyLinkedOrders subscriberId={s.id} />
-                  )}
+                  {crm && <LazySubscriberTickets id={s.id} />}
+                  {field && <LazyLinkedOrders subscriberId={s.id} />}
                 </div>
               </TabsContent>
             )}
-            {can(me, "network:read") && (
+            {network && (
               <TabsContent value="conexao">
                 <div className="sheet-content-body erp-stack">
                   {s.contracts.length ? (
@@ -393,16 +767,52 @@ function SubscriberDetails({
             </TabsContent>
             <TabsContent value="historico">
               <div className="sheet-content-body">
-                <SubscriberSections
-                  subscriber={s}
-                  section="historico"
-                  refresh={refresh}
-                />
+                <ProfileSection
+                  title="Histórico e marcos do assinante"
+                  caption="Do mais recente ao mais antigo: contrato, rede, fatura, pagamento, OS e atendimento, conforme suas permissões."
+                >
+                  <QueryBoundary
+                    loading={timeline.isLoading}
+                    error={timeline.error}
+                    retry={() => timeline.mutate()}
+                  >
+                    <HistoryTimeline
+                      entries={(timeline.data ?? [])
+                        .slice(0, 80)
+                        .map((event, index) => ({
+                          id: `${event.at}-${index}`,
+                          title: event.title,
+                          description: event.detail,
+                          at: event.at,
+                          instant: true,
+                          meta: ` · ${event.by ?? "Sistema"}`,
+                          action: event.contract_id ? (
+                            <a
+                              className="profile-text-action"
+                              href={`/contratos/${event.contract_id}`}
+                            >
+                              Abrir contrato
+                            </a>
+                          ) : undefined,
+                        }))}
+                    />
+                    {!timeline.data?.length && (
+                      <p className="profile-footnote">
+                        Nenhum evento disponível.
+                      </p>
+                    )}
+                  </QueryBoundary>
+                </ProfileSection>
               </div>
             </TabsContent>
-          </Tabs>
+          </SubscriberSheetTabs>
         )}
       </QueryBoundary>
+      <div className="sheet-bottom-note">
+        <ShieldCheck size={13} />
+        Dados do provedor conforme suas permissões · equipamentos não são
+        consultados automaticamente
+      </div>
       {creatingContract && (
         <CreateContract
           subscriberId={id}
@@ -425,54 +835,5 @@ function SubscriberDetails({
         />
       )}
     </>
-  );
-}
-function ContractCards({
-  subscriber,
-  navigate,
-}: {
-  subscriber: import("./model").SubscriberDetail;
-  navigate: (path: string) => void;
-}) {
-  return (
-    <ProfileSection
-      title="Contratos do titular"
-      caption="Cada contrato preserva sua versão, preço e vencimento."
-    >
-      {!subscriber.contracts.length && (
-        <EmptyState icon={FileText} title="Nenhum contrato cadastrado" />
-      )}
-      {subscriber.contracts.map((contract) => (
-        <div key={contract.id} className="erp-contract-card">
-          <header>
-            <strong>
-              {contract.plan_name} <small>v{contract.plan_version}</small>
-            </strong>
-            <Status
-              value={contract.status === "active" ? "Vigente" : "Encerrado"}
-            />
-          </header>
-          <ProfileFacts
-            items={[
-              [
-                "Velocidade",
-                `${contract.down_kbps / 1000} / ${contract.up_kbps / 1000} Mbps`,
-              ],
-              ["Mensalidade", money(contract.price_cents / 100)],
-              ["Vencimento", `Dia ${contract.due_day}`],
-              ["Início", date(contract.start_date)],
-            ]}
-          />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate(`/contratos/${contract.id}`)}
-          >
-            Abrir contrato
-            <ArrowUpRight />
-          </Button>
-        </div>
-      ))}
-    </ProfileSection>
   );
 }

@@ -62,7 +62,7 @@ function TicketListing({ subscriberId }: { subscriberId?: string }) {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const [creating, setCreating] = useState(false);
-  const { page, setPage } = useUrlPage();
+  const { page, setPage, size, setSize } = useUrlPage();
   const embedded = Boolean(subscriberId);
   const statusLabel =
     params.get("situacao") ??
@@ -87,7 +87,7 @@ function TicketListing({ subscriberId }: { subscriberId?: string }) {
     ...(subscriber ? { subscriber_id: subscriber } : {}),
     ...(!embedded && params.get("meus") === "1" ? { mine: "1" } : {}),
   });
-  const path = `/tickets?${filters}&limit=8&offset=${embedded ? 0 : page * 8}`;
+  const path = `/tickets?${filters}&limit=${embedded ? 8 : size}&offset=${embedded ? 0 : page * size}`;
   const result = useSWR(
     ["erp-tickets", path],
     async ([, path]) => {
@@ -186,6 +186,8 @@ function TicketListing({ subscriberId }: { subscriberId?: string }) {
             <ServerPager
               page={page}
               setPage={setPage}
+              size={size}
+              setSize={setSize}
               total={result.data?.total ?? 0}
               loading={result.isLoading}
             />

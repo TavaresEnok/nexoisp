@@ -45,7 +45,7 @@ import { FieldOrderBoard } from "@/components/field-order-board";
 import { cn } from "@/lib/utils";
 import styles from "./operations.module.css";
 import { selectOrders } from "@/application/selectors/operations";
-import { QueryBoundary } from "@/features/shared/feedback";
+import { QueryBoundary } from "@/components/query-boundary";
 import type { WorkOrderSubscriber } from "@/lib/work-order-print";
 import { fieldOrderViews } from "@/domain/view-states";
 
