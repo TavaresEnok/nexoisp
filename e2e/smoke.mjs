@@ -6,3 +6,4 @@ await import('./frontend-v0-session.mjs');
 await import('./frontend-v0-commercial.mjs');
 await import('./frontend-v0-finance.mjs');
 await import('./frontend-v0-crm.mjs');
+await import('./frontend-v0-field.mjs');

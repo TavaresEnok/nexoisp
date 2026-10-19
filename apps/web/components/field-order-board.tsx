@@ -74,7 +74,7 @@ export function FieldOrderBoard({
                         <span className={styles.orderTitle}>{order.type}</span>
                         <span className={styles.orderName}>{order.name}</span>
                         <span className={styles.orderLocation}><MapPin size={12} aria-hidden="true" />{order.neighborhood}</span>
-                        <Status value={order.status} />
+                        <Status value={order.status} />{order.late && <Badge variant="warning">Agendamento vencido</Badge>}
                         <span className={styles.orderBottom}>
                           <PersonAvatar name={order.technician} small />
                           <span>{order.technician}</span>

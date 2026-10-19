@@ -83,3 +83,20 @@ A fila e a ficha de atendimento usam os componentes originais `Support`/`TicketD
 - O módulo CRM foi verificado no servidor de desenvolvimento. A evidência da imagem de produção acima continua referente ao checkpoint comercial/financeiro.
 
 A operação completa de OS, auxiliares, materiais, estoque e agenda ainda está em implementação. Criar uma OS pelo protocolo não comprova esses módulos e não encerra a etapa 6.
+
+## Incremento de OS e agenda — 19 de outubro de 2026
+
+O quadro, a lista e o diálogo de OS usam os componentes originais `FieldOperations`, `FieldOrderBoard` e `ServiceOrderDetails`, extraídos para receber os registros operacionais. Agenda, Meu trabalho e os controles adicionais usam os componentes, fontes e tokens do v0. A referência original e os componentes básicos de UI continuam preservados.
+
+- TypeScript e build aprovados; 150 testes locais aprovados. O teste Go de filtros de OS passou, incluindo UUID inválido e precedência de `mine=1`.
+- Quatorze comparações visuais com capturas idênticas (28 capturas), incluindo quadro e ficha demonstrativos de OS.
+- Dezoito verificações compostas de OS aprovadas em desenvolvimento e na imagem de produção: criação e endereço específico; atribuição/agendamento e horário local; agenda com sobreposição/janelas/fila de espera; Meu trabalho no celular; fichas de assinante e contrato; auxiliares/checklist; rejeição de saída sem saldo e devolução excessiva; material/devolução/kit; instalação por série; espera/reagendamento/deslocamento/execução/conclusão; ficha A4 sem notas internas; filtro por responsável/CSV; cancelamento; paginação/busca; falha operacional sem seeds; comodato a recolher; perfis; isolamento entre provedores.
+- O checklist mostra a marcação durante a gravação e restaura o estado anterior se o servidor rejeitar a alteração. OS finalizada oculta controles de execução, equipe e consumo; anotações posteriores continuam permitidas conforme o Go.
+- A lista pagina oito registros no servidor. As fichas consultam até oito OS do vínculo, respeitando a ordenação do Go, e oferecem acesso à lista completa. A agenda usa o fuso do provedor e as janelas calculadas no backend. Meu trabalho consulta até 50 OS pendentes do usuário e atualiza a cada 30 segundos; exige conexão.
+- A ficha imprimível informa o contrato e distingue o endereço do serviço do cadastro do titular. Não inclui descrição e notas internas nem presume plano, velocidade, anexos ou assinatura eletrônica ausentes.
+- O filtro opcional `assignee_id` foi acrescentado à leitura Go de OS, reutilizando o mesmo SQL, contagem, autorização e isolamento existentes. `mine=1` mantém precedência. Não houve alteração de migrations ou regras comerciais.
+- A imagem foi construída com Node 22/Caddy e verificada localmente em `http://127.0.0.1:18390`, contra Go/PostgreSQL isolados e somente dados sintéticos. Os cenários não detectaram erros de execução ou de CSP; a política original foi mantida. Isso não representa publicação no ambiente operacional do usuário.
+
+Evidências: `evidencias/integracao-os.json`, `evidencias/producao-os.json`, `evidencias/os-conectada-desktop.png` e `evidencias/meu-trabalho-conectado-celular.png`. O CRM também foi revalidado após os novos acessos nas fichas; o resultado de produção é registrado em `evidencias/producao-crm.json`.
+
+A instalação e o alerta de comodato a recolher foram validados. O catálogo completo de estoque, distribuição, retirada, defeito, conserto, baixa e histórico de unidades continuam pendentes (OS-11–14). O cartão de equipamentos permanece parcial até a integração do recolhimento efetivo. A etapa 6 continua em andamento e a etapa 7 permanece pendente.

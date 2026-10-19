@@ -48,6 +48,8 @@ export type Ticket = {
   sla: string;
 };
 export type WorkOrder = {
+  assigneeId?: string | null;
+  late?: boolean;
   id: string;
   code: number;
   subscriberId: string;

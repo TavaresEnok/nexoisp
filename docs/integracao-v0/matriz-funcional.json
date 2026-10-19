@@ -435,7 +435,8 @@
     "integrationState": "partial",
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
-      "Consulta e estado vazio integrados; unidades instaladas e recolhimento serão validados com OS/estoque."
+      "e2e/frontend-v0-field.mjs",
+      "Consulta de unidade instalada e alerta de comodato a recolher validados. Retirada efetiva ainda depende da integração do estoque (OS-14)."
     ]
   },
   {
@@ -656,8 +657,12 @@
     "behavior": "Busca nome/descrição/número, situação/pendentes/todos, só as minhas; subscriber_id/contract_id nas fichas; paginação; destaca agendamento vencido. Modal compartilhado acessível da agenda e Meu trabalho.",
     "endpoints": "GET /api/work-orders; GET /api/work-orders/:id",
     "evidence": "P/Field.tsx; L/grupos.go; L/paged.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-field.mjs",
+      "evidencias/integracao-os.json",
+      "evidencias/producao-os.json"
+    ]
   },
   {
     "id": "OS-02",
@@ -667,10 +672,12 @@
     "behavior": "Natureza instalação/reparo/mudança/retirada/outro; assinante, contrato/ticket opcionais; técnico, agendamento, motivo, duração 5–1440 min, descrição; endereço do cadastro/contrato/manual. Registra evento, SLA e avisos quando aplicáveis.",
     "endpoints": "POST /api/work-orders",
     "evidence": "P/Field.tsx (WorkOrderForm); E/ordens.go; M/00011_os_estoque_ftth.sql; M/00028_fluxo_os_catalogos_sla.sql",
-    "integrationState": "partial",
+    "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-crm.mjs",
-      "Criação pelo protocolo validada; a listagem geral, agenda e operação da OS ainda estão em implementação."
+      "e2e/frontend-v0-field.mjs",
+      "evidencias/integracao-os.json",
+      "evidencias/producao-os.json",
+      "e2e/frontend-v0-crm.mjs"
     ]
   },
   {
@@ -681,8 +688,12 @@
     "behavior": "Selecionar técnico/remover; editar data por blur; visualizar endereço resolvido, telefone, origem e SLA. Go impede mudanças incompatíveis em OS finalizada e remove auxiliar promovido a responsável.",
     "endpoints": "PATCH /api/work-orders/:id; GET /api/staff",
     "evidence": "P/Field.tsx; E/ordens.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-field.mjs",
+      "evidencias/integracao-os.json",
+      "evidencias/producao-os.json"
+    ]
   },
   {
     "id": "OS-04",
@@ -692,8 +703,12 @@
     "behavior": "Transições validadas por estado: open/analysis/awaiting_schedule/scheduled/en_route/in_progress/done/canceled. Deslocamento exige responsável; agendada exige data; conclusão/cancelamento exigem resolução; UI exige motivo para aguardar. done cria pesquisa de satisfação; histórico e evento webhook.",
     "endpoints": "POST /api/work-orders/:id/status",
     "evidence": "P/Field.tsx; E/operacoes.go (workStatus); M/00028_fluxo_os_catalogos_sla.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-field.mjs",
+      "evidencias/integracao-os.json",
+      "evidencias/producao-os.json"
+    ]
   },
   {
     "id": "OS-05",
@@ -703,8 +718,12 @@
     "behavior": "Adicionar/remover auxiliar distinto do responsável; aplicar kit ativo de itens não serializados com baixa transacional; adicionar itens de checklist e marcar feitos com autor/data. OS encerrada não aceita essas alterações.",
     "endpoints": "POST /api/work-orders/:id/helpers; DELETE /api/work-orders/:id/helpers/:userId; POST /api/work-orders/:id/kit; POST /api/work-orders/:id/checklist; POST /api/work-orders/:id/checklist/:itemId",
     "evidence": "P/Field.tsx (KitAndHelpers); P/Extras.tsx; E/materiais.go; E/estoque.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-field.mjs",
+      "evidencias/integracao-os.json",
+      "evidencias/producao-os.json"
+    ]
   },
   {
     "id": "OS-06",
@@ -714,8 +733,12 @@
     "behavior": "Escolhe item não serializado ativo e quantidade; negativa devolve; registra estoque/material/autor e evento OS; impede saldo e devolução incompatíveis segundo handlers. Não altera movimento histórico.",
     "endpoints": "POST /api/work-orders/:id/materials",
     "evidence": "P/Field.tsx; E/materiais.go; E/estoque.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-field.mjs",
+      "evidencias/integracao-os.json",
+      "evidencias/producao-os.json"
+    ]
   },
   {
     "id": "OS-07",
@@ -725,8 +748,12 @@
     "behavior": "Busca a partir de três caracteres, até cinco candidatos disponíveis; instala unidade in_stock/with_tech em contrato da OS e retira do saldo. UI usa comodato padrão; backend aceita venda via mode=sale.",
     "endpoints": "GET /api/stock/units; POST /api/work-orders/:id/units",
     "evidence": "P/Field.tsx; E/operacoes.go (installUnit); M/00015_estoque_series.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-field.mjs",
+      "evidencias/integracao-os.json",
+      "evidencias/producao-os.json"
+    ]
   },
   {
     "id": "OS-08",
@@ -736,8 +763,12 @@
     "behavior": "Anotar, consultar mudanças/atribuição/agendamento/material e autor/data. Notas podem ser lançadas por os:write mesmo quando controles de execução já estão ocultos; sem edição/exclusão de evento no painel.",
     "endpoints": "POST /api/work-orders/:id/notes; GET /api/work-orders/:id",
     "evidence": "P/Field.tsx; E/materiais.go; L/grupos.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-field.mjs",
+      "evidencias/integracao-os.json",
+      "evidencias/producao-os.json"
+    ]
   },
   {
     "id": "OS-09",
@@ -747,8 +778,12 @@
     "behavior": "Até 50 OS pendentes atribuídas, atualização 30 s, cartões com dados/telefone, mapa externo OSM e modal Abrir/Continuar. Requer conexão; não há fila offline/sincronização móvel implementada.",
     "endpoints": "GET /api/work-orders",
     "evidence": "P/Field.tsx (MyWork); L/paged.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-field.mjs",
+      "evidencias/integracao-os.json",
+      "evidencias/producao-os.json"
+    ]
   },
   {
     "id": "OS-10",
@@ -758,8 +793,12 @@
     "behavior": "Dia e 1/3/7 dias; detecta sobreposição conforme duração; horas livres por técnico para janela de 60 min entre 8h–18h; fila aguardando agendamento; abrir OS. Sem arrastar agendamento no calendário.",
     "endpoints": "GET /api/agenda; GET /api/agenda/free",
     "evidence": "P/Agenda.tsx; L/agenda.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-field.mjs",
+      "evidencias/integracao-os.json",
+      "evidencias/producao-os.json"
+    ]
   },
   {
     "id": "OS-11",

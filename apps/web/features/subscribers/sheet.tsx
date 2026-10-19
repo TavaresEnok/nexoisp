@@ -9,7 +9,7 @@ import { Status, PersonAvatar } from "@/components/workspace-ui";
 import { ProfileSection, ProfileFacts } from "@/components/subscriber-profile-sections";
 import { EmptyState } from "@/components/workspace-feedback";
 import { QueryBoundary } from "@/features/shared/feedback";
-import { can } from "@/features/session/model";
+import { can, hasModule } from "@/features/session/model";
 import { useSession } from "@/features/session/provider";
 import { readSubscriber } from "@/data/erp/subscribers";
 import { date, money } from "@/lib/format";
@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { SubscriberEditor } from "./form";
 import { CreateContract } from "@/features/contracts/create";
 import { LazyContractFinance as ContractFinance } from "@/features/finance/lazy";
+import { LazyLinkedOrders } from "@/features/field/lazy";
 import { LazySubscriberTickets } from "@/features/crm/lazy";
 import { SubscriberSections } from "./sections";
 export function OperationalSubscriberSheet() {
@@ -29,7 +30,7 @@ function SubscriberDetails({ id, expanded, onExpand }: { id: string; expanded: b
  const { me } = useSession(); const navigate = useNavigate(); const [params, setParams] = useSearchParams(); const [editing, setEditing] = useState(false); const [creatingContract, setCreatingContract] = useState(false); const scroll = useRef<HTMLDivElement>(null);
  const { mutate } = useSWRConfig();
  const subscriber = useSWR(["erp-subscriber", id], ([, id]) => readSubscriber(id)); const s = subscriber.data;
- const tabs = [["resumo", "Visão geral"], ["cadastro", "Cadastro"], ["contrato", "Contratos"], ...(can(me, "finance:read") ? [["financeiro", "Financeiro"]] : []), ...(can(me, "network:read") ? [["conexao", "Conexão"]] : []), ...(can(me, "crm:read") || can(me, "os:read") ? [["atendimento", "Atendimento e OS"]] : []), ["documentos", "Documentos e privacidade"], ["historico", "Histórico"]];
+ const tabs = [["resumo", "Visão geral"], ["cadastro", "Cadastro"], ["contrato", "Contratos"], ...(can(me, "finance:read") ? [["financeiro", "Financeiro"]] : []), ...(can(me, "network:read") ? [["conexao", "Conexão"]] : []), ...((can(me, "crm:read") && hasModule(me,"crm")) || (can(me, "os:read") && hasModule(me,"field")) ? [["atendimento", "Atendimento e OS"]] : []), ["documentos", "Documentos e privacidade"], ["historico", "Histórico"]];
  const tab = tabs.some(([key]) => key === params.get("abaFicha")) ? params.get("abaFicha")! : "resumo";
  const setTab = (value: string) => setParams(previous => { const next = new URLSearchParams(previous); value === "resumo" ? next.delete("abaFicha") : next.set("abaFicha", value); return next; }, { replace: true });
  useLayoutEffect(() => { const selected = scroll.current?.querySelector<HTMLElement>('[data-slot="tabs-trigger"][data-active]'); selected?.scrollIntoView({ block: "nearest", inline: "nearest" }); }, [tab]);
@@ -42,8 +43,8 @@ function SubscriberDetails({ id, expanded, onExpand }: { id: string; expanded: b
  <TabsContent value="cadastro"><div className="sheet-content-body"><div className="profile-two-columns"><ProfileSection title="Identificação e contato"><ProfileFacts items={[["Nome / Razão social", s.name], ["CPF/CNPJ", s.document || "—"], ["E-mail", s.email || "—"], ["Telefone", s.phone || "—"], ["Nascimento / abertura", s.birth_date ? date(s.birth_date) : "—"], ["RG / Emissor", [s.rg, s.rg_issuer].filter(Boolean).join(" / ") || "—"], ["Nome da mãe", s.mother_name || "—"], ["Nome fantasia", s.trade_name || "—"]]} /></ProfileSection><ProfileSection title="Endereço cadastral"><ProfileFacts items={[["Logradouro", s.address_street || "—"], ["Número", s.address_number || "—"], ["Bairro", s.address_district || "—"], ["Cidade", s.address_city || "—"], ["UF", s.address_state || "—"], ["CEP", s.address_zip || "—"], ["Observações", s.notes || "—"]]} /></ProfileSection></div><SubscriberSections subscriber={s} section="cadastro" refresh={refresh} /></div></TabsContent>
  <TabsContent value="contrato"><div className="sheet-content-body"><ContractCards subscriber={s} navigate={navigate} /></div></TabsContent>
  {can(me, "finance:read") && <TabsContent value="financeiro"><div className="sheet-content-body">{s.contracts.length ? s.contracts.map(contract => <ProfileSection key={contract.id} title={`${contract.plan_name} · ${contract.id.slice(0,8)}`}><ContractFinance id={contract.id} /></ProfileSection>) : <p className="profile-footnote">O titular ainda não possui contratos.</p>}</div></TabsContent>}
- {can(me,"crm:read") && <TabsContent value="atendimento"><div className="sheet-content-body"><LazySubscriberTickets id={s.id} /></div></TabsContent>}
- {["conexao", ...(can(me,"crm:read") ? []:["atendimento"])].map(section => <TabsContent key={section} value={section}><div className="sheet-content-body"><ProfileSection title={section === "conexao" ? "Acessos dos contratos" : "Atendimento e ordens de serviço"} caption="Integração desta seção em andamento."><p className="profile-footnote">O contexto deste titular é real. Nenhum dado demonstrativo é exibido nesta ficha.</p><Button variant="outline" onClick={() => navigate(section === "conexao" ? "/rede/equipamentos" : "/atendimentos")}>Abrir área correspondente<ArrowUpRight /></Button></ProfileSection></div></TabsContent>)}
+ {(can(me,"crm:read") || can(me,"os:read")) && <TabsContent value="atendimento"><div className="sheet-content-body erp-stack">{can(me,"crm:read") && hasModule(me,"crm") && <LazySubscriberTickets id={s.id} />}{can(me,"os:read") && hasModule(me,"field") && <LazyLinkedOrders subscriberId={s.id} />}</div></TabsContent>}
+ {can(me,"network:read") && <TabsContent value="conexao"><div className="sheet-content-body"><ProfileSection title="Acessos dos contratos" caption="Integração desta seção em andamento."><p className="profile-footnote">O contexto deste titular é real. Nenhum dado demonstrativo é exibido nesta ficha.</p><Button variant="outline" onClick={() => navigate("/rede/equipamentos")}>Abrir área correspondente<ArrowUpRight /></Button></ProfileSection></div></TabsContent>}
  <TabsContent value="documentos"><div className="sheet-content-body"><SubscriberSections subscriber={s} section="documentos" refresh={refresh} /></div></TabsContent>
  <TabsContent value="historico"><div className="sheet-content-body"><SubscriberSections subscriber={s} section="historico" refresh={refresh} /></div></TabsContent>
  </Tabs>}</QueryBoundary>{creatingContract && <CreateContract subscriberId={id} onClose={() => setCreatingContract(false)} onDone={async () => { setCreatingContract(false); setTab("contrato"); await refresh(); }} />}{editing && s && <SubscriberEditor initial={s} onClose={() => setEditing(false)} onDone={async () => { setEditing(false); await refresh(); }} />}</>;

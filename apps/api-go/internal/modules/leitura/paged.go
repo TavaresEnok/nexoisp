@@ -44,7 +44,7 @@ func parsePaged(path string, r *http.Request, user string) (*groupInput, error) 
 		mine := q.Enum("mine", "", "1")
 		subscriber := q.UUID("subscriber_id", false)
 		contract := q.UUID("contract_id", false)
-		var assigned any
+		var assigned any = null(q.UUID("assignee_id", false))
 		if mine != "" {
 			assigned = user
 		}

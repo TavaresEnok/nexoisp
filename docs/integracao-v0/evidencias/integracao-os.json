@@ -1,0 +1,26 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:3000",
+  "verified_at": "2026-10-19T10:45:14.408Z",
+  "backend": "Go isolado, dados sintéticos",
+  "checks": [
+    "OS criada pela interface v0 com titular, contrato e endereço específico reais",
+    "Atribuição e agendamento persistem no Go, com conversão correta do horário local",
+    "Agenda em fuso do provedor mostra sobreposição, janela livre real, fila de espera e abre a ficha compartilhada",
+    "Meu trabalho exibe a fila real do responsável no celular, com telefone, mapa e abertura da OS",
+    "Fichas do titular e do contrato consultam apenas as OS do vínculo e preservam o contexto ao fechar",
+    "Auxiliar adicionado/removido e checklist concluído com registro do autor",
+    "Go rejeita saída sem saldo e devolução superior ao consumo da OS sem alterar o estoque",
+    "Material lançado, devolvido e kit aplicado com saldos reais e históricos preservados",
+    "Instalação por série vincula equipamento ao contrato em comodato",
+    "Espera, reagendamento, deslocamento, execução e conclusão registram datas; OS finalizada preserva anotações sem reabrir controles",
+    "Ficha A4 usa os registros do ERP, indica o contrato e exclui descrição/anotações internas",
+    "Filtro por técnico validado no Go e exportação CSV operacional",
+    "Cancelamento exige motivo e atribuir somente responsável preserva a situação de espera",
+    "Listagem pagina oito registros no servidor e reinicia página junto à busca, mantendo o filtro do titular",
+    "Falha operacional exibe erro de consulta sem introduzir ordens demonstrativas",
+    "Contrato encerrado mostra o equipamento em comodato a recolher",
+    "Perfil Técnico/NOC usa sua fila pessoal; Financeiro não acessa OS nem executa comandos",
+    "OS e filtro por responsável mantêm o isolamento entre provedores"
+  ]
+}

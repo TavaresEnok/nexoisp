@@ -51,3 +51,12 @@ test("a ficha escapa conteúdo HTML de todos os campos e rejeita outro assinante
   assert.throws(() => buildWorkOrderPrintDocument(order, { ...subscriber, id: "b" }, "Teste", data.snapshot.asOf), /não corresponde/);
   assert.match(buildWorkOrderPrintDocument(order, undefined, "Teste", data.snapshot.asOf), /Não disponível/);
 });
+
+test("a ficha operacional distingue o endereço do serviço e não presume dados técnicos ausentes", () => {
+  const html = buildWorkOrderPrintDocument(order, { id: "a", name: "Titular real", code: "a", address: "Cadastro", phone: "" }, "Provedor", data.snapshot.asOf, { operational: true, contractId: "contrato-real", serviceAddress: "Instalação <privada>" });
+  assert.match(html, /FICHA DE SERVIÇO/);
+  assert.match(html, /Abertura da OS/);
+  assert.match(html, /contrato-real/);
+  assert.match(html, /Instalação &lt;privada&gt;/);
+  assert.doesNotMatch(html, /FICHA DEMONSTRATIVA|0 Mbps|undefined|Conteúdo interno reservado|<privada>/);
+});

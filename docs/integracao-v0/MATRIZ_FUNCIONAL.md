@@ -54,16 +54,16 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | CR-07 | Implementada | Responsável, conversa, notas e estado | Integrada e validada |
 | CR-08 | Implementada | Criar OS vinculada ao atendimento | Integrada e validada |
 | CR-09 | Implementada | Relatório CRM por período | Integrada e validada |
-| OS-01 | Implementada | Listagem de OS | Pendente |
-| OS-02 | Implementada | Cadastrar OS e endereço de atendimento | Parcial |
-| OS-03 | Implementada | Atribuir responsável e agendamento | Pendente |
-| OS-04 | Implementada | Fluxo de execução e conclusão | Pendente |
-| OS-05 | Implementada | Auxiliares, kit e checklist | Pendente |
-| OS-06 | Implementada | Lançar e devolver material | Pendente |
-| OS-07 | Implementada | Instalar equipamento por série | Pendente |
-| OS-08 | Implementada | Anotações e eventos | Pendente |
-| OS-09 | Implementada | Operação móvel do técnico | Pendente |
-| OS-10 | Implementada | Agenda por técnico, conflitos e janelas | Pendente |
+| OS-01 | Implementada | Listagem de OS | Integrada e validada |
+| OS-02 | Implementada | Cadastrar OS e endereço de atendimento | Integrada e validada |
+| OS-03 | Implementada | Atribuir responsável e agendamento | Integrada e validada |
+| OS-04 | Implementada | Fluxo de execução e conclusão | Integrada e validada |
+| OS-05 | Implementada | Auxiliares, kit e checklist | Integrada e validada |
+| OS-06 | Implementada | Lançar e devolver material | Integrada e validada |
+| OS-07 | Implementada | Instalar equipamento por série | Integrada e validada |
+| OS-08 | Implementada | Anotações e eventos | Integrada e validada |
+| OS-09 | Implementada | Operação móvel do técnico | Integrada e validada |
+| OS-10 | Implementada | Agenda por técnico, conflitos e janelas | Integrada e validada |
 | OS-11 | Implementada | Catálogo de materiais | Pendente |
 | OS-12 | Implementada | Entradas, saídas, ajustes e consulta | Pendente |
 | OS-13 | Implementada | Receber lote e distribuir unidades | Pendente |

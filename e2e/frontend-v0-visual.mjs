@@ -12,6 +12,8 @@ try {
   { name: 'assinantes-desktop-escuro', path: '/assinantes', width: 1342, height: 805, theme: 'dark' },
   { name: 'assinantes-celular', path: '/assinantes', width: 390, height: 844, theme: 'light' },
   { name: 'ficha-desktop', path: '/assinantes?ficha=sub-1', width: 1342, height: 805, theme: 'dark' },
+  { name: 'ordens-quadro', path: '/ordens-de-servico', heading: 'Ordens de serviço', width: 1342, height: 805, theme: 'light' },
+  { name: 'ordem-ficha', path: '/ordens-de-servico', heading: 'Ordens de serviço', action: 'Ver OS ', width: 1342, height: 805, theme: 'dark' },
   { name: 'atendimentos-desktop', path: '/atendimentos', heading: 'Atendimentos', width: 1342, height: 805, theme: 'light' },
   { name: 'atendimento-ficha', path: '/atendimentos', heading: 'Atendimentos', action: 'Ver chamado ', width: 1342, height: 805, theme: 'dark' },
   { name: 'faturas-desktop', path: '/financeiro/faturas', heading: 'Faturas', width: 1342, height: 805, theme: 'light' },
