@@ -1,0 +1,178 @@
+{
+  "ok": true,
+  "verified_at": "2026-10-19T15:49:59.346595+00:00",
+  "stages_completed": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "coverage": {
+    "total": 169,
+    "validated": 139,
+    "backend_preserved_or_limited": 30,
+    "partial": 0,
+    "pending": 0
+  },
+  "local_tests": {
+    "passed": 152,
+    "failed": 0
+  },
+  "typescript": "passed",
+  "vite_build": "passed",
+  "docker_image": "nexo-v0-frontend:validation",
+  "docker_image_id": "sha256:fea42e8e6e476a3ca98449f3f3b6f2a5854b3f3b24b9e53565492e916ed7fcf3",
+  "reference_files_preserved": 231,
+  "original_ui_global_css_fonts": "identical",
+  "sequential_regression": {
+    "base": "http://127.0.0.1:3005",
+    "backend": "Go/PostgreSQL descartáveis e exclusivos desta regressão; jobs desligados",
+    "scenarios": [
+      {
+        "script": "e2e/frontend-v0.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-assinantes.json",
+        "checks": 16
+      },
+      {
+        "script": "e2e/frontend-v0-session.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-sessao.json",
+        "checks": 5
+      },
+      {
+        "script": "e2e/frontend-v0-commercial.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-comercial.json",
+        "checks": 10
+      },
+      {
+        "script": "e2e/frontend-v0-finance.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-financeiro.json",
+        "checks": 10
+      },
+      {
+        "script": "e2e/frontend-v0-crm.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-crm.json",
+        "checks": 12
+      },
+      {
+        "script": "e2e/frontend-v0-field.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-os.json",
+        "checks": 18
+      },
+      {
+        "script": "e2e/frontend-v0-stock.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-estoque.json",
+        "checks": 12
+      },
+      {
+        "script": "e2e/frontend-v0-network.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-rede.json",
+        "checks": 12
+      },
+      {
+        "script": "e2e/frontend-v0-access.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-acesso.json",
+        "checks": 12
+      },
+      {
+        "script": "e2e/frontend-v0-optical.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-optica.json",
+        "checks": 6
+      },
+      {
+        "script": "e2e/frontend-v0-maintenance.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-manutencoes-pops.json",
+        "checks": 5
+      },
+      {
+        "script": "e2e/frontend-v0-workspace.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-workspace.json",
+        "checks": 7
+      },
+      {
+        "script": "e2e/frontend-v0-ftth.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-ftth.json",
+        "checks": 6
+      },
+      {
+        "script": "e2e/frontend-v0-ipam.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-ipam.json",
+        "checks": 5
+      },
+      {
+        "script": "e2e/frontend-v0-cgnat-legal.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-cgnat-legal.json",
+        "checks": 6
+      },
+      {
+        "script": "e2e/frontend-v0-map.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-mapa.json",
+        "checks": 5
+      },
+      {
+        "script": "e2e/frontend-v0-admin-team.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-equipe-empresas.json",
+        "checks": 7
+      },
+      {
+        "script": "e2e/frontend-v0-quality.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-qualidade.json",
+        "checks": 8
+      },
+      {
+        "script": "e2e/frontend-v0-admin-reports.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-auditoria-anatel.json",
+        "checks": 5
+      },
+      {
+        "script": "e2e/frontend-v0-saas.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-saas.json",
+        "checks": 5
+      },
+      {
+        "script": "e2e/frontend-v0-portal.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-portal.json",
+        "checks": 8
+      },
+      {
+        "script": "e2e/frontend-v0-messages.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-avisos.json",
+        "checks": 6
+      },
+      {
+        "script": "e2e/frontend-v0-integrations.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-integracoes.json",
+        "checks": 6
+      },
+      {
+        "script": "e2e/frontend-v0-import.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-importacao.json",
+        "checks": 6
+      },
+      {
+        "script": "e2e/frontend-v0-finance-access.mjs",
+        "evidence": "docs/integracao-v0/evidencias/integracao-cobranca-acesso.json",
+        "checks": 4
+      }
+    ],
+    "execution": "Primeiros quatro cenários aprovados; continuação a partir de CRM após corrigir verificações de espera pela resposta da API, encerrada com código 0. As alterações foram somente nas verificações assíncronas dos testes."
+  },
+  "additional_scenarios": [
+    "integracao-cpe.json",
+    "producao-cpe.json",
+    "integracao-portal-wifi.json",
+    "producao-portal-wifi.json",
+    "integracao-rede-complementar.json",
+    "producao-rede-complementar.json"
+  ],
+  "visual": "comparacao-visual.json e comparacao-visual-administracao-portal.json",
+  "production_scope": "Imagem Caddy local; não é declaração de publicação em servidor externo nem homologação física de integrações. Evidências de cada incremento registram o ambiente usado.",
+  "limitations": "Limites existentes preservados: gateway real ausente; migração universal ausente; Huawei não homologado em OLT física; CGNAT de laboratório; IPv6/delegações e histórico limitados; célula c1. Ver matriz e OPERACAO.md.",
+  "local_application": {
+    "frontend": "http://127.0.0.1:3000",
+    "upstream": "http://127.0.0.1:18081",
+    "verification": "Página de login e health HTTP 200, sem erros de execução e sem escritas de teste no backend do projeto."
+  }
+}

@@ -1,69 +1,47 @@
 # Integração do frontend oficial v0 ao ERP Go
 
-## Regra e critério de conclusão
+## Resultado
 
-O frontend do v0 é a referência oficial e obrigatória de UI/UX. A integração adapta as funcionalidades existentes à nova interface, preservando seus componentes e sua identidade visual. A conclusão da etapa 7 exige todas as funcionalidades existentes do NexoISP Go integradas, respeitando as limitações já existentes no backend. Recursos apenas previstos no v0 podem permanecer demonstrativos ou planejados, com identificação explícita.
+As sete etapas estão concluídas no código e na validação da integração. A aplicação oficial em `apps/web` utiliza o frontend do v0 e cobre as funcionalidades disponíveis no NexoISP Go, respeitando suas limitações existentes.
 
-## Preservação
+O fechamento registra **139 unidades integradas e validadas**, **30 capacidades internas ou limitações de backend preservadas**, **zero pendentes** e **zero parciais de integração**. Esses estados descrevem a adaptação da interface; não transformam uma capacidade parcial do backend em capacidade completa. A matriz mantém separadamente o estado original do Go.
 
-- `docs/novo-design-nexoISP`: referência original preservada; hashes em `referencia-v0.sha256.json`.
-- `apps/web-legacy`: cópia do frontend anterior, incluindo seu `package.json` já modificado pelo usuário. Não compõe o workspace ou o build oficial.
-- `apps/web`: aplicação oficial baseada no código completo do v0.
-- As alterações preexistentes do usuário no lockfile, inventários e exclusão de `docs/pilha-tecnologica.md` não devem ser revertidas.
+Evidências: [fechamento das sete etapas](evidencias/fechamento-sete-etapas.json), [matriz funcional](MATRIZ_FUNCIONAL.md), [validações por incremento](VALIDACAO.md) e [execução e operação](OPERACAO.md).
 
-## Etapas
+## Regra obrigatória
 
-| Etapa | Escopo | Situação |
+O frontend do v0 é a referência oficial e obrigatória de UI/UX. As funcionalidades do Go foram adaptadas aos seus componentes, layouts, estilos, fontes e interações. As regras de negócio, autorização, isolamento por provedor/POP, autenticação por cookie HttpOnly e proteção CSRF permanecem no Go existente. Não há backend duplicado, banco de negócio no navegador ou autenticação simulada.
+
+`docs/novo-design-nexoISP` permanece como referência original, com **231 arquivos conferidos por SHA-256**. Componentes `ui`, CSS global e fontes continuam idênticos à referência. `apps/web-legacy` preserva o frontend anterior para consulta e não participa do workspace, do build ou dos imports oficiais. As alterações preexistentes do usuário, incluindo a exclusão de `docs/pilha-tecnologica.md`, não foram revertidas nem incluídas nos commits da integração.
+
+## Etapas concluídas
+
+| Etapa | Entrega | Evidência de conclusão |
 |---|---|---|
-| 1 | Referência visual, preservação e matriz por unidade funcional | Concluída: 169 unidades e vinte e duas comparações visuais idênticas |
-| 2 | Promover o código completo do v0 para `apps/web`, build e implantação | Código promovido; build e imagem Docker validados |
-| 3 | Sessão, MFA, permissões, módulos, HTTP, cache e demonstração isolada | Fundação integrada; login, senha, TOTP, expiração e isolamento validados |
-| 4 | Assinantes: consulta paginada, ficha, cadastro e edição | Cadastro e recursos complementares validados; ficha recebe os módulos das etapas 5 e 6 |
-| 5 | Planos, contratos, versões, adicionais e condições | Núcleo comercial, equipamentos e recolhimento validados; comprovante de aceite depende do portal |
-| 6 | Atendimento, OS, estoque, financeiro, rede, administração e importação | Financeiro, CRM, OS, agenda, estoque, acessos, sessões, CPE, ONUs, NOC, manutenções, POPs e caixas/portas ópticas integrados e validados; endereçamento validado; administração em conclusão |
-| 7 | Portal, SaaS, revisão da cobertura e retirada operacional do legado | Portal e SaaS validados; revisão de cobertura e fechamento pendentes |
+| 1 | Referência visual, preservação e matriz funcional | 169 unidades inventariadas; 231 hashes preservados; 22 cenários visuais idênticos, com nova conferência de início em claro/escuro/celular |
+| 2 | Promoção do v0 para `apps/web`, build e implantação da imagem | React/Vite ativos; build Node 22 e imagem Caddy aprovados; frontend anterior fora da aplicação oficial |
+| 3 | Fundação operacional | Sessão, MFA, permissões, módulos, CSRF, downloads, expiração, cache por contexto, suporte e demonstração isolada validados |
+| 4 | Assinantes | Lista paginada, cadastro, ficha, edição, contatos, documentos, privacidade, histórico e múltiplos contratos validados |
+| 5 | Núcleo comercial | Planos/versões, contratos, condições, adicionais, equipamentos, encerramento e aceite com comprovante conferido validados |
+| 6 | Expansão funcional | Financeiro, CRM, OS/agenda/estoque, rede, CPE/ONU/NOC, FTTH/mapa/IPAM/CGNAT, administração, avisos, integrações e importação validados |
+| 7 | Cobertura final e retirada operacional do legado | Portal e SaaS validados; todas as rotas estáticas anteriores cobertas; matriz sem integração pendente; regressão sequencial aprovada e legado mantido apenas para consulta |
 
-Uma etapa ou unidade só recebe estado concluído após validação correspondente. A presença de uma tela, de um endpoint ou de um teste de leitura não comprova a cobertura de suas mutações e regras.
+## Arquitetura e contextos
 
-## Arquitetura
+Componentes v0 → consultas e comandos tipados por funcionalidade → adaptadores HTTP → API Go existente. As entidades operacionais não são colocadas no contrato demonstrativo `WorkspaceData`. Campos sem fonte são explicitamente ausentes; intenção de rede, observação, pendência, falha e resultado incerto são separados.
 
-Componentes e composição visual do v0 → consultas/comandos por funcionalidade → adaptadores HTTP → API Go existente. O modo demonstrativo usa os leitores locais originais. Consultas reais usam paginação e carregamento por contexto, sem sintetizar métricas ausentes nem preencher lacunas com seeds. Sessão e cache são delimitados por identidade, provedor e entrada/saída de suporte.
+`/demonstracao/` mantém o cenário fictício original, carregado separadamente e sem chamadas operacionais. Falha na API real exibe erro e nunca seleciona seeds. Recursos previstos no catálogo visual que não existem no backend são identificados como planejados; os 420 nós do v0 não equivalem a 420 páginas ou capacidades disponíveis no Go.
 
-## Validação
+## Verificações finais
 
-Usar testes de contrato dos adaptadores, testes direcionados de interação e navegador contra uma instância isolada do Go. O ambiente existente do usuário não deve receber escritas de teste. Capturar referências determinísticas da demonstração em claro/escuro e desktop/celular. Registrar resultados reais e limitações em `VALIDACAO.md`.
+- TypeScript e build Vite aprovados.
+- **152 testes locais aprovados**, incluindo preservação visual e paridade das rotas estáticas anteriores.
+- **25 cenários operacionais sequenciais aprovados** na base descartável de regressão, com continuação após corrigir esperas assíncronas dos testes; CPE, Wi-Fi do portal e túnel/certificado têm cenários dirigidos adicionais.
+- Mutações, consultas e permissões conferidas com Go/PostgreSQL reais e registros sintéticos. Incrementos também validados em imagens locais Node 22/Caddy com a CSP existente.
+- Comparações visuais preservam o v0 em desktop claro/escuro, celular e fichas; os ativos originais não foram substituídos.
 
-## Execução local e evidências
+## Limites de conclusão
 
-- `npm ci` na raiz instala as dependências da aplicação oficial. As versões diretas foram fixadas conforme o lockfile original do v0; React/ReactDOM e Vite têm resolução única no workspace.
-- `API_URL=http://127.0.0.1:18081 npm -w apps/web run dev` conecta o frontend ao Go escolhido, em `http://127.0.0.1:3000`.
-- `/demonstracao/` abre o cenário visual original em um contexto separado, sem chamar a API operacional. O navegador carrega a aplicação demonstrativa sob demanda.
-- `npm -w apps/web run typecheck`, `npm -w apps/web test` e `npm -w apps/web run build` verificam tipos, testes locais e produção.
-- `python3 tests/contrato/frontend_v0.py --serve` prepara um PostgreSQL descartável e uma instância Go sintética. O comando não lê `.env` do produto; encerre-o para remover o contêiner de validação.
-- Com o frontend apontando para essa instância, `npm -w apps/web run test:e2e` percorre os fluxos efetivamente integrados. A fumaça antiga está preservada em `e2e/legacy-smoke.mjs`, como referência para as etapas ainda pendentes.
-- `e2e/frontend-v0-visual.mjs` compara a referência original com `/demonstracao/`; as capturas e os hashes estão em `evidencias/`.
+O fechamento é da integração do frontend às capacidades disponíveis. Não representa publicação em servidor externo ou homologação de equipamentos/serviços físicos. Permanecem os limites documentados: gateway financeiro real ausente, migração universal SGP/MK-Auth ausente, driver Huawei sem homologação física, CGNAT de laboratório, entrega/histórico IPv6 limitados e operação de banco restrita à célula `c1`. Jobs periódicos dependem de habilitação na instalação.
 
-As páginas ainda não conectadas apresentam esse estado e permitem abrir a demonstração visual. Não há fallback para seeds no contexto real. A aplicação oficial ainda não substitui a cobertura funcional completa do frontend anterior; a etapa 7 permanece pendente.
-
-Resultados executados, evidências e limites: [VALIDACAO.md](VALIDACAO.md).
-
-## Cobertura atual
-
-A matriz registra 127 unidades integradas e validadas, 5 parciais, 8 pendentes e 29 capacidades internas ou limitações do backend preservadas. Esses números contam unidades funcionais, não esforço ou tempo restante. A cobertura ainda não representa conclusão das sete etapas.
-
-`test:commercial` valida o núcleo comercial; `test:finance` valida os fluxos financeiros; `test:crm` valida prospectos e atendimento; `test:field` valida OS, agenda e trabalho do técnico; `test:stock` valida o estoque e o ciclo das unidades por série; `test:network` valida o inventário de rede, concentradores e evidências de operações. A fumaça oficial executa assinantes, sessão, comercial, financeiro, CRM, OS, estoque e rede em sequência contra a mesma base sintética para evitar interferência entre geração financeira e dados de outros cenários.
-
-
-## Incremento de acesso e infraestrutura
-
-Validados o provisionamento PPPoE/IPoE/Hotspot, credenciais e MAC, comandos e observações separados, sessões/consumo/disponibilidade, conexões online e desconexão em lote. CPE usa ACS sintético TR-098/TR-181, preservando a distinção entre tarefa aplicada e enfileirada. ONUs usam o protocolo real do agente em laboratório; isso não homologa o driver Huawei em equipamento físico.
-
-NOC, diagnóstico, avisos de manutenção com consentimento, POPs e CTO/CEO com reservas de portas têm evidências de mutação no Go e imagem local de produção. O painel inicial reaproveita os componentes originais do v0 para indicadores, prioridades e gráficos de dados do Go. Busca global e página de resultados usam os registros do provedor.
-
-IPAM, CGNAT e consulta legal tiveram seus cenários de mutação e consulta aprovados no Go isolado e na imagem local de produção. O mapa operacional também foi validado no Go isolado e na imagem local de produção. Administração, portal e SaaS receberam cobertura dirigida; avisos, integrações e importação ainda precisam de implementação e validação. A etapa 7 continua pendente.
-
-## Incremento de administração e portal
-
-Equipe e empresas, SaaS, qualidade/SLA, pesquisas, definições personalizadas, kits e comissões foram integrados aos componentes do v0 e validados por comandos no Go. Auditoria e retenção usam paginação/limites reais. A coleta DICI oferece prévia, correção de IBGE/tecnologia e CSV, sem transmissão externa. O portal inclui contratos, faturas, confiança, consumo selecionável por contrato, chamados, pesquisas, aceite simples e Wi-Fi. O comprovante imprime somente seu documento sanitizado.
-
-Validação também executada na imagem Node 22/Caddy. Wi-Fi usa ACS TR-098/TR-181 de laboratório, separando tarefa aplicada de enfileirada. Não há gateway financeiro real no Go; códigos demonstrativos estão identificados. Avisos, integrações, importação e unidades parciais ainda precisam de conclusão. A etapa 7 permanece aberta.
+Para iniciar ou reproduzir as validações, consulte [OPERACAO.md](OPERACAO.md). O ambiente operacional do usuário não recebeu escritas de teste.

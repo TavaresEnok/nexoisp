@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "base": "http://127.0.0.1:3000",
-  "verified_at": "2026-10-19T10:51:13.241Z",
+  "base": "http://127.0.0.1:3005",
+  "verified_at": "2026-10-19T15:45:26.430Z",
   "backend": "Go/PostgreSQL isolados; somente dados sintéticos",
   "checks": [
     "Catálogo cadastra material com código, unidade e mínimo; alerta usa saldo real",

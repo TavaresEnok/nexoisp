@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "base": "http://127.0.0.1:3000",
-  "verified_at": "2026-10-19T11:46:36.091Z",
+  "base": "http://127.0.0.1:3005",
+  "verified_at": "2026-10-19T15:46:13.532Z",
   "backend": "Go/PostgreSQL isolados; comandos sem NAS físico",
   "checks": [
     "Provisionamento pela ficha usa equipamento real, emite senha apenas uma vez e mantém intenção separada da leitura ausente",

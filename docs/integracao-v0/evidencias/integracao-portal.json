@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "base": "http://127.0.0.1:3000",
-  "verified_at": "2026-10-19T13:25:06.786Z",
+  "base": "http://127.0.0.1:3005",
+  "verified_at": "2026-10-19T15:48:19.887Z",
   "backend": "Go/PostgreSQL isolados; gateway e relatos de rede sintéticos; sem NAS físico",
   "checks": [
     "Portal consulta somente cadastro, contratos e faturas próprios; plano sem provisionamento e manutenção são apresentados sem supor conexão online",
@@ -11,6 +11,6 @@
     "Pesquisa de OS é respondida pela UI do portal e registrada uma única vez na administração",
     "Confiança solicitada com confirmação respeita elegibilidade e intervalo no Go; gera intenção de reativação sem alegar execução no NAS",
     "Consumo mensal exibe accounting recebido do agente; séries consultam o contrato escolhido e conservam ausência de dados explícita",
-    "Titulares do mesmo provedor permanecem isolados em protocolos, consumo e aceite; portal é utilizável em tela de celular"
+    "Titulares do mesmo provedor permanecem isolados em protocolos, consumo e aceite; portal mantém destinos de navegação, encerra sessão e é utilizável em tela de celular"
   ]
 }

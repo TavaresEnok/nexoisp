@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "base": "http://127.0.0.1:3000",
-  "verified_at": "2026-10-19T12:58:39.401Z",
+  "base": "http://127.0.0.1:3005",
+  "verified_at": "2026-10-19T15:47:15.943Z",
   "backend": "Go/PostgreSQL isolados; reservas cadastrais sem alteração de rede física",
   "checks": [
     "Cadastro e edição de pool IPv4 preservam CIDR; reserva automática ignora endereço de rede e grava descrição no Go",

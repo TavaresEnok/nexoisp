@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:18390",
+  "verified_at": "2026-10-19T15:40:27.110Z",
+  "backend": "Go/PostgreSQL isolados; fatura e integração sintéticas, sem NAS físico; jobs automáticos desativados e verificação executada explicitamente",
+  "checks": [
+    "Política salva na UI executa verificação real de inadimplência e solicita suspensão no Go sem inventar confirmação de equipamento",
+    "Confiança concedida pela equipe registra autor, dias e motivo; liberação ativa impede suspensão por cobrança e o Go rejeita repetição",
+    "Baixa quita a confiança e retoma suspensão automática; suspensão manual é preservada pelo Go, sem afirmar aplicação física no NAS",
+    "Ficha do titular conserva cadastro, versão e preço dos contratos; novo contrato é criado na ficha e abre sua consulta operacional"
+  ]
+}

@@ -37,6 +37,11 @@ def main():
         NEXO_DEMO_MODE='1', NEXO_REQUIRE_ADMIN_MFA='0', NEXO_AGENT_MTLS='off', NEXO_GO_JOBS='0',
         NEXO_GO_ADDR=f'127.0.0.1:{api_port}', NEXO_GO_INTERNAL_ADDR=f'127.0.0.1:{api_port+1000}', NEXO_GO_AGENT_ADDR=f'127.0.0.1:{api_port+2000}',
     )
+    network_fixture = os.getenv("NEXO_V0_NETWORK") == "1"
+    if network_fixture:
+        env["NEXO_L2TP_PSK"] = "v0-fixture-l2tp-sintetica-000001"
+        env["NEXO_VPN_PUBLIC_HOST"] = "203.0.113.254"
+        env["NEXO_RADIUS_PUBLIC_HOST"] = "203.0.113.254"
     acs_server = None
     if os.getenv("NEXO_V0_ACS") == "1":
         from fixtures.acs_v0 import start
@@ -58,6 +63,10 @@ def main():
             raise RuntimeError('PostgreSQL de validação não iniciou')
         for task in ['prepare', 'seed-demo']:
             subprocess.run([str(ROOT/'apps/api-go/bin/nexo-db'), task], cwd=ROOT, env=env, check=True, stdout=log, stderr=log)
+        if network_fixture:
+            # Public key only: this fixture never starts a real WireGuard or IPsec tunnel.
+            public_key = base64.b64encode(os.urandom(32)).decode()
+            subprocess.run(['docker', 'exec', name, 'psql', '-p', str(port), '-U', 'nexo_owner', '-d', 'nexo_v0_validation', '-v', 'ON_ERROR_STOP=1', '-c', f"select vpn_set_server_key('{public_key}');"], check=True, stdout=log, stderr=log)
         process = subprocess.Popen([str(ROOT/'apps/api-go/bin/api')], cwd=ROOT, env=env, stdout=log, stderr=log)
         from lib import wait
         wait(f'http://127.0.0.1:{api_port}', '/api/health', process)

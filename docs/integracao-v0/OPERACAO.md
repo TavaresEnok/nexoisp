@@ -1,0 +1,29 @@
+# Aplicação oficial e validação
+
+O frontend oficial é `apps/web`, baseado no v0. `apps/web-legacy` permanece exclusivamente como referência de contratos e comportamentos: não integra o workspace npm, a imagem Caddy ou os imports da aplicação. `docs/novo-design-nexoISP` continua como referência original preservada.
+
+## Executar
+
+- Instalar com `npm ci` na raiz, usando Node 22.
+- Iniciar com `API_URL=http://127.0.0.1:18081 npm -w apps/web run dev`, ajustando a URL para o backend Go da instalação. O endereço padrão do Vite é `http://127.0.0.1:3000`.
+- Gerar com `npm -w apps/web run build` ou construir a imagem `docker build -f infra/prod/caddy/Dockerfile -t nexo-frontend .`.
+- Caddy usa `NEXO_DOMAIN` e `NEXO_GO_UPSTREAM`. A imagem incorpora somente a aplicação oficial e preserva as rotas HTTP nativas do Go.
+- O acesso operacional exige as contas e permissões reais do Go. Não há banco no navegador nem autenticação simulada. `/demonstracao/` permanece um contexto fictício independente, sem comandos operacionais.
+
+## Testes reproduzíveis
+
+`npm -w apps/web run typecheck`, `npm -w apps/web test` e `npm -w apps/web run build` executam verificações locais. A fumaça `npm -w apps/web run test:e2e` cobre os fluxos operacionais em sequência e deve ser direcionada **exclusivamente a um laboratório descartável**, pois cria e altera registros.
+
+`python3 tests/contrato/frontend_v0.py --serve` cria PostgreSQL e Go isolados, com contas sintéticas, secrets próprios e jobs desligados. Não lê `.env` do produto. O frontend de validação deve apontar para a API desse harness. A porta do protocolo do agente é a porta HTTP mais 2000; informe `V0_AGENT_URL` se mudar a porta padrão. O processo do harness remove seu contêiner ao encerrar normalmente.
+
+A execução dirigida de CPE/Wi-Fi usa `NEXO_V0_ACS=1` com as portas HTTP, PostgreSQL, agente e ACS separadas do primeiro laboratório. A fixture ACS TR-098/TR-181 nunca acessa roteador físico.
+
+A execução dirigida `test:network-final` usa `NEXO_V0_NETWORK=1` em outro harness. A fixture prepara somente uma chave pública sintética e habilita os contratos de geração de instruções de túnel; não inicia WireGuard, IPsec, NAS nem interface de rede. Informe explicitamente `BASE`, `V0_VALIDATION_DB_CONTAINER` e `V0_VALIDATION_DB_PORT`. O teste valida o rótulo de laboratório antes de preparar fingerprint e timestamp sintéticos no banco.
+
+`test:integrations` testa tokens, assinaturas e destinos por HTTP local. Com `V0_VALIDATION_DB_CONTAINER` e `V0_VALIDATION_DB_PORT`, acrescenta reenvio de uma entrega cuja falha anterior é preparada no banco descartável rotulado. Sem essas variáveis, valida a fila pendente sem acesso administrativo ao banco. Nenhum segredo de aplicação é registrado nas evidências.
+
+## Limites preservados
+
+A integração de interface não homologa equipamento ou serviço externo: driver Huawei, CGNAT de laboratório, entrega IPv6, histórico de prefixos, gateway financeiro real e distribuição multicélula mantêm os limites do Go documentados na matriz. Migração direta universal de SGP/MK-Auth não existe: o importador aceita CSV intermediário e faz prévia, mapeamento, aplicação e provisionamento separado. Jobs de cobrança, limpeza, avisos e expiração só executam quando habilitados no backend.
+
+Tarefas de rede exibem intenção, observação e resultado incerto separadamente. Não use a presença de uma operação ou instrução emitida como prova de execução no equipamento.

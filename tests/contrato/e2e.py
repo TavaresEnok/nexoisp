@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """Fumaça original do painel pelo Caddy, com API e seed exclusivamente Go."""
+import base64
+import os
 from pathlib import Path
 import subprocess
 import time
@@ -12,7 +14,10 @@ def main():
     go('build','-o','bin/nexo-db','./cmd/nexo-db')
     go('build','-o','bin/api','./cmd/api')
     sql('drop database if exists nexo_test with (force);create database nexo_test;','postgres')
-    env=go_env('nexo_test');env.update(NEXO_DEMO_MODE='1',NEXO_REQUIRE_ADMIN_MFA='0',NEXO_GO_ADDR='127.0.0.1:18181',NEXO_GO_INTERNAL_ADDR='127.0.0.1:19181',NEXO_GO_AGENT_ADDR='127.0.0.1:18544',NEXO_GO_JOBS='0')
+    env=go_env('nexo_test');env.update(NEXO_DEMO_MODE='1',NEXO_REQUIRE_ADMIN_MFA='0',NEXO_GO_ADDR='127.0.0.1:18181',NEXO_GO_INTERNAL_ADDR='127.0.0.1:19181',NEXO_GO_AGENT_ADDR='127.0.0.1:18544',NEXO_GO_JOBS='0',
+        NEXO_RADIUS_KEY='radius-chave-sintetica-e2e-000001',NEXO_RADIUS_DB_PASSWORD='radius-senha-sintetica-e2e',NEXO_REPLICA_PASSWORD='replica-senha-sintetica-e2e',
+        NEXO_GATEWAY_WEBHOOK_SECRET=base64.b64encode(os.urandom(32)).decode(),NEXO_SECRET_KEY=base64.b64encode(os.urandom(32)).decode(),
+        NEXO_OP_SIGNING_KEY=base64.b64encode(subprocess.check_output(['openssl','genpkey','-algorithm','ed25519','-outform','DER'])).decode())
     for cmd in ['prepare','seed-demo']:command([str(ROOT/'apps/api-go/bin/nexo-db'),cmd],cwd=ROOT,env=env)
     command(['docker','build','--network','host','-f','infra/prod/caddy/Dockerfile','-t','nexo-fase1-caddy-web:local','.'],cwd=ROOT)
     command(['docker','create','--name','nexo-fase1-web-build','nexo-fase1-caddy-web:local'],capture_output=True)
@@ -37,7 +42,7 @@ def main():
             assert r['headers']['x-content-type-options']=='nosniff' and r['headers']['x-frame-options']=='DENY'
             assert "frame-ancestors 'none'" in r['headers']['content-security-policy']
         command(['docker','run','--rm','--network','host','--ipc=host','--security-opt','seccomp=unconfined',
-                 '-v',str(ROOT/'e2e')+':/e2e','-w','/e2e','-e','BASE=http://127.0.0.1:18380',
+                 '-v',str(ROOT/'e2e')+':/e2e','-w','/e2e','-e','BASE=http://127.0.0.1:18380','-e','V0_AGENT_URL=http://127.0.0.1:18544',
                  'mcr.microsoft.com/playwright:v1.55.1-jammy','node','smoke.mjs'])
     finally:
         api.terminate()

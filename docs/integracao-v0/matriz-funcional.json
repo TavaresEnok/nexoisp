@@ -9,7 +9,8 @@
     "evidence": "P/Login.tsx; W/App.tsx; I/service.go; G/cryptox/crypto.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-session.mjs"
+      "e2e/frontend-v0-session.mjs",
+      "docs/integracao-v0/evidencias/integracao-sessao.json"
     ]
   },
   {
@@ -22,7 +23,9 @@
     "evidence": "P/Login.tsx; G/db/demo.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-workspace.mjs"
+      "e2e/frontend-v0-workspace.mjs",
+      "docs/integracao-v0/evidencias/integracao-workspace.json",
+      "docs/integracao-v0/evidencias/producao-workspace.json"
     ]
   },
   {
@@ -35,7 +38,9 @@
     "evidence": "P/Atendimento.tsx (SearchBox/Busca); L/search.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-workspace.mjs"
+      "e2e/frontend-v0-workspace.mjs",
+      "docs/integracao-v0/evidencias/integracao-workspace.json",
+      "docs/integracao-v0/evidencias/producao-workspace.json"
     ]
   },
   {
@@ -48,7 +53,9 @@
     "evidence": "W/App.tsx; W/main.tsx; I/self.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-workspace.mjs"
+      "e2e/frontend-v0-workspace.mjs",
+      "docs/integracao-v0/evidencias/integracao-workspace.json",
+      "docs/integracao-v0/evidencias/producao-workspace.json"
     ]
   },
   {
@@ -61,7 +68,9 @@
     "evidence": "P/Dashboard.tsx; L/today.go; L/service.go; L/queries/dashboard_0.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-workspace.mjs"
+      "e2e/frontend-v0-workspace.mjs",
+      "docs/integracao-v0/evidencias/integracao-workspace.json",
+      "docs/integracao-v0/evidencias/producao-workspace.json"
     ]
   },
   {
@@ -74,7 +83,9 @@
     "evidence": "P/Cobranca.tsx (Panels); L/agenda.go; L/dinamicas.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-workspace.mjs"
+      "e2e/frontend-v0-workspace.mjs",
+      "docs/integracao-v0/evidencias/integracao-workspace.json",
+      "docs/integracao-v0/evidencias/producao-workspace.json"
     ]
   },
   {
@@ -87,7 +98,8 @@
     "evidence": "P/Account.tsx; I/self.go; I/sql/",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-session.mjs"
+      "e2e/frontend-v0-session.mjs",
+      "docs/integracao-v0/evidencias/integracao-sessao.json"
     ]
   },
   {
@@ -100,7 +112,8 @@
     "evidence": "P/Account.tsx; I/self.go; G/cryptox/totp.go; M/00005_mfa.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-session.mjs"
+      "e2e/frontend-v0-session.mjs",
+      "docs/integracao-v0/evidencias/integracao-sessao.json"
     ]
   },
   {
@@ -113,7 +126,8 @@
     "evidence": "P/Subscribers.tsx; G/modules/cadastro/routes.go; G/modules/cadastro/service.go; G/modules/cadastro/queries/list.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0.mjs"
+      "e2e/frontend-v0.mjs",
+      "docs/integracao-v0/evidencias/integracao-assinantes.json"
     ]
   },
   {
@@ -126,7 +140,8 @@
     "evidence": "P/Subscribers.tsx; E/cadastro.go; E/schemas.go; G/modules/cadastro/service.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0.mjs"
+      "e2e/frontend-v0.mjs",
+      "docs/integracao-v0/evidencias/integracao-assinantes.json"
     ]
   },
   {
@@ -137,9 +152,11 @@
     "behavior": "Exibe cadastro, data/status, observações, acesso ao portal e tabela de contratos com plano/versão/preço/início/vencimento; abre contrato ou modal de novo contrato.",
     "endpoints": "GET /api/subscribers/:id; GET /api/subscribers/:id/portal-access; POST /api/contracts",
     "evidence": "P/Subscribers.tsx; P/Contracts.tsx; G/modules/cadastro/service.go; E/cadastro.go",
-    "integrationState": "partial",
+    "integrationState": "validated",
     "validation": [
-      "Fluxo parcial implementado; conferir o plano para os escopos restantes."
+      "e2e/frontend-v0-finance-access.mjs",
+      "docs/integracao-v0/evidencias/integracao-cobranca-acesso.json",
+      "docs/integracao-v0/evidencias/producao-cobranca-acesso.json"
     ]
   },
   {
@@ -152,7 +169,8 @@
     "evidence": "P/Subscribers.tsx; E/acessos.go (portalAccess)",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0.mjs"
+      "e2e/frontend-v0.mjs",
+      "docs/integracao-v0/evidencias/integracao-assinantes.json"
     ]
   },
   {
@@ -165,7 +183,8 @@
     "evidence": "P/Atendimento.tsx (Contacts); E/config.go; M/00025_sessoes_contatos_pops.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0.mjs"
+      "e2e/frontend-v0.mjs",
+      "docs/integracao-v0/evidencias/integracao-assinantes.json"
     ]
   },
   {
@@ -178,7 +197,8 @@
     "evidence": "P/Atendimento.tsx (SubscriberNotes); E/condicoes.go; M/00030_estados_motivos_anotacoes.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0.mjs"
+      "e2e/frontend-v0.mjs",
+      "docs/integracao-v0/evidencias/integracao-assinantes.json"
     ]
   },
   {
@@ -191,7 +211,8 @@
     "evidence": "P/Atendimento.tsx (SubscriberDocuments); E/documentos.go; E/relatorios.go; M/00034_escopo_pop_aviso_documentos.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0.mjs"
+      "e2e/frontend-v0.mjs",
+      "docs/integracao-v0/evidencias/integracao-assinantes.json"
     ]
   },
   {
@@ -204,7 +225,8 @@
     "evidence": "P/Atendimento.tsx (Timeline); L/timeline.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0.mjs"
+      "e2e/frontend-v0.mjs",
+      "docs/integracao-v0/evidencias/integracao-assinantes.json"
     ]
   },
   {
@@ -217,7 +239,8 @@
     "evidence": "P/Subscribers.tsx (Privacy); E/relatorios.go (lgpdExport)",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0.mjs"
+      "e2e/frontend-v0.mjs",
+      "docs/integracao-v0/evidencias/integracao-assinantes.json"
     ]
   },
   {
@@ -230,7 +253,8 @@
     "evidence": "P/Subscribers.tsx; E/documentos.go (anonymize); M/00045_lgpd_titular.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0.mjs"
+      "e2e/frontend-v0.mjs",
+      "docs/integracao-v0/evidencias/integracao-assinantes.json"
     ]
   },
   {
@@ -243,7 +267,8 @@
     "evidence": "P/Plans.tsx; E/cadastro.go; L/service.go; M/00001_identidade_cadastro.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-commercial.mjs"
+      "e2e/frontend-v0-commercial.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json"
     ]
   },
   {
@@ -256,7 +281,8 @@
     "evidence": "P/Plans.tsx; P/Cobranca.tsx; E/cadastro.go; G/finance/gateway.go; M/00026_degraus_por_plano.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-commercial.mjs"
+      "e2e/frontend-v0-commercial.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json"
     ]
   },
   {
@@ -269,7 +295,8 @@
     "evidence": "P/Plans.tsx; E/comercial.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-commercial.mjs"
+      "e2e/frontend-v0-commercial.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json"
     ]
   },
   {
@@ -282,7 +309,8 @@
     "evidence": "P/Plans.tsx; E/rede.go; G/network/engine.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-commercial.mjs"
+      "e2e/frontend-v0-commercial.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json"
     ]
   },
   {
@@ -295,7 +323,8 @@
     "evidence": "P/Adicionais.tsx; E/comercial.go; M/00044_produtos_adicionais.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-commercial.mjs"
+      "e2e/frontend-v0-commercial.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json"
     ]
   },
   {
@@ -308,7 +337,8 @@
     "evidence": "P/Contracts.tsx; L/contracts.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-commercial.mjs"
+      "e2e/frontend-v0-commercial.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json"
     ]
   },
   {
@@ -321,7 +351,8 @@
     "evidence": "P/Contracts.tsx (ContractForm); E/cadastro.go; E/schemas.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0.mjs"
+      "e2e/frontend-v0.mjs",
+      "docs/integracao-v0/evidencias/integracao-assinantes.json"
     ]
   },
   {
@@ -334,7 +365,8 @@
     "evidence": "P/Contracts.tsx; G/modules/cadastro/service.go; E/contratos.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-commercial.mjs"
+      "e2e/frontend-v0-commercial.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json"
     ]
   },
   {
@@ -347,7 +379,8 @@
     "evidence": "P/Contracts.tsx; E/contratos.go; L/dinamicas.go; M/00031_condicoes_contrato.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-commercial.mjs"
+      "e2e/frontend-v0-commercial.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json"
     ]
   },
   {
@@ -360,7 +393,8 @@
     "evidence": "P/Contracts.tsx; E/condicoes.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-commercial.mjs"
+      "e2e/frontend-v0-commercial.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json"
     ]
   },
   {
@@ -373,7 +407,8 @@
     "evidence": "P/Atendimento.tsx (ContractStates); L/grupos.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-commercial.mjs"
+      "e2e/frontend-v0-commercial.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json"
     ]
   },
   {
@@ -386,7 +421,8 @@
     "evidence": "P/Extras.tsx (ContractTags); E/empresas_tags.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-commercial.mjs"
+      "e2e/frontend-v0-commercial.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json"
     ]
   },
   {
@@ -399,7 +435,8 @@
     "evidence": "P/Atendimento.tsx (ContractPop); E/config.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-commercial.mjs"
+      "e2e/frontend-v0-commercial.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json"
     ]
   },
   {
@@ -412,7 +449,8 @@
     "evidence": "P/Empresas.tsx; P/Anatel.tsx; E/empresas_tags.go; E/condicoes.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-commercial.mjs"
+      "e2e/frontend-v0-commercial.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json"
     ]
   },
   {
@@ -425,7 +463,8 @@
     "evidence": "P/Adicionais.tsx (ContractAddons); E/comercial.go; E/documentos.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-commercial.mjs"
+      "e2e/frontend-v0-commercial.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json"
     ]
   },
   {
@@ -439,10 +478,13 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-stock.mjs",
-      "evidencias/integracao-estoque.json",
-      "evidencias/producao-estoque.json",
+      "docs/integracao-v0/evidencias/integracao-estoque.json",
+      "docs/integracao-v0/evidencias/producao-estoque.json",
       "e2e/frontend-v0-commercial.mjs",
-      "e2e/frontend-v0-field.mjs"
+      "e2e/frontend-v0-field.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json",
+      "docs/integracao-v0/evidencias/integracao-os.json",
+      "docs/integracao-v0/evidencias/producao-os.json"
     ]
   },
   {
@@ -455,7 +497,8 @@
     "evidence": "P/Condicoes.tsx; E/comercial.go; L/dinamicas.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-commercial.mjs"
+      "e2e/frontend-v0-commercial.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json"
     ]
   },
   {
@@ -468,7 +511,8 @@
     "evidence": "P/Condicoes.tsx; E/comercial.go; G/finance/sql/",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-commercial.mjs"
+      "e2e/frontend-v0-commercial.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json"
     ]
   },
   {
@@ -481,7 +525,8 @@
     "evidence": "P/Condicoes.tsx; E/comercial.go; E/rotinas.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-commercial.mjs"
+      "e2e/frontend-v0-commercial.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json"
     ]
   },
   {
@@ -494,7 +539,8 @@
     "evidence": "P/Condicoes.tsx; E/comercial.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-commercial.mjs"
+      "e2e/frontend-v0-commercial.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json"
     ]
   },
   {
@@ -508,8 +554,10 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
-      "Solicitação e cancelamento validados; aceite e comprovante completo dependem do portal na etapa 7.",
-      "e2e/frontend-v0-portal.mjs"
+      "e2e/frontend-v0-portal.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json",
+      "docs/integracao-v0/evidencias/integracao-portal.json",
+      "docs/integracao-v0/evidencias/producao-portal.json"
     ]
   },
   {
@@ -522,7 +570,8 @@
     "evidence": "P/Contracts.tsx; G/modules/cadastro/queries/history.sql; E/contratos.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-commercial.mjs"
+      "e2e/frontend-v0-commercial.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json"
     ]
   },
   {
@@ -536,7 +585,9 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
-      "e2e/frontend-v0.mjs"
+      "e2e/frontend-v0.mjs",
+      "docs/integracao-v0/evidencias/integracao-comercial.json",
+      "docs/integracao-v0/evidencias/integracao-assinantes.json"
     ]
   },
   {
@@ -549,7 +600,9 @@
     "evidence": "P/Crm.tsx; L/grupos.go; L/paged.go; L/queries/group775251e1_0.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-crm.mjs"
+      "e2e/frontend-v0-crm.mjs",
+      "docs/integracao-v0/evidencias/integracao-crm.json",
+      "docs/integracao-v0/evidencias/producao-crm.json"
     ]
   },
   {
@@ -562,7 +615,9 @@
     "evidence": "P/Crm.tsx (LeadForm); E/crm.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-crm.mjs"
+      "e2e/frontend-v0-crm.mjs",
+      "docs/integracao-v0/evidencias/integracao-crm.json",
+      "docs/integracao-v0/evidencias/producao-crm.json"
     ]
   },
   {
@@ -575,7 +630,9 @@
     "evidence": "P/Crm.tsx (LeadDetail); E/crm.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-crm.mjs"
+      "e2e/frontend-v0-crm.mjs",
+      "docs/integracao-v0/evidencias/integracao-crm.json",
+      "docs/integracao-v0/evidencias/producao-crm.json"
     ]
   },
   {
@@ -588,7 +645,9 @@
     "evidence": "P/Crm.tsx; E/crm.go (convertLead)",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-crm.mjs"
+      "e2e/frontend-v0-crm.mjs",
+      "docs/integracao-v0/evidencias/integracao-crm.json",
+      "docs/integracao-v0/evidencias/producao-crm.json"
     ]
   },
   {
@@ -601,7 +660,9 @@
     "evidence": "P/Crm.tsx (TicketList/TicketDetail); L/grupos.go; L/paged.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-crm.mjs"
+      "e2e/frontend-v0-crm.mjs",
+      "docs/integracao-v0/evidencias/integracao-crm.json",
+      "docs/integracao-v0/evidencias/producao-crm.json"
     ]
   },
   {
@@ -614,7 +675,9 @@
     "evidence": "P/Crm.tsx (TicketForm); E/crm.go; M/00012_crm_atendimento.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-crm.mjs"
+      "e2e/frontend-v0-crm.mjs",
+      "docs/integracao-v0/evidencias/integracao-crm.json",
+      "docs/integracao-v0/evidencias/producao-crm.json"
     ]
   },
   {
@@ -627,7 +690,9 @@
     "evidence": "P/Crm.tsx; E/crm.go; L/service.go (ticket)",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-crm.mjs"
+      "e2e/frontend-v0-crm.mjs",
+      "docs/integracao-v0/evidencias/integracao-crm.json",
+      "docs/integracao-v0/evidencias/producao-crm.json"
     ]
   },
   {
@@ -640,7 +705,9 @@
     "evidence": "P/Crm.tsx; P/Field.tsx; E/ordens.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-crm.mjs"
+      "e2e/frontend-v0-crm.mjs",
+      "docs/integracao-v0/evidencias/integracao-crm.json",
+      "docs/integracao-v0/evidencias/producao-crm.json"
     ]
   },
   {
@@ -653,7 +720,9 @@
     "evidence": "P/Crm.tsx (CrmReport); L/dinamicas.go; L/dinamicas/",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-crm.mjs"
+      "e2e/frontend-v0-crm.mjs",
+      "docs/integracao-v0/evidencias/integracao-crm.json",
+      "docs/integracao-v0/evidencias/producao-crm.json"
     ]
   },
   {
@@ -667,8 +736,8 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-field.mjs",
-      "evidencias/integracao-os.json",
-      "evidencias/producao-os.json"
+      "docs/integracao-v0/evidencias/integracao-os.json",
+      "docs/integracao-v0/evidencias/producao-os.json"
     ]
   },
   {
@@ -682,9 +751,11 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-field.mjs",
-      "evidencias/integracao-os.json",
-      "evidencias/producao-os.json",
-      "e2e/frontend-v0-crm.mjs"
+      "docs/integracao-v0/evidencias/integracao-os.json",
+      "docs/integracao-v0/evidencias/producao-os.json",
+      "e2e/frontend-v0-crm.mjs",
+      "docs/integracao-v0/evidencias/integracao-crm.json",
+      "docs/integracao-v0/evidencias/producao-crm.json"
     ]
   },
   {
@@ -698,8 +769,8 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-field.mjs",
-      "evidencias/integracao-os.json",
-      "evidencias/producao-os.json"
+      "docs/integracao-v0/evidencias/integracao-os.json",
+      "docs/integracao-v0/evidencias/producao-os.json"
     ]
   },
   {
@@ -713,8 +784,8 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-field.mjs",
-      "evidencias/integracao-os.json",
-      "evidencias/producao-os.json"
+      "docs/integracao-v0/evidencias/integracao-os.json",
+      "docs/integracao-v0/evidencias/producao-os.json"
     ]
   },
   {
@@ -728,8 +799,8 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-field.mjs",
-      "evidencias/integracao-os.json",
-      "evidencias/producao-os.json"
+      "docs/integracao-v0/evidencias/integracao-os.json",
+      "docs/integracao-v0/evidencias/producao-os.json"
     ]
   },
   {
@@ -743,8 +814,8 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-field.mjs",
-      "evidencias/integracao-os.json",
-      "evidencias/producao-os.json"
+      "docs/integracao-v0/evidencias/integracao-os.json",
+      "docs/integracao-v0/evidencias/producao-os.json"
     ]
   },
   {
@@ -758,8 +829,8 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-field.mjs",
-      "evidencias/integracao-os.json",
-      "evidencias/producao-os.json"
+      "docs/integracao-v0/evidencias/integracao-os.json",
+      "docs/integracao-v0/evidencias/producao-os.json"
     ]
   },
   {
@@ -773,8 +844,8 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-field.mjs",
-      "evidencias/integracao-os.json",
-      "evidencias/producao-os.json"
+      "docs/integracao-v0/evidencias/integracao-os.json",
+      "docs/integracao-v0/evidencias/producao-os.json"
     ]
   },
   {
@@ -788,8 +859,8 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-field.mjs",
-      "evidencias/integracao-os.json",
-      "evidencias/producao-os.json"
+      "docs/integracao-v0/evidencias/integracao-os.json",
+      "docs/integracao-v0/evidencias/producao-os.json"
     ]
   },
   {
@@ -803,8 +874,8 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-field.mjs",
-      "evidencias/integracao-os.json",
-      "evidencias/producao-os.json"
+      "docs/integracao-v0/evidencias/integracao-os.json",
+      "docs/integracao-v0/evidencias/producao-os.json"
     ]
   },
   {
@@ -818,8 +889,8 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-stock.mjs",
-      "evidencias/integracao-estoque.json",
-      "evidencias/producao-estoque.json"
+      "docs/integracao-v0/evidencias/integracao-estoque.json",
+      "docs/integracao-v0/evidencias/producao-estoque.json"
     ]
   },
   {
@@ -833,8 +904,8 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-stock.mjs",
-      "evidencias/integracao-estoque.json",
-      "evidencias/producao-estoque.json"
+      "docs/integracao-v0/evidencias/integracao-estoque.json",
+      "docs/integracao-v0/evidencias/producao-estoque.json"
     ]
   },
   {
@@ -848,8 +919,8 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-stock.mjs",
-      "evidencias/integracao-estoque.json",
-      "evidencias/producao-estoque.json"
+      "docs/integracao-v0/evidencias/integracao-estoque.json",
+      "docs/integracao-v0/evidencias/producao-estoque.json"
     ]
   },
   {
@@ -863,8 +934,8 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-stock.mjs",
-      "evidencias/integracao-estoque.json",
-      "evidencias/producao-estoque.json"
+      "docs/integracao-v0/evidencias/integracao-estoque.json",
+      "docs/integracao-v0/evidencias/producao-estoque.json"
     ]
   },
   {
@@ -877,7 +948,8 @@
     "evidence": "P/Finance.tsx; L/dinamicas.go; L/auxiliares.go; L/grupos.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-finance.mjs"
+      "e2e/frontend-v0-finance.mjs",
+      "docs/integracao-v0/evidencias/integracao-financeiro.json"
     ]
   },
   {
@@ -890,7 +962,8 @@
     "evidence": "P/Finance.tsx; E/financeiro.go; G/finance/core.go; G/finance/sql/; M/00021_financeiro_avancado.sql; M/00031_condicoes_contrato.sql; M/00044_produtos_adicionais.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-finance.mjs"
+      "e2e/frontend-v0-finance.mjs",
+      "docs/integracao-v0/evidencias/integracao-financeiro.json"
     ]
   },
   {
@@ -903,7 +976,8 @@
     "evidence": "P/Finance.tsx (InvoiceModal); L/grupos.go; L/auxiliares.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-finance.mjs"
+      "e2e/frontend-v0-finance.mjs",
+      "docs/integracao-v0/evidencias/integracao-financeiro.json"
     ]
   },
   {
@@ -916,7 +990,8 @@
     "evidence": "P/Finance.tsx; E/financeiro.go; G/finance/core.go (Manual/settle/Paid)",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-finance.mjs"
+      "e2e/frontend-v0-finance.mjs",
+      "docs/integracao-v0/evidencias/integracao-financeiro.json"
     ]
   },
   {
@@ -929,7 +1004,8 @@
     "evidence": "P/Finance.tsx; E/financeiro.go; G/finance/core.go (Reverse)",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-finance.mjs"
+      "e2e/frontend-v0-finance.mjs",
+      "docs/integracao-v0/evidencias/integracao-financeiro.json"
     ]
   },
   {
@@ -942,7 +1018,8 @@
     "evidence": "P/Finance.tsx; E/financeiro.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-finance.mjs"
+      "e2e/frontend-v0-finance.mjs",
+      "docs/integracao-v0/evidencias/integracao-financeiro.json"
     ]
   },
   {
@@ -955,7 +1032,8 @@
     "evidence": "P/Finance.tsx; E/financeiro.go; G/finance/core.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-finance.mjs"
+      "e2e/frontend-v0-finance.mjs",
+      "docs/integracao-v0/evidencias/integracao-financeiro.json"
     ]
   },
   {
@@ -968,7 +1046,8 @@
     "evidence": "P/Finance.tsx (ContractFinance); L/grupos.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-finance.mjs"
+      "e2e/frontend-v0-finance.mjs",
+      "docs/integracao-v0/evidencias/integracao-financeiro.json"
     ]
   },
   {
@@ -981,7 +1060,8 @@
     "evidence": "P/Finance.tsx (AgreementModal); G/finance/advanced.go (Agreement); E/financeiro.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-finance.mjs"
+      "e2e/frontend-v0-finance.mjs",
+      "docs/integracao-v0/evidencias/integracao-financeiro.json"
     ]
   },
   {
@@ -992,10 +1072,13 @@
     "behavior": "Elegibilidade por contrato/estado, política/prazo/intervalo e histórico; equipe informa dias e motivo, trust:grant. Registra liberação e operação de reativação; expiração depende das rotinas e da política de suspensão.",
     "endpoints": "GET /api/contracts/:id/trust-release; POST /api/contracts/:id/trust-release",
     "evidence": "P/Finance.tsx; G/finance/advanced.go; L/service.go; E/financeiro.go",
-    "integrationState": "partial",
+    "integrationState": "validated",
     "validation": [
-      "Consulta de elegibilidade e editor integrados; concessão/expiração serão validadas com provisionamento e política de rede."
-    ]
+      "e2e/frontend-v0-finance-access.mjs",
+      "docs/integracao-v0/evidencias/integracao-cobranca-acesso.json",
+      "docs/integracao-v0/evidencias/producao-cobranca-acesso.json"
+    ],
+    "integrationNote": "Concessão pela equipe e pelo portal, histórico, bloqueio de repetição e efeito de intenção validados. Liberação ativa protege contra auto-suspensão; validade expirada e nova suspensão dependem dos jobs e da política existente. Não comprova mudança física no NAS."
   },
   {
     "id": "FI-11",
@@ -1005,11 +1088,15 @@
     "behavior": "settings:manage grava gateway none/demo, billing_auto, auto_suspend/dias, auto_resume, rejeição/perfil, confiança/dias/gap, multa percentual, juros mensais e proporcional primeiro mês. finance:read consulta. Jobs só atuam se habilitados.",
     "endpoints": "GET /api/finance/settings; PUT /api/finance/settings; POST /api/finance/run-auto-suspend",
     "evidence": "P/Finance.tsx; E/ordens.go (financeSettings); E/financeiro.go; G/finance/gateway.go",
-    "integrationState": "partial",
+    "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-finance.mjs",
-      "Leitura e edição de política validadas; execução da suspensão e confiança ainda dependem dos cenários de rede."
-    ]
+      "e2e/frontend-v0-finance-access.mjs",
+      "docs/integracao-v0/evidencias/integracao-financeiro.json",
+      "docs/integracao-v0/evidencias/integracao-cobranca-acesso.json",
+      "docs/integracao-v0/evidencias/producao-cobranca-acesso.json"
+    ],
+    "integrationNote": "Configurações e verificação explícita de inadimplência validadas com o Go. Pagamento retoma suspensão automática e preserva suspensão manual; rotinas periódicas continuam dependentes dos jobs habilitados."
   },
   {
     "id": "FI-12",
@@ -1021,7 +1108,8 @@
     "evidence": "P/Finance.tsx (NoticePageCard); E/config.go; L/notice.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-finance.mjs"
+      "e2e/frontend-v0-finance.mjs",
+      "docs/integracao-v0/evidencias/integracao-financeiro.json"
     ]
   },
   {
@@ -1034,7 +1122,8 @@
     "evidence": "P/Finance.tsx (AccountingExport); E/relatorios.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-finance.mjs"
+      "e2e/frontend-v0-finance.mjs",
+      "docs/integracao-v0/evidencias/integracao-financeiro.json"
     ]
   },
   {
@@ -1047,7 +1136,8 @@
     "evidence": "P/Cobranca.tsx; E/relatorios.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-finance.mjs"
+      "e2e/frontend-v0-finance.mjs",
+      "docs/integracao-v0/evidencias/integracao-financeiro.json"
     ]
   },
   {
@@ -1060,7 +1150,8 @@
     "evidence": "P/Finance.tsx; G/finance/gateway.go (chargePayments/Reconcile); E/financeiro.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-finance.mjs"
+      "e2e/frontend-v0-finance.mjs",
+      "docs/integracao-v0/evidencias/integracao-financeiro.json"
     ]
   },
   {
@@ -1073,7 +1164,8 @@
     "evidence": "P/Finance.tsx; E/gateway.go; G/finance/core.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-finance.mjs"
+      "e2e/frontend-v0-finance.mjs",
+      "docs/integracao-v0/evidencias/integracao-financeiro.json"
     ]
   },
   {
@@ -1085,7 +1177,8 @@
     "endpoints": "—",
     "evidence": "G/finance/core.go (Charges/Demo); G/finance/gateway.go (chargePayments); E/gateway.go; E/ordens.go",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Limitação existente preservada: nenhum gateway real localizado; não é capacidade disponível nem promessa de homologação."
     ]
   },
@@ -1100,8 +1193,8 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-network.mjs",
-      "evidencias/integracao-rede.json",
-      "evidencias/producao-rede.json"
+      "docs/integracao-v0/evidencias/integracao-rede.json",
+      "docs/integracao-v0/evidencias/producao-rede.json"
     ]
   },
   {
@@ -1112,11 +1205,16 @@
     "behavior": "Nome, criação, rotação de token, revogação/reativação e limpeza da associação de certificado; token e chave pública de assinatura exibidos no momento da emissão. Certificado e situação de sincronização são acompanhados.",
     "endpoints": "POST /api/agents; PATCH /api/agents/:id",
     "evidence": "P/Network.tsx; E/rede.go; G/agent/; M/00002_rede_operacoes.sql",
-    "integrationState": "partial",
+    "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-network.mjs",
-      "Criação, emissão/rotação e invalidação de token, revogação/reativação, versão, contato e sincronização validados com agente sintético. Redefinição de certificado implementada, ainda sem validação com certificado fixado; harness de agentes usa mTLS desligado somente neste ambiente isolado."
-    ]
+      "e2e/frontend-v0-network-final.mjs",
+      "docs/integracao-v0/evidencias/integracao-rede.json",
+      "docs/integracao-v0/evidencias/producao-rede.json",
+      "docs/integracao-v0/evidencias/integracao-rede-complementar.json",
+      "docs/integracao-v0/evidencias/producao-rede-complementar.json"
+    ],
+    "integrationNote": "Cadastro, token e status validados no cenário de rede; remoção de fingerprint fixado foi validada com associação preparada no banco descartável. Este teste não homologa certificado ou handshake físico de agente."
   },
   {
     "id": "RE-03",
@@ -1129,8 +1227,8 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-network.mjs",
-      "evidencias/integracao-rede.json",
-      "evidencias/producao-rede.json"
+      "docs/integracao-v0/evidencias/integracao-rede.json",
+      "docs/integracao-v0/evidencias/producao-rede.json"
     ]
   },
   {
@@ -1144,8 +1242,8 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-network.mjs",
-      "evidencias/integracao-rede.json",
-      "evidencias/producao-rede.json"
+      "docs/integracao-v0/evidencias/integracao-rede.json",
+      "docs/integracao-v0/evidencias/producao-rede.json"
     ]
   },
   {
@@ -1156,11 +1254,16 @@
     "behavior": "Alterar parâmetros de sessões simultâneas e intervalo de accounting; rodar novo segredo/túnel, inspecionar handshake e reaplicar contas. Operações não demonstram conectividade real por si só.",
     "endpoints": "PATCH /api/radius/devices/:id; POST /api/radius/devices/:id/secret; POST /api/radius/devices/:id/tunnel; POST /api/devices/:id/reapply",
     "evidence": "P/Concentradores.tsx; E/radius.go; E/rede.go; G/vpn/vpn.go",
-    "integrationState": "partial",
+    "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-network.mjs",
-      "Parâmetros, rotação de segredo, instruções e reaplicação validados. Opções de túnel seguem capacidades do servidor; criação/refazimento e handshake não validados, pois VPN/L2TP não estão habilitados no harness. Não houve conexão a NAS físico."
-    ]
+      "e2e/frontend-v0-network-final.mjs",
+      "docs/integracao-v0/evidencias/integracao-rede.json",
+      "docs/integracao-v0/evidencias/producao-rede.json",
+      "docs/integracao-v0/evidencias/integracao-rede-complementar.json",
+      "docs/integracao-v0/evidencias/producao-rede-complementar.json"
+    ],
+    "integrationNote": "Parâmetros, segredo e reaplicação validados; emissão/rotação WireGuard e L2TP e leitura de handshake sintético validadas em harness separado. Chaves privadas aparecem na emissão e consultas posteriores usam marcadores. Nenhum túnel físico foi aberto."
   },
   {
     "id": "RE-06",
@@ -1173,8 +1276,8 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-network.mjs",
-      "evidencias/integracao-rede.json",
-      "evidencias/producao-rede.json"
+      "docs/integracao-v0/evidencias/integracao-rede.json",
+      "docs/integracao-v0/evidencias/producao-rede.json"
     ]
   },
   {
@@ -1187,7 +1290,9 @@
     "evidence": "P/Service.tsx; E/rede.go; E/acessos.go; G/network/",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-access.mjs"
+      "e2e/frontend-v0-access.mjs",
+      "docs/integracao-v0/evidencias/integracao-acesso.json",
+      "docs/integracao-v0/evidencias/producao-acesso.json"
     ]
   },
   {
@@ -1200,7 +1305,9 @@
     "evidence": "P/Service.tsx; E/rede.go; G/network/engine.go; G/radius/",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-access.mjs"
+      "e2e/frontend-v0-access.mjs",
+      "docs/integracao-v0/evidencias/integracao-acesso.json",
+      "docs/integracao-v0/evidencias/producao-acesso.json"
     ]
   },
   {
@@ -1214,8 +1321,8 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-network.mjs",
-      "evidencias/integracao-rede.json",
-      "evidencias/producao-rede.json"
+      "docs/integracao-v0/evidencias/integracao-rede.json",
+      "docs/integracao-v0/evidencias/producao-rede.json"
     ]
   },
   {
@@ -1228,7 +1335,9 @@
     "evidence": "P/Atendimento.tsx; E/operacoes.go; E/relatorios.go; G/radius/",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-access.mjs"
+      "e2e/frontend-v0-access.mjs",
+      "docs/integracao-v0/evidencias/integracao-acesso.json",
+      "docs/integracao-v0/evidencias/producao-acesso.json"
     ]
   },
   {
@@ -1241,7 +1350,9 @@
     "evidence": "P/Service.tsx; P/Concentradores.tsx; P/Atendimento.tsx; E/relatorios.go; L/usage.go; M/00036_radius_integrado.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-access.mjs"
+      "e2e/frontend-v0-access.mjs",
+      "docs/integracao-v0/evidencias/integracao-acesso.json",
+      "docs/integracao-v0/evidencias/producao-acesso.json"
     ]
   },
   {
@@ -1255,6 +1366,10 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-cpe.mjs",
+      "docs/integracao-v0/evidencias/integracao-cpe.json",
+      "docs/integracao-v0/evidencias/producao-cpe.json"
+    ],
+    "validationNotes": [
       "ACS sintético TR-098/TR-181: vínculo, leitura, Wi-Fi aplicado/enfileirado, reinício, releitura e desvínculo; sem roteador físico."
     ]
   },
@@ -1268,7 +1383,9 @@
     "evidence": "P/Network.tsx; services/network-agent/nexo_agent/drivers/; G/config/",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-access.mjs"
+      "e2e/frontend-v0-access.mjs",
+      "docs/integracao-v0/evidencias/integracao-acesso.json",
+      "docs/integracao-v0/evidencias/producao-acesso.json"
     ]
   },
   {
@@ -1281,7 +1398,9 @@
     "evidence": "P/Extras.tsx; P/Atendimento.tsx; L/usage.go; L/dinamicas.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-access.mjs"
+      "e2e/frontend-v0-access.mjs",
+      "docs/integracao-v0/evidencias/integracao-acesso.json",
+      "docs/integracao-v0/evidencias/producao-acesso.json"
     ]
   },
   {
@@ -1295,6 +1414,10 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-optical.mjs",
+      "docs/integracao-v0/evidencias/integracao-optica.json",
+      "docs/integracao-v0/evidencias/producao-optica.json"
+    ],
+    "validationNotes": [
       "Protocolo sintético do agente validado; driver Huawei segue sem homologação em OLT física. Nenhum fabricante adicional foi presumido."
     ]
   },
@@ -1309,6 +1432,10 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-optical.mjs",
+      "docs/integracao-v0/evidencias/integracao-optica.json",
+      "docs/integracao-v0/evidencias/producao-optica.json"
+    ],
+    "validationNotes": [
       "Protocolo sintético do agente validado; driver Huawei segue sem homologação em OLT física. Nenhum fabricante adicional foi presumido."
     ]
   },
@@ -1323,6 +1450,10 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-optical.mjs",
+      "docs/integracao-v0/evidencias/integracao-optica.json",
+      "docs/integracao-v0/evidencias/producao-optica.json"
+    ],
+    "validationNotes": [
       "Protocolo sintético do agente validado; driver Huawei segue sem homologação em OLT física. Nenhum fabricante adicional foi presumido."
     ]
   },
@@ -1336,7 +1467,9 @@
     "evidence": "P/Field.tsx; E/infraestrutura.go; M/00011_os_estoque_ftth.sql; M/00040_mapa_coordenadas.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-ftth.mjs"
+      "e2e/frontend-v0-ftth.mjs",
+      "docs/integracao-v0/evidencias/integracao-ftth.json",
+      "docs/integracao-v0/evidencias/producao-ftth.json"
     ]
   },
   {
@@ -1349,7 +1482,9 @@
     "evidence": "P/Field.tsx; E/infraestrutura.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-ftth.mjs"
+      "e2e/frontend-v0-ftth.mjs",
+      "docs/integracao-v0/evidencias/integracao-ftth.json",
+      "docs/integracao-v0/evidencias/producao-ftth.json"
     ]
   },
   {
@@ -1363,6 +1498,10 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-ftth.mjs",
+      "docs/integracao-v0/evidencias/integracao-ftth.json",
+      "docs/integracao-v0/evidencias/producao-ftth.json"
+    ],
+    "validationNotes": [
       "Capacidades existentes de caixas, portas e esquema por coordenadas integradas. Traçado físico completo, fusões, OTDR e importação GIS não existem no backend e não foram inventados."
     ]
   },
@@ -1376,7 +1515,9 @@
     "evidence": "P/Noc.tsx; E/noc.go; G/jobs/; M/00013_noc.sql; M/00014_onu_encerramento.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-optical.mjs"
+      "e2e/frontend-v0-optical.mjs",
+      "docs/integracao-v0/evidencias/integracao-optica.json",
+      "docs/integracao-v0/evidencias/producao-optica.json"
     ]
   },
   {
@@ -1389,7 +1530,9 @@
     "evidence": "P/Noc.tsx; E/noc.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-optical.mjs"
+      "e2e/frontend-v0-optical.mjs",
+      "docs/integracao-v0/evidencias/integracao-optica.json",
+      "docs/integracao-v0/evidencias/producao-optica.json"
     ]
   },
   {
@@ -1403,6 +1546,10 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-map.mjs",
+      "docs/integracao-v0/evidencias/integracao-mapa.json",
+      "docs/integracao-v0/evidencias/producao-mapa.json"
+    ],
+    "validationNotes": [
       "Contratos, POPs, caixas, filtro por região/camada/situação, coordenadas exatas, clique para mover, remoção, cobertura, celular e RLS. Blocos OSM interceptados somente na validação."
     ]
   },
@@ -1416,7 +1563,9 @@
     "evidence": "P/Ipam.tsx; E/ipam.go; E/infraestrutura.go; M/00010_ipam_cgnat.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-ipam.mjs"
+      "e2e/frontend-v0-ipam.mjs",
+      "docs/integracao-v0/evidencias/integracao-ipam.json",
+      "docs/integracao-v0/evidencias/producao-ipam.json"
     ]
   },
   {
@@ -1430,6 +1579,10 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-ipam.mjs",
+      "docs/integracao-v0/evidencias/integracao-ipam.json",
+      "docs/integracao-v0/evidencias/producao-ipam.json"
+    ],
+    "validationNotes": [
       "Reserva e liberação de prefixo validadas; a entrega automática IPv6 ao NAS não existe no backend e permanece explícita na interface."
     ]
   },
@@ -1443,7 +1596,9 @@
     "evidence": "P/Ipam.tsx; E/ipam.go; L/cgnat.go; M/00010_ipam_cgnat.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-cgnat-legal.mjs"
+      "e2e/frontend-v0-cgnat-legal.mjs",
+      "docs/integracao-v0/evidencias/integracao-cgnat-legal.json",
+      "docs/integracao-v0/evidencias/producao-cgnat-legal.json"
     ]
   },
   {
@@ -1456,7 +1611,9 @@
     "evidence": "P/Ipam.tsx; E/ipam.go; M/00010_ipam_cgnat.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-cgnat-legal.mjs"
+      "e2e/frontend-v0-cgnat-legal.mjs",
+      "docs/integracao-v0/evidencias/integracao-cgnat-legal.json",
+      "docs/integracao-v0/evidencias/producao-cgnat-legal.json"
     ]
   },
   {
@@ -1469,7 +1626,9 @@
     "evidence": "P/ConsultaIp.tsx; E/ipam.go; M/00010_ipam_cgnat.sql; M/00025_sessoes_contatos_pops.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-cgnat-legal.mjs"
+      "e2e/frontend-v0-cgnat-legal.mjs",
+      "docs/integracao-v0/evidencias/integracao-cgnat-legal.json",
+      "docs/integracao-v0/evidencias/producao-cgnat-legal.json"
     ]
   },
   {
@@ -1483,6 +1642,10 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-cgnat-legal.mjs",
+      "docs/integracao-v0/evidencias/integracao-cgnat-legal.json",
+      "docs/integracao-v0/evidencias/producao-cgnat-legal.json"
+    ],
+    "validationNotes": [
       "Consulta IPv6 apresenta delegação cadastrada e a ausência de histórico completo após liberação. Não presume titularidade anterior."
     ]
   },
@@ -1496,7 +1659,9 @@
     "evidence": "P/Extras.tsx; E/condicoes.go; E/rotinas.go; M/00022_cadastro_manutencao_campo.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-maintenance.mjs"
+      "e2e/frontend-v0-maintenance.mjs",
+      "docs/integracao-v0/evidencias/integracao-manutencoes-pops.json",
+      "docs/integracao-v0/evidencias/producao-manutencoes-pops.json"
     ]
   },
   {
@@ -1510,7 +1675,14 @@
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-ipam.mjs",
-      "e2e/frontend-v0-ftth.mjs: porta da caixa positiva consultada na ficha do contrato."
+      "e2e/frontend-v0-ftth.mjs",
+      "docs/integracao-v0/evidencias/integracao-ipam.json",
+      "docs/integracao-v0/evidencias/producao-ipam.json",
+      "docs/integracao-v0/evidencias/integracao-ftth.json",
+      "docs/integracao-v0/evidencias/producao-ftth.json"
+    ],
+    "validationNotes": [
+      "porta da caixa positiva consultada na ficha do contrato."
     ]
   },
   {
@@ -1523,7 +1695,9 @@
     "evidence": "P/Users.tsx; G/auth/permissions.go; I/; M/00034_escopo_pop_aviso_documentos.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-admin-team.mjs"
+      "e2e/frontend-v0-admin-team.mjs",
+      "docs/integracao-v0/evidencias/integracao-equipe-empresas.json",
+      "docs/integracao-v0/evidencias/producao-equipe-empresas.json"
     ]
   },
   {
@@ -1536,7 +1710,9 @@
     "evidence": "P/Users.tsx; P/Login.tsx; I/",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-admin-team.mjs"
+      "e2e/frontend-v0-admin-team.mjs",
+      "docs/integracao-v0/evidencias/integracao-equipe-empresas.json",
+      "docs/integracao-v0/evidencias/producao-equipe-empresas.json"
     ],
     "integrationNote": "A interface oficial oferece redefinição de senha de outro usuário; senha antiga e nova foram verificadas por autenticação real, sem recuperar a senha atual."
   },
@@ -1550,7 +1726,9 @@
     "evidence": "P/Tenants.tsx; I/; G/tenancy/; M/00018_modulos.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-saas.mjs"
+      "e2e/frontend-v0-saas.mjs",
+      "docs/integracao-v0/evidencias/integracao-saas.json",
+      "docs/integracao-v0/evidencias/producao-saas.json"
     ]
   },
   {
@@ -1563,7 +1741,9 @@
     "evidence": "P/Empresas.tsx; E/empresas_tags.go; M/00041_empresas.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-admin-team.mjs"
+      "e2e/frontend-v0-admin-team.mjs",
+      "docs/integracao-v0/evidencias/integracao-equipe-empresas.json",
+      "docs/integracao-v0/evidencias/producao-equipe-empresas.json"
     ]
   },
   {
@@ -1576,7 +1756,9 @@
     "evidence": "P/Atendimento.tsx; E/config.go; M/00025_sessoes_contatos_pops.sql; M/00034_escopo_pop_aviso_documentos.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-maintenance.mjs"
+      "e2e/frontend-v0-maintenance.mjs",
+      "docs/integracao-v0/evidencias/integracao-manutencoes-pops.json",
+      "docs/integracao-v0/evidencias/producao-manutencoes-pops.json"
     ]
   },
   {
@@ -1587,8 +1769,12 @@
     "behavior": "Salvar/remover URL, testar entrega e executar pendentes; histórico de estados e tentativas. Mensagens saem via HTTP; integração depende do destinatário, rede e configuração segura.",
     "endpoints": "GET /api/notifications; PUT /api/notifications/settings; POST /api/notifications/test; POST /api/notifications/deliver",
     "evidence": "P/Notices.tsx; E/integracoes.go; G/outbound/; M/00016_avisos.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-messages.mjs",
+      "docs/integracao-v0/evidencias/integracao-avisos.json",
+      "docs/integracao-v0/evidencias/producao-avisos.json"
+    ]
   },
   {
     "id": "AD-07",
@@ -1598,8 +1784,12 @@
     "behavior": "Nome, URL, nomes dos campos de telefone e mensagem e autorização opcional; ativar, desativar, excluir, enviar teste; segredo protegido no backend. É um adaptador HTTP genérico, não um conector universal homologado para WhatsApp.",
     "endpoints": "GET /api/notice-channels; POST /api/notice-channels; PATCH /api/notice-channels/:id; DELETE /api/notice-channels/:id; POST /api/notice-channels/:id/test",
     "evidence": "P/AvisosAssinante.tsx; E/avisos.go; E/integracoes.go; G/outbound/; M/00027_avisos_ao_assinante.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-messages.mjs",
+      "docs/integracao-v0/evidencias/integracao-avisos.json",
+      "docs/integracao-v0/evidencias/producao-avisos.json"
+    ]
   },
   {
     "id": "AD-08",
@@ -1609,8 +1799,12 @@
     "behavior": "Modelo parametrizado de mensagem e catálogo de variáveis; exclusão sujeita ao uso. A tela não oferece edição de modelo existente.",
     "endpoints": "GET /api/notice-templates; POST /api/notice-templates; DELETE /api/notice-templates/:id",
     "evidence": "P/AvisosAssinante.tsx; E/avisos.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-messages.mjs",
+      "docs/integracao-v0/evidencias/integracao-avisos.json",
+      "docs/integracao-v0/evidencias/producao-avisos.json"
+    ]
   },
   {
     "id": "AD-09",
@@ -1620,8 +1814,12 @@
     "behavior": "Regra por dias em relação ao vencimento, janela, canal, modelo e plano opcional; criar, pausar, ativar, excluir e executar agora. Enfileiramento considera consentimento e deduplicação; histórico não é caixa de entrada ou conversa.",
     "endpoints": "GET /api/notice-rules; POST /api/notice-rules; PATCH /api/notice-rules/:id; DELETE /api/notice-rules/:id; POST /api/notice-rules/run",
     "evidence": "P/AvisosAssinante.tsx; E/avisos.go; G/jobs/; M/00035_fila_de_avisos.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-messages.mjs",
+      "docs/integracao-v0/evidencias/integracao-avisos.json",
+      "docs/integracao-v0/evidencias/producao-avisos.json"
+    ]
   },
   {
     "id": "AD-10",
@@ -1631,8 +1829,12 @@
     "behavior": "Criar token com nome, escopos, limite e expiração, exibir segredo uma vez, consultar prefixo/uso e revogar. API pública tem escopos e rate limit próprios.",
     "endpoints": "GET /api/api-tokens; POST /api/api-tokens; DELETE /api/api-tokens/:id",
     "evidence": "P/Integracoes.tsx; E/acessos.go; E/integracoes.go; E/public.go; M/00029_api_publica_webhooks.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-integrations.mjs",
+      "docs/integracao-v0/evidencias/integracao-integracoes.json",
+      "docs/integracao-v0/evidencias/producao-integracoes.json"
+    ]
   },
   {
     "id": "AD-11",
@@ -1642,8 +1844,12 @@
     "behavior": "Criar URL/eventos/segredo, ativar/desativar, excluir, rotacionar segredo, testar, consultar histórico e solicitar repetição de falha. Assinatura HMAC e validação de destino são feitas no servidor; sucesso depende do receptor.",
     "endpoints": "GET /api/webhook-endpoints; POST /api/webhook-endpoints; PATCH /api/webhook-endpoints/:id; DELETE /api/webhook-endpoints/:id; POST /api/webhook-endpoints/:id/rotate-secret; POST /api/webhook-endpoints/:id/test; POST /api/webhook-deliveries/:id/retry",
     "evidence": "P/Integracoes.tsx; E/integracoes.go; G/outbound/; G/jobs/",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-integrations.mjs",
+      "docs/integracao-v0/evidencias/integracao-integracoes.json",
+      "docs/integracao-v0/evidencias/producao-integracoes.json"
+    ]
   },
   {
     "id": "AD-12",
@@ -1655,7 +1861,9 @@
     "evidence": "P/Qualidade.tsx; E/config.go; M/00028_fluxo_os_catalogos_sla.sql; M/00030_estados_motivos_anotacoes.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-quality.mjs"
+      "e2e/frontend-v0-quality.mjs",
+      "docs/integracao-v0/evidencias/integracao-qualidade.json",
+      "docs/integracao-v0/evidencias/producao-qualidade.json"
     ]
   },
   {
@@ -1668,7 +1876,9 @@
     "evidence": "P/Qualidade.tsx; E/config.go; L/dinamicas.go; G/jobs/",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-quality.mjs"
+      "e2e/frontend-v0-quality.mjs",
+      "docs/integracao-v0/evidencias/integracao-qualidade.json",
+      "docs/integracao-v0/evidencias/producao-qualidade.json"
     ]
   },
   {
@@ -1681,7 +1891,9 @@
     "evidence": "P/Qualidade.tsx; P/Portal.tsx; E/operacoes.go; E/config.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-quality.mjs"
+      "e2e/frontend-v0-quality.mjs",
+      "docs/integracao-v0/evidencias/integracao-qualidade.json",
+      "docs/integracao-v0/evidencias/producao-qualidade.json"
     ]
   },
   {
@@ -1694,7 +1906,9 @@
     "evidence": "P/Qualidade.tsx; P/Extras.tsx; E/config.go; E/custom.go; M/00032_campos_kits_comissao.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-quality.mjs"
+      "e2e/frontend-v0-quality.mjs",
+      "docs/integracao-v0/evidencias/integracao-qualidade.json",
+      "docs/integracao-v0/evidencias/producao-qualidade.json"
     ]
   },
   {
@@ -1707,7 +1921,9 @@
     "evidence": "P/Qualidade.tsx; P/Field.tsx; E/documentos.go; E/estoque.go; E/materiais.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-quality.mjs"
+      "e2e/frontend-v0-quality.mjs",
+      "docs/integracao-v0/evidencias/integracao-qualidade.json",
+      "docs/integracao-v0/evidencias/producao-qualidade.json"
     ]
   },
   {
@@ -1720,7 +1936,9 @@
     "evidence": "P/Qualidade.tsx; E/documentos.go; E/relatorios.go; M/00032_campos_kits_comissao.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-quality.mjs"
+      "e2e/frontend-v0-quality.mjs",
+      "docs/integracao-v0/evidencias/integracao-qualidade.json",
+      "docs/integracao-v0/evidencias/producao-qualidade.json"
     ],
     "integrationNote": "Regras e apuração existentes integradas; regras vigentes alteram a apuração histórica. Não há pagamento nem liquidação de comissão no backend."
   },
@@ -1734,7 +1952,9 @@
     "evidence": "P/Anatel.tsx; E/relatorios.go; E/condicoes.go; M/00049_anatel_dici.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-admin-reports.mjs"
+      "e2e/frontend-v0-admin-reports.mjs",
+      "docs/integracao-v0/evidencias/integracao-auditoria-anatel.json",
+      "docs/integracao-v0/evidencias/producao-auditoria-anatel.json"
     ],
     "integrationNote": "Prévia, correções IBGE/tecnologia e CSV integrados. Não transmite declaração à ANATEL; conferir leiaute continua responsabilidade operacional do provedor."
   },
@@ -1746,8 +1966,12 @@
     "behavior": "Selecionar tipo/arquivo, mapear colunas e planos, pré-visualizar com rollback, importar e consultar linhas/avisos; cadastros, contratos, contas, faturas e históricos disponíveis conforme tipo. Provisionamento é etapa separada; contas sem senha exigem tratamento.",
     "endpoints": "POST /api/import/preview; POST /api/import/apply; GET /api/import/batches; GET /api/import/batches/:id; POST /api/import/batches/:id/provision",
     "evidence": "P/Import.tsx; E/importacao.go; M/00004_portal_importacao.sql; M/00050_importacao_historico.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-import.mjs",
+      "docs/integracao-v0/evidencias/integracao-importacao.json",
+      "docs/integracao-v0/evidencias/producao-importacao.json"
+    ]
   },
   {
     "id": "AD-20",
@@ -1757,8 +1981,13 @@
     "behavior": "Há cliente e ferramentas auxiliares de leitura/exportação e importador CSV mapeado, sem evidência de conector universal com mapeamento completo e corte automático; senhas/relacionamentos e dados reais exigem conferência.",
     "endpoints": "POST /api/import/preview; POST /api/import/apply",
     "evidence": "P/Import.tsx; E/importacao.go; tools/sgp-migracao/",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "backend-preserved",
+    "validation": [
+      "e2e/frontend-v0-import.mjs",
+      "docs/integracao-v0/evidencias/integracao-importacao.json",
+      "docs/integracao-v0/evidencias/producao-importacao.json"
+    ],
+    "integrationNote": "Importador CSV intermediário existente foi integrado com mapeamento, prévia transacional, aplicação, histórico e provisionamento separado. Migração universal direta de SGP/MK-Auth não é capacidade disponível no backend; exige conversão da exportação e validação por instalação."
   },
   {
     "id": "AD-21",
@@ -1770,7 +1999,9 @@
     "evidence": "P/Audit.tsx; E/config.go; G/audit/; G/jobs/; M/00053_retencao.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-admin-reports.mjs"
+      "e2e/frontend-v0-admin-reports.mjs",
+      "docs/integracao-v0/evidencias/integracao-auditoria-anatel.json",
+      "docs/integracao-v0/evidencias/producao-auditoria-anatel.json"
     ]
   },
   {
@@ -1783,7 +2014,9 @@
     "evidence": "P/Portal.tsx; L/service.go; G/auth/",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-portal.mjs"
+      "e2e/frontend-v0-portal.mjs",
+      "docs/integracao-v0/evidencias/integracao-portal.json",
+      "docs/integracao-v0/evidencias/producao-portal.json"
     ]
   },
   {
@@ -1796,7 +2029,9 @@
     "evidence": "P/Portal.tsx; L/service.go; G/finance/core.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-portal.mjs"
+      "e2e/frontend-v0-portal.mjs",
+      "docs/integracao-v0/evidencias/integracao-portal.json",
+      "docs/integracao-v0/evidencias/producao-portal.json"
     ]
   },
   {
@@ -1809,7 +2044,9 @@
     "evidence": "P/Portal.tsx; E/financeiro.go; G/finance/advanced.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-portal.mjs"
+      "e2e/frontend-v0-portal.mjs",
+      "docs/integracao-v0/evidencias/integracao-portal.json",
+      "docs/integracao-v0/evidencias/producao-portal.json"
     ]
   },
   {
@@ -1822,7 +2059,9 @@
     "evidence": "P/Portal.tsx; P/Extras.tsx; L/usage.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-portal.mjs"
+      "e2e/frontend-v0-portal.mjs",
+      "docs/integracao-v0/evidencias/integracao-portal.json",
+      "docs/integracao-v0/evidencias/producao-portal.json"
     ]
   },
   {
@@ -1835,7 +2074,9 @@
     "evidence": "P/Cpe.tsx; E/cpe.go; G/acs/",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-portal-wifi.mjs"
+      "e2e/frontend-v0-portal-wifi.mjs",
+      "docs/integracao-v0/evidencias/integracao-portal-wifi.json",
+      "docs/integracao-v0/evidencias/producao-portal-wifi.json"
     ]
   },
   {
@@ -1848,7 +2089,9 @@
     "evidence": "P/Crm.tsx; E/crm.go; L/service.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-portal.mjs"
+      "e2e/frontend-v0-portal.mjs",
+      "docs/integracao-v0/evidencias/integracao-portal.json",
+      "docs/integracao-v0/evidencias/producao-portal.json"
     ]
   },
   {
@@ -1861,7 +2104,9 @@
     "evidence": "P/Portal.tsx; E/avisos.go; L/consultas_generated.go",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-portal.mjs"
+      "e2e/frontend-v0-portal.mjs",
+      "docs/integracao-v0/evidencias/integracao-portal.json",
+      "docs/integracao-v0/evidencias/producao-portal.json"
     ]
   },
   {
@@ -1874,7 +2119,9 @@
     "evidence": "P/Portal.tsx; E/acessos.go; M/00042_aceite_eletronico.sql",
     "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-portal.mjs"
+      "e2e/frontend-v0-portal.mjs",
+      "docs/integracao-v0/evidencias/integracao-portal.json",
+      "docs/integracao-v0/evidencias/producao-portal.json"
     ]
   },
   {
@@ -1887,7 +2134,9 @@
     "evidence": "P/Portal.tsx; G/finance/core.go; G/finance/gateway.go",
     "integrationState": "backend-preserved",
     "validation": [
-      "e2e/frontend-v0-portal.mjs"
+      "e2e/frontend-v0-portal.mjs",
+      "docs/integracao-v0/evidencias/integracao-portal.json",
+      "docs/integracao-v0/evidencias/producao-portal.json"
     ],
     "integrationNote": "Meios ausentes e códigos explicitamente simulados validados no portal. Pix/boleto real não é uma capacidade disponível no gateway Go atual."
   },
@@ -1900,7 +2149,8 @@
     "endpoints": "GET /public/v1; GET /public/v1/subscribers; GET /public/v1/subscribers/:id; GET /public/v1/contracts; GET /public/v1/invoices; GET /public/v1/work-orders/:id",
     "evidence": "E/public.go; E/integracoes.go; M/00029_api_publica_webhooks.sql",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -1913,7 +2163,8 @@
     "endpoints": "POST /public/v1/tickets; POST /public/v1/work-orders",
     "evidence": "E/public.go; E/crm.go; E/ordens.go; M/00029_api_publica_webhooks.sql",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -1926,7 +2177,8 @@
     "endpoints": "PUT /api/contracts/:id/install-address",
     "evidence": "E/config.go; M/00028_fluxo_os_catalogos_sla.sql",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -1939,7 +2191,8 @@
     "endpoints": "PUT /api/contracts/:id/referral",
     "evidence": "E/comercial.go; M/00031_condicoes_contrato.sql",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -1952,7 +2205,8 @@
     "endpoints": "PATCH /api/tickets/:id; POST /api/leads/:id/convert",
     "evidence": "E/crm.go; E/schemas.go; P/Crm.tsx",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -1965,7 +2219,8 @@
     "endpoints": "PATCH /api/users/:id; PATCH /api/pops/:id; PATCH /api/companies/:id; PATCH /api/catalogs/:id; PATCH /api/sla-policies/:id; PATCH /api/custom-fields/:id",
     "evidence": "I/service.go; E/config.go; E/empresas_tags.go; E/config.go; E/config.go; E/custom.go",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -1978,7 +2233,8 @@
     "endpoints": "PATCH /api/devices/:id; PATCH /api/ipam/pools/:id",
     "evidence": "E/rede.go; E/ipam.go; E/infraestrutura.go; P/Network.tsx; P/Ipam.tsx",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -1991,7 +2247,8 @@
     "endpoints": "GET /api/cgnat/plans/:id/lookup; GET /api/cgnat/trace",
     "evidence": "L/cgnat.go; E/ipam.go; P/Ipam.tsx",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -2004,7 +2261,8 @@
     "endpoints": "GET /api/finance/reports/aging; GET /api/finance/export",
     "evidence": "E/relatorios.go; P/Cobranca.tsx; P/Finance.tsx",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -2017,7 +2275,8 @@
     "endpoints": "POST /agent/v1/hello; POST /agent/v1/sync-done; POST /agent/v1/poll; POST /agent/v1/attempts/:id/begin; POST /agent/v1/attempts/:id/progress; POST /agent/v1/attempts/:id/result; POST /agent/v1/observations; POST /agent/v1/olt-report; POST /agent/v1/usage-report; POST /agent/v1/sessions-report",
     "evidence": "G/agent/; G/network/; apps/api-go/cmd/api/main.go",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -2030,7 +2289,8 @@
     "endpoints": "GET /api/operations; GET /api/operations/:id",
     "evidence": "G/network/engine.go; G/network/attempts.go; G/jobs/; M/00002_rede_operacoes.sql",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -2043,7 +2303,8 @@
     "endpoints": "—",
     "evidence": "G/radius/; infra/radius/; M/00036_radius_integrado.sql; M/00038_escala_radius.sql",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -2056,7 +2317,8 @@
     "endpoints": "POST /agent/v1/poll; POST /agent/v1/attempts/:id/result; POST /agent/v1/observations",
     "evidence": "services/network-agent/nexo_agent/agent.py; services/network-agent/nexo_agent/executor.py; services/network-agent/nexo_agent/store.py; services/network-agent/nexo_agent/drivers/",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -2069,7 +2331,8 @@
     "endpoints": "—",
     "evidence": "apps/api-go/cmd/nexo-vpn/; G/vpn/vpn.go; infra/prod/",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -2082,7 +2345,8 @@
     "endpoints": "—",
     "evidence": "G/acs/; E/cpe.go; infra/compose/",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -2095,7 +2359,8 @@
     "endpoints": "—",
     "evidence": "G/jobs/; G/finance/; E/rotinas.go; apps/api-go/cmd/api/main.go",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -2108,7 +2373,8 @@
     "endpoints": "—",
     "evidence": "G/jobs/; E/rotinas.go; G/outbound/; M/00029_api_publica_webhooks.sql; M/00053_retencao.sql",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -2121,7 +2387,8 @@
     "endpoints": "—",
     "evidence": "G/jobs/; G/radius/; M/00023_consumo.sql; M/00043_consumo_diario.sql; M/00047_consumo_por_hora.sql",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -2134,7 +2401,8 @@
     "endpoints": "—",
     "evidence": "apps/api-go/cmd/nexo-db/; G/db/; db/migrations/",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -2147,7 +2415,8 @@
     "endpoints": "POST /api/auth/login; POST /api/auth/logout; GET /api/me; POST /api/me/mfa/setup; POST /api/me/mfa/enable; POST /api/me/mfa/disable",
     "evidence": "G/auth/; I/; G/tenancy/; G/db/; M/00005_mfa.sql; M/00019_limite_login.sql; M/00034_escopo_pop_aviso_documentos.sql",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -2160,7 +2429,8 @@
     "endpoints": "GET /healthz; GET /metrics; GET /openapi.json",
     "evidence": "apps/api-go/cmd/api/main.go; G/config/",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -2173,7 +2443,8 @@
     "endpoints": "—",
     "evidence": "scripts/backup.sh; infra/prod/; infra/compose/",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -2186,7 +2457,8 @@
     "endpoints": "—",
     "evidence": "M/00056_diretorio_celulas.sql; G/db/; G/tenancy/",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Limitação existente confirmada em apps/api-go/internal/db/db.go: células diferentes de c1 não têm conexão disponível. O frontend não cria roteamento ou migração distribuída paralela."
     ]
   },
@@ -2199,7 +2471,8 @@
     "endpoints": "GET /api/reports/referrals",
     "evidence": "L/consultas.go; L/consultas_generated.go; E/comercial.go",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -2212,7 +2485,8 @@
     "endpoints": "GET /api/radius/allowed-sources",
     "evidence": "L/grupos.go; L/grupos_generated.go; G/radius/",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -2225,7 +2499,8 @@
     "endpoints": "POST /api/invoices",
     "evidence": "E/financeiro.go; G/finance/core.go; P/Finance.tsx",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   },
@@ -2238,7 +2513,8 @@
     "endpoints": "DELETE /api/tags/:id",
     "evidence": "E/empresas_tags.go; P/Extras.tsx",
     "integrationState": "backend-preserved",
-    "validation": [
+    "validation": [],
+    "validationNotes": [
       "Código do backend/serviço não alterado; operação externa não revalidada nesta etapa."
     ]
   }

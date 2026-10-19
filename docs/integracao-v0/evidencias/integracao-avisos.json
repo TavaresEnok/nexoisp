@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:3005",
+  "verified_at": "2026-10-19T15:48:31.373Z",
+  "backend": "Go/PostgreSQL isolados; receptor HTTP local; telefones e mensagens sintéticos",
+  "checks": [
+    "Webhook da equipe é configurado pela UI, recebe teste e entrega aviso real originado por chamado do portal no receptor local",
+    "Canal guarda autorização sem expô-la e envia teste com campos corretos; ativação usa o backend",
+    "Modelo com variáveis é criado e a prévia ilustrativa é renderizada pelo Go sem disparar mensagens",
+    "Régua filtra plano e data, respeita consentimento e não repete envio do mesmo título/regra; modelo em uso não é excluído",
+    "Histórico conserva envio e recusa por consentimento; regras, modelos e canais podem ser excluídos após remover referências",
+    "Avisos mantêm isolamento do provedor sem usar serviços de mensagem externos"
+  ]
+}

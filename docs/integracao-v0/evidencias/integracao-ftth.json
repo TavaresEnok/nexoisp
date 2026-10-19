@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "base": "http://127.0.0.1:3000",
-  "verified_at": "2026-10-19T12:50:36.912Z",
+  "base": "http://127.0.0.1:3005",
+  "verified_at": "2026-10-19T15:47:03.097Z",
   "backend": "Go/PostgreSQL isolados; sem intervenção física",
   "checks": [
     "Cadastro CEO/CTO, coordenadas em conjunto, hierarquia, OLT/PON e edição persistem no Go",

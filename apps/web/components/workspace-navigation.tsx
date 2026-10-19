@@ -19,7 +19,7 @@ const areaIcons = [Users, ChartNoAxesCombined, Wallet, Network, Headphones, Sett
 
 function NavigationBranch({ node, pathname, onNavigate, icon: Icon, compact = false }: { node: NavigationNode; pathname: string; onNavigate: () => void; icon?: typeof Users; compact?: boolean }) {
   const { operational, me } = useSession();
-  const availability = operational ? integrationStatus(node.href) === "connected" ? "conectado ao ERP" : "integração pendente" : node.view ? "consulta parcial disponível" : "implementação pendente";
+  const availability = operational ? integrationStatus(node.href) === "connected" ? "conectado ao ERP" : "recurso planejado" : node.view ? "consulta parcial disponível" : "implementação pendente";
   const current = findNavigationPage(pathname);
   const [selection, setSelection] = useState<{ path: string; open: boolean } | null>(null);
   const open = selection?.path === pathname ? selection.open : Boolean(current && current.href !== node.href && (node.href === "/" ? current.moduleHref === "/" : current.href.startsWith(`${node.href}/`)));

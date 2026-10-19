@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:18390",
+  "verified_at": "2026-10-19T15:37:18.919Z",
+  "backend": "Go/PostgreSQL isolados; receptor HTTP local; falha prévia de entrega preparada em fixture do banco descartável",
+  "checks": [
+    "Token criado na UI aparece uma vez, autentica a API pública e respeita escopo, validade e limite de chamadas do Go",
+    "Revogação confirmada invalida imediatamente o token na API pública",
+    "Destino criado envia evento assinado real ao receptor local e distingue HTTP 200 de falha HTTP 500",
+    "Rotação mostra novo segredo uma vez; edição, pausa e ativação conservam a assinatura correta no próximo teste",
+    "Evento real gera entrega; falha anterior preparada em banco isolado permite testar reenvio da UI com envio assinado, resposta e histórico reais do Go",
+    "Exclusão confirmada remove destino e histórico; outro provedor não pode excluir o webhook"
+  ]
+}

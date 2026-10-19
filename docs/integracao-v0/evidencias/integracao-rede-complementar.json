@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:3004",
+  "verified_at": "2026-10-19T15:37:33.536Z",
+  "backend": "Go/PostgreSQL isolados; chave pública VPN, associação de certificado e timestamp de handshake preparados em fixture; nenhum serviço WireGuard/IPsec ou NAS físico iniciado",
+  "checks": [
+    "Associação de certificado preparada no banco isolado é removida pela UI e pelo Go com confirmação; não há alegação de novo handshake mTLS",
+    "WireGuard é emitido e regenerado na UI com credencial privada apenas na emissão; instruções posteriores usam marcadores e ausência de handshake permanece explícita",
+    "Leitura de handshake sintético aparece na ficha; troca para L2TP e regeneração produzem novas credenciais, depois ocultas por marcadores, sem abrir túnel físico"
+  ]
+}

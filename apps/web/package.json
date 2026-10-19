@@ -35,7 +35,12 @@
     "test:admin-reports": "node ../../e2e/frontend-v0-admin-reports.mjs",
     "test:saas": "node ../../e2e/frontend-v0-saas.mjs",
     "test:portal": "node ../../e2e/frontend-v0-portal.mjs",
-    "test:portal-wifi": "node ../../e2e/frontend-v0-portal-wifi.mjs"
+    "test:portal-wifi": "node ../../e2e/frontend-v0-portal-wifi.mjs",
+    "test:messages": "node ../../e2e/frontend-v0-messages.mjs",
+    "test:integrations": "node ../../e2e/frontend-v0-integrations.mjs",
+    "test:import": "node ../../e2e/frontend-v0-import.mjs",
+    "test:finance-access": "node ../../e2e/frontend-v0-finance-access.mjs",
+    "test:network-final": "node ../../e2e/frontend-v0-network-final.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.5.0",

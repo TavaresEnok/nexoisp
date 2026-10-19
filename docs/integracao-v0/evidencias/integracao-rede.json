@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "base": "http://127.0.0.1:3000",
-  "verified_at": "2026-10-19T11:16:56.384Z",
+  "base": "http://127.0.0.1:3005",
+  "verified_at": "2026-10-19T15:45:52.053Z",
   "backend": "Go/PostgreSQL isolados; sem conexão a NAS físico",
   "checks": [
     "Agente criado no Go; token e chave pública exibidos na emissão, sem token na consulta posterior",

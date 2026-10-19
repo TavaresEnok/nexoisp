@@ -14,7 +14,7 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | AC-08 | Implementada | Gerenciar TOTP | Integrada e validada |
 | AS-01 | Implementada | Listar, buscar e exportar cadastro | Integrada e validada |
 | AS-02 | Implementada | Cadastrar/editar/inativar assinante | Integrada e validada |
-| AS-03 | Implementada | Ficha e contratos do titular | Parcial |
+| AS-03 | Implementada | Ficha e contratos do titular | Integrada e validada |
 | AS-04 | Implementada | Criar/redefinir acesso de portal | Integrada e validada |
 | AS-05 | Implementada | Manter contatos e consentimento | Integrada e validada |
 | AS-06 | Implementada | Anotações estruturadas | Integrada e validada |
@@ -77,8 +77,8 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | FI-07 | Implementada | Decisão manual de divergência | Integrada e validada |
 | FI-08 | Implementada | Extrato financeiro do contrato | Integrada e validada |
 | FI-09 | Implementada | Renegociar títulos | Integrada e validada |
-| FI-10 | Implementada | Conceder prazo e consultar histórico | Parcial |
-| FI-11 | Implementada | Configurar regras de cobrança | Parcial |
+| FI-10 | Implementada | Conceder prazo e consultar histórico | Integrada e validada |
+| FI-11 | Implementada | Configurar regras de cobrança | Integrada e validada |
 | FI-12 | Implementada | Configurar página pública de bloqueio/redução | Integrada e validada |
 | FI-13 | Implementada | Exportar CSV contábil | Integrada e validada |
 | FI-14 | Implementada | Quatro relatórios e CSV | Integrada e validada |
@@ -86,10 +86,10 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | FI-16 | Demonstrativa | Simulação de pagamento e cobrança | Integrada e validada |
 | FI-17 | Não confirmado | Cobrança bancária real, Pix/boleto pagável | Backend preservado / limitação |
 | RE-01 | Implementada | Indicadores e inventário de agentes/equipamentos | Integrada e validada |
-| RE-02 | Implementada | Cadastrar e administrar agente | Parcial |
+| RE-02 | Implementada | Cadastrar e administrar agente | Integrada e validada |
 | RE-03 | Implementada | Cadastrar equipamento conectado a agente | Integrada e validada |
 | RE-04 | Implementada | Adicionar NAS RADIUS integrado | Integrada e validada |
-| RE-05 | Implementada | Parâmetros, segredo, túnel e reaplicação | Parcial |
+| RE-05 | Implementada | Parâmetros, segredo, túnel e reaplicação | Integrada e validada |
 | RE-06 | Implementada | Converter concentrador legado ao integrado | Integrada e validada |
 | RE-07 | Implementada | Criar acesso e manter credenciais | Integrada e validada |
 | RE-08 | Implementada | Provisionar, suspender, reativar e desconectar | Integrada e validada |
@@ -121,12 +121,12 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | AD-03 | Implementada | Provedores e módulos de produto | Integrada e validada |
 | AD-04 | Implementada | Empresas de faturamento | Integrada e validada |
 | AD-05 | Implementada | Cadastrar e administrar POPs | Integrada e validada |
-| AD-06 | Implementada | Notificações do provedor via webhook | Pendente |
-| AD-07 | Implementada | Cadastrar e testar canais de mensagem | Pendente |
-| AD-08 | Implementada | Criar e excluir textos com variáveis | Pendente |
-| AD-09 | Implementada | Disparar mensagens de cobrança | Pendente |
-| AD-10 | Implementada | Credenciais para API pública | Pendente |
-| AD-11 | Implementada | Destinos, assinatura e entregas | Pendente |
+| AD-06 | Implementada | Notificações do provedor via webhook | Integrada e validada |
+| AD-07 | Implementada | Cadastrar e testar canais de mensagem | Integrada e validada |
+| AD-08 | Implementada | Criar e excluir textos com variáveis | Integrada e validada |
+| AD-09 | Implementada | Disparar mensagens de cobrança | Integrada e validada |
+| AD-10 | Implementada | Credenciais para API pública | Integrada e validada |
+| AD-11 | Implementada | Destinos, assinatura e entregas | Integrada e validada |
 | AD-12 | Implementada | Tipos, classificações, causas e motivos | Integrada e validada |
 | AD-13 | Implementada | Políticas e acompanhamento de prazo | Integrada e validada |
 | AD-14 | Implementada | Consultar pesquisas de OS | Integrada e validada |
@@ -134,8 +134,8 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | AD-16 | Implementada | Criar kits de materiais | Integrada e validada |
 | AD-17 | Parcial | Regras e relatório de comissões | Integrada e validada |
 | AD-18 | Parcial | Dados DICI por competência | Integrada e validada |
-| AD-19 | Implementada | Importar CSV em lotes e conferir erros | Pendente |
-| AD-20 | Parcial | Migração automatizada de qualquer instalação SGP | Pendente |
+| AD-19 | Implementada | Importar CSV em lotes e conferir erros | Integrada e validada |
+| AD-20 | Parcial | Migração automatizada de qualquer instalação SGP | Backend preservado / limitação |
 | AD-21 | Implementada | Consultar eventos e retenção | Integrada e validada |
 | PO-01 | Implementada | Situação dos planos e acesso | Integrada e validada |
 | PO-02 | Implementada | Consultar títulos e abrir meios de pagamento | Integrada e validada |
@@ -174,4 +174,6 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | BE-26 | Somente backend | Criar cobrança avulsa | Backend preservado / limitação |
 | BE-27 | Somente backend | Excluir etiqueta do catálogo | Backend preservado / limitação |
 
-Administração e portal: usuários/senha/MFA/POPs, empresas, SaaS, catálogos, SLA, pesquisas, campos personalizados, kits, comissões, DICI e auditoria possuem evidências de comandos e leitura no Go isolado e na imagem Caddy. O portal valida planos, faturas, confiança, consumo, chamados, pesquisas, aceite e Wi-Fi com ACS sintético. Gateway financeiro real permanece indisponível no backend. Restam avisos, integrações, importação e revisão das unidades parciais. A etapa 7 continua aberta.
+Cobertura de interface: **139 unidades integradas e validadas**, sem unidade operacional pendente ou parcial. As outras **30 unidades** correspondem a capacidades internas e limitações preservadas do backend. Cada registro do JSON aponta arquivos de teste e evidências existentes; observações são mantidas separadamente dos caminhos de validação.
+
+A migração não acrescenta gateway financeiro real, migração universal de SGP/MK-Auth, entrega automática de IPv6, histórico completo de prefixos ou homologação física de OLT/NAS. Consulte as restrições por unidade e as evidências de laboratório. A revisão conjunta final está registrada em `VALIDACAO.md`.

@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:18390",
+  "verified_at": "2026-10-19T15:37:31.290Z",
+  "backend": "Go/PostgreSQL isolados; CSV intermediário e contas sintéticos, sem migração de produção nem NAS físico",
+  "checks": [
+    "CSV é lido, campos e plano são mapeados; prévia valida erros e senha ausente sem gravar assinantes e exige nova simulação após alterar mapa",
+    "Aplicação grava somente linhas válidas e registra lote/avisos; contas importadas ficam sem provisionamento e conta sem senha continua bloqueada",
+    "Provisionamento explícito solicita operação somente para conta com senha; reimportação da mesma origem não duplica assinantes nem contas",
+    "Títulos importados preservam centavos, pagamento parcial e cancelamento; titular inexistente é erro explícito e título aberto não recebe cobrança automática",
+    "Histórico mantém datas originais, importa atendimento/OS/anotação sem abrir SLA nem disparar avisos e não duplica registros na reimportação",
+    "Lotes e provisionamento respeitam isolamento e permissões; importação preserva layout do v0 no celular"
+  ]
+}

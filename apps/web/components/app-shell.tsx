@@ -243,10 +243,10 @@ export function AppShell({ children, initialAppearance }: { children: ReactNode;
                   <DropdownMenuLabel>
                     {operational && me ? `${me.name} · ${roleLabels[me.role]}` : "Gabriel Almeida · perfil demonstrativo"}
                   </DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => go("/configuracoes")}>
+                  {(!operational || canAccessPath(me,"/configuracoes")) && <DropdownMenuItem onClick={() => go("/configuracoes")}>
                     <Settings2 />
                     Configurações do workspace
-                  </DropdownMenuItem>
+                  </DropdownMenuItem>}
                   <DropdownMenuItem onClick={() => { setMobileOpen(false); setHelpOpen(true) }}>
                     <HelpCircle />
                     {operational ? "Sobre o NexoISP" : "Sobre esta demonstração"}

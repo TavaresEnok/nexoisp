@@ -22,3 +22,7 @@ await import('./frontend-v0-quality.mjs');
 await import('./frontend-v0-admin-reports.mjs');
 await import('./frontend-v0-saas.mjs');
 await import('./frontend-v0-portal.mjs');
+await import('./frontend-v0-messages.mjs');
+await import('./frontend-v0-integrations.mjs');
+await import('./frontend-v0-import.mjs');
+await import('./frontend-v0-finance-access.mjs');
