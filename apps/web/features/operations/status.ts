@@ -1,6 +1,9 @@
+import { canonicalErpPath } from "./navigation";
 export function integrationStatus(pathname: string): "connected" | "pending" {
+  pathname = canonicalErpPath(pathname);
   if (pathname.startsWith("/portal/")) return "connected";
   return [
+    "/relatorios/indicacoes",
     "/configuracoes",
     "/administracao/importacao",
     "/administracao/integracoes",
@@ -54,6 +57,7 @@ export function integrationStatus(pathname: string): "connected" | "pending" {
 export function operationalTitle(pathname: string): string | undefined {
   return (
     {
+      "/relatorios/indicacoes": "Relatório de indicações",
       "/noc": "NOC",
       "/pops": "Pontos de presença",
       "/rede/onus": "ONUs e autorizações",

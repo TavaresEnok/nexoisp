@@ -28,7 +28,9 @@ export function QualityAdministration() {
   const [params, setParams] = useSearchParams();
   const choices = [
     { id: "catalogos", label: "Catálogos", component: Catalogs },
-    { id: "sla", label: "SLA", component: SlaPolicies },
+    ...(hasModule(me, "crm") || hasModule(me, "field")
+      ? [{ id: "sla", label: "SLA", component: SlaPolicies }]
+      : []),
     ...(hasModule(me, "field")
       ? [{ id: "satisfacao", label: "Satisfação", component: Satisfaction }]
       : []),

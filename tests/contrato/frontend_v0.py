@@ -19,9 +19,9 @@ def main():
     for candidate in [port, api_port, api_port + 1000, api_port + 2000]:
         with socket.socket() as sock:
             sock.bind(('127.0.0.1', candidate))
-    if not (ROOT / 'apps/api-go/bin/api').exists():
-        go('build', '-o', 'bin/nexo-db', './cmd/nexo-db')
-        go('build', '-o', 'bin/api', './cmd/api')
+    # O cache incremental do Go evita custo desnecessário sem reutilizar código antigo.
+    go('build', '-o', 'bin/nexo-db', './cmd/nexo-db')
+    go('build', '-o', 'bin/api', './cmd/api')
     name = 'nexo-v0-validation-' + uuid.uuid4().hex[:8]
     owner = 'v0-owner-isolated-validation'
     env = dict(os.environ,

@@ -24,6 +24,7 @@ jobs:
       - name: Frontend preservado
         run: |
           npm ci
+          npm -w apps/web run format:check
           npm -w apps/web run typecheck
           npm -w apps/web test
           npm -w apps/web run build
@@ -38,6 +39,9 @@ jobs:
           docker build -f apps/api-go/Dockerfile -t nexo-api-go:final .
           docker build -f apps/api-go/Dockerfile.vpn -t nexo-vpn-go:final .
           python3 tests/contrato/vpn_go.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: frontend-v0-evidencias, path: docs/integracao-v0/evidencias/}
       - uses: actions/upload-artifact@v4
         if: always()
         with: {name: verificacao-go, path: tests/contrato/relatorios/}

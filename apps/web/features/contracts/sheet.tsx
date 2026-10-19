@@ -120,7 +120,9 @@ export function OperationalContractSheet({
         contract && (
           <>
             <ContractCommercial contract={contract} refresh={refresh} />
-            {can(me, "stock:read") && <ContractEquipment id={contract.id} />}
+            {can(me, "stock:read") && hasModule(me, "field") && (
+              <ContractEquipment id={contract.id} />
+            )}
           </>
         )
       }

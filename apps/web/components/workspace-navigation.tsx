@@ -1,3 +1,4 @@
+import { operationalNavigationAreas, findOperationalPage } from "@/features/operations/catalogue";
 "use client";
 
 import { useId, useState, useSyncExternalStore } from "react";
@@ -20,13 +21,13 @@ const areaIcons = [Users, ChartNoAxesCombined, Wallet, Network, Headphones, Sett
 function NavigationBranch({ node, pathname, onNavigate, icon: Icon, compact = false }: { node: NavigationNode; pathname: string; onNavigate: () => void; icon?: typeof Users; compact?: boolean }) {
   const { operational, me } = useSession();
   const availability = operational ? integrationStatus(node.href) === "connected" ? "conectado ao ERP" : "recurso planejado" : node.view ? "consulta parcial disponível" : "implementação pendente";
-  const current = findNavigationPage(pathname);
+  const current = findNavigationPage(pathname) ?? (operational ? findOperationalPage(pathname) : undefined);
   const [selection, setSelection] = useState<{ path: string; open: boolean } | null>(null);
   const open = selection?.path === pathname ? selection.open : Boolean(current && current.href !== node.href && (node.href === "/" ? current.moduleHref === "/" : current.href.startsWith(`${node.href}/`)));
   const panelId = useId();
   return <li>
     <div className="navigation-branch-row">
-      <Link href={node.href} prefetch={false} className={cn("context-link", isNavigationCurrent(node, pathname) && "active")} onClick={onNavigate} aria-label={compact ? node.label : undefined} aria-current={isNavigationCurrent(node, pathname) ? "page" : undefined} title={`${node.label} · ${availability}`}>
+      <Link href={node.href} prefetch={false} className={cn("context-link", (isNavigationCurrent(node, pathname) || (operational && node.href === pathname)) && "active")} onClick={onNavigate} aria-label={compact ? node.label : undefined} aria-current={(isNavigationCurrent(node, pathname) || (operational && node.href === pathname)) ? "page" : undefined} title={`${node.label} · ${availability}`}>
         {Icon && <Icon size={17} />}<span>{node.label}</span>{!Icon && <i className={cn("page-marker", (operational ? integrationStatus(node.href) === "connected" : node.view) && "available")} aria-hidden="true" />}<span className="sr-only">{`(${availability})`}</span>
       </Link>
       {!compact && node.children.length > 0 && <button className="branch-toggle" aria-label={`${open ? "Recolher" : "Expandir"} submenus de ${node.label}`} aria-expanded={open} aria-controls={panelId} onClick={() => setSelection({ path: pathname, open: !open })}><ChevronRight size={12} className={cn(open && "rotated")} /></button>}
@@ -45,15 +46,15 @@ export function WorkspaceNavigation({ collapsed: desktopCollapsed, onNavigate, o
   collapsed: boolean; onNavigate: () => void; onSearch: () => void; onHelp: () => void; onProvider: () => void; onToggle: () => void;
 }) {
   const { operational, me } = useSession();
-  const areas = navigationAreas.map((area, index) => ({ ...area, icon: areaIcons[index], pages: area.pages.filter(page => !operational || canAccessPath(me, page.href)) })).filter(area => area.pages.length);
+  const areas = (operational ? operationalNavigationAreas() : navigationAreas).map((area, index) => ({ ...area, icon: areaIcons[index], pages: area.pages.filter(page => !operational || canAccessPath(me, page.href)) })).filter(area => area.pages.length);
   const personalDestination = operational && me?.role === "subscriber" ? {href:"/portal",label:"Meu portal"} : operational && me?.role === "saas_operator" && !me.support ? {href:"/provedores",label:"Provedores"} : null;
   const personalNode: NavigationNode | null = personalDestination ? {...personalDestination, sourceLabel:personalDestination.label,area:"Conta",audience:me?.role === "subscriber"?"Assinante":"Operador",trail:[personalDestination.label],parentHref:null,moduleHref:personalDestination.href,children:[]} : null;
   const route = resolveNavigationRoute(usePathname());
   const pathname = route.pathname;
-  const current = findNavigationPage(pathname);
+  const current = findNavigationPage(pathname) ?? (operational ? findOperationalPage(pathname) : undefined);
   const mobile = useSyncExternalStore(subscribeMobile, () => window.matchMedia("(max-width: 700px)").matches, () => false);
   const collapsed = desktopCollapsed && !mobile;
-  const activeArea = navigationAreas.find(area => area.pages.some(page => page.href === current?.moduleHref));
+  const activeArea = (operational ? operationalNavigationAreas() : navigationAreas).find(area => area.pages.some(page => page.href === current?.moduleHref));
   const [selection, setSelection] = useState<{ path: string; areas: string[] } | null>(null);
   const openAreas = selection?.path === pathname ? selection.areas : [activeArea?.id ?? "assinantes"];
   return <div className={cn("premium-navigation", collapsed && "is-collapsed")}>

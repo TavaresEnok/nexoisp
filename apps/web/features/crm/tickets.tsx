@@ -1,3 +1,7 @@
+import {
+  TicketClassification,
+  TicketClassificationSummary,
+} from "./classification";
 import { useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -347,6 +351,7 @@ function LiveTicket({ id, onClose }: { id: string; onClose: () => void }) {
     api<{ id: string; name: string }[]>("/staff"),
   );
   const [assigning, setAssigning] = useState(false);
+  const [classifying, setClassifying] = useState(false);
   const [body, setBody] = useState("");
   const [internal, setInternal] = useState(false);
   const [order, setOrder] = useState(false);
@@ -411,6 +416,22 @@ function LiveTicket({ id, onClose }: { id: string; onClose: () => void }) {
                 <p>{ticket.assignee_name ?? "Não atribuído"}</p>
               </QueryBoundary>
             </ProfileSection>
+          )}
+          <TicketClassificationSummary ticket={ticket} />
+          {writable && (
+            <Button variant="outline" onClick={() => setClassifying(true)}>
+              Editar classificação do atendimento
+            </Button>
+          )}
+          {classifying && (
+            <TicketClassification
+              ticket={ticket}
+              onClose={() => setClassifying(false)}
+              onDone={async () => {
+                setClassifying(false);
+                await refresh();
+              }}
+            />
           )}
           <ProfileSection title="Conversa e notas">
             <div className="erp-stack">

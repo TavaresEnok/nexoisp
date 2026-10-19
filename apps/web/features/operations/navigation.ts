@@ -1,5 +1,8 @@
 import { can, hasModule, type Session } from "@/features/session/model";
 export const erpAliases: Record<string, string> = {
+  "/rede/equipamentos/concentradores": "/rede/equipamentos",
+  "/rede/ftth/fttx-olt": "/rede/equipamentos",
+  "/financeiro/contratos": "/contratos",
   "/relatorios/consultar-onu": "/rede/onus",
   "/financeiro": "/financeiro/faturas",
   "/faturas": "/financeiro/faturas",
@@ -37,6 +40,7 @@ const policies: [string, string, string?][] = [
   ["/produtos-adicionais", "plans:read"],
   ["/financeiro", "finance:read"],
   ["/relatorios/cobranca", "finance:read"],
+  ["/relatorios/indicacoes", "finance:read"],
   ["/atendimentos", "crm:read", "crm"],
   ["/prospectos", "crm:read", "crm"],
   ["/relatorios/atendimento", "crm:read", "crm"],
@@ -66,6 +70,7 @@ const policies: [string, string, string?][] = [
 ];
 export function canAccessPath(me: Session | null, pathname: string): boolean {
   if (!me) return false;
+  if (pathname === "/rede/ftth/fttx-olt" && !hasModule(me, "olt")) return false;
   const path = canonicalErpPath(pathname);
   if (path === "/conta" || path.startsWith("/conta/")) return true;
   if (me.mfa_pending) return false;

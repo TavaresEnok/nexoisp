@@ -1,3 +1,4 @@
+import { DeviceIdentityEditor } from "./device-editor";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -132,6 +133,10 @@ export function DeviceDetails({
   const { me } = useSession();
   const refresh = useNetworkRefresh();
   const [editing, setEditing] = useState(false);
+  const [identityEditing, setIdentityEditing] = useState(false);
+  const writable =
+    can(me, "network:write") &&
+    (!device.driver.startsWith("olt") || hasModule(me, "olt"));
   return (
     <Sheet
       open
@@ -211,7 +216,12 @@ export function DeviceDetails({
             chegou ao equipamento.
           </p>
           {extra}
-          {can(me, "network:write") && (
+          {writable && (
+            <Button variant="outline" onClick={() => setIdentityEditing(true)}>
+              Editar equipamento
+            </Button>
+          )}
+          {writable && (
             <div className="erp-inline-actions">
               {!device.driver.startsWith("olt") && (
                 <Button variant="outline" onClick={() => setEditing(true)}>
@@ -254,6 +264,12 @@ export function DeviceDetails({
             </div>
           )}
         </div>
+        {identityEditing && (
+          <DeviceIdentityEditor
+            device={device}
+            onClose={() => setIdentityEditing(false)}
+          />
+        )}
         {editing && (
           <DeviceParameters device={device} onClose={() => setEditing(false)} />
         )}

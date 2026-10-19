@@ -39,6 +39,7 @@ import { LazyLinkedOrders } from "@/features/field/lazy";
 import { LazySubscriberTickets } from "@/features/crm/lazy";
 import { LazyContractService } from "@/features/network/lazy";
 import { SubscriberSections } from "./sections";
+import { SubscriberAlerts } from "./notes";
 export function OperationalSubscriberSheet() {
   const [params, setParams] = useSearchParams();
   const id = params.get("ficha");
@@ -188,6 +189,7 @@ function SubscriberDetails({
           {expanded ? "Recolher ficha" : "Ampliar ficha"}
         </Button>
       </div>
+      {s && <SubscriberAlerts id={id} />}
       <QueryBoundary
         loading={subscriber.isLoading}
         error={subscriber.error}

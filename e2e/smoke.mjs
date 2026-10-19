@@ -1,6 +1,7 @@
 // Fumaça da aplicação oficial do v0. A cobertura da migração é explícita em
 // docs/integracao-v0/MATRIZ_FUNCIONAL.md. Os cenários da interface anterior
 // foram preservados em legacy-smoke.mjs como referência para as próximas etapas.
+if (!process.env.BASE) throw new Error('Informe BASE explicitamente para o laboratório descartável antes de executar a fumaça operacional.');
 await import('./frontend-v0.mjs');
 await import('./frontend-v0-session.mjs');
 await import('./frontend-v0-commercial.mjs');
@@ -26,3 +27,4 @@ await import('./frontend-v0-messages.mjs');
 await import('./frontend-v0-integrations.mjs');
 await import('./frontend-v0-import.mjs');
 await import('./frontend-v0-finance-access.mjs');
+await import('./frontend-v0-remediation.mjs');

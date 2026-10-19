@@ -17,7 +17,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { EmptyState } from "@/components/workspace-feedback";
 import { useSession } from "@/features/session/provider";
 import { can } from "@/features/session/model";
@@ -28,6 +27,7 @@ import { api, download } from "@/platform/erp-client";
 import { date } from "@/lib/format";
 import { EntityCustomFields } from "@/features/shared/custom-fields";
 import type { SubscriberDetail } from "./model";
+import { useSubscriberNotes } from "./notes";
 export function SubscriberSections({
   subscriber,
   section,
@@ -145,20 +145,10 @@ function PortalAccess({ subscriber }: { subscriber: SubscriberDetail }) {
     </ProfileSection>
   );
 }
-type Note = {
-  id: string;
-  body: string;
-  alert: boolean;
-  type_name?: string;
-  created_at: string;
-  created_by_name?: string;
-};
 function Notes({ id }: { id: string }) {
   const { me } = useSession();
   const writable = can(me, "subscribers:write");
-  const notes = useSWR(["erp-notes", id], ([, id]) =>
-    api<Note[]>(`/subscribers/${id}/notes`),
-  );
+  const notes = useSubscriberNotes(id);
   const types = useSWR(writable ? "erp-note-types" : null, () =>
     api<{ id: string; name: string }[]>("/catalogs?kind=note_type"),
   );
@@ -170,13 +160,6 @@ function Notes({ id }: { id: string }) {
         error={notes.error}
         retry={() => notes.mutate()}
       >
-        {notes.data
-          ?.filter((note) => note.alert)
-          .map((note) => (
-            <Alert key={note.id}>
-              <AlertDescription>{note.body}</AlertDescription>
-            </Alert>
-          ))}
         {notes.data?.map((note) => (
           <div key={note.id} className="erp-contract-card">
             <p className="whitespace-pre-wrap">

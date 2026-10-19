@@ -24,6 +24,7 @@ import { useSession } from "@/features/session/provider";
 import { can } from "@/features/session/model";
 import { api } from "@/platform/erp-client";
 import type { ContractDetail } from "./models";
+import { ContractReferral } from "./referral";
 type Lookup = {
   id: string;
   name: string;
@@ -120,6 +121,7 @@ export function ContractCommercial({
           ]}
         />
       </ProfileSection>
+      <ContractReferral contract={contract} refresh={refresh} />
       <Tags contract={contract} refresh={refresh} />
       <EntityCustomFields
         entity="contract"
@@ -306,21 +308,37 @@ function Tags({
               >
                 <div className="erp-stack">
                   {catalog.data?.map((tag) => (
-                    <Label className="erp-inline-actions" key={tag.id}>
-                      <input
-                        type="checkbox"
-                        className="size-4 accent-primary"
-                        checked={selected.includes(tag.id)}
-                        onChange={(event) =>
-                          setSelected(
-                            event.target.checked
-                              ? [...selected, tag.id]
-                              : selected.filter((id) => id !== tag.id),
-                          )
-                        }
-                      />
-                      {tag.name}
-                    </Label>
+                    <div className="erp-inline-actions" key={tag.id}>
+                      <Label className="erp-inline-actions">
+                        <input
+                          type="checkbox"
+                          className="size-4 accent-primary"
+                          checked={selected.includes(tag.id)}
+                          onChange={(event) =>
+                            setSelected(
+                              event.target.checked
+                                ? [...selected, tag.id]
+                                : selected.filter((id) => id !== tag.id),
+                            )
+                          }
+                        />
+                        {tag.name}
+                      </Label>
+                      <ActionButton
+                        danger
+                        confirm={`Excluir a etiqueta ${tag.name} do catálogo e de todos os contratos vinculados?`}
+                        onClick={async () => {
+                          await api(`/tags/${tag.id}`, { method: "DELETE" });
+                          setSelected((current) =>
+                            current.filter((id) => id !== tag.id),
+                          );
+                          await catalog.mutate();
+                          await refresh();
+                        }}
+                      >
+                        Excluir etiqueta {tag.name}
+                      </ActionButton>
+                    </div>
                   ))}
                 </div>
                 <FormField label="Nova etiqueta">

@@ -1,3 +1,7 @@
+import {
+  operationalNavigationAreas,
+  searchOperationalNavigation,
+} from "./catalogue";
 import { useEffect, lazy, Suspense } from "react";
 import {
   Navigate,
@@ -29,6 +33,11 @@ import {
   findNavigationPage,
   searchNavigation,
 } from "@/lib/navigation";
+const ReferralReport = lazy(() =>
+  import("@/features/finance/referrals").then((module) => ({
+    default: module.ReferralReport,
+  })),
+);
 const CollectionReports = lazy(() =>
   import("@/features/finance/reports").then((module) => ({
     default: module.CollectionReports,
@@ -282,7 +291,7 @@ export function OperationalApplication() {
       : !me.tenant
         ? "/provedores"
         : "/";
-  const allowed = canAccessPath(me, canonical);
+  const allowed = canAccessPath(me, location.pathname);
   return (
     <OperationalWorkspaceProvider>
       <AppShell initialAppearance={readAppearance()}>
@@ -304,6 +313,10 @@ export function OperationalApplication() {
                     <ErpOverview />
                   )
                 }
+              />
+              <Route
+                path="/relatorios/indicacoes"
+                element={<ReferralReport />}
               />
               <Route path="/configuracoes" element={<OperationalSettings />} />
               <Route
@@ -497,7 +510,7 @@ function PlannedFeature({ pathname }: { pathname: string }) {
       />
       <Panel
         title="Recurso planejado"
-        description="Este recurso ainda não está disponível no backend Go atual."
+        description="Este destino ainda não possui uma apresentação operacional nesta página. Consulte os recursos conectados no menu ou explore a demonstração visual."
       >
         <Badge variant="outline">Planejado</Badge>
         <p className="profile-footnote">
@@ -518,7 +531,7 @@ function OperationalDirectory() {
   const [params] = useSearchParams();
   const query = params.get("busca") ?? "";
   const matches = query
-    ? new Set(searchNavigation(query).map((page) => page.href))
+    ? new Set(searchOperationalNavigation(query).map((page) => page.href))
     : null;
   return (
     <>
@@ -527,7 +540,7 @@ function OperationalDirectory() {
         description="Destinos disponíveis para seu contexto de acesso."
       />
       <div className="erp-stack">
-        {navigationAreas
+        {operationalNavigationAreas()
           .map((area) => ({
             ...area,
             pages: area.pages.filter(

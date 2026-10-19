@@ -1,3 +1,4 @@
+import { ConvertToExistingSubscriber } from "./convert";
 import { useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -315,6 +316,7 @@ function LeadSheet({ id, onClose }: { id: string; onClose: () => void }) {
   );
   const [editing, setEditing] = useState(false);
   const [lost, setLost] = useState(false);
+  const [converting, setConverting] = useState(false);
   const [note, setNote] = useState("");
   const lead = result.data;
   const writable = can(me, "crm:write") && lead?.stage !== "won";
@@ -427,6 +429,14 @@ function LeadSheet({ id, onClose }: { id: string; onClose: () => void }) {
                         Converter em assinante
                       </ActionButton>
                     )}
+                    {can(me, "subscribers:write") && (
+                      <Button
+                        variant="outline"
+                        onClick={() => setConverting(true)}
+                      >
+                        Vincular a assinante existente
+                      </Button>
+                    )}
                   </div>
                 )}
                 <ProfileSection title="Histórico de contato">
@@ -490,6 +500,17 @@ function LeadSheet({ id, onClose }: { id: string; onClose: () => void }) {
             onDone={async () => {
               setEditing(false);
               await refresh();
+            }}
+          />
+        )}
+        {converting && (
+          <ConvertToExistingSubscriber
+            leadId={id}
+            onClose={() => setConverting(false)}
+            onDone={async (subscriberId) => {
+              setConverting(false);
+              await refresh();
+              navigate(`/assinantes?ficha=${subscriberId}`);
             }}
           />
         )}

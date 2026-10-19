@@ -9,9 +9,11 @@ export type SubscriberChoice = { subscriber_id: string; contract_id: string };
 export function SubscriberPicker({
   value,
   onChange,
+  includeContracts = true,
 }: {
   value: SubscriberChoice;
   onChange: (next: SubscriberChoice) => void;
+  includeContracts?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const rows = useSWR(
@@ -62,24 +64,26 @@ export function SubscriberPicker({
             ))}
           </select>
         </FormField>
-        <FormField label="Contrato vinculado (opcional)">
-          <select
-            className="commercial-select"
-            value={value.contract_id}
-            disabled={!value.subscriber_id || detail.isLoading}
-            onChange={(e) =>
-              onChange({ ...value, contract_id: e.target.value })
-            }
-          >
-            <option value="">Sem contrato específico</option>
-            {detail.data?.contracts.map((contract) => (
-              <option key={contract.id} value={contract.id}>
-                {contract.plan_name} · {contract.id.slice(0, 8)}
-                {contract.status === "ended" ? " · Encerrado" : ""}
-              </option>
-            ))}
-          </select>
-        </FormField>
+        {includeContracts && (
+          <FormField label="Contrato vinculado (opcional)">
+            <select
+              className="commercial-select"
+              value={value.contract_id}
+              disabled={!value.subscriber_id || detail.isLoading}
+              onChange={(e) =>
+                onChange({ ...value, contract_id: e.target.value })
+              }
+            >
+              <option value="">Sem contrato específico</option>
+              {detail.data?.contracts.map((contract) => (
+                <option key={contract.id} value={contract.id}>
+                  {contract.plan_name} · {contract.id.slice(0, 8)}
+                  {contract.status === "ended" ? " · Encerrado" : ""}
+                </option>
+              ))}
+            </select>
+          </FormField>
+        )}
       </div>
       <QueryBoundary
         error={rows.error || detail.error}

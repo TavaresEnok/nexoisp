@@ -17,7 +17,7 @@ import {
 import { FormField, MutationForm } from "@/features/shared/form";
 import { ActionButton } from "@/features/shared/action";
 import { ServerPager, useUrlPage } from "@/features/shared/pagination";
-import { ConnectedNotice } from "@/features/shared/feedback";
+import { ConnectedNotice, QueryBoundary } from "@/features/shared/feedback";
 import { useSession } from "@/features/session/provider";
 import { can } from "@/features/session/model";
 import { api, download, erpClient } from "@/platform/erp-client";
@@ -221,9 +221,13 @@ export function OperationalInvoices() {
   );
 }
 function AccountingExport() {
+  const companies = useSWR("erp-companies", () =>
+    api<{ id: string; name: string }[]>("/companies"),
+  );
   const today = new Date().toLocaleDateString("en-CA");
   const [form, setForm] = useState({
     kind: "payments",
+    company_id: "",
     from: `${today.slice(0, 8)}01`,
     to: today,
   });
@@ -233,6 +237,28 @@ function AccountingExport() {
       description="Planilha de conferência; a emissão fiscal não é realizada pelo NexoISP."
     >
       <div className="erp-columns">
+        <FormField label="Empresa da exportação contábil">
+          <QueryBoundary
+            loading={companies.isLoading}
+            error={companies.error}
+            retry={() => companies.mutate()}
+          >
+            <select
+              className="commercial-select"
+              value={form.company_id}
+              onChange={(event) =>
+                setForm({ ...form, company_id: event.target.value })
+              }
+            >
+              <option value="">Todas as empresas</option>
+              {companies.data?.map((company) => (
+                <option key={company.id} value={company.id}>
+                  {company.name}
+                </option>
+              ))}
+            </select>
+          </QueryBoundary>
+        </FormField>
         <FormField label="O que exportar">
           <select
             className="commercial-select"
@@ -261,7 +287,7 @@ function AccountingExport() {
       <ActionButton
         onClick={() =>
           download(
-            `/finance/export?${new URLSearchParams(form)}`,
+            `/finance/export?${new URLSearchParams(Object.entries(form).filter(([, value]) => value))}`,
             `contabilidade-${form.kind}.csv`,
           )
         }

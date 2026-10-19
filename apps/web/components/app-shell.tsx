@@ -1,3 +1,4 @@
+import { searchOperationalNavigation } from "@/features/operations/catalogue";
 "use client";
 
 import { integrationStatus, operationalTitle } from "@/features/operations/status";
@@ -134,7 +135,7 @@ export function AppShell({ children, initialAppearance }: { children: ReactNode;
         .slice(0, 3)
     : [];
   const search = useSWR(operational && me && !me.mfa_pending && me.tenant && me.role !== "subscriber" && query.trim().length >= 2 ? ["erp-search", query.trim()] : null, ([, text]) => api<{ results: { subscriber_id: string; subscriber_name: string; contract_id?: string; plan_name?: string; document?: string }[] }>(`/search?q=${encodeURIComponent(text)}`));
-  const allPageResults = searchNavigation(query).filter(page => !operational || canAccessPath(me, page.href));
+  const allPageResults = (operational ? searchOperationalNavigation(query) : searchNavigation(query)).filter(page => !operational || canAccessPath(me, page.href));
   const pageResults = allPageResults.slice(0, query.trim() ? 18 : 8);
   return (
     <div className={cn("app-frame", collapsed && "sidebar-collapsed")}>

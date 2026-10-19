@@ -1,3 +1,5 @@
+import { AgingFilters, type AgingFilterValues } from "./aging-filters";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import useSWR from "swr";
 import { Link } from "react-router-dom";
@@ -43,9 +45,17 @@ export function CollectionReports() {
   );
   const [to, setTo] = useState(new Date().toLocaleDateString("en-CA"));
   const [days, setDays] = useState("90");
+  const [aging, setAging] = useState<AgingFilterValues>({
+    plan_id: "",
+    pop_id: "",
+    tag: "",
+  });
+  const agingQuery = new URLSearchParams(
+    Object.entries(aging).filter(([, value]) => value),
+  );
   const path =
     tab === "aging"
-      ? "/finance/reports/aging"
+      ? `/finance/reports/aging?${agingQuery}`
       : tab === "receipts"
         ? `/finance/reports/receipts?${new URLSearchParams({ from, to })}`
         : tab === "without"
@@ -60,16 +70,24 @@ export function CollectionReports() {
         title="Relatórios de cobrança"
         description="Carteira, recebimentos e pendências calculados pelo Go."
         actions={
-          <ActionButton
-            onClick={() =>
-              download(
-                `${path}${path.includes("?") ? "&" : "?"}format=csv`,
-                `${tab}.csv`,
-              )
-            }
-          >
-            Exportar relatório CSV
-          </ActionButton>
+          <>
+            <Button
+              variant="outline"
+              render={<Link to="/relatorios/indicacoes" />}
+            >
+              Indicações
+            </Button>
+            <ActionButton
+              onClick={() =>
+                download(
+                  `${path}${path.includes("?") ? "&" : "?"}format=csv`,
+                  `${tab}.csv`,
+                )
+              }
+            >
+              Exportar relatório CSV
+            </ActionButton>
+          </>
         }
       />
       <Panel title="Acompanhamento da carteira" className="list-panel">
@@ -90,6 +108,9 @@ export function CollectionReports() {
           </Tabs>
         </div>
         <div className="commercial-detail-body">
+          {tab === "aging" && (
+            <AgingFilters values={aging} onChange={setAging} />
+          )}
           {tab === "receipts" && (
             <div className="erp-columns">
               <FormField label="Recebimentos desde">

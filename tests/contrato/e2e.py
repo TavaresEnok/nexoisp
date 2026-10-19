@@ -42,7 +42,10 @@ def main():
             assert r['headers']['x-content-type-options']=='nosniff' and r['headers']['x-frame-options']=='DENY'
             assert "frame-ancestors 'none'" in r['headers']['content-security-policy']
         command(['docker','run','--rm','--network','host','--ipc=host','--security-opt','seccomp=unconfined',
-                 '-v',str(ROOT/'e2e')+':/e2e','-w','/e2e','-e','BASE=http://127.0.0.1:18380','-e','V0_AGENT_URL=http://127.0.0.1:18544',
+                 '-v',str(ROOT/'e2e')+':/e2e',
+                 '-v',str(ROOT/'docs/integracao-v0/evidencias')+':/docs/integracao-v0/evidencias',
+                 '-w','/e2e','-e','BASE=http://127.0.0.1:18380','-e','V0_AGENT_URL=http://127.0.0.1:18544',
+                 '-e','V0_OPERATIONAL_VISUAL=1',
                  'mcr.microsoft.com/playwright:v1.55.1-jammy','node','smoke.mjs'])
     finally:
         api.terminate()
