@@ -24,6 +24,18 @@
     "official": "ce16656e87b3c51328e76cf743fb1329fab7f80bc4e88c8576a1a574af78547c"
   },
   {
+    "name": "atendimentos-desktop",
+    "identical": true,
+    "reference": "dbdf12eb18aaa2bb6f4bbbb390b611e567829091259031154820cc42838bd4fa",
+    "official": "dbdf12eb18aaa2bb6f4bbbb390b611e567829091259031154820cc42838bd4fa"
+  },
+  {
+    "name": "atendimento-ficha",
+    "identical": true,
+    "reference": "6eb35163902906cac498e6a2f1728be11a7cf864afcb5d2f7d60779ae60342a1",
+    "official": "6eb35163902906cac498e6a2f1728be11a7cf864afcb5d2f7d60779ae60342a1"
+  },
+  {
     "name": "faturas-desktop",
     "identical": true,
     "reference": "5b0bd0cdc950803f6ba321256ecdc50864a5748ea1f78da45566bd7ea83a4452",

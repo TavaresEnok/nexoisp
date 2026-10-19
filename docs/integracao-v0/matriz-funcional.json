@@ -539,8 +539,10 @@
     "behavior": "Indicadores novos/contatados/proposta e ganhos/perdidos no mês; busca nome/telefone/e-mail, etapa/abertos/todos, paginação, detalhe em modal com histórico.",
     "endpoints": "GET /api/leads; GET /api/leads/summary; GET /api/leads/:id",
     "evidence": "P/Crm.tsx; L/grupos.go; L/paged.go; L/queries/group775251e1_0.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-crm.mjs"
+    ]
   },
   {
     "id": "CR-02",
@@ -550,8 +552,10 @@
     "behavior": "Nome, telefone, e-mail, documento opcional, endereço completo, origem, plano de interesse, observações; CRM write. Plano não cria contrato automaticamente; cadastro ganho tem restrições de edição.",
     "endpoints": "POST /api/leads; PATCH /api/leads/:id",
     "evidence": "P/Crm.tsx (LeadForm); E/crm.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-crm.mjs"
+    ]
   },
   {
     "id": "CR-03",
@@ -561,8 +565,10 @@
     "behavior": "Marcar novo/contatado/proposta/perdido, motivo de perda; anotações de contato e eventos datados. Ganho ocorre por conversão; não há exclusão física no painel.",
     "endpoints": "POST /api/leads/:id/stage; POST /api/leads/:id/notes",
     "evidence": "P/Crm.tsx (LeadDetail); E/crm.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-crm.mjs"
+    ]
   },
   {
     "id": "CR-04",
@@ -572,8 +578,10 @@
     "behavior": "Cria cadastro a partir do lead, registra relação e ganho, abre ficha; interface exige subscribers:write além da edição CRM, Go verifica regra. Backend também aceita indicar assinante existente, sem seletor correspondente na UI.",
     "endpoints": "POST /api/leads/:id/convert",
     "evidence": "P/Crm.tsx; E/crm.go (convertLead)",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-crm.mjs"
+    ]
   },
   {
     "id": "CR-05",
@@ -583,8 +591,10 @@
     "behavior": "Pesquisa assinante/assunto/protocolo; pendentes/abertos/aguardando/encerrados/todos; só os meus; subscriber_id na ficha; paginação e atualização periódica.",
     "endpoints": "GET /api/tickets; GET /api/tickets/:id",
     "evidence": "P/Crm.tsx (TicketList/TicketDetail); L/grupos.go; L/paged.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-crm.mjs"
+    ]
   },
   {
     "id": "CR-06",
@@ -594,8 +604,10 @@
     "behavior": "Assinante e contrato opcional, assunto, categoria técnica/financeira/comercial/outro, prioridade baixa/normal/alta, relato; origem provedor; cria mensagem inicial e eventos/notificações.",
     "endpoints": "POST /api/tickets",
     "evidence": "P/Crm.tsx (TicketForm); E/crm.go; M/00012_crm_atendimento.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-crm.mjs"
+    ]
   },
   {
     "id": "CR-07",
@@ -605,8 +617,10 @@
     "behavior": "Atribuir/remover responsável quando staff acessível; responder público ou nota interna; encerrar com confirmação, reabrir; notas internas não vão ao portal. Mensagem pode mudar estado de espera. Backend permite outros campos de classificação descritos adiante.",
     "endpoints": "PATCH /api/tickets/:id; POST /api/tickets/:id/messages; POST /api/tickets/:id/status",
     "evidence": "P/Crm.tsx; E/crm.go; L/service.go (ticket)",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-crm.mjs"
+    ]
   },
   {
     "id": "CR-08",
@@ -616,8 +630,10 @@
     "behavior": "Reusa WorkOrderForm com assinante/contrato/ticket; mostra OS associadas por número e situação. Exige os:write e módulo field no servidor.",
     "endpoints": "POST /api/work-orders; GET /api/tickets/:id",
     "evidence": "P/Crm.tsx; P/Field.tsx; E/ordens.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-crm.mjs"
+    ]
   },
   {
     "id": "CR-09",
@@ -627,8 +643,10 @@
     "behavior": "Datas inicial/final; leads por origem/conversão; chamados por categoria/origem portal/primeira resposta/resolução; OS por natureza/conclusão se permitido. Médias em horas corridas; sem exportação própria nesta tela.",
     "endpoints": "GET /api/crm/report",
     "evidence": "P/Crm.tsx (CrmReport); L/dinamicas.go; L/dinamicas/",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-crm.mjs"
+    ]
   },
   {
     "id": "OS-01",
@@ -649,8 +667,11 @@
     "behavior": "Natureza instalação/reparo/mudança/retirada/outro; assinante, contrato/ticket opcionais; técnico, agendamento, motivo, duração 5–1440 min, descrição; endereço do cadastro/contrato/manual. Registra evento, SLA e avisos quando aplicáveis.",
     "endpoints": "POST /api/work-orders",
     "evidence": "P/Field.tsx (WorkOrderForm); E/ordens.go; M/00011_os_estoque_ftth.sql; M/00028_fluxo_os_catalogos_sla.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "partial",
+    "validation": [
+      "e2e/frontend-v0-crm.mjs",
+      "Criação pelo protocolo validada; a listagem geral, agenda e operação da OS ainda estão em implementação."
+    ]
   },
   {
     "id": "OS-03",

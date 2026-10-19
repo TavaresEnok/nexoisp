@@ -45,17 +45,17 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | CO-21 | Implementada | Solicitar e comprovar aceite simples | Parcial |
 | CO-22 | Implementada | Histórico comercial | Integrada e validada |
 | CO-23 | Implementada | Valores de campos personalizados | Integrada e validada |
-| CR-01 | Implementada | Funil, listagem e ficha de prospecto | Pendente |
-| CR-02 | Implementada | Manter dados do prospecto | Pendente |
-| CR-03 | Implementada | Etapas e contatos | Pendente |
-| CR-04 | Implementada | Converter em assinante | Pendente |
-| CR-05 | Implementada | Listar e abrir chamados | Pendente |
-| CR-06 | Implementada | Abrir protocolo | Pendente |
-| CR-07 | Implementada | Responsável, conversa, notas e estado | Pendente |
-| CR-08 | Implementada | Criar OS vinculada ao atendimento | Pendente |
-| CR-09 | Implementada | Relatório CRM por período | Pendente |
+| CR-01 | Implementada | Funil, listagem e ficha de prospecto | Integrada e validada |
+| CR-02 | Implementada | Manter dados do prospecto | Integrada e validada |
+| CR-03 | Implementada | Etapas e contatos | Integrada e validada |
+| CR-04 | Implementada | Converter em assinante | Integrada e validada |
+| CR-05 | Implementada | Listar e abrir chamados | Integrada e validada |
+| CR-06 | Implementada | Abrir protocolo | Integrada e validada |
+| CR-07 | Implementada | Responsável, conversa, notas e estado | Integrada e validada |
+| CR-08 | Implementada | Criar OS vinculada ao atendimento | Integrada e validada |
+| CR-09 | Implementada | Relatório CRM por período | Integrada e validada |
 | OS-01 | Implementada | Listagem de OS | Pendente |
-| OS-02 | Implementada | Cadastrar OS e endereço de atendimento | Pendente |
+| OS-02 | Implementada | Cadastrar OS e endereço de atendimento | Parcial |
 | OS-03 | Implementada | Atribuir responsável e agendamento | Pendente |
 | OS-04 | Implementada | Fluxo de execução e conclusão | Pendente |
 | OS-05 | Implementada | Auxiliares, kit e checklist | Pendente |

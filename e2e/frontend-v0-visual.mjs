@@ -12,6 +12,8 @@ try {
   { name: 'assinantes-desktop-escuro', path: '/assinantes', width: 1342, height: 805, theme: 'dark' },
   { name: 'assinantes-celular', path: '/assinantes', width: 390, height: 844, theme: 'light' },
   { name: 'ficha-desktop', path: '/assinantes?ficha=sub-1', width: 1342, height: 805, theme: 'dark' },
+  { name: 'atendimentos-desktop', path: '/atendimentos', heading: 'Atendimentos', width: 1342, height: 805, theme: 'light' },
+  { name: 'atendimento-ficha', path: '/atendimentos', heading: 'Atendimentos', action: 'Ver chamado ', width: 1342, height: 805, theme: 'dark' },
   { name: 'faturas-desktop', path: '/financeiro/faturas', heading: 'Faturas', width: 1342, height: 805, theme: 'light' },
   { name: 'fatura-detalhes', path: '/financeiro/faturas', heading: 'Faturas', action: 'Ver fatura ', width: 1342, height: 805, theme: 'dark' },
   { name: 'planos-desktop', path: '/planos', heading: 'Planos & ofertas', width: 1342, height: 805, theme: 'light' },
@@ -22,7 +24,7 @@ try {
   const screenshots = [];
   for (const [name, base] of [['referencia', process.env.V0_REFERENCE ?? 'http://127.0.0.1:3001'], ['oficial', `${process.env.BASE ?? 'http://127.0.0.1:3000'}/demonstracao`]]) {
    const context = await browser.newContext({ viewport: { width: variant.width, height: variant.height }, colorScheme: variant.theme, reducedMotion: 'reduce', timezoneId: 'America/Fortaleza' });
-   const errors = []; const page = await context.newPage(); page.on('pageerror', error => errors.push(error.message));
+   const errors = []; const page = await context.newPage(); page.setDefaultTimeout(15000); page.on('pageerror', error => errors.push(error.message));
    await page.goto(`${base}${variant.path}`);
    if (variant.path.includes('ficha=')) await page.getByRole('dialog').waitFor();
    else await page.getByRole('heading', { name: variant.heading ?? 'Assinantes', exact: true }).waitFor();

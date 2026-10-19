@@ -16,7 +16,8 @@
     "test:visual": "node ../../e2e/frontend-v0-visual.mjs",
     "test:session": "node ../../e2e/frontend-v0-session.mjs",
     "test:commercial": "node ../../e2e/frontend-v0-commercial.mjs",
-    "test:finance": "node ../../e2e/frontend-v0-finance.mjs"
+    "test:finance": "node ../../e2e/frontend-v0-finance.mjs",
+    "test:crm": "node ../../e2e/frontend-v0-crm.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.5.0",

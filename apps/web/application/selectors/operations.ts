@@ -1,7 +1,7 @@
 import type { Ticket, WorkOrder } from "../../lib/types";
 import { normalize } from "../../domain/formatters";
 
-export function selectTickets(tickets: readonly Ticket[], status: string, query: string) {
+export function selectTickets<T extends Pick<Ticket, "status" | "sla" | "name" | "subject" | "code">>(tickets: readonly T[], status: string, query: string) {
   return tickets.filter(t => (status === "Todos" || (status === "Em risco" ? t.sla === "Em risco" : t.status === status)) && normalize(`${t.name} ${t.subject} ${t.code}`).includes(normalize(query)));
 }
 export function selectOrders(orders: readonly WorkOrder[], status: string, technician: string, query: string) {

@@ -70,3 +70,16 @@ A concessão/expiração de confiança, a execução da política de suspensão 
 Imagem `nexo-v0-frontend:validation`, construída com o Dockerfile de produção (Node 22 e Caddy), verificada em `http://127.0.0.1:18390` contra o Go isolado. Os 20 cenários compostos de comercial/financeiro passaram nessa imagem, incluindo carregamento dos módulos sob demanda, página pública e operações autenticadas, sem erros de execução ou bloqueios de CSP detectados. A política de segurança existente não foi flexibilizada. Isso é uma validação local da imagem, não publicação no ambiente operacional do usuário.
 
 Evidência resumida em `evidencias/producao-comercial-financeiro.json`. O ambiente existente em 18081 foi preservado.
+
+## Incremento de CRM — 19 de outubro de 2026
+
+A fila e a ficha de atendimento usam os componentes originais `Support`/`TicketDetails` do v0, extraídos para receber dados do Go. O funil de prospectos e seus editores utilizam a mesma estrutura de páginas, painéis, fichas e formulários. Nenhuma página, componente ou CSS do frontend antigo foi importado.
+
+- TypeScript e build Vite aprovados; 149 testes locais aprovados, sem falhas.
+- Doze comparações visuais com capturas idênticas (24 capturas), agora incluindo fila e ficha demonstrativas de atendimento.
+- Doze verificações compostas aprovadas contra o Go isolado: cadastro/edição de prospecto e validação de contato; etapas/perda/retomada; contato/histórico; conversão; criação de protocolo com titular/contrato; responsável; nota interna/resposta; criação de OS vinculada com endereço; encerramento/reabertura; restauração por URL e ficha do titular; busca/paginação/exportação/relatório; perfis e isolamento.
+- A privacidade da nota interna foi conferida também pela API do portal: o assinante recebe a resposta pública e não recebe a nota da equipe. O frontend completo do portal continua pendente.
+- Os estados de atendimento correspondem aos valores do Go. Incidentes do cenário fictício não aparecem no modo operacional. A ausência de prazo é explícita; não há relógio de espera ou SLA inventado para preencher o contrato visual.
+- O módulo CRM foi verificado no servidor de desenvolvimento. A evidência da imagem de produção acima continua referente ao checkpoint comercial/financeiro.
+
+A operação completa de OS, auxiliares, materiais, estoque e agenda ainda está em implementação. Criar uma OS pelo protocolo não comprova esses módulos e não encerra a etapa 6.
