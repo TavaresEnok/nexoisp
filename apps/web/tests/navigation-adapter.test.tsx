@@ -54,3 +54,19 @@ test("filtros, updates funcionais e ficha usam só o adaptador e compõem a URL 
   assert.equal(url.searchParams.get("keep"), "1");
   assert.equal(url.hash, "#table");
 });
+
+function PageFilterProbe() {
+ const [,search] = useQueryState("busca", "", undefined, { resetPage: true });
+ const replace = useReplaceQueryValues();
+ search("Titular"); replace({ fatura: "fatura-real" });
+ return null;
+}
+test("busca paginada reinicia a página na mesma navegação e preserva a ficha aberta em seguida", () => {
+ let href = "/financeiro/faturas?pagina=2&keep=1";
+ const calls: unknown[] = [];
+ const adapter: NavigationAdapter = { pathname:"/financeiro/faturas",search:"pagina=2&keep=1",getSearch:()=>new URL(href,"https://test.invalid").search,push:()=>{},replace:()=>{},refresh:()=>{},replaceQuery: values=>{calls.push(values);href=updateQueryHref(href,values);} };
+ renderToStaticMarkup(<NavigationProvider adapter={adapter}><PageFilterProbe /></NavigationProvider>);
+ assert.deepEqual(calls,[{busca:"Titular",pagina:null},{fatura:"fatura-real"}]);
+ const params=new URL(href,"https://test.invalid").searchParams;
+ assert.equal(params.has("pagina"),false);assert.equal(params.get("fatura"),"fatura-real");assert.equal(params.get("keep"),"1");
+});

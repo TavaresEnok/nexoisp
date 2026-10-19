@@ -22,29 +22,29 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | AS-08 | Implementada | Linha do tempo consolidada | Integrada e validada |
 | AS-09 | Implementada | Exportar dados pessoais | Integrada e validada |
 | AS-10 | Implementada | Anonimizar titular | Integrada e validada |
-| CO-01 | Implementada | Catálogo e versão comercial | Pendente |
-| CO-02 | Implementada | Degraus de inadimplência | Pendente |
-| CO-03 | Implementada | Fidelidade padrão | Pendente |
-| CO-04 | Implementada | Parâmetros de rede e reaplicação por plano | Pendente |
-| CO-05 | Implementada | Catálogo de adicionais recorrentes | Pendente |
-| CO-06 | Implementada | Pesquisar, listar e exportar contratos | Pendente |
+| CO-01 | Implementada | Catálogo e versão comercial | Integrada e validada |
+| CO-02 | Implementada | Degraus de inadimplência | Integrada e validada |
+| CO-03 | Implementada | Fidelidade padrão | Integrada e validada |
+| CO-04 | Implementada | Parâmetros de rede e reaplicação por plano | Integrada e validada |
+| CO-05 | Implementada | Catálogo de adicionais recorrentes | Integrada e validada |
+| CO-06 | Implementada | Pesquisar, listar e exportar contratos | Integrada e validada |
 | CO-07 | Implementada | Criar vínculo comercial | Integrada e validada |
-| CO-08 | Implementada | Ficha e alteração de plano/vencimento | Pendente |
-| CO-09 | Implementada | Encerrar contrato com decisão sobre multa | Pendente |
-| CO-10 | Implementada | Marcar/liberar restrição comercial | Pendente |
-| CO-11 | Implementada | Separar comercial, acesso e velocidade | Pendente |
-| CO-12 | Implementada | Etiquetas | Pendente |
-| CO-13 | Implementada | Vincular POP | Pendente |
-| CO-14 | Implementada | Empresa faturadora e área | Pendente |
-| CO-15 | Implementada | Contratar/encerrar adicionais | Pendente |
-| CO-16 | Implementada | Equipamentos e recolhimento | Pendente |
-| CO-17 | Implementada | Fidelidade e cotação de rescisão | Pendente |
-| CO-18 | Implementada | Desconto recorrente | Pendente |
-| CO-19 | Implementada | Mudança agendada | Pendente |
-| CO-20 | Implementada | Registrar aditivo | Pendente |
-| CO-21 | Implementada | Solicitar e comprovar aceite simples | Pendente |
-| CO-22 | Implementada | Histórico comercial | Pendente |
-| CO-23 | Implementada | Valores de campos personalizados | Parcial |
+| CO-08 | Implementada | Ficha e alteração de plano/vencimento | Integrada e validada |
+| CO-09 | Implementada | Encerrar contrato com decisão sobre multa | Integrada e validada |
+| CO-10 | Implementada | Marcar/liberar restrição comercial | Integrada e validada |
+| CO-11 | Implementada | Separar comercial, acesso e velocidade | Integrada e validada |
+| CO-12 | Implementada | Etiquetas | Integrada e validada |
+| CO-13 | Implementada | Vincular POP | Integrada e validada |
+| CO-14 | Implementada | Empresa faturadora e área | Integrada e validada |
+| CO-15 | Implementada | Contratar/encerrar adicionais | Integrada e validada |
+| CO-16 | Implementada | Equipamentos e recolhimento | Parcial |
+| CO-17 | Implementada | Fidelidade e cotação de rescisão | Integrada e validada |
+| CO-18 | Implementada | Desconto recorrente | Integrada e validada |
+| CO-19 | Implementada | Mudança agendada | Integrada e validada |
+| CO-20 | Implementada | Registrar aditivo | Integrada e validada |
+| CO-21 | Implementada | Solicitar e comprovar aceite simples | Parcial |
+| CO-22 | Implementada | Histórico comercial | Integrada e validada |
+| CO-23 | Implementada | Valores de campos personalizados | Integrada e validada |
 | CR-01 | Implementada | Funil, listagem e ficha de prospecto | Pendente |
 | CR-02 | Implementada | Manter dados do prospecto | Pendente |
 | CR-03 | Implementada | Etapas e contatos | Pendente |
@@ -68,23 +68,23 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | OS-12 | Implementada | Entradas, saídas, ajustes e consulta | Pendente |
 | OS-13 | Implementada | Receber lote e distribuir unidades | Pendente |
 | OS-14 | Implementada | Retirada, defeito, conserto, baixa e histórico | Pendente |
-| FI-01 | Implementada | Listagem, filtros e visão financeira | Pendente |
-| FI-02 | Implementada | Geração idempotente por competência | Pendente |
-| FI-03 | Implementada | Consulta detalhada e saldo devido | Pendente |
-| FI-04 | Implementada | Recebimento integral/parcial, taxas e desconto | Pendente |
-| FI-05 | Implementada | Estorno de baixa manual | Pendente |
-| FI-06 | Implementada | Cancelamento de título com motivo | Pendente |
-| FI-07 | Implementada | Decisão manual de divergência | Pendente |
-| FI-08 | Implementada | Extrato financeiro do contrato | Pendente |
-| FI-09 | Implementada | Renegociar títulos | Pendente |
-| FI-10 | Implementada | Conceder prazo e consultar histórico | Pendente |
-| FI-11 | Implementada | Configurar regras de cobrança | Pendente |
-| FI-12 | Implementada | Configurar página pública de bloqueio/redução | Pendente |
-| FI-13 | Implementada | Exportar CSV contábil | Pendente |
-| FI-14 | Implementada | Quatro relatórios e CSV | Pendente |
-| FI-15 | Demonstrativa | Conciliação automática com gateway demo | Pendente |
-| FI-16 | Demonstrativa | Simulação de pagamento e cobrança | Pendente |
-| FI-17 | Não confirmado | Cobrança bancária real, Pix/boleto pagável | Pendente |
+| FI-01 | Implementada | Listagem, filtros e visão financeira | Integrada e validada |
+| FI-02 | Implementada | Geração idempotente por competência | Integrada e validada |
+| FI-03 | Implementada | Consulta detalhada e saldo devido | Integrada e validada |
+| FI-04 | Implementada | Recebimento integral/parcial, taxas e desconto | Integrada e validada |
+| FI-05 | Implementada | Estorno de baixa manual | Integrada e validada |
+| FI-06 | Implementada | Cancelamento de título com motivo | Integrada e validada |
+| FI-07 | Implementada | Decisão manual de divergência | Integrada e validada |
+| FI-08 | Implementada | Extrato financeiro do contrato | Integrada e validada |
+| FI-09 | Implementada | Renegociar títulos | Integrada e validada |
+| FI-10 | Implementada | Conceder prazo e consultar histórico | Parcial |
+| FI-11 | Implementada | Configurar regras de cobrança | Parcial |
+| FI-12 | Implementada | Configurar página pública de bloqueio/redução | Integrada e validada |
+| FI-13 | Implementada | Exportar CSV contábil | Integrada e validada |
+| FI-14 | Implementada | Quatro relatórios e CSV | Integrada e validada |
+| FI-15 | Demonstrativa | Conciliação automática com gateway demo | Integrada e validada |
+| FI-16 | Demonstrativa | Simulação de pagamento e cobrança | Integrada e validada |
+| FI-17 | Não confirmado | Cobrança bancária real, Pix/boleto pagável | Limitação preservada |
 | RE-01 | Implementada | Indicadores e inventário de agentes/equipamentos | Pendente |
 | RE-02 | Implementada | Cadastrar e administrar agente | Pendente |
 | RE-03 | Implementada | Cadastrar equipamento conectado a agente | Pendente |
@@ -146,30 +146,30 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | PO-07 | Implementada | Responder sobre OS concluída | Pendente |
 | PO-08 | Implementada | Ler e aceitar solicitação | Pendente |
 | PO-09 | Parcial | Quitar fatura em instituição financeira | Pendente |
-| BE-01 | Somente backend | Catálogo e consultas externas autorizadas | Backend preservado; sem alteração |
-| BE-02 | Somente backend | Criar atendimento e OS por integração | Backend preservado; sem alteração |
-| BE-03 | Somente backend | Endereço de instalação específico | Backend preservado; sem alteração |
-| BE-04 | Somente backend | Indicação de outro contrato | Backend preservado; sem alteração |
-| BE-05 | Somente backend | Campos adicionais de atendimento e conversão de lead | Backend preservado; sem alteração |
-| BE-06 | Somente backend | Atualização de senha de usuário, dados de POP/empresa e parâmetros de qualidade | Backend preservado; sem alteração |
-| BE-07 | Somente backend | Editar propriedades além dos controles visuais | Backend preservado; sem alteração |
-| BE-08 | Somente backend | Consultar bloco por IP privado e titulares históricos | Backend preservado; sem alteração |
-| BE-09 | Somente backend | Filtros adicionais de relatório/exportação | Backend preservado; sem alteração |
-| BE-10 | Somente backend | Autenticar, sincronizar e despachar operações | Backend preservado; sem alteração |
-| BE-11 | Somente backend | Fila, assinatura e recuperação de operações | Backend preservado; sem alteração |
-| BE-12 | Somente backend | Autorização, accounting e desconexão | Backend preservado; sem alteração |
-| BE-13 | Somente backend | Executar comandos e relatar observações | Backend preservado; sem alteração |
-| BE-14 | Somente backend | Gerir configuração e túneis dos NAS | Backend preservado; sem alteração |
-| BE-15 | Somente backend | Integrar CPE TR-069 via HTTP | Backend preservado; sem alteração |
-| BE-16 | Somente backend | Cobrança, suspensão, confiança e reconciliação | Backend preservado; sem alteração |
-| BE-17 | Somente backend | Avisos, webhooks, SLA, alertas e limpeza | Backend preservado; sem alteração |
-| BE-18 | Somente backend | Sincronização e agregação de RADIUS | Backend preservado; sem alteração |
-| BE-19 | Somente backend | Preparação, migrações e diagnóstico operacional | Backend preservado; sem alteração |
-| BE-20 | Somente backend | Sessão, CSRF, MFA, escopo e auditoria | Backend preservado; sem alteração |
-| BE-21 | Somente backend | Saúde, métricas e especificação interna | Backend preservado; sem alteração |
-| BE-22 | Somente backend | Backup, cópia e restauração | Backend preservado; sem alteração |
+| BE-01 | Somente backend | Catálogo e consultas externas autorizadas | Backend preservado |
+| BE-02 | Somente backend | Criar atendimento e OS por integração | Backend preservado |
+| BE-03 | Somente backend | Endereço de instalação específico | Backend preservado |
+| BE-04 | Somente backend | Indicação de outro contrato | Backend preservado |
+| BE-05 | Somente backend | Campos adicionais de atendimento e conversão de lead | Backend preservado |
+| BE-06 | Somente backend | Atualização de senha de usuário, dados de POP/empresa e parâmetros de qualidade | Backend preservado |
+| BE-07 | Somente backend | Editar propriedades além dos controles visuais | Backend preservado |
+| BE-08 | Somente backend | Consultar bloco por IP privado e titulares históricos | Backend preservado |
+| BE-09 | Somente backend | Filtros adicionais de relatório/exportação | Backend preservado |
+| BE-10 | Somente backend | Autenticar, sincronizar e despachar operações | Backend preservado |
+| BE-11 | Somente backend | Fila, assinatura e recuperação de operações | Backend preservado |
+| BE-12 | Somente backend | Autorização, accounting e desconexão | Backend preservado |
+| BE-13 | Somente backend | Executar comandos e relatar observações | Backend preservado |
+| BE-14 | Somente backend | Gerir configuração e túneis dos NAS | Backend preservado |
+| BE-15 | Somente backend | Integrar CPE TR-069 via HTTP | Backend preservado |
+| BE-16 | Somente backend | Cobrança, suspensão, confiança e reconciliação | Backend preservado |
+| BE-17 | Somente backend | Avisos, webhooks, SLA, alertas e limpeza | Backend preservado |
+| BE-18 | Somente backend | Sincronização e agregação de RADIUS | Backend preservado |
+| BE-19 | Somente backend | Preparação, migrações e diagnóstico operacional | Backend preservado |
+| BE-20 | Somente backend | Sessão, CSRF, MFA, escopo e auditoria | Backend preservado |
+| BE-21 | Somente backend | Saúde, métricas e especificação interna | Backend preservado |
+| BE-22 | Somente backend | Backup, cópia e restauração | Backend preservado |
 | BE-23 | Parcial | Distribuição em múltiplas células de dados | Pendente |
-| BE-24 | Somente backend | Consultar indicações | Backend preservado; sem alteração |
-| BE-25 | Somente backend | Consultar origens de NAS autorizadas | Backend preservado; sem alteração |
-| BE-26 | Somente backend | Criar cobrança avulsa | Backend preservado; sem alteração |
-| BE-27 | Somente backend | Excluir etiqueta do catálogo | Backend preservado; sem alteração |
+| BE-24 | Somente backend | Consultar indicações | Backend preservado |
+| BE-25 | Somente backend | Consultar origens de NAS autorizadas | Backend preservado |
+| BE-26 | Somente backend | Criar cobrança avulsa | Backend preservado |
+| BE-27 | Somente backend | Excluir etiqueta do catálogo | Backend preservado |

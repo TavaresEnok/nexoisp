@@ -237,8 +237,10 @@
     "behavior": "Criar nome/preço/velocidades/perfil; consultar contratos ativos; ativar/desativar; criar versão de preço/velocidade sem reescrever versões já contratadas; histórico em modal. plans:write para mutações.",
     "endpoints": "GET /api/plans; POST /api/plans; PATCH /api/plans/:id; GET /api/plans/:id/versions; POST /api/plans/:id/versions",
     "evidence": "P/Plans.tsx; E/cadastro.go; L/service.go; M/00001_identidade_cadastro.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs"
+    ]
   },
   {
     "id": "CO-02",
@@ -248,8 +250,10 @@
     "behavior": "Modal com aviso/redução/bloqueio em dias e perfil reduzido; valida ordem crescente; vazio herda política. Ação automática exige configuração do tenant e workers, não ocorre ao editar o plano.",
     "endpoints": "PUT /api/plans/:id/dunning",
     "evidence": "P/Plans.tsx; P/Cobranca.tsx; E/cadastro.go; G/finance/gateway.go; M/00026_degraus_por_plano.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs"
+    ]
   },
   {
     "id": "CO-03",
@@ -259,8 +263,10 @@
     "behavior": "Meses 1–60 ou null, multa fixa/por mês restante e valor; aplica a novos contratos. Fidelidade específica do contrato é outra operação.",
     "endpoints": "PUT /api/plans/:id/loyalty",
     "evidence": "P/Plans.tsx; E/comercial.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs"
+    ]
   },
   {
     "id": "CO-04",
@@ -270,8 +276,10 @@
     "behavior": "Rate-limit no formato MikroTik e pool opcional; salvar não altera imediatamente todas as contas. Reaplicar solicita operações, até 500 por chamada, e informa recusas; salvar exige network:write, reaplicar network:operate.",
     "endpoints": "PUT /api/plans/:id/network; POST /api/plans/:id/reapply",
     "evidence": "P/Plans.tsx; E/rede.go; G/network/engine.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs"
+    ]
   },
   {
     "id": "CO-05",
@@ -281,8 +289,10 @@
     "behavior": "Criar nome/preço, consultar uso, alterar preço, ativar/desativar. Preço novo não reescreve preço congelado nos contratos. Sem integração de ativação TV/telefonia identificada.",
     "endpoints": "GET /api/addons; POST /api/addons; PATCH /api/addons/:id",
     "evidence": "P/Adicionais.tsx; E/comercial.go; M/00044_produtos_adicionais.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs"
+    ]
   },
   {
     "id": "CO-06",
@@ -292,8 +302,10 @@
     "behavior": "q e status active/ended/todos; paginação; CSV; assinante, plano/versão, etiquetas, preço e vencimento. Criação parte da ficha do assinante; lista não oferece criação autônoma.",
     "endpoints": "GET /api/contracts",
     "evidence": "P/Contracts.tsx; L/contracts.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs"
+    ]
   },
   {
     "id": "CO-07",
@@ -316,8 +328,10 @@
     "behavior": "Consulta vínculos e histórico; modal troca para versão atual do plano; atualiza acesso conforme estado, solicita provisionamento quando aplicável. Contrato encerrado não é editável nem reativável por essa operação.",
     "endpoints": "GET /api/contracts/:id; PATCH /api/contracts/:id",
     "evidence": "P/Contracts.tsx; G/modules/cadastro/service.go; E/contratos.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs"
+    ]
   },
   {
     "id": "CO-09",
@@ -327,8 +341,10 @@
     "behavior": "Motivo de catálogo, observação, cotação da multa e débitos; cobrar gera fatura de multa, dispensar requer justificativa. Encerra comercial e solicita suspensão; pode solicitar remoção ONU se opção do tenant estiver ligada. Faturas existentes permanecem.",
     "endpoints": "GET /api/contracts/:id/termination-quote; PATCH /api/contracts/:id",
     "evidence": "P/Contracts.tsx; E/contratos.go; L/dinamicas.go; M/00031_condicoes_contrato.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs"
+    ]
   },
   {
     "id": "CO-10",
@@ -338,8 +354,10 @@
     "behavior": "PUT restricted e motivo; exige finance:write; não bloqueia acesso por si. Cabeçalho visual também exige contrato ativo e contracts:write.",
     "endpoints": "PUT /api/contracts/:id/credit-restriction",
     "evidence": "P/Contracts.tsx; E/condicoes.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs"
+    ]
   },
   {
     "id": "CO-11",
@@ -349,8 +367,10 @@
     "behavior": "GET computa vigente/encerrado/restrito, acesso não provisionado/liberado/bloqueado, redução, causa/modo/data e confirmação técnica; não equipara intenção a efeito observado.",
     "endpoints": "GET /api/contracts/:id/states",
     "evidence": "P/Atendimento.tsx (ContractStates); L/grupos.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs"
+    ]
   },
   {
     "id": "CO-12",
@@ -360,8 +380,10 @@
     "behavior": "Consultar/criar etiqueta; selecionar conjunto e salvar no contrato; até 30 IDs. Sem tela de excluir etiqueta global na UI; existe DELETE backend.",
     "endpoints": "GET /api/tags; POST /api/tags; PUT /api/contracts/:id/tags",
     "evidence": "P/Extras.tsx (ContractTags); E/empresas_tags.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs"
+    ]
   },
   {
     "id": "CO-13",
@@ -371,8 +393,10 @@
     "behavior": "Selecionar POP ativo ou limpar; contrato deve estar ativo na UI. Vínculo afeta organização e escopo de acesso.",
     "endpoints": "GET /api/pops; PUT /api/contracts/:id/pop",
     "evidence": "P/Atendimento.tsx (ContractPop); E/config.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs"
+    ]
   },
   {
     "id": "CO-14",
@@ -382,8 +406,10 @@
     "behavior": "Selecionar empresa ou padrão; novas faturas herdam empresa, antigas preservam vínculo; definir urbana/rural para coleta. Empresa só aparece se houver cadastro.",
     "endpoints": "GET /api/companies; PUT /api/contracts/:id/company; PUT /api/contracts/:id/service-area",
     "evidence": "P/Empresas.tsx; P/Anatel.tsx; E/empresas_tags.go; E/condicoes.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs"
+    ]
   },
   {
     "id": "CO-15",
@@ -393,8 +419,10 @@
     "behavior": "Produto ativo e quantidade 1–99; congela descrição/preço; início padrão próximo mês; encerramento deixa de cobrar em competência futura. Histórico de adicionais e total mensal; não provisiona serviço externo.",
     "endpoints": "GET /api/contracts/:id/addons; POST /api/contracts/:id/addons; DELETE /api/contracts/:id/addons/:addonId",
     "evidence": "P/Adicionais.tsx (ContractAddons); E/comercial.go; E/documentos.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs"
+    ]
   },
   {
     "id": "CO-16",
@@ -404,8 +432,11 @@
     "behavior": "Tabela de unidades/série/modalidade/OS e alerta de comodato a recolher em contrato encerrado. Instalação/retirada efetivas são feitas nos módulos OS/estoque, não neste cartão.",
     "endpoints": "GET /api/contracts/:id/equipment",
     "evidence": "P/Extras.tsx (ContractEquipment); L/grupos.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "partial",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs",
+      "Consulta e estado vazio integrados; unidades instaladas e recolhimento serão validados com OS/estoque."
+    ]
   },
   {
     "id": "CO-17",
@@ -415,8 +446,10 @@
     "behavior": "Definir/remover meses/modelo/valor; visualizar vigência, meses restantes, multa hoje e faturas abertas. Registro real; cálculo não equivale a validação jurídica da regra.",
     "endpoints": "PUT /api/contracts/:id/loyalty; GET /api/contracts/:id/termination-quote",
     "evidence": "P/Condicoes.tsx; E/comercial.go; L/dinamicas.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs"
+    ]
   },
   {
     "id": "CO-18",
@@ -426,8 +459,10 @@
     "behavior": "Percentual até 100 ou valor fixo; motivo, início e número de meses/opcional; consultar vigência e cancelar. Afeta geração futura; faturas existentes não são recalculadas ao cancelar.",
     "endpoints": "GET /api/contracts/:id/discounts; POST /api/contracts/:id/discounts; DELETE /api/discounts/:id",
     "evidence": "P/Condicoes.tsx; E/comercial.go; G/finance/sql/",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs"
+    ]
   },
   {
     "id": "CO-19",
@@ -437,8 +472,10 @@
     "behavior": "Agendar plano/vencimento/encerramento com data futura; decisão de multa; consultar pending/applied/canceled/failed e erro; cancelar pendente. Aplicação depende da rotina SCHEDULED.",
     "endpoints": "GET /api/contracts/:id/scheduled-changes; POST /api/contracts/:id/scheduled-changes; DELETE /api/scheduled-changes/:id",
     "evidence": "P/Condicoes.tsx; E/comercial.go; E/rotinas.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs"
+    ]
   },
   {
     "id": "CO-20",
@@ -448,8 +485,10 @@
     "behavior": "Tipo endereço/titularidade/plano/condição/outro, título/texto e vigência; tabela de registros. O tipo titularidade não transfere o contrato nem muda cadastro por si; texto de aditivo não é assinatura.",
     "endpoints": "GET /api/contracts/:id/amendments; POST /api/contracts/:id/amendments",
     "evidence": "P/Condicoes.tsx; E/comercial.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs"
+    ]
   },
   {
     "id": "CO-21",
@@ -459,8 +498,11 @@
     "behavior": "Texto livre ou snapshot de aditivo; publicar no portal; cancelar pendente; evidência aceita com texto, usuário, e-mail, IP, agente de navegador, datas e hashes; Go recalcula conferência; impressão pelo navegador. Não é assinatura qualificada.",
     "endpoints": "GET /api/contracts/:id/acceptances; POST /api/contracts/:id/acceptances; POST /api/acceptances/:id/cancel; GET /api/acceptances/:id/evidence",
     "evidence": "P/Condicoes.tsx; E/acessos.go; L/grupos.go; M/00042_aceite_eletronico.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "partial",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs",
+      "Solicitação e cancelamento validados; aceite e comprovante completo dependem do portal na etapa 7."
+    ]
   },
   {
     "id": "CO-22",
@@ -470,8 +512,10 @@
     "behavior": "Eventos de criação, plano, vencimento, encerramento, fidelidade e restrições existem no banco; tabela apresenta autor/data e parte dos detalhes. Tipos fora do mapa de rótulos aparecem com nome técnico; não há filtro próprio.",
     "endpoints": "GET /api/contracts/:id",
     "evidence": "P/Contracts.tsx; G/modules/cadastro/queries/history.sql; E/contratos.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-commercial.mjs"
+    ]
   },
   {
     "id": "CO-23",
@@ -481,9 +525,10 @@
     "behavior": "Ler definições ativas; editor text/number/date/boolean/select; só envia alterações e null limpa opcionais; Go valida tipo, opção, tamanho, data e texto obrigatório; não basta cadastrar a definição.",
     "endpoints": "GET /api/custom-fields; PUT /api/subscribers/:id/custom; PUT /api/contracts/:id/custom",
     "evidence": "P/Atendimento.tsx (CustomValues); E/custom.go; M/00032_campos_kits_comissao.sql",
-    "integrationState": "partial",
+    "integrationState": "validated",
     "validation": [
-      "Fluxo parcial implementado; conferir o plano para os escopos restantes."
+      "e2e/frontend-v0-commercial.mjs",
+      "e2e/frontend-v0.mjs"
     ]
   },
   {
@@ -747,8 +792,10 @@
     "behavior": "q, status abertas/vencidas/pagas/em conciliação/canceladas, empresa, paginação, CSV; indicadores aberto/vencido/recebido/mês/conciliação. Sumário por empresa; gráfico mensal é consulta própria e não recebe automaticamente esse filtro.",
     "endpoints": "GET /api/invoices; GET /api/finance/summary; GET /api/finance/monthly",
     "evidence": "P/Finance.tsx; L/dinamicas.go; L/auxiliares.go; L/grupos.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-finance.mjs"
+    ]
   },
   {
     "id": "FI-02",
@@ -758,8 +805,10 @@
     "behavior": "Competência AAAA-MM; Go aplica contrato vigente, versão, proporcional do primeiro mês se configurado, descontos e adicionais em linhas próprias; restrição de unicidade evita duplicação. Texto antigo da tela diz que não aplica regras, contrariando SQL atual.",
     "endpoints": "POST /api/finance/generate",
     "evidence": "P/Finance.tsx; E/financeiro.go; G/finance/core.go; G/finance/sql/; M/00021_financeiro_avancado.sql; M/00031_condicoes_contrato.sql; M/00044_produtos_adicionais.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-finance.mjs"
+    ]
   },
   {
     "id": "FI-03",
@@ -769,8 +818,10 @@
     "behavior": "Itens, principal/recebido/status/competência/datas; pagamentos e estornos; eventos do gateway; breakdown multa/juros/desconto/saldo. Endpoints reais; meios externos dependem do gateway separado.",
     "endpoints": "GET /api/invoices/:id; GET /api/invoices/:id/due",
     "evidence": "P/Finance.tsx (InvoiceModal); L/grupos.go; L/auxiliares.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-finance.mjs"
+    ]
   },
   {
     "id": "FI-04",
@@ -780,8 +831,10 @@
     "behavior": "Valor em centavos, data, meio, observação; marcar parcial mantém saldo; opcional aplicar multa e juros calculados, desconto com motivo. Exige finance:write; saldo divergente pode ir à conciliação; baixa pode gerar evento/reativação conforme política.",
     "endpoints": "POST /api/invoices/:id/manual-payment",
     "evidence": "P/Finance.tsx; E/financeiro.go; G/finance/core.go (Manual/settle/Paid)",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-finance.mjs"
+    ]
   },
   {
     "id": "FI-05",
@@ -791,8 +844,10 @@
     "behavior": "Selecionar pagamento manual ainda não estornado, motivo mínimo de cinco caracteres; lança reversão e recalcula título, preserva histórico. Não é devolução bancária; não suspende imediatamente o acesso já reativado.",
     "endpoints": "POST /api/invoices/:id/payments/:paymentId/reverse",
     "evidence": "P/Finance.tsx; E/financeiro.go; G/finance/core.go (Reverse)",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-finance.mjs"
+    ]
   },
   {
     "id": "FI-06",
@@ -802,8 +857,10 @@
     "behavior": "UI oferece para open; Go valida estado/restrições e registra cancelamento. Não há conector bancário para cancelar boleto real.",
     "endpoints": "POST /api/invoices/:id/cancel",
     "evidence": "P/Finance.tsx; E/financeiro.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-finance.mjs"
+    ]
   },
   {
     "id": "FI-07",
@@ -813,8 +870,10 @@
     "behavior": "Escolher paga/aberta com justificativa mínima; registra decisão, reconcilia estado e pode disparar processamento de quitação. Não homologa gateway.",
     "endpoints": "POST /api/invoices/:id/resolve",
     "evidence": "P/Finance.tsx; E/financeiro.go; G/finance/core.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-finance.mjs"
+    ]
   },
   {
     "id": "FI-08",
@@ -824,8 +883,10 @@
     "behavior": "Resumo de aberto/vencido/conciliação e tabela; abre mesmo modal de fatura; layout em Acesso para quem lê rede e em Contrato para os demais; finance:read.",
     "endpoints": "GET /api/contracts/:id/finance",
     "evidence": "P/Finance.tsx (ContractFinance); L/grupos.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-finance.mjs"
+    ]
   },
   {
     "id": "FI-09",
@@ -835,8 +896,10 @@
     "behavior": "Selecionar abertas, até 24 títulos; parcelas 1–24, primeiro vencimento, desconto, taxas e justificativa; usa saldo líquido de parciais; cancela originais e cria parcelas; pode pedir religamento. Não movimenta dinheiro externo.",
     "endpoints": "POST /api/contracts/:id/agreement",
     "evidence": "P/Finance.tsx (AgreementModal); G/finance/advanced.go (Agreement); E/financeiro.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-finance.mjs"
+    ]
   },
   {
     "id": "FI-10",
@@ -846,8 +909,10 @@
     "behavior": "Elegibilidade por contrato/estado, política/prazo/intervalo e histórico; equipe informa dias e motivo, trust:grant. Registra liberação e operação de reativação; expiração depende das rotinas e da política de suspensão.",
     "endpoints": "GET /api/contracts/:id/trust-release; POST /api/contracts/:id/trust-release",
     "evidence": "P/Finance.tsx; G/finance/advanced.go; L/service.go; E/financeiro.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "partial",
+    "validation": [
+      "Consulta de elegibilidade e editor integrados; concessão/expiração serão validadas com provisionamento e política de rede."
+    ]
   },
   {
     "id": "FI-11",
@@ -857,8 +922,11 @@
     "behavior": "settings:manage grava gateway none/demo, billing_auto, auto_suspend/dias, auto_resume, rejeição/perfil, confiança/dias/gap, multa percentual, juros mensais e proporcional primeiro mês. finance:read consulta. Jobs só atuam se habilitados.",
     "endpoints": "GET /api/finance/settings; PUT /api/finance/settings; POST /api/finance/run-auto-suspend",
     "evidence": "P/Finance.tsx; E/ordens.go (financeSettings); E/financeiro.go; G/finance/gateway.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "partial",
+    "validation": [
+      "e2e/frontend-v0-finance.mjs",
+      "Leitura e edição de política validadas; execução da suspensão e confiança ainda dependem dos cenários de rede."
+    ]
   },
   {
     "id": "FI-12",
@@ -868,8 +936,10 @@
     "behavior": "Título, textos, telefone, WhatsApp e botão portal; salvar ou page=null desativa; mostra URL pública. Gera HTML real; o redirecionamento do NAS exige configuração externa e não é implantado por este formulário.",
     "endpoints": "GET /api/notice-page; PUT /api/notice-page; GET /aviso/:slug",
     "evidence": "P/Finance.tsx (NoticePageCard); E/config.go; L/notice.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-finance.mjs"
+    ]
   },
   {
     "id": "FI-13",
@@ -879,8 +949,10 @@
     "behavior": "Tipo recebimentos/faturas e datas; backend também aceita company_id; planilha com valores/dados de conferência e registro de auditoria. Não gera NFSe/NFCom ou arquivo fiscal homologado.",
     "endpoints": "GET /api/finance/export",
     "evidence": "P/Finance.tsx (AccountingExport); E/relatorios.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-finance.mjs"
+    ]
   },
   {
     "id": "FI-14",
@@ -890,8 +962,10 @@
     "behavior": "Aging por faixa; recebido por plano/meio líquido de estornos e datas; contrato sem fatura do mês; candidatos a cancelar por dias. Links para contrato, sem cancelamento automático. Go oferece filtros plan_id/pop_id/tag no aging além da UI.",
     "endpoints": "GET /api/finance/reports/aging; GET /api/finance/reports/receipts; GET /api/finance/reports/without-invoice; GET /api/finance/reports/to-cancel",
     "evidence": "P/Cobranca.tsx; E/relatorios.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-finance.mjs"
+    ]
   },
   {
     "id": "FI-15",
@@ -901,8 +975,10 @@
     "behavior": "Consulta cobranças fictícias, recupera pagamento perdido, trata duplicidade e valor divergente; lista eventos e faturas para decisão manual. chargePayments só implementa demo; none não consulta instituição financeira.",
     "endpoints": "GET /api/finance/reconciliation; POST /api/finance/reconcile",
     "evidence": "P/Finance.tsx; G/finance/gateway.go (chargePayments/Reconcile); E/financeiro.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-finance.mjs"
+    ]
   },
   {
     "id": "FI-16",
@@ -912,8 +988,10 @@
     "behavior": "Modos webhook/duplicate/lost/divergent; persiste pagamento de teste em demo_gateway_charges; códigos Pix/boleto explicitamente não pagáveis. Requer modo demo e gateway demo.",
     "endpoints": "POST /api/demo-gateway/pay",
     "evidence": "P/Finance.tsx; E/gateway.go; G/finance/core.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-finance.mjs"
+    ]
   },
   {
     "id": "FI-17",
@@ -923,8 +1001,10 @@
     "behavior": "Não foi localizado conector de gateway além de none/demo; emissão real, extrato real, reembolso e homologação dependem de implementação/fornecedor. Este item registra ausência de comprovação, não uma capacidade disponível.",
     "endpoints": "—",
     "evidence": "G/finance/core.go (Charges/Demo); G/finance/gateway.go (chargePayments); E/gateway.go; E/ordens.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Limitação existente preservada: nenhum gateway real localizado; não é capacidade disponível nem promessa de homologação."
+    ]
   },
   {
     "id": "RE-01",

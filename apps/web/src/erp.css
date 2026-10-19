@@ -19,3 +19,7 @@
 .erp-contract-card { display: flex; flex-direction: column; gap: 12px; padding: 16px; border: 1px solid var(--border); border-radius: var(--surface-radius); }
 .erp-contract-card > header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 @media (max-width: 600px) { .erp-editor { padding: 20px 16px; } .erp-source { gap: 8px; } }
+
+/* O contrato operacional pode conter mais seções que a ficha demonstrativa. */
+.erp-contract-sheet > * { flex-shrink: 0; }
+.erp-contract-sheet > [data-slot="tabs"] { flex: none; min-height: auto; }

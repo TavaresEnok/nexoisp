@@ -14,7 +14,9 @@
     "verify": "npm run typecheck && npm test",
     "test:integration": "node ../../e2e/frontend-v0.mjs",
     "test:visual": "node ../../e2e/frontend-v0-visual.mjs",
-    "test:session": "node ../../e2e/frontend-v0-session.mjs"
+    "test:session": "node ../../e2e/frontend-v0-session.mjs",
+    "test:commercial": "node ../../e2e/frontend-v0-commercial.mjs",
+    "test:finance": "node ../../e2e/frontend-v0-finance.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.5.0",

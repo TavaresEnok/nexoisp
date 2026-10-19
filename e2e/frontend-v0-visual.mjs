@@ -12,6 +12,12 @@ try {
   { name: 'assinantes-desktop-escuro', path: '/assinantes', width: 1342, height: 805, theme: 'dark' },
   { name: 'assinantes-celular', path: '/assinantes', width: 390, height: 844, theme: 'light' },
   { name: 'ficha-desktop', path: '/assinantes?ficha=sub-1', width: 1342, height: 805, theme: 'dark' },
+  { name: 'faturas-desktop', path: '/financeiro/faturas', heading: 'Faturas', width: 1342, height: 805, theme: 'light' },
+  { name: 'fatura-detalhes', path: '/financeiro/faturas', heading: 'Faturas', action: 'Ver fatura ', width: 1342, height: 805, theme: 'dark' },
+  { name: 'planos-desktop', path: '/planos', heading: 'Planos & ofertas', width: 1342, height: 805, theme: 'light' },
+  { name: 'plano-configuracao', path: '/planos', heading: 'Planos & ofertas', action: 'Abrir configuração de', width: 1342, height: 805, theme: 'dark' },
+  { name: 'contratos-desktop', path: '/contratos', heading: 'Contratos dos assinantes', width: 1342, height: 805, theme: 'light' },
+  { name: 'contrato-ficha', path: '/contratos', heading: 'Contratos dos assinantes', action: 'Detalhes do contrato', width: 1342, height: 805, theme: 'dark' },
  ]) {
   const screenshots = [];
   for (const [name, base] of [['referencia', process.env.V0_REFERENCE ?? 'http://127.0.0.1:3001'], ['oficial', `${process.env.BASE ?? 'http://127.0.0.1:3000'}/demonstracao`]]) {
@@ -19,7 +25,8 @@ try {
    const errors = []; const page = await context.newPage(); page.on('pageerror', error => errors.push(error.message));
    await page.goto(`${base}${variant.path}`);
    if (variant.path.includes('ficha=')) await page.getByRole('dialog').waitFor();
-   else await page.getByRole('heading', { name: 'Assinantes', exact: true }).waitFor();
+   else await page.getByRole('heading', { name: variant.heading ?? 'Assinantes', exact: true }).waitFor();
+   if (variant.action) await page.getByRole('button', { name: new RegExp(variant.action) }).first().click();
    await page.evaluate(() => document.fonts.ready); await page.waitForTimeout(800);
    assert.deepEqual(errors, [], `${variant.name}: erros de execução em ${name}`);
    const bytes = await page.screenshot({ path: new URL(`${variant.name}-${name}.png`, output).pathname, animations: 'disabled', fullPage: false });

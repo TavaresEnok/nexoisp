@@ -1,0 +1,17 @@
+{
+  "ok": true,
+  "verified_at": "2026-10-19T03:50:19.180857+00:00",
+  "base": "http://127.0.0.1:18390",
+  "image": "nexo-v0-frontend:validation",
+  "image_id": "sha256:64876c8215cc588c52e9af96604d9a5a5ea7a00b2b606a07ff04755fc0891765",
+  "backend": "Go e PostgreSQL isolados; somente dados sintéticos",
+  "checks": {
+    "commercial": 10,
+    "finance": 10
+  },
+  "scripts": [
+    "e2e/frontend-v0-commercial.mjs",
+    "e2e/frontend-v0-finance.mjs"
+  ],
+  "csp": "Política existente mantida; nenhum erro de CSP detectado pelos cenários"
+}

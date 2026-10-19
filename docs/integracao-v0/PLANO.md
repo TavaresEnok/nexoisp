@@ -15,12 +15,12 @@ O frontend do v0 é a referência oficial e obrigatória de UI/UX. A integraçã
 
 | Etapa | Escopo | Situação |
 |---|---|---|
-| 1 | Referência visual, preservação e matriz por unidade funcional | Concluída: 169 unidades e quatro comparações visuais idênticas |
+| 1 | Referência visual, preservação e matriz por unidade funcional | Concluída: 169 unidades e dez comparações visuais idênticas |
 | 2 | Promover o código completo do v0 para `apps/web`, build e implantação | Código promovido; build e imagem Docker validados |
 | 3 | Sessão, MFA, permissões, módulos, HTTP, cache e demonstração isolada | Fundação integrada; login, senha, TOTP, expiração e isolamento validados |
-| 4 | Assinantes: consulta paginada, ficha, cadastro e edição | Em andamento: cadastro e recursos complementares conectados; abertura completa de contrato depende da etapa 5 |
-| 5 | Planos, contratos, versões, adicionais e condições | Pendente |
-| 6 | Atendimento, OS, estoque, financeiro, rede, administração e importação | Pendente |
+| 4 | Assinantes: consulta paginada, ficha, cadastro e edição | Cadastro e recursos complementares validados; ficha recebe os módulos das etapas 5 e 6 |
+| 5 | Planos, contratos, versões, adicionais e condições | Núcleo comercial validado; equipamentos/recolhimento dependem de OS/estoque, comprovante de aceite depende do portal |
+| 6 | Atendimento, OS, estoque, financeiro, rede, administração e importação | Em andamento: financeiro integrado; confiança/suspensão e demais módulos ainda em implementação |
 | 7 | Portal, SaaS, revisão da cobertura e retirada operacional do legado | Pendente |
 
 Uma etapa ou unidade só recebe estado concluído após validação correspondente. A presença de uma tela, de um endpoint ou de um teste de leitura não comprova a cobertura de suas mutações e regras.
@@ -46,3 +46,9 @@ Usar testes de contrato dos adaptadores, testes direcionados de interação e na
 As páginas ainda não conectadas apresentam esse estado e permitem abrir a demonstração visual. Não há fallback para seeds no contexto real. A aplicação oficial ainda não substitui a cobertura funcional completa do frontend anterior; a etapa 7 permanece pendente.
 
 Resultados executados, evidências e limites: [VALIDACAO.md](VALIDACAO.md).
+
+## Cobertura após o incremento comercial e financeiro
+
+A matriz registra 47 unidades integradas e validadas, 8 parciais, 87 pendentes e 27 capacidades internas ou limitações do backend preservadas. Esses números contam unidades funcionais, não esforço ou tempo restante. A cobertura ainda não representa conclusão das sete etapas.
+
+`test:commercial` valida o núcleo comercial; `test:finance` valida os fluxos financeiros. A fumaça oficial executa assinantes, sessão, comercial e financeiro em sequência contra a mesma base sintética para evitar interferência entre geração financeira e dados de outros cenários.

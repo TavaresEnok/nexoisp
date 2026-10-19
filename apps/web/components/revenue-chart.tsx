@@ -7,14 +7,16 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import type { RevenuePoint } from "@/lib/types";
+
 
 export function RevenueChart({
   data,
   compact = false,
+  monthly = false,
 }: {
-  data: RevenuePoint[];
+  data: { day: string; current: number; previous?: number }[];
   compact?: boolean;
+  monthly?: boolean;
 }) {
   const gradient = useId().replaceAll(":", "");
   return (
@@ -50,7 +52,7 @@ export function RevenueChart({
               dataKey="day"
               axisLine={false}
               tickLine={false}
-              interval={3}
+              interval={monthly ? 0 : 3}
               tickMargin={12}
               fontSize={10}
             />
@@ -62,14 +64,14 @@ export function RevenueChart({
               fontSize={10}
             />
             <ChartTooltip content={<ChartTooltipContent />} />
-            <Area
+            {!monthly && <Area
               type="monotone"
               dataKey="previous"
               stroke="var(--color-previous)"
               strokeDasharray="4 4"
               fill="transparent"
               strokeWidth={1.5}
-            />
+            />}
           </>
         )}
         <Area

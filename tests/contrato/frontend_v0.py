@@ -31,6 +31,7 @@ def main():
         NEXO_GO_DB_PASSWORD='v0-go-isolated-validation', NEXO_APP_DB_PASSWORD='v0-app-isolated-validation',
         NEXO_RADIUS_KEY='radius-chave-sintetica-v0-00000001', NEXO_RADIUS_DB_PASSWORD='v0-radius-isolated-validation',
         NEXO_REPLICA_PASSWORD='v0-replica-isolated-validation',
+        NEXO_GATEWAY_WEBHOOK_SECRET=base64.b64encode(os.urandom(32)).decode(),
         NEXO_SECRET_KEY=base64.b64encode(os.urandom(32)).decode(),
         NEXO_OP_SIGNING_KEY=base64.b64encode(subprocess.check_output(['openssl', 'genpkey', '-algorithm', 'ed25519', '-outform', 'DER'])).decode(),
         NEXO_DEMO_MODE='1', NEXO_REQUIRE_ADMIN_MFA='0', NEXO_AGENT_MTLS='off', NEXO_GO_JOBS='0',

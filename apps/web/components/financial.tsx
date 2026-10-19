@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useSearchParams } from "@/platform/navigation/react";
 import { useQueryState } from "@/lib/use-query-state";
 import {
@@ -36,7 +36,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { useWorkspace } from "@/components/workspace-provider";
+import { useWorkspace } from "@/features/workspace/context";
 import {
   Panel,
   PageHeading,
@@ -51,17 +51,23 @@ import { money, date, scenarioDate, exportCsv } from "@/lib/format";
 import { revenueTrend } from "@/lib/overview";
 import type { Invoice } from "@/lib/types";
 import { selectInvoices } from "@/application/selectors/financial";
+import { QueryBoundary } from "@/features/shared/feedback";
 import { EmptyState, ContextCallout } from "@/components/workspace-feedback";
 
 export function Financial() {
   const { data, openSubscriber } = useWorkspace();
-  const { snapshot: s } = data;
+  return <InvoiceCatalog invoices={data.invoices} snapshot={data.snapshot} openSubscriber={openSubscriber} />;
+}
+export function InvoiceCatalog({ invoices, snapshot: s, openSubscriber, operational = false, top, actions, onOpen, onExport, pagination, loading, error }: {
+ invoices: Invoice[]; snapshot?: import("@/lib/types").Snapshot; openSubscriber: (id: string) => void; operational?: boolean; top?: ReactNode; actions?: ReactNode; onOpen?: (invoice: Invoice) => void; onExport?: () => void; pagination?: ReactNode; loading?: boolean; error?: unknown;
+}) {
   const params = useSearchParams();
   const initialFilter = params.get("filtro");
-  const [status, setStatus] = useQueryState("situacao", initialFilter === "vencidas" ? "Vencida" : initialFilter === "conciliacao" ? "Em conciliação" : "Todas", ["Todas", ...data.invoices.map(i => i.status)]);
-  const [query, setQuery] = useQueryState("busca", "");
+  const [status, setStatus] = useQueryState("situacao", initialFilter === "vencidas" ? "Vencida" : initialFilter === "conciliacao" ? "Em conciliação" : "Todas", ["Todas", ...(operational ? ["Em aberto", "Vencida", "Em conciliação", "Paga", "Cancelada"] : invoices.map(i => i.status))], { resetPage: operational });
+  const [query, setQuery] = useQueryState("busca", "", undefined, { resetPage: operational });
   const [selected, setSelected] = useState<Invoice | null>(null);
-  const { rows: filtered, total } = selectInvoices(data.invoices, status, query);
+  const { rows: filtered, total } = operational ? { rows: invoices, total: invoices.reduce((sum, invoice) => sum + invoice.amount, 0) } : selectInvoices(invoices, status, query);
+  const openInvoice = (invoice: Invoice) => onOpen ? onOpen(invoice) : setSelected(invoice);
   const exportRows = () =>
     exportCsv(
       "nexo-faturas-demonstrativas",
@@ -84,20 +90,20 @@ export function Financial() {
         i.method,
       ]),
     );
-  const receivedTrend = revenueTrend(s.series);
+  const receivedTrend = s ? revenueTrend(s.series) : null;
   return (
     <>
       <PageHeading
         title="Faturas"
         description="Do recebimento à conciliação, sem perder de vista quem está do outro lado."
         actions={
-          <Button variant="outline" onClick={exportRows}>
+          <>{actions}<Button variant="outline" onClick={onExport ?? exportRows}>
             <Download data-icon="inline-start" />
             Exportar faturas
-          </Button>
+          </Button></>
         }
       />
-      <div className="metrics-grid financial-metrics">
+      {top}{s && <><div className="metrics-grid financial-metrics">
         {[
           {
             title: "Faturamento da competência",
@@ -167,16 +173,16 @@ export function Financial() {
           </Button>
         </Panel>
       </div>
-      <Panel
+      </>}<Panel
         title="Cada fatura, no seu lugar"
-        description="Registros vinculados à amostra demonstrativa de assinantes"
+        description={operational ? "Consulta paginada de cobranças registradas no ERP" : "Registros vinculados à amostra demonstrativa de assinantes"}
         action={<Badge variant="secondary">{money(total)} na seleção</Badge>}
         className="list-panel"
       >
         <div className="list-toolbar">
           <Tabs value={status} onValueChange={(v) => setStatus(String(v))}>
             <TabsList>
-              {["Todas", "Em aberto", "Vencida", "Em conciliação", "Paga"].map(
+              {["Todas", "Em aberto", "Vencida", "Em conciliação", "Paga", ...(operational ? ["Cancelada"] : [])].map(
                 (v) => (
                   <TabsTrigger key={v} value={v}>
                     {v === "Vencida" ? "Vencidas" : v === "Paga" ? "Pagas" : v}
@@ -195,7 +201,7 @@ export function Financial() {
             />
           </div>
         </div>
-        <Table>
+        <QueryBoundary loading={loading} error={error}><Table>
           <TableHeader>
             <TableRow>
               <TableHead>Fatura</TableHead>
@@ -215,11 +221,11 @@ export function Financial() {
                 <TableCell>
                   <button
                     className="code-link mono"
-                    onClick={() => setSelected(i)}
+                    onClick={() => openInvoice(i)}
                   >
                     {i.code}
                   </button>
-                  <small className="table-subline">Out. 2026</small>
+                  <small className="table-subline">{operational ? i.reference : "Out. 2026"}</small>
                 </TableCell>
                 <TableCell>
                   <button
@@ -234,7 +240,7 @@ export function Financial() {
                   </button>
                 </TableCell>
                 <TableCell className="subtle">
-                  {date(i.due).replace(" de 2026", "")}
+                  {operational ? date(i.due) : date(i.due).replace(" de 2026", "")}
                 </TableCell>
                 <TableCell>
                   <Status value={i.status} />
@@ -247,7 +253,7 @@ export function Financial() {
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    onClick={() => setSelected(i)}
+                    onClick={() => openInvoice(i)}
                     aria-label={`Ver fatura ${i.code}`}
                   >
                     <ArrowUpRight />
@@ -275,30 +281,37 @@ export function Financial() {
           </EmptyState>
         )}
         <div className="table-total">
-          <span>{filtered.length} faturas da amostra</span>
+          <span>{filtered.length} {operational ? "faturas nesta página" : "faturas da amostra"}</span>
           <span>
             Total selecionado <strong className="mono">{money(total)}</strong>
           </span>
         </div>
+        </QueryBoundary>{pagination}
       </Panel>
-      <DemoNotice>
+      {!operational && <><DemoNotice>
         Totais superiores: cenário operacional. Tabela e exportação: amostra de
         24 faturas fictícias. Nenhuma transação bancária é executada.
       </DemoNotice>
-      <SourceFooter sample="Financeiro demonstrativo" />
-      <Dialog
-        open={!!selected}
-        onOpenChange={(open) => !open && setSelected(null)}
+      <SourceFooter sample="Financeiro demonstrativo" /></>}
+      <InvoiceDetails invoice={selected} onClose={() => setSelected(null)} openSubscriber={openSubscriber} />
+    </>
+  );
+}
+
+export function InvoiceDetails({ invoice: selected, onClose, openSubscriber, operational = false, children, isOpen, loading, error }: { invoice: Invoice | null; onClose: () => void; openSubscriber: (id: string) => void; operational?: boolean; children?: ReactNode; isOpen?: boolean; loading?: boolean; error?: unknown }) {
+ return (      <Dialog
+        open={isOpen ?? !!selected}
+        onOpenChange={(open) => !open && onClose()}
       >
-        <DialogContent className="invoice-dialog">
+        <DialogContent className={`invoice-dialog${operational ? " erp-editor" : ""}`}>
           <DialogHeader>
             <div className="eyebrow">DETALHES DA FATURA</div>
-            <DialogTitle>{selected?.code}</DialogTitle>
+            <DialogTitle>{selected?.code ?? "Fatura"}</DialogTitle>
             <DialogDescription>
-              Documento demonstrativo. Não é uma cobrança válida.
+              {operational ? "Cobrança registrada no ERP. Consulte as condições e os pagamentos abaixo." : "Documento demonstrativo. Não é uma cobrança válida."}
             </DialogDescription>
           </DialogHeader>
-          {selected && (
+          <QueryBoundary loading={loading} error={error}>{selected && (
             <>
               <div className="invoice-amount">
                 <strong>{money(selected.amount)}</strong>
@@ -322,7 +335,7 @@ export function Financial() {
                   <dd>{selected.method}</dd>
                 </div>
               </dl>
-              {selected.status === "Em conciliação" && (
+              {!operational && selected.status === "Em conciliação" && (
                 <ContextCallout
                   icon={ShieldCheck}
                   title="Correspondência não é confirmação."
@@ -337,21 +350,19 @@ export function Financial() {
                 variant="outline"
                 onClick={() => {
                   const id = selected.subscriberId;
-                  setSelected(null);
+                  onClose();
                   openSubscriber(id);
                 }}
               >
                 Ver contexto do assinante
                 <ArrowUpRight data-icon="inline-end" />
               </Button>
-              <p className="demo-notice">
+              {operational ? children : <p className="demo-notice">
                 <Info size={13} />
                 Somente leitura · sem emissão, cobrança ou baixa real
-              </p>
+              </p>}
             </>
-          )}
+          )}</QueryBoundary>
         </DialogContent>
-      </Dialog>
-    </>
-  );
+      </Dialog>);
 }

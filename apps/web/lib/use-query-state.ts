@@ -8,7 +8,7 @@ export function useReplaceQueryValues() {
   return useNavigation().replaceQuery;
 }
 
-export function useQueryState<T extends string = string>(key: string, fallback: NoInfer<T>, allowed?: readonly NoInfer<T>[]) {
+export function useQueryState<T extends string = string>(key: string, fallback: NoInfer<T>, allowed?: readonly NoInfer<T>[], options?: { resetPage?: boolean }) {
   const params = useSearchParams();
   const navigation = useNavigation();
   const raw = params.get(key);
@@ -18,7 +18,7 @@ export function useQueryState<T extends string = string>(key: string, fallback: 
     const previous = readQueryValue(current, fallback, allowed);
     const candidate = typeof next === "function" ? next(previous) : next;
     const updated = readQueryValue(candidate, fallback, allowed);
-    navigation.replaceQuery({ [key]: updated === fallback ? null : updated });
+    navigation.replaceQuery({ [key]: updated === fallback ? null : updated, ...(options?.resetPage ? { pagina: null } : {}) });
   };
   return [value, setValue] as const;
 }

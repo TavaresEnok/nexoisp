@@ -3,3 +3,5 @@
 // foram preservados em legacy-smoke.mjs como referência para as próximas etapas.
 await import('./frontend-v0.mjs');
 await import('./frontend-v0-session.mjs');
+await import('./frontend-v0-commercial.mjs');
+await import('./frontend-v0-finance.mjs');

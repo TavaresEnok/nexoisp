@@ -22,5 +22,41 @@
     "identical": true,
     "reference": "ce16656e87b3c51328e76cf743fb1329fab7f80bc4e88c8576a1a574af78547c",
     "official": "ce16656e87b3c51328e76cf743fb1329fab7f80bc4e88c8576a1a574af78547c"
+  },
+  {
+    "name": "faturas-desktop",
+    "identical": true,
+    "reference": "5b0bd0cdc950803f6ba321256ecdc50864a5748ea1f78da45566bd7ea83a4452",
+    "official": "5b0bd0cdc950803f6ba321256ecdc50864a5748ea1f78da45566bd7ea83a4452"
+  },
+  {
+    "name": "fatura-detalhes",
+    "identical": true,
+    "reference": "91afef98aca25a72588218d4b9d56852799813747042bb0f0e3671e191554d2c",
+    "official": "91afef98aca25a72588218d4b9d56852799813747042bb0f0e3671e191554d2c"
+  },
+  {
+    "name": "planos-desktop",
+    "identical": true,
+    "reference": "e2afe99593a52ec0dea65c20d60dd47b2efda26e575b0501ded9a12555d78c36",
+    "official": "e2afe99593a52ec0dea65c20d60dd47b2efda26e575b0501ded9a12555d78c36"
+  },
+  {
+    "name": "plano-configuracao",
+    "identical": true,
+    "reference": "1c193c6937ec7cbf5d4db17beffa8fcd4252cf1435b1879e003daf48412d96e9",
+    "official": "1c193c6937ec7cbf5d4db17beffa8fcd4252cf1435b1879e003daf48412d96e9"
+  },
+  {
+    "name": "contratos-desktop",
+    "identical": true,
+    "reference": "834f1c6f2999c399ff3a1cc836af6b644ac9c1e89d89014da0af158805217eac",
+    "official": "834f1c6f2999c399ff3a1cc836af6b644ac9c1e89d89014da0af158805217eac"
+  },
+  {
+    "name": "contrato-ficha",
+    "identical": true,
+    "reference": "d4ca5b51e17ec0e59f2354ed05acb344b355f51fa556ad7a3d0085118fa6d473",
+    "official": "d4ca5b51e17ec0e59f2354ed05acb344b355f51fa556ad7a3d0085118fa6d473"
   }
 ]
