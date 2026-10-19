@@ -1,23 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import { NetworkEquipmentTable } from "./network-equipment-table";
 import { useSearchParams } from "@/platform/navigation/react";
 import { useQueryState } from "@/lib/use-query-state";
 import { isDemoMode } from "@/application/execution-mode";
 import {
-  Network,
   Radio,
   Activity,
   Router,
   ArrowUpRight,
-  Search,
   Download,
   ChevronRight,
   Signal,
   Info,
   Users,
   CircleCheck,
-  Server,
 } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
@@ -26,17 +24,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Table,
-  TableHeader,
-  TableHead,
-  TableRow,
-  TableBody,
-  TableCell,
-} from "@/components/ui/table";
 import {
   Sheet,
   SheetContent,
@@ -63,7 +51,7 @@ import { useWorkspace } from "@/components/workspace-provider";
 import { number, clock, exportCsv } from "@/lib/format";
 import type { NetworkNode } from "@/lib/types";
 import { selectNetworkNodes } from "@/application/selectors/network";
-import { EmptyState, ContextCallout } from "@/components/workspace-feedback";
+import { ContextCallout } from "@/components/workspace-feedback";
 
 export function NetworkCenter() {
   const { data, openSubscriber } = useWorkspace();
@@ -256,109 +244,7 @@ export function NetworkCenter() {
           </div>
         </Panel>
       </div>
-      <Panel
-        title="Equipamentos com identidade"
-        description="Amostra de 8 elementos da infraestrutura do cenário"
-        action={<Badge variant="outline">Sem comandos remotos</Badge>}
-        className="list-panel"
-      >
-        <div className="list-toolbar">
-          <Tabs value={filter} onValueChange={(v) => setFilter(String(v))}>
-            <TabsList variant="line">
-              {["Todos", "Operacional", "Atenção", "Offline"].map((v) => (
-                <TabsTrigger key={v} value={v}>
-                  {v === "Operacional" ? "Operacionais" : v}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-          <div className="search-field">
-            <Search size={15} />
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Nome, POP ou endereço IP…"
-              aria-label="Buscar equipamentos"
-            />
-          </div>
-        </div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Equipamento</TableHead>
-              <TableHead>Tipo / fabricante</TableHead>
-              <TableHead>POP</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Latência</TableHead>
-              <TableHead>CPU</TableHead>
-              <TableHead />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.map((n) => (
-              <TableRow key={n.id}>
-                <TableCell>
-                  <button className="node-identity" onClick={() => setNode(n)}>
-                    <span className="node-icon">
-                      <Server size={17} />
-                    </span>
-                    <span>
-                      <strong className="mono">{n.name}</strong>
-                      <small className="mono">{n.ip}</small>
-                    </span>
-                  </button>
-                </TableCell>
-                <TableCell>
-                  {n.type}
-                  <small className="table-subline">{n.vendor}</small>
-                </TableCell>
-                <TableCell className="subtle">{n.pop}</TableCell>
-                <TableCell>
-                  <Status value={n.status} />
-                </TableCell>
-                <TableCell className="mono">
-                  {n.status === "Offline" ? "—" : `${n.latency.toFixed(1)} ms`}
-                </TableCell>
-                <TableCell>
-                  <span className="cpu-meter">
-                    <i style={{ width: `${n.cpu}%` }} />
-                  </span>
-                  <small className="mono">
-                    {n.status === "Offline" ? "—" : `${n.cpu}%`}
-                  </small>
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={`Detalhes de ${n.name}`}
-                    onClick={() => setNode(n)}
-                  >
-                    <ArrowUpRight />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        {rows.length === 0 && (
-          <EmptyState icon={Network} title="Nenhum equipamento nesta seleção.">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setFilter("Todos");
-                setQuery("");
-              }}
-            >
-              Limpar filtros
-            </Button>
-          </EmptyState>
-        )}
-        <div className="table-total">
-          <span>{rows.length} equipamentos na seleção</span>
-          <span>Endereços privados fictícios · somente leitura</span>
-        </div>
-      </Panel>
+      <NetworkEquipmentTable rows={rows} filter={filter} setFilter={setFilter} query={query} setQuery={setQuery} onOpen={n => setNode(n as NetworkNode)} />
       <DemoNotice>
         {isDemoMode ? "Telemetria sintética e estática do cenário local." : "Telemetria sintética e estática, armazenada no Neon."} Nenhum agente, concentrador ou OLT real está conectado.
       </DemoNotice>

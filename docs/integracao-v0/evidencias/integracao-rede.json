@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:3000",
+  "verified_at": "2026-10-19T11:16:56.384Z",
+  "backend": "Go/PostgreSQL isolados; sem conexão a NAS físico",
+  "checks": [
+    "Agente criado no Go; token e chave pública exibidos na emissão, sem token na consulta posterior",
+    "Rotação invalida token anterior; revogação bloqueia o agente; hello e sincronização sintéticos registram versão e contato após reativação",
+    "Equipamento usa agente e referência local reais; ausência de telemetria permanece explícita e sem incidente demonstrativo",
+    "Parâmetros e manutenção são gravados no Go; mudanças de intenção não são apresentadas como confirmação do NAS",
+    "Concentrador emite segredo mesmo com falha de atualização do inventário; instruções posteriores não recuperam o segredo",
+    "Rotação do segredo exige confirmação e emite outro valor apenas na janela de emissão",
+    "Go bloqueia conversão com operação em aberto; relato sintético encerra a tentativa sem acessar NAS físico",
+    "Reaplicação solicita uma conta sem pendência e ignora conta já em operação; conversão preserva a conta e emite configuração integrada sem afirmar conectividade física",
+    "Fila e ficha de operações exibem intenção, idempotência, tentativa e evidências reais, com filtro e restauração pela URL",
+    "Inventário oficial mantém navegação e consulta no celular",
+    "Permissões de consulta/escrita e isolamento entre provedores são aplicados pelo Go",
+    "Falha no inventário operacional exibe erro sem equipamentos demonstrativos"
+  ]
+}

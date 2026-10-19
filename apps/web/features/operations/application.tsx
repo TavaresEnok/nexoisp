@@ -26,6 +26,9 @@ const OperationalLeads=lazy(()=>import("@/features/crm/leads").then(module=>({de
 const OperationalTickets=lazy(()=>import("@/features/crm/tickets").then(module=>({default:module.OperationalTickets})));
 const OperationalTicketOverlay=lazy(()=>import("@/features/crm/tickets").then(module=>({default:module.OperationalTicketOverlay})));
 const CrmReport=lazy(()=>import("@/features/crm/report").then(module=>({default:module.CrmReport})));
+const NetworkOperations=lazy(()=>import("@/features/network/operations").then(module=>({default:module.NetworkOperations})));
+const OperationalOperationOverlay=lazy(()=>import("@/features/network/operations").then(module=>({default:module.OperationalOperationOverlay})));
+const NetworkDirectory=lazy(()=>import("@/features/network/directory").then(module=>({default:module.NetworkDirectory})));
 const StockCatalog=lazy(()=>import("@/features/stock/catalog").then(module=>({default:module.StockCatalog})));
 const OperationalAgenda=lazy(()=>import("@/features/field/agenda").then(module=>({default:module.OperationalAgenda})));
 const MyWork=lazy(()=>import("@/features/field/my-work").then(module=>({default:module.MyWork})));
@@ -47,7 +50,7 @@ export function OperationalApplication() {
  return <OperationalWorkspaceProvider><AppShell initialAppearance={readAppearance()}>
  {location.pathname === "/login" ? <Navigate to={home} replace /> : me.mfa_pending && !location.pathname.startsWith("/conta") ? <Navigate to="/conta" replace /> : !allowed ? <AccessDenied /> : <Suspense fallback={<QueryBoundary loading>{null}</QueryBoundary>}><Routes>
  <Route path="/" element={me.role === "subscriber" || !me.tenant ? <Navigate to={home} replace /> : <ErpOverview />} />
- <Route path="/estoque" element={<StockCatalog />} /><Route path="/agenda" element={<OperationalAgenda />} /><Route path="/meu-trabalho" element={<MyWork />} /><Route path="/ordens-de-servico" element={<OperationalOrders />} /><Route path="/prospectos" element={<OperationalLeads />} /><Route path="/atendimentos" element={<OperationalTickets />} /><Route path="/relatorios/atendimento" element={<CrmReport />} /><Route path="/relatorios/cobranca" element={<CollectionReports />} /><Route path="/financeiro/politica-de-cobranca" element={<FinancePolicy />} /><Route path="/financeiro/conciliacao" element={<FinanceReconciliation />} /><Route path="/financeiro/faturas" element={<OperationalInvoices />} />
+ <Route path="/rede/operacoes" element={<NetworkOperations />} /><Route path="/rede/equipamentos" element={<NetworkDirectory />} /><Route path="/estoque" element={<StockCatalog />} /><Route path="/agenda" element={<OperationalAgenda />} /><Route path="/meu-trabalho" element={<MyWork />} /><Route path="/ordens-de-servico" element={<OperationalOrders />} /><Route path="/prospectos" element={<OperationalLeads />} /><Route path="/atendimentos" element={<OperationalTickets />} /><Route path="/relatorios/atendimento" element={<CrmReport />} /><Route path="/relatorios/cobranca" element={<CollectionReports />} /><Route path="/financeiro/politica-de-cobranca" element={<FinancePolicy />} /><Route path="/financeiro/conciliacao" element={<FinanceReconciliation />} /><Route path="/financeiro/faturas" element={<OperationalInvoices />} />
  <Route path="/contratos" element={<OperationalContracts />} /><Route path="/contratos/:id" element={<ContractLegacyLink />} /><Route path="/produtos-adicionais" element={<AddonCatalog />} /><Route path="/planos" element={<OperationalPlans />} /><Route path="/conta/*" element={<Account />} /><Route path="/assinantes" element={<SubscriberDirectory />} />
  <Route path="/assinantes/:id" element={<SubscriberLegacyLink />} />
  {Object.entries(erpAliases).map(([from, to]) => <Route key={from} path={from} element={<Navigate to={`${to}${location.search}`} replace />} />)}
@@ -57,6 +60,7 @@ export function OperationalApplication() {
  {allowed && me.tenant && me.role !== "subscriber" && !me.mfa_pending && <OperationalSubscriberSheet />}
  {allowed && me.tenant && me.role !== "subscriber" && !me.mfa_pending && new URLSearchParams(location.search).has("protocolo") && <Suspense fallback={<QueryBoundary loading>{null}</QueryBoundary>}><OperationalTicketOverlay /></Suspense>}
  {allowed && me.tenant && me.role !== "subscriber" && !me.mfa_pending && new URLSearchParams(location.search).has("ordem") && <Suspense fallback={<QueryBoundary loading>{null}</QueryBoundary>}><OperationalOrderOverlay /></Suspense>}
+ {allowed && me.tenant && me.role !== "subscriber" && !me.mfa_pending && new URLSearchParams(location.search).has("operacao") && <Suspense fallback={<QueryBoundary loading>{null}</QueryBoundary>}><OperationalOperationOverlay /></Suspense>}
  </AppShell></OperationalWorkspaceProvider>;
 }
 function ContractLegacyLink() { const location = useLocation(); const id = location.pathname.split("/").at(-1)!; const query = new URLSearchParams(location.search); query.set("contrato", id); return <Navigate to={`/contratos?${query}`} replace />; }

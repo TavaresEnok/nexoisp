@@ -1092,8 +1092,12 @@
     "behavior": "Agentes offline, falhas recentes, divergências e operações em espera; atualização periódica. Lista equipamentos e vínculo com agente, estado e manutenção. Sujeito a network:read e disponibilidade dos relatos.",
     "endpoints": "GET /api/network/health; GET /api/agents; GET /api/devices",
     "evidence": "P/Network.tsx; E/rede.go; L/consultas_generated.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-network.mjs",
+      "evidencias/integracao-rede.json",
+      "evidencias/producao-rede.json"
+    ]
   },
   {
     "id": "RE-02",
@@ -1103,8 +1107,11 @@
     "behavior": "Nome, criação, rotação de token, revogação/reativação e limpeza da associação de certificado; token e chave pública de assinatura exibidos no momento da emissão. Certificado e situação de sincronização são acompanhados.",
     "endpoints": "POST /api/agents; PATCH /api/agents/:id",
     "evidence": "P/Network.tsx; E/rede.go; G/agent/; M/00002_rede_operacoes.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "partial",
+    "validation": [
+      "e2e/frontend-v0-network.mjs",
+      "Criação, emissão/rotação e invalidação de token, revogação/reativação, versão, contato e sincronização validados com agente sintético. Redefinição de certificado implementada, ainda sem validação com certificado fixado; harness de agentes usa mTLS desligado somente neste ambiente isolado."
+    ]
   },
   {
     "id": "RE-03",
@@ -1114,8 +1121,12 @@
     "behavior": "Nome, driver, host, porta, referência de credencial e agente. Credenciais de equipamentos ficam na configuração local do agente; configuração demo é limitada pelo ambiente. Operação depende de comunicação com agente.",
     "endpoints": "POST /api/devices; PATCH /api/devices/:id",
     "evidence": "P/Network.tsx; E/rede.go; services/network-agent/nexo_agent/agent.py",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-network.mjs",
+      "evidencias/integracao-rede.json",
+      "evidencias/producao-rede.json"
+    ]
   },
   {
     "id": "RE-04",
@@ -1125,8 +1136,12 @@
     "behavior": "Dados do NAS, fabricante, endereço/forma de conexão, segredo, instruções e estado. Modos de conexão, incluindo túnel, dependem das opções suportadas; comandos copiados não configuram o equipamento automaticamente. Segredo é mostrado na criação/rotação.",
     "endpoints": "POST /api/radius/devices; GET /api/radius/status; GET /api/radius/devices/:id/setup",
     "evidence": "P/Concentradores.tsx; E/radius.go; L/radius_setup.go; G/radius/; M/00036_radius_integrado.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-network.mjs",
+      "evidencias/integracao-rede.json",
+      "evidencias/producao-rede.json"
+    ]
   },
   {
     "id": "RE-05",
@@ -1136,8 +1151,11 @@
     "behavior": "Alterar parâmetros de sessões simultâneas e intervalo de accounting; rodar novo segredo/túnel, inspecionar handshake e reaplicar contas. Operações não demonstram conectividade real por si só.",
     "endpoints": "PATCH /api/radius/devices/:id; POST /api/radius/devices/:id/secret; POST /api/radius/devices/:id/tunnel; POST /api/devices/:id/reapply",
     "evidence": "P/Concentradores.tsx; E/radius.go; E/rede.go; G/vpn/vpn.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "partial",
+    "validation": [
+      "e2e/frontend-v0-network.mjs",
+      "Parâmetros, rotação de segredo, instruções e reaplicação validados. Opções de túnel seguem capacidades do servidor; criação/refazimento e handshake não validados, pois VPN/L2TP não estão habilitados no harness. Não houve conexão a NAS físico."
+    ]
   },
   {
     "id": "RE-06",
@@ -1147,8 +1165,12 @@
     "behavior": "Ação para dispositivo compatível, com aviso das contas que precisam de segredo/reaplicação. Alterar cadastro não garante configuração remota do NAS.",
     "endpoints": "POST /api/devices/:id/convert-to-integrated",
     "evidence": "P/Concentradores.tsx; E/radius.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-network.mjs",
+      "evidencias/integracao-rede.json",
+      "evidencias/producao-rede.json"
+    ]
   },
   {
     "id": "RE-07",
@@ -1180,8 +1202,12 @@
     "behavior": "Lista e modal mostram estado, tentativas, etapas, datas, validade, chave de idempotência, resultado e comparação desejado/observado; recuperação de resultado incerto é controlada pelo motor.",
     "endpoints": "GET /api/operations; GET /api/operations/:id",
     "evidence": "P/Network.tsx; E/rede.go; G/network/attempts.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-network.mjs",
+      "evidencias/integracao-rede.json",
+      "evidencias/producao-rede.json"
+    ]
   },
   {
     "id": "RE-10",

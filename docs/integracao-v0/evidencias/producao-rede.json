@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:18390",
+  "verified_at": "2026-10-19T11:16:55.518Z",
+  "backend": "Go/PostgreSQL isolados; sem conexão a NAS físico",
+  "checks": [
+    "Agente criado no Go; token e chave pública exibidos na emissão, sem token na consulta posterior",
+    "Rotação invalida token anterior; revogação bloqueia o agente; hello e sincronização sintéticos registram versão e contato após reativação",
+    "Equipamento usa agente e referência local reais; ausência de telemetria permanece explícita e sem incidente demonstrativo",
+    "Parâmetros e manutenção são gravados no Go; mudanças de intenção não são apresentadas como confirmação do NAS",
+    "Concentrador emite segredo mesmo com falha de atualização do inventário; instruções posteriores não recuperam o segredo",
+    "Rotação do segredo exige confirmação e emite outro valor apenas na janela de emissão",
+    "Go bloqueia conversão com operação em aberto; relato sintético encerra a tentativa sem acessar NAS físico",
+    "Reaplicação solicita uma conta sem pendência e ignora conta já em operação; conversão preserva a conta e emite configuração integrada sem afirmar conectividade física",
+    "Fila e ficha de operações exibem intenção, idempotência, tentativa e evidências reais, com filtro e restauração pela URL",
+    "Inventário oficial mantém navegação e consulta no celular",
+    "Permissões de consulta/escrita e isolamento entre provedores são aplicados pelo Go",
+    "Falha no inventário operacional exibe erro sem equipamentos demonstrativos"
+  ],
+  "image": "nexo-v0-frontend:validation",
+  "image_id": "sha256:2838d9092b53629f6973666561e0f768d8e85e8f4dfad6cf9de3359fd1e1c448",
+  "csp": "Política original mantida; cenários sem erros de execução ou de CSP detectados.",
+  "agent": "Agente sintético no protocolo real; mTLS desligado apenas no harness, sem conexão a NAS físico."
+}

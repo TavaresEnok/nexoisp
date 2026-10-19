@@ -85,15 +85,15 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | FI-15 | Demonstrativa | Conciliação automática com gateway demo | Integrada e validada |
 | FI-16 | Demonstrativa | Simulação de pagamento e cobrança | Integrada e validada |
 | FI-17 | Não confirmado | Cobrança bancária real, Pix/boleto pagável | Limitação preservada |
-| RE-01 | Implementada | Indicadores e inventário de agentes/equipamentos | Pendente |
-| RE-02 | Implementada | Cadastrar e administrar agente | Pendente |
-| RE-03 | Implementada | Cadastrar equipamento conectado a agente | Pendente |
-| RE-04 | Implementada | Adicionar NAS RADIUS integrado | Pendente |
-| RE-05 | Implementada | Parâmetros, segredo, túnel e reaplicação | Pendente |
-| RE-06 | Implementada | Converter concentrador legado ao integrado | Pendente |
+| RE-01 | Implementada | Indicadores e inventário de agentes/equipamentos | Integrada e validada |
+| RE-02 | Implementada | Cadastrar e administrar agente | Parcial |
+| RE-03 | Implementada | Cadastrar equipamento conectado a agente | Integrada e validada |
+| RE-04 | Implementada | Adicionar NAS RADIUS integrado | Integrada e validada |
+| RE-05 | Implementada | Parâmetros, segredo, túnel e reaplicação | Parcial |
+| RE-06 | Implementada | Converter concentrador legado ao integrado | Integrada e validada |
 | RE-07 | Implementada | Criar acesso e manter credenciais | Pendente |
 | RE-08 | Implementada | Provisionar, suspender, reativar e desconectar | Pendente |
-| RE-09 | Implementada | Inspecionar fila e evidências de operações | Pendente |
+| RE-09 | Implementada | Inspecionar fila e evidências de operações | Integrada e validada |
 | RE-10 | Implementada | Consultar sessões e solicitar desconexão | Pendente |
 | RE-11 | Implementada | Consultar sessões, tráfego e tentativas | Pendente |
 | RE-12 | Implementada | Vincular equipamento e administrar Wi-Fi | Pendente |

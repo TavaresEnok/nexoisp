@@ -12,6 +12,8 @@ try {
   { name: 'assinantes-desktop-escuro', path: '/assinantes', width: 1342, height: 805, theme: 'dark' },
   { name: 'assinantes-celular', path: '/assinantes', width: 390, height: 844, theme: 'light' },
   { name: 'ficha-desktop', path: '/assinantes?ficha=sub-1', width: 1342, height: 805, theme: 'dark' },
+  { name: 'rede-inventario', path: '/rede/equipamentos', heading: 'Monitoramento de rede', width: 1342, height: 805, theme: 'dark' },
+  { name: 'rede-ficha', path: '/rede/equipamentos', heading: 'Monitoramento de rede', action: 'Detalhes de ', width: 1342, height: 805, theme: 'light' },
   { name: 'ordens-quadro', path: '/ordens-de-servico', heading: 'Ordens de serviço', width: 1342, height: 805, theme: 'light' },
   { name: 'ordem-ficha', path: '/ordens-de-servico', heading: 'Ordens de serviço', action: 'Ver OS ', width: 1342, height: 805, theme: 'dark' },
   { name: 'atendimentos-desktop', path: '/atendimentos', heading: 'Atendimentos', width: 1342, height: 805, theme: 'light' },

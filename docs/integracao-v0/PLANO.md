@@ -15,12 +15,12 @@ O frontend do v0 é a referência oficial e obrigatória de UI/UX. A integraçã
 
 | Etapa | Escopo | Situação |
 |---|---|---|
-| 1 | Referência visual, preservação e matriz por unidade funcional | Concluída: 169 unidades e quatorze comparações visuais idênticas |
+| 1 | Referência visual, preservação e matriz por unidade funcional | Concluída: 169 unidades e dezesseis comparações visuais idênticas |
 | 2 | Promover o código completo do v0 para `apps/web`, build e implantação | Código promovido; build e imagem Docker validados |
 | 3 | Sessão, MFA, permissões, módulos, HTTP, cache e demonstração isolada | Fundação integrada; login, senha, TOTP, expiração e isolamento validados |
 | 4 | Assinantes: consulta paginada, ficha, cadastro e edição | Cadastro e recursos complementares validados; ficha recebe os módulos das etapas 5 e 6 |
 | 5 | Planos, contratos, versões, adicionais e condições | Núcleo comercial, equipamentos e recolhimento validados; comprovante de aceite depende do portal |
-| 6 | Atendimento, OS, estoque, financeiro, rede, administração e importação | Financeiro, CRM, operação de OS, agenda, Meu trabalho e estoque integrados; rede e administração em implementação |
+| 6 | Atendimento, OS, estoque, financeiro, rede, administração e importação | Financeiro, CRM, operação de OS, agenda, Meu trabalho e estoque integrados; inventário de rede, concentradores e operações integrados; acesso dos contratos, demais recursos de rede e administração em implementação |
 | 7 | Portal, SaaS, revisão da cobertura e retirada operacional do legado | Pendente |
 
 Uma etapa ou unidade só recebe estado concluído após validação correspondente. A presença de uma tela, de um endpoint ou de um teste de leitura não comprova a cobertura de suas mutações e regras.
@@ -49,6 +49,6 @@ Resultados executados, evidências e limites: [VALIDACAO.md](VALIDACAO.md).
 
 ## Cobertura atual
 
-A matriz registra 71 unidades integradas e validadas, 7 parciais, 64 pendentes e 27 capacidades internas ou limitações do backend preservadas. Esses números contam unidades funcionais, não esforço ou tempo restante. A cobertura ainda não representa conclusão das sete etapas.
+A matriz registra 76 unidades integradas e validadas, 9 parciais, 57 pendentes e 27 capacidades internas ou limitações do backend preservadas. Esses números contam unidades funcionais, não esforço ou tempo restante. A cobertura ainda não representa conclusão das sete etapas.
 
-`test:commercial` valida o núcleo comercial; `test:finance` valida os fluxos financeiros; `test:crm` valida prospectos e atendimento; `test:field` valida OS, agenda e trabalho do técnico; `test:stock` valida o estoque e o ciclo das unidades por série. A fumaça oficial executa assinantes, sessão, comercial, financeiro, CRM, OS e estoque em sequência contra a mesma base sintética para evitar interferência entre geração financeira e dados de outros cenários.
+`test:commercial` valida o núcleo comercial; `test:finance` valida os fluxos financeiros; `test:crm` valida prospectos e atendimento; `test:field` valida OS, agenda e trabalho do técnico; `test:stock` valida o estoque e o ciclo das unidades por série; `test:network` valida o inventário de rede, concentradores e evidências de operações. A fumaça oficial executa assinantes, sessão, comercial, financeiro, CRM, OS, estoque e rede em sequência contra a mesma base sintética para evitar interferência entre geração financeira e dados de outros cenários.

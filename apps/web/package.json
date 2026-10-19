@@ -19,7 +19,8 @@
     "test:finance": "node ../../e2e/frontend-v0-finance.mjs",
     "test:crm": "node ../../e2e/frontend-v0-crm.mjs",
     "test:field": "node ../../e2e/frontend-v0-field.mjs",
-    "test:stock": "node ../../e2e/frontend-v0-stock.mjs"
+    "test:stock": "node ../../e2e/frontend-v0-stock.mjs",
+    "test:network": "node ../../e2e/frontend-v0-network.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.5.0",

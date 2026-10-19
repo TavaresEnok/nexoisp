@@ -24,6 +24,18 @@
     "official": "ce16656e87b3c51328e76cf743fb1329fab7f80bc4e88c8576a1a574af78547c"
   },
   {
+    "name": "rede-inventario",
+    "identical": true,
+    "reference": "2cb12e0484c910e1c87a368b4c6f059580b1355ec3251974827a8e07645b458f",
+    "official": "2cb12e0484c910e1c87a368b4c6f059580b1355ec3251974827a8e07645b458f"
+  },
+  {
+    "name": "rede-ficha",
+    "identical": true,
+    "reference": "abb32cfb047046f1267a5fea879e328219e830d34f18a053bc0362a06e40cded",
+    "official": "abb32cfb047046f1267a5fea879e328219e830d34f18a053bc0362a06e40cded"
+  },
+  {
     "name": "ordens-quadro",
     "identical": true,
     "reference": "903228c3c98ff97bd2d16231fcb1ec8b6690ad93bc34c8104881cf50175e3929",

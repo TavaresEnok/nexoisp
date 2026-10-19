@@ -8,3 +8,4 @@ await import('./frontend-v0-finance.mjs');
 await import('./frontend-v0-crm.mjs');
 await import('./frontend-v0-field.mjs');
 await import('./frontend-v0-stock.mjs');
+await import('./frontend-v0-network.mjs');
