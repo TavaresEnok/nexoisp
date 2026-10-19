@@ -2,12 +2,21 @@ import { useState } from "react";
 import useSWR from "swr";
 import { FileText } from "lucide-react";
 import { toast } from "sonner";
-import { ProfileSection, ProfileFacts } from "@/components/subscriber-profile-sections";
+import {
+  ProfileSection,
+  ProfileFacts,
+} from "@/components/subscriber-profile-sections";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { EmptyState } from "@/components/workspace-feedback";
 import { useSession } from "@/features/session/provider";
@@ -19,38 +28,685 @@ import { api, download } from "@/platform/erp-client";
 import { date } from "@/lib/format";
 import { EntityCustomFields } from "@/features/shared/custom-fields";
 import type { SubscriberDetail } from "./model";
-export function SubscriberSections({ subscriber, section, refresh }: { subscriber: SubscriberDetail; section: "cadastro" | "documentos" | "historico"; refresh: () => Promise<void> }) {
- return <div className="erp-stack">{section === "cadastro" && <><PortalAccess subscriber={subscriber} /><CustomFields subscriber={subscriber} refresh={refresh} /><Notes id={subscriber.id} /><Contacts id={subscriber.id} /></>}{section === "documentos" && <><Documents id={subscriber.id} /><Privacy subscriber={subscriber} refresh={refresh} /></>}{section === "historico" && <Timeline id={subscriber.id} />}</div>;
+export function SubscriberSections({
+  subscriber,
+  section,
+  refresh,
+}: {
+  subscriber: SubscriberDetail;
+  section: "cadastro" | "documentos" | "historico";
+  refresh: () => Promise<void>;
+}) {
+  return (
+    <div className="erp-stack">
+      {section === "cadastro" && (
+        <>
+          <PortalAccess subscriber={subscriber} />
+          <CustomFields subscriber={subscriber} refresh={refresh} />
+          <Notes id={subscriber.id} />
+          <Contacts id={subscriber.id} />
+        </>
+      )}
+      {section === "documentos" && (
+        <>
+          <Documents id={subscriber.id} />
+          <Privacy subscriber={subscriber} refresh={refresh} />
+        </>
+      )}
+      {section === "historico" && <Timeline id={subscriber.id} />}
+    </div>
+  );
 }
 function PortalAccess({ subscriber }: { subscriber: SubscriberDetail }) {
- const { me } = useSession(); const access = useSWR(["erp-portal-access", subscriber.id], ([, id]) => api<{ email: string } | null>(`/subscribers/${id}/portal-access`)); const [editing, setEditing] = useState(false); const [form, setForm] = useState({ email: "", password: "" });
- return <ProfileSection title="Acesso ao portal" action={can(me, "subscribers:write") && !subscriber.anonymized_at && <Button variant="outline" size="sm" onClick={() => { setForm({ email: access.data?.email ?? subscriber.email ?? "", password: "" }); setEditing(true); }}>{access.data ? "Redefinir acesso" : "Criar acesso"}</Button>}><QueryBoundary loading={access.isLoading} error={access.error} retry={() => access.mutate()}><p>{access.data?.email ?? "Sem acesso ao portal cadastrado."}</p></QueryBoundary>{editing && <Dialog open onOpenChange={open => { if (!open) setEditing(false); }}><DialogContent><DialogHeader><DialogTitle>Acesso ao portal do assinante</DialogTitle><DialogDescription>Informe as credenciais ao titular por um canal seguro.</DialogDescription></DialogHeader><MutationForm onCancel={() => setEditing(false)} onSubmit={async () => { await api(`/subscribers/${subscriber.id}/portal-access`, { body: form }); setEditing(false); await access.mutate(); }}><FormField label="E-mail de acesso"><Input type="email" autoComplete="off" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required /></FormField><FormField label="Senha" hint="Mínimo de 8 caracteres."><Input type="password" autoComplete="new-password" minLength={8} value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required /></FormField></MutationForm></DialogContent></Dialog>}</ProfileSection>;
+  const { me } = useSession();
+  const access = useSWR(["erp-portal-access", subscriber.id], ([, id]) =>
+    api<{ email: string } | null>(`/subscribers/${id}/portal-access`),
+  );
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState({ email: "", password: "" });
+  return (
+    <ProfileSection
+      title="Acesso ao portal"
+      action={
+        can(me, "subscribers:write") &&
+        !subscriber.anonymized_at && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setForm({
+                email: access.data?.email ?? subscriber.email ?? "",
+                password: "",
+              });
+              setEditing(true);
+            }}
+          >
+            {access.data ? "Redefinir acesso" : "Criar acesso"}
+          </Button>
+        )
+      }
+    >
+      <QueryBoundary
+        loading={access.isLoading}
+        error={access.error}
+        retry={() => access.mutate()}
+      >
+        <p>{access.data?.email ?? "Sem acesso ao portal cadastrado."}</p>
+      </QueryBoundary>
+      {editing && (
+        <Dialog
+          open
+          onOpenChange={(open) => {
+            if (!open) setEditing(false);
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Acesso ao portal do assinante</DialogTitle>
+              <DialogDescription>
+                Informe as credenciais ao titular por um canal seguro.
+              </DialogDescription>
+            </DialogHeader>
+            <MutationForm
+              onCancel={() => setEditing(false)}
+              onSubmit={async () => {
+                await api(`/subscribers/${subscriber.id}/portal-access`, {
+                  body: form,
+                });
+                setEditing(false);
+                await access.mutate();
+              }}
+            >
+              <FormField label="E-mail de acesso">
+                <Input
+                  type="email"
+                  autoComplete="off"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  required
+                />
+              </FormField>
+              <FormField label="Senha" hint="Mínimo de 8 caracteres.">
+                <Input
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={8}
+                  value={form.password}
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
+                  required
+                />
+              </FormField>
+            </MutationForm>
+          </DialogContent>
+        </Dialog>
+      )}
+    </ProfileSection>
+  );
 }
-type Note = { id: string; body: string; alert: boolean; type_name?: string; created_at: string; created_by_name?: string };
+type Note = {
+  id: string;
+  body: string;
+  alert: boolean;
+  type_name?: string;
+  created_at: string;
+  created_by_name?: string;
+};
 function Notes({ id }: { id: string }) {
- const { me } = useSession(); const writable = can(me, "subscribers:write"); const notes = useSWR(["erp-notes", id], ([, id]) => api<Note[]>(`/subscribers/${id}/notes`)); const types = useSWR(writable ? "erp-note-types" : null, () => api<{ id: string; name: string }[]>("/catalogs?kind=note_type")); const [form, setForm] = useState({ body: "", type_id: "", alert: false });
- return <ProfileSection title="Anotações"><QueryBoundary loading={notes.isLoading} error={notes.error} retry={() => notes.mutate()}>{notes.data?.filter(note => note.alert).map(note => <Alert key={note.id}><AlertDescription>{note.body}</AlertDescription></Alert>)}{notes.data?.map(note => <div key={note.id} className="erp-contract-card"><p className="whitespace-pre-wrap">{note.type_name && <Badge variant="outline">{note.type_name}</Badge>} {note.body}</p><small>{date(note.created_at)} · {note.created_by_name ?? "Sistema"}</small>{writable && <ActionButton onClick={async () => { await api(`/notes/${note.id}`, { method: "PATCH", body: { archived: true } }); await notes.mutate(); }}>Arquivar</ActionButton>}</div>)}</QueryBoundary>{writable && <MutationForm submit="Anotar" onSubmit={async () => { await api(`/subscribers/${id}/notes`, { body: { ...form, type_id: form.type_id || null } }); setForm({ body: "", type_id: "", alert: false }); await notes.mutate(); }}><FormField label="Nova anotação"><Textarea value={form.body} maxLength={2000} required onChange={e => setForm({ ...form, body: e.target.value })} /></FormField><FormField label="Tipo da anotação"><select className="commercial-select" value={form.type_id} onChange={e => setForm({ ...form, type_id: e.target.value })}><option value="">Sem tipo</option>{types.data?.map(type => <option key={type.id} value={type.id}>{type.name}</option>)}</select></FormField><label><input type="checkbox" checked={form.alert} onChange={e => setForm({ ...form, alert: e.target.checked })} /> Alertar ao abrir</label></MutationForm>}</ProfileSection>;
+  const { me } = useSession();
+  const writable = can(me, "subscribers:write");
+  const notes = useSWR(["erp-notes", id], ([, id]) =>
+    api<Note[]>(`/subscribers/${id}/notes`),
+  );
+  const types = useSWR(writable ? "erp-note-types" : null, () =>
+    api<{ id: string; name: string }[]>("/catalogs?kind=note_type"),
+  );
+  const [form, setForm] = useState({ body: "", type_id: "", alert: false });
+  return (
+    <ProfileSection title="Anotações">
+      <QueryBoundary
+        loading={notes.isLoading}
+        error={notes.error}
+        retry={() => notes.mutate()}
+      >
+        {notes.data
+          ?.filter((note) => note.alert)
+          .map((note) => (
+            <Alert key={note.id}>
+              <AlertDescription>{note.body}</AlertDescription>
+            </Alert>
+          ))}
+        {notes.data?.map((note) => (
+          <div key={note.id} className="erp-contract-card">
+            <p className="whitespace-pre-wrap">
+              {note.type_name && (
+                <Badge variant="outline">{note.type_name}</Badge>
+              )}{" "}
+              {note.body}
+            </p>
+            <small>
+              {date(note.created_at)} · {note.created_by_name ?? "Sistema"}
+            </small>
+            {writable && (
+              <ActionButton
+                onClick={async () => {
+                  await api(`/notes/${note.id}`, {
+                    method: "PATCH",
+                    body: { archived: true },
+                  });
+                  await notes.mutate();
+                }}
+              >
+                Arquivar
+              </ActionButton>
+            )}
+          </div>
+        ))}
+      </QueryBoundary>
+      {writable && (
+        <MutationForm
+          submit="Anotar"
+          onSubmit={async () => {
+            await api(`/subscribers/${id}/notes`, {
+              body: { ...form, type_id: form.type_id || null },
+            });
+            setForm({ body: "", type_id: "", alert: false });
+            await notes.mutate();
+          }}
+        >
+          <FormField label="Nova anotação">
+            <Textarea
+              value={form.body}
+              maxLength={2000}
+              required
+              onChange={(e) => setForm({ ...form, body: e.target.value })}
+            />
+          </FormField>
+          <FormField label="Tipo da anotação">
+            <select
+              className="commercial-select"
+              value={form.type_id}
+              onChange={(e) => setForm({ ...form, type_id: e.target.value })}
+            >
+              <option value="">Sem tipo</option>
+              {types.data?.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.name}
+                </option>
+              ))}
+            </select>
+          </FormField>
+          <label>
+            <input
+              type="checkbox"
+              checked={form.alert}
+              onChange={(e) => setForm({ ...form, alert: e.target.checked })}
+            />{" "}
+            Alertar ao abrir
+          </label>
+        </MutationForm>
+      )}
+    </ProfileSection>
+  );
 }
-type Contact = { id?: string; kind: string; value: string; label?: string | null; purpose: string; allow_notices: boolean };
-const kinds: Record<string, string> = { mobile: "Celular", whatsapp: "WhatsApp", landline: "Telefone fixo", email: "E-mail", responsible: "Responsável" }; const purposes: Record<string, string> = { general: "Geral", billing: "Cobrança", technical: "Técnico" };
+type Contact = {
+  id?: string;
+  kind: string;
+  value: string;
+  label?: string | null;
+  purpose: string;
+  allow_notices: boolean;
+};
+const kinds: Record<string, string> = {
+  mobile: "Celular",
+  whatsapp: "WhatsApp",
+  landline: "Telefone fixo",
+  email: "E-mail",
+  responsible: "Responsável",
+};
+const purposes: Record<string, string> = {
+  general: "Geral",
+  billing: "Cobrança",
+  technical: "Técnico",
+};
 function Contacts({ id }: { id: string }) {
- const { me } = useSession(); const contacts = useSWR(["erp-contacts", id], ([, id]) => api<Contact[]>(`/subscribers/${id}/contacts`)); const [form, setForm] = useState<Contact[] | null>(null); const change = (index: number, values: Partial<Contact>) => setForm(current => current?.map((contact, i) => i === index ? { ...contact, ...values } : contact) ?? null);
- return <ProfileSection title="Contatos e consentimento" action={can(me, "subscribers:write") && !form && contacts.data && <Button variant="outline" size="sm" onClick={() => setForm(contacts.data!.map(contact => ({ ...contact })))}>Editar contatos</Button>}><QueryBoundary loading={contacts.isLoading} error={contacts.error} retry={() => contacts.mutate()}>{form ? <MutationForm submit="Salvar contatos" onCancel={() => setForm(null)} onSubmit={async () => { await api(`/subscribers/${id}/contacts`, { method: "PUT", body: { contacts: form.filter(contact => contact.value.trim()).map(({ kind, value, label, purpose, allow_notices }) => ({ kind, value, label: label || null, purpose, allow_notices })) } }); setForm(null); await contacts.mutate(); }}>{form.map((contact, index) => <div className="erp-contract-card" key={index}><div className="erp-columns"><FormField label="Tipo"><select className="commercial-select" value={contact.kind} onChange={e => change(index, { kind: e.target.value })}>{Object.entries(kinds).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></FormField><FormField label="Contato"><Input value={contact.value} onChange={e => change(index, { value: e.target.value })} required /></FormField><FormField label="Finalidade"><select className="commercial-select" value={contact.purpose} onChange={e => change(index, { purpose: e.target.value })}>{Object.entries(purposes).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></FormField></div><label><input type="checkbox" checked={contact.allow_notices} onChange={e => change(index, { allow_notices: e.target.checked })} /> Aceita avisos</label><Button type="button" variant="destructive" size="sm" onClick={() => setForm(form.filter((_, i) => i !== index))}>Remover contato</Button></div>)}<Button type="button" variant="outline" disabled={form.length >= 20} onClick={() => setForm([...form, { kind: "mobile", value: "", purpose: "general", allow_notices: false }])}>Adicionar contato</Button></MutationForm> : <>{!contacts.data?.length && <p className="profile-footnote">Nenhum contato adicional.</p>}{contacts.data?.map((contact, index) => <div className="erp-contract-card" key={contact.id ?? index}><strong>{kinds[contact.kind]} · {contact.value}</strong><small>{purposes[contact.purpose]} · {contact.allow_notices ? "Aceita avisos" : "Sem consentimento para avisos"}</small></div>)}</>}</QueryBoundary></ProfileSection>;
+  const { me } = useSession();
+  const contacts = useSWR(["erp-contacts", id], ([, id]) =>
+    api<Contact[]>(`/subscribers/${id}/contacts`),
+  );
+  const [form, setForm] = useState<Contact[] | null>(null);
+  const change = (index: number, values: Partial<Contact>) =>
+    setForm(
+      (current) =>
+        current?.map((contact, i) =>
+          i === index ? { ...contact, ...values } : contact,
+        ) ?? null,
+    );
+  return (
+    <ProfileSection
+      title="Contatos e consentimento"
+      action={
+        can(me, "subscribers:write") &&
+        !form &&
+        contacts.data && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              setForm(contacts.data!.map((contact) => ({ ...contact })))
+            }
+          >
+            Editar contatos
+          </Button>
+        )
+      }
+    >
+      <QueryBoundary
+        loading={contacts.isLoading}
+        error={contacts.error}
+        retry={() => contacts.mutate()}
+      >
+        {form ? (
+          <MutationForm
+            submit="Salvar contatos"
+            onCancel={() => setForm(null)}
+            onSubmit={async () => {
+              await api(`/subscribers/${id}/contacts`, {
+                method: "PUT",
+                body: {
+                  contacts: form
+                    .filter((contact) => contact.value.trim())
+                    .map(({ kind, value, label, purpose, allow_notices }) => ({
+                      kind,
+                      value,
+                      label: label || null,
+                      purpose,
+                      allow_notices,
+                    })),
+                },
+              });
+              setForm(null);
+              await contacts.mutate();
+            }}
+          >
+            {form.map((contact, index) => (
+              <div className="erp-contract-card" key={index}>
+                <div className="erp-columns">
+                  <FormField label="Tipo">
+                    <select
+                      className="commercial-select"
+                      value={contact.kind}
+                      onChange={(e) => change(index, { kind: e.target.value })}
+                    >
+                      {Object.entries(kinds).map(([key, label]) => (
+                        <option key={key} value={key}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </FormField>
+                  <FormField label="Contato">
+                    <Input
+                      value={contact.value}
+                      onChange={(e) => change(index, { value: e.target.value })}
+                      required
+                    />
+                  </FormField>
+                  <FormField label="Finalidade">
+                    <select
+                      className="commercial-select"
+                      value={contact.purpose}
+                      onChange={(e) =>
+                        change(index, { purpose: e.target.value })
+                      }
+                    >
+                      {Object.entries(purposes).map(([key, label]) => (
+                        <option key={key} value={key}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </FormField>
+                </div>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={contact.allow_notices}
+                    onChange={(e) =>
+                      change(index, { allow_notices: e.target.checked })
+                    }
+                  />{" "}
+                  Aceita avisos
+                </label>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setForm(form.filter((_, i) => i !== index))}
+                >
+                  Remover contato
+                </Button>
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              disabled={form.length >= 20}
+              onClick={() =>
+                setForm([
+                  ...form,
+                  {
+                    kind: "mobile",
+                    value: "",
+                    purpose: "general",
+                    allow_notices: false,
+                  },
+                ])
+              }
+            >
+              Adicionar contato
+            </Button>
+          </MutationForm>
+        ) : (
+          <>
+            {!contacts.data?.length && (
+              <p className="profile-footnote">Nenhum contato adicional.</p>
+            )}
+            {contacts.data?.map((contact, index) => (
+              <div className="erp-contract-card" key={contact.id ?? index}>
+                <strong>
+                  {kinds[contact.kind]} · {contact.value}
+                </strong>
+                <small>
+                  {purposes[contact.purpose]} ·{" "}
+                  {contact.allow_notices
+                    ? "Aceita avisos"
+                    : "Sem consentimento para avisos"}
+                </small>
+              </div>
+            ))}
+          </>
+        )}
+      </QueryBoundary>
+    </ProfileSection>
+  );
 }
-type Document = { id: string; name: string; kind: string; size_bytes: number; created_at: string };
+type Document = {
+  id: string;
+  name: string;
+  kind: string;
+  size_bytes: number;
+  created_at: string;
+};
 function Documents({ id }: { id: string }) {
- const { me } = useSession(); const writable = can(me, "subscribers:write"); const docs = useSWR(["erp-documents", id], ([, id]) => api<Document[]>(`/subscribers/${id}/documents`)); const [kind, setKind] = useState("identity"); const [busy, setBusy] = useState(false);
- const upload = async (file?: File) => { if (!file || busy) return; if (file.size > 5 * 1024 * 1024) { toast.error("Arquivo acima de 5 MiB."); return; } setBusy(true); try { const bytes = new Uint8Array(await file.arrayBuffer()); let content = ""; for (let i = 0; i < bytes.length; i += 0x8000) content += String.fromCharCode(...bytes.subarray(i, i + 0x8000)); await api(`/subscribers/${id}/documents`, { body: { kind, name: file.name.slice(0, 120), content_base64: btoa(content) } }); await docs.mutate(); } catch (error) { toast.error((error as Error).message); } finally { setBusy(false); } };
- return <ProfileSection title="Documentos" caption="PDF, JPEG, PNG ou WebP, até 5 MiB por arquivo.">{writable && <div className="erp-columns"><FormField label="Tipo do documento"><select className="commercial-select" value={kind} onChange={e => setKind(e.target.value)}>{Object.entries({ identity: "Identidade", address_proof: "Comprovante de endereço", contract: "Contrato", photo: "Foto", other: "Outro" }).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></FormField><FormField label={busy ? "Enviando arquivo…" : "Arquivo"}><Input type="file" disabled={busy} accept="application/pdf,image/jpeg,image/png,image/webp" onChange={e => { void upload(e.target.files?.[0]); e.target.value = ""; }} /></FormField></div>}<QueryBoundary loading={docs.isLoading} error={docs.error} retry={() => docs.mutate()}>{!docs.data?.length && <EmptyState icon={FileText} title="Nenhum documento anexado" />}{docs.data?.map(doc => <div className="erp-contract-card" key={doc.id}><strong>{doc.name}</strong><small>{Math.ceil(doc.size_bytes / 1024)} KiB · {date(doc.created_at)}</small>{writable && <div className="erp-inline-actions"><ActionButton onClick={() => download(`/documents/${doc.id}/download`, doc.name)}>Baixar</ActionButton><ActionButton danger confirm="Excluir este documento? O arquivo será removido; o registro de auditoria será preservado." onClick={async () => { await api(`/documents/${doc.id}`, { method: "DELETE" }); await docs.mutate(); }}>Excluir</ActionButton></div>}</div>)}</QueryBoundary></ProfileSection>;
+  const { me } = useSession();
+  const writable = can(me, "subscribers:write");
+  const docs = useSWR(["erp-documents", id], ([, id]) =>
+    api<Document[]>(`/subscribers/${id}/documents`),
+  );
+  const [kind, setKind] = useState("identity");
+  const [busy, setBusy] = useState(false);
+  const upload = async (file?: File) => {
+    if (!file || busy) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Arquivo acima de 5 MiB.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      let content = "";
+      for (let i = 0; i < bytes.length; i += 0x8000)
+        content += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+      await api(`/subscribers/${id}/documents`, {
+        body: {
+          kind,
+          name: file.name.slice(0, 120),
+          content_base64: btoa(content),
+        },
+      });
+      await docs.mutate();
+    } catch (error) {
+      toast.error((error as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <ProfileSection
+      title="Documentos"
+      caption="PDF, JPEG, PNG ou WebP, até 5 MiB por arquivo."
+    >
+      {writable && (
+        <div className="erp-columns">
+          <FormField label="Tipo do documento">
+            <select
+              className="commercial-select"
+              value={kind}
+              onChange={(e) => setKind(e.target.value)}
+            >
+              {Object.entries({
+                identity: "Identidade",
+                address_proof: "Comprovante de endereço",
+                contract: "Contrato",
+                photo: "Foto",
+                other: "Outro",
+              }).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </FormField>
+          <FormField label={busy ? "Enviando arquivo…" : "Arquivo"}>
+            <Input
+              type="file"
+              disabled={busy}
+              accept="application/pdf,image/jpeg,image/png,image/webp"
+              onChange={(e) => {
+                void upload(e.target.files?.[0]);
+                e.target.value = "";
+              }}
+            />
+          </FormField>
+        </div>
+      )}
+      <QueryBoundary
+        loading={docs.isLoading}
+        error={docs.error}
+        retry={() => docs.mutate()}
+      >
+        {!docs.data?.length && (
+          <EmptyState icon={FileText} title="Nenhum documento anexado" />
+        )}
+        {docs.data?.map((doc) => (
+          <div className="erp-contract-card" key={doc.id}>
+            <strong>{doc.name}</strong>
+            <small>
+              {Math.ceil(doc.size_bytes / 1024)} KiB · {date(doc.created_at)}
+            </small>
+            {writable && (
+              <div className="erp-inline-actions">
+                <ActionButton
+                  onClick={() =>
+                    download(`/documents/${doc.id}/download`, doc.name)
+                  }
+                >
+                  Baixar
+                </ActionButton>
+                <ActionButton
+                  danger
+                  confirm="Excluir este documento? O arquivo será removido; o registro de auditoria será preservado."
+                  onClick={async () => {
+                    await api(`/documents/${doc.id}`, { method: "DELETE" });
+                    await docs.mutate();
+                  }}
+                >
+                  Excluir
+                </ActionButton>
+              </div>
+            )}
+          </div>
+        ))}
+      </QueryBoundary>
+    </ProfileSection>
+  );
 }
-function Privacy({ subscriber, refresh }: { subscriber: SubscriberDetail; refresh: () => Promise<void> }) {
- const { me } = useSession(); const [open, setOpen] = useState(false); const [form, setForm] = useState({ reason: "", confirm_name: "" }); if (!can(me, "settings:manage")) return null;
- return <ProfileSection title="Privacidade do titular" caption="Exportação de dados pessoais e anonimização validada pelo servidor.">{subscriber.anonymized_at ? <p>Anonimizado em {date(subscriber.anonymized_at)} · {subscriber.anonymized_reason}</p> : <div className="erp-inline-actions"><ActionButton onClick={() => download(`/subscribers/${subscriber.id}/lgpd-export`, `dados-titular-${subscriber.id.slice(0, 8)}.json`)}>Exportar dados pessoais</ActionButton><Button variant="destructive" size="sm" onClick={() => setOpen(true)}>Anonimizar titular</Button></div>}{open && <Dialog open onOpenChange={setOpen}><DialogContent><DialogHeader><DialogTitle>Anonimizar titular</DialogTitle><DialogDescription>A ação é definitiva. Exige contratos encerrados e ausência de pendências financeiras. Os registros comerciais e de guarda previstos pelo servidor são preservados.</DialogDescription></DialogHeader><MutationForm submit="Anonimizar definitivamente" onCancel={() => setOpen(false)} onSubmit={async () => { if (form.confirm_name !== subscriber.name) throw new Error("Informe o nome completo do titular para confirmar."); await api(`/subscribers/${subscriber.id}/anonymize`, { body: form }); setOpen(false); await refresh(); }}><FormField label="Motivo e protocolo"><Input minLength={5} maxLength={300} value={form.reason} onChange={e => setForm({ ...form, reason: e.target.value })} required /></FormField><FormField label={`Digite o nome: ${subscriber.name}`}><Input value={form.confirm_name} onChange={e => setForm({ ...form, confirm_name: e.target.value })} required /></FormField></MutationForm></DialogContent></Dialog>}</ProfileSection>;
+function Privacy({
+  subscriber,
+  refresh,
+}: {
+  subscriber: SubscriberDetail;
+  refresh: () => Promise<void>;
+}) {
+  const { me } = useSession();
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ reason: "", confirm_name: "" });
+  if (!can(me, "settings:manage")) return null;
+  return (
+    <ProfileSection
+      title="Privacidade do titular"
+      caption="Exportação de dados pessoais e anonimização validada pelo servidor."
+    >
+      {subscriber.anonymized_at ? (
+        <p>
+          Anonimizado em {date(subscriber.anonymized_at)} ·{" "}
+          {subscriber.anonymized_reason}
+        </p>
+      ) : (
+        <div className="erp-inline-actions">
+          <ActionButton
+            onClick={() =>
+              download(
+                `/subscribers/${subscriber.id}/lgpd-export`,
+                `dados-titular-${subscriber.id.slice(0, 8)}.json`,
+              )
+            }
+          >
+            Exportar dados pessoais
+          </ActionButton>
+          <Button variant="destructive" size="sm" onClick={() => setOpen(true)}>
+            Anonimizar titular
+          </Button>
+        </div>
+      )}
+      {open && (
+        <Dialog open onOpenChange={setOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Anonimizar titular</DialogTitle>
+              <DialogDescription>
+                A ação é definitiva. Exige contratos encerrados e ausência de
+                pendências financeiras. Os registros comerciais e de guarda
+                previstos pelo servidor são preservados.
+              </DialogDescription>
+            </DialogHeader>
+            <MutationForm
+              submit="Anonimizar definitivamente"
+              onCancel={() => setOpen(false)}
+              onSubmit={async () => {
+                if (form.confirm_name !== subscriber.name)
+                  throw new Error(
+                    "Informe o nome completo do titular para confirmar.",
+                  );
+                await api(`/subscribers/${subscriber.id}/anonymize`, {
+                  body: form,
+                });
+                setOpen(false);
+                await refresh();
+              }}
+            >
+              <FormField label="Motivo e protocolo">
+                <Input
+                  minLength={5}
+                  maxLength={300}
+                  value={form.reason}
+                  onChange={(e) => setForm({ ...form, reason: e.target.value })}
+                  required
+                />
+              </FormField>
+              <FormField label={`Digite o nome: ${subscriber.name}`}>
+                <Input
+                  value={form.confirm_name}
+                  onChange={(e) =>
+                    setForm({ ...form, confirm_name: e.target.value })
+                  }
+                  required
+                />
+              </FormField>
+            </MutationForm>
+          </DialogContent>
+        </Dialog>
+      )}
+    </ProfileSection>
+  );
 }
 function Timeline({ id }: { id: string }) {
- const events = useSWR(["erp-timeline", id], ([, id]) => api<{ kind: string; title: string; detail?: string; at: string; by?: string; contract_id?: string }[]>(`/subscribers/${id}/timeline`));
- return <ProfileSection title="Linha do tempo" caption="Eventos disponíveis conforme suas permissões."><QueryBoundary loading={events.isLoading} error={events.error} retry={() => events.mutate()}><div className="profile-recent">{events.data?.slice(0, 80).map((event, index) => <div key={index}><span className="timeline-dot" /><div><strong>{event.title}</strong><p>{event.detail}</p><small>{date(event.at)} · {event.by ?? "Sistema"}</small>{event.contract_id && <a className="profile-text-action" href={`/contratos/${event.contract_id}`}>Abrir contrato</a>}</div></div>)}</div>{!events.data?.length && <p className="profile-footnote">Nenhum evento disponível.</p>}</QueryBoundary></ProfileSection>;
+  const events = useSWR(["erp-timeline", id], ([, id]) =>
+    api<
+      {
+        kind: string;
+        title: string;
+        detail?: string;
+        at: string;
+        by?: string;
+        contract_id?: string;
+      }[]
+    >(`/subscribers/${id}/timeline`),
+  );
+  return (
+    <ProfileSection
+      title="Linha do tempo"
+      caption="Eventos disponíveis conforme suas permissões."
+    >
+      <QueryBoundary
+        loading={events.isLoading}
+        error={events.error}
+        retry={() => events.mutate()}
+      >
+        <div className="profile-recent">
+          {events.data?.slice(0, 80).map((event, index) => (
+            <div key={index}>
+              <span className="timeline-dot" />
+              <div>
+                <strong>{event.title}</strong>
+                <p>{event.detail}</p>
+                <small>
+                  {date(event.at)} · {event.by ?? "Sistema"}
+                </small>
+                {event.contract_id && (
+                  <a
+                    className="profile-text-action"
+                    href={`/contratos/${event.contract_id}`}
+                  >
+                    Abrir contrato
+                  </a>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+        {!events.data?.length && (
+          <p className="profile-footnote">Nenhum evento disponível.</p>
+        )}
+      </QueryBoundary>
+    </ProfileSection>
+  );
 }
-function CustomFields({ subscriber, refresh }: { subscriber: SubscriberDetail; refresh: () => Promise<void> }) {
- return <EntityCustomFields entity="subscriber" id={subscriber.id} values={subscriber.custom ?? {}} refresh={refresh} />;
+function CustomFields({
+  subscriber,
+  refresh,
+}: {
+  subscriber: SubscriberDetail;
+  refresh: () => Promise<void>;
+}) {
+  return (
+    <EntityCustomFields
+      entity="subscriber"
+      id={subscriber.id}
+      values={subscriber.custom ?? {}}
+      refresh={refresh}
+    />
+  );
 }

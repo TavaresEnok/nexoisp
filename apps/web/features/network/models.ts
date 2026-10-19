@@ -1,15 +1,160 @@
 import { z } from "zod";
 import type { InventoryNode } from "@/components/network-equipment-table";
-export const agentSchema=z.object({id:z.string().uuid(),name:z.string(),status:z.enum(['active','revoked']),internal:z.boolean(),version:z.string().nullable(),online:z.boolean(),last_seen_at:z.string().nullable(),last_sync_at:z.string().nullable(),cert_fingerprint:z.string().nullable(),cert_pinned_at:z.string().nullable(),devices:z.coerce.number(),open_operations:z.coerce.number(),oldest_pending:z.string().nullable()});
-export const deviceSchema=z.object({id:z.string().uuid(),name:z.string(),driver:z.string(),host:z.string().nullable(),api_port:z.number().nullable(),credential_ref:z.string().nullable(),agent_id:z.string().nullable(),agent_name:z.string().nullable(),agent_online:z.boolean(),maintenance:z.boolean(),simultaneous_use:z.number().nullable(),acct_interim_seconds:z.number().nullable(),last_check:z.object({ok:z.boolean(),detail:z.string().optional()}).nullable(),last_check_at:z.string().nullable(),accounts:z.coerce.number(),onus:z.coerce.number(),vendor:z.string().nullable(),nas_ip:z.string().nullable(),tunnel:z.object({kind:z.string(),ip:z.string(),handshake_at:z.string().nullable(),endpoint:z.string().nullable()}).nullable()});
-export type Device=z.infer<typeof deviceSchema>;export type Agent=z.infer<typeof agentSchema>;
-export const vendors:Record<string,string>={mikrotik:'MikroTik',huawei:'Huawei (NE/ME)',cisco:'Cisco',generic:'RADIUS padrão'};
-export const drivers:Record<string,string>={demo:'Concentrador PPPoE · simulado',mikrotik_radius:'MikroTik RouterOS v7 + RADIUS local',olt_demo:'OLT · simulada',olt_huawei:'OLT Huawei SmartAX · não homologada',radius:'RADIUS integrado'};
-export function projectDevice(device:Device):InventoryNode{return {id:device.id,name:device.name,ip:device.nas_ip||device.host||'Endereço não informado',type:drivers[device.driver]??device.driver,vendor:device.driver==='olt_huawei'?'Huawei':device.driver==='mikrotik_radius'?'MikroTik':device.driver==='radius'&&device.vendor?vendors[device.vendor]??device.vendor:'Fabricante não informado',pop:'Não informado',status:device.maintenance?'Manutenção':device.last_check?device.last_check.ok?'Operacional':'Atenção':'Não verificado',latency:null,cpu:null};}
-export const healthSchema=z.object({agents:z.coerce.number(),agents_offline:z.coerce.number(),uncertain:z.coerce.number(),failed_recent:z.coerce.number(),in_progress:z.coerce.number(),oldest_pending_s:z.number().nullable(),devices_maintenance:z.coerce.number(),drift:z.coerce.number()});
-export function stamp(value:string|null){return value?new Date(value).toLocaleString('pt-BR'):'Não informado';}
-export const operationLabels:Record<string,string>={PENDING:'Aguardando agente',RESERVED:'Reservada pelo agente',EXECUTING:'Executando',VERIFYING:'Verificando',UNCERTAIN:'Incerta · verificar antes de repetir',SUCCEEDED:'Concluída',SUPERSEDED:'Substituída',CANCELED:'Cancelada',EXPIRED:'Expirada',FAILED:'Falhou'};
-export const actionLabels:Record<string,string>={'subscriber.provision':'Provisionar','subscriber.suspend':'Suspender','subscriber.resume':'Reativar','subscriber.disconnect':'Desconectar','onu.authorize':'Autorizar ONU','onu.deauthorize':'Desautorizar ONU'};
-export const operationSchema=z.object({id:z.string().uuid(),action:z.string(),status:z.string(),desired_version:z.coerce.number(),attempts:z.coerce.number(),note:z.string().nullable(),reason:z.string(),created_at:z.string()});
-export const operationRowSchema=operationSchema.extend({contract_id:z.string().nullable(),subscriber_name:z.string().nullable(),pppoe_username:z.string().nullable(),device_name:z.string()});
-export const operationDetailSchema=operationSchema.extend({idempotency_key:z.string(),valid_until:z.string(),updated_at:z.string(),finished_at:z.string().nullable(),result:z.record(z.string(),z.unknown()).nullable(),attempt_list:z.array(z.object({id:z.string().uuid(),recover:z.boolean(),status:z.string(),started_at:z.string(),finished_at:z.string().nullable(),steps:z.array(z.object({name:z.string(),status:z.string(),detail:z.unknown().optional()}))}))});
+export const agentSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  status: z.enum(["active", "revoked"]),
+  internal: z.boolean(),
+  version: z.string().nullable(),
+  online: z.boolean(),
+  last_seen_at: z.string().nullable(),
+  last_sync_at: z.string().nullable(),
+  cert_fingerprint: z.string().nullable(),
+  cert_pinned_at: z.string().nullable(),
+  devices: z.coerce.number(),
+  open_operations: z.coerce.number(),
+  oldest_pending: z.string().nullable(),
+});
+export const deviceSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  driver: z.string(),
+  host: z.string().nullable(),
+  api_port: z.number().nullable(),
+  credential_ref: z.string().nullable(),
+  agent_id: z.string().nullable(),
+  agent_name: z.string().nullable(),
+  agent_online: z.boolean(),
+  maintenance: z.boolean(),
+  simultaneous_use: z.number().nullable(),
+  acct_interim_seconds: z.number().nullable(),
+  last_check: z
+    .object({ ok: z.boolean(), detail: z.string().optional() })
+    .nullable(),
+  last_check_at: z.string().nullable(),
+  accounts: z.coerce.number(),
+  onus: z.coerce.number(),
+  vendor: z.string().nullable(),
+  nas_ip: z.string().nullable(),
+  tunnel: z
+    .object({
+      kind: z.string(),
+      ip: z.string(),
+      handshake_at: z.string().nullable(),
+      endpoint: z.string().nullable(),
+    })
+    .nullable(),
+});
+export type Device = z.infer<typeof deviceSchema>;
+export type Agent = z.infer<typeof agentSchema>;
+export const vendors: Record<string, string> = {
+  mikrotik: "MikroTik",
+  huawei: "Huawei (NE/ME)",
+  cisco: "Cisco",
+  generic: "RADIUS padrão",
+};
+export const drivers: Record<string, string> = {
+  demo: "Concentrador PPPoE · simulado",
+  mikrotik_radius: "MikroTik RouterOS v7 + RADIUS local",
+  olt_demo: "OLT · simulada",
+  olt_huawei: "OLT Huawei SmartAX · não homologada",
+  radius: "RADIUS integrado",
+};
+export function projectDevice(device: Device): InventoryNode {
+  return {
+    id: device.id,
+    name: device.name,
+    ip: device.nas_ip || device.host || "Endereço não informado",
+    type: drivers[device.driver] ?? device.driver,
+    vendor:
+      device.driver === "olt_huawei"
+        ? "Huawei"
+        : device.driver === "mikrotik_radius"
+          ? "MikroTik"
+          : device.driver === "radius" && device.vendor
+            ? (vendors[device.vendor] ?? device.vendor)
+            : "Fabricante não informado",
+    pop: "Não informado",
+    status: device.maintenance
+      ? "Manutenção"
+      : device.last_check
+        ? device.last_check.ok
+          ? "Operacional"
+          : "Atenção"
+        : "Não verificado",
+    latency: null,
+    cpu: null,
+  };
+}
+export const healthSchema = z.object({
+  agents: z.coerce.number(),
+  agents_offline: z.coerce.number(),
+  uncertain: z.coerce.number(),
+  failed_recent: z.coerce.number(),
+  in_progress: z.coerce.number(),
+  oldest_pending_s: z.number().nullable(),
+  devices_maintenance: z.coerce.number(),
+  drift: z.coerce.number(),
+});
+export function stamp(value: string | null) {
+  return value ? new Date(value).toLocaleString("pt-BR") : "Não informado";
+}
+export const operationLabels: Record<string, string> = {
+  PENDING: "Aguardando agente",
+  RESERVED: "Reservada pelo agente",
+  EXECUTING: "Executando",
+  VERIFYING: "Verificando",
+  UNCERTAIN: "Incerta · verificar antes de repetir",
+  SUCCEEDED: "Concluída",
+  SUPERSEDED: "Substituída",
+  CANCELED: "Cancelada",
+  EXPIRED: "Expirada",
+  FAILED: "Falhou",
+};
+export const actionLabels: Record<string, string> = {
+  "subscriber.provision": "Provisionar",
+  "subscriber.suspend": "Suspender",
+  "subscriber.resume": "Reativar",
+  "subscriber.disconnect": "Desconectar",
+  "onu.authorize": "Autorizar ONU",
+  "onu.deauthorize": "Desautorizar ONU",
+};
+export const operationSchema = z.object({
+  id: z.string().uuid(),
+  action: z.string(),
+  status: z.string(),
+  desired_version: z.coerce.number(),
+  attempts: z.coerce.number(),
+  note: z.string().nullable(),
+  reason: z.string(),
+  created_at: z.string(),
+});
+export const operationRowSchema = operationSchema.extend({
+  contract_id: z.string().nullable(),
+  subscriber_name: z.string().nullable(),
+  pppoe_username: z.string().nullable(),
+  device_name: z.string(),
+});
+export const operationDetailSchema = operationSchema.extend({
+  idempotency_key: z.string(),
+  valid_until: z.string(),
+  updated_at: z.string(),
+  finished_at: z.string().nullable(),
+  result: z.record(z.string(), z.unknown()).nullable(),
+  attempt_list: z.array(
+    z.object({
+      id: z.string().uuid(),
+      recover: z.boolean(),
+      status: z.string(),
+      started_at: z.string(),
+      finished_at: z.string().nullable(),
+      steps: z.array(
+        z.object({
+          name: z.string(),
+          status: z.string(),
+          detail: z.unknown().optional(),
+        }),
+      ),
+    }),
+  ),
+});

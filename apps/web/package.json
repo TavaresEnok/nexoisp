@@ -40,7 +40,9 @@
     "test:integrations": "node ../../e2e/frontend-v0-integrations.mjs",
     "test:import": "node ../../e2e/frontend-v0-import.mjs",
     "test:finance-access": "node ../../e2e/frontend-v0-finance-access.mjs",
-    "test:network-final": "node ../../e2e/frontend-v0-network-final.mjs"
+    "test:network-final": "node ../../e2e/frontend-v0-network-final.mjs",
+    "format:features": "prettier --write \"features/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"features/**/*.{ts,tsx}\""
   },
   "dependencies": {
     "@base-ui/react": "1.5.0",
@@ -88,6 +90,7 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "4.7.0",
     "postcss": "8.5.23",
+    "prettier": "3.6.2",
     "tailwindcss": "4.3.3",
     "tsx": "4.23.15",
     "typescript": "5.7.3",

@@ -13,13 +13,32 @@ type WorkspaceDataState = {
 };
 const DataContext = createContext<WorkspaceDataState | null>(null);
 
-export function WorkspaceDataProvider({ children, enabled, readWorkspace, cacheKey }: {
-  children: ReactNode; enabled: boolean; readWorkspace: DataReader<WorkspaceData>; cacheKey: string;
+export function WorkspaceDataProvider({
+  children,
+  enabled,
+  readWorkspace,
+  cacheKey,
+}: {
+  children: ReactNode;
+  enabled: boolean;
+  readWorkspace: DataReader<WorkspaceData>;
+  cacheKey: string;
 }) {
-  const { data, error, isValidating, mutate } = useSWR(enabled ? cacheKey : null, readWorkspace, {
-    revalidateOnFocus: false, shouldRetryOnError: false,
-  });
-  return <DataContext.Provider value={{ data, error, isValidating, refresh: () => mutate() }}>{children}</DataContext.Provider>;
+  const { data, error, isValidating, mutate } = useSWR(
+    enabled ? cacheKey : null,
+    readWorkspace,
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+    },
+  );
+  return (
+    <DataContext.Provider
+      value={{ data, error, isValidating, refresh: () => mutate() }}
+    >
+      {children}
+    </DataContext.Provider>
+  );
 }
 
 export function useWorkspaceData() {

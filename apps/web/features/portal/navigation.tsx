@@ -1,7 +1,62 @@
-import {useEffect,useRef,useState} from 'react';
-import {useNavigate} from 'react-router-dom';
-import {useSession} from '@/features/session/provider';
-import {QueryBoundary} from '@/features/shared/feedback';
-export function PortalSignOut(){const {logout}=useSession();const navigate=useNavigate();const started=useRef(false);const [error,setError]=useState<Error|null>(null);useEffect(()=>{if(started.current)return;started.current=true;void logout().then(()=>navigate('/login',{replace:true})).catch(reason=>setError(reason as Error));},[logout,navigate]);return <QueryBoundary loading={!error} error={error} retry={()=>window.location.reload()}><p>Encerrando sessão…</p></QueryBoundary>;}
-export const portalSections:Record<string,string>={planos:'Meus planos',consumo:'Meu consumo',faturas:'Minhas faturas',dados:'Meus dados',wifi:'Meu Wi-Fi',religar:'Liberação por confiança',atendimento:'Meus atendimentos',documentos:'Meus documentos',satisfacao:'Como foi o atendimento?'};
-export function usePortalSection(pathname:string,ready:boolean){useEffect(()=>{const target=portalSections[pathname.split('/')[2]??''];if(!target||!ready)return;let observer:MutationObserver|undefined;const focus=()=>{const heading=Array.from(document.querySelectorAll<HTMLElement>('#main-content h2')).find(node=>node.textContent?.startsWith(target));if(!heading)return false;heading.setAttribute('tabindex','-1');heading.focus({preventScroll:true});heading.scrollIntoView({block:'start'});return true;};if(!focus()){observer=new MutationObserver(()=>{if(focus())observer?.disconnect();});const main=document.getElementById('main-content');if(main)observer.observe(main,{subtree:true,childList:true});}return()=>observer?.disconnect();},[pathname,ready]);}
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSession } from "@/features/session/provider";
+import { QueryBoundary } from "@/features/shared/feedback";
+export function PortalSignOut() {
+  const { logout } = useSession();
+  const navigate = useNavigate();
+  const started = useRef(false);
+  const [error, setError] = useState<Error | null>(null);
+  useEffect(() => {
+    if (started.current) return;
+    started.current = true;
+    void logout()
+      .then(() => navigate("/login", { replace: true }))
+      .catch((reason) => setError(reason as Error));
+  }, [logout, navigate]);
+  return (
+    <QueryBoundary
+      loading={!error}
+      error={error}
+      retry={() => window.location.reload()}
+    >
+      <p>Encerrando sessão…</p>
+    </QueryBoundary>
+  );
+}
+export const portalSections: Record<string, string> = {
+  planos: "Meus planos",
+  consumo: "Meu consumo",
+  faturas: "Minhas faturas",
+  dados: "Meus dados",
+  wifi: "Meu Wi-Fi",
+  religar: "Liberação por confiança",
+  atendimento: "Meus atendimentos",
+  documentos: "Meus documentos",
+  satisfacao: "Como foi o atendimento?",
+};
+export function usePortalSection(pathname: string, ready: boolean) {
+  useEffect(() => {
+    const target = portalSections[pathname.split("/")[2] ?? ""];
+    if (!target || !ready) return;
+    let observer: MutationObserver | undefined;
+    const focus = () => {
+      const heading = Array.from(
+        document.querySelectorAll<HTMLElement>("#main-content h2"),
+      ).find((node) => node.textContent?.startsWith(target));
+      if (!heading) return false;
+      heading.setAttribute("tabindex", "-1");
+      heading.focus({ preventScroll: true });
+      heading.scrollIntoView({ block: "start" });
+      return true;
+    };
+    if (!focus()) {
+      observer = new MutationObserver(() => {
+        if (focus()) observer?.disconnect();
+      });
+      const main = document.getElementById("main-content");
+      if (main) observer.observe(main, { subtree: true, childList: true });
+    }
+    return () => observer?.disconnect();
+  }, [pathname, ready]);
+}

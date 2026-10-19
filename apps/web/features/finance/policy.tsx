@@ -5,7 +5,13 @@ import { ProfileFacts } from "@/components/subscriber-profile-sections";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { MutationForm, FormField } from "@/features/shared/form";
 import { RecordEditor } from "@/features/shared/record-editor";
 import { ActionButton } from "@/features/shared/action";
@@ -14,19 +20,416 @@ import { useSession } from "@/features/session/provider";
 import { can } from "@/features/session/model";
 import { policySchema } from "./models";
 import { api } from "@/platform/erp-client";
-const booleans = { billing_auto: "Gerar mensalidades automaticamente", auto_suspend: "Suspender automaticamente por inadimplência", auto_resume_on_payment: "Reativar após pagamento confirmado", trust_release_enabled: "Permitir liberação por confiança", prorate_first_month: "Primeiro mês proporcional aos dias de uso" };
-const numbers = { suspend_after_days: { label: "Dias de atraso até suspensão", min:0,max:365 }, trust_release_days: { label: "Prazo da confiança (dias)",min:1,max:30 }, trust_release_gap_days: { label: "Intervalo entre liberações (dias)",min:0,max:365 }, late_fee_percent: { label: "Multa por atraso (%)",min:0,max:20 }, interest_monthly_percent: { label: "Juros ao mês (%)",min:0,max:20 } };
-type Policy = Record<keyof typeof booleans,boolean> & Record<keyof typeof numbers,number|null> & { gateway: string; demo_mode: boolean; suspension_mode: string; suspension_profile: string | null };
+const booleans = {
+  billing_auto: "Gerar mensalidades automaticamente",
+  auto_suspend: "Suspender automaticamente por inadimplência",
+  auto_resume_on_payment: "Reativar após pagamento confirmado",
+  trust_release_enabled: "Permitir liberação por confiança",
+  prorate_first_month: "Primeiro mês proporcional aos dias de uso",
+};
+const numbers = {
+  suspend_after_days: {
+    label: "Dias de atraso até suspensão",
+    min: 0,
+    max: 365,
+  },
+  trust_release_days: { label: "Prazo da confiança (dias)", min: 1, max: 30 },
+  trust_release_gap_days: {
+    label: "Intervalo entre liberações (dias)",
+    min: 0,
+    max: 365,
+  },
+  late_fee_percent: { label: "Multa por atraso (%)", min: 0, max: 20 },
+  interest_monthly_percent: { label: "Juros ao mês (%)", min: 0, max: 20 },
+};
+type Policy = Record<keyof typeof booleans, boolean> &
+  Record<keyof typeof numbers, number | null> & {
+    gateway: string;
+    demo_mode: boolean;
+    suspension_mode: string;
+    suspension_profile: string | null;
+  };
 export function FinancePolicy() {
- const { me } = useSession(); const writable = can(me,"settings:manage"); const current = useSWR("erp-finance-settings",async()=>policySchema.parse(await api("/finance/settings"))); const [editing,setEditing] = useState(false); const [result,setResult] = useState<{requested:number}|null>(null);
- return <><PageHeading title="Política de cobrança" description="Configure as regras existentes de geração, inadimplência e retomada do acesso." /><ConnectedNotice demo={me?.demo} /><div className="erp-stack"><Panel title="Regras do provedor" action={writable && current.data && <Button variant="outline" onClick={()=>setEditing(true)}>Editar política</Button>}><QueryBoundary loading={current.isLoading} error={current.error} retry={()=>current.mutate()}>{current.data && <><ProfileFacts items={[["Gateway",current.data.gateway === "demo" ? "Demonstrativo · sem movimentar dinheiro" : "Sem gateway · baixa manual"],...Object.entries(booleans).map(([key,label]):[string,string]=>[label,current.data![key as keyof typeof booleans] ? "Sim":"Não"]),...Object.entries(numbers).map(([key,definition]):[string,string]=>[definition.label,String(current.data![key as keyof typeof numbers] ?? "Não definido")]),["Modalidade da suspensão",current.data.suspension_mode === "profile" ? "Perfil de bloqueio do concentrador":"Negar autenticação"],["Perfil de bloqueio",current.data.suspension_profile ?? "—"]]} /><p className="profile-footnote">As rotinas automáticas dependem dos jobs habilitados. Multa e juros são aplicados na baixa quando selecionados; cobranças já emitidas no gateway preservam seu valor.</p>{writable && current.data.auto_suspend && <ActionButton confirm="Executar a verificação de inadimplência conforme a política salva?" onClick={async()=>setResult(await api("/finance/run-auto-suspend",{method:"POST"}))}>Verificar inadimplência agora</ActionButton>}{result && <p role="status">{result.requested} suspensão(ões) solicitada(s).</p>}</>}</QueryBoundary></Panel>{writable && <NoticePage />}</div>{editing && current.data && <PolicyEditor initial={current.data} onClose={()=>setEditing(false)} onDone={async()=>{setEditing(false);await current.mutate();}} />}</>;
+  const { me } = useSession();
+  const writable = can(me, "settings:manage");
+  const current = useSWR("erp-finance-settings", async () =>
+    policySchema.parse(await api("/finance/settings")),
+  );
+  const [editing, setEditing] = useState(false);
+  const [result, setResult] = useState<{ requested: number } | null>(null);
+  return (
+    <>
+      <PageHeading
+        title="Política de cobrança"
+        description="Configure as regras existentes de geração, inadimplência e retomada do acesso."
+      />
+      <ConnectedNotice demo={me?.demo} />
+      <div className="erp-stack">
+        <Panel
+          title="Regras do provedor"
+          action={
+            writable &&
+            current.data && (
+              <Button variant="outline" onClick={() => setEditing(true)}>
+                Editar política
+              </Button>
+            )
+          }
+        >
+          <QueryBoundary
+            loading={current.isLoading}
+            error={current.error}
+            retry={() => current.mutate()}
+          >
+            {current.data && (
+              <>
+                <ProfileFacts
+                  items={[
+                    [
+                      "Gateway",
+                      current.data.gateway === "demo"
+                        ? "Demonstrativo · sem movimentar dinheiro"
+                        : "Sem gateway · baixa manual",
+                    ],
+                    ...Object.entries(booleans).map(
+                      ([key, label]): [string, string] => [
+                        label,
+                        current.data![key as keyof typeof booleans]
+                          ? "Sim"
+                          : "Não",
+                      ],
+                    ),
+                    ...Object.entries(numbers).map(
+                      ([key, definition]): [string, string] => [
+                        definition.label,
+                        String(
+                          current.data![key as keyof typeof numbers] ??
+                            "Não definido",
+                        ),
+                      ],
+                    ),
+                    [
+                      "Modalidade da suspensão",
+                      current.data.suspension_mode === "profile"
+                        ? "Perfil de bloqueio do concentrador"
+                        : "Negar autenticação",
+                    ],
+                    [
+                      "Perfil de bloqueio",
+                      current.data.suspension_profile ?? "—",
+                    ],
+                  ]}
+                />
+                <p className="profile-footnote">
+                  As rotinas automáticas dependem dos jobs habilitados. Multa e
+                  juros são aplicados na baixa quando selecionados; cobranças já
+                  emitidas no gateway preservam seu valor.
+                </p>
+                {writable && current.data.auto_suspend && (
+                  <ActionButton
+                    confirm="Executar a verificação de inadimplência conforme a política salva?"
+                    onClick={async () =>
+                      setResult(
+                        await api("/finance/run-auto-suspend", {
+                          method: "POST",
+                        }),
+                      )
+                    }
+                  >
+                    Verificar inadimplência agora
+                  </ActionButton>
+                )}
+                {result && (
+                  <p role="status">
+                    {result.requested} suspensão(ões) solicitada(s).
+                  </p>
+                )}
+              </>
+            )}
+          </QueryBoundary>
+        </Panel>
+        {writable && <NoticePage />}
+      </div>
+      {editing && current.data && (
+        <PolicyEditor
+          initial={current.data}
+          onClose={() => setEditing(false)}
+          onDone={async () => {
+            setEditing(false);
+            await current.mutate();
+          }}
+        />
+      )}
+    </>
+  );
 }
-function PolicyEditor({initial,onClose,onDone}:{initial:Policy;onClose:()=>void;onDone:()=>Promise<void>}) {
- const [form,setForm] = useState({...initial,suspension_profile:initial.suspension_profile ?? ""});
- return <Dialog open onOpenChange={open=>{if(!open)onClose();}}><DialogContent className="erp-editor"><DialogHeader><DialogTitle>Editar política de cobrança</DialogTitle><DialogDescription>As alterações serão validadas pelo Go e aplicadas às operações futuras.</DialogDescription></DialogHeader><MutationForm onCancel={onClose} submit="Salvar política" onSubmit={async()=>{await api("/finance/settings",{method:"PUT",body:{gateway:form.gateway,suspension_mode:form.suspension_mode,suspension_profile:form.suspension_mode === "profile" ? form.suspension_profile:null,...Object.fromEntries(Object.keys(booleans).map(key=>[key,form[key as keyof typeof booleans]])),...Object.fromEntries(Object.keys(numbers).map(key=>[key,form[key as keyof typeof numbers]]))}});await onDone();}}><FormField label="Gateway de pagamento" hint="A integração com gateway real depende da homologação existente no backend."><select className="commercial-select" value={form.gateway} onChange={e=>setForm({...form,gateway:e.target.value})}><option value="none">Nenhum · baixa manual</option>{initial.demo_mode && <option value="demo">Demonstrativo · sem dinheiro real</option>}</select></FormField>{Object.entries(booleans).map(([key,label])=><Label className="erp-inline-actions" key={key}><input type="checkbox" checked={form[key as keyof typeof booleans]} onChange={e=>setForm({...form,[key]:e.target.checked})} />{label}</Label>)}<div className="erp-columns">{Object.entries(numbers).map(([key,definition])=><FormField label={definition.label} key={key}><Input type="number" min={definition.min} max={definition.max} step={key.endsWith("percent") ? "0.01":1} required={key !== "suspend_after_days" || form.auto_suspend} value={form[key as keyof typeof numbers] ?? ""} onChange={e=>setForm({...form,[key]:e.target.value === "" ? null:Number(e.target.value)})} /></FormField>)}</div><FormField label="Modalidade da suspensão"><select className="commercial-select" value={form.suspension_mode} onChange={e=>setForm({...form,suspension_mode:e.target.value})}><option value="reject">Negar autenticação e encerrar sessão</option><option value="profile">Manter conectado com perfil de bloqueio</option></select></FormField>{form.suspension_mode === "profile" && <FormField label="Perfil de bloqueio" hint="Nome do perfil PPP existente no concentrador; exige suporte do agente."><Input required pattern="[A-Za-z0-9_.-]{1,60}" value={form.suspension_profile} onChange={e=>setForm({...form,suspension_profile:e.target.value})} /></FormField>}</MutationForm></DialogContent></Dialog>;
+function PolicyEditor({
+  initial,
+  onClose,
+  onDone,
+}: {
+  initial: Policy;
+  onClose: () => void;
+  onDone: () => Promise<void>;
+}) {
+  const [form, setForm] = useState({
+    ...initial,
+    suspension_profile: initial.suspension_profile ?? "",
+  });
+  return (
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <DialogContent className="erp-editor">
+        <DialogHeader>
+          <DialogTitle>Editar política de cobrança</DialogTitle>
+          <DialogDescription>
+            As alterações serão validadas pelo Go e aplicadas às operações
+            futuras.
+          </DialogDescription>
+        </DialogHeader>
+        <MutationForm
+          onCancel={onClose}
+          submit="Salvar política"
+          onSubmit={async () => {
+            await api("/finance/settings", {
+              method: "PUT",
+              body: {
+                gateway: form.gateway,
+                suspension_mode: form.suspension_mode,
+                suspension_profile:
+                  form.suspension_mode === "profile"
+                    ? form.suspension_profile
+                    : null,
+                ...Object.fromEntries(
+                  Object.keys(booleans).map((key) => [
+                    key,
+                    form[key as keyof typeof booleans],
+                  ]),
+                ),
+                ...Object.fromEntries(
+                  Object.keys(numbers).map((key) => [
+                    key,
+                    form[key as keyof typeof numbers],
+                  ]),
+                ),
+              },
+            });
+            await onDone();
+          }}
+        >
+          <FormField
+            label="Gateway de pagamento"
+            hint="A integração com gateway real depende da homologação existente no backend."
+          >
+            <select
+              className="commercial-select"
+              value={form.gateway}
+              onChange={(e) => setForm({ ...form, gateway: e.target.value })}
+            >
+              <option value="none">Nenhum · baixa manual</option>
+              {initial.demo_mode && (
+                <option value="demo">Demonstrativo · sem dinheiro real</option>
+              )}
+            </select>
+          </FormField>
+          {Object.entries(booleans).map(([key, label]) => (
+            <Label className="erp-inline-actions" key={key}>
+              <input
+                type="checkbox"
+                checked={form[key as keyof typeof booleans]}
+                onChange={(e) => setForm({ ...form, [key]: e.target.checked })}
+              />
+              {label}
+            </Label>
+          ))}
+          <div className="erp-columns">
+            {Object.entries(numbers).map(([key, definition]) => (
+              <FormField label={definition.label} key={key}>
+                <Input
+                  type="number"
+                  min={definition.min}
+                  max={definition.max}
+                  step={key.endsWith("percent") ? "0.01" : 1}
+                  required={key !== "suspend_after_days" || form.auto_suspend}
+                  value={form[key as keyof typeof numbers] ?? ""}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      [key]:
+                        e.target.value === "" ? null : Number(e.target.value),
+                    })
+                  }
+                />
+              </FormField>
+            ))}
+          </div>
+          <FormField label="Modalidade da suspensão">
+            <select
+              className="commercial-select"
+              value={form.suspension_mode}
+              onChange={(e) =>
+                setForm({ ...form, suspension_mode: e.target.value })
+              }
+            >
+              <option value="reject">
+                Negar autenticação e encerrar sessão
+              </option>
+              <option value="profile">
+                Manter conectado com perfil de bloqueio
+              </option>
+            </select>
+          </FormField>
+          {form.suspension_mode === "profile" && (
+            <FormField
+              label="Perfil de bloqueio"
+              hint="Nome do perfil PPP existente no concentrador; exige suporte do agente."
+            >
+              <Input
+                required
+                pattern="[A-Za-z0-9_.-]{1,60}"
+                value={form.suspension_profile}
+                onChange={(e) =>
+                  setForm({ ...form, suspension_profile: e.target.value })
+                }
+              />
+            </FormField>
+          )}
+        </MutationForm>
+      </DialogContent>
+    </Dialog>
+  );
 }
-type Notice = {title:string;blocked_text:string;reduced_text:string|null;phone:string|null;whatsapp:string|null;show_portal_link:boolean};
-function NoticePage(){
- const current=useSWR("erp-notice-page",()=>api<{page:Notice|null;path:string}>("/notice-page"));const [editing,setEditing]=useState(false);const page=current.data?.page;
- return <Panel title="Página de aviso ao assinante" description="Página pública para acesso bloqueado ou reduzido, sem dados pessoais ou valores." action={<Button variant="outline" onClick={()=>setEditing(true)}>{page ? "Editar aviso":"Configurar aviso"}</Button>}><QueryBoundary loading={current.isLoading} error={current.error} retry={()=>current.mutate()}>{page ? <><p>{page.title}</p><a href={current.data?.path} target="_blank" rel="noreferrer" className="profile-text-action">Abrir página de aviso</a><ActionButton danger confirm="Desativar a página pública de aviso?" onClick={async()=>{await api("/notice-page",{method:"PUT",body:{page:null}});await current.mutate();}}>Desativar aviso</ActionButton></>:<p className="profile-footnote">Página não configurada.</p>}</QueryBoundary><p className="profile-footnote">O redirecionamento depende da configuração do concentrador e mantém as limitações de validação em equipamento já existentes.</p>{editing && <RecordEditor title="Página de aviso" initial={{title:page?.title ?? "Acesso suspenso",blocked_text:page?.blocked_text ?? "Identificamos uma pendência. Entre no portal do assinante para consultar suas faturas.",reduced_text:page?.reduced_text ?? "",phone:page?.phone ?? "",whatsapp:page?.whatsapp ?? "",show_portal_link:String(page?.show_portal_link ?? true)}} fields={[{key:"title",label:"Título do aviso",required:true,maxLength:80},{key:"blocked_text",label:"Texto para acesso bloqueado",type:"textarea",required:true,maxLength:600},{key:"reduced_text",label:"Texto para velocidade reduzida",type:"textarea",maxLength:600},{key:"phone",label:"Telefone de atendimento",maxLength:30},{key:"whatsapp",label:"WhatsApp com país e DDD",maxLength:15},{key:"show_portal_link",label:"Exibir botão do portal",type:"select",options:[{value:"true",label:"Sim"},{value:"false",label:"Não"}]}]} onClose={()=>setEditing(false)} onSubmit={async values=>{await api("/notice-page",{method:"PUT",body:{page:{...values,show_portal_link:values.show_portal_link === "true"}}});setEditing(false);await current.mutate();}} />}</Panel>;
+type Notice = {
+  title: string;
+  blocked_text: string;
+  reduced_text: string | null;
+  phone: string | null;
+  whatsapp: string | null;
+  show_portal_link: boolean;
+};
+function NoticePage() {
+  const current = useSWR("erp-notice-page", () =>
+    api<{ page: Notice | null; path: string }>("/notice-page"),
+  );
+  const [editing, setEditing] = useState(false);
+  const page = current.data?.page;
+  return (
+    <Panel
+      title="Página de aviso ao assinante"
+      description="Página pública para acesso bloqueado ou reduzido, sem dados pessoais ou valores."
+      action={
+        <Button variant="outline" onClick={() => setEditing(true)}>
+          {page ? "Editar aviso" : "Configurar aviso"}
+        </Button>
+      }
+    >
+      <QueryBoundary
+        loading={current.isLoading}
+        error={current.error}
+        retry={() => current.mutate()}
+      >
+        {page ? (
+          <>
+            <p>{page.title}</p>
+            <a
+              href={current.data?.path}
+              target="_blank"
+              rel="noreferrer"
+              className="profile-text-action"
+            >
+              Abrir página de aviso
+            </a>
+            <ActionButton
+              danger
+              confirm="Desativar a página pública de aviso?"
+              onClick={async () => {
+                await api("/notice-page", {
+                  method: "PUT",
+                  body: { page: null },
+                });
+                await current.mutate();
+              }}
+            >
+              Desativar aviso
+            </ActionButton>
+          </>
+        ) : (
+          <p className="profile-footnote">Página não configurada.</p>
+        )}
+      </QueryBoundary>
+      <p className="profile-footnote">
+        O redirecionamento depende da configuração do concentrador e mantém as
+        limitações de validação em equipamento já existentes.
+      </p>
+      {editing && (
+        <RecordEditor
+          title="Página de aviso"
+          initial={{
+            title: page?.title ?? "Acesso suspenso",
+            blocked_text:
+              page?.blocked_text ??
+              "Identificamos uma pendência. Entre no portal do assinante para consultar suas faturas.",
+            reduced_text: page?.reduced_text ?? "",
+            phone: page?.phone ?? "",
+            whatsapp: page?.whatsapp ?? "",
+            show_portal_link: String(page?.show_portal_link ?? true),
+          }}
+          fields={[
+            {
+              key: "title",
+              label: "Título do aviso",
+              required: true,
+              maxLength: 80,
+            },
+            {
+              key: "blocked_text",
+              label: "Texto para acesso bloqueado",
+              type: "textarea",
+              required: true,
+              maxLength: 600,
+            },
+            {
+              key: "reduced_text",
+              label: "Texto para velocidade reduzida",
+              type: "textarea",
+              maxLength: 600,
+            },
+            { key: "phone", label: "Telefone de atendimento", maxLength: 30 },
+            {
+              key: "whatsapp",
+              label: "WhatsApp com país e DDD",
+              maxLength: 15,
+            },
+            {
+              key: "show_portal_link",
+              label: "Exibir botão do portal",
+              type: "select",
+              options: [
+                { value: "true", label: "Sim" },
+                { value: "false", label: "Não" },
+              ],
+            },
+          ]}
+          onClose={() => setEditing(false)}
+          onSubmit={async (values) => {
+            await api("/notice-page", {
+              method: "PUT",
+              body: {
+                page: {
+                  ...values,
+                  show_portal_link: values.show_portal_link === "true",
+                },
+              },
+            });
+            setEditing(false);
+            await current.mutate();
+          }}
+        />
+      )}
+    </Panel>
+  );
 }

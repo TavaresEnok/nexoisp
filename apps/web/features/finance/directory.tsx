@@ -7,7 +7,13 @@ import { InvoiceCatalog } from "@/components/financial";
 import { Panel } from "@/components/workspace-ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { FormField, MutationForm } from "@/features/shared/form";
 import { ActionButton } from "@/features/shared/action";
 import { ServerPager, useUrlPage } from "@/features/shared/pagination";
@@ -19,19 +25,249 @@ import { invoiceSchema, projectInvoice, summarySchema } from "./models";
 import { FinanceOverview } from "./overview";
 import { OperationalInvoice } from "./invoice";
 export function OperationalInvoices() {
- const { me } = useSession(); const [params, setParams] = useSearchParams(); const navigate = useNavigate(); const [generating, setGenerating] = useState(false);
- const [generation, setGeneration] = useState<{ created: number; already_existing: number; gateway: string; charges_emitted: number } | null>(null); const [competence, setCompetence] = useState(new Date().toLocaleDateString("en-CA").slice(0,7));
- const query = params.get("busca") ?? ""; const statusLabel = params.get("situacao") ?? (params.get("filtro") === "vencidas" ? "Vencida" : params.get("filtro") === "conciliacao" ? "Em conciliação" : "Todas"); const status = ({ "Em aberto": "open", Vencida: "overdue", Paga: "paid", "Em conciliação": "reconciling", Cancelada: "canceled" } as Record<string,string>)[statusLabel] ?? ""; const company = params.get("empresa") ?? "";
- const { page, setPage } = useUrlPage(); const filters = new URLSearchParams({ q: query, ...(status ? { status } : {}), ...(company ? { company_id: company } : {}) });
- const list = useSWR(["erp-invoices", `${filters}&limit=8&offset=${page*8}`], async ([,filters]) => { const response = await erpClient.request(`/invoices?${filters}`); if (response.total === null) throw new Error("O servidor não informou a contagem de faturas."); return { rows: z.array(invoiceSchema).parse(response.data), total: response.total }; });
- const summary = useSWR(["erp-finance-summary",company], async ([,id]) => summarySchema.parse(await api(`/finance/summary${id ? `?company_id=${encodeURIComponent(id)}` : ""}`)));
- const companies = useSWR("erp-companies", () => api<{ id: string; name: string }[]>("/companies"));
- const refresh = async () => { await Promise.all([list.mutate(),summary.mutate()]); };
- return <><ConnectedNotice demo={me?.demo} /><InvoiceCatalog operational invoices={(list.data?.rows ?? []).map(projectInvoice)} openSubscriber={id => navigate(`/assinantes?ficha=${id}`)} loading={list.isLoading} error={list.error} onOpen={invoice => { const next = new URLSearchParams(params); next.set("fatura",invoice.id); setParams(next); }} actions={can(me,"finance:write") && <Button onClick={() => setGenerating(true)}>Gerar mensalidades</Button>} onExport={() => { void download(`/invoices?${filters}&format=csv&limit=5000`,"faturas.csv").catch(error => toast.error((error as Error).message)); }} top={<><FinanceOverview summary={summary.data} loading={summary.isLoading} error={summary.error} company={company} /><div className="erp-inline-actions"><FormField label="Empresa faturadora"><select className="commercial-select" value={company} onChange={event => setParams(current => { const next = new URLSearchParams(current); next.delete("pagina"); event.target.value ? next.set("empresa",event.target.value) : next.delete("empresa"); return next; },{replace:true})}><option value="">Todas as empresas</option>{companies.data?.map(company => <option key={company.id} value={company.id}>{company.name}</option>)}</select></FormField></div>{generation && <p role="status">{generation.created} fatura(s) criada(s); {generation.already_existing} já existente(s). {generation.gateway === "none" ? "Sem gateway: cobranças não emitidas." : `${generation.charges_emitted} cobrança(s) emitida(s).`}</p>}<AccountingExport /></>} pagination={<ServerPager page={page} setPage={setPage} total={list.data?.total ?? 0} loading={list.isLoading} />} />
- {params.get("fatura") && <OperationalInvoice key={params.get("fatura")} id={params.get("fatura")!} onClose={() => { const next = new URLSearchParams(params); next.delete("fatura"); setParams(next,{replace:true}); void refresh(); }} />}
- {generating && <Dialog open onOpenChange={setGenerating}><DialogContent><DialogHeader><DialogTitle>Gerar mensalidades</DialogTitle><DialogDescription>O Go usa as versões e condições de cada contrato. Faturas existentes da competência são preservadas.</DialogDescription></DialogHeader><MutationForm submit="Gerar faturas" onCancel={() => setGenerating(false)} onSubmit={async () => { setGeneration(await api("/finance/generate",{body:{competence}})); setGenerating(false); await refresh(); }}><FormField label="Competência"><Input type="month" required value={competence} onChange={e => setCompetence(e.target.value)} /></FormField></MutationForm></DialogContent></Dialog>}</>;
+  const { me } = useSession();
+  const [params, setParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [generating, setGenerating] = useState(false);
+  const [generation, setGeneration] = useState<{
+    created: number;
+    already_existing: number;
+    gateway: string;
+    charges_emitted: number;
+  } | null>(null);
+  const [competence, setCompetence] = useState(
+    new Date().toLocaleDateString("en-CA").slice(0, 7),
+  );
+  const query = params.get("busca") ?? "";
+  const statusLabel =
+    params.get("situacao") ??
+    (params.get("filtro") === "vencidas"
+      ? "Vencida"
+      : params.get("filtro") === "conciliacao"
+        ? "Em conciliação"
+        : "Todas");
+  const status =
+    (
+      {
+        "Em aberto": "open",
+        Vencida: "overdue",
+        Paga: "paid",
+        "Em conciliação": "reconciling",
+        Cancelada: "canceled",
+      } as Record<string, string>
+    )[statusLabel] ?? "";
+  const company = params.get("empresa") ?? "";
+  const { page, setPage } = useUrlPage();
+  const filters = new URLSearchParams({
+    q: query,
+    ...(status ? { status } : {}),
+    ...(company ? { company_id: company } : {}),
+  });
+  const list = useSWR(
+    ["erp-invoices", `${filters}&limit=8&offset=${page * 8}`],
+    async ([, filters]) => {
+      const response = await erpClient.request(`/invoices?${filters}`);
+      if (response.total === null)
+        throw new Error("O servidor não informou a contagem de faturas.");
+      return {
+        rows: z.array(invoiceSchema).parse(response.data),
+        total: response.total,
+      };
+    },
+  );
+  const summary = useSWR(["erp-finance-summary", company], async ([, id]) =>
+    summarySchema.parse(
+      await api(
+        `/finance/summary${id ? `?company_id=${encodeURIComponent(id)}` : ""}`,
+      ),
+    ),
+  );
+  const companies = useSWR("erp-companies", () =>
+    api<{ id: string; name: string }[]>("/companies"),
+  );
+  const refresh = async () => {
+    await Promise.all([list.mutate(), summary.mutate()]);
+  };
+  return (
+    <>
+      <ConnectedNotice demo={me?.demo} />
+      <InvoiceCatalog
+        operational
+        invoices={(list.data?.rows ?? []).map(projectInvoice)}
+        openSubscriber={(id) => navigate(`/assinantes?ficha=${id}`)}
+        loading={list.isLoading}
+        error={list.error}
+        onOpen={(invoice) => {
+          const next = new URLSearchParams(params);
+          next.set("fatura", invoice.id);
+          setParams(next);
+        }}
+        actions={
+          can(me, "finance:write") && (
+            <Button onClick={() => setGenerating(true)}>
+              Gerar mensalidades
+            </Button>
+          )
+        }
+        onExport={() => {
+          void download(
+            `/invoices?${filters}&format=csv&limit=5000`,
+            "faturas.csv",
+          ).catch((error) => toast.error((error as Error).message));
+        }}
+        top={
+          <>
+            <FinanceOverview
+              summary={summary.data}
+              loading={summary.isLoading}
+              error={summary.error}
+              company={company}
+            />
+            <div className="erp-inline-actions">
+              <FormField label="Empresa faturadora">
+                <select
+                  className="commercial-select"
+                  value={company}
+                  onChange={(event) =>
+                    setParams(
+                      (current) => {
+                        const next = new URLSearchParams(current);
+                        next.delete("pagina");
+                        event.target.value
+                          ? next.set("empresa", event.target.value)
+                          : next.delete("empresa");
+                        return next;
+                      },
+                      { replace: true },
+                    )
+                  }
+                >
+                  <option value="">Todas as empresas</option>
+                  {companies.data?.map((company) => (
+                    <option key={company.id} value={company.id}>
+                      {company.name}
+                    </option>
+                  ))}
+                </select>
+              </FormField>
+            </div>
+            {generation && (
+              <p role="status">
+                {generation.created} fatura(s) criada(s);{" "}
+                {generation.already_existing} já existente(s).{" "}
+                {generation.gateway === "none"
+                  ? "Sem gateway: cobranças não emitidas."
+                  : `${generation.charges_emitted} cobrança(s) emitida(s).`}
+              </p>
+            )}
+            <AccountingExport />
+          </>
+        }
+        pagination={
+          <ServerPager
+            page={page}
+            setPage={setPage}
+            total={list.data?.total ?? 0}
+            loading={list.isLoading}
+          />
+        }
+      />
+      {params.get("fatura") && (
+        <OperationalInvoice
+          key={params.get("fatura")}
+          id={params.get("fatura")!}
+          onClose={() => {
+            const next = new URLSearchParams(params);
+            next.delete("fatura");
+            setParams(next, { replace: true });
+            void refresh();
+          }}
+        />
+      )}
+      {generating && (
+        <Dialog open onOpenChange={setGenerating}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Gerar mensalidades</DialogTitle>
+              <DialogDescription>
+                O Go usa as versões e condições de cada contrato. Faturas
+                existentes da competência são preservadas.
+              </DialogDescription>
+            </DialogHeader>
+            <MutationForm
+              submit="Gerar faturas"
+              onCancel={() => setGenerating(false)}
+              onSubmit={async () => {
+                setGeneration(
+                  await api("/finance/generate", { body: { competence } }),
+                );
+                setGenerating(false);
+                await refresh();
+              }}
+            >
+              <FormField label="Competência">
+                <Input
+                  type="month"
+                  required
+                  value={competence}
+                  onChange={(e) => setCompetence(e.target.value)}
+                />
+              </FormField>
+            </MutationForm>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
+  );
 }
 function AccountingExport() {
- const today = new Date().toLocaleDateString("en-CA"); const [form,setForm] = useState({ kind: "payments", from: `${today.slice(0,8)}01`, to: today });
- return <Panel title="Exportação para contabilidade" description="Planilha de conferência; a emissão fiscal não é realizada pelo NexoISP."><div className="erp-columns"><FormField label="O que exportar"><select className="commercial-select" value={form.kind} onChange={e => setForm({...form,kind:e.target.value})}><option value="payments">Recebimentos por data de pagamento</option><option value="invoices">Faturas por vencimento</option></select></FormField><FormField label="Data inicial"><Input type="date" value={form.from} onChange={e => setForm({...form,from:e.target.value})} /></FormField><FormField label="Data final"><Input type="date" value={form.to} onChange={e => setForm({...form,to:e.target.value})} /></FormField></div><ActionButton onClick={() => download(`/finance/export?${new URLSearchParams(form)}`,`contabilidade-${form.kind}.csv`)}>Baixar CSV contábil</ActionButton></Panel>;
+  const today = new Date().toLocaleDateString("en-CA");
+  const [form, setForm] = useState({
+    kind: "payments",
+    from: `${today.slice(0, 8)}01`,
+    to: today,
+  });
+  return (
+    <Panel
+      title="Exportação para contabilidade"
+      description="Planilha de conferência; a emissão fiscal não é realizada pelo NexoISP."
+    >
+      <div className="erp-columns">
+        <FormField label="O que exportar">
+          <select
+            className="commercial-select"
+            value={form.kind}
+            onChange={(e) => setForm({ ...form, kind: e.target.value })}
+          >
+            <option value="payments">Recebimentos por data de pagamento</option>
+            <option value="invoices">Faturas por vencimento</option>
+          </select>
+        </FormField>
+        <FormField label="Data inicial">
+          <Input
+            type="date"
+            value={form.from}
+            onChange={(e) => setForm({ ...form, from: e.target.value })}
+          />
+        </FormField>
+        <FormField label="Data final">
+          <Input
+            type="date"
+            value={form.to}
+            onChange={(e) => setForm({ ...form, to: e.target.value })}
+          />
+        </FormField>
+      </div>
+      <ActionButton
+        onClick={() =>
+          download(
+            `/finance/export?${new URLSearchParams(form)}`,
+            `contabilidade-${form.kind}.csv`,
+          )
+        }
+      >
+        Baixar CSV contábil
+      </ActionButton>
+    </Panel>
+  );
 }

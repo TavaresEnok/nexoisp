@@ -1,12 +1,28 @@
 import { useState } from "react";
 import useSWR from "swr";
 import { Plus } from "lucide-react";
-import { ProfileSection, ProfileFacts } from "@/components/subscriber-profile-sections";
+import {
+  ProfileSection,
+  ProfileFacts,
+} from "@/components/subscriber-profile-sections";
 import { PageHeading, Panel, Status } from "@/components/workspace-ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Table,
+  TableHeader,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { MutationForm, FormField } from "@/features/shared/form";
 import { ActionButton } from "@/features/shared/action";
 import { QueryBoundary, ConnectedNotice } from "@/features/shared/feedback";
@@ -14,13 +30,327 @@ import { useSession } from "@/features/session/provider";
 import { can } from "@/features/session/model";
 import { api } from "@/platform/erp-client";
 import { money } from "@/lib/format";
-import { decimalToCents, type ContractAddon, type ContractDetail } from "./models";
-type Addon = { id: string; name: string; price_cents: number; active: boolean; in_use: number };
+import {
+  decimalToCents,
+  type ContractAddon,
+  type ContractDetail,
+} from "./models";
+type Addon = {
+  id: string;
+  name: string;
+  price_cents: number;
+  active: boolean;
+  in_use: number;
+};
 export function AddonCatalog() {
- const { me } = useSession(); const list = useSWR("erp-addons", () => api<Addon[]>("/addons")); const [editor, setEditor] = useState<{ id?: string; name: string; price: string } | null>(null);
- return <><PageHeading title="Produtos adicionais" description="Itens recorrentes cobrados com a mensalidade, com preço preservado em cada contratação." actions={can(me, "plans:write") && <Button onClick={() => setEditor({ name: "", price: "" })}><Plus />Novo produto</Button>} /><ConnectedNotice demo={me?.demo} /><Panel title="Catálogo de adicionais"><QueryBoundary loading={list.isLoading} error={list.error} retry={() => list.mutate()}><Table><TableHeader><TableRow><TableHead>Produto</TableHead><TableHead>Preço mensal</TableHead><TableHead>Contratos</TableHead><TableHead>Situação</TableHead><TableHead>Ações</TableHead></TableRow></TableHeader><TableBody>{list.data?.map(addon => <TableRow key={addon.id}><TableCell>{addon.name}</TableCell><TableCell>{money(addon.price_cents / 100)}</TableCell><TableCell>{addon.in_use}</TableCell><TableCell><Status value={addon.active ? "Ativo" : "Inativo"} /></TableCell><TableCell>{can(me, "plans:write") && <div className="erp-inline-actions"><Button variant="outline" size="sm" onClick={() => setEditor({ id: addon.id, name: addon.name, price: (addon.price_cents / 100).toFixed(2).replace(".", ",") })}>Alterar preço</Button><ActionButton onClick={async () => { await api(`/addons/${addon.id}`, { method: "PATCH", body: { active: !addon.active } }); await list.mutate(); }}>{addon.active ? "Desativar" : "Ativar"}</ActionButton></div>}</TableCell></TableRow>)}</TableBody></Table>{!list.data?.length && <p className="profile-footnote">Nenhum produto cadastrado.</p>}</QueryBoundary></Panel>{editor && <Dialog open onOpenChange={open => { if (!open) setEditor(null); }}><DialogContent><DialogHeader><DialogTitle>{editor.id ? "Alterar preço" : "Novo produto adicional"}</DialogTitle><DialogDescription>O novo preço vale para contratações futuras.</DialogDescription></DialogHeader><MutationForm onCancel={() => setEditor(null)} onSubmit={async () => { await api(editor.id ? `/addons/${editor.id}` : "/addons", { method: editor.id ? "PATCH" : "POST", body: { ...(!editor.id ? { name: editor.name } : {}), price_cents: decimalToCents(editor.price) } }); setEditor(null); await list.mutate(); }}><FormField label="Nome do produto"><Input required minLength={2} maxLength={80} readOnly={Boolean(editor.id)} value={editor.name} onChange={e => setEditor({ ...editor, name: e.target.value })} /></FormField><FormField label="Preço mensal (R$)"><Input required value={editor.price} onChange={e => setEditor({ ...editor, price: e.target.value })} /></FormField></MutationForm></DialogContent></Dialog>}</>;
+  const { me } = useSession();
+  const list = useSWR("erp-addons", () => api<Addon[]>("/addons"));
+  const [editor, setEditor] = useState<{
+    id?: string;
+    name: string;
+    price: string;
+  } | null>(null);
+  return (
+    <>
+      <PageHeading
+        title="Produtos adicionais"
+        description="Itens recorrentes cobrados com a mensalidade, com preço preservado em cada contratação."
+        actions={
+          can(me, "plans:write") && (
+            <Button onClick={() => setEditor({ name: "", price: "" })}>
+              <Plus />
+              Novo produto
+            </Button>
+          )
+        }
+      />
+      <ConnectedNotice demo={me?.demo} />
+      <Panel title="Catálogo de adicionais">
+        <QueryBoundary
+          loading={list.isLoading}
+          error={list.error}
+          retry={() => list.mutate()}
+        >
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Produto</TableHead>
+                <TableHead>Preço mensal</TableHead>
+                <TableHead>Contratos</TableHead>
+                <TableHead>Situação</TableHead>
+                <TableHead>Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {list.data?.map((addon) => (
+                <TableRow key={addon.id}>
+                  <TableCell>{addon.name}</TableCell>
+                  <TableCell>{money(addon.price_cents / 100)}</TableCell>
+                  <TableCell>{addon.in_use}</TableCell>
+                  <TableCell>
+                    <Status value={addon.active ? "Ativo" : "Inativo"} />
+                  </TableCell>
+                  <TableCell>
+                    {can(me, "plans:write") && (
+                      <div className="erp-inline-actions">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            setEditor({
+                              id: addon.id,
+                              name: addon.name,
+                              price: (addon.price_cents / 100)
+                                .toFixed(2)
+                                .replace(".", ","),
+                            })
+                          }
+                        >
+                          Alterar preço
+                        </Button>
+                        <ActionButton
+                          onClick={async () => {
+                            await api(`/addons/${addon.id}`, {
+                              method: "PATCH",
+                              body: { active: !addon.active },
+                            });
+                            await list.mutate();
+                          }}
+                        >
+                          {addon.active ? "Desativar" : "Ativar"}
+                        </ActionButton>
+                      </div>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          {!list.data?.length && (
+            <p className="profile-footnote">Nenhum produto cadastrado.</p>
+          )}
+        </QueryBoundary>
+      </Panel>
+      {editor && (
+        <Dialog
+          open
+          onOpenChange={(open) => {
+            if (!open) setEditor(null);
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {editor.id ? "Alterar preço" : "Novo produto adicional"}
+              </DialogTitle>
+              <DialogDescription>
+                O novo preço vale para contratações futuras.
+              </DialogDescription>
+            </DialogHeader>
+            <MutationForm
+              onCancel={() => setEditor(null)}
+              onSubmit={async () => {
+                await api(editor.id ? `/addons/${editor.id}` : "/addons", {
+                  method: editor.id ? "PATCH" : "POST",
+                  body: {
+                    ...(!editor.id ? { name: editor.name } : {}),
+                    price_cents: decimalToCents(editor.price),
+                  },
+                });
+                setEditor(null);
+                await list.mutate();
+              }}
+            >
+              <FormField label="Nome do produto">
+                <Input
+                  required
+                  minLength={2}
+                  maxLength={80}
+                  readOnly={Boolean(editor.id)}
+                  value={editor.name}
+                  onChange={(e) =>
+                    setEditor({ ...editor, name: e.target.value })
+                  }
+                />
+              </FormField>
+              <FormField label="Preço mensal (R$)">
+                <Input
+                  required
+                  value={editor.price}
+                  onChange={(e) =>
+                    setEditor({ ...editor, price: e.target.value })
+                  }
+                />
+              </FormField>
+            </MutationForm>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
+  );
 }
-export function ContractAddons({ contract, refresh }: { contract: ContractDetail; refresh: () => Promise<void> }) {
- const { me } = useSession(); const list = useSWR(["erp-contract-addons", contract.id], ([, id]) => api<ContractAddon[]>(`/contracts/${id}/addons`)); const catalog = useSWR("erp-addons", () => api<Addon[]>("/addons")); const [form, setForm] = useState<{ product_id: string; quantity: string } | null>(null); const writable = can(me, "contracts:write") && contract.status === "active";
- return <ProfileSection title="Serviços adicionais" caption="Histórico e condições dos produtos vinculados a este contrato." action={writable && <Button variant="outline" size="sm" onClick={() => setForm({ product_id: "", quantity: "1" })}>Adicionar produto</Button>}><QueryBoundary loading={list.isLoading} error={list.error} retry={() => list.mutate()}>{!list.data?.length && <p className="profile-footnote">Nenhum adicional registrado.</p>}{list.data?.map(addon => <div className="erp-contract-card" key={addon.id}><header><strong>{addon.description}{addon.quantity > 1 && ` × ${addon.quantity}`}</strong><Status value={addon.current ? "Vigente" : addon.ended_competence ? "Encerrado" : "Agendado"} /></header><ProfileFacts items={[["Mensalidade", money(addon.unit_price_cents * addon.quantity / 100)], ["A partir de", addon.from_competence.slice(0, 7)], ["Encerramento", addon.ended_competence ? `Antes de ${addon.ended_competence.slice(0, 7)}` : "Sem encerramento agendado"]]} />{writable && !addon.ended_competence && <ActionButton danger confirm="Encerrar a cobrança deste adicional a partir da competência definida pelo servidor? As faturas existentes são preservadas." onClick={async () => { await api(`/contracts/${contract.id}/addons/${addon.id}`, { method: "DELETE" }); await list.mutate(); await refresh(); }}>Encerrar adicional</ActionButton>}</div>)}</QueryBoundary>{form && <Dialog open onOpenChange={open => { if (!open) setForm(null); }}><DialogContent><DialogHeader><DialogTitle>Adicionar produto ao contrato</DialogTitle><DialogDescription>O preço será preservado neste vínculo. A cobrança começa na competência definida pelo servidor.</DialogDescription></DialogHeader><QueryBoundary loading={catalog.isLoading} error={catalog.error} retry={() => catalog.mutate()}><MutationForm onCancel={() => setForm(null)} submit="Adicionar produto" onSubmit={async () => { await api(`/contracts/${contract.id}/addons`, { body: { product_id: form.product_id, quantity: Number(form.quantity) } }); setForm(null); await list.mutate(); await refresh(); }}><FormField label="Produto"><select className="commercial-select" required value={form.product_id} onChange={e => setForm({ ...form, product_id: e.target.value })}><option value="">Escolha um produto</option>{catalog.data?.filter(product => product.active).map(product => <option key={product.id} value={product.id}>{product.name} · {money(product.price_cents / 100)}</option>)}</select></FormField><FormField label="Quantidade"><Input type="number" min={1} max={99} required value={form.quantity} onChange={e => setForm({ ...form, quantity: e.target.value })} /></FormField></MutationForm></QueryBoundary></DialogContent></Dialog>}</ProfileSection>;
+export function ContractAddons({
+  contract,
+  refresh,
+}: {
+  contract: ContractDetail;
+  refresh: () => Promise<void>;
+}) {
+  const { me } = useSession();
+  const list = useSWR(["erp-contract-addons", contract.id], ([, id]) =>
+    api<ContractAddon[]>(`/contracts/${id}/addons`),
+  );
+  const catalog = useSWR("erp-addons", () => api<Addon[]>("/addons"));
+  const [form, setForm] = useState<{
+    product_id: string;
+    quantity: string;
+  } | null>(null);
+  const writable = can(me, "contracts:write") && contract.status === "active";
+  return (
+    <ProfileSection
+      title="Serviços adicionais"
+      caption="Histórico e condições dos produtos vinculados a este contrato."
+      action={
+        writable && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setForm({ product_id: "", quantity: "1" })}
+          >
+            Adicionar produto
+          </Button>
+        )
+      }
+    >
+      <QueryBoundary
+        loading={list.isLoading}
+        error={list.error}
+        retry={() => list.mutate()}
+      >
+        {!list.data?.length && (
+          <p className="profile-footnote">Nenhum adicional registrado.</p>
+        )}
+        {list.data?.map((addon) => (
+          <div className="erp-contract-card" key={addon.id}>
+            <header>
+              <strong>
+                {addon.description}
+                {addon.quantity > 1 && ` × ${addon.quantity}`}
+              </strong>
+              <Status
+                value={
+                  addon.current
+                    ? "Vigente"
+                    : addon.ended_competence
+                      ? "Encerrado"
+                      : "Agendado"
+                }
+              />
+            </header>
+            <ProfileFacts
+              items={[
+                [
+                  "Mensalidade",
+                  money((addon.unit_price_cents * addon.quantity) / 100),
+                ],
+                ["A partir de", addon.from_competence.slice(0, 7)],
+                [
+                  "Encerramento",
+                  addon.ended_competence
+                    ? `Antes de ${addon.ended_competence.slice(0, 7)}`
+                    : "Sem encerramento agendado",
+                ],
+              ]}
+            />
+            {writable && !addon.ended_competence && (
+              <ActionButton
+                danger
+                confirm="Encerrar a cobrança deste adicional a partir da competência definida pelo servidor? As faturas existentes são preservadas."
+                onClick={async () => {
+                  await api(`/contracts/${contract.id}/addons/${addon.id}`, {
+                    method: "DELETE",
+                  });
+                  await list.mutate();
+                  await refresh();
+                }}
+              >
+                Encerrar adicional
+              </ActionButton>
+            )}
+          </div>
+        ))}
+      </QueryBoundary>
+      {form && (
+        <Dialog
+          open
+          onOpenChange={(open) => {
+            if (!open) setForm(null);
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Adicionar produto ao contrato</DialogTitle>
+              <DialogDescription>
+                O preço será preservado neste vínculo. A cobrança começa na
+                competência definida pelo servidor.
+              </DialogDescription>
+            </DialogHeader>
+            <QueryBoundary
+              loading={catalog.isLoading}
+              error={catalog.error}
+              retry={() => catalog.mutate()}
+            >
+              <MutationForm
+                onCancel={() => setForm(null)}
+                submit="Adicionar produto"
+                onSubmit={async () => {
+                  await api(`/contracts/${contract.id}/addons`, {
+                    body: {
+                      product_id: form.product_id,
+                      quantity: Number(form.quantity),
+                    },
+                  });
+                  setForm(null);
+                  await list.mutate();
+                  await refresh();
+                }}
+              >
+                <FormField label="Produto">
+                  <select
+                    className="commercial-select"
+                    required
+                    value={form.product_id}
+                    onChange={(e) =>
+                      setForm({ ...form, product_id: e.target.value })
+                    }
+                  >
+                    <option value="">Escolha um produto</option>
+                    {catalog.data
+                      ?.filter((product) => product.active)
+                      .map((product) => (
+                        <option key={product.id} value={product.id}>
+                          {product.name} · {money(product.price_cents / 100)}
+                        </option>
+                      ))}
+                  </select>
+                </FormField>
+                <FormField label="Quantidade">
+                  <Input
+                    type="number"
+                    min={1}
+                    max={99}
+                    required
+                    value={form.quantity}
+                    onChange={(e) =>
+                      setForm({ ...form, quantity: e.target.value })
+                    }
+                  />
+                </FormField>
+              </MutationForm>
+            </QueryBoundary>
+          </DialogContent>
+        </Dialog>
+      )}
+    </ProfileSection>
+  );
 }

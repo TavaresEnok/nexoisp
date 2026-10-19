@@ -1,12 +1,28 @@
 import { useState } from "react";
 import useSWR from "swr";
-import { ProfileSection, ProfileFacts } from "@/components/subscriber-profile-sections";
+import {
+  ProfileSection,
+  ProfileFacts,
+} from "@/components/subscriber-profile-sections";
 import { Status } from "@/components/workspace-ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Table,
+  TableHeader,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { FormField, MutationForm } from "@/features/shared/form";
 import { RecordEditor } from "@/features/shared/record-editor";
 import { QueryBoundary } from "@/features/shared/feedback";
@@ -17,20 +33,435 @@ import { api } from "@/platform/erp-client";
 import { date, money } from "@/lib/format";
 import { invoiceStatus, type ErpInvoice } from "./models";
 import { OperationalInvoice } from "./invoice";
-type ContractBalance = { invoices: ErpInvoice[]; open:number;open_cents:number;overdue:number;reconciling:number };
-export function ContractFinance({id}:{id:string}){
- const {me}=useSession();const list=useSWR(["erp-contract-finance",id],([,id])=>api<ContractBalance>(`/contracts/${id}/finance`));const [invoice,setInvoice]=useState<string|null>(null);const [creating,setCreating]=useState(false);const [agreement,setAgreement]=useState(false);
- const refreshed=async()=>{await list.mutate();};
- return <div className="erp-stack"><ProfileSection title="Faturas do contrato" action={can(me,"finance:write") && <Button variant="outline" size="sm" onClick={()=>setCreating(true)}>Nova fatura avulsa</Button>}><QueryBoundary loading={list.isLoading} error={list.error} retry={()=>list.mutate()}>{list.data && <><ProfileFacts items={[["Em aberto",`${list.data.open} · ${money(list.data.open_cents / 100)}`],["Vencidas",list.data.overdue],["Em conciliação",list.data.reconciling]]} />{list.data.invoices.length ? <Table><TableHeader><TableRow><TableHead>Referência</TableHead><TableHead>Vencimento</TableHead><TableHead>Valor</TableHead><TableHead>Situação</TableHead><TableHead>Ação</TableHead></TableRow></TableHeader><TableBody>{list.data.invoices.map(row=><TableRow key={row.id}><TableCell>{row.competence?.slice(0,7) ?? "Avulsa"}</TableCell><TableCell>{date(row.due_date)}</TableCell><TableCell>{money(row.amount_cents / 100)}</TableCell><TableCell><Status value={invoiceStatus(row)} /></TableCell><TableCell><Button variant="outline" size="sm" onClick={()=>setInvoice(row.id)}>Abrir fatura</Button></TableCell></TableRow>)}</TableBody></Table>:<p className="profile-footnote">Nenhuma cobrança neste contrato.</p>}{can(me,"finance:write") && list.data.invoices.some(row=>row.status === "open") && <Button variant="outline" onClick={()=>setAgreement(true)}>Acordo de pagamento</Button>}</>}</QueryBoundary></ProfileSection><TrustRelease id={id} />{invoice && <OperationalInvoice key={invoice} id={invoice} onClose={()=>{setInvoice(null);void refreshed();}} />}{creating && <RecordEditor title="Nova fatura avulsa" description="A cobrança será registrada neste contrato pelo servidor." initial={{description:"",amount:"",due:new Date().toLocaleDateString("en-CA")}} fields={[{key:"description",label:"Descrição da cobrança",required:true,maxLength:200},{key:"amount",label:"Valor da cobrança (R$)",required:true},{key:"due",label:"Vencimento da cobrança",type:"date",required:true}]} onClose={()=>setCreating(false)} onSubmit={async values=>{await api("/invoices",{body:{contract_id:id,description:values.description,amount_cents:decimalToCents(values.amount),due_date:values.due}});setCreating(false);await refreshed();}} />}{agreement && list.data && <Agreement id={id} invoices={list.data.invoices.filter(row=>row.status === "open")} onClose={()=>setAgreement(false)} onDone={async()=>{setAgreement(false);await refreshed();}} />}</div>;
+type ContractBalance = {
+  invoices: ErpInvoice[];
+  open: number;
+  open_cents: number;
+  overdue: number;
+  reconciling: number;
+};
+export function ContractFinance({ id }: { id: string }) {
+  const { me } = useSession();
+  const list = useSWR(["erp-contract-finance", id], ([, id]) =>
+    api<ContractBalance>(`/contracts/${id}/finance`),
+  );
+  const [invoice, setInvoice] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [agreement, setAgreement] = useState(false);
+  const refreshed = async () => {
+    await list.mutate();
+  };
+  return (
+    <div className="erp-stack">
+      <ProfileSection
+        title="Faturas do contrato"
+        action={
+          can(me, "finance:write") && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCreating(true)}
+            >
+              Nova fatura avulsa
+            </Button>
+          )
+        }
+      >
+        <QueryBoundary
+          loading={list.isLoading}
+          error={list.error}
+          retry={() => list.mutate()}
+        >
+          {list.data && (
+            <>
+              <ProfileFacts
+                items={[
+                  [
+                    "Em aberto",
+                    `${list.data.open} · ${money(list.data.open_cents / 100)}`,
+                  ],
+                  ["Vencidas", list.data.overdue],
+                  ["Em conciliação", list.data.reconciling],
+                ]}
+              />
+              {list.data.invoices.length ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Referência</TableHead>
+                      <TableHead>Vencimento</TableHead>
+                      <TableHead>Valor</TableHead>
+                      <TableHead>Situação</TableHead>
+                      <TableHead>Ação</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {list.data.invoices.map((row) => (
+                      <TableRow key={row.id}>
+                        <TableCell>
+                          {row.competence?.slice(0, 7) ?? "Avulsa"}
+                        </TableCell>
+                        <TableCell>{date(row.due_date)}</TableCell>
+                        <TableCell>{money(row.amount_cents / 100)}</TableCell>
+                        <TableCell>
+                          <Status value={invoiceStatus(row)} />
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setInvoice(row.id)}
+                          >
+                            Abrir fatura
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <p className="profile-footnote">
+                  Nenhuma cobrança neste contrato.
+                </p>
+              )}
+              {can(me, "finance:write") &&
+                list.data.invoices.some((row) => row.status === "open") && (
+                  <Button variant="outline" onClick={() => setAgreement(true)}>
+                    Acordo de pagamento
+                  </Button>
+                )}
+            </>
+          )}
+        </QueryBoundary>
+      </ProfileSection>
+      <TrustRelease id={id} />
+      {invoice && (
+        <OperationalInvoice
+          key={invoice}
+          id={invoice}
+          onClose={() => {
+            setInvoice(null);
+            void refreshed();
+          }}
+        />
+      )}
+      {creating && (
+        <RecordEditor
+          title="Nova fatura avulsa"
+          description="A cobrança será registrada neste contrato pelo servidor."
+          initial={{
+            description: "",
+            amount: "",
+            due: new Date().toLocaleDateString("en-CA"),
+          }}
+          fields={[
+            {
+              key: "description",
+              label: "Descrição da cobrança",
+              required: true,
+              maxLength: 200,
+            },
+            { key: "amount", label: "Valor da cobrança (R$)", required: true },
+            {
+              key: "due",
+              label: "Vencimento da cobrança",
+              type: "date",
+              required: true,
+            },
+          ]}
+          onClose={() => setCreating(false)}
+          onSubmit={async (values) => {
+            await api("/invoices", {
+              body: {
+                contract_id: id,
+                description: values.description,
+                amount_cents: decimalToCents(values.amount),
+                due_date: values.due,
+              },
+            });
+            setCreating(false);
+            await refreshed();
+          }}
+        />
+      )}
+      {agreement && list.data && (
+        <Agreement
+          id={id}
+          invoices={list.data.invoices.filter((row) => row.status === "open")}
+          onClose={() => setAgreement(false)}
+          onDone={async () => {
+            setAgreement(false);
+            await refreshed();
+          }}
+        />
+      )}
+    </div>
+  );
 }
-function Agreement({id,invoices,onClose,onDone}:{id:string;invoices:ErpInvoice[];onClose:()=>void;onDone:()=>Promise<void>}){
- const [form,setForm]=useState({ids:invoices.map(row=>row.id),installments:"3",due:new Date(Date.now()+7*86400000).toLocaleDateString("en-CA"),discount:"",reason:"",fees:false,release:false});
- const selectedBalance=invoices.filter(row=>form.ids.includes(row.id)).reduce((total,row)=>total+row.amount_cents+row.fee_cents-row.discount_cents-row.paid_cents,0);
- return <Dialog open onOpenChange={open=>{if(!open)onClose();}}><DialogContent className="erp-editor"><DialogHeader><DialogTitle>Acordo de pagamento</DialogTitle><DialogDescription>As faturas escolhidas são substituídas pelas parcelas. Os pagamentos parciais são descontados do saldo pelo servidor.</DialogDescription></DialogHeader><MutationForm submit="Criar acordo" onCancel={onClose} onSubmit={async()=>{await api(`/contracts/${id}/agreement`,{body:{invoice_ids:form.ids,installments:Number(form.installments),first_due_date:form.due,reason:form.reason,apply_fees:form.fees,release_service:form.release,...(form.discount ? {discount_cents:decimalToCents(form.discount)}:{})}});await onDone();}}>{invoices.map(row=><Label className="erp-inline-actions" key={row.id}><input type="checkbox" checked={form.ids.includes(row.id)} onChange={e=>setForm({...form,ids:e.target.checked ? [...form.ids,row.id]:form.ids.filter(id=>id!==row.id)})} />{date(row.due_date)} · {money((row.amount_cents+row.fee_cents-row.discount_cents-row.paid_cents)/100)}</Label>)}<p className="profile-footnote">Saldo selecionado antes de novos encargos ou desconto: {money(selectedBalance / 100)}.</p><div className="erp-columns"><FormField label="Número de parcelas"><Input type="number" min={1} max={24} required value={form.installments} onChange={e=>setForm({...form,installments:e.target.value})} /></FormField><FormField label="Primeiro vencimento"><Input type="date" required value={form.due} onChange={e=>setForm({...form,due:e.target.value})} /></FormField><FormField label="Desconto do acordo (R$)"><Input value={form.discount} onChange={e=>setForm({...form,discount:e.target.value})} /></FormField></div><Label className="erp-inline-actions"><input type="checkbox" checked={form.fees} onChange={e=>setForm({...form,fees:e.target.checked})} />Incluir multa e juros conforme política</Label><Label className="erp-inline-actions"><input type="checkbox" checked={form.release} onChange={e=>setForm({...form,release:e.target.checked})} />Solicitar retomada do acesso suspenso</Label><FormField label="Descrição do acordo"><Input required minLength={5} maxLength={200} value={form.reason} onChange={e=>setForm({...form,reason:e.target.value})} /></FormField></MutationForm></DialogContent></Dialog>;
+function Agreement({
+  id,
+  invoices,
+  onClose,
+  onDone,
+}: {
+  id: string;
+  invoices: ErpInvoice[];
+  onClose: () => void;
+  onDone: () => Promise<void>;
+}) {
+  const [form, setForm] = useState({
+    ids: invoices.map((row) => row.id),
+    installments: "3",
+    due: new Date(Date.now() + 7 * 86400000).toLocaleDateString("en-CA"),
+    discount: "",
+    reason: "",
+    fees: false,
+    release: false,
+  });
+  const selectedBalance = invoices
+    .filter((row) => form.ids.includes(row.id))
+    .reduce(
+      (total, row) =>
+        total +
+        row.amount_cents +
+        row.fee_cents -
+        row.discount_cents -
+        row.paid_cents,
+      0,
+    );
+  return (
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <DialogContent className="erp-editor">
+        <DialogHeader>
+          <DialogTitle>Acordo de pagamento</DialogTitle>
+          <DialogDescription>
+            As faturas escolhidas são substituídas pelas parcelas. Os pagamentos
+            parciais são descontados do saldo pelo servidor.
+          </DialogDescription>
+        </DialogHeader>
+        <MutationForm
+          submit="Criar acordo"
+          onCancel={onClose}
+          onSubmit={async () => {
+            await api(`/contracts/${id}/agreement`, {
+              body: {
+                invoice_ids: form.ids,
+                installments: Number(form.installments),
+                first_due_date: form.due,
+                reason: form.reason,
+                apply_fees: form.fees,
+                release_service: form.release,
+                ...(form.discount
+                  ? { discount_cents: decimalToCents(form.discount) }
+                  : {}),
+              },
+            });
+            await onDone();
+          }}
+        >
+          {invoices.map((row) => (
+            <Label className="erp-inline-actions" key={row.id}>
+              <input
+                type="checkbox"
+                checked={form.ids.includes(row.id)}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    ids: e.target.checked
+                      ? [...form.ids, row.id]
+                      : form.ids.filter((id) => id !== row.id),
+                  })
+                }
+              />
+              {date(row.due_date)} ·{" "}
+              {money(
+                (row.amount_cents +
+                  row.fee_cents -
+                  row.discount_cents -
+                  row.paid_cents) /
+                  100,
+              )}
+            </Label>
+          ))}
+          <p className="profile-footnote">
+            Saldo selecionado antes de novos encargos ou desconto:{" "}
+            {money(selectedBalance / 100)}.
+          </p>
+          <div className="erp-columns">
+            <FormField label="Número de parcelas">
+              <Input
+                type="number"
+                min={1}
+                max={24}
+                required
+                value={form.installments}
+                onChange={(e) =>
+                  setForm({ ...form, installments: e.target.value })
+                }
+              />
+            </FormField>
+            <FormField label="Primeiro vencimento">
+              <Input
+                type="date"
+                required
+                value={form.due}
+                onChange={(e) => setForm({ ...form, due: e.target.value })}
+              />
+            </FormField>
+            <FormField label="Desconto do acordo (R$)">
+              <Input
+                value={form.discount}
+                onChange={(e) => setForm({ ...form, discount: e.target.value })}
+              />
+            </FormField>
+          </div>
+          <Label className="erp-inline-actions">
+            <input
+              type="checkbox"
+              checked={form.fees}
+              onChange={(e) => setForm({ ...form, fees: e.target.checked })}
+            />
+            Incluir multa e juros conforme política
+          </Label>
+          <Label className="erp-inline-actions">
+            <input
+              type="checkbox"
+              checked={form.release}
+              onChange={(e) => setForm({ ...form, release: e.target.checked })}
+            />
+            Solicitar retomada do acesso suspenso
+          </Label>
+          <FormField label="Descrição do acordo">
+            <Input
+              required
+              minLength={5}
+              maxLength={200}
+              value={form.reason}
+              onChange={(e) => setForm({ ...form, reason: e.target.value })}
+            />
+          </FormField>
+        </MutationForm>
+      </DialogContent>
+    </Dialog>
+  );
 }
-type Trust = {enabled:boolean;eligible:boolean;reason:string;max_days:number;active:{expires_at:string;source:string}|null;history:{id:string;granted_at:string;days:number;status:string;requested_by_name:string|null;source:string;reason:string|null}[]};
-function TrustRelease({id}:{id:string}){
- const {me}=useSession();const current=useSWR(["erp-trust-release",id],([,id])=>api<Trust>(`/contracts/${id}/trust-release`));const [editing,setEditing]=useState(false);
- if(current.data && !current.data.enabled)return null;
- return <ProfileSection title="Liberação por confiança" action={current.data?.eligible && can(me,"trust:grant") && <Button variant="outline" size="sm" onClick={()=>setEditing(true)}>Liberar por confiança</Button>}><QueryBoundary loading={current.isLoading} error={current.error} retry={()=>current.mutate()}>{current.data && <><p>{current.data.active ? `Em curso até ${date(current.data.active.expires_at)} · ${current.data.active.source === "portal" ? "Solicitada no portal":"Concedida pela equipe"}` : current.data.eligible ? `Disponível por até ${current.data.max_days} dia(s).`:current.data.reason}</p>{current.data.history.length>0 && <details><summary>Histórico das liberações</summary><Table><TableBody>{current.data.history.map(row=><TableRow key={row.id}><TableCell>{date(row.granted_at)}</TableCell><TableCell>{row.days} dia(s)</TableCell><TableCell>{({active:"Em curso",expired:"Vencida",settled:"Quitada",canceled:"Cancelada"} as Record<string,string>)[row.status] ?? row.status}</TableCell><TableCell>{row.requested_by_name ?? "Portal"} · {row.reason}</TableCell></TableRow>)}</TableBody></Table></details>}</>}</QueryBoundary>{editing && current.data && <RecordEditor title="Liberar por confiança" description="A política salva define elegibilidade, prazo e intervalo entre liberações." initial={{days:String(current.data.max_days),reason:""}} fields={[{key:"days",label:"Dias de liberação",type:"number",min:1,max:current.data.max_days,required:true},{key:"reason",label:"Motivo da liberação",required:true,maxLength:200}]} onClose={()=>setEditing(false)} submit="Liberar acesso" onSubmit={async values=>{await api(`/contracts/${id}/trust-release`,{body:{days:Number(values.days),reason:values.reason}});setEditing(false);await current.mutate();}} />}</ProfileSection>;
+type Trust = {
+  enabled: boolean;
+  eligible: boolean;
+  reason: string;
+  max_days: number;
+  active: { expires_at: string; source: string } | null;
+  history: {
+    id: string;
+    granted_at: string;
+    days: number;
+    status: string;
+    requested_by_name: string | null;
+    source: string;
+    reason: string | null;
+  }[];
+};
+function TrustRelease({ id }: { id: string }) {
+  const { me } = useSession();
+  const current = useSWR(["erp-trust-release", id], ([, id]) =>
+    api<Trust>(`/contracts/${id}/trust-release`),
+  );
+  const [editing, setEditing] = useState(false);
+  if (current.data && !current.data.enabled) return null;
+  return (
+    <ProfileSection
+      title="Liberação por confiança"
+      action={
+        current.data?.eligible &&
+        can(me, "trust:grant") && (
+          <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+            Liberar por confiança
+          </Button>
+        )
+      }
+    >
+      <QueryBoundary
+        loading={current.isLoading}
+        error={current.error}
+        retry={() => current.mutate()}
+      >
+        {current.data && (
+          <>
+            <p>
+              {current.data.active
+                ? `Em curso até ${date(current.data.active.expires_at)} · ${current.data.active.source === "portal" ? "Solicitada no portal" : "Concedida pela equipe"}`
+                : current.data.eligible
+                  ? `Disponível por até ${current.data.max_days} dia(s).`
+                  : current.data.reason}
+            </p>
+            {current.data.history.length > 0 && (
+              <details>
+                <summary>Histórico das liberações</summary>
+                <Table>
+                  <TableBody>
+                    {current.data.history.map((row) => (
+                      <TableRow key={row.id}>
+                        <TableCell>{date(row.granted_at)}</TableCell>
+                        <TableCell>{row.days} dia(s)</TableCell>
+                        <TableCell>
+                          {(
+                            {
+                              active: "Em curso",
+                              expired: "Vencida",
+                              settled: "Quitada",
+                              canceled: "Cancelada",
+                            } as Record<string, string>
+                          )[row.status] ?? row.status}
+                        </TableCell>
+                        <TableCell>
+                          {row.requested_by_name ?? "Portal"} · {row.reason}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </details>
+            )}
+          </>
+        )}
+      </QueryBoundary>
+      {editing && current.data && (
+        <RecordEditor
+          title="Liberar por confiança"
+          description="A política salva define elegibilidade, prazo e intervalo entre liberações."
+          initial={{ days: String(current.data.max_days), reason: "" }}
+          fields={[
+            {
+              key: "days",
+              label: "Dias de liberação",
+              type: "number",
+              min: 1,
+              max: current.data.max_days,
+              required: true,
+            },
+            {
+              key: "reason",
+              label: "Motivo da liberação",
+              required: true,
+              maxLength: 200,
+            },
+          ]}
+          onClose={() => setEditing(false)}
+          submit="Liberar acesso"
+          onSubmit={async (values) => {
+            await api(`/contracts/${id}/trust-release`, {
+              body: { days: Number(values.days), reason: values.reason },
+            });
+            setEditing(false);
+            await current.mutate();
+          }}
+        />
+      )}
+    </ProfileSection>
+  );
 }

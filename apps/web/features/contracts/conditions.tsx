@@ -1,10 +1,23 @@
 import { useRef, useState } from "react";
 import useSWR from "swr";
-import { ProfileSection, ProfileFacts } from "@/components/subscriber-profile-sections";
+import {
+  ProfileSection,
+  ProfileFacts,
+} from "@/components/subscriber-profile-sections";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { RecordEditor, type EditorField, type EditorValues } from "@/features/shared/record-editor";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  RecordEditor,
+  type EditorField,
+  type EditorValues,
+} from "@/features/shared/record-editor";
 import { QueryBoundary } from "@/features/shared/feedback";
 import { ActionButton } from "@/features/shared/action";
 import { useSession } from "@/features/session/provider";
@@ -14,49 +27,810 @@ import { api } from "@/platform/erp-client";
 import { money, date } from "@/lib/format";
 import { decimalToCents, type ContractDetail, type ErpPlan } from "./models";
 import type { TerminationQuote } from "./actions";
-type Discount = { id: string; kind: string; value: number; reason: string; months: number | null; from_competence: string; canceled_at: string | null; current: boolean };
-type Schedule = { id: string; kind: string; effective_date: string; status: string; plan_name?: string; due_day?: number; error?: string };
-type Amendment = { id: string; kind: string; title: string; body: string; effective_date: string; created_at: string; created_by_name?: string };
-const changeLabels: Record<string,string> = { plan_change: "Troca de plano", due_day: "Troca de vencimento", end: "Encerramento" };
-const stateLabels: Record<string,string> = { pending: "Agendada", applied: "Aplicada", canceled: "Cancelada", failed: "Falhou" };
-const amendmentLabels: Record<string,string> = { address: "Endereço", holder: "Titularidade", plan: "Plano", condition: "Condição", other: "Outro" };
-const options = (map: Record<string,string>) => Object.entries(map).map(([value,label]) => ({ value,label }));
-export function ContractConditions({ contract, refresh }: { contract: ContractDetail; refresh: () => Promise<void> }) {
- const { me } = useSession(); const active = contract.status === "active"; const commercial = can(me, "contracts:write") && active; const financial = can(me, "finance:write") && active;
- const quote = useSWR(["erp-termination-quote", contract.id], ([,id]) => api<TerminationQuote>(`/contracts/${id}/termination-quote`));
- const discounts = useSWR(["erp-contract-discounts", contract.id], ([,id]) => api<Discount[]>(`/contracts/${id}/discounts`));
- const schedules = useSWR(["erp-contract-schedules", contract.id], ([,id]) => api<Schedule[]>(`/contracts/${id}/scheduled-changes`));
- const amendments = useSWR(["erp-contract-amendments", contract.id], ([,id]) => api<Amendment[]>(`/contracts/${id}/amendments`));
- const plans = useSWR(commercial ? "erp-plans-for-contract" : null, () => api<ErpPlan[]>("/plans"));
- const [editor, setEditor] = useState<{ kind: "loyalty" | "discount" | "schedule" | "amendment"; initial: EditorValues } | null>(null);
- const done = async () => { setEditor(null); await Promise.all([quote.mutate(), discounts.mutate(), schedules.mutate(), amendments.mutate(), refresh()]); };
- const fields: Record<NonNullable<typeof editor>["kind"], EditorField[]> = {
-  loyalty: [{ key: "months", label: "Meses de fidelidade", type: "number", min: 1, max: 60, hint: "Vazio remove a fidelidade deste contrato." }, { key: "model", label: "Modelo da multa", type: "select", options: [{ value: "fixed", label: "Valor único" }, { value: "monthly", label: "Por mês restante" }] }, { key: "price", label: "Valor da multa (R$)", when: values => values.months !== "", required: true }],
-  discount: [{ key: "kind", label: "Tipo de desconto", type: "select", options: [{ value: "percent", label: "Percentual" }, { value: "fixed", label: "Valor em reais" }] }, { key: "value", label: "Percentual ou valor (R$)", required: true }, { key: "reason", label: "Motivo do desconto", required: true, maxLength: 120 }, { key: "months", label: "Quantidade de meses", type: "number", min: 1, max: 120, hint: "Vazio mantém até cancelar." }, { key: "from", label: "A partir de", type: "date", hint: "Vazio aplica à próxima mensalidade gerada." }],
-  schedule: [{ key: "kind", label: "O que muda", type: "select", options: options(changeLabels) }, { key: "date", label: "Data da mudança", type: "date", required: true }, { key: "plan_id", label: "Novo plano", type: "select", required: true, when: values => values.kind === "plan_change", options: [{ value: "", label: "Escolha um plano" }, ...(plans.data ?? []).filter(plan => plan.active).map(plan => ({ value: plan.id, label: plan.name }))] }, { key: "due_day", label: "Novo vencimento", type: "number", min: 1, max: 28, required: true, when: values => values.kind === "due_day" }, { key: "penalty", label: "Tratamento da multa", type: "select", when: values => values.kind === "end" && Boolean(quote.data?.within_loyalty), options: [{ value: "charge", label: "Cobrar na data" }, { value: "waive", label: "Dispensar com justificativa" }] }, { key: "waive", label: "Motivo da dispensa", required: true, maxLength: 200, when: values => values.kind === "end" && values.penalty === "waive" && Boolean(quote.data?.within_loyalty) }],
-  amendment: [{ key: "kind", label: "Tipo de aditivo", type: "select", options: options(amendmentLabels) }, { key: "title", label: "Título do aditivo", required: true, maxLength: 120 }, { key: "body", label: "O que foi acordado", type: "textarea", required: true, maxLength: 4000 }, { key: "effective", label: "Início da vigência", type: "date" }],
- };
- const submit = async (values: EditorValues) => {
-  if (editor?.kind === "loyalty") await api(`/contracts/${contract.id}/loyalty`, { method: "PUT", body: values.months ? { months: Number(values.months), penalty_model: values.model, penalty_cents: decimalToCents(values.price) } : { months: null } });
-  else if (editor?.kind === "discount") await api(`/contracts/${contract.id}/discounts`, { body: { kind: values.kind, value: values.kind === "fixed" ? decimalToCents(values.value) : Number(values.value.replace(",", ".")), reason: values.reason, months: values.months ? Number(values.months) : null, ...(values.from ? { from_competence: values.from } : {}) } });
-  else if (editor?.kind === "schedule") await api(`/contracts/${contract.id}/scheduled-changes`, { body: { kind: values.kind, effective_date: values.date, plan_id: values.kind === "plan_change" ? values.plan_id : null, due_day: values.kind === "due_day" ? Number(values.due_day) : null, penalty: values.kind === "end" && quote.data?.within_loyalty ? values.penalty : null, penalty_waive_reason: values.kind === "end" && quote.data?.within_loyalty && values.penalty === "waive" ? values.waive : null } });
-  else await api(`/contracts/${contract.id}/amendments`, { body: { kind: values.kind, title: values.title, body: values.body, ...(values.effective ? { effective_date: values.effective } : {}) } });
-  await done();
- };
- return <div className="erp-stack"><ProfileSection title="Fidelidade" action={commercial && <Button variant="outline" size="sm" onClick={() => setEditor({ kind: "loyalty", initial: { months: "", model: contract.penalty_model ?? "fixed", price: contract.penalty_cents == null ? "" : (contract.penalty_cents / 100).toFixed(2).replace(".", ",") } })}>Definir fidelidade</Button>}><QueryBoundary loading={quote.isLoading} error={quote.error} retry={() => quote.mutate()}>{quote.data?.loyalty_until ? <ProfileFacts items={[["Até", date(quote.data.loyalty_until)], ["Condição", quote.data.within_loyalty ? "Em vigor" : "Cumprida"], ["Multa se encerrar hoje", money(quote.data.penalty_cents / 100)], ["Meses restantes", quote.data.remaining_months], ["Modelo", quote.data.penalty_model === "monthly" ? "Por mês restante" : "Valor único"], ["Valor da multa", money((quote.data.penalty_unit_cents ?? 0) / 100)], ["Faturas em aberto", `${quote.data.open_invoices} · ${money(quote.data.open_invoices_cents / 100)}`]]} /> : <p className="profile-footnote">Sem fidelidade neste contrato.</p>}</QueryBoundary></ProfileSection>
- <ProfileSection title="Descontos" action={financial && <Button variant="outline" size="sm" onClick={() => setEditor({ kind: "discount", initial: { kind: "percent", value: "10", reason: "", months: "3", from: "" } })}>Novo desconto</Button>}><QueryBoundary loading={discounts.isLoading} error={discounts.error} retry={() => discounts.mutate()}>{!discounts.data?.length && <p className="profile-footnote">Nenhum desconto registrado.</p>}{discounts.data?.map(discount => <div className="erp-contract-card" key={discount.id}><header><strong>{discount.kind === "percent" ? `${discount.value}%` : money(discount.value / 100)}</strong><Badge variant="outline">{discount.canceled_at ? "Cancelado" : discount.current ? "Vigente" : "Encerrado"}</Badge></header><ProfileFacts items={[["Motivo", discount.reason], ["Desde", date(discount.from_competence)], ["Prazo", discount.months ? `${discount.months} mês(es)` : "Até cancelar"]]} />{financial && !discount.canceled_at && <ActionButton danger confirm="Cancelar o desconto? As faturas existentes são preservadas." onClick={async () => { await api(`/discounts/${discount.id}`, { method: "DELETE" }); await discounts.mutate(); }}>Cancelar desconto</ActionButton>}</div>)}</QueryBoundary></ProfileSection>
- <ProfileSection title="Mudanças agendadas" action={commercial && <Button variant="outline" size="sm" onClick={() => setEditor({ kind: "schedule", initial: { kind: "plan_change", date: "", plan_id: "", due_day: "10", penalty: "charge", waive: "" } })}>Agendar mudança</Button>}><QueryBoundary loading={schedules.isLoading} error={schedules.error} retry={() => schedules.mutate()}>{!schedules.data?.length && <p className="profile-footnote">Nenhuma mudança agendada.</p>}{schedules.data?.map(schedule => <div className="erp-contract-card" key={schedule.id}><header><strong>{changeLabels[schedule.kind] ?? schedule.kind}</strong><Badge variant={schedule.status === "failed" ? "destructive" : "outline"}>{stateLabels[schedule.status] ?? schedule.status}</Badge></header><p>{date(schedule.effective_date)}{schedule.plan_name ? ` · ${schedule.plan_name}` : ""}{schedule.due_day ? ` · Dia ${schedule.due_day}` : ""}</p>{schedule.error && <p className="text-danger">{schedule.error}</p>}{commercial && schedule.status === "pending" && <ActionButton danger onClick={async () => { await api(`/scheduled-changes/${schedule.id}`, { method: "DELETE" }); await schedules.mutate(); }}>Cancelar mudança</ActionButton>}</div>)}</QueryBoundary></ProfileSection>
- <ProfileSection title="Aditivos" action={commercial && <Button variant="outline" size="sm" onClick={() => setEditor({ kind: "amendment", initial: { kind: "condition", title: "", body: "", effective: "" } })}>Novo aditivo</Button>}><QueryBoundary loading={amendments.isLoading} error={amendments.error} retry={() => amendments.mutate()}>{!amendments.data?.length && <p className="profile-footnote">Nenhum aditivo registrado.</p>}{amendments.data?.map(amendment => <div className="erp-contract-card" key={amendment.id}><header><strong>{amendment.title}</strong><Badge variant="outline">{amendmentLabels[amendment.kind] ?? amendment.kind}</Badge></header><p className="whitespace-pre-wrap">{amendment.body}</p><small>Vigência {date(amendment.effective_date)} · {amendment.created_by_name ?? "Sistema"}</small></div>)}</QueryBoundary></ProfileSection>
- <Acceptances contract={contract} amendments={amendments.data ?? []} />
- {editor && <RecordEditor key={editor.kind} title={{ loyalty: "Fidelidade do contrato", discount: "Novo desconto", schedule: "Agendar mudança", amendment: "Novo aditivo" }[editor.kind]} description={editor.kind === "amendment" ? "O registro do aditivo é separado do aceite do assinante." : "As condições e os prazos são validados pelo servidor."} initial={editor.initial} fields={fields[editor.kind]} onClose={() => setEditor(null)} onSubmit={submit} />}</div>;
+type Discount = {
+  id: string;
+  kind: string;
+  value: number;
+  reason: string;
+  months: number | null;
+  from_competence: string;
+  canceled_at: string | null;
+  current: boolean;
+};
+type Schedule = {
+  id: string;
+  kind: string;
+  effective_date: string;
+  status: string;
+  plan_name?: string;
+  due_day?: number;
+  error?: string;
+};
+type Amendment = {
+  id: string;
+  kind: string;
+  title: string;
+  body: string;
+  effective_date: string;
+  created_at: string;
+  created_by_name?: string;
+};
+const changeLabels: Record<string, string> = {
+  plan_change: "Troca de plano",
+  due_day: "Troca de vencimento",
+  end: "Encerramento",
+};
+const stateLabels: Record<string, string> = {
+  pending: "Agendada",
+  applied: "Aplicada",
+  canceled: "Cancelada",
+  failed: "Falhou",
+};
+const amendmentLabels: Record<string, string> = {
+  address: "Endereço",
+  holder: "Titularidade",
+  plan: "Plano",
+  condition: "Condição",
+  other: "Outro",
+};
+const options = (map: Record<string, string>) =>
+  Object.entries(map).map(([value, label]) => ({ value, label }));
+export function ContractConditions({
+  contract,
+  refresh,
+}: {
+  contract: ContractDetail;
+  refresh: () => Promise<void>;
+}) {
+  const { me } = useSession();
+  const active = contract.status === "active";
+  const commercial = can(me, "contracts:write") && active;
+  const financial = can(me, "finance:write") && active;
+  const quote = useSWR(["erp-termination-quote", contract.id], ([, id]) =>
+    api<TerminationQuote>(`/contracts/${id}/termination-quote`),
+  );
+  const discounts = useSWR(["erp-contract-discounts", contract.id], ([, id]) =>
+    api<Discount[]>(`/contracts/${id}/discounts`),
+  );
+  const schedules = useSWR(["erp-contract-schedules", contract.id], ([, id]) =>
+    api<Schedule[]>(`/contracts/${id}/scheduled-changes`),
+  );
+  const amendments = useSWR(
+    ["erp-contract-amendments", contract.id],
+    ([, id]) => api<Amendment[]>(`/contracts/${id}/amendments`),
+  );
+  const plans = useSWR(commercial ? "erp-plans-for-contract" : null, () =>
+    api<ErpPlan[]>("/plans"),
+  );
+  const [editor, setEditor] = useState<{
+    kind: "loyalty" | "discount" | "schedule" | "amendment";
+    initial: EditorValues;
+  } | null>(null);
+  const done = async () => {
+    setEditor(null);
+    await Promise.all([
+      quote.mutate(),
+      discounts.mutate(),
+      schedules.mutate(),
+      amendments.mutate(),
+      refresh(),
+    ]);
+  };
+  const fields: Record<NonNullable<typeof editor>["kind"], EditorField[]> = {
+    loyalty: [
+      {
+        key: "months",
+        label: "Meses de fidelidade",
+        type: "number",
+        min: 1,
+        max: 60,
+        hint: "Vazio remove a fidelidade deste contrato.",
+      },
+      {
+        key: "model",
+        label: "Modelo da multa",
+        type: "select",
+        options: [
+          { value: "fixed", label: "Valor único" },
+          { value: "monthly", label: "Por mês restante" },
+        ],
+      },
+      {
+        key: "price",
+        label: "Valor da multa (R$)",
+        when: (values) => values.months !== "",
+        required: true,
+      },
+    ],
+    discount: [
+      {
+        key: "kind",
+        label: "Tipo de desconto",
+        type: "select",
+        options: [
+          { value: "percent", label: "Percentual" },
+          { value: "fixed", label: "Valor em reais" },
+        ],
+      },
+      { key: "value", label: "Percentual ou valor (R$)", required: true },
+      {
+        key: "reason",
+        label: "Motivo do desconto",
+        required: true,
+        maxLength: 120,
+      },
+      {
+        key: "months",
+        label: "Quantidade de meses",
+        type: "number",
+        min: 1,
+        max: 120,
+        hint: "Vazio mantém até cancelar.",
+      },
+      {
+        key: "from",
+        label: "A partir de",
+        type: "date",
+        hint: "Vazio aplica à próxima mensalidade gerada.",
+      },
+    ],
+    schedule: [
+      {
+        key: "kind",
+        label: "O que muda",
+        type: "select",
+        options: options(changeLabels),
+      },
+      { key: "date", label: "Data da mudança", type: "date", required: true },
+      {
+        key: "plan_id",
+        label: "Novo plano",
+        type: "select",
+        required: true,
+        when: (values) => values.kind === "plan_change",
+        options: [
+          { value: "", label: "Escolha um plano" },
+          ...(plans.data ?? [])
+            .filter((plan) => plan.active)
+            .map((plan) => ({ value: plan.id, label: plan.name })),
+        ],
+      },
+      {
+        key: "due_day",
+        label: "Novo vencimento",
+        type: "number",
+        min: 1,
+        max: 28,
+        required: true,
+        when: (values) => values.kind === "due_day",
+      },
+      {
+        key: "penalty",
+        label: "Tratamento da multa",
+        type: "select",
+        when: (values) =>
+          values.kind === "end" && Boolean(quote.data?.within_loyalty),
+        options: [
+          { value: "charge", label: "Cobrar na data" },
+          { value: "waive", label: "Dispensar com justificativa" },
+        ],
+      },
+      {
+        key: "waive",
+        label: "Motivo da dispensa",
+        required: true,
+        maxLength: 200,
+        when: (values) =>
+          values.kind === "end" &&
+          values.penalty === "waive" &&
+          Boolean(quote.data?.within_loyalty),
+      },
+    ],
+    amendment: [
+      {
+        key: "kind",
+        label: "Tipo de aditivo",
+        type: "select",
+        options: options(amendmentLabels),
+      },
+      {
+        key: "title",
+        label: "Título do aditivo",
+        required: true,
+        maxLength: 120,
+      },
+      {
+        key: "body",
+        label: "O que foi acordado",
+        type: "textarea",
+        required: true,
+        maxLength: 4000,
+      },
+      { key: "effective", label: "Início da vigência", type: "date" },
+    ],
+  };
+  const submit = async (values: EditorValues) => {
+    if (editor?.kind === "loyalty")
+      await api(`/contracts/${contract.id}/loyalty`, {
+        method: "PUT",
+        body: values.months
+          ? {
+              months: Number(values.months),
+              penalty_model: values.model,
+              penalty_cents: decimalToCents(values.price),
+            }
+          : { months: null },
+      });
+    else if (editor?.kind === "discount")
+      await api(`/contracts/${contract.id}/discounts`, {
+        body: {
+          kind: values.kind,
+          value:
+            values.kind === "fixed"
+              ? decimalToCents(values.value)
+              : Number(values.value.replace(",", ".")),
+          reason: values.reason,
+          months: values.months ? Number(values.months) : null,
+          ...(values.from ? { from_competence: values.from } : {}),
+        },
+      });
+    else if (editor?.kind === "schedule")
+      await api(`/contracts/${contract.id}/scheduled-changes`, {
+        body: {
+          kind: values.kind,
+          effective_date: values.date,
+          plan_id: values.kind === "plan_change" ? values.plan_id : null,
+          due_day: values.kind === "due_day" ? Number(values.due_day) : null,
+          penalty:
+            values.kind === "end" && quote.data?.within_loyalty
+              ? values.penalty
+              : null,
+          penalty_waive_reason:
+            values.kind === "end" &&
+            quote.data?.within_loyalty &&
+            values.penalty === "waive"
+              ? values.waive
+              : null,
+        },
+      });
+    else
+      await api(`/contracts/${contract.id}/amendments`, {
+        body: {
+          kind: values.kind,
+          title: values.title,
+          body: values.body,
+          ...(values.effective ? { effective_date: values.effective } : {}),
+        },
+      });
+    await done();
+  };
+  return (
+    <div className="erp-stack">
+      <ProfileSection
+        title="Fidelidade"
+        action={
+          commercial && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setEditor({
+                  kind: "loyalty",
+                  initial: {
+                    months: "",
+                    model: contract.penalty_model ?? "fixed",
+                    price:
+                      contract.penalty_cents == null
+                        ? ""
+                        : (contract.penalty_cents / 100)
+                            .toFixed(2)
+                            .replace(".", ","),
+                  },
+                })
+              }
+            >
+              Definir fidelidade
+            </Button>
+          )
+        }
+      >
+        <QueryBoundary
+          loading={quote.isLoading}
+          error={quote.error}
+          retry={() => quote.mutate()}
+        >
+          {quote.data?.loyalty_until ? (
+            <ProfileFacts
+              items={[
+                ["Até", date(quote.data.loyalty_until)],
+                [
+                  "Condição",
+                  quote.data.within_loyalty ? "Em vigor" : "Cumprida",
+                ],
+                [
+                  "Multa se encerrar hoje",
+                  money(quote.data.penalty_cents / 100),
+                ],
+                ["Meses restantes", quote.data.remaining_months],
+                [
+                  "Modelo",
+                  quote.data.penalty_model === "monthly"
+                    ? "Por mês restante"
+                    : "Valor único",
+                ],
+                [
+                  "Valor da multa",
+                  money((quote.data.penalty_unit_cents ?? 0) / 100),
+                ],
+                [
+                  "Faturas em aberto",
+                  `${quote.data.open_invoices} · ${money(quote.data.open_invoices_cents / 100)}`,
+                ],
+              ]}
+            />
+          ) : (
+            <p className="profile-footnote">Sem fidelidade neste contrato.</p>
+          )}
+        </QueryBoundary>
+      </ProfileSection>
+      <ProfileSection
+        title="Descontos"
+        action={
+          financial && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setEditor({
+                  kind: "discount",
+                  initial: {
+                    kind: "percent",
+                    value: "10",
+                    reason: "",
+                    months: "3",
+                    from: "",
+                  },
+                })
+              }
+            >
+              Novo desconto
+            </Button>
+          )
+        }
+      >
+        <QueryBoundary
+          loading={discounts.isLoading}
+          error={discounts.error}
+          retry={() => discounts.mutate()}
+        >
+          {!discounts.data?.length && (
+            <p className="profile-footnote">Nenhum desconto registrado.</p>
+          )}
+          {discounts.data?.map((discount) => (
+            <div className="erp-contract-card" key={discount.id}>
+              <header>
+                <strong>
+                  {discount.kind === "percent"
+                    ? `${discount.value}%`
+                    : money(discount.value / 100)}
+                </strong>
+                <Badge variant="outline">
+                  {discount.canceled_at
+                    ? "Cancelado"
+                    : discount.current
+                      ? "Vigente"
+                      : "Encerrado"}
+                </Badge>
+              </header>
+              <ProfileFacts
+                items={[
+                  ["Motivo", discount.reason],
+                  ["Desde", date(discount.from_competence)],
+                  [
+                    "Prazo",
+                    discount.months
+                      ? `${discount.months} mês(es)`
+                      : "Até cancelar",
+                  ],
+                ]}
+              />
+              {financial && !discount.canceled_at && (
+                <ActionButton
+                  danger
+                  confirm="Cancelar o desconto? As faturas existentes são preservadas."
+                  onClick={async () => {
+                    await api(`/discounts/${discount.id}`, {
+                      method: "DELETE",
+                    });
+                    await discounts.mutate();
+                  }}
+                >
+                  Cancelar desconto
+                </ActionButton>
+              )}
+            </div>
+          ))}
+        </QueryBoundary>
+      </ProfileSection>
+      <ProfileSection
+        title="Mudanças agendadas"
+        action={
+          commercial && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setEditor({
+                  kind: "schedule",
+                  initial: {
+                    kind: "plan_change",
+                    date: "",
+                    plan_id: "",
+                    due_day: "10",
+                    penalty: "charge",
+                    waive: "",
+                  },
+                })
+              }
+            >
+              Agendar mudança
+            </Button>
+          )
+        }
+      >
+        <QueryBoundary
+          loading={schedules.isLoading}
+          error={schedules.error}
+          retry={() => schedules.mutate()}
+        >
+          {!schedules.data?.length && (
+            <p className="profile-footnote">Nenhuma mudança agendada.</p>
+          )}
+          {schedules.data?.map((schedule) => (
+            <div className="erp-contract-card" key={schedule.id}>
+              <header>
+                <strong>{changeLabels[schedule.kind] ?? schedule.kind}</strong>
+                <Badge
+                  variant={
+                    schedule.status === "failed" ? "destructive" : "outline"
+                  }
+                >
+                  {stateLabels[schedule.status] ?? schedule.status}
+                </Badge>
+              </header>
+              <p>
+                {date(schedule.effective_date)}
+                {schedule.plan_name ? ` · ${schedule.plan_name}` : ""}
+                {schedule.due_day ? ` · Dia ${schedule.due_day}` : ""}
+              </p>
+              {schedule.error && (
+                <p className="text-danger">{schedule.error}</p>
+              )}
+              {commercial && schedule.status === "pending" && (
+                <ActionButton
+                  danger
+                  onClick={async () => {
+                    await api(`/scheduled-changes/${schedule.id}`, {
+                      method: "DELETE",
+                    });
+                    await schedules.mutate();
+                  }}
+                >
+                  Cancelar mudança
+                </ActionButton>
+              )}
+            </div>
+          ))}
+        </QueryBoundary>
+      </ProfileSection>
+      <ProfileSection
+        title="Aditivos"
+        action={
+          commercial && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setEditor({
+                  kind: "amendment",
+                  initial: {
+                    kind: "condition",
+                    title: "",
+                    body: "",
+                    effective: "",
+                  },
+                })
+              }
+            >
+              Novo aditivo
+            </Button>
+          )
+        }
+      >
+        <QueryBoundary
+          loading={amendments.isLoading}
+          error={amendments.error}
+          retry={() => amendments.mutate()}
+        >
+          {!amendments.data?.length && (
+            <p className="profile-footnote">Nenhum aditivo registrado.</p>
+          )}
+          {amendments.data?.map((amendment) => (
+            <div className="erp-contract-card" key={amendment.id}>
+              <header>
+                <strong>{amendment.title}</strong>
+                <Badge variant="outline">
+                  {amendmentLabels[amendment.kind] ?? amendment.kind}
+                </Badge>
+              </header>
+              <p className="whitespace-pre-wrap">{amendment.body}</p>
+              <small>
+                Vigência {date(amendment.effective_date)} ·{" "}
+                {amendment.created_by_name ?? "Sistema"}
+              </small>
+            </div>
+          ))}
+        </QueryBoundary>
+      </ProfileSection>
+      <Acceptances contract={contract} amendments={amendments.data ?? []} />
+      {editor && (
+        <RecordEditor
+          key={editor.kind}
+          title={
+            {
+              loyalty: "Fidelidade do contrato",
+              discount: "Novo desconto",
+              schedule: "Agendar mudança",
+              amendment: "Novo aditivo",
+            }[editor.kind]
+          }
+          description={
+            editor.kind === "amendment"
+              ? "O registro do aditivo é separado do aceite do assinante."
+              : "As condições e os prazos são validados pelo servidor."
+          }
+          initial={editor.initial}
+          fields={fields[editor.kind]}
+          onClose={() => setEditor(null)}
+          onSubmit={submit}
+        />
+      )}
+    </div>
+  );
 }
-type Acceptance = { id: string; title: string; status: string; requested_at: string; accepted_at?: string; accepted_ip?: string };
-type Evidence = { title: string; subscriber: { name: string }; accepted_at: string; accepted_ip: string; accepted_email: string; accepted_user_agent: string; body_hash: string; evidence_hash: string; body: string; method: string; verification: { text_matches_hash: boolean; evidence_matches: boolean } };
-function Acceptances({ contract, amendments }: { contract: ContractDetail; amendments: Amendment[] }) {
- const { me } = useSession(); const list = useSWR(["erp-contract-acceptances", contract.id], ([,id]) => api<Acceptance[]>(`/contracts/${id}/acceptances`)); const [editing, setEditing] = useState(false); const [evidence, setEvidence] = useState<Evidence | null>(null); const printFrame=useRef<HTMLIFrameElement>(null); const [printReady,setPrintReady]=useState(false);
- return <ProfileSection title="Aceite eletrônico" caption="O texto e as evidências do aceite simples são registrados pelo servidor." action={can(me, "contracts:write") && <Button variant="outline" size="sm" onClick={() => setEditing(true)}>Pedir aceite</Button>}><QueryBoundary loading={list.isLoading} error={list.error} retry={() => list.mutate()}>{!list.data?.length && <p className="profile-footnote">Nenhum pedido de aceite.</p>}{list.data?.map(acceptance => <div className="erp-contract-card" key={acceptance.id}><header><strong>{acceptance.title}</strong><Badge variant="outline">{({ pending: "Aguardando assinante", accepted: "Aceito", canceled: "Cancelado" } as Record<string,string>)[acceptance.status] ?? acceptance.status}</Badge></header><small>Pedido em {date(acceptance.requested_at)}{acceptance.accepted_at ? ` · Aceito em ${date(acceptance.accepted_at)}` : ""}</small>{acceptance.status === "accepted" && <ActionButton onClick={async () => setEvidence(await api(`/acceptances/${acceptance.id}/evidence`))}>Comprovante de aceite</ActionButton>}{acceptance.status === "pending" && can(me, "contracts:write") && <ActionButton danger onClick={async () => { await api(`/acceptances/${acceptance.id}/cancel`, { method: "POST" }); await list.mutate(); }}>Cancelar pedido</ActionButton>}</div>)}</QueryBoundary>
- {editing && <RecordEditor title="Solicitar aceite" initial={{ amendment: "", title: "", body: "" }} fields={[{ key: "amendment", label: "Documento", type: "select", options: [{ value: "", label: "Texto livre" }, ...amendments.map(amendment => ({ value: amendment.id, label: amendment.title }))] }, { key: "title", label: "Título do documento", required: true, maxLength: 120, when: values => !values.amendment }, { key: "body", label: "Texto para leitura e aceite", type: "textarea", required: true, maxLength: 8000, when: values => !values.amendment }]} onClose={() => setEditing(false)} submit="Enviar ao portal" onSubmit={async values => { await api(`/contracts/${contract.id}/acceptances`, { body: values.amendment ? { amendment_id: values.amendment } : { title: values.title, body: values.body } }); setEditing(false); await list.mutate(); }} />}
- {evidence && <Dialog open onOpenChange={open => { if (!open) {setEvidence(null);setPrintReady(false);} }}><DialogContent className="erp-editor"><DialogHeader><DialogTitle>Comprovante de aceite</DialogTitle><DialogDescription>{evidence.title}</DialogDescription></DialogHeader><ProfileFacts items={[["Assinante", evidence.subscriber.name], ["Aceito em", date(evidence.accepted_at)], ["Endereço de rede", evidence.accepted_ip], ["Acesso ao portal", evidence.accepted_email], ["Navegador", evidence.accepted_user_agent], ["Hash do texto", evidence.body_hash], ["Hash da prova", evidence.evidence_hash]]} /><Badge variant={evidence.verification.text_matches_hash && evidence.verification.evidence_matches ? "success" : "destructive"}>{evidence.verification.text_matches_hash && evidence.verification.evidence_matches ? "Texto e prova conferem" : "Divergência na conferência"}</Badge><p className="whitespace-pre-wrap">{evidence.body}</p><p className="profile-footnote">{evidence.method}</p><iframe ref={printFrame} className="erp-print-frame" title="Comprovante de aceite para impressão" sandbox="allow-same-origin allow-modals" srcDoc={acceptancePrintHtml(evidence)} onLoad={()=>setPrintReady(true)} /><Button variant="outline" disabled={!printReady} onClick={() => printDocument(printFrame.current?.contentWindow)}>Imprimir comprovante</Button></DialogContent></Dialog>}</ProfileSection>;
+type Acceptance = {
+  id: string;
+  title: string;
+  status: string;
+  requested_at: string;
+  accepted_at?: string;
+  accepted_ip?: string;
+};
+type Evidence = {
+  title: string;
+  subscriber: { name: string };
+  accepted_at: string;
+  accepted_ip: string;
+  accepted_email: string;
+  accepted_user_agent: string;
+  body_hash: string;
+  evidence_hash: string;
+  body: string;
+  method: string;
+  verification: { text_matches_hash: boolean; evidence_matches: boolean };
+};
+function Acceptances({
+  contract,
+  amendments,
+}: {
+  contract: ContractDetail;
+  amendments: Amendment[];
+}) {
+  const { me } = useSession();
+  const list = useSWR(["erp-contract-acceptances", contract.id], ([, id]) =>
+    api<Acceptance[]>(`/contracts/${id}/acceptances`),
+  );
+  const [editing, setEditing] = useState(false);
+  const [evidence, setEvidence] = useState<Evidence | null>(null);
+  const printFrame = useRef<HTMLIFrameElement>(null);
+  const [printReady, setPrintReady] = useState(false);
+  return (
+    <ProfileSection
+      title="Aceite eletrônico"
+      caption="O texto e as evidências do aceite simples são registrados pelo servidor."
+      action={
+        can(me, "contracts:write") && (
+          <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+            Pedir aceite
+          </Button>
+        )
+      }
+    >
+      <QueryBoundary
+        loading={list.isLoading}
+        error={list.error}
+        retry={() => list.mutate()}
+      >
+        {!list.data?.length && (
+          <p className="profile-footnote">Nenhum pedido de aceite.</p>
+        )}
+        {list.data?.map((acceptance) => (
+          <div className="erp-contract-card" key={acceptance.id}>
+            <header>
+              <strong>{acceptance.title}</strong>
+              <Badge variant="outline">
+                {(
+                  {
+                    pending: "Aguardando assinante",
+                    accepted: "Aceito",
+                    canceled: "Cancelado",
+                  } as Record<string, string>
+                )[acceptance.status] ?? acceptance.status}
+              </Badge>
+            </header>
+            <small>
+              Pedido em {date(acceptance.requested_at)}
+              {acceptance.accepted_at
+                ? ` · Aceito em ${date(acceptance.accepted_at)}`
+                : ""}
+            </small>
+            {acceptance.status === "accepted" && (
+              <ActionButton
+                onClick={async () =>
+                  setEvidence(
+                    await api(`/acceptances/${acceptance.id}/evidence`),
+                  )
+                }
+              >
+                Comprovante de aceite
+              </ActionButton>
+            )}
+            {acceptance.status === "pending" && can(me, "contracts:write") && (
+              <ActionButton
+                danger
+                onClick={async () => {
+                  await api(`/acceptances/${acceptance.id}/cancel`, {
+                    method: "POST",
+                  });
+                  await list.mutate();
+                }}
+              >
+                Cancelar pedido
+              </ActionButton>
+            )}
+          </div>
+        ))}
+      </QueryBoundary>
+      {editing && (
+        <RecordEditor
+          title="Solicitar aceite"
+          initial={{ amendment: "", title: "", body: "" }}
+          fields={[
+            {
+              key: "amendment",
+              label: "Documento",
+              type: "select",
+              options: [
+                { value: "", label: "Texto livre" },
+                ...amendments.map((amendment) => ({
+                  value: amendment.id,
+                  label: amendment.title,
+                })),
+              ],
+            },
+            {
+              key: "title",
+              label: "Título do documento",
+              required: true,
+              maxLength: 120,
+              when: (values) => !values.amendment,
+            },
+            {
+              key: "body",
+              label: "Texto para leitura e aceite",
+              type: "textarea",
+              required: true,
+              maxLength: 8000,
+              when: (values) => !values.amendment,
+            },
+          ]}
+          onClose={() => setEditing(false)}
+          submit="Enviar ao portal"
+          onSubmit={async (values) => {
+            await api(`/contracts/${contract.id}/acceptances`, {
+              body: values.amendment
+                ? { amendment_id: values.amendment }
+                : { title: values.title, body: values.body },
+            });
+            setEditing(false);
+            await list.mutate();
+          }}
+        />
+      )}
+      {evidence && (
+        <Dialog
+          open
+          onOpenChange={(open) => {
+            if (!open) {
+              setEvidence(null);
+              setPrintReady(false);
+            }
+          }}
+        >
+          <DialogContent className="erp-editor">
+            <DialogHeader>
+              <DialogTitle>Comprovante de aceite</DialogTitle>
+              <DialogDescription>{evidence.title}</DialogDescription>
+            </DialogHeader>
+            <ProfileFacts
+              items={[
+                ["Assinante", evidence.subscriber.name],
+                ["Aceito em", date(evidence.accepted_at)],
+                ["Endereço de rede", evidence.accepted_ip],
+                ["Acesso ao portal", evidence.accepted_email],
+                ["Navegador", evidence.accepted_user_agent],
+                ["Hash do texto", evidence.body_hash],
+                ["Hash da prova", evidence.evidence_hash],
+              ]}
+            />
+            <Badge
+              variant={
+                evidence.verification.text_matches_hash &&
+                evidence.verification.evidence_matches
+                  ? "success"
+                  : "destructive"
+              }
+            >
+              {evidence.verification.text_matches_hash &&
+              evidence.verification.evidence_matches
+                ? "Texto e prova conferem"
+                : "Divergência na conferência"}
+            </Badge>
+            <p className="whitespace-pre-wrap">{evidence.body}</p>
+            <p className="profile-footnote">{evidence.method}</p>
+            <iframe
+              ref={printFrame}
+              className="erp-print-frame"
+              title="Comprovante de aceite para impressão"
+              sandbox="allow-same-origin allow-modals"
+              srcDoc={acceptancePrintHtml(evidence)}
+              onLoad={() => setPrintReady(true)}
+            />
+            <Button
+              variant="outline"
+              disabled={!printReady}
+              onClick={() => printDocument(printFrame.current?.contentWindow)}
+            >
+              Imprimir comprovante
+            </Button>
+          </DialogContent>
+        </Dialog>
+      )}
+    </ProfileSection>
+  );
 }
 
-function acceptancePrintHtml(evidence:Evidence){const escape=(value:string)=>String(value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]!));const pairs=[["Assinante",evidence.subscriber.name],["Aceito em",date(evidence.accepted_at)],["Endereço de rede",evidence.accepted_ip],["Acesso ao portal",evidence.accepted_email],["Navegador",evidence.accepted_user_agent],["Hash do texto",evidence.body_hash],["Hash da prova",evidence.evidence_hash]];return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Comprovante de aceite</title><style>body{font:14px system-ui;margin:32px;color:#111}p,dd{white-space:pre-wrap;overflow-wrap:anywhere}dt{font-weight:bold;margin-top:12px}dd{margin-left:0}</style></head><body><h1>Comprovante de aceite</h1><h2>${escape(evidence.title)}</h2><dl>${pairs.map(([label,value])=>`<dt>${escape(label)}</dt><dd>${escape(value)}</dd>`).join('')}</dl><p>${evidence.verification.text_matches_hash&&evidence.verification.evidence_matches?'Texto e prova conferem':'Divergência na conferência'}</p><p>${escape(evidence.body)}</p><p>${escape(evidence.method)}</p></body></html>`;}
+function acceptancePrintHtml(evidence: Evidence) {
+  const escape = (value: string) =>
+    String(value).replace(
+      /[&<>"']/g,
+      (char) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[char]!,
+    );
+  const pairs = [
+    ["Assinante", evidence.subscriber.name],
+    ["Aceito em", date(evidence.accepted_at)],
+    ["Endereço de rede", evidence.accepted_ip],
+    ["Acesso ao portal", evidence.accepted_email],
+    ["Navegador", evidence.accepted_user_agent],
+    ["Hash do texto", evidence.body_hash],
+    ["Hash da prova", evidence.evidence_hash],
+  ];
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Comprovante de aceite</title><style>body{font:14px system-ui;margin:32px;color:#111}p,dd{white-space:pre-wrap;overflow-wrap:anywhere}dt{font-weight:bold;margin-top:12px}dd{margin-left:0}</style></head><body><h1>Comprovante de aceite</h1><h2>${escape(evidence.title)}</h2><dl>${pairs.map(([label, value]) => `<dt>${escape(label)}</dt><dd>${escape(value)}</dd>`).join("")}</dl><p>${evidence.verification.text_matches_hash && evidence.verification.evidence_matches ? "Texto e prova conferem" : "Divergência na conferência"}</p><p>${escape(evidence.body)}</p><p>${escape(evidence.method)}</p></body></html>`;
+}

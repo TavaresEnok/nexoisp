@@ -1,19 +1,351 @@
-import {useState} from 'react';
-import useSWR from 'swr';
-import {useNavigate} from 'react-router-dom';
-import {z} from 'zod';
-import {PageHeading} from '@/components/workspace-ui';
-import {OperationalCatalog} from '@/components/operational-catalog';
-import {Button} from '@/components/ui/button';
-import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription} from '@/components/ui/dialog';
-import {RecordEditor} from '@/features/shared/record-editor';
-import {MutationForm} from '@/features/shared/form';
-import {QueryBoundary} from '@/features/shared/feedback';
-import {ActionButton} from '@/features/shared/action';
-import {useSession} from '@/features/session/provider';
-import {api} from '@/platform/erp-client';
-const tenant=z.object({id:z.string(),name:z.string(),slug:z.string(),users:z.coerce.number(),created_at:z.string(),agents:z.coerce.number().nullable(),agents_offline:z.coerce.number().nullable(),uncertain:z.coerce.number().nullable(),failed_recent:z.coerce.number().nullable(),modules:z.array(z.string()),status:z.enum(['active','suspended'])});
-const modules=[['crm','Atendimentos e prospectos','Protocolos, funil comercial, relatórios e chamados do portal.'],['field','Ordens de serviço e estoque','OS com materiais, estoque por série e trabalho de campo.'],['notices','Avisos à equipe','Eventos de chamados e ordens de serviço por webhook.'],['api','API pública e webhooks','Tokens por aplicação e eventos de saída assinados.'],['messages','Avisos ao assinante','Mensagens de cobrança, manutenção e OS pelo provedor de envio configurado.'],['noc','NOC e diagnóstico','Alertas e diagnóstico de leitura.'],['ftth','Rede óptica','Caixas, portas e mapa esquemático.'],['ipam','Endereços IP e CGNAT','IP fixo pelo RADIUS, plano de CGNAT e rastreio. CGNAT validado somente em laboratório.'],['olt','OLT e ONUs','Autorização de ONUs. O driver Huawei ainda não foi homologado em equipamento físico.']] as const;
-type Tenant=z.infer<typeof tenant>;
-export function TenantDirectory(){const result=useSWR('erp-tenants',async()=>z.array(tenant).parse(await api('/tenants')));const {reload}=useSession();const navigate=useNavigate();const [editor,setEditor]=useState<'create'|{kind:'modules'|'support'|'name';tenant:Tenant}|null>(null);return <><PageHeading title="Provedores" description="Gestão da plataforma e acesso de suporte auditado a cada provedor." actions={<Button onClick={()=>setEditor('create')}>Novo provedor</Button>} /><QueryBoundary loading={result.isLoading} error={result.error} retry={()=>result.mutate()}><OperationalCatalog title="Provedores da plataforma" description="Indicadores de agentes e operações são informados pelo Go. A suspensão impede o acesso do provedor ao sistema." columns={['Provedor','Identificador','Usuários','Desde','Agentes','Operações','Módulos','Situação']} rows={(result.data??[]).map(item=>({id:item.id,cells:[item.name,item.slug,item.users,new Date(item.created_at).toLocaleDateString('pt-BR'),item.agents?`${item.agents_offline??0} de ${item.agents} offline`:'Sem agentes',`${item.uncertain??0} incertas · ${item.failed_recent??0} falhas em 7 dias`,`${item.modules.length} de ${modules.length}`,item.status==='active'?'Ativo':'Suspenso'],actions:<div className="erp-inline-actions"><Button variant="outline" size="sm" onClick={()=>setEditor({kind:'name',tenant:item})}>Editar provedor</Button><Button variant="outline" size="sm" onClick={()=>setEditor({kind:'modules',tenant:item})}>Módulos</Button><Button variant="outline" size="sm" onClick={()=>setEditor({kind:'support',tenant:item})}>Acesso de suporte</Button><ActionButton danger={item.status==='active'} confirm={item.status==='active'?`Suspender o acesso de ${item.name} ao sistema?`:undefined} onClick={async()=>{await api(`/tenants/${item.id}`,{method:'PATCH',body:{status:item.status==='active'?'suspended':'active'}});await result.mutate();}}>{item.status==='active'?'Suspender provedor':'Reativar provedor'}</ActionButton></div>}))} /></QueryBoundary>{editor==='create'&&<RecordEditor title="Novo provedor" description="Cria o provedor e seu primeiro administrador. Informe a senha inicial por um canal seguro." initial={{name:'',slug:'',admin_name:'',admin_email:'',admin_password:''}} fields={[{key:'name',label:'Nome do provedor',required:true,maxLength:120},{key:'slug',label:'Identificador do provedor',required:true,maxLength:40,hint:'De 2 a 40 letras minúsculas, números ou hífen.'},{key:'admin_name',label:'Nome do administrador',required:true},{key:'admin_email',label:'E-mail do administrador',type:'email',required:true},{key:'admin_password',label:'Senha inicial do administrador',type:'password',required:true,maxLength:128,hint:'Pelo menos oito caracteres.'}]} onClose={()=>setEditor(null)} onSubmit={async values=>{if(values.admin_password.length<8)throw new Error('Informe uma senha com pelo menos oito caracteres.');await api('/tenants',{body:values});setEditor(null);await result.mutate();}} />}{editor&&editor!=='create'&&editor.kind==='name'&&<RecordEditor title="Editar provedor" initial={{name:editor.tenant.name}} fields={[{key:'name',label:'Nome do provedor',required:true,maxLength:120}]} onClose={()=>setEditor(null)} onSubmit={async values=>{await api(`/tenants/${editor.tenant.id}`,{method:'PATCH',body:values});setEditor(null);await result.mutate();}} />}{editor&&editor!=='create'&&editor.kind==='modules'&&<TenantModules tenant={editor.tenant} onClose={()=>setEditor(null)} onDone={async()=>{setEditor(null);await result.mutate();}} />}{editor&&editor!=='create'&&editor.kind==='support'&&<RecordEditor title={`Acesso de suporte · ${editor.tenant.name}`} description="O acesso e as ações ficam registrados na auditoria do provedor com seu usuário e o motivo informado." initial={{reason:''}} fields={[{key:'reason',label:'Motivo do acesso de suporte',required:true,type:'textarea',hint:'Descreva o motivo com pelo menos cinco caracteres.'}]} submit="Entrar no provedor" onClose={()=>setEditor(null)} onSubmit={async values=>{await api('/support/enter',{body:{tenant_id:editor.tenant.id,reason:values.reason}});await reload();navigate('/');}} />}</>;}
-function TenantModules({tenant,onClose,onDone}:{tenant:Tenant;onClose:()=>void;onDone:()=>Promise<void>}){const [selected,setSelected]=useState(tenant.modules);return <Dialog open onOpenChange={open=>{if(!open)onClose();}}><DialogContent className="erp-editor"><DialogHeader><DialogTitle>Módulos · {tenant.name}</DialogTitle><DialogDescription>Cadastro, contratos, acesso, financeiro, portal, importação, auditoria e agentes compõem o núcleo. O Go valida a liberação dos módulos adicionais.</DialogDescription></DialogHeader><MutationForm onCancel={onClose} onSubmit={async()=>{await api(`/tenants/${tenant.id}`,{method:'PATCH',body:{modules:selected}});await onDone();}}>{modules.map(([id,label,hint])=><label key={id} className="erp-inline-actions"><input type="checkbox" checked={selected.includes(id)} onChange={event=>setSelected(previous=>event.target.checked?[...previous,id]:previous.filter(value=>value!==id))} /><span><strong>{label}</strong><small className="block">{hint}</small></span></label>)}</MutationForm></DialogContent></Dialog>;}
+import { useState } from "react";
+import useSWR from "swr";
+import { useNavigate } from "react-router-dom";
+import { z } from "zod";
+import { PageHeading } from "@/components/workspace-ui";
+import { OperationalCatalog } from "@/components/operational-catalog";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { RecordEditor } from "@/features/shared/record-editor";
+import { MutationForm } from "@/features/shared/form";
+import { QueryBoundary } from "@/features/shared/feedback";
+import { ActionButton } from "@/features/shared/action";
+import { useSession } from "@/features/session/provider";
+import { api } from "@/platform/erp-client";
+const tenant = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  users: z.coerce.number(),
+  created_at: z.string(),
+  agents: z.coerce.number().nullable(),
+  agents_offline: z.coerce.number().nullable(),
+  uncertain: z.coerce.number().nullable(),
+  failed_recent: z.coerce.number().nullable(),
+  modules: z.array(z.string()),
+  status: z.enum(["active", "suspended"]),
+});
+const modules = [
+  [
+    "crm",
+    "Atendimentos e prospectos",
+    "Protocolos, funil comercial, relatórios e chamados do portal.",
+  ],
+  [
+    "field",
+    "Ordens de serviço e estoque",
+    "OS com materiais, estoque por série e trabalho de campo.",
+  ],
+  [
+    "notices",
+    "Avisos à equipe",
+    "Eventos de chamados e ordens de serviço por webhook.",
+  ],
+  [
+    "api",
+    "API pública e webhooks",
+    "Tokens por aplicação e eventos de saída assinados.",
+  ],
+  [
+    "messages",
+    "Avisos ao assinante",
+    "Mensagens de cobrança, manutenção e OS pelo provedor de envio configurado.",
+  ],
+  ["noc", "NOC e diagnóstico", "Alertas e diagnóstico de leitura."],
+  ["ftth", "Rede óptica", "Caixas, portas e mapa esquemático."],
+  [
+    "ipam",
+    "Endereços IP e CGNAT",
+    "IP fixo pelo RADIUS, plano de CGNAT e rastreio. CGNAT validado somente em laboratório.",
+  ],
+  [
+    "olt",
+    "OLT e ONUs",
+    "Autorização de ONUs. O driver Huawei ainda não foi homologado em equipamento físico.",
+  ],
+] as const;
+type Tenant = z.infer<typeof tenant>;
+export function TenantDirectory() {
+  const result = useSWR("erp-tenants", async () =>
+    z.array(tenant).parse(await api("/tenants")),
+  );
+  const { reload } = useSession();
+  const navigate = useNavigate();
+  const [editor, setEditor] = useState<
+    "create" | { kind: "modules" | "support" | "name"; tenant: Tenant } | null
+  >(null);
+  return (
+    <>
+      <PageHeading
+        title="Provedores"
+        description="Gestão da plataforma e acesso de suporte auditado a cada provedor."
+        actions={
+          <Button onClick={() => setEditor("create")}>Novo provedor</Button>
+        }
+      />
+      <QueryBoundary
+        loading={result.isLoading}
+        error={result.error}
+        retry={() => result.mutate()}
+      >
+        <OperationalCatalog
+          title="Provedores da plataforma"
+          description="Indicadores de agentes e operações são informados pelo Go. A suspensão impede o acesso do provedor ao sistema."
+          columns={[
+            "Provedor",
+            "Identificador",
+            "Usuários",
+            "Desde",
+            "Agentes",
+            "Operações",
+            "Módulos",
+            "Situação",
+          ]}
+          rows={(result.data ?? []).map((item) => ({
+            id: item.id,
+            cells: [
+              item.name,
+              item.slug,
+              item.users,
+              new Date(item.created_at).toLocaleDateString("pt-BR"),
+              item.agents
+                ? `${item.agents_offline ?? 0} de ${item.agents} offline`
+                : "Sem agentes",
+              `${item.uncertain ?? 0} incertas · ${item.failed_recent ?? 0} falhas em 7 dias`,
+              `${item.modules.length} de ${modules.length}`,
+              item.status === "active" ? "Ativo" : "Suspenso",
+            ],
+            actions: (
+              <div className="erp-inline-actions">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditor({ kind: "name", tenant: item })}
+                >
+                  Editar provedor
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditor({ kind: "modules", tenant: item })}
+                >
+                  Módulos
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditor({ kind: "support", tenant: item })}
+                >
+                  Acesso de suporte
+                </Button>
+                <ActionButton
+                  danger={item.status === "active"}
+                  confirm={
+                    item.status === "active"
+                      ? `Suspender o acesso de ${item.name} ao sistema?`
+                      : undefined
+                  }
+                  onClick={async () => {
+                    await api(`/tenants/${item.id}`, {
+                      method: "PATCH",
+                      body: {
+                        status:
+                          item.status === "active" ? "suspended" : "active",
+                      },
+                    });
+                    await result.mutate();
+                  }}
+                >
+                  {item.status === "active"
+                    ? "Suspender provedor"
+                    : "Reativar provedor"}
+                </ActionButton>
+              </div>
+            ),
+          }))}
+        />
+      </QueryBoundary>
+      {editor === "create" && (
+        <RecordEditor
+          title="Novo provedor"
+          description="Cria o provedor e seu primeiro administrador. Informe a senha inicial por um canal seguro."
+          initial={{
+            name: "",
+            slug: "",
+            admin_name: "",
+            admin_email: "",
+            admin_password: "",
+          }}
+          fields={[
+            {
+              key: "name",
+              label: "Nome do provedor",
+              required: true,
+              maxLength: 120,
+            },
+            {
+              key: "slug",
+              label: "Identificador do provedor",
+              required: true,
+              maxLength: 40,
+              hint: "De 2 a 40 letras minúsculas, números ou hífen.",
+            },
+            {
+              key: "admin_name",
+              label: "Nome do administrador",
+              required: true,
+            },
+            {
+              key: "admin_email",
+              label: "E-mail do administrador",
+              type: "email",
+              required: true,
+            },
+            {
+              key: "admin_password",
+              label: "Senha inicial do administrador",
+              type: "password",
+              required: true,
+              maxLength: 128,
+              hint: "Pelo menos oito caracteres.",
+            },
+          ]}
+          onClose={() => setEditor(null)}
+          onSubmit={async (values) => {
+            if (values.admin_password.length < 8)
+              throw new Error(
+                "Informe uma senha com pelo menos oito caracteres.",
+              );
+            await api("/tenants", { body: values });
+            setEditor(null);
+            await result.mutate();
+          }}
+        />
+      )}
+      {editor && editor !== "create" && editor.kind === "name" && (
+        <RecordEditor
+          title="Editar provedor"
+          initial={{ name: editor.tenant.name }}
+          fields={[
+            {
+              key: "name",
+              label: "Nome do provedor",
+              required: true,
+              maxLength: 120,
+            },
+          ]}
+          onClose={() => setEditor(null)}
+          onSubmit={async (values) => {
+            await api(`/tenants/${editor.tenant.id}`, {
+              method: "PATCH",
+              body: values,
+            });
+            setEditor(null);
+            await result.mutate();
+          }}
+        />
+      )}
+      {editor && editor !== "create" && editor.kind === "modules" && (
+        <TenantModules
+          tenant={editor.tenant}
+          onClose={() => setEditor(null)}
+          onDone={async () => {
+            setEditor(null);
+            await result.mutate();
+          }}
+        />
+      )}
+      {editor && editor !== "create" && editor.kind === "support" && (
+        <RecordEditor
+          title={`Acesso de suporte · ${editor.tenant.name}`}
+          description="O acesso e as ações ficam registrados na auditoria do provedor com seu usuário e o motivo informado."
+          initial={{ reason: "" }}
+          fields={[
+            {
+              key: "reason",
+              label: "Motivo do acesso de suporte",
+              required: true,
+              type: "textarea",
+              hint: "Descreva o motivo com pelo menos cinco caracteres.",
+            },
+          ]}
+          submit="Entrar no provedor"
+          onClose={() => setEditor(null)}
+          onSubmit={async (values) => {
+            await api("/support/enter", {
+              body: { tenant_id: editor.tenant.id, reason: values.reason },
+            });
+            await reload();
+            navigate("/");
+          }}
+        />
+      )}
+    </>
+  );
+}
+function TenantModules({
+  tenant,
+  onClose,
+  onDone,
+}: {
+  tenant: Tenant;
+  onClose: () => void;
+  onDone: () => Promise<void>;
+}) {
+  const [selected, setSelected] = useState(tenant.modules);
+  return (
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <DialogContent className="erp-editor">
+        <DialogHeader>
+          <DialogTitle>Módulos · {tenant.name}</DialogTitle>
+          <DialogDescription>
+            Cadastro, contratos, acesso, financeiro, portal, importação,
+            auditoria e agentes compõem o núcleo. O Go valida a liberação dos
+            módulos adicionais.
+          </DialogDescription>
+        </DialogHeader>
+        <MutationForm
+          onCancel={onClose}
+          onSubmit={async () => {
+            await api(`/tenants/${tenant.id}`, {
+              method: "PATCH",
+              body: { modules: selected },
+            });
+            await onDone();
+          }}
+        >
+          {modules.map(([id, label, hint]) => (
+            <label key={id} className="erp-inline-actions">
+              <input
+                type="checkbox"
+                checked={selected.includes(id)}
+                onChange={(event) =>
+                  setSelected((previous) =>
+                    event.target.checked
+                      ? [...previous, id]
+                      : previous.filter((value) => value !== id),
+                  )
+                }
+              />
+              <span>
+                <strong>{label}</strong>
+                <small className="block">{hint}</small>
+              </span>
+            </label>
+          ))}
+        </MutationForm>
+      </DialogContent>
+    </Dialog>
+  );
+}

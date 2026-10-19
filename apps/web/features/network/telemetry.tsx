@@ -1,8 +1,18 @@
 import { useState } from "react";
 import useSWR from "swr";
 import { z } from "zod";
-import { ProfileSection, ProfileFacts } from "@/components/subscriber-profile-sections";
-import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from "@/components/ui/table";
+import {
+  ProfileSection,
+  ProfileFacts,
+} from "@/components/subscriber-profile-sections";
+import {
+  Table,
+  TableHeader,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { QueryBoundary } from "@/features/shared/feedback";
@@ -10,28 +20,467 @@ import { FormField } from "@/features/shared/form";
 import { ActionButton } from "@/features/shared/action";
 import { api, download } from "@/platform/erp-client";
 import { stamp } from "./models";
-const amount=z.coerce.number().nonnegative();
-export const sessionSchema=z.object({rows:z.array(z.object({session_key:z.string(),started_at:z.string(),stopped_at:z.string().nullable(),ip:z.string().nullable(),mac:z.string().nullable(),nas_ip:z.string().nullable(),seconds:amount,bytes_in:amount,bytes_out:amount,terminate_cause:z.string().nullable()})),totals:z.object({sessions:amount,seconds:amount,bytes_in:amount,bytes_out:amount}),daily:z.array(z.object({day:z.string(),bytes_in:amount,bytes_out:amount})),truncated:z.boolean()});
-const usageSchema=z.array(z.object({month:z.string(),bytes_in:amount,bytes_out:amount,sessions:amount,session_seconds:amount.optional()}));
-const seriesSchema=z.array(z.object({period:z.string(),bytes_in:amount,bytes_out:amount}));
-const availabilitySchema=z.object({timezone:z.string(),note:z.string(),total:z.object({availability_pct:z.number().nullable(),online_seconds:amount,window_seconds:amount}).nullable(),days:z.array(z.object({day:z.string(),online_seconds:amount,offline_seconds:amount,availability_pct:z.number().nullable(),sessions:amount}))});
-const logSchema=z.object({integrated:z.boolean(),rows:z.array(z.object({at:z.string(),reply:z.string(),calling_station:z.string().nullable(),nas_ip:z.string().nullable()}))});
-export function bytes(value:number){const units=['B','KB','MB','GB','TB'];let unit=0;while(value>=1024&&unit<units.length-1){value/=1024;unit++;}return `${value.toLocaleString('pt-BR',{maximumFractionDigits:1})} ${units[unit]}`;}
-export const duration=(seconds:number)=>`${Math.floor(seconds/3600)} h ${Math.floor(seconds%3600/60)} min`;
-export function ContractSessions({id}:{id:string}){
- const [from,setFrom]=useState('');const [to,setTo]=useState('');const query=new URLSearchParams();if(from)query.set('from',from);if(to)query.set('to',to);const path=`/contracts/${id}/sessions?${query}`;const invalid=Boolean(from&&to&&from>to);const result=useSWR(invalid?null:['erp-sessions',id,from,to],async()=>sessionSchema.parse(await api(path)));const data=result.data;
- return <ProfileSection title="Sessões e consumo" caption="Histórico relatado pelo agente e accounting recebido pelo servidor." action={<ActionButton disabled={invalid||!data} onClick={()=>download(`${path}&format=csv`,'sessoes.csv')}>Exportar sessões</ActionButton>}><div className="erp-columns"><FormField label="Sessões desde"><Input type="date" value={from} onChange={event=>setFrom(event.target.value)} /></FormField><FormField label="Sessões até"><Input type="date" value={to} onChange={event=>setTo(event.target.value)} /></FormField></div>{invalid?<p role="alert">A data final deve ser igual ou posterior à inicial.</p>:<QueryBoundary loading={result.isLoading} error={result.error} retry={()=>result.mutate()}>{data&&<><ProfileFacts items={[["Sessões no recorte",data.totals.sessions],["Tempo conectado",duration(data.totals.seconds)],["Download",bytes(data.totals.bytes_out)],["Upload",bytes(data.totals.bytes_in)]]} />{data.truncated&&<p role="status">São exibidas as 1.000 sessões mais recentes. Os totais acima correspondem a esse recorte; refine as datas.</p>}{data.rows.length?<Table><TableHeader><TableRow>{['Início','Fim','IP / MAC','NAS','Tempo','Download','Upload','Encerramento'].map(label=><TableHead key={label}>{label}</TableHead>)}</TableRow></TableHeader><TableBody>{data.rows.map(row=><TableRow key={row.session_key}><TableCell>{stamp(row.started_at)}</TableCell><TableCell>{row.stopped_at?stamp(row.stopped_at):<Badge variant="outline">Em curso</Badge>}</TableCell><TableCell>{row.ip||'—'}<small className="table-subline">{row.mac||'—'}</small></TableCell><TableCell>{row.nas_ip||'—'}</TableCell><TableCell>{duration(row.seconds)}</TableCell><TableCell>{bytes(row.bytes_out)}</TableCell><TableCell>{bytes(row.bytes_in)}</TableCell><TableCell>{row.terminate_cause||'—'}</TableCell></TableRow>)}</TableBody></Table>:<p className="profile-footnote">Nenhuma sessão registrada neste período.</p>}{data.daily.length>0&&<ProfileSection title="Consumo diário"><Table><TableHeader><TableRow><TableHead>Dia</TableHead><TableHead>Download</TableHead><TableHead>Upload</TableHead></TableRow></TableHeader><TableBody>{data.daily.map(row=><TableRow key={row.day}><TableCell>{row.day}</TableCell><TableCell>{bytes(row.bytes_out)}</TableCell><TableCell>{bytes(row.bytes_in)}</TableCell></TableRow>)}</TableBody></Table></ProfileSection>}</>}</QueryBoundary>}</ProfileSection>;
+const amount = z.coerce.number().nonnegative();
+export const sessionSchema = z.object({
+  rows: z.array(
+    z.object({
+      session_key: z.string(),
+      started_at: z.string(),
+      stopped_at: z.string().nullable(),
+      ip: z.string().nullable(),
+      mac: z.string().nullable(),
+      nas_ip: z.string().nullable(),
+      seconds: amount,
+      bytes_in: amount,
+      bytes_out: amount,
+      terminate_cause: z.string().nullable(),
+    }),
+  ),
+  totals: z.object({
+    sessions: amount,
+    seconds: amount,
+    bytes_in: amount,
+    bytes_out: amount,
+  }),
+  daily: z.array(
+    z.object({ day: z.string(), bytes_in: amount, bytes_out: amount }),
+  ),
+  truncated: z.boolean(),
+});
+const usageSchema = z.array(
+  z.object({
+    month: z.string(),
+    bytes_in: amount,
+    bytes_out: amount,
+    sessions: amount,
+    session_seconds: amount.optional(),
+  }),
+);
+const seriesSchema = z.array(
+  z.object({ period: z.string(), bytes_in: amount, bytes_out: amount }),
+);
+const availabilitySchema = z.object({
+  timezone: z.string(),
+  note: z.string(),
+  total: z
+    .object({
+      availability_pct: z.number().nullable(),
+      online_seconds: amount,
+      window_seconds: amount,
+    })
+    .nullable(),
+  days: z.array(
+    z.object({
+      day: z.string(),
+      online_seconds: amount,
+      offline_seconds: amount,
+      availability_pct: z.number().nullable(),
+      sessions: amount,
+    }),
+  ),
+});
+const logSchema = z.object({
+  integrated: z.boolean(),
+  rows: z.array(
+    z.object({
+      at: z.string(),
+      reply: z.string(),
+      calling_station: z.string().nullable(),
+      nas_ip: z.string().nullable(),
+    }),
+  ),
+});
+export function bytes(value: number) {
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  let unit = 0;
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024;
+    unit++;
+  }
+  return `${value.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} ${units[unit]}`;
 }
-export function ContractUsage({id}:{id:string}){
- const [view,setView]=useState('month');const path=view==='month'?`/contracts/${id}/usage`:`/contracts/${id}/usage-series?by=${view}`;const result=useSWR(['erp-usage',id,view],async()=>view==='month'?usageSchema.parse(await api(path)):seriesSchema.parse(await api(path)));const data=result.data;
- return <ProfileSection title="Consumo do acesso" caption="Download corresponde aos bytes enviados ao assinante; upload, aos bytes recebidos dele."><FormField label="Período do consumo"><select className="commercial-select" value={view} onChange={event=>setView(event.target.value)}>{[['month','Mensal'],['hour','Por hora · últimas 48 horas'],['day','Por dia · 30 dias'],['week','Por semana · 26 semanas'],['year','Por ano · 3 anos']].map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></FormField><QueryBoundary loading={result.isLoading} error={result.error} retry={()=>result.mutate()}>{data?.length?<Table><TableHeader><TableRow><TableHead>Período</TableHead><TableHead>Download</TableHead><TableHead>Upload</TableHead>{view==='month'&&<><TableHead>Sessões</TableHead><TableHead>Tempo conectado</TableHead></>}</TableRow></TableHeader><TableBody>{data.map(row=><TableRow key={'month'in row?row.month:row.period}><TableCell>{'month'in row?row.month:row.period}</TableCell><TableCell>{bytes(row.bytes_out)}</TableCell><TableCell>{bytes(row.bytes_in)}</TableCell>{'month'in row&&<><TableCell>{row.sessions}</TableCell><TableCell>{row.session_seconds==null?'—':duration(row.session_seconds)}</TableCell></>}</TableRow>)}</TableBody></Table>:<p className="profile-footnote">Sem consumo registrado neste período.</p>}</QueryBoundary><p className="profile-footnote">Accounting depende dos relatos do concentrador. O mês corrente é consolidado a cada quinze minutos; séries usam o fuso do provedor e começam na ativação do RADIUS integrado.</p></ProfileSection>;
+export const duration = (seconds: number) =>
+  `${Math.floor(seconds / 3600)} h ${Math.floor((seconds % 3600) / 60)} min`;
+export function ContractSessions({ id }: { id: string }) {
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const query = new URLSearchParams();
+  if (from) query.set("from", from);
+  if (to) query.set("to", to);
+  const path = `/contracts/${id}/sessions?${query}`;
+  const invalid = Boolean(from && to && from > to);
+  const result = useSWR(
+    invalid ? null : ["erp-sessions", id, from, to],
+    async () => sessionSchema.parse(await api(path)),
+  );
+  const data = result.data;
+  return (
+    <ProfileSection
+      title="Sessões e consumo"
+      caption="Histórico relatado pelo agente e accounting recebido pelo servidor."
+      action={
+        <ActionButton
+          disabled={invalid || !data}
+          onClick={() => download(`${path}&format=csv`, "sessoes.csv")}
+        >
+          Exportar sessões
+        </ActionButton>
+      }
+    >
+      <div className="erp-columns">
+        <FormField label="Sessões desde">
+          <Input
+            type="date"
+            value={from}
+            onChange={(event) => setFrom(event.target.value)}
+          />
+        </FormField>
+        <FormField label="Sessões até">
+          <Input
+            type="date"
+            value={to}
+            onChange={(event) => setTo(event.target.value)}
+          />
+        </FormField>
+      </div>
+      {invalid ? (
+        <p role="alert">A data final deve ser igual ou posterior à inicial.</p>
+      ) : (
+        <QueryBoundary
+          loading={result.isLoading}
+          error={result.error}
+          retry={() => result.mutate()}
+        >
+          {data && (
+            <>
+              <ProfileFacts
+                items={[
+                  ["Sessões no recorte", data.totals.sessions],
+                  ["Tempo conectado", duration(data.totals.seconds)],
+                  ["Download", bytes(data.totals.bytes_out)],
+                  ["Upload", bytes(data.totals.bytes_in)],
+                ]}
+              />
+              {data.truncated && (
+                <p role="status">
+                  São exibidas as 1.000 sessões mais recentes. Os totais acima
+                  correspondem a esse recorte; refine as datas.
+                </p>
+              )}
+              {data.rows.length ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      {[
+                        "Início",
+                        "Fim",
+                        "IP / MAC",
+                        "NAS",
+                        "Tempo",
+                        "Download",
+                        "Upload",
+                        "Encerramento",
+                      ].map((label) => (
+                        <TableHead key={label}>{label}</TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {data.rows.map((row) => (
+                      <TableRow key={row.session_key}>
+                        <TableCell>{stamp(row.started_at)}</TableCell>
+                        <TableCell>
+                          {row.stopped_at ? (
+                            stamp(row.stopped_at)
+                          ) : (
+                            <Badge variant="outline">Em curso</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {row.ip || "—"}
+                          <small className="table-subline">
+                            {row.mac || "—"}
+                          </small>
+                        </TableCell>
+                        <TableCell>{row.nas_ip || "—"}</TableCell>
+                        <TableCell>{duration(row.seconds)}</TableCell>
+                        <TableCell>{bytes(row.bytes_out)}</TableCell>
+                        <TableCell>{bytes(row.bytes_in)}</TableCell>
+                        <TableCell>{row.terminate_cause || "—"}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <p className="profile-footnote">
+                  Nenhuma sessão registrada neste período.
+                </p>
+              )}
+              {data.daily.length > 0 && (
+                <ProfileSection title="Consumo diário">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Dia</TableHead>
+                        <TableHead>Download</TableHead>
+                        <TableHead>Upload</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {data.daily.map((row) => (
+                        <TableRow key={row.day}>
+                          <TableCell>{row.day}</TableCell>
+                          <TableCell>{bytes(row.bytes_out)}</TableCell>
+                          <TableCell>{bytes(row.bytes_in)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ProfileSection>
+              )}
+            </>
+          )}
+        </QueryBoundary>
+      )}
+    </ProfileSection>
+  );
 }
-export function ContractAvailability({id}:{id:string}){
- const [days,setDays]=useState('7');const result=useSWR(['erp-availability',id,days],async()=>availabilitySchema.parse(await api(`/contracts/${id}/availability?days=${days}`)));const data=result.data;
- return <ProfileSection title="Disponibilidade do acesso"><FormField label="Período de disponibilidade"><select className="commercial-select" value={days} onChange={event=>setDays(event.target.value)}>{['7','15','30'].map(value=><option key={value} value={value}>{value} dias</option>)}</select></FormField><QueryBoundary loading={result.isLoading} error={result.error} retry={()=>result.mutate()}>{data&&<>{data.total&&<ProfileFacts items={[["Disponibilidade",data.total.availability_pct==null?'Sem janela para medir':`${data.total.availability_pct}%`],["Tempo conectado",duration(data.total.online_seconds)],["Fuso do provedor",data.timezone]]} />}{data.days.length>0&&<Table><TableHeader><TableRow>{['Dia','Conectado','Sem sessão','Disponibilidade','Sessões'].map(label=><TableHead key={label}>{label}</TableHead>)}</TableRow></TableHeader><TableBody>{data.days.map(row=><TableRow key={row.day}><TableCell>{row.day}</TableCell><TableCell>{duration(row.online_seconds)}</TableCell><TableCell>{duration(row.offline_seconds)}</TableCell><TableCell>{row.availability_pct==null?'—':`${row.availability_pct}%`}</TableCell><TableCell>{row.sessions}</TableCell></TableRow>)}</TableBody></Table>}<p className="profile-footnote">{data.note}</p></>}</QueryBoundary></ProfileSection>;
+export function ContractUsage({ id }: { id: string }) {
+  const [view, setView] = useState("month");
+  const path =
+    view === "month"
+      ? `/contracts/${id}/usage`
+      : `/contracts/${id}/usage-series?by=${view}`;
+  const result = useSWR(["erp-usage", id, view], async () =>
+    view === "month"
+      ? usageSchema.parse(await api(path))
+      : seriesSchema.parse(await api(path)),
+  );
+  const data = result.data;
+  return (
+    <ProfileSection
+      title="Consumo do acesso"
+      caption="Download corresponde aos bytes enviados ao assinante; upload, aos bytes recebidos dele."
+    >
+      <FormField label="Período do consumo">
+        <select
+          className="commercial-select"
+          value={view}
+          onChange={(event) => setView(event.target.value)}
+        >
+          {[
+            ["month", "Mensal"],
+            ["hour", "Por hora · últimas 48 horas"],
+            ["day", "Por dia · 30 dias"],
+            ["week", "Por semana · 26 semanas"],
+            ["year", "Por ano · 3 anos"],
+          ].map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </FormField>
+      <QueryBoundary
+        loading={result.isLoading}
+        error={result.error}
+        retry={() => result.mutate()}
+      >
+        {data?.length ? (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Período</TableHead>
+                <TableHead>Download</TableHead>
+                <TableHead>Upload</TableHead>
+                {view === "month" && (
+                  <>
+                    <TableHead>Sessões</TableHead>
+                    <TableHead>Tempo conectado</TableHead>
+                  </>
+                )}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.map((row) => (
+                <TableRow key={"month" in row ? row.month : row.period}>
+                  <TableCell>
+                    {"month" in row ? row.month : row.period}
+                  </TableCell>
+                  <TableCell>{bytes(row.bytes_out)}</TableCell>
+                  <TableCell>{bytes(row.bytes_in)}</TableCell>
+                  {"month" in row && (
+                    <>
+                      <TableCell>{row.sessions}</TableCell>
+                      <TableCell>
+                        {row.session_seconds == null
+                          ? "—"
+                          : duration(row.session_seconds)}
+                      </TableCell>
+                    </>
+                  )}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <p className="profile-footnote">
+            Sem consumo registrado neste período.
+          </p>
+        )}
+      </QueryBoundary>
+      <p className="profile-footnote">
+        Accounting depende dos relatos do concentrador. O mês corrente é
+        consolidado a cada quinze minutos; séries usam o fuso do provedor e
+        começam na ativação do RADIUS integrado.
+      </p>
+    </ProfileSection>
+  );
 }
-export function ContractAuthLog({id}:{id:string}){
- const result=useSWR(['erp-auth-log',id],async()=>logSchema.parse(await api(`/contracts/${id}/radius-log`)),{refreshInterval:20000});const data=result.data;
- return <ProfileSection title="Tentativas de autenticação"><QueryBoundary loading={result.isLoading} error={result.error} retry={()=>result.mutate()}>{data&&!data.integrated?<p className="profile-footnote">Este acesso não utiliza o RADIUS integrado.</p>:data?.rows.length?<Table><TableHeader><TableRow><TableHead>Quando</TableHead><TableHead>Resultado</TableHead><TableHead>MAC apresentado</TableHead><TableHead>Concentrador</TableHead></TableRow></TableHeader><TableBody>{data.rows.map((row,index)=><TableRow key={index}><TableCell>{stamp(row.at)}</TableCell><TableCell><Badge variant={row.reply==='Access-Accept'?'outline':'warning'}>{row.reply==='Access-Accept'?'Aceita':'Recusada'}</Badge></TableCell><TableCell>{row.calling_station||'—'}</TableCell><TableCell>{row.nas_ip||'—'}</TableCell></TableRow>)}</TableBody></Table>:<p className="profile-footnote">Nenhuma tentativa registrada.</p>}</QueryBoundary></ProfileSection>;
+export function ContractAvailability({ id }: { id: string }) {
+  const [days, setDays] = useState("7");
+  const result = useSWR(["erp-availability", id, days], async () =>
+    availabilitySchema.parse(
+      await api(`/contracts/${id}/availability?days=${days}`),
+    ),
+  );
+  const data = result.data;
+  return (
+    <ProfileSection title="Disponibilidade do acesso">
+      <FormField label="Período de disponibilidade">
+        <select
+          className="commercial-select"
+          value={days}
+          onChange={(event) => setDays(event.target.value)}
+        >
+          {["7", "15", "30"].map((value) => (
+            <option key={value} value={value}>
+              {value} dias
+            </option>
+          ))}
+        </select>
+      </FormField>
+      <QueryBoundary
+        loading={result.isLoading}
+        error={result.error}
+        retry={() => result.mutate()}
+      >
+        {data && (
+          <>
+            {data.total && (
+              <ProfileFacts
+                items={[
+                  [
+                    "Disponibilidade",
+                    data.total.availability_pct == null
+                      ? "Sem janela para medir"
+                      : `${data.total.availability_pct}%`,
+                  ],
+                  ["Tempo conectado", duration(data.total.online_seconds)],
+                  ["Fuso do provedor", data.timezone],
+                ]}
+              />
+            )}
+            {data.days.length > 0 && (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {[
+                      "Dia",
+                      "Conectado",
+                      "Sem sessão",
+                      "Disponibilidade",
+                      "Sessões",
+                    ].map((label) => (
+                      <TableHead key={label}>{label}</TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.days.map((row) => (
+                    <TableRow key={row.day}>
+                      <TableCell>{row.day}</TableCell>
+                      <TableCell>{duration(row.online_seconds)}</TableCell>
+                      <TableCell>{duration(row.offline_seconds)}</TableCell>
+                      <TableCell>
+                        {row.availability_pct == null
+                          ? "—"
+                          : `${row.availability_pct}%`}
+                      </TableCell>
+                      <TableCell>{row.sessions}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+            <p className="profile-footnote">{data.note}</p>
+          </>
+        )}
+      </QueryBoundary>
+    </ProfileSection>
+  );
 }
-export function ContractTelemetry({id}:{id:string}){return <div className="erp-stack"><ContractSessions id={id} /><ContractAuthLog id={id} /><ContractUsage id={id} /><ContractAvailability id={id} /></div>;}
+export function ContractAuthLog({ id }: { id: string }) {
+  const result = useSWR(
+    ["erp-auth-log", id],
+    async () => logSchema.parse(await api(`/contracts/${id}/radius-log`)),
+    { refreshInterval: 20000 },
+  );
+  const data = result.data;
+  return (
+    <ProfileSection title="Tentativas de autenticação">
+      <QueryBoundary
+        loading={result.isLoading}
+        error={result.error}
+        retry={() => result.mutate()}
+      >
+        {data && !data.integrated ? (
+          <p className="profile-footnote">
+            Este acesso não utiliza o RADIUS integrado.
+          </p>
+        ) : data?.rows.length ? (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Quando</TableHead>
+                <TableHead>Resultado</TableHead>
+                <TableHead>MAC apresentado</TableHead>
+                <TableHead>Concentrador</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.rows.map((row, index) => (
+                <TableRow key={index}>
+                  <TableCell>{stamp(row.at)}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        row.reply === "Access-Accept" ? "outline" : "warning"
+                      }
+                    >
+                      {row.reply === "Access-Accept" ? "Aceita" : "Recusada"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{row.calling_station || "—"}</TableCell>
+                  <TableCell>{row.nas_ip || "—"}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <p className="profile-footnote">Nenhuma tentativa registrada.</p>
+        )}
+      </QueryBoundary>
+    </ProfileSection>
+  );
+}
+export function ContractTelemetry({ id }: { id: string }) {
+  return (
+    <div className="erp-stack">
+      <ContractSessions id={id} />
+      <ContractAuthLog id={id} />
+      <ContractUsage id={id} />
+      <ContractAvailability id={id} />
+    </div>
+  );
+}

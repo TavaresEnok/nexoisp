@@ -8,11 +8,168 @@ import { MutationForm, FormField } from "@/features/shared/form";
 import { api } from "@/platform/erp-client";
 import { useSession } from "./provider";
 export function Account() {
-  const { me, reload } = useSession(); const [setup, setSetup] = useState<{ secret: string; otpauth_url: string } | null>(null); const [code, setCode] = useState(""); const [off, setOff] = useState({ password: "", code: "" }); const [password, setPassword] = useState({ current: "", next: "" }); const [message, setMessage] = useState(""); const [error, setError] = useState("");
-  return <><PageHeading title="Minha conta" description="Credenciais e segurança de acesso." />{me?.mfa_pending && <Alert><AlertTitle>Configure a verificação em duas etapas</AlertTitle><AlertDescription>Sua conta exige essa configuração para acessar o restante do sistema.</AlertDescription></Alert>}<div className="erp-stack"><Panel title="Verificação em duas etapas" description="Use um aplicativo autenticador para gerar seus códigos de acesso." action={<Badge variant={me?.mfa_enabled ? "success" : "secondary"}>{me?.mfa_enabled ? "Ativa" : "Inativa"}</Badge>}>
-  {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
-  {!me?.mfa_enabled && !setup && <Button onClick={async () => { setError(""); try { setSetup(await api("/me/mfa/setup", { method: "POST" })); } catch (error) { setError((error as Error).message); } }}>Configurar autenticação</Button>}
-  {!me?.mfa_enabled && setup && <MutationForm submit="Ativar verificação" onSubmit={async () => { await api("/me/mfa/enable", { body: { code } }); setSetup(null); setCode(""); await reload(); }}><FormField label="Chave de configuração"><Input readOnly value={setup.secret} onFocus={e => e.target.select()} /></FormField><FormField label="Endereço otpauth"><Input readOnly value={setup.otpauth_url} onFocus={e => e.target.select()} /></FormField><FormField label="Código do aplicativo"><Input inputMode="numeric" autoComplete="one-time-code" value={code} onChange={e => setCode(e.target.value)} required /></FormField></MutationForm>}
-  {me?.mfa_enabled && <MutationForm submit="Desativar verificação" onSubmit={async () => { await api("/me/mfa/disable", { body: off }); setOff({ password: "", code: "" }); await reload(); }}><div className="erp-columns"><FormField label="Senha atual"><Input type="password" autoComplete="current-password" value={off.password} onChange={e => setOff({ ...off, password: e.target.value })} required /></FormField><FormField label="Código do aplicativo"><Input value={off.code} onChange={e => setOff({ ...off, code: e.target.value })} required /></FormField></div></MutationForm>}
-  </Panel><Panel title="Alterar senha" description="A alteração encerra suas outras sessões."><MutationForm submit="Alterar senha" onSubmit={async () => { await api("/me/password", { body: password }); setPassword({ current: "", next: "" }); setMessage("Senha alterada. Outras sessões foram encerradas."); }}><div className="erp-columns"><FormField label="Senha atual"><Input type="password" autoComplete="current-password" value={password.current} onChange={e => setPassword({ ...password, current: e.target.value })} required /></FormField><FormField label="Nova senha" hint="Mínimo de 8 caracteres."><Input type="password" autoComplete="new-password" minLength={8} value={password.next} onChange={e => setPassword({ ...password, next: e.target.value })} required /></FormField></div>{message && <p role="status">{message}</p>}</MutationForm></Panel></div></>;
+  const { me, reload } = useSession();
+  const [setup, setSetup] = useState<{
+    secret: string;
+    otpauth_url: string;
+  } | null>(null);
+  const [code, setCode] = useState("");
+  const [off, setOff] = useState({ password: "", code: "" });
+  const [password, setPassword] = useState({ current: "", next: "" });
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  return (
+    <>
+      <PageHeading
+        title="Minha conta"
+        description="Credenciais e segurança de acesso."
+      />
+      {me?.mfa_pending && (
+        <Alert>
+          <AlertTitle>Configure a verificação em duas etapas</AlertTitle>
+          <AlertDescription>
+            Sua conta exige essa configuração para acessar o restante do
+            sistema.
+          </AlertDescription>
+        </Alert>
+      )}
+      <div className="erp-stack">
+        <Panel
+          title="Verificação em duas etapas"
+          description="Use um aplicativo autenticador para gerar seus códigos de acesso."
+          action={
+            <Badge variant={me?.mfa_enabled ? "success" : "secondary"}>
+              {me?.mfa_enabled ? "Ativa" : "Inativa"}
+            </Badge>
+          }
+        >
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          {!me?.mfa_enabled && !setup && (
+            <Button
+              onClick={async () => {
+                setError("");
+                try {
+                  setSetup(await api("/me/mfa/setup", { method: "POST" }));
+                } catch (error) {
+                  setError((error as Error).message);
+                }
+              }}
+            >
+              Configurar autenticação
+            </Button>
+          )}
+          {!me?.mfa_enabled && setup && (
+            <MutationForm
+              submit="Ativar verificação"
+              onSubmit={async () => {
+                await api("/me/mfa/enable", { body: { code } });
+                setSetup(null);
+                setCode("");
+                await reload();
+              }}
+            >
+              <FormField label="Chave de configuração">
+                <Input
+                  readOnly
+                  value={setup.secret}
+                  onFocus={(e) => e.target.select()}
+                />
+              </FormField>
+              <FormField label="Endereço otpauth">
+                <Input
+                  readOnly
+                  value={setup.otpauth_url}
+                  onFocus={(e) => e.target.select()}
+                />
+              </FormField>
+              <FormField label="Código do aplicativo">
+                <Input
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  required
+                />
+              </FormField>
+            </MutationForm>
+          )}
+          {me?.mfa_enabled && (
+            <MutationForm
+              submit="Desativar verificação"
+              onSubmit={async () => {
+                await api("/me/mfa/disable", { body: off });
+                setOff({ password: "", code: "" });
+                await reload();
+              }}
+            >
+              <div className="erp-columns">
+                <FormField label="Senha atual">
+                  <Input
+                    type="password"
+                    autoComplete="current-password"
+                    value={off.password}
+                    onChange={(e) =>
+                      setOff({ ...off, password: e.target.value })
+                    }
+                    required
+                  />
+                </FormField>
+                <FormField label="Código do aplicativo">
+                  <Input
+                    value={off.code}
+                    onChange={(e) => setOff({ ...off, code: e.target.value })}
+                    required
+                  />
+                </FormField>
+              </div>
+            </MutationForm>
+          )}
+        </Panel>
+        <Panel
+          title="Alterar senha"
+          description="A alteração encerra suas outras sessões."
+        >
+          <MutationForm
+            submit="Alterar senha"
+            onSubmit={async () => {
+              await api("/me/password", { body: password });
+              setPassword({ current: "", next: "" });
+              setMessage("Senha alterada. Outras sessões foram encerradas.");
+            }}
+          >
+            <div className="erp-columns">
+              <FormField label="Senha atual">
+                <Input
+                  type="password"
+                  autoComplete="current-password"
+                  value={password.current}
+                  onChange={(e) =>
+                    setPassword({ ...password, current: e.target.value })
+                  }
+                  required
+                />
+              </FormField>
+              <FormField label="Nova senha" hint="Mínimo de 8 caracteres.">
+                <Input
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={8}
+                  value={password.next}
+                  onChange={(e) =>
+                    setPassword({ ...password, next: e.target.value })
+                  }
+                  required
+                />
+              </FormField>
+            </div>
+            {message && <p role="status">{message}</p>}
+          </MutationForm>
+        </Panel>
+      </div>
+    </>
+  );
 }

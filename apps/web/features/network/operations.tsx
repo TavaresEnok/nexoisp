@@ -2,30 +2,397 @@ import useSWR from "swr";
 import { z } from "zod";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { PageHeading, Panel } from "@/components/workspace-ui";
-import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Table,
+  TableHeader,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ProfileSection, ProfileFacts } from "@/components/subscriber-profile-sections";
+import {
+  ProfileSection,
+  ProfileFacts,
+} from "@/components/subscriber-profile-sections";
 import { QueryBoundary, ConnectedNotice } from "@/features/shared/feedback";
 import { FormField } from "@/features/shared/form";
 import { ServerPager, useUrlPage } from "@/features/shared/pagination";
 import { useSession } from "@/features/session/provider";
 import { can } from "@/features/session/model";
 import { api, erpClient } from "@/platform/erp-client";
-import { actionLabels, operationLabels, operationRowSchema, operationDetailSchema, stamp } from "./models";
-export function OperationState({value}:{value:string}){return <Badge variant={['FAILED','EXPIRED'].includes(value)?'destructive':value==='UNCERTAIN'?'warning':'outline'}>{operationLabels[value]??value}</Badge>;}
-export function NetworkOperations(){
- const {me}=useSession();const navigate=useNavigate();const [params,setParams]=useSearchParams();const {page,setPage}=useUrlPage();const filter=['all','open','problem'].includes(params.get('filter')??'')?params.get('filter')!:'all';const path=`/operations?filter=${filter}&limit=8&offset=${page*8}`;const result=useSWR(['erp-operations',path],async([,path])=>{const response=await erpClient.request(path);if(response.total===null)throw new Error('O servidor não informou a contagem de operações.');return {rows:z.array(operationRowSchema).parse(response.data),total:response.total};},{refreshInterval:3000});
- const drift=useSWR('erp-drift',()=>api<{id:string;contract_id:string;subscriber_name:string;pppoe_username:string;desired_policy:string;desired_profile:string;observed_policy:string;observed_profile:string|null;observed_at:string|null}[]>('/network/drift'),{refreshInterval:10000});
- return <><ConnectedNotice demo={me?.demo} /><PageHeading title="Operações de rede" description="Intenção, execução e evidências recebidas das integrações." actions={<FormField label="Filtrar operações"><select className="commercial-select" value={filter} onChange={event=>{const next=new URLSearchParams(params);next.set('filter',event.target.value);next.delete('pagina');setParams(next,{replace:true});}}><option value="all">Todas</option><option value="open">Em andamento</option><option value="problem">Com problema ou atrasadas</option></select></FormField>} /><div className="erp-stack"><QueryBoundary loading={drift.isLoading} error={drift.error} retry={()=>drift.mutate()}>{Boolean(drift.data?.length)&&<Panel title="Divergências entre intenção e estado observado"><Table><TableHeader><TableRow>{['Assinante / login','Desejado','Observado','Última leitura','Ação'].map(label=><TableHead key={label}>{label}</TableHead>)}</TableRow></TableHeader><TableBody>{drift.data?.map(item=><TableRow key={item.id}><TableCell>{item.subscriber_name}<p className="profile-footnote">{item.pppoe_username}</p></TableCell><TableCell>{item.desired_policy} / {item.desired_profile}</TableCell><TableCell>{item.observed_policy} / {item.observed_profile??'—'}</TableCell><TableCell>{stamp(item.observed_at)}</TableCell><TableCell><Button variant="outline" size="sm" onClick={()=>navigate(`/contratos?contrato=${item.contract_id}`)}>Abrir contrato</Button></TableCell></TableRow>)}</TableBody></Table></Panel>}</QueryBoundary>
- <Panel title="Fila de operações" description="Estados e tentativas informados pelo Go; atualização a cada três segundos."><QueryBoundary loading={result.isLoading} error={result.error} retry={()=>result.mutate()}>{result.data?.rows.length?<Table><TableHeader><TableRow>{['Solicitada','Assinante / login','Ação / versão','Situação','Tentativas','Equipamento','Nota / motivo','Evidências'].map(label=><TableHead key={label}>{label}</TableHead>)}</TableRow></TableHeader><TableBody>{result.data.rows.map(item=><TableRow key={item.id}><TableCell>{stamp(item.created_at)}</TableCell><TableCell>{item.contract_id?<Button variant="ghost" size="sm" onClick={()=>navigate(`/contratos?contrato=${item.contract_id}`)}>{item.subscriber_name??'Contrato'}</Button>:item.subscriber_name??'Sem contrato'}<p className="profile-footnote mono">{item.pppoe_username??'—'}</p></TableCell><TableCell>{actionLabels[item.action]??item.action} · v{item.desired_version}</TableCell><TableCell><OperationState value={item.status} /></TableCell><TableCell>{item.attempts}</TableCell><TableCell>{item.device_name}</TableCell><TableCell>{item.note||item.reason}</TableCell><TableCell><Button variant="outline" size="sm" onClick={()=>{const next=new URLSearchParams(params);next.set('operacao',item.id);setParams(next);}}>Ver evidências</Button></TableCell></TableRow>)}</TableBody></Table>:<p className="profile-footnote">Nenhuma operação nesta consulta.</p>}</QueryBoundary><ServerPager page={page} setPage={setPage} total={result.data?.total??0} loading={result.isLoading} /></Panel></div></>;
+import {
+  actionLabels,
+  operationLabels,
+  operationRowSchema,
+  operationDetailSchema,
+  stamp,
+} from "./models";
+export function OperationState({ value }: { value: string }) {
+  return (
+    <Badge
+      variant={
+        ["FAILED", "EXPIRED"].includes(value)
+          ? "destructive"
+          : value === "UNCERTAIN"
+            ? "warning"
+            : "outline"
+      }
+    >
+      {operationLabels[value] ?? value}
+    </Badge>
+  );
 }
-export function OperationalOperationOverlay(){
- const {me}=useSession();const [params,setParams]=useSearchParams();const id=params.get('operacao');if(!id||!can(me,'network:read'))return null;
- return <OperationEvidence key={id} id={id} onClose={()=>{const next=new URLSearchParams(params);next.delete('operacao');setParams(next,{replace:true});}} />;
+export function NetworkOperations() {
+  const { me } = useSession();
+  const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
+  const { page, setPage } = useUrlPage();
+  const filter = ["all", "open", "problem"].includes(params.get("filter") ?? "")
+    ? params.get("filter")!
+    : "all";
+  const path = `/operations?filter=${filter}&limit=8&offset=${page * 8}`;
+  const result = useSWR(
+    ["erp-operations", path],
+    async ([, path]) => {
+      const response = await erpClient.request(path);
+      if (response.total === null)
+        throw new Error("O servidor não informou a contagem de operações.");
+      return {
+        rows: z.array(operationRowSchema).parse(response.data),
+        total: response.total,
+      };
+    },
+    { refreshInterval: 3000 },
+  );
+  const drift = useSWR(
+    "erp-drift",
+    () =>
+      api<
+        {
+          id: string;
+          contract_id: string;
+          subscriber_name: string;
+          pppoe_username: string;
+          desired_policy: string;
+          desired_profile: string;
+          observed_policy: string;
+          observed_profile: string | null;
+          observed_at: string | null;
+        }[]
+      >("/network/drift"),
+    { refreshInterval: 10000 },
+  );
+  return (
+    <>
+      <ConnectedNotice demo={me?.demo} />
+      <PageHeading
+        title="Operações de rede"
+        description="Intenção, execução e evidências recebidas das integrações."
+        actions={
+          <FormField label="Filtrar operações">
+            <select
+              className="commercial-select"
+              value={filter}
+              onChange={(event) => {
+                const next = new URLSearchParams(params);
+                next.set("filter", event.target.value);
+                next.delete("pagina");
+                setParams(next, { replace: true });
+              }}
+            >
+              <option value="all">Todas</option>
+              <option value="open">Em andamento</option>
+              <option value="problem">Com problema ou atrasadas</option>
+            </select>
+          </FormField>
+        }
+      />
+      <div className="erp-stack">
+        <QueryBoundary
+          loading={drift.isLoading}
+          error={drift.error}
+          retry={() => drift.mutate()}
+        >
+          {Boolean(drift.data?.length) && (
+            <Panel title="Divergências entre intenção e estado observado">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {[
+                      "Assinante / login",
+                      "Desejado",
+                      "Observado",
+                      "Última leitura",
+                      "Ação",
+                    ].map((label) => (
+                      <TableHead key={label}>{label}</TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {drift.data?.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell>
+                        {item.subscriber_name}
+                        <p className="profile-footnote">
+                          {item.pppoe_username}
+                        </p>
+                      </TableCell>
+                      <TableCell>
+                        {item.desired_policy} / {item.desired_profile}
+                      </TableCell>
+                      <TableCell>
+                        {item.observed_policy} / {item.observed_profile ?? "—"}
+                      </TableCell>
+                      <TableCell>{stamp(item.observed_at)}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            navigate(`/contratos?contrato=${item.contract_id}`)
+                          }
+                        >
+                          Abrir contrato
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Panel>
+          )}
+        </QueryBoundary>
+        <Panel
+          title="Fila de operações"
+          description="Estados e tentativas informados pelo Go; atualização a cada três segundos."
+        >
+          <QueryBoundary
+            loading={result.isLoading}
+            error={result.error}
+            retry={() => result.mutate()}
+          >
+            {result.data?.rows.length ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {[
+                      "Solicitada",
+                      "Assinante / login",
+                      "Ação / versão",
+                      "Situação",
+                      "Tentativas",
+                      "Equipamento",
+                      "Nota / motivo",
+                      "Evidências",
+                    ].map((label) => (
+                      <TableHead key={label}>{label}</TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {result.data.rows.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell>{stamp(item.created_at)}</TableCell>
+                      <TableCell>
+                        {item.contract_id ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              navigate(
+                                `/contratos?contrato=${item.contract_id}`,
+                              )
+                            }
+                          >
+                            {item.subscriber_name ?? "Contrato"}
+                          </Button>
+                        ) : (
+                          (item.subscriber_name ?? "Sem contrato")
+                        )}
+                        <p className="profile-footnote mono">
+                          {item.pppoe_username ?? "—"}
+                        </p>
+                      </TableCell>
+                      <TableCell>
+                        {actionLabels[item.action] ?? item.action} · v
+                        {item.desired_version}
+                      </TableCell>
+                      <TableCell>
+                        <OperationState value={item.status} />
+                      </TableCell>
+                      <TableCell>{item.attempts}</TableCell>
+                      <TableCell>{item.device_name}</TableCell>
+                      <TableCell>{item.note || item.reason}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const next = new URLSearchParams(params);
+                            next.set("operacao", item.id);
+                            setParams(next);
+                          }}
+                        >
+                          Ver evidências
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="profile-footnote">
+                Nenhuma operação nesta consulta.
+              </p>
+            )}
+          </QueryBoundary>
+          <ServerPager
+            page={page}
+            setPage={setPage}
+            total={result.data?.total ?? 0}
+            loading={result.isLoading}
+          />
+        </Panel>
+      </div>
+    </>
+  );
 }
-function OperationEvidence({id,onClose}:{id:string;onClose:()=>void}){
- const result=useSWR(['erp-operation',id],async([,id])=>operationDetailSchema.parse(await api(`/operations/${encodeURIComponent(id)}`)),{refreshInterval:3000});const item=result.data;
- return <Dialog open onOpenChange={open=>{if(!open)onClose();}}><DialogContent className="erp-editor"><DialogHeader><DialogTitle>Operação de rede</DialogTitle><DialogDescription>Consulta de execução e evidências. A recuperação de resultados incertos é controlada pelo motor de operações.</DialogDescription></DialogHeader><QueryBoundary loading={result.isLoading} error={result.error} retry={()=>result.mutate()}>{item&&<div className="erp-stack"><div className="erp-inline-actions"><strong>{actionLabels[item.action]??item.action}</strong><OperationState value={item.status} /></div><ProfileFacts items={[["Identificador",item.id],["Intenção",`v${item.desired_version}`],["Tentativas",item.attempts],["Motivo",item.reason||'Não informado'],["Nota",item.note||'Não informada'],["Criada em",stamp(item.created_at)],["Validade",stamp(item.valid_until)],["Finalização",stamp(item.finished_at)],["Chave de idempotência",item.idempotency_key]]} />{item.attempt_list.length?item.attempt_list.map((attempt,index)=><ProfileSection key={attempt.id} title={`Tentativa ${index+1}${attempt.recover?' · recuperação':''}`}><Badge variant="outline">{attempt.status}</Badge><p className="profile-footnote">Início: {stamp(attempt.started_at)} · fim: {stamp(attempt.finished_at)}</p><div className="profile-recent">{attempt.steps.length?attempt.steps.map((step,index)=><div key={index}><span className="timeline-dot" /><div><strong>{step.name} · {step.status}</strong>{step.detail!=null&&<p className="whitespace-pre-wrap">{typeof step.detail==='string'?step.detail:JSON.stringify(step.detail)}</p>}</div></div>):<p className="profile-footnote">Sem etapas registradas nesta tentativa.</p>}</div></ProfileSection>):<p className="profile-footnote">Nenhuma tentativa registrada.</p>}{item.result?.observed!=null&&<ProfileSection title="Estado observado ao final"><pre className="whitespace-pre-wrap break-words">{JSON.stringify(item.result.observed,null,2)}</pre></ProfileSection>}</div>}</QueryBoundary></DialogContent></Dialog>;
+export function OperationalOperationOverlay() {
+  const { me } = useSession();
+  const [params, setParams] = useSearchParams();
+  const id = params.get("operacao");
+  if (!id || !can(me, "network:read")) return null;
+  return (
+    <OperationEvidence
+      key={id}
+      id={id}
+      onClose={() => {
+        const next = new URLSearchParams(params);
+        next.delete("operacao");
+        setParams(next, { replace: true });
+      }}
+    />
+  );
+}
+function OperationEvidence({
+  id,
+  onClose,
+}: {
+  id: string;
+  onClose: () => void;
+}) {
+  const result = useSWR(
+    ["erp-operation", id],
+    async ([, id]) =>
+      operationDetailSchema.parse(
+        await api(`/operations/${encodeURIComponent(id)}`),
+      ),
+    { refreshInterval: 3000 },
+  );
+  const item = result.data;
+  return (
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <DialogContent className="erp-editor">
+        <DialogHeader>
+          <DialogTitle>Operação de rede</DialogTitle>
+          <DialogDescription>
+            Consulta de execução e evidências. A recuperação de resultados
+            incertos é controlada pelo motor de operações.
+          </DialogDescription>
+        </DialogHeader>
+        <QueryBoundary
+          loading={result.isLoading}
+          error={result.error}
+          retry={() => result.mutate()}
+        >
+          {item && (
+            <div className="erp-stack">
+              <div className="erp-inline-actions">
+                <strong>{actionLabels[item.action] ?? item.action}</strong>
+                <OperationState value={item.status} />
+              </div>
+              <ProfileFacts
+                items={[
+                  ["Identificador", item.id],
+                  ["Intenção", `v${item.desired_version}`],
+                  ["Tentativas", item.attempts],
+                  ["Motivo", item.reason || "Não informado"],
+                  ["Nota", item.note || "Não informada"],
+                  ["Criada em", stamp(item.created_at)],
+                  ["Validade", stamp(item.valid_until)],
+                  ["Finalização", stamp(item.finished_at)],
+                  ["Chave de idempotência", item.idempotency_key],
+                ]}
+              />
+              {item.attempt_list.length ? (
+                item.attempt_list.map((attempt, index) => (
+                  <ProfileSection
+                    key={attempt.id}
+                    title={`Tentativa ${index + 1}${attempt.recover ? " · recuperação" : ""}`}
+                  >
+                    <Badge variant="outline">{attempt.status}</Badge>
+                    <p className="profile-footnote">
+                      Início: {stamp(attempt.started_at)} · fim:{" "}
+                      {stamp(attempt.finished_at)}
+                    </p>
+                    <div className="profile-recent">
+                      {attempt.steps.length ? (
+                        attempt.steps.map((step, index) => (
+                          <div key={index}>
+                            <span className="timeline-dot" />
+                            <div>
+                              <strong>
+                                {step.name} · {step.status}
+                              </strong>
+                              {step.detail != null && (
+                                <p className="whitespace-pre-wrap">
+                                  {typeof step.detail === "string"
+                                    ? step.detail
+                                    : JSON.stringify(step.detail)}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="profile-footnote">
+                          Sem etapas registradas nesta tentativa.
+                        </p>
+                      )}
+                    </div>
+                  </ProfileSection>
+                ))
+              ) : (
+                <p className="profile-footnote">
+                  Nenhuma tentativa registrada.
+                </p>
+              )}
+              {item.result?.observed != null && (
+                <ProfileSection title="Estado observado ao final">
+                  <pre className="whitespace-pre-wrap break-words">
+                    {JSON.stringify(item.result.observed, null, 2)}
+                  </pre>
+                </ProfileSection>
+              )}
+            </div>
+          )}
+        </QueryBoundary>
+      </DialogContent>
+    </Dialog>
+  );
 }

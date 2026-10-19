@@ -1,12 +1,138 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { QueryBoundary } from "./feedback";
 import { MutationForm, FormField } from "./form";
 export type EditorValues = Record<string, string>;
-export type EditorField = { key: string; label: string; type?: "text" | "number" | "date" | "datetime-local" | "month" | "password" | "email" | "textarea" | "select"; required?: boolean; min?: number; max?: number; maxLength?: number; hint?: string; when?: (values: EditorValues) => boolean; options?: { value: string; label: string }[] | ((values: EditorValues) => { value: string; label: string }[]) };
-export function RecordEditor({ title, description, initial, fields, onClose, onSubmit, submit, loading, error, retry }: { title: string; description?: string; initial: EditorValues; fields: EditorField[]; onClose: () => void; onSubmit: (values: EditorValues) => Promise<void>; submit?: string; loading?: boolean; error?: unknown; retry?: () => unknown }) {
- const [values, setValues] = useState(initial);
- return <Dialog open onOpenChange={open => { if (!open) onClose(); }}><DialogContent className="erp-editor"><DialogHeader><DialogTitle>{title}</DialogTitle><DialogDescription>{description ?? "Preencha os dados para continuar."}</DialogDescription></DialogHeader><QueryBoundary loading={loading} error={error} retry={retry}><MutationForm submit={submit} onCancel={onClose} onSubmit={() => onSubmit(values)}><div className="erp-columns">{fields.filter(field => !field.when || field.when(values)).map(field => <FormField key={field.key} label={field.label} hint={field.hint}>{field.type === "select" ? <select className="commercial-select" required={field.required} value={values[field.key] ?? ""} onChange={e => setValues({ ...values, [field.key]: e.target.value })}>{(typeof field.options === "function" ? field.options(values) : field.options)?.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select> : field.type === "textarea" ? <Textarea required={field.required} maxLength={field.maxLength} value={values[field.key] ?? ""} onChange={e => setValues({ ...values, [field.key]: e.target.value })} /> : <Input type={field.type ?? "text"} min={field.min} max={field.max} maxLength={field.maxLength} required={field.required} value={values[field.key] ?? ""} onChange={e => setValues({ ...values, [field.key]: e.target.value })} />}</FormField>)}</div></MutationForm></QueryBoundary></DialogContent></Dialog>;
+export type EditorField = {
+  key: string;
+  label: string;
+  type?:
+    | "text"
+    | "number"
+    | "date"
+    | "datetime-local"
+    | "month"
+    | "password"
+    | "email"
+    | "textarea"
+    | "select";
+  required?: boolean;
+  min?: number;
+  max?: number;
+  maxLength?: number;
+  hint?: string;
+  when?: (values: EditorValues) => boolean;
+  options?:
+    | { value: string; label: string }[]
+    | ((values: EditorValues) => { value: string; label: string }[]);
+};
+export function RecordEditor({
+  title,
+  description,
+  initial,
+  fields,
+  onClose,
+  onSubmit,
+  submit,
+  loading,
+  error,
+  retry,
+}: {
+  title: string;
+  description?: string;
+  initial: EditorValues;
+  fields: EditorField[];
+  onClose: () => void;
+  onSubmit: (values: EditorValues) => Promise<void>;
+  submit?: string;
+  loading?: boolean;
+  error?: unknown;
+  retry?: () => unknown;
+}) {
+  const [values, setValues] = useState(initial);
+  return (
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <DialogContent className="erp-editor">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>
+            {description ?? "Preencha os dados para continuar."}
+          </DialogDescription>
+        </DialogHeader>
+        <QueryBoundary loading={loading} error={error} retry={retry}>
+          <MutationForm
+            submit={submit}
+            onCancel={onClose}
+            onSubmit={() => onSubmit(values)}
+          >
+            <div className="erp-columns">
+              {fields
+                .filter((field) => !field.when || field.when(values))
+                .map((field) => (
+                  <FormField
+                    key={field.key}
+                    label={field.label}
+                    hint={field.hint}
+                  >
+                    {field.type === "select" ? (
+                      <select
+                        className="commercial-select"
+                        required={field.required}
+                        value={values[field.key] ?? ""}
+                        onChange={(e) =>
+                          setValues({ ...values, [field.key]: e.target.value })
+                        }
+                      >
+                        {(typeof field.options === "function"
+                          ? field.options(values)
+                          : field.options
+                        )?.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    ) : field.type === "textarea" ? (
+                      <Textarea
+                        required={field.required}
+                        maxLength={field.maxLength}
+                        value={values[field.key] ?? ""}
+                        onChange={(e) =>
+                          setValues({ ...values, [field.key]: e.target.value })
+                        }
+                      />
+                    ) : (
+                      <Input
+                        type={field.type ?? "text"}
+                        min={field.min}
+                        max={field.max}
+                        maxLength={field.maxLength}
+                        required={field.required}
+                        value={values[field.key] ?? ""}
+                        onChange={(e) =>
+                          setValues({ ...values, [field.key]: e.target.value })
+                        }
+                      />
+                    )}
+                  </FormField>
+                ))}
+            </div>
+          </MutationForm>
+        </QueryBoundary>
+      </DialogContent>
+    </Dialog>
+  );
 }

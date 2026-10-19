@@ -1,9 +1,112 @@
 import { z } from "zod";
 import type { WorkOrder } from "@/domain/workspace";
 import { orderKinds, orderStates } from "./labels";
-export const orderSchema=z.object({id:z.string().uuid(),number:z.coerce.number(),kind:z.string(),subscriber_id:z.string().uuid(),contract_id:z.string().nullable(),ticket_id:z.string().nullable(),subscriber_name:z.string(),subscriber_phone:z.string().nullable(),subscriber_address:z.string(),service_address:z.string(),assignee_id:z.string().nullable(),assignee_name:z.string().nullable(),created_by_name:z.string().nullable(),status:z.enum(["open","analysis","awaiting_schedule","scheduled","en_route","in_progress","done","canceled"]),description:z.string(),scheduled_for:z.string().nullable(),estimated_minutes:z.coerce.number(),created_at:z.string(),updated_at:z.string(),en_route_at:z.string().nullable(),started_at:z.string().nullable(),finished_at:z.string().nullable(),resolution:z.string().nullable(),awaiting_reason:z.string().nullable(),sla_due_at:z.string().nullable(),sla_breached:z.boolean(),address_origin:z.string(),reason_name:z.string().nullable()});
-export const orderDetailSchema=orderSchema.extend({events:z.array(z.object({at:z.string(),event:z.string(),actor_name:z.string().nullable(),detail:z.record(z.string(),z.unknown())})),helpers:z.array(z.object({user_id:z.string(),name:z.string()})),checklist:z.array(z.object({id:z.union([z.string(),z.number()]),position:z.coerce.number(),label:z.string(),done:z.boolean(),done_at:z.string().nullable(),done_by_name:z.string().nullable()})),materials:z.array(z.object({id:z.union([z.string(),z.number()]),item_id:z.string(),item_name:z.string(),unit:z.string(),qty:z.coerce.number(),created_at:z.string(),created_by_name:z.string().nullable()}))});
-export type ErpOrder=z.infer<typeof orderSchema>;export type OrderDetail=z.infer<typeof orderDetailSchema>;
-export type OrderDisplay=WorkOrder & {assigneeId?:string|null};
-export function projectOrder(order:ErpOrder):OrderDisplay{return {id:order.id,code:order.number,subscriberId:order.subscriber_id,name:order.subscriber_name,type:orderKinds[order.kind] ?? order.kind,technician:order.assignee_name ?? "Não atribuído",assigneeId:order.assignee_id,time:order.scheduled_for ? new Date(order.scheduled_for).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"Não agendada",status:orderStates[order.status],neighborhood:order.service_address || "Endereço não informado",duration:order.estimated_minutes,notes:order.description,late:Boolean(order.scheduled_for && new Date(order.scheduled_for).getTime()<Date.now() && ["open","analysis","scheduled","en_route"].includes(order.status))};}
-export function localDateTime(value:string|null){if(!value)return "";const instant=new Date(value);return new Date(instant.getTime()-instant.getTimezoneOffset()*60000).toISOString().slice(0,16);}
+export const orderSchema = z.object({
+  id: z.string().uuid(),
+  number: z.coerce.number(),
+  kind: z.string(),
+  subscriber_id: z.string().uuid(),
+  contract_id: z.string().nullable(),
+  ticket_id: z.string().nullable(),
+  subscriber_name: z.string(),
+  subscriber_phone: z.string().nullable(),
+  subscriber_address: z.string(),
+  service_address: z.string(),
+  assignee_id: z.string().nullable(),
+  assignee_name: z.string().nullable(),
+  created_by_name: z.string().nullable(),
+  status: z.enum([
+    "open",
+    "analysis",
+    "awaiting_schedule",
+    "scheduled",
+    "en_route",
+    "in_progress",
+    "done",
+    "canceled",
+  ]),
+  description: z.string(),
+  scheduled_for: z.string().nullable(),
+  estimated_minutes: z.coerce.number(),
+  created_at: z.string(),
+  updated_at: z.string(),
+  en_route_at: z.string().nullable(),
+  started_at: z.string().nullable(),
+  finished_at: z.string().nullable(),
+  resolution: z.string().nullable(),
+  awaiting_reason: z.string().nullable(),
+  sla_due_at: z.string().nullable(),
+  sla_breached: z.boolean(),
+  address_origin: z.string(),
+  reason_name: z.string().nullable(),
+});
+export const orderDetailSchema = orderSchema.extend({
+  events: z.array(
+    z.object({
+      at: z.string(),
+      event: z.string(),
+      actor_name: z.string().nullable(),
+      detail: z.record(z.string(), z.unknown()),
+    }),
+  ),
+  helpers: z.array(z.object({ user_id: z.string(), name: z.string() })),
+  checklist: z.array(
+    z.object({
+      id: z.union([z.string(), z.number()]),
+      position: z.coerce.number(),
+      label: z.string(),
+      done: z.boolean(),
+      done_at: z.string().nullable(),
+      done_by_name: z.string().nullable(),
+    }),
+  ),
+  materials: z.array(
+    z.object({
+      id: z.union([z.string(), z.number()]),
+      item_id: z.string(),
+      item_name: z.string(),
+      unit: z.string(),
+      qty: z.coerce.number(),
+      created_at: z.string(),
+      created_by_name: z.string().nullable(),
+    }),
+  ),
+});
+export type ErpOrder = z.infer<typeof orderSchema>;
+export type OrderDetail = z.infer<typeof orderDetailSchema>;
+export type OrderDisplay = WorkOrder & { assigneeId?: string | null };
+export function projectOrder(order: ErpOrder): OrderDisplay {
+  return {
+    id: order.id,
+    code: order.number,
+    subscriberId: order.subscriber_id,
+    name: order.subscriber_name,
+    type: orderKinds[order.kind] ?? order.kind,
+    technician: order.assignee_name ?? "Não atribuído",
+    assigneeId: order.assignee_id,
+    time: order.scheduled_for
+      ? new Date(order.scheduled_for).toLocaleString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "Não agendada",
+    status: orderStates[order.status],
+    neighborhood: order.service_address || "Endereço não informado",
+    duration: order.estimated_minutes,
+    notes: order.description,
+    late: Boolean(
+      order.scheduled_for &&
+        new Date(order.scheduled_for).getTime() < Date.now() &&
+        ["open", "analysis", "scheduled", "en_route"].includes(order.status),
+    ),
+  };
+}
+export function localDateTime(value: string | null) {
+  if (!value) return "";
+  const instant = new Date(value);
+  return new Date(instant.getTime() - instant.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16);
+}
