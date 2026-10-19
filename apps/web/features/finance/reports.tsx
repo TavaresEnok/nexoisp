@@ -15,6 +15,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { FormField } from "@/features/shared/form";
+import { useQueryState } from "@/lib/use-query-state";
 import { ActionButton } from "@/features/shared/action";
 import { QueryBoundary } from "@/features/shared/feedback";
 import { api, download } from "@/platform/erp-client";
@@ -39,7 +40,12 @@ type Report = {
   by_method: Group[];
 };
 export function CollectionReports() {
-  const [tab, setTab] = useState("aging");
+  const [tab, setTab] = useQueryState("aba", "aging", [
+    "aging",
+    "receipts",
+    "without",
+    "cancel",
+  ]);
   const [from, setFrom] = useState(
     new Date(Date.now() - 30 * 86400000).toLocaleDateString("en-CA"),
   );

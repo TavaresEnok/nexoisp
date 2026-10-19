@@ -1,4 +1,4 @@
-import { operationalNavigationAreas, findOperationalPage } from "@/features/operations/catalogue";
+import { operationalNavigationAreas, findOperationalPage, operationalBranch } from "@/features/operations/catalogue";
 "use client";
 
 import { useId, useState, useSyncExternalStore } from "react";
@@ -62,7 +62,7 @@ export function WorkspaceNavigation({ collapsed: desktopCollapsed, onNavigate, o
     <button className="organization-switch" onClick={onProvider} aria-label={operational ? `Consultar provedor ${me?.tenant?.name ?? "NexoISP"}` : "Consultar provedor Conecta Fibra"}><span className="organization-monogram" aria-hidden="true">{operational ? initials(me?.tenant?.name ?? "NexoISP") : "cf"}<i /></span><span className="organization-details"><strong>{operational ? me?.tenant?.name ?? "Operação do SaaS" : "Conecta Fibra"}</strong><small>{operational && me ? roleLabels[me.role] : "Ambiente de demonstração"}</small></span><ChevronsUpDown size={13} /></button>
     <button className="sidebar-search" onClick={onSearch} aria-label="Buscar qualquer coisa" title="Buscar · Ctrl ou ⌘ K"><Search size={16} /><span>Buscar qualquer coisa</span><kbd>⌘ K</kbd></button>
     <nav className="context-navigation" aria-label="Áreas do provedor">
-      <ul className="sidebar-start-links">{personalNode && <NavigationBranch node={personalNode} pathname={pathname} onNavigate={onNavigate} icon={LayoutDashboard} compact={collapsed} />}{(!operational || canAccessPath(me, "/")) && <NavigationBranch node={findNavigationPage("/")!} pathname={pathname} onNavigate={onNavigate} icon={LayoutDashboard} compact={collapsed} />}</ul>
+      <ul className="sidebar-start-links">{personalNode && <NavigationBranch node={personalNode} pathname={pathname} onNavigate={onNavigate} icon={LayoutDashboard} compact={collapsed} />}{(!operational || canAccessPath(me, "/")) && <NavigationBranch node={operational ? operationalBranch(findNavigationPage("/")!) : findNavigationPage("/")!} pathname={pathname} onNavigate={onNavigate} icon={LayoutDashboard} compact={collapsed} />}</ul>
       <p className="context-label">ÁREAS DO PROVEDOR</p>
       <Accordion.Root multiple className="sidebar-areas" value={collapsed ? [] : openAreas} onValueChange={value => { setSelection({ path: pathname, areas: value }); if (collapsed) onToggle(); }}>
         {areas.map((area) => {

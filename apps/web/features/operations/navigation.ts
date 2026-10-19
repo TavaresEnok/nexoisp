@@ -1,4 +1,5 @@
 import { can, hasModule, type Session } from "@/features/session/model";
+import { catalogueAllows, catalogueTarget } from "./catalogue";
 export const erpAliases: Record<string, string> = {
   "/rede/equipamentos/concentradores": "/rede/equipamentos",
   "/rede/ftth/fttx-olt": "/rede/equipamentos",
@@ -31,7 +32,8 @@ export const erpAliases: Record<string, string> = {
   "/relatorios-atendimento": "/relatorios/atendimento",
 };
 export function canonicalErpPath(path: string) {
-  return erpAliases[path] ?? path;
+  const target = catalogueTarget(path);
+  return erpAliases[path] ?? erpAliases[target] ?? target;
 }
 const policies: [string, string, string?][] = [
   ["/assinantes", "subscribers:read"],
@@ -71,6 +73,7 @@ const policies: [string, string, string?][] = [
 export function canAccessPath(me: Session | null, pathname: string): boolean {
   if (!me) return false;
   if (pathname === "/rede/ftth/fttx-olt" && !hasModule(me, "olt")) return false;
+  if (!catalogueAllows(me, pathname)) return false;
   const path = canonicalErpPath(pathname);
   if (path === "/conta" || path.startsWith("/conta/")) return true;
   if (me.mfa_pending) return false;

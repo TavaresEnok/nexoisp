@@ -1,5 +1,7 @@
 import {
+  isRecordId,
   operationalNavigationAreas,
+  resolveCatalogueNode,
   searchOperationalNavigation,
 } from "./catalogue";
 import { useEffect, lazy, Suspense } from "react";
@@ -8,8 +10,10 @@ import {
   Route,
   Routes,
   useLocation,
+  useParams,
   useSearchParams,
 } from "react-router-dom";
+import NotFound from "@/src/not-found";
 import { AppShell } from "@/components/app-shell";
 import { OperationalWorkspaceProvider } from "./workspace-provider";
 import { PageHeading, Panel } from "@/components/workspace-ui";
@@ -283,7 +287,6 @@ export function OperationalApplication() {
       </Routes>
     );
   const me = session.me;
-  const canonical = canonicalErpPath(location.pathname);
   const home = me.mfa_pending
     ? "/conta"
     : me.role === "subscriber"
@@ -404,14 +407,17 @@ export function OperationalApplication() {
                 element={<OperationalInvoices />}
               />
               <Route path="/contratos" element={<OperationalContracts />} />
-              <Route path="/contratos/:id" element={<ContractLegacyLink />} />
+              <Route
+                path="/contratos/:id"
+                element={<RecordLink base="/contratos" param="contrato" />}
+              />
               <Route path="/produtos-adicionais" element={<AddonCatalog />} />
               <Route path="/planos" element={<OperationalPlans />} />
               <Route path="/conta/*" element={<Account />} />
               <Route path="/assinantes" element={<SubscriberDirectory />} />
               <Route
                 path="/assinantes/:id"
-                element={<SubscriberLegacyLink />}
+                element={<RecordLink base="/assinantes" param="ficha" />}
               />
               {Object.entries(erpAliases).map(([from, to]) => (
                 <Route
@@ -421,10 +427,7 @@ export function OperationalApplication() {
                 />
               ))}
               <Route path="/estrutura" element={<OperationalDirectory />} />
-              <Route
-                path="*"
-                element={<PlannedFeature pathname={canonical} />}
-              />
+              <Route path="*" element={<CatalogueDestination />} />
             </Routes>
           </Suspense>
         )}
@@ -463,19 +466,28 @@ export function OperationalApplication() {
     </OperationalWorkspaceProvider>
   );
 }
-function ContractLegacyLink() {
+// Links antigos de ficha aceitam somente identificadores do Go.
+function RecordLink({ base, param }: { base: string; param: string }) {
   const location = useLocation();
-  const id = location.pathname.split("/").at(-1)!;
+  const { id = "" } = useParams();
+  if (!isRecordId(id)) return <CatalogueDestination />;
   const query = new URLSearchParams(location.search);
-  query.set("contrato", id);
-  return <Navigate to={`/contratos?${query}`} replace />;
+  query.set(param, id);
+  return <Navigate to={`${base}?${query}`} replace />;
 }
-function SubscriberLegacyLink() {
+function CatalogueDestination() {
   const location = useLocation();
-  const id = location.pathname.split("/").at(-1)!;
+  const resolution = resolveCatalogueNode(location.pathname);
+  if (!resolution) return <NotFound />;
+  if (resolution.kind === "planned")
+    return <PlannedFeature pathname={location.pathname} />;
+  const [pathname, target = ""] = resolution.destination.split("?");
+  if (pathname === location.pathname) return <NotFound />;
   const query = new URLSearchParams(location.search);
-  query.set("ficha", id);
-  return <Navigate to={`/assinantes?${query}`} replace />;
+  new URLSearchParams(target).forEach((value, key) => query.set(key, value));
+  return (
+    <Navigate to={`${pathname}${query.size ? `?${query}` : ""}`} replace />
+  );
 }
 function AccessDenied() {
   return (
