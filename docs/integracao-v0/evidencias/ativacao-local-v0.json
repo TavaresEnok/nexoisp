@@ -1,0 +1,23 @@
+{
+  "ok": true,
+  "activated_at": "2026-10-19T17:04:55.725038+00:00",
+  "base": "http://localhost:18081",
+  "container": "nexoisp-go-caddy-1",
+  "image_id": "sha256:21028f2bd4b6a5a5a54063ef1ea7a48f48455a53722929f03907b57a4b9c0fdd",
+  "frontend": "apps/web — v0 oficial",
+  "backend_api_and_database_containers_unchanged": true,
+  "business_data_test_writes": false,
+  "health_status": 200,
+  "unauthenticated_me_status": 401,
+  "browser": {
+    "ok": true,
+    "checks": [
+      "Login do frontend oficial renderizado com os ativos e fontes da imagem validada",
+      "Rota operacional exige sessão real",
+      "Demonstração v0 carregada no mesmo endereço principal"
+    ],
+    "runtimeErrors": []
+  },
+  "rollback_image": "nexoisp-go-caddy:before-v0-20261019",
+  "external_deployment": false
+}

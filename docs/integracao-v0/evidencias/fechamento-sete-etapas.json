@@ -183,9 +183,13 @@
   "production_scope": "Imagem Caddy local; não é declaração de publicação em servidor externo nem homologação física de integrações. Evidências de cada incremento registram o ambiente usado.",
   "limitations": "Limites existentes preservados: gateway real ausente; migração universal ausente; Huawei não homologado em OLT física; CGNAT de laboratório; IPv6/delegações e histórico limitados; célula c1. Ver matriz e OPERACAO.md.",
   "local_application": {
-    "documented_frontend": "http://127.0.0.1:3000",
-    "documented_upstream": "http://127.0.0.1:18081",
-    "note": "Configuração de desenvolvimento; não é declaração de processo ativo. O backend operacional não recebeu escritas de teste."
+    "frontend": "http://localhost:18081",
+    "container": "nexoisp-go-caddy-1",
+    "frontend_source": "apps/web",
+    "upstream": "api:8080",
+    "active_image_id": "sha256:21028f2bd4b6a5a5a54063ef1ea7a48f48455a53722929f03907b57a4b9c0fdd",
+    "verification": "Frontend v0 ativo: login, rota protegida e demonstração conferidos no navegador sem erros; health 200 e me sem sessão 401. API e banco não foram reiniciados; nenhuma escrita de negócio de teste.",
+    "evidence": "docs/integracao-v0/evidencias/ativacao-local-v0.json"
   },
   "previous_checkpoint": {
     "commit": "97d47ccee074bf4137751e02e73770fcd65689b4",

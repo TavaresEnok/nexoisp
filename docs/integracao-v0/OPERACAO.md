@@ -37,3 +37,11 @@ A fumaça agora exige `BASE` explicitamente e inclui `frontend-v0-remediation.mj
 A comparação operacional exige `V0_OPERATIONAL_VISUAL=1`. Para reprodução exata, use o contêiner `mcr.microsoft.com/playwright:v1.55.1-jammy` da CI, rede host, `/e2e` montado e a pasta de evidências montada em `/docs/integracao-v0/evidencias`, como em `tests/contrato/e2e.py`. Fontes de sistema de outros hosts podem renderizar o atalho de teclado de forma diferente. Seis PNGs de referência ficam em `e2e/visual-baselines/operacional`; o teste compara hashes e falha sem atualizar arquivos. `UPDATE_V0_OPERATIONAL_VISUAL=1` é reservado à geração explícita de referências após revisão visual; não deve ser habilitado na CI.
 
 As capturas normalizam apenas datas variáveis e mascaram identificadores. Persistência e autorização são verificadas por comandos e leituras reais, independentemente das capturas. A evidência final está no [relatório das seis correções](CORRECOES-REVISAO.md).
+
+## Frontend ativo no ambiente local
+
+Em 19/10/2026 o serviço `nexoisp-go-caddy-1` foi atualizado para a imagem validada `nexo-v0-frontend:corrections`, publicada localmente também como `nexoisp-go-caddy:latest`. **`http://localhost:18081` agora serve o frontend oficial v0.** O endereço existente da instalação permanece válido.
+
+Foi recriado somente o serviço `caddy`, usando os mesmos três arquivos Compose registrados no contêiner e `up -d --no-deps --no-build caddy`. A API e o PostgreSQL mantiveram os mesmos IDs e horários de início. A imagem anterior foi preservada como `nexoisp-go-caddy:before-v0-20261019` para reversão.
+
+A verificação conferiu HTML/ativos oficiais, saúde HTTP 200, sessão ausente HTTP 401, login, proteção da rota de assinantes e demonstração v0 no navegador, sem erros de execução e sem gravar registros de negócio. Evidência: [ativacao-local-v0.json](evidencias/ativacao-local-v0.json). Esta ativação é local, sem publicação em servidor externo.
