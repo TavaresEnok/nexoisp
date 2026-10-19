@@ -432,11 +432,13 @@
     "behavior": "Tabela de unidades/série/modalidade/OS e alerta de comodato a recolher em contrato encerrado. Instalação/retirada efetivas são feitas nos módulos OS/estoque, não neste cartão.",
     "endpoints": "GET /api/contracts/:id/equipment",
     "evidence": "P/Extras.tsx (ContractEquipment); L/grupos.go",
-    "integrationState": "partial",
+    "integrationState": "validated",
     "validation": [
+      "e2e/frontend-v0-stock.mjs",
+      "evidencias/integracao-estoque.json",
+      "evidencias/producao-estoque.json",
       "e2e/frontend-v0-commercial.mjs",
-      "e2e/frontend-v0-field.mjs",
-      "Consulta de unidade instalada e alerta de comodato a recolher validados. Retirada efetiva ainda depende da integração do estoque (OS-14)."
+      "e2e/frontend-v0-field.mjs"
     ]
   },
   {
@@ -808,8 +810,12 @@
     "behavior": "Criar/editar nome, SKU, unidade, mínimo e flag de série; ativar/desativar; saldo e estoque baixo; bloqueio de mudança de serialização após movimentos. stock:write para mutações; sem pesquisa/pager visual nesta tela.",
     "endpoints": "GET /api/stock/items; POST /api/stock/items; PATCH /api/stock/items/:id",
     "evidence": "P/Field.tsx (Stock/ItemForm); E/estoque.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-stock.mjs",
+      "evidencias/integracao-estoque.json",
+      "evidencias/producao-estoque.json"
+    ]
   },
   {
     "id": "OS-12",
@@ -819,8 +825,12 @@
     "behavior": "Quantidade positiva em entrada/saída; ajuste assinado com justificativa; controle de saldo e eventos imutáveis. Itens serializados remetem à gestão de unidades, não aceitam lançamento comum pela UI.",
     "endpoints": "GET /api/stock/items/:id/movements; POST /api/stock/items/:id/movements",
     "evidence": "P/Field.tsx (Movements); E/estoque.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-stock.mjs",
+      "evidencias/integracao-estoque.json",
+      "evidencias/producao-estoque.json"
+    ]
   },
   {
     "id": "OS-13",
@@ -830,8 +840,12 @@
     "behavior": "Entrada por séries separadas por linha/espaço/vírgula; localizar unidade, situação e detentor; transferir técnico↔almoxarifado; não instala por transferência, instalação vem da OS.",
     "endpoints": "GET /api/stock/items/:id/units; POST /api/stock/items/:id/units; POST /api/stock/units/:id/transfer",
     "evidence": "P/Field.tsx (Units); E/estoque.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-stock.mjs",
+      "evidencias/integracao-estoque.json",
+      "evidencias/producao-estoque.json"
+    ]
   },
   {
     "id": "OS-14",
@@ -841,8 +855,12 @@
     "behavior": "Retirar instalada para estoque; marcar defeito; consertada retorna; baixa definitiva exige motivo; histórico por unidade. Há restrições de transição/saldo no Go; não é inventário contábil depreciável.",
     "endpoints": "POST /api/stock/units/:id/status; GET /api/stock/units/:id/events",
     "evidence": "P/Field.tsx; E/estoque.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-stock.mjs",
+      "evidencias/integracao-estoque.json",
+      "evidencias/producao-estoque.json"
+    ]
   },
   {
     "id": "FI-01",

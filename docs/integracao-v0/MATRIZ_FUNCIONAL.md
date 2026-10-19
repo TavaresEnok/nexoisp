@@ -37,7 +37,7 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | CO-13 | Implementada | Vincular POP | Integrada e validada |
 | CO-14 | Implementada | Empresa faturadora e área | Integrada e validada |
 | CO-15 | Implementada | Contratar/encerrar adicionais | Integrada e validada |
-| CO-16 | Implementada | Equipamentos e recolhimento | Parcial |
+| CO-16 | Implementada | Equipamentos e recolhimento | Integrada e validada |
 | CO-17 | Implementada | Fidelidade e cotação de rescisão | Integrada e validada |
 | CO-18 | Implementada | Desconto recorrente | Integrada e validada |
 | CO-19 | Implementada | Mudança agendada | Integrada e validada |
@@ -64,10 +64,10 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | OS-08 | Implementada | Anotações e eventos | Integrada e validada |
 | OS-09 | Implementada | Operação móvel do técnico | Integrada e validada |
 | OS-10 | Implementada | Agenda por técnico, conflitos e janelas | Integrada e validada |
-| OS-11 | Implementada | Catálogo de materiais | Pendente |
-| OS-12 | Implementada | Entradas, saídas, ajustes e consulta | Pendente |
-| OS-13 | Implementada | Receber lote e distribuir unidades | Pendente |
-| OS-14 | Implementada | Retirada, defeito, conserto, baixa e histórico | Pendente |
+| OS-11 | Implementada | Catálogo de materiais | Integrada e validada |
+| OS-12 | Implementada | Entradas, saídas, ajustes e consulta | Integrada e validada |
+| OS-13 | Implementada | Receber lote e distribuir unidades | Integrada e validada |
+| OS-14 | Implementada | Retirada, defeito, conserto, baixa e histórico | Integrada e validada |
 | FI-01 | Implementada | Listagem, filtros e visão financeira | Integrada e validada |
 | FI-02 | Implementada | Geração idempotente por competência | Integrada e validada |
 | FI-03 | Implementada | Consulta detalhada e saldo devido | Integrada e validada |

@@ -1,0 +1,23 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:18390",
+  "verified_at": "2026-10-19T10:53:51.475Z",
+  "backend": "Go/PostgreSQL isolados; somente dados sintéticos",
+  "checks": [
+    "Catálogo cadastra material com código, unidade e mínimo; alerta usa saldo real",
+    "Entradas, saídas e ajuste com sinal preservam os três movimentos e saldo calculado pelo Go",
+    "Edição, ativação e mínimo persistem; Go bloqueia mudar serialização após movimento",
+    "Lote normaliza séries no Go e duplicidade desfaz toda a entrada, sem unidade ou saldo parcial",
+    "Distribuição ao técnico e retorno ao almoxarifado preservam saldo e atualizam custódia",
+    "Contrato mostra série, comodato e OS; retirada confirmada devolve a unidade ao saldo e encerra a pendência de recolhimento",
+    "Defeito e conserto mantêm a unidade rastreável; baixa exige motivo, reduz saldo e não pode ser desfeita",
+    "Histórico por série preserva entrada, custódia, instalação, retirada, defeito, conserto, baixa, autor e data",
+    "Catálogo operacional permanece navegável no celular com a tabela oficial do v0",
+    "Atendimento consulta unidades e histórico sem controles nem autorização para movimentar estoque",
+    "Catálogo, histórico e comandos por série mantêm isolamento entre provedores",
+    "Erro na consulta de estoque não introduz catálogo ou saldos demonstrativos"
+  ],
+  "image": "nexo-v0-frontend:validation",
+  "image_id": "sha256:8ceeaa82a751a99e9aaf79bb4e0e42be5ac2a9c35335e0a27cb942fca9a2fc9d",
+  "csp": "Política original mantida; cenários sem erros de execução ou de CSP detectados."
+}

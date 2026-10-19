@@ -100,3 +100,16 @@ O quadro, a lista e o diálogo de OS usam os componentes originais `FieldOperati
 Evidências: `evidencias/integracao-os.json`, `evidencias/producao-os.json`, `evidencias/os-conectada-desktop.png` e `evidencias/meu-trabalho-conectado-celular.png`. O CRM também foi revalidado após os novos acessos nas fichas; o resultado de produção é registrado em `evidencias/producao-crm.json`.
 
 A instalação e o alerta de comodato a recolher foram validados. O catálogo completo de estoque, distribuição, retirada, defeito, conserto, baixa e histórico de unidades continuam pendentes (OS-11–14). O cartão de equipamentos permanece parcial até a integração do recolhimento efetivo. A etapa 6 continua em andamento e a etapa 7 permanece pendente.
+
+## Incremento de estoque — 19 de outubro de 2026
+
+A referência do v0 não possui uma tela operacional de estoque. O catálogo, movimentos e unidades foram compostos com `PageHeading`, `Panel`, `Table`, `Dialog`, formulários, fontes e tokens da interface oficial. Não foram importadas páginas, componentes ou CSS do frontend anterior.
+
+- TypeScript/build de produção e 150 testes locais aprovados.
+- Doze verificações compostas aprovadas contra o Go isolado, em desenvolvimento e na imagem com Node 22/Caddy: cadastro e mínimo; entrada/saída/ajuste; edição/ativação e bloqueio de serialização após movimento; lote com normalização e rollback por série duplicada; distribuição e custódia; contrato/instalação/retirada/recolhimento; defeito/conserto/baixa definitiva; histórico; celular; permissão de consulta sem movimentação; isolamento; falha operacional sem seeds.
+- A busca do catálogo filtra somente os itens retornados pelo servidor; a tela informa essa abrangência. As consultas de movimentos e unidades preservam os limites existentes de 200 e 2.000 registros, respectivamente. Lotes preservam o limite de 500 séries por entrada.
+- A unidade instalada aponta para contrato e OS reais. A retirada exige confirmação, retorna ao saldo e elimina a pendência de comodato a recolher do contrato encerrado. Defeito, conserto, custódia e baixa seguem as regras existentes do Go. O histórico é preservado, sem edição ou exclusão.
+- O cache compartilhado de itens, unidades, movimentos, eventos e equipamentos do contrato é atualizado após as mutações. O perfil Atendimento consulta unidades e histórico, mas não recebe controles nem autorização para movimentar estoque.
+- O backend Go não foi alterado neste incremento. Não foram acrescentados banco no navegador, regras comerciais paralelas ou simulação de registros operacionais. A imagem foi validada localmente, sem publicação no ambiente do usuário.
+
+Evidências: `evidencias/integracao-estoque.json`, `evidencias/producao-estoque.json` e `evidencias/estoque-conectado-celular.png`. A matriz passa a registrar 71 unidades validadas, 7 parciais, 64 pendentes e 27 capacidades internas/limitações preservadas. Isso não corresponde a um percentual de esforço concluído. Rede, administração, portal e SaaS continuam entre os escopos pendentes; a etapa 7 não está concluída.
