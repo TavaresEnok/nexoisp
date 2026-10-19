@@ -5,11 +5,11 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | ID | Estado no backend | Funcionalidade | Integração |
 |---|---|---|---|
 | AC-01 | Implementada | Autenticar e encerrar sessão | Integrada e validada |
-| AC-02 | Demonstrativa | Preenchimento com contas de demonstração | Pendente |
-| AC-03 | Implementada | Busca unificada e abertura de fichas | Parcial |
-| AC-04 | Implementada | Menu, tema, navegação móvel e suporte visível | Parcial |
-| AC-05 | Implementada | Visão inicial e prioridades pessoais | Parcial |
-| AC-06 | Implementada | Painéis de operação e caixa | Pendente |
+| AC-02 | Demonstrativa | Preenchimento com contas de demonstração | Integrada e validada |
+| AC-03 | Implementada | Busca unificada e abertura de fichas | Integrada e validada |
+| AC-04 | Implementada | Menu, tema, navegação móvel e suporte visível | Integrada e validada |
+| AC-05 | Implementada | Visão inicial e prioridades pessoais | Integrada e validada |
+| AC-06 | Implementada | Painéis de operação e caixa | Integrada e validada |
 | AC-07 | Implementada | Trocar senha própria | Integrada e validada |
 | AC-08 | Implementada | Gerenciar TOTP | Integrada e validada |
 | AS-01 | Implementada | Listar, buscar e exportar cadastro | Integrada e validada |
@@ -84,43 +84,43 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | FI-14 | Implementada | Quatro relatórios e CSV | Integrada e validada |
 | FI-15 | Demonstrativa | Conciliação automática com gateway demo | Integrada e validada |
 | FI-16 | Demonstrativa | Simulação de pagamento e cobrança | Integrada e validada |
-| FI-17 | Não confirmado | Cobrança bancária real, Pix/boleto pagável | Limitação preservada |
+| FI-17 | Não confirmado | Cobrança bancária real, Pix/boleto pagável | Backend preservado / limitação |
 | RE-01 | Implementada | Indicadores e inventário de agentes/equipamentos | Integrada e validada |
 | RE-02 | Implementada | Cadastrar e administrar agente | Parcial |
 | RE-03 | Implementada | Cadastrar equipamento conectado a agente | Integrada e validada |
 | RE-04 | Implementada | Adicionar NAS RADIUS integrado | Integrada e validada |
 | RE-05 | Implementada | Parâmetros, segredo, túnel e reaplicação | Parcial |
 | RE-06 | Implementada | Converter concentrador legado ao integrado | Integrada e validada |
-| RE-07 | Implementada | Criar acesso e manter credenciais | Pendente |
-| RE-08 | Implementada | Provisionar, suspender, reativar e desconectar | Pendente |
+| RE-07 | Implementada | Criar acesso e manter credenciais | Integrada e validada |
+| RE-08 | Implementada | Provisionar, suspender, reativar e desconectar | Integrada e validada |
 | RE-09 | Implementada | Inspecionar fila e evidências de operações | Integrada e validada |
-| RE-10 | Implementada | Consultar sessões e solicitar desconexão | Pendente |
-| RE-11 | Implementada | Consultar sessões, tráfego e tentativas | Pendente |
-| RE-12 | Implementada | Vincular equipamento e administrar Wi-Fi | Pendente |
-| RE-13 | Demonstrativa | Equipamentos e observações simuladas | Pendente |
-| RE-14 | Implementada | Visualizar uso e disponibilidade estimada | Pendente |
-| IN-01 | Implementada | Descobrir e vincular ONU ao contrato | Pendente |
-| IN-02 | Implementada | Enviar comandos e acompanhar execução | Pendente |
-| IN-03 | Parcial | Cobertura de equipamentos OLT | Pendente |
-| IN-04 | Implementada | Cadastrar e manter CTO/CEO | Pendente |
-| IN-05 | Implementada | Reservar e liberar porta | Pendente |
-| IN-06 | Parcial | Projeto físico completo da rede óptica | Pendente |
-| IN-07 | Implementada | Visão operacional e configurações | Pendente |
-| IN-08 | Implementada | Diagnóstico baseado em regras e evidências | Pendente |
-| IN-09 | Implementada | Mapa de contratos, POPs e caixas | Pendente |
-| IN-10 | Implementada | Manter pools e reservas IPv4/IPv6 individuais | Pendente |
-| IN-11 | Parcial | Reservar prefixo para contrato | Pendente |
-| IN-12 | Implementada | Planejar blocos de portas e gerar script | Pendente |
-| IN-13 | Parcial | Encontrar o responsável em um instante | Pendente |
-| IN-14 | Implementada | Pesquisa legal por IP e período | Pendente |
-| IN-15 | Parcial | Identificar titular IPv6 anterior | Pendente |
-| IN-16 | Implementada | Comunicar manutenção programada | Pendente |
-| IN-17 | Implementada | Consultar endereços, prefixos e caixa | Pendente |
+| RE-10 | Implementada | Consultar sessões e solicitar desconexão | Integrada e validada |
+| RE-11 | Implementada | Consultar sessões, tráfego e tentativas | Integrada e validada |
+| RE-12 | Implementada | Vincular equipamento e administrar Wi-Fi | Integrada e validada |
+| RE-13 | Demonstrativa | Equipamentos e observações simuladas | Integrada e validada |
+| RE-14 | Implementada | Visualizar uso e disponibilidade estimada | Integrada e validada |
+| IN-01 | Implementada | Descobrir e vincular ONU ao contrato | Integrada e validada |
+| IN-02 | Implementada | Enviar comandos e acompanhar execução | Integrada e validada |
+| IN-03 | Parcial | Cobertura de equipamentos OLT | Integrada e validada |
+| IN-04 | Implementada | Cadastrar e manter CTO/CEO | Integrada e validada |
+| IN-05 | Implementada | Reservar e liberar porta | Integrada e validada |
+| IN-06 | Parcial | Projeto físico completo da rede óptica | Integrada e validada |
+| IN-07 | Implementada | Visão operacional e configurações | Integrada e validada |
+| IN-08 | Implementada | Diagnóstico baseado em regras e evidências | Integrada e validada |
+| IN-09 | Implementada | Mapa de contratos, POPs e caixas | Integrada e validada |
+| IN-10 | Implementada | Manter pools e reservas IPv4/IPv6 individuais | Integrada e validada |
+| IN-11 | Parcial | Reservar prefixo para contrato | Integrada e validada |
+| IN-12 | Implementada | Planejar blocos de portas e gerar script | Integrada e validada |
+| IN-13 | Parcial | Encontrar o responsável em um instante | Integrada e validada |
+| IN-14 | Implementada | Pesquisa legal por IP e período | Integrada e validada |
+| IN-15 | Parcial | Identificar titular IPv6 anterior | Integrada e validada |
+| IN-16 | Implementada | Comunicar manutenção programada | Integrada e validada |
+| IN-17 | Implementada | Consultar endereços, prefixos e caixa | Integrada e validada |
 | AD-01 | Implementada | Cadastro e gestão da equipe | Pendente |
 | AD-02 | Parcial | Redefinição de senha de outro usuário | Pendente |
 | AD-03 | Implementada | Provedores e módulos de produto | Pendente |
 | AD-04 | Implementada | Empresas de faturamento | Pendente |
-| AD-05 | Implementada | Cadastrar e administrar POPs | Pendente |
+| AD-05 | Implementada | Cadastrar e administrar POPs | Integrada e validada |
 | AD-06 | Implementada | Notificações do provedor via webhook | Pendente |
 | AD-07 | Implementada | Cadastrar e testar canais de mensagem | Pendente |
 | AD-08 | Implementada | Criar e excluir textos com variáveis | Pendente |
@@ -146,30 +146,30 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | PO-07 | Implementada | Responder sobre OS concluída | Pendente |
 | PO-08 | Implementada | Ler e aceitar solicitação | Pendente |
 | PO-09 | Parcial | Quitar fatura em instituição financeira | Pendente |
-| BE-01 | Somente backend | Catálogo e consultas externas autorizadas | Backend preservado |
-| BE-02 | Somente backend | Criar atendimento e OS por integração | Backend preservado |
-| BE-03 | Somente backend | Endereço de instalação específico | Backend preservado |
-| BE-04 | Somente backend | Indicação de outro contrato | Backend preservado |
-| BE-05 | Somente backend | Campos adicionais de atendimento e conversão de lead | Backend preservado |
-| BE-06 | Somente backend | Atualização de senha de usuário, dados de POP/empresa e parâmetros de qualidade | Backend preservado |
-| BE-07 | Somente backend | Editar propriedades além dos controles visuais | Backend preservado |
-| BE-08 | Somente backend | Consultar bloco por IP privado e titulares históricos | Backend preservado |
-| BE-09 | Somente backend | Filtros adicionais de relatório/exportação | Backend preservado |
-| BE-10 | Somente backend | Autenticar, sincronizar e despachar operações | Backend preservado |
-| BE-11 | Somente backend | Fila, assinatura e recuperação de operações | Backend preservado |
-| BE-12 | Somente backend | Autorização, accounting e desconexão | Backend preservado |
-| BE-13 | Somente backend | Executar comandos e relatar observações | Backend preservado |
-| BE-14 | Somente backend | Gerir configuração e túneis dos NAS | Backend preservado |
-| BE-15 | Somente backend | Integrar CPE TR-069 via HTTP | Backend preservado |
-| BE-16 | Somente backend | Cobrança, suspensão, confiança e reconciliação | Backend preservado |
-| BE-17 | Somente backend | Avisos, webhooks, SLA, alertas e limpeza | Backend preservado |
-| BE-18 | Somente backend | Sincronização e agregação de RADIUS | Backend preservado |
-| BE-19 | Somente backend | Preparação, migrações e diagnóstico operacional | Backend preservado |
-| BE-20 | Somente backend | Sessão, CSRF, MFA, escopo e auditoria | Backend preservado |
-| BE-21 | Somente backend | Saúde, métricas e especificação interna | Backend preservado |
-| BE-22 | Somente backend | Backup, cópia e restauração | Backend preservado |
-| BE-23 | Parcial | Distribuição em múltiplas células de dados | Pendente |
-| BE-24 | Somente backend | Consultar indicações | Backend preservado |
-| BE-25 | Somente backend | Consultar origens de NAS autorizadas | Backend preservado |
-| BE-26 | Somente backend | Criar cobrança avulsa | Backend preservado |
-| BE-27 | Somente backend | Excluir etiqueta do catálogo | Backend preservado |
+| BE-01 | Somente backend | Catálogo e consultas externas autorizadas | Backend preservado / limitação |
+| BE-02 | Somente backend | Criar atendimento e OS por integração | Backend preservado / limitação |
+| BE-03 | Somente backend | Endereço de instalação específico | Backend preservado / limitação |
+| BE-04 | Somente backend | Indicação de outro contrato | Backend preservado / limitação |
+| BE-05 | Somente backend | Campos adicionais de atendimento e conversão de lead | Backend preservado / limitação |
+| BE-06 | Somente backend | Atualização de senha de usuário, dados de POP/empresa e parâmetros de qualidade | Backend preservado / limitação |
+| BE-07 | Somente backend | Editar propriedades além dos controles visuais | Backend preservado / limitação |
+| BE-08 | Somente backend | Consultar bloco por IP privado e titulares históricos | Backend preservado / limitação |
+| BE-09 | Somente backend | Filtros adicionais de relatório/exportação | Backend preservado / limitação |
+| BE-10 | Somente backend | Autenticar, sincronizar e despachar operações | Backend preservado / limitação |
+| BE-11 | Somente backend | Fila, assinatura e recuperação de operações | Backend preservado / limitação |
+| BE-12 | Somente backend | Autorização, accounting e desconexão | Backend preservado / limitação |
+| BE-13 | Somente backend | Executar comandos e relatar observações | Backend preservado / limitação |
+| BE-14 | Somente backend | Gerir configuração e túneis dos NAS | Backend preservado / limitação |
+| BE-15 | Somente backend | Integrar CPE TR-069 via HTTP | Backend preservado / limitação |
+| BE-16 | Somente backend | Cobrança, suspensão, confiança e reconciliação | Backend preservado / limitação |
+| BE-17 | Somente backend | Avisos, webhooks, SLA, alertas e limpeza | Backend preservado / limitação |
+| BE-18 | Somente backend | Sincronização e agregação de RADIUS | Backend preservado / limitação |
+| BE-19 | Somente backend | Preparação, migrações e diagnóstico operacional | Backend preservado / limitação |
+| BE-20 | Somente backend | Sessão, CSRF, MFA, escopo e auditoria | Backend preservado / limitação |
+| BE-21 | Somente backend | Saúde, métricas e especificação interna | Backend preservado / limitação |
+| BE-22 | Somente backend | Backup, cópia e restauração | Backend preservado / limitação |
+| BE-23 | Parcial | Distribuição em múltiplas células de dados | Backend preservado / limitação |
+| BE-24 | Somente backend | Consultar indicações | Backend preservado / limitação |
+| BE-25 | Somente backend | Consultar origens de NAS autorizadas | Backend preservado / limitação |
+| BE-26 | Somente backend | Criar cobrança avulsa | Backend preservado / limitação |
+| BE-27 | Somente backend | Excluir etiqueta do catálogo | Backend preservado / limitação |

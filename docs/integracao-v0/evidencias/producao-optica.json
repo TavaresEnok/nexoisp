@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:18390",
+  "verified_at": "2026-10-19T11:46:58.541Z",
+  "backend": "Go/PostgreSQL e protocolo do agente isolados; sem OLT física",
+  "checks": [
+    "Descoberta relatada pelo agente é vinculada pela UI ao contrato, PON, perfis e VLAN; driver Huawei mantém a limitação de homologação explícita",
+    "Relato sintético da tentativa confirma versão e potências; reaplicação solicita nova operação sem alegar homologação física",
+    "NOC consulta contadores, alertas e PON reais; limiares são definidos pelo provedor e gravados pelo Go",
+    "Diagnóstico apresenta conclusão, limites e evidências datadas do Go sem executar teste remoto",
+    "Desautorização exige confirmação e só permite substituição após ausência confirmada pela OLT sintética",
+    "Falha de consulta, permissões do NOC e isolamento das ONUs entre provedores são preservados"
+  ]
+}

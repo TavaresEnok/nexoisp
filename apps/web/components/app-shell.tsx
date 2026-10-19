@@ -1,5 +1,7 @@
 "use client";
 
+import { integrationStatus, operationalTitle } from "@/features/operations/status";
+
 import {
   useState,
   useEffect,
@@ -96,7 +98,7 @@ export function AppShell({ children, initialAppearance }: { children: ReactNode;
     () => false,
   );
   const dark = appearance ? appearance === "dark" : systemDark;
-  const label = resolveNavigationRoute(pathname).title;
+  const label = (operational ? operationalTitle(pathname) : undefined) ?? resolveNavigationRoute(pathname).title;
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
@@ -277,6 +279,7 @@ export function AppShell({ children, initialAppearance }: { children: ReactNode;
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Nome, documento, telefone, PPPoE, IP, MAC ou serial…"
               aria-label="Busca global"
+              maxLength={operational?80:undefined}
             />
           </div>
           <div className="command-results">
@@ -284,6 +287,7 @@ export function AppShell({ children, initialAppearance }: { children: ReactNode;
             {operational && search.error && <p role="alert" className="command-empty">{search.error.message}</p>}
             {operational && search.isLoading && <p role="status" className="command-empty">Consultando o provedor…</p>}
             {operational && search.data?.results.map(result => <button key={result.contract_id ?? result.subscriber_id} onClick={() => { setSearchOpen(false); go(`/assinantes?ficha=${encodeURIComponent(result.subscriber_id)}`); }}><Users size={17} /><span>{result.subscriber_name}<small>{result.plan_name ?? result.document ?? "Cadastro"}</small></span><ArrowUpRight size={15} /></button>)}
+            {operational && query.trim().length>=2 && canAccessPath(me,"/busca") && <button onClick={()=>{setSearchOpen(false);go(`/busca?q=${encodeURIComponent(query.trim())}`);}}><Search size={17} /><span>Ver resultados completos<small>Assinantes, contratos e correspondências da rede</small></span><ArrowUpRight size={15} /></button>}
             {!operational && results.length > 0 && (
               <>
                 <p className="nav-label">ASSINANTES</p>
@@ -331,16 +335,16 @@ export function AppShell({ children, initialAppearance }: { children: ReactNode;
                 {pageResults.map((page) => (
                   <button key={page.href} onClick={() => go(page.href)}>
                     <ListTree size={17} />
-                    <span>{page.label}<small>{page.trail.slice(0, -1).join(" / ")} · {page.view ? "Consulta parcial" : "Pendente"}</small></span>
+                    <span>{page.label}<small>{page.trail.slice(0, -1).join(" / ")} · {operational ? integrationStatus(page.href)==="connected"?"Conectado ao ERP":"Integração pendente" : page.view ? "Consulta parcial" : "Pendente"}</small></span>
                     <ArrowRight size={15} />
                   </button>
                 ))}
-                {allPageResults.length > pageResults.length && <button onClick={() => go(`/busca?q=${encodeURIComponent(query)}`)}><Search size={17} /><span>Ver os {allPageResults.length} resultados de navegação</span><ArrowRight size={15} /></button>}
+                {allPageResults.length > pageResults.length && <button onClick={() => go(operational?`/estrutura?busca=${encodeURIComponent(query)}`:`/busca?q=${encodeURIComponent(query)}`)}><Search size={17} /><span>Ver os {allPageResults.length} resultados de navegação</span><ArrowRight size={15} /></button>}
               </>
             )}
             {results.length === 0 &&
               ticketResults.length === 0 &&
-              pageResults.length === 0 && (
+              pageResults.length === 0 && (!operational || (!search.isLoading && !search.error && !search.data?.results.length)) && (
                 <p className="command-empty">
                   {operational ? "Nenhum destino encontrado. Busque por nome ou documento." : "Nenhum resultado. Tente um nome, como Mariana."}
                 </p>

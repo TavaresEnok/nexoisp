@@ -23,3 +23,5 @@
 /* O contrato operacional pode conter mais seções que a ficha demonstrativa. */
 .erp-contract-sheet > * { flex-shrink: 0; }
 .erp-contract-sheet > [data-slot="tabs"] { flex: none; min-height: auto; }
+
+.erp-print-frame { position: fixed; width: 1px; height: 1px; left: -10000px; top: 0; border: 0; }

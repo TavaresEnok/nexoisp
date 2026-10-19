@@ -8,10 +8,16 @@ const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] }
 const checks = [];
 try {
  for (const variant of [
+  { name: 'inicio-desktop-claro', path: '/', heading: 'A operação, em perspectiva.', width: 1342, height: 805, theme: 'light', settle: 2400 },
+  { name: 'inicio-desktop-escuro', path: '/', heading: 'A operação, em perspectiva.', width: 1342, height: 805, theme: 'dark', settle: 2400 },
+  { name: 'inicio-celular', path: '/', heading: 'A operação, em perspectiva.', width: 390, height: 844, theme: 'light', settle: 2400 },
+  { name: 'inicio-rede', path: '/?painel=network', heading: 'A operação, em perspectiva.', width: 1342, height: 805, theme: 'dark', settle: 2400 },
   { name: 'assinantes-desktop-claro', path: '/assinantes', width: 1342, height: 805, theme: 'light' },
   { name: 'assinantes-desktop-escuro', path: '/assinantes', width: 1342, height: 805, theme: 'dark' },
   { name: 'assinantes-celular', path: '/assinantes', width: 390, height: 844, theme: 'light' },
   { name: 'ficha-desktop', path: '/assinantes?ficha=sub-1', width: 1342, height: 805, theme: 'dark' },
+  { name: 'rede-online-desktop', path: '/rede/online', heading: 'Usuários conectados', width: 1342, height: 805, theme: 'light' },
+  { name: 'rede-online-celular', path: '/rede/online', heading: 'Usuários conectados', width: 390, height: 844, theme: 'dark' },
   { name: 'rede-inventario', path: '/rede/equipamentos', heading: 'Monitoramento de rede', width: 1342, height: 805, theme: 'dark' },
   { name: 'rede-ficha', path: '/rede/equipamentos', heading: 'Monitoramento de rede', action: 'Detalhes de ', width: 1342, height: 805, theme: 'light' },
   { name: 'ordens-quadro', path: '/ordens-de-servico', heading: 'Ordens de serviço', width: 1342, height: 805, theme: 'light' },
@@ -33,7 +39,7 @@ try {
    if (variant.path.includes('ficha=')) await page.getByRole('dialog').waitFor();
    else await page.getByRole('heading', { name: variant.heading ?? 'Assinantes', exact: true }).waitFor();
    if (variant.action) await page.getByRole('button', { name: new RegExp(variant.action) }).first().click();
-   await page.evaluate(() => document.fonts.ready); await page.waitForTimeout(800);
+   await page.evaluate(() => document.fonts.ready); await page.waitForTimeout(variant.settle ?? 800);
    assert.deepEqual(errors, [], `${variant.name}: erros de execução em ${name}`);
    const bytes = await page.screenshot({ path: new URL(`${variant.name}-${name}.png`, output).pathname, animations: 'disabled', fullPage: false });
    screenshots.push(createHash('sha256').update(bytes).digest('hex'));

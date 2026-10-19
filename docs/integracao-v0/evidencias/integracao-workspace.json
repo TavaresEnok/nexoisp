@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:3000",
+  "verified_at": "2026-10-19T12:48:05.110Z",
+  "backend": "Go/PostgreSQL isolados; recursos e observações sintéticos",
+  "checks": [
+    "Contas sintéticas só aparecem com health.demo; preencher uma conta não cria sessão nem contorna o login Go",
+    "Busca operacional encontra nome, login, IP, MAC, ONU e OS e abre fichas reais de assinante e contrato",
+    "Busca do shell preserva a composição v0 e encaminha ao resultado completo com o termo na URL",
+    "Visão inicial usa indicadores, caixa, ativações/encerramentos e prioridades do Go; o alerta abre o NOC correspondente",
+    "Tema persiste após recarga e navegação móvel utiliza o shell oficial",
+    "Resultados respeitam a apresentação por perfil; suporte mantém provedor visível e saída real restaura a conta SaaS",
+    "Falha na busca operacional não seleciona registros demonstrativos"
+  ]
+}

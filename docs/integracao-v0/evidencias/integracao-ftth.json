@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:3000",
+  "verified_at": "2026-10-19T12:50:36.912Z",
+  "backend": "Go/PostgreSQL isolados; sem intervenção física",
+  "checks": [
+    "Cadastro CEO/CTO, coordenadas em conjunto, hierarquia, OLT/PON e edição persistem no Go",
+    "Reserva e vínculo a contrato ocupam portas reais; o Go impede ocupação concorrente da mesma porta",
+    "Ficha de portas restaura pela URL e liberação confirmada devolve reserva e contrato à capacidade livre",
+    "Go bloqueia ciclos de hierarquia e exclusão de caixa com derivadas",
+    "Esquema por coordenadas usa tokens v0, permite teclado e explicita que linhas não são traçado físico da fibra",
+    "Caixas sem dependências podem ser excluídas; consulta preserva isolamento por provedor"
+  ]
+}

@@ -19,6 +19,7 @@ import { CreateContract } from "@/features/contracts/create";
 import { LazyContractFinance as ContractFinance } from "@/features/finance/lazy";
 import { LazyLinkedOrders } from "@/features/field/lazy";
 import { LazySubscriberTickets } from "@/features/crm/lazy";
+import { LazyContractService } from "@/features/network/lazy";
 import { SubscriberSections } from "./sections";
 export function OperationalSubscriberSheet() {
  const [params, setParams] = useSearchParams(); const id = params.get("ficha"); const [expanded, setExpanded] = useState(false);
@@ -44,7 +45,7 @@ function SubscriberDetails({ id, expanded, onExpand }: { id: string; expanded: b
  <TabsContent value="contrato"><div className="sheet-content-body"><ContractCards subscriber={s} navigate={navigate} /></div></TabsContent>
  {can(me, "finance:read") && <TabsContent value="financeiro"><div className="sheet-content-body">{s.contracts.length ? s.contracts.map(contract => <ProfileSection key={contract.id} title={`${contract.plan_name} · ${contract.id.slice(0,8)}`}><ContractFinance id={contract.id} /></ProfileSection>) : <p className="profile-footnote">O titular ainda não possui contratos.</p>}</div></TabsContent>}
  {(can(me,"crm:read") || can(me,"os:read")) && <TabsContent value="atendimento"><div className="sheet-content-body erp-stack">{can(me,"crm:read") && hasModule(me,"crm") && <LazySubscriberTickets id={s.id} />}{can(me,"os:read") && hasModule(me,"field") && <LazyLinkedOrders subscriberId={s.id} />}</div></TabsContent>}
- {can(me,"network:read") && <TabsContent value="conexao"><div className="sheet-content-body"><ProfileSection title="Acessos dos contratos" caption="Integração desta seção em andamento."><p className="profile-footnote">O contexto deste titular é real. Nenhum dado demonstrativo é exibido nesta ficha.</p><Button variant="outline" onClick={() => navigate("/rede/equipamentos")}>Abrir área correspondente<ArrowUpRight /></Button></ProfileSection></div></TabsContent>}
+ {can(me,"network:read") && <TabsContent value="conexao"><div className="sheet-content-body erp-stack">{s.contracts.length?s.contracts.map(contract=><LazyContractService key={contract.id} id={contract.id} status={contract.status} planName={contract.plan_name} />):<p className="profile-footnote">O titular ainda não possui contratos.</p>}</div></TabsContent>}
  <TabsContent value="documentos"><div className="sheet-content-body"><SubscriberSections subscriber={s} section="documentos" refresh={refresh} /></div></TabsContent>
  <TabsContent value="historico"><div className="sheet-content-body"><SubscriberSections subscriber={s} section="historico" refresh={refresh} /></div></TabsContent>
  </Tabs>}</QueryBoundary>{creatingContract && <CreateContract subscriberId={id} onClose={() => setCreatingContract(false)} onDone={async () => { setCreatingContract(false); setTab("contrato"); await refresh(); }} />}{editing && s && <SubscriberEditor initial={s} onClose={() => setEditing(false)} onDone={async () => { setEditing(false); await refresh(); }} />}</>;

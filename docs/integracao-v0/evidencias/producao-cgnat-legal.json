@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:18390",
+  "verified_at": "2026-10-19T13:01:50.220Z",
+  "backend": "Go/PostgreSQL isolados; accounting sintético, script não aplicado em rede física",
+  "checks": [
+    "UI consulta capacidade no Go, cria plano imutável, apresenta mapa/lookup e exporta script sem aplicá-lo ao NAS",
+    "Rastreio exibe holders_at do accounting no instante consultado e distingue reservas e sessão atual",
+    "Encerramento preserva rastreabilidade histórica e o Go impede apagar blocos usados por planos encerrados",
+    "Consulta legal aplica fuso explícito, IP/porta e referência auditada; CSV e impressão isolada contêm o mesmo resultado",
+    "Consulta direta de IP usa sessões históricas sem exigir porta CGNAT",
+    "Consulta IPv6 expõe o prefixo cadastrado e a limitação histórica existente em vez de presumir titulares anteriores"
+  ]
+}

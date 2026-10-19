@@ -20,8 +20,10 @@
     "behavior": "Lista de seis contas sintéticas somente se health informa demo; preenche e-mail/senha, não contorna autenticação.",
     "endpoints": "GET /api/health; POST /api/auth/login",
     "evidence": "P/Login.tsx; G/db/demo.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-workspace.mjs"
+    ]
   },
   {
     "id": "AC-03",
@@ -31,9 +33,9 @@
     "behavior": "Termo mínimo de dois caracteres; Go agrega correspondências de cadastro, login, IP, MAC, ONU e OS; dados financeiros/rede são condicionados ao perfil. Resultado abre assinante/contrato; sem pager visual.",
     "endpoints": "GET /api/search",
     "evidence": "P/Atendimento.tsx (SearchBox/Busca); L/search.go",
-    "integrationState": "partial",
+    "integrationState": "validated",
     "validation": [
-      "Fluxo parcial implementado; conferir o plano para os escopos restantes."
+      "e2e/frontend-v0-workspace.mjs"
     ]
   },
   {
@@ -44,9 +46,9 @@
     "behavior": "Filtrar menu, Enter para primeiro destino, recolher áreas, persistir preferências em localStorage; alternar tema; banners demo/suporte e encerrar suporte. Estado visual é local; suporte tem operação Go.",
     "endpoints": "POST /api/support/exit; GET /api/me",
     "evidence": "W/App.tsx; W/main.tsx; I/self.go",
-    "integrationState": "partial",
+    "integrationState": "validated",
     "validation": [
-      "Fluxo parcial implementado; conferir o plano para os escopos restantes."
+      "e2e/frontend-v0-workspace.mjs"
     ]
   },
   {
@@ -57,9 +59,9 @@
     "behavior": "Contadores de assinantes/contratos/planos/MRR; today monta pendências e links conforme papel, módulos e contexto. Consulta real; seed demo pode tornar conteúdo sintético.",
     "endpoints": "GET /api/dashboard; GET /api/today",
     "evidence": "P/Dashboard.tsx; L/today.go; L/service.go; L/queries/dashboard_0.sql",
-    "integrationState": "partial",
+    "integrationState": "validated",
     "validation": [
-      "Fluxo parcial implementado; conferir o plano para os escopos restantes."
+      "e2e/frontend-v0-workspace.mjs"
     ]
   },
   {
@@ -70,8 +72,10 @@
     "behavior": "Faixas offline, distribuição RX, ativações/encerramentos em 12 meses, últimas operações; caixa líquido e sem-fatura somente quando permitido. Componente exige network:read; dados dependem de observações/accounting.",
     "endpoints": "GET /api/dashboard/panels",
     "evidence": "P/Cobranca.tsx (Panels); L/agenda.go; L/dinamicas.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-workspace.mjs"
+    ]
   },
   {
     "id": "AC-07",
@@ -1180,8 +1184,10 @@
     "behavior": "Escolher concentrador, PPPoE/hotspot com login e senha ou IPoE com MAC conforme compatibilidade; senha gerada ou fornecida; atualizar senha/MAC, remover associação MAC e reaplicar. Credenciais não são redisponibilizadas como texto pela ficha.",
     "endpoints": "GET /api/contracts/:id/service; POST /api/contracts/:id/service; PATCH /api/resources/:id/mac; PATCH /api/resources/:id/secret",
     "evidence": "P/Service.tsx; E/rede.go; E/acessos.go; G/network/",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-access.mjs"
+    ]
   },
   {
     "id": "RE-08",
@@ -1191,8 +1197,10 @@
     "behavior": "Botões disparam operações assinadas e versionadas; controle por network:operate, dispositivo, estado desejado e política. Resultado depende do agente ou executor RADIUS e da rede real.",
     "endpoints": "POST /api/resources/:id/:action; GET /api/operations/:id",
     "evidence": "P/Service.tsx; E/rede.go; G/network/engine.go; G/radius/",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-access.mjs"
+    ]
   },
   {
     "id": "RE-09",
@@ -1217,8 +1225,10 @@
     "behavior": "Busca, seleção em lote até 200, CSV e motivo; servidor processa recursos individualmente e informa aceitos/recusados. Visão é baseada no accounting disponível, não garante sessão em tempo real.",
     "endpoints": "GET /api/network/online; POST /api/network/disconnect",
     "evidence": "P/Atendimento.tsx; E/operacoes.go; E/relatorios.go; G/radius/",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-access.mjs"
+    ]
   },
   {
     "id": "RE-11",
@@ -1228,8 +1238,10 @@
     "behavior": "Histórico de accounting, início/fim, IP/NAS, aceites/rejeições e MAC conforme origem; horários e totais dependem de dados enviados ao RADIUS/relatórios do agente.",
     "endpoints": "GET /api/contracts/:id/sessions; GET /api/contracts/:id/radius-log",
     "evidence": "P/Service.tsx; P/Concentradores.tsx; P/Atendimento.tsx; E/relatorios.go; L/usage.go; M/00036_radius_integrado.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-access.mjs"
+    ]
   },
   {
     "id": "RE-12",
@@ -1239,8 +1251,11 @@
     "behavior": "Busca candidatos no ACS, vincula/desvincula, mostra dados, atualiza parâmetros, reinicia e configura rede Wi-Fi quando o dispositivo expõe os parâmetros. Envia tarefas ao ACS; execução assíncrona e compatibilidade por modelo não são comprovadas pela simples aceitação da tarefa.",
     "endpoints": "GET /api/contracts/:id/cpe; GET /api/contracts/:id/cpe/candidates; POST /api/contracts/:id/cpe/link; DELETE /api/contracts/:id/cpe/link; POST /api/contracts/:id/cpe/wifi; POST /api/contracts/:id/cpe/reboot; POST /api/contracts/:id/cpe/refresh",
     "evidence": "P/Cpe.tsx; E/cpe.go; G/acs/",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-cpe.mjs",
+      "ACS sintético TR-098/TR-181: vínculo, leitura, Wi-Fi aplicado/enfileirado, reinício, releitura e desvínculo; sem roteador físico."
+    ]
   },
   {
     "id": "RE-13",
@@ -1250,8 +1265,10 @@
     "behavior": "Drivers e contas sintéticas existem para demonstração; o driver real do agente e o RADIUS integrado são caminhos distintos. Não interpreta a execução demo como equipamento físico.",
     "endpoints": "POST /api/devices; POST /api/resources/:id/:action",
     "evidence": "P/Network.tsx; services/network-agent/nexo_agent/drivers/; G/config/",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-access.mjs"
+    ]
   },
   {
     "id": "RE-14",
@@ -1261,8 +1278,10 @@
     "behavior": "Consumo mensal e série por hora/dia/semana/ano; disponibilidade por 7, 15 ou 30 dias calculada com sessões de accounting. A estimativa não é monitoramento direto de enlace e depende dos registros recebidos.",
     "endpoints": "GET /api/contracts/:id/usage; GET /api/contracts/:id/usage-series; GET /api/contracts/:id/availability",
     "evidence": "P/Extras.tsx; P/Atendimento.tsx; L/usage.go; L/dinamicas.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-access.mjs"
+    ]
   },
   {
     "id": "IN-01",
@@ -1272,8 +1291,11 @@
     "behavior": "Lista descobertas do agente; serial/PON, estado, sinal RX/TX e vínculo; cadastro escolhe OLT, serial ou descoberta, porta PON, perfis e VLAN. Validação de serial e requisitos Huawei são aplicados; cada contrato ativo tem limite de vínculo segundo o backend.",
     "endpoints": "GET /api/contracts/:id/onu; POST /api/contracts/:id/onu",
     "evidence": "P/Olt.tsx; E/olt.go; G/agent/; M/00008_olt_onu.sql; M/00009_olt_huawei.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-optical.mjs",
+      "Protocolo sintético do agente validado; driver Huawei segue sem homologação em OLT física. Nenhum fabricante adicional foi presumido."
+    ]
   },
   {
     "id": "IN-02",
@@ -1283,8 +1305,11 @@
     "behavior": "Solicita autorização ou remoção ao agente, registra estados desejado/observado, tentativas e evidências; substituição requer estado anterior compatível. O driver Huawei usa SSH/CLI; integração real depende da configuração e homologação do equipamento.",
     "endpoints": "POST /api/onus/:id/:action; GET /api/operations/:id",
     "evidence": "P/Olt.tsx; E/olt.go; services/network-agent/nexo_agent/drivers/",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-optical.mjs",
+      "Protocolo sintético do agente validado; driver Huawei segue sem homologação em OLT física. Nenhum fabricante adicional foi presumido."
+    ]
   },
   {
     "id": "IN-03",
@@ -1294,8 +1319,11 @@
     "behavior": "Há implementação específica Huawei e driver de demonstração, sem evidência de suporte genérico a todos os fabricantes/modelos. Código do driver informa necessidade de validação em ambiente real; ausência de homologação não implica que o driver seja fictício.",
     "endpoints": "POST /api/contracts/:id/onu; POST /api/onus/:id/:action",
     "evidence": "E/olt.go; services/network-agent/nexo_agent/drivers/",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-optical.mjs",
+      "Protocolo sintético do agente validado; driver Huawei segue sem homologação em OLT física. Nenhum fabricante adicional foi presumido."
+    ]
   },
   {
     "id": "IN-04",
@@ -1305,8 +1333,10 @@
     "behavior": "Nome, tipo, capacidade, endereço/coordenadas, caixa pai, OLT/PON e observações; editar/excluir conforme restrições, inclusive prevenção de ciclos e uso existente; visualização de ligações entre caixas.",
     "endpoints": "GET /api/ftth/boxes; POST /api/ftth/boxes; PATCH /api/ftth/boxes/:id; DELETE /api/ftth/boxes/:id",
     "evidence": "P/Field.tsx; E/infraestrutura.go; M/00011_os_estoque_ftth.sql; M/00040_mapa_coordenadas.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-ftth.mjs"
+    ]
   },
   {
     "id": "IN-05",
@@ -1316,8 +1346,10 @@
     "behavior": "Selecionar porta, contrato ou anotação; impedir conflitos de porta/contrato segundo regras; remover reserva. Exibe uso e vínculo à ficha correspondente.",
     "endpoints": "POST /api/ftth/boxes/:id/drops; DELETE /api/ftth/drops/:id",
     "evidence": "P/Field.tsx; E/infraestrutura.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-ftth.mjs"
+    ]
   },
   {
     "id": "IN-06",
@@ -1327,8 +1359,11 @@
     "behavior": "Existe mapa esquemático e gestão de caixas/portas, mas não foram identificados cadastro de traçado completo de fibra, fusões, OTDR ou importação de projeto GIS. O desenho não prova conectividade física.",
     "endpoints": "GET /api/ftth/boxes; GET /api/map/points",
     "evidence": "P/Field.tsx; P/Mapa.tsx; E/infraestrutura.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-ftth.mjs",
+      "Capacidades existentes de caixas, portas e esquema por coordenadas integradas. Traçado físico completo, fusões, OTDR e importação GIS não existem no backend e não foram inventados."
+    ]
   },
   {
     "id": "IN-07",
@@ -1338,8 +1373,10 @@
     "behavior": "Indicadores de agentes, ONUs, falhas de operações, divergências, OS e SLA; alertas derivados de dados armazenados; parâmetros de RX, limiar de falhas por PON e remoção de ONU ao encerrar contrato. Permissão e módulo NOC aplicam-se.",
     "endpoints": "GET /api/noc/overview; PUT /api/noc/settings",
     "evidence": "P/Noc.tsx; E/noc.go; G/jobs/; M/00013_noc.sql; M/00014_onu_encerramento.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-optical.mjs"
+    ]
   },
   {
     "id": "IN-08",
@@ -1349,8 +1386,10 @@
     "behavior": "Mostra achados, severidade, evidências e sugestões a partir de estados disponíveis de rede/serviço/ONU; não executa teste de cabo, ping ou OTDR apenas por abrir o diagnóstico.",
     "endpoints": "GET /api/contracts/:id/diagnosis",
     "evidence": "P/Noc.tsx; E/noc.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-optical.mjs"
+    ]
   },
   {
     "id": "IN-09",
@@ -1360,8 +1399,11 @@
     "behavior": "Camadas e filtros; pan/zoom e busca; pontos limitados por área e truncamento informado; alterar coordenadas de contrato/POP quando permitido. Usa mapas externos no navegador; não faz geocodificação automática.",
     "endpoints": "GET /api/map/points; PUT /api/contracts/:id/location; PUT /api/pops/:id/location",
     "evidence": "P/Mapa.tsx; E/infraestrutura.go; L/dinamicas.go; M/00040_mapa_coordenadas.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-map.mjs",
+      "Contratos, POPs, caixas, filtro por região/camada/situação, coordenadas exatas, clique para mover, remoção, cobertura, celular e RLS. Blocos OSM interceptados somente na validação."
+    ]
   },
   {
     "id": "IN-10",
@@ -1371,8 +1413,10 @@
     "behavior": "Criar/excluir pool CIDR, tipo e parâmetros; reservar endereço manualmente ou selecionar próximo IPv4 livre dentro dos limites do algoritmo; associar contrato ou descrever reserva e liberar. Aplicação do IPv4 no acesso depende de compatibilidade e reaplicação.",
     "endpoints": "GET /api/ipam/pools; POST /api/ipam/pools; DELETE /api/ipam/pools/:id; POST /api/ipam/pools/:id/allocations; DELETE /api/ipam/allocations/:id",
     "evidence": "P/Ipam.tsx; E/ipam.go; E/infraestrutura.go; M/00010_ipam_cgnat.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-ipam.mjs"
+    ]
   },
   {
     "id": "IN-11",
@@ -1382,8 +1426,11 @@
     "behavior": "Cria/libera delegação manual ou automática com comprimento permitido e unicidade; o código RADIUS examinado não entrega automaticamente prefixo IPv6 ao NAS. Portanto o ciclo de provisionamento IPv6 não está completo.",
     "endpoints": "POST /api/ipam/pools/:id/delegations; DELETE /api/ipam/delegations/:id",
     "evidence": "P/Ipam.tsx; E/ipam.go; G/radius/vendor.go; M/00017_ipv6_delegacao.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-ipam.mjs",
+      "Reserva e liberação de prefixo validadas; a entrega automática IPv6 ao NAS não existe no backend e permanece explícita na interface."
+    ]
   },
   {
     "id": "IN-12",
@@ -1393,8 +1440,10 @@
     "behavior": "Valida faixa privada/pública, quantidade de portas e capacidade; cria plano determinístico, visualiza mapa, gera script RouterOS e retira plano preservando histórico. O script precisa ser aplicado externamente.",
     "endpoints": "POST /api/cgnat/plans/check; POST /api/cgnat/plans; POST /api/cgnat/plans/:id/retire; GET /api/cgnat/plans/:id/map; GET /api/cgnat/plans/:id/script",
     "evidence": "P/Ipam.tsx; E/ipam.go; L/cgnat.go; M/00010_ipam_cgnat.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-cgnat-legal.mjs"
+    ]
   },
   {
     "id": "IN-13",
@@ -1404,8 +1453,10 @@
     "behavior": "Busca IP público e porta, com horário opcional; backend inclui titulares históricos, mas a tela apresenta dados atuais e não exibe a coleção holders_at. A resposta visual isolada pode não comprovar titularidade histórica.",
     "endpoints": "GET /api/cgnat/trace",
     "evidence": "P/Ipam.tsx; E/ipam.go; M/00010_ipam_cgnat.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-cgnat-legal.mjs"
+    ]
   },
   {
     "id": "IN-14",
@@ -1415,8 +1466,10 @@
     "behavior": "IP, porta opcional, intervalo, fuso e margem; retorna candidatos e sessões de accounting/CGNAT, permite impressão e CSV quando há sessões e mantém histórico auditável. Janela e quantidade têm limites no servidor.",
     "endpoints": "POST /api/legal/ip-lookup",
     "evidence": "P/ConsultaIp.tsx; E/ipam.go; M/00010_ipam_cgnat.sql; M/00025_sessoes_contatos_pops.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-cgnat-legal.mjs"
+    ]
   },
   {
     "id": "IN-15",
@@ -1426,8 +1479,11 @@
     "behavior": "A consulta usa delegações registradas e sua data de criação; não foi encontrada manutenção completa de titulares de delegação anteriores após liberação. Resultados históricos exigem conferência das fontes existentes.",
     "endpoints": "POST /api/legal/ip-lookup",
     "evidence": "E/ipam.go; M/00017_ipv6_delegacao.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-cgnat-legal.mjs",
+      "Consulta IPv6 apresenta delegação cadastrada e a ausência de histórico completo após liberação. Não presume titularidade anterior."
+    ]
   },
   {
     "id": "IN-16",
@@ -1437,8 +1493,10 @@
     "behavior": "Cadastrar aviso, período/abrangência, consultar, cancelar e disparar notificações; avisos chegam ao portal conforme vínculo e regras. Envio externo depende de canais configurados.",
     "endpoints": "POST /api/maintenance-notices; POST /api/maintenance-notices/:id/cancel; POST /api/maintenance-notices/:id/notify",
     "evidence": "P/Extras.tsx; E/condicoes.go; E/rotinas.go; M/00022_cadastro_manutencao_campo.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-maintenance.mjs"
+    ]
   },
   {
     "id": "IN-17",
@@ -1448,8 +1506,11 @@
     "behavior": "Cartão consulta IPv4, delegações IPv6 e caixa/porta vinculados ao contrato; cadastro e liberação são feitos nas telas IPAM e FTTH.",
     "endpoints": "GET /api/contracts/:id/ips; GET /api/contracts/:id/ipv6; GET /api/contracts/:id/ftth",
     "evidence": "P/Noc.tsx; L/consultas.go; L/grupos.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-ipam.mjs",
+      "e2e/frontend-v0-ftth.mjs: porta da caixa positiva consultada na ficha do contrato."
+    ]
   },
   {
     "id": "AD-01",
@@ -1503,8 +1564,10 @@
     "behavior": "Nome, cidade e estado, contagens de contratos; ativar/inativar e associar a usuários/contratos. Edição de dados cadastrais existe no servidor, mas não foi localizada na tela.",
     "endpoints": "GET /api/pops; POST /api/pops; PATCH /api/pops/:id; PUT /api/contracts/:id/pop",
     "evidence": "P/Atendimento.tsx; E/config.go; M/00025_sessoes_contatos_pops.sql; M/00034_escopo_pop_aviso_documentos.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-maintenance.mjs"
+    ]
   },
   {
     "id": "AD-06",
@@ -2075,8 +2138,10 @@
     "behavior": "Há tabelas e diretório para células, porém a implementação de escopo inspecionada limita o acesso à célula c1. Migração e operação distribuída entre células não estão completas.",
     "endpoints": "—",
     "evidence": "M/00056_diretorio_celulas.sql; G/db/; G/tenancy/",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "backend-preserved",
+    "validation": [
+      "Limitação existente confirmada em apps/api-go/internal/db/db.go: células diferentes de c1 não têm conexão disponível. O frontend não cria roteamento ou migração distribuída paralela."
+    ]
   },
   {
     "id": "BE-24",

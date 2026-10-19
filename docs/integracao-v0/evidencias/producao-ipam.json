@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:18390",
+  "verified_at": "2026-10-19T13:01:56.830Z",
+  "backend": "Go/PostgreSQL isolados; reservas cadastrais sem alteração de rede física",
+  "checks": [
+    "Cadastro e edição de pool IPv4 preservam CIDR; reserva automática ignora endereço de rede e grava descrição no Go",
+    "Reserva a contrato, unicidade do IP e restauração da ficha pela URL seguem o Go",
+    "Delegação automática /56 é registrada no contrato com aviso explícito de que o backend não entrega IPv6 ao NAS",
+    "Reserva e liberação de IPv6 individual exigem endereço explícito e não se confundem com delegação de prefixo",
+    "Liberação de prefixo e endereços atualiza a ocupação e permite excluir blocos sem vínculos"
+  ]
+}

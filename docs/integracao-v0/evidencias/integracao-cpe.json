@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:3002",
+  "verified_at": "2026-10-19T11:37:08.565Z",
+  "backend": "Go/PostgreSQL isolados; ACS sintético TR-098/TR-181",
+  "checks": [
+    "Pesquisa por série, confirmação e vínculo TR-098 persistem no Go com WAN e Wi-Fi reais do ACS sintético",
+    "Alteração de Wi-Fi valida senha e distingue aplicação imediata; consultas de estado não recuperam a senha",
+    "Releitura e reinício enviam tarefas ao ACS e reinício exige confirmação explícita",
+    "TR-181 enfileirado mantém o SSID observado e informa que a alteração depende do próximo contato do roteador",
+    "Isolamento por provedor, apresentação no celular e desvínculo são validados sem tocar em roteador físico"
+  ]
+}

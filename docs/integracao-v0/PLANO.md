@@ -15,12 +15,12 @@ O frontend do v0 é a referência oficial e obrigatória de UI/UX. A integraçã
 
 | Etapa | Escopo | Situação |
 |---|---|---|
-| 1 | Referência visual, preservação e matriz por unidade funcional | Concluída: 169 unidades e dezesseis comparações visuais idênticas |
+| 1 | Referência visual, preservação e matriz por unidade funcional | Concluída: 169 unidades e vinte e duas comparações visuais idênticas |
 | 2 | Promover o código completo do v0 para `apps/web`, build e implantação | Código promovido; build e imagem Docker validados |
 | 3 | Sessão, MFA, permissões, módulos, HTTP, cache e demonstração isolada | Fundação integrada; login, senha, TOTP, expiração e isolamento validados |
 | 4 | Assinantes: consulta paginada, ficha, cadastro e edição | Cadastro e recursos complementares validados; ficha recebe os módulos das etapas 5 e 6 |
 | 5 | Planos, contratos, versões, adicionais e condições | Núcleo comercial, equipamentos e recolhimento validados; comprovante de aceite depende do portal |
-| 6 | Atendimento, OS, estoque, financeiro, rede, administração e importação | Financeiro, CRM, operação de OS, agenda, Meu trabalho e estoque integrados; inventário de rede, concentradores e operações integrados; acesso dos contratos, demais recursos de rede e administração em implementação |
+| 6 | Atendimento, OS, estoque, financeiro, rede, administração e importação | Financeiro, CRM, OS, agenda, estoque, acessos, sessões, CPE, ONUs, NOC, manutenções, POPs e caixas/portas ópticas integrados e validados; endereçamento e demais módulos em implementação |
 | 7 | Portal, SaaS, revisão da cobertura e retirada operacional do legado | Pendente |
 
 Uma etapa ou unidade só recebe estado concluído após validação correspondente. A presença de uma tela, de um endpoint ou de um teste de leitura não comprova a cobertura de suas mutações e regras.
@@ -49,6 +49,15 @@ Resultados executados, evidências e limites: [VALIDACAO.md](VALIDACAO.md).
 
 ## Cobertura atual
 
-A matriz registra 76 unidades integradas e validadas, 9 parciais, 57 pendentes e 27 capacidades internas ou limitações do backend preservadas. Esses números contam unidades funcionais, não esforço ou tempo restante. A cobertura ainda não representa conclusão das sete etapas.
+A matriz registra 106 unidades integradas e validadas, 6 parciais, 29 pendentes e 28 capacidades internas ou limitações do backend preservadas. Esses números contam unidades funcionais, não esforço ou tempo restante. A cobertura ainda não representa conclusão das sete etapas.
 
 `test:commercial` valida o núcleo comercial; `test:finance` valida os fluxos financeiros; `test:crm` valida prospectos e atendimento; `test:field` valida OS, agenda e trabalho do técnico; `test:stock` valida o estoque e o ciclo das unidades por série; `test:network` valida o inventário de rede, concentradores e evidências de operações. A fumaça oficial executa assinantes, sessão, comercial, financeiro, CRM, OS, estoque e rede em sequência contra a mesma base sintética para evitar interferência entre geração financeira e dados de outros cenários.
+
+
+## Incremento de acesso e infraestrutura
+
+Validados o provisionamento PPPoE/IPoE/Hotspot, credenciais e MAC, comandos e observações separados, sessões/consumo/disponibilidade, conexões online e desconexão em lote. CPE usa ACS sintético TR-098/TR-181, preservando a distinção entre tarefa aplicada e enfileirada. ONUs usam o protocolo real do agente em laboratório; isso não homologa o driver Huawei em equipamento físico.
+
+NOC, diagnóstico, avisos de manutenção com consentimento, POPs e CTO/CEO com reservas de portas têm evidências de mutação no Go e imagem local de produção. O painel inicial reaproveita os componentes originais do v0 para indicadores, prioridades e gráficos de dados do Go. Busca global e página de resultados usam os registros do provedor.
+
+IPAM, CGNAT e consulta legal tiveram seus cenários de mutação e consulta aprovados no Go isolado e na imagem local de produção. O mapa operacional também foi validado no Go isolado e na imagem local de produção. Administração, portal e SaaS ainda precisam de cobertura. A etapa 7 continua pendente.

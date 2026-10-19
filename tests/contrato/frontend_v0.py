@@ -37,8 +37,16 @@ def main():
         NEXO_DEMO_MODE='1', NEXO_REQUIRE_ADMIN_MFA='0', NEXO_AGENT_MTLS='off', NEXO_GO_JOBS='0',
         NEXO_GO_ADDR=f'127.0.0.1:{api_port}', NEXO_GO_INTERNAL_ADDR=f'127.0.0.1:{api_port+1000}', NEXO_GO_AGENT_ADDR=f'127.0.0.1:{api_port+2000}',
     )
+    acs_server = None
+    if os.getenv("NEXO_V0_ACS") == "1":
+        from fixtures.acs_v0 import start
+        acs_port = int(os.getenv("NEXO_V0_ACS_PORT", "18982"))
+        acs_server = start(acs_port)
+        env["NEXO_ACS_URL"] = f"http://127.0.0.1:{acs_port}"
+    else:
+        env.pop("NEXO_ACS_URL", None)
     process = None
-    log = open(LOCAL / 'frontend-v0-api.log', 'w')
+    log = open(LOCAL / ('frontend-v0-api.log' if api_port == 18881 else f'frontend-v0-api-{api_port}.log'), 'w')
     try:
         subprocess.run(['docker', 'run', '--rm', '-d', '--name', name, '--label', 'nexo.validation=v0', '--network', 'host', '-e', 'POSTGRES_USER=nexo_owner', '-e', f'POSTGRES_PASSWORD={owner}', '-e', 'POSTGRES_DB=nexo_v0_validation', 'postgres:16-alpine', 'postgres', '-p', str(port)], check=True, stdout=subprocess.DEVNULL)
         for _ in range(100):
@@ -67,6 +75,9 @@ def main():
             except subprocess.TimeoutExpired:
                 process.kill()
                 process.wait()
+        if acs_server:
+            acs_server.shutdown()
+            acs_server.server_close()
         log.close()
         subprocess.run(['docker', 'rm', '-f', name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 

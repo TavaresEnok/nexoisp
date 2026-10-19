@@ -1,5 +1,29 @@
 [
   {
+    "name": "inicio-desktop-claro",
+    "identical": true,
+    "reference": "cf9c58af3f5a27fc0ecdefebe41f943858b718485e2736a185b89574ad7a8926",
+    "official": "cf9c58af3f5a27fc0ecdefebe41f943858b718485e2736a185b89574ad7a8926"
+  },
+  {
+    "name": "inicio-desktop-escuro",
+    "identical": true,
+    "reference": "9b8153228c29f3d3e8bebe99fdba92e667312493a5309ba9915edb90faade282",
+    "official": "9b8153228c29f3d3e8bebe99fdba92e667312493a5309ba9915edb90faade282"
+  },
+  {
+    "name": "inicio-celular",
+    "identical": true,
+    "reference": "3dbfab1340dc6518ab15f01944899daf079a1650f0e7a9bb3bd5d4e2fa0b2ab1",
+    "official": "3dbfab1340dc6518ab15f01944899daf079a1650f0e7a9bb3bd5d4e2fa0b2ab1"
+  },
+  {
+    "name": "inicio-rede",
+    "identical": true,
+    "reference": "f748c59743bfc65a1a8cfb08ed45cf28b6726249f4d8b9acfc42f9419009948e",
+    "official": "f748c59743bfc65a1a8cfb08ed45cf28b6726249f4d8b9acfc42f9419009948e"
+  },
+  {
     "name": "assinantes-desktop-claro",
     "identical": true,
     "reference": "aa2c1b93532cab2937d4ea29935d270302c53fe050d58e65986e6f7592f551bb",
@@ -22,6 +46,18 @@
     "identical": true,
     "reference": "ce16656e87b3c51328e76cf743fb1329fab7f80bc4e88c8576a1a574af78547c",
     "official": "ce16656e87b3c51328e76cf743fb1329fab7f80bc4e88c8576a1a574af78547c"
+  },
+  {
+    "name": "rede-online-desktop",
+    "identical": true,
+    "reference": "2833c00003c62367f69b2cb4215db81ecd47d23c8b98fcbe83e141223924e0d1",
+    "official": "2833c00003c62367f69b2cb4215db81ecd47d23c8b98fcbe83e141223924e0d1"
+  },
+  {
+    "name": "rede-online-celular",
+    "identical": true,
+    "reference": "da41203047b68a2d74e5a6e80c9bd9d594acc0e5a70578d4a1601e36c26d4fc6",
+    "official": "da41203047b68a2d74e5a6e80c9bd9d594acc0e5a70578d4a1601e36c26d4fc6"
   },
   {
     "name": "rede-inventario",

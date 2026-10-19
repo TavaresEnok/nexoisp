@@ -20,7 +20,16 @@
     "test:crm": "node ../../e2e/frontend-v0-crm.mjs",
     "test:field": "node ../../e2e/frontend-v0-field.mjs",
     "test:stock": "node ../../e2e/frontend-v0-stock.mjs",
-    "test:network": "node ../../e2e/frontend-v0-network.mjs"
+    "test:network": "node ../../e2e/frontend-v0-network.mjs",
+    "test:access": "node ../../e2e/frontend-v0-access.mjs",
+    "test:cpe": "node ../../e2e/frontend-v0-cpe.mjs",
+    "test:optical": "node ../../e2e/frontend-v0-optical.mjs",
+    "test:maintenance": "node ../../e2e/frontend-v0-maintenance.mjs",
+    "test:workspace": "node ../../e2e/frontend-v0-workspace.mjs",
+    "test:ftth": "node ../../e2e/frontend-v0-ftth.mjs",
+    "test:ipam": "node ../../e2e/frontend-v0-ipam.mjs",
+    "test:cgnat": "node ../../e2e/frontend-v0-cgnat-legal.mjs",
+    "test:map": "node ../../e2e/frontend-v0-map.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.5.0",

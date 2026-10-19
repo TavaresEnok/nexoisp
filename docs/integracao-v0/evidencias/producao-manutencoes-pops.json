@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:18390",
+  "verified_at": "2026-10-19T11:46:52.258Z",
+  "backend": "Go/PostgreSQL isolados; canal HTTP em loopback, sem mensagens externas",
+  "deliveries_observed": 2,
+  "checks": [
+    "Cadastro, edição, normalização de UF e ativação/inativação de POP persistem no Go",
+    "Manutenção valida intervalo, grava público por concentrador e calcula dois assinantes atingidos no Go",
+    "Avisos de início e normalização exigem confirmação e consentimento; somente o contato sintético autorizado entra na fila do canal local",
+    "Cancelamento retira o aviso do portal e a consulta mantém a apresentação no celular",
+    "Atendimento consulta avisos sem receber comandos administrativos; o Go nega cancelamento sem permissão"
+  ]
+}

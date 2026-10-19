@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:3000",
+  "verified_at": "2026-10-19T11:46:36.091Z",
+  "backend": "Go/PostgreSQL isolados; comandos sem NAS físico",
+  "checks": [
+    "Provisionamento pela ficha usa equipamento real, emite senha apenas uma vez e mantém intenção separada da leitura ausente",
+    "Troca de senha valida tamanho, solicita reaplicação e vínculo MAC é normalizado pelo Go",
+    "Suspensão, reativação, reaplicação e desconexão geram operações no Go sem inventar confirmação do NAS",
+    "Evidências preservam a ficha e a seção Conexão do titular consulta o mesmo acesso real",
+    "Consulta de conexões usa o endpoint operacional e não trata intenção ativa sem leitura como sessão online",
+    "Relatos sintéticos do agente alimentam sessão, consumo mensal, exportação, séries e disponibilidade sem estimar tráfego ausente",
+    "Consulta de sessão observada permite busca, CSV e desconexão selecionada com motivo registrado no Go",
+    "Desconexão recusada pelo Go permanece explícita e não é apresentada como execução bem-sucedida",
+    "RADIUS integrado oferece IPoE por MAC sem senha e Hotspot com credencial; ambos preservam o tipo de acesso no Go",
+    "Driver demonstrativo criado pela UI somente no servidor de demonstração identifica explicitamente a leitura sintética, sem acesso a NAS físico",
+    "Conta financeira sem permissão de rede não recebe a seção de conexão; Go nega alterações e acesso entre provedores",
+    "Erro de consulta de serviço exibe falha e não oferece criar um acesso substituto"
+  ]
+}

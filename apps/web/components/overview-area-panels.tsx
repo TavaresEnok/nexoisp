@@ -11,23 +11,27 @@ import type { WorkspaceData } from "@/lib/types";
 export function OverviewAreaChart({ area, data }: { area: "network" | "support"; data: WorkspaceData }) {
   const network = area === "network";
   const rows = getOverviewBreakdown(area, data);
+  return <OverviewBreakdownPanel title={network ? "Nos bastidores da sua rede" : "Cada atendimento conta."} description={network ? "Tráfego por equipamento · leitura do cenário às 09:42" : "Distribuição dos chamados por situação"} href={network ? "/rede/equipamentos" : "/atendimentos"} actionLabel={network?"Abrir NOC":"Abrir fila"} rows={rows} summary={network ? `${rows.reduce((sum,row)=>sum+row.value,0).toLocaleString("pt-BR",{maximumFractionDigits:2})} Gbps`:number(data.tickets.length)} summaryNote={network?"tráfego agregado dos equipamentos listados":"chamados listados neste workspace"} valueLabel={network?"Tráfego · Gbps":"Chamados"} allowDecimals={network} sourceNote="Recorte dos registros demonstrativos disponíveis" />;
+}
+
+export function OverviewBreakdownPanel({title,description,href,actionLabel,rows,summary,summaryNote,valueLabel,allowDecimals=false,sourceNote}:{title:string;description:string;href:string;actionLabel:string;rows:{name:string;value:number}[];summary:string;summaryNote:string;valueLabel:string;allowDecimals?:boolean;sourceNote:string}) {
   return <Panel
-    title={network ? "Nos bastidores da sua rede" : "Cada atendimento conta."}
-    description={network ? "Tráfego por equipamento · leitura do cenário às 09:42" : "Distribuição dos chamados por situação"}
-    action={<TextLink href={network ? "/rede/equipamentos" : "/atendimentos"}>{network ? "Abrir NOC" : "Abrir fila"}</TextLink>}
+    title={title}
+    description={description}
+    action={<TextLink href={href}>{actionLabel}</TextLink>}
     className="revenue-panel"
   >
-    <div className="revenue-summary"><div><div className="revenue-number">{network ? `${rows.reduce((sum, row) => sum + row.value, 0).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} Gbps` : number(data.tickets.length)}</div><p>{network ? "tráfego agregado dos equipamentos listados" : "chamados listados neste workspace"}</p></div></div>
-    {rows.length ? <ChartContainer className="revenue-chart overview-breakdown-chart" config={{ value: { label: network ? "Tráfego · Gbps" : "Chamados", color: "var(--chart-1)" } }}>
+    <div className="revenue-summary"><div><div className="revenue-number">{summary}</div><p>{summaryNote}</p></div></div>
+    {rows.length ? <ChartContainer className="revenue-chart overview-breakdown-chart" config={{ value: { label: valueLabel, color: "var(--chart-1)" } }}>
       <BarChart accessibilityLayer data={rows} margin={{ top: 14, right: 12, left: -18, bottom: 0 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 4" stroke="var(--border)" />
         <XAxis dataKey="name" axisLine={false} tickLine={false} fontSize={10} interval={0} tickMargin={12} tickFormatter={name => String(name).replace("-01", "")} />
-        <YAxis axisLine={false} tickLine={false} fontSize={10} allowDecimals={network} />
+        <YAxis axisLine={false} tickLine={false} fontSize={10} allowDecimals={allowDecimals} />
         <ChartTooltip content={<ChartTooltipContent />} />
         <Bar dataKey="value" fill="var(--color-value)" radius={[4, 4, 0, 0]} maxBarSize={48} />
       </BarChart>
     </ChartContainer> : <p className="overview-chart-empty">Nenhum registro disponível nesta área.</p>}
-    <div className="revenue-footer"><span>Recorte dos registros demonstrativos disponíveis</span><TextLink href={network ? "/rede/equipamentos" : "/atendimentos"}>Ver detalhes</TextLink></div>
+    <div className="revenue-footer"><span>{sourceNote}</span><TextLink href={href}>Ver detalhes</TextLink></div>
   </Panel>;
 }
 

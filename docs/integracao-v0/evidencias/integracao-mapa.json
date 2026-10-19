@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:3000",
+  "verified_at": "2026-10-19T13:03:31.817Z",
+  "backend": "Go/PostgreSQL isolados; blocos de mapa sintéticos apenas no teste",
+  "checks": [
+    "Localização do contrato é gravada pelo endpoint Go, sem geocodificação nem aproximação de endereço",
+    "Mapa e lista consultam contratos, POPs e caixas com coordenadas reais; caixa abre a ocupação de portas",
+    "Clique no mapa move o contrato com coordenadas exatas e confirmação do Go",
+    "Remoção de coordenadas exige confirmação; camadas e situação alteram a consulta sem inventar pontos",
+    "Mapa mantém consulta no celular, isolamento por provedor e CSP; blocos OSM foram interceptados apenas no teste"
+  ]
+}
