@@ -30,7 +30,7 @@ try {
   { name: 'plano-configuracao', path: '/planos', heading: 'Planos & ofertas', action: 'Abrir configuração de', width: 1342, height: 805, theme: 'dark' },
   { name: 'contratos-desktop', path: '/contratos', heading: 'Contratos dos assinantes', width: 1342, height: 805, theme: 'light' },
   { name: 'contrato-ficha', path: '/contratos', heading: 'Contratos dos assinantes', action: 'Detalhes do contrato', width: 1342, height: 805, theme: 'dark' },
- ]) {
+ ].filter(variant=>!process.env.VISUAL_VARIANTS||process.env.VISUAL_VARIANTS.split(',').includes(variant.name))) {
   const screenshots = [];
   for (const [name, base] of [['referencia', process.env.V0_REFERENCE ?? 'http://127.0.0.1:3001'], ['oficial', `${process.env.BASE ?? 'http://127.0.0.1:3000'}/demonstracao`]]) {
    const context = await browser.newContext({ viewport: { width: variant.width, height: variant.height }, colorScheme: variant.theme, reducedMotion: 'reduce', timezoneId: 'America/Fortaleza' });
@@ -47,7 +47,7 @@ try {
   }
   checks.push({ name: variant.name, identical: screenshots[0] === screenshots[1], reference: screenshots[0], official: screenshots[1] });
  }
- await writeFile(new URL('comparacao-visual.json', output), JSON.stringify(checks, null, 2) + '\n');
+ await writeFile(new URL(process.env.VISUAL_EVIDENCE??'comparacao-visual.json', output), JSON.stringify(checks, null, 2) + '\n');
  console.log(JSON.stringify(checks));
  assert.ok(checks.every(check => check.identical), 'A aplicação oficial difere da referência visual; examine as capturas.');
 } finally { await browser.close(); }

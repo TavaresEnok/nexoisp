@@ -42,7 +42,7 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | CO-18 | Implementada | Desconto recorrente | Integrada e validada |
 | CO-19 | Implementada | Mudança agendada | Integrada e validada |
 | CO-20 | Implementada | Registrar aditivo | Integrada e validada |
-| CO-21 | Implementada | Solicitar e comprovar aceite simples | Parcial |
+| CO-21 | Implementada | Solicitar e comprovar aceite simples | Integrada e validada |
 | CO-22 | Implementada | Histórico comercial | Integrada e validada |
 | CO-23 | Implementada | Valores de campos personalizados | Integrada e validada |
 | CR-01 | Implementada | Funil, listagem e ficha de prospecto | Integrada e validada |
@@ -116,10 +116,10 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | IN-15 | Parcial | Identificar titular IPv6 anterior | Integrada e validada |
 | IN-16 | Implementada | Comunicar manutenção programada | Integrada e validada |
 | IN-17 | Implementada | Consultar endereços, prefixos e caixa | Integrada e validada |
-| AD-01 | Implementada | Cadastro e gestão da equipe | Pendente |
-| AD-02 | Parcial | Redefinição de senha de outro usuário | Pendente |
-| AD-03 | Implementada | Provedores e módulos de produto | Pendente |
-| AD-04 | Implementada | Empresas de faturamento | Pendente |
+| AD-01 | Implementada | Cadastro e gestão da equipe | Integrada e validada |
+| AD-02 | Parcial | Redefinição de senha de outro usuário | Integrada e validada |
+| AD-03 | Implementada | Provedores e módulos de produto | Integrada e validada |
+| AD-04 | Implementada | Empresas de faturamento | Integrada e validada |
 | AD-05 | Implementada | Cadastrar e administrar POPs | Integrada e validada |
 | AD-06 | Implementada | Notificações do provedor via webhook | Pendente |
 | AD-07 | Implementada | Cadastrar e testar canais de mensagem | Pendente |
@@ -127,25 +127,25 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | AD-09 | Implementada | Disparar mensagens de cobrança | Pendente |
 | AD-10 | Implementada | Credenciais para API pública | Pendente |
 | AD-11 | Implementada | Destinos, assinatura e entregas | Pendente |
-| AD-12 | Implementada | Tipos, classificações, causas e motivos | Pendente |
-| AD-13 | Implementada | Políticas e acompanhamento de prazo | Pendente |
-| AD-14 | Implementada | Consultar pesquisas de OS | Pendente |
-| AD-15 | Implementada | Definir e usar campos de assinante/contrato | Pendente |
-| AD-16 | Implementada | Criar kits de materiais | Pendente |
-| AD-17 | Parcial | Regras e relatório de comissões | Pendente |
-| AD-18 | Parcial | Dados DICI por competência | Pendente |
+| AD-12 | Implementada | Tipos, classificações, causas e motivos | Integrada e validada |
+| AD-13 | Implementada | Políticas e acompanhamento de prazo | Integrada e validada |
+| AD-14 | Implementada | Consultar pesquisas de OS | Integrada e validada |
+| AD-15 | Implementada | Definir e usar campos de assinante/contrato | Integrada e validada |
+| AD-16 | Implementada | Criar kits de materiais | Integrada e validada |
+| AD-17 | Parcial | Regras e relatório de comissões | Integrada e validada |
+| AD-18 | Parcial | Dados DICI por competência | Integrada e validada |
 | AD-19 | Implementada | Importar CSV em lotes e conferir erros | Pendente |
 | AD-20 | Parcial | Migração automatizada de qualquer instalação SGP | Pendente |
-| AD-21 | Implementada | Consultar eventos e retenção | Pendente |
-| PO-01 | Implementada | Situação dos planos e acesso | Pendente |
-| PO-02 | Implementada | Consultar títulos e abrir meios de pagamento | Pendente |
-| PO-03 | Implementada | Liberação temporária por confiança | Pendente |
-| PO-04 | Implementada | Resumo e série temporal de uso | Pendente |
-| PO-05 | Implementada | Alterar Wi-Fi do próprio CPE | Pendente |
-| PO-06 | Implementada | Abrir chamado e responder | Pendente |
-| PO-07 | Implementada | Responder sobre OS concluída | Pendente |
-| PO-08 | Implementada | Ler e aceitar solicitação | Pendente |
-| PO-09 | Parcial | Quitar fatura em instituição financeira | Pendente |
+| AD-21 | Implementada | Consultar eventos e retenção | Integrada e validada |
+| PO-01 | Implementada | Situação dos planos e acesso | Integrada e validada |
+| PO-02 | Implementada | Consultar títulos e abrir meios de pagamento | Integrada e validada |
+| PO-03 | Implementada | Liberação temporária por confiança | Integrada e validada |
+| PO-04 | Implementada | Resumo e série temporal de uso | Integrada e validada |
+| PO-05 | Implementada | Alterar Wi-Fi do próprio CPE | Integrada e validada |
+| PO-06 | Implementada | Abrir chamado e responder | Integrada e validada |
+| PO-07 | Implementada | Responder sobre OS concluída | Integrada e validada |
+| PO-08 | Implementada | Ler e aceitar solicitação | Integrada e validada |
+| PO-09 | Parcial | Quitar fatura em instituição financeira | Backend preservado / limitação |
 | BE-01 | Somente backend | Catálogo e consultas externas autorizadas | Backend preservado / limitação |
 | BE-02 | Somente backend | Criar atendimento e OS por integração | Backend preservado / limitação |
 | BE-03 | Somente backend | Endereço de instalação específico | Backend preservado / limitação |
@@ -173,3 +173,5 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | BE-25 | Somente backend | Consultar origens de NAS autorizadas | Backend preservado / limitação |
 | BE-26 | Somente backend | Criar cobrança avulsa | Backend preservado / limitação |
 | BE-27 | Somente backend | Excluir etiqueta do catálogo | Backend preservado / limitação |
+
+Administração e portal: usuários/senha/MFA/POPs, empresas, SaaS, catálogos, SLA, pesquisas, campos personalizados, kits, comissões, DICI e auditoria possuem evidências de comandos e leitura no Go isolado e na imagem Caddy. O portal valida planos, faturas, confiança, consumo, chamados, pesquisas, aceite e Wi-Fi com ACS sintético. Gateway financeiro real permanece indisponível no backend. Restam avisos, integrações, importação e revisão das unidades parciais. A etapa 7 continua aberta.

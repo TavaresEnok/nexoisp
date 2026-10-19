@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:18390",
+  "verified_at": "2026-10-19T13:21:01.808Z",
+  "backend": "Go/PostgreSQL isolados; dados inteiramente sintéticos",
+  "checks": [
+    "Auditoria pagina registros reais e exibe detalhes; retenção salva no Go e rejeita prazo de conexão abaixo do limite",
+    "Prazos vazios retornam aos padrões da instalação, preservando faturas, pagamentos, aceites e auditoria",
+    "Coleta DICI usa competência, empresa e contrato reais; correções de IBGE e tecnologia alimentam prévia e CSV sem transmissão externa",
+    "Tipo de ocorrência selecionado na UI de atendimento aplica a política específica de SLA no Go",
+    "Coleta respeita isolamento por provedor e configuração de qualidade permanece acessível no celular"
+  ]
+}

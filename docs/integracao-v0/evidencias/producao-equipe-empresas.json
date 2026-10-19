@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:18390",
+  "verified_at": "2026-10-19T13:18:50.180Z",
+  "backend": "Go/PostgreSQL isolados; usuários e empresas sintéticos",
+  "checks": [
+    "Usuário criado pela UI autentica no Go; perfil é atualizado sem expor senha na listagem",
+    "Administrador redefine senha real e remove MFA com confirmação; senha antiga deixa de autenticar",
+    "Escopo por POP restringe contratos de outro POP e conserva contratos do POP selecionado e sem POP",
+    "Bloqueio e desbloqueio afetam login; remoção do próprio acesso de administrador é impedida no Go",
+    "Empresas são cadastradas, ativadas e definidas como padrão; o Go conserva uma única padrão e impede inativá-la",
+    "Empresa do contrato usa cadastro real e filtro de faturas conserva o vínculo na URL",
+    "Administração mantém permissões do Go e isolamento de usuários e empresas por provedor"
+  ]
+}

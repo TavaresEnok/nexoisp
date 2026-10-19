@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:18390",
+  "verified_at": "2026-10-19T13:21:32.362Z",
+  "backend": "Go/PostgreSQL isolados; provedor criado exclusivamente para validação",
+  "checks": [
+    "Novo provedor e primeiro administrador criados na UI autenticam no Go com contexto próprio",
+    "Nome e módulos são atualizados na plataforma; o Go libera CRM e campo e conserva NOC bloqueado",
+    "Suspensão confirmada impede acesso e login; reativação restaura autenticação do administrador",
+    "Entrada de suporte exige motivo, identifica o contexto e audita ações; saída restaura a plataforma sem permitir gestão SaaS dentro do provedor",
+    "Administrador de provedor não acessa catálogo ou gestão de provedores"
+  ]
+}

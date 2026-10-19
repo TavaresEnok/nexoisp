@@ -29,7 +29,13 @@
     "test:ftth": "node ../../e2e/frontend-v0-ftth.mjs",
     "test:ipam": "node ../../e2e/frontend-v0-ipam.mjs",
     "test:cgnat": "node ../../e2e/frontend-v0-cgnat-legal.mjs",
-    "test:map": "node ../../e2e/frontend-v0-map.mjs"
+    "test:map": "node ../../e2e/frontend-v0-map.mjs",
+    "test:team": "node ../../e2e/frontend-v0-admin-team.mjs",
+    "test:quality": "node ../../e2e/frontend-v0-quality.mjs",
+    "test:admin-reports": "node ../../e2e/frontend-v0-admin-reports.mjs",
+    "test:saas": "node ../../e2e/frontend-v0-saas.mjs",
+    "test:portal": "node ../../e2e/frontend-v0-portal.mjs",
+    "test:portal-wifi": "node ../../e2e/frontend-v0-portal-wifi.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.5.0",

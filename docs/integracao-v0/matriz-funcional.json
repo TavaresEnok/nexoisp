@@ -505,10 +505,11 @@
     "behavior": "Texto livre ou snapshot de aditivo; publicar no portal; cancelar pendente; evidência aceita com texto, usuário, e-mail, IP, agente de navegador, datas e hashes; Go recalcula conferência; impressão pelo navegador. Não é assinatura qualificada.",
     "endpoints": "GET /api/contracts/:id/acceptances; POST /api/contracts/:id/acceptances; POST /api/acceptances/:id/cancel; GET /api/acceptances/:id/evidence",
     "evidence": "P/Condicoes.tsx; E/acessos.go; L/grupos.go; M/00042_aceite_eletronico.sql",
-    "integrationState": "partial",
+    "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-commercial.mjs",
-      "Solicitação e cancelamento validados; aceite e comprovante completo dependem do portal na etapa 7."
+      "Solicitação e cancelamento validados; aceite e comprovante completo dependem do portal na etapa 7.",
+      "e2e/frontend-v0-portal.mjs"
     ]
   },
   {
@@ -1520,8 +1521,10 @@
     "behavior": "Criar nome/e-mail/perfil/senha; trocar perfil, ativar/bloquear outro usuário, redefinir MFA e associar POPs; restrições para ações sobre o próprio usuário. Não há editor visual de permissões arbitrárias.",
     "endpoints": "GET /api/users; POST /api/users; PATCH /api/users/:id; PUT /api/users/:id/pops",
     "evidence": "P/Users.tsx; G/auth/permissions.go; I/; M/00034_escopo_pop_aviso_documentos.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-admin-team.mjs"
+    ]
   },
   {
     "id": "AD-02",
@@ -1531,8 +1534,11 @@
     "behavior": "O backend permite atualização da senha pelo endpoint de administração, mas não foi encontrado controle correspondente na tela de usuários, embora o texto de ajuda de login sugira procurar o administrador.",
     "endpoints": "PATCH /api/users/:id",
     "evidence": "P/Users.tsx; P/Login.tsx; I/",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-admin-team.mjs"
+    ],
+    "integrationNote": "A interface oficial oferece redefinição de senha de outro usuário; senha antiga e nova foram verificadas por autenticação real, sem recuperar a senha atual."
   },
   {
     "id": "AD-03",
@@ -1542,8 +1548,10 @@
     "behavior": "Operador SaaS cria provedor e administrador, altera status e módulos disponíveis; entra em suporte com motivo e sai pelo banner. Operações são separadas do contexto comum do provedor.",
     "endpoints": "GET /api/tenants; POST /api/tenants; PATCH /api/tenants/:id; POST /api/support/enter; POST /api/support/exit",
     "evidence": "P/Tenants.tsx; I/; G/tenancy/; M/00018_modulos.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-saas.mjs"
+    ]
   },
   {
     "id": "AD-04",
@@ -1553,8 +1561,10 @@
     "behavior": "Cadastrar nome/CNPJ, definir padrão, ativar/inativar respeitando restrição da padrão e associar ao contrato; filtro em faturas. Não constitui emissão fiscal automática.",
     "endpoints": "GET /api/companies; POST /api/companies; PATCH /api/companies/:id; PUT /api/contracts/:id/company",
     "evidence": "P/Empresas.tsx; E/empresas_tags.go; M/00041_empresas.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-admin-team.mjs"
+    ]
   },
   {
     "id": "AD-05",
@@ -1643,8 +1653,10 @@
     "behavior": "Criar e ativar/desativar itens de atendimento, OS e anotações; sem edição do nome na UI, embora PATCH aceite alteração no backend.",
     "endpoints": "GET /api/catalogs; POST /api/catalogs; PATCH /api/catalogs/:id",
     "evidence": "P/Qualidade.tsx; E/config.go; M/00028_fluxo_os_catalogos_sla.sql; M/00030_estados_motivos_anotacoes.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-quality.mjs"
+    ]
   },
   {
     "id": "AD-13",
@@ -1654,8 +1666,10 @@
     "behavior": "Criar para atendimento ou OS por prioridade/tipo, prazo em minutos e responsável de escalonamento; ativar/desativar/excluir quando permitido; relatório de violações e tempos corridos. Alterações completas de política não estão expostas na tela.",
     "endpoints": "GET /api/sla-policies; POST /api/sla-policies; PATCH /api/sla-policies/:id; DELETE /api/sla-policies/:id; GET /api/reports/sla",
     "evidence": "P/Qualidade.tsx; E/config.go; L/dinamicas.go; G/jobs/",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-quality.mjs"
+    ]
   },
   {
     "id": "AD-14",
@@ -1665,8 +1679,10 @@
     "behavior": "Lista situação, notas e comentários e consolida média e proporção de avaliações positivas; pesquisas são geradas na conclusão da OS e respondidas pelo portal.",
     "endpoints": "GET /api/surveys; POST /api/portal/surveys/:id",
     "evidence": "P/Qualidade.tsx; P/Portal.tsx; E/operacoes.go; E/config.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-quality.mjs"
+    ]
   },
   {
     "id": "AD-15",
@@ -1676,8 +1692,10 @@
     "behavior": "Nome/chave, tipo texto/número/data/booleano/seleção, opções e obrigatoriedade; criar e ativar/desativar; valores editados nas fichas. Servidor permite atualizar mais propriedades do que a tela expõe.",
     "endpoints": "GET /api/custom-fields; POST /api/custom-fields; PATCH /api/custom-fields/:id",
     "evidence": "P/Qualidade.tsx; P/Extras.tsx; E/config.go; E/custom.go; M/00032_campos_kits_comissao.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-quality.mjs"
+    ]
   },
   {
     "id": "AD-16",
@@ -1687,8 +1705,10 @@
     "behavior": "Nome e itens não serializados com quantidade; ativar/desativar e aplicar em OS para baixa transacional. A UI não oferece editor posterior dos itens de um kit.",
     "endpoints": "GET /api/install-kits; POST /api/install-kits; PATCH /api/install-kits/:id; POST /api/work-orders/:id/kit",
     "evidence": "P/Qualidade.tsx; P/Field.tsx; E/documentos.go; E/estoque.go; E/materiais.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-quality.mjs"
+    ]
   },
   {
     "id": "AD-17",
@@ -1698,8 +1718,11 @@
     "behavior": "Regras de venda/OS, natureza e valores de responsável/auxiliar; relatório por período e técnico. Apuração usa regras atuais para registros históricos e não há folha, pagamento ou liquidação de comissão.",
     "endpoints": "GET /api/commission-rules; POST /api/commission-rules; GET /api/reports/commissions",
     "evidence": "P/Qualidade.tsx; E/documentos.go; E/relatorios.go; M/00032_campos_kits_comissao.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-quality.mjs"
+    ],
+    "integrationNote": "Regras e apuração existentes integradas; regras vigentes alteram a apuração histórica. Não há pagamento nem liquidação de comissão no backend."
   },
   {
     "id": "AD-18",
@@ -1709,8 +1732,11 @@
     "behavior": "Consulta agregada por empresa/CNPJ, município, tecnologia, área e velocidade; configuração de tecnologia e código municipal e exportação CSV. Não foi identificada transmissão automática nem comprovada adequação do arquivo a leiaute oficial vigente.",
     "endpoints": "GET /api/anatel/dici; PUT /api/anatel/municipalities; PUT /api/plans/:id/technology; PUT /api/contracts/:id/service-area",
     "evidence": "P/Anatel.tsx; E/relatorios.go; E/condicoes.go; M/00049_anatel_dici.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-admin-reports.mjs"
+    ],
+    "integrationNote": "Prévia, correções IBGE/tecnologia e CSV integrados. Não transmite declaração à ANATEL; conferir leiaute continua responsabilidade operacional do provedor."
   },
   {
     "id": "AD-19",
@@ -1742,8 +1768,10 @@
     "behavior": "Lista eventos de auditoria, usuários e ações; ajustar retenção de autenticação, sessões e avisos, com limites. Aplicação de limpeza depende de job habilitado; registro financeiro não é apagado por esse controle.",
     "endpoints": "GET /api/audit; GET /api/settings/retention; PUT /api/settings/retention",
     "evidence": "P/Audit.tsx; E/config.go; G/audit/; G/jobs/; M/00053_retencao.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-admin-reports.mjs"
+    ]
   },
   {
     "id": "PO-01",
@@ -1753,8 +1781,10 @@
     "behavior": "Saudação, planos, velocidade, mensalidade, vencimento e acesso desejado/observado; manutenção ativa ou agendada e dados cadastrais de leitura. Saída encerra sessão.",
     "endpoints": "GET /api/portal/overview; POST /api/auth/logout",
     "evidence": "P/Portal.tsx; L/service.go; G/auth/",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-portal.mjs"
+    ]
   },
   {
     "id": "PO-02",
@@ -1764,8 +1794,10 @@
     "behavior": "Mostra competência, vencimento, valor e situação; botão abre modal com códigos copiáveis se disponíveis. Em gateway demo são códigos fictícios; nenhum gateway real foi encontrado.",
     "endpoints": "GET /api/portal/overview",
     "evidence": "P/Portal.tsx; L/service.go; G/finance/core.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-portal.mjs"
+    ]
   },
   {
     "id": "PO-03",
@@ -1775,8 +1807,10 @@
     "behavior": "Exibe elegibilidade ou prazo ativo; confirmação solicita liberação do próprio contrato segundo política e limites do provedor.",
     "endpoints": "POST /api/portal/trust-release",
     "evidence": "P/Portal.tsx; E/financeiro.go; G/finance/advanced.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-portal.mjs"
+    ]
   },
   {
     "id": "PO-04",
@@ -1786,8 +1820,10 @@
     "behavior": "Totais e série por hora/dia/semana/ano quando houver dados; gráfico detalhado usa o primeiro contrato ativo, sem seletor entre vários contratos. Depende de accounting disponível.",
     "endpoints": "GET /api/portal/overview; GET /api/portal/usage-series",
     "evidence": "P/Portal.tsx; P/Extras.tsx; L/usage.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-portal.mjs"
+    ]
   },
   {
     "id": "PO-05",
@@ -1797,8 +1833,10 @@
     "behavior": "Exibe dados disponíveis do equipamento vinculado e formulário de Wi-Fi; envia tarefa ao ACS para o próprio contrato. Disponibilidade e sucesso dependem de suporte do CPE e do ACS.",
     "endpoints": "GET /api/portal/cpe; POST /api/portal/cpe/:contractId/wifi",
     "evidence": "P/Cpe.tsx; E/cpe.go; G/acs/",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-portal-wifi.mjs"
+    ]
   },
   {
     "id": "PO-06",
@@ -1808,8 +1846,10 @@
     "behavior": "Criar chamado e consultar conversa dos próprios atendimentos, enviar mensagem pública; notas internas de equipe não são expostas. Exige módulo CRM.",
     "endpoints": "GET /api/portal/tickets; GET /api/portal/tickets/:id; POST /api/portal/tickets; POST /api/portal/tickets/:id/messages",
     "evidence": "P/Crm.tsx; E/crm.go; L/service.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-portal.mjs"
+    ]
   },
   {
     "id": "PO-07",
@@ -1819,8 +1859,10 @@
     "behavior": "Nota de 1 a 5 e comentário opcional para pesquisa pendente; exige módulo campo. Servidor valida vínculo e situação.",
     "endpoints": "GET /api/portal/surveys; POST /api/portal/surveys/:id",
     "evidence": "P/Portal.tsx; E/avisos.go; L/consultas_generated.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-portal.mjs"
+    ]
   },
   {
     "id": "PO-08",
@@ -1830,8 +1872,10 @@
     "behavior": "Modal exibe texto e exige marcação de concordância; aceite registra conteúdo, data e evidências de acesso; é possível fechar para decidir depois.",
     "endpoints": "GET /api/portal/acceptances; POST /api/portal/acceptances/:id/accept",
     "evidence": "P/Portal.tsx; E/acessos.go; M/00042_aceite_eletronico.sql",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-portal.mjs"
+    ]
   },
   {
     "id": "PO-09",
@@ -1841,8 +1885,11 @@
     "behavior": "O botão mostra meios disponibilizados pelo backend; hoje a geração localizada é demonstrativa ou ausente. Não foi encontrada operação real de Pix/boleto no código do gateway.",
     "endpoints": "GET /api/portal/overview",
     "evidence": "P/Portal.tsx; G/finance/core.go; G/finance/gateway.go",
-    "integrationState": "pending",
-    "validation": []
+    "integrationState": "backend-preserved",
+    "validation": [
+      "e2e/frontend-v0-portal.mjs"
+    ],
+    "integrationNote": "Meios ausentes e códigos explicitamente simulados validados no portal. Pix/boleto real não é uma capacidade disponível no gateway Go atual."
   },
   {
     "id": "BE-01",

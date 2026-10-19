@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:3002",
+  "verified_at": "2026-10-19T13:25:41.843Z",
+  "backend": "Go/PostgreSQL e ACS TR-098/TR-181 sintéticos; sem roteador físico",
+  "checks": [
+    "Titular altera SSID e senha do próprio TR-098 pela UI; ACS sintético confirma aplicação imediata e a consulta registra o nome observado",
+    "TR-181 enfileirado mantém SSID observado anterior; mensagem explica que a mudança depende do próximo contato do roteador",
+    "Wi-Fi do portal rejeita contrato de outro titular e preserva layout utilizável no celular"
+  ]
+}

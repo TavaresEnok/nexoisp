@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:18390",
+  "verified_at": "2026-10-19T13:19:03.911Z",
+  "backend": "Go/PostgreSQL isolados; cadastros e OS sintéticos",
+  "checks": [
+    "Catálogo criado, renomeado e desativado/reativado; seleções operacionais respeitam itens ativos",
+    "SLA com tipo, prioridade e escalonamento aplica prazo real ao atendimento; edição, ativação e relatório preservam política em uso",
+    "SLA de OS aceita filtro por natureza e exclusão confirmada apenas quando não utilizado",
+    "Definições de campo conservam tipo e identificador; opções, ordem, valores e ativação usam o Go",
+    "Kit criado na UI exclui itens serializados; aplicação em OS baixa quantidades reais do estoque e conserva ativação",
+    "Regra de comissão mantém centavos e apura OS concluída com responsável real; relatório explicita regras vigentes sem executar pagamento",
+    "Pesquisa nasce da conclusão da OS; resposta autenticada do assinante aparece na administração com nota e comentário",
+    "Cadastros e configurações respeitam permissões e isolamento por provedor"
+  ]
+}

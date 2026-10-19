@@ -20,8 +20,8 @@ O frontend do v0 é a referência oficial e obrigatória de UI/UX. A integraçã
 | 3 | Sessão, MFA, permissões, módulos, HTTP, cache e demonstração isolada | Fundação integrada; login, senha, TOTP, expiração e isolamento validados |
 | 4 | Assinantes: consulta paginada, ficha, cadastro e edição | Cadastro e recursos complementares validados; ficha recebe os módulos das etapas 5 e 6 |
 | 5 | Planos, contratos, versões, adicionais e condições | Núcleo comercial, equipamentos e recolhimento validados; comprovante de aceite depende do portal |
-| 6 | Atendimento, OS, estoque, financeiro, rede, administração e importação | Financeiro, CRM, OS, agenda, estoque, acessos, sessões, CPE, ONUs, NOC, manutenções, POPs e caixas/portas ópticas integrados e validados; endereçamento e demais módulos em implementação |
-| 7 | Portal, SaaS, revisão da cobertura e retirada operacional do legado | Pendente |
+| 6 | Atendimento, OS, estoque, financeiro, rede, administração e importação | Financeiro, CRM, OS, agenda, estoque, acessos, sessões, CPE, ONUs, NOC, manutenções, POPs e caixas/portas ópticas integrados e validados; endereçamento validado; administração em conclusão |
+| 7 | Portal, SaaS, revisão da cobertura e retirada operacional do legado | Portal e SaaS validados; revisão de cobertura e fechamento pendentes |
 
 Uma etapa ou unidade só recebe estado concluído após validação correspondente. A presença de uma tela, de um endpoint ou de um teste de leitura não comprova a cobertura de suas mutações e regras.
 
@@ -49,7 +49,7 @@ Resultados executados, evidências e limites: [VALIDACAO.md](VALIDACAO.md).
 
 ## Cobertura atual
 
-A matriz registra 106 unidades integradas e validadas, 6 parciais, 29 pendentes e 28 capacidades internas ou limitações do backend preservadas. Esses números contam unidades funcionais, não esforço ou tempo restante. A cobertura ainda não representa conclusão das sete etapas.
+A matriz registra 127 unidades integradas e validadas, 5 parciais, 8 pendentes e 29 capacidades internas ou limitações do backend preservadas. Esses números contam unidades funcionais, não esforço ou tempo restante. A cobertura ainda não representa conclusão das sete etapas.
 
 `test:commercial` valida o núcleo comercial; `test:finance` valida os fluxos financeiros; `test:crm` valida prospectos e atendimento; `test:field` valida OS, agenda e trabalho do técnico; `test:stock` valida o estoque e o ciclo das unidades por série; `test:network` valida o inventário de rede, concentradores e evidências de operações. A fumaça oficial executa assinantes, sessão, comercial, financeiro, CRM, OS, estoque e rede em sequência contra a mesma base sintética para evitar interferência entre geração financeira e dados de outros cenários.
 
@@ -60,4 +60,10 @@ Validados o provisionamento PPPoE/IPoE/Hotspot, credenciais e MAC, comandos e ob
 
 NOC, diagnóstico, avisos de manutenção com consentimento, POPs e CTO/CEO com reservas de portas têm evidências de mutação no Go e imagem local de produção. O painel inicial reaproveita os componentes originais do v0 para indicadores, prioridades e gráficos de dados do Go. Busca global e página de resultados usam os registros do provedor.
 
-IPAM, CGNAT e consulta legal tiveram seus cenários de mutação e consulta aprovados no Go isolado e na imagem local de produção. O mapa operacional também foi validado no Go isolado e na imagem local de produção. Administração, portal e SaaS ainda precisam de cobertura. A etapa 7 continua pendente.
+IPAM, CGNAT e consulta legal tiveram seus cenários de mutação e consulta aprovados no Go isolado e na imagem local de produção. O mapa operacional também foi validado no Go isolado e na imagem local de produção. Administração, portal e SaaS receberam cobertura dirigida; avisos, integrações e importação ainda precisam de implementação e validação. A etapa 7 continua pendente.
+
+## Incremento de administração e portal
+
+Equipe e empresas, SaaS, qualidade/SLA, pesquisas, definições personalizadas, kits e comissões foram integrados aos componentes do v0 e validados por comandos no Go. Auditoria e retenção usam paginação/limites reais. A coleta DICI oferece prévia, correção de IBGE/tecnologia e CSV, sem transmissão externa. O portal inclui contratos, faturas, confiança, consumo selecionável por contrato, chamados, pesquisas, aceite simples e Wi-Fi. O comprovante imprime somente seu documento sanitizado.
+
+Validação também executada na imagem Node 22/Caddy. Wi-Fi usa ACS TR-098/TR-181 de laboratório, separando tarefa aplicada de enfileirada. Não há gateway financeiro real no Go; códigos demonstrativos estão identificados. Avisos, integrações, importação e unidades parciais ainda precisam de conclusão. A etapa 7 permanece aberta.

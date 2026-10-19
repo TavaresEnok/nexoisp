@@ -17,3 +17,8 @@ await import('./frontend-v0-ftth.mjs');
 await import('./frontend-v0-ipam.mjs');
 await import('./frontend-v0-cgnat-legal.mjs');
 await import('./frontend-v0-map.mjs');
+await import('./frontend-v0-admin-team.mjs');
+await import('./frontend-v0-quality.mjs');
+await import('./frontend-v0-admin-reports.mjs');
+await import('./frontend-v0-saas.mjs');
+await import('./frontend-v0-portal.mjs');

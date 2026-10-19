@@ -46,6 +46,8 @@ export function WorkspaceNavigation({ collapsed: desktopCollapsed, onNavigate, o
 }) {
   const { operational, me } = useSession();
   const areas = navigationAreas.map((area, index) => ({ ...area, icon: areaIcons[index], pages: area.pages.filter(page => !operational || canAccessPath(me, page.href)) })).filter(area => area.pages.length);
+  const personalDestination = operational && me?.role === "subscriber" ? {href:"/portal",label:"Meu portal"} : operational && me?.role === "saas_operator" && !me.support ? {href:"/provedores",label:"Provedores"} : null;
+  const personalNode: NavigationNode | null = personalDestination ? {...personalDestination, sourceLabel:personalDestination.label,area:"Conta",audience:me?.role === "subscriber"?"Assinante":"Operador",trail:[personalDestination.label],parentHref:null,moduleHref:personalDestination.href,children:[]} : null;
   const route = resolveNavigationRoute(usePathname());
   const pathname = route.pathname;
   const current = findNavigationPage(pathname);
@@ -59,7 +61,7 @@ export function WorkspaceNavigation({ collapsed: desktopCollapsed, onNavigate, o
     <button className="organization-switch" onClick={onProvider} aria-label={operational ? `Consultar provedor ${me?.tenant?.name ?? "NexoISP"}` : "Consultar provedor Conecta Fibra"}><span className="organization-monogram" aria-hidden="true">{operational ? initials(me?.tenant?.name ?? "NexoISP") : "cf"}<i /></span><span className="organization-details"><strong>{operational ? me?.tenant?.name ?? "Operação do SaaS" : "Conecta Fibra"}</strong><small>{operational && me ? roleLabels[me.role] : "Ambiente de demonstração"}</small></span><ChevronsUpDown size={13} /></button>
     <button className="sidebar-search" onClick={onSearch} aria-label="Buscar qualquer coisa" title="Buscar · Ctrl ou ⌘ K"><Search size={16} /><span>Buscar qualquer coisa</span><kbd>⌘ K</kbd></button>
     <nav className="context-navigation" aria-label="Áreas do provedor">
-      <ul className="sidebar-start-links">{(!operational || canAccessPath(me, "/")) && <NavigationBranch node={findNavigationPage("/")!} pathname={pathname} onNavigate={onNavigate} icon={LayoutDashboard} compact={collapsed} />}</ul>
+      <ul className="sidebar-start-links">{personalNode && <NavigationBranch node={personalNode} pathname={pathname} onNavigate={onNavigate} icon={LayoutDashboard} compact={collapsed} />}{(!operational || canAccessPath(me, "/")) && <NavigationBranch node={findNavigationPage("/")!} pathname={pathname} onNavigate={onNavigate} icon={LayoutDashboard} compact={collapsed} />}</ul>
       <p className="context-label">ÁREAS DO PROVEDOR</p>
       <Accordion.Root multiple className="sidebar-areas" value={collapsed ? [] : openAreas} onValueChange={value => { setSelection({ path: pathname, areas: value }); if (collapsed) onToggle(); }}>
         {areas.map((area) => {
@@ -72,10 +74,10 @@ export function WorkspaceNavigation({ collapsed: desktopCollapsed, onNavigate, o
       </Accordion.Root>
       <p className="context-label">GESTÃO DO WORKSPACE</p>
       <div className="sidebar-scroll-utilities">
-      <Link href="/assistente" className={cn("context-link", (route.kind === "special" && route.entry === "assistant") && "active")} onClick={onNavigate} aria-label="Assistente" aria-current={route.kind === "special" && route.entry === "assistant" ? "page" : undefined} title="Assistente NexoISP"><Bot size={17} /><span>Assistente</span></Link>
-      <Link href="/configuracoes" className={cn("context-link", pathname === "/configuracoes" && "active")} onClick={onNavigate} aria-label="Configurações" title="Configurações"><Settings2 size={17} /><span>Configurações</span></Link>
-      <Link href="/estrutura" className={cn("context-link", pathname === "/estrutura" && "active")} onClick={onNavigate} aria-current={pathname === "/estrutura" ? "page" : undefined} title="Mapa de páginas" aria-label="Mapa de páginas"><ListTree size={17} /><span>Mapa de páginas</span></Link>
-      <Link href="/acompanhamento" className={cn("context-link", pathname === "/acompanhamento" && "active")} onClick={onNavigate} aria-current={pathname === "/acompanhamento" ? "page" : undefined} title="Consolidação e evidências" aria-label="Consolidação e evidências"><ShieldCheck size={17} /><span>Consolidação e evidências</span></Link>
+      {(!operational || canAccessPath(me,"/assistente")) && <Link href="/assistente" className={cn("context-link", (route.kind === "special" && route.entry === "assistant") && "active")} onClick={onNavigate} aria-label="Assistente" aria-current={route.kind === "special" && route.entry === "assistant" ? "page" : undefined} title="Assistente NexoISP"><Bot size={17} /><span>Assistente</span></Link>}
+      {(!operational || canAccessPath(me,"/configuracoes")) && <Link href="/configuracoes" className={cn("context-link", pathname === "/configuracoes" && "active")} onClick={onNavigate} aria-label="Configurações" title="Configurações"><Settings2 size={17} /><span>Configurações</span></Link>}
+      {(!operational || canAccessPath(me,"/estrutura")) && <Link href="/estrutura" className={cn("context-link", pathname === "/estrutura" && "active")} onClick={onNavigate} aria-current={pathname === "/estrutura" ? "page" : undefined} title="Mapa de páginas" aria-label="Mapa de páginas"><ListTree size={17} /><span>Mapa de páginas</span></Link>}
+      {(!operational || canAccessPath(me,"/acompanhamento")) && <Link href="/acompanhamento" className={cn("context-link", pathname === "/acompanhamento" && "active")} onClick={onNavigate} aria-current={pathname === "/acompanhamento" ? "page" : undefined} title="Consolidação e evidências" aria-label="Consolidação e evidências"><ShieldCheck size={17} /><span>Consolidação e evidências</span></Link>}
       </div>
       <div className="context-profile"><Link href="/conta" onClick={onNavigate} aria-label={operational && me ? `Minha conta · ${me.name}` : "Minha conta · Gabriel Almeida"} title="Minha conta"><span className="profile-avatar">{operational && me ? initials(me.name) : "GA"}</span><span><strong>{operational ? me?.name : "Gabriel Almeida"}</strong><small>{operational && me ? roleLabels[me.role] : "Perfil demonstrativo"}</small></span></Link><button className="sidebar-toggle" onClick={onToggle} aria-label={collapsed ? "Expandir menu" : "Recolher menu"} title={collapsed ? "Expandir menu" : "Recolher menu"}>{collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}</button></div>
     </nav>
