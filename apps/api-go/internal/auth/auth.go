@@ -3,6 +3,8 @@ package auth
 import (
 	"context"
 	"crypto/sha256"
+	"crypto/subtle"
+	"encoding/base64"
 	"encoding/hex"
 	"net/http"
 	"nexoisp/api-go/internal/requestctx"
@@ -109,9 +111,24 @@ func (a *Auth) Invalidate(n db.Notification) {
 		a.Invalidation.Observe(max(0, time.Since(n.At).Seconds()))
 	}
 }
-func (a *Auth) Load(ctx context.Context, token string) (*Ctx, error) {
+func hashToken(token string) string {
 	sum := sha256.Sum256([]byte(token))
-	hash := hex.EncodeToString(sum[:])
+	return hex.EncodeToString(sum[:])
+}
+
+// CSRF deriva da sessão o valor exigido em X-Nexo-CSRF quando a sessão vem do
+// cookie HttpOnly. A página recebe o valor em /api/me e na resposta do login;
+// outro site não consegue lê-lo nem calculá-lo sem o token da sessão.
+func CSRF(tokenHash string) string {
+	sum := sha256.Sum256([]byte("nexo-csrf\x00" + tokenHash))
+	return base64.RawURLEncoding.EncodeToString(sum[:])
+}
+
+// SessionCSRF devolve o valor CSRF de um token de sessão recém-emitido.
+func SessionCSRF(token string) string { return CSRF(hashToken(token)) }
+
+func (a *Auth) Load(ctx context.Context, token string) (*Ctx, error) {
+	hash := hashToken(token)
 	a.mu.Lock()
 	epoch := a.epoch
 	if a.online && a.TTL > 0 {
@@ -176,7 +193,7 @@ func Token(r *http.Request) (string, error) {
 				break
 			}
 		}
-		if !fault.Active("sem_csrf") && token != "" && r.Method != "GET" && r.Method != "HEAD" && r.Header.Get("X-Nexo-Csrf") != "1" {
+		if !fault.Active("sem_csrf") && token != "" && r.Method != "GET" && r.Method != "HEAD" && subtle.ConstantTimeCompare([]byte(r.Header.Get("X-Nexo-Csrf")), []byte(SessionCSRF(token))) != 1 {
 			return "", apierr.New(403, "requisição sem proteção CSRF")
 		}
 	}

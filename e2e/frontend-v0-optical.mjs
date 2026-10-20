@@ -1,6 +1,7 @@
 import {chromium} from 'playwright';import assert from 'node:assert/strict';import {writeFile} from 'node:fs/promises';
+import { csrf } from './csrf.mjs';
 const base=process.env.BASE??'http://127.0.0.1:3000';const agentBase=process.env.V0_AGENT_URL??'http://127.0.0.1:20881';const browser=await chromium.launch({args:['--no-sandbox']});const context=await browser.newContext({viewport:{width:1342,height:805}});const page=await context.newPage();page.setDefaultTimeout(15000);const checks=[];const errors=[];const token=Date.now();const serial=`48575443${token.toString(16).slice(-8).toUpperCase()}`;const dialog=title=>page.getByRole('dialog',{name:title,exact:true});page.on('pageerror',error=>errors.push(error.message));
-async function request(path,data,method='POST'){const response=await context.request.fetch(`${base}/api${path}`,{method,headers:{'X-Nexo-CSRF':'1'},...(data?{data}:{})});assert.equal(response.ok(),true,`${method} ${path}: ${await response.text()}`);return response.status()===204?null:response.json();}
+async function request(path,data,method='POST'){const response=await context.request.fetch(`${base}/api${path}`,{method,headers:await csrf(context,base),...(data?{data}:{})});assert.equal(response.ok(),true,`${method} ${path}: ${await response.text()}`);return response.status()===204?null:response.json();}
 async function confirm(){await dialog('Confirme a ação').getByRole('button',{name:'Confirmar',exact:true}).click();await dialog('Confirme a ação').waitFor({state:'hidden'});}
 const check=message=>{checks.push(message);console.log(message);};
 let originalSettings;

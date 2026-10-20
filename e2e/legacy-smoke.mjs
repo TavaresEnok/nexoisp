@@ -2,6 +2,7 @@
 // Uso:  BASE=http://localhost:18080 node smoke.mjs     (o servidor precisa estar em modo demonstração)
 // Falha com código 1 se alguma etapa falhar, houver erro de página, chamada de API com erro inesperado ou janela nativa do navegador.
 import { chromium } from 'playwright';
+import { csrf } from './csrf.mjs';
 
 const BASE = process.env.BASE ?? 'http://localhost:18080';
 const problems = [];
@@ -132,7 +133,7 @@ await step('financeiro não vê a rede (menu e servidor)', async () => {
 const portalEmail = `fumaca-${Date.now() % 1e6}@exemplo.demo`;
 await step('portal: assinante vê só o seu', async () => {
   const [sub] = await (await admin.request.get(`${BASE}/api/subscribers?limit=1`)).json();
-  const r = await admin.request.post(`${BASE}/api/subscribers/${sub.id}/portal-access`, { headers: { 'X-Nexo-CSRF': '1' }, data: { email: portalEmail, password: 'demo1234' } });
+  const r = await admin.request.post(`${BASE}/api/subscribers/${sub.id}/portal-access`, { headers: await csrf(admin,BASE), data: { email: portalEmail, password: 'demo1234' } });
   if (!r.ok()) throw new Error('não criou o acesso do portal');
   const p = await open(portalEmail, { width: 420, height: 860 });
   await p.waitForSelector('.portal .hello');

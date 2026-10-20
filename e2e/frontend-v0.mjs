@@ -1,6 +1,7 @@
 import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
 import { writeFile, mkdir } from 'node:fs/promises';
+import { csrf } from './csrf.mjs';
 const base = process.env.BASE ?? 'http://127.0.0.1:3000';
 const report = new URL('../docs/integracao-v0/evidencias/', import.meta.url);
 await mkdir(report, { recursive: true });
@@ -17,7 +18,7 @@ try {
  await page.goto(`${base}/assinantes`); await visible(page.getByRole('button', { name: /Abrir ficha de/ }).first());
  const exporting = page.waitForEvent('download'); await page.getByRole('button', { name: 'Exportar CSV', exact: true }).click(); assert.equal((await exporting).suggestedFilename(), 'assinantes.csv'); checks.push('Exportação CSV autenticada do cadastro');
  const fieldKey = `v0_${Date.now()}`; const fieldLabel = `Referência ${fieldKey}`;
- const definition = await context.request.post(`${base}/api/custom-fields`, { headers: { 'X-Nexo-CSRF': '1' }, data: { entity: 'subscriber', key: fieldKey, label: fieldLabel, type: 'text', required: false } }); assert.equal(definition.ok(), true);
+ const definition = await context.request.post(`${base}/api/custom-fields`, { headers: await csrf(context,base), data: { entity: 'subscriber', key: fieldKey, label: fieldLabel, type: 'text', required: false } }); assert.equal(definition.ok(), true);
  const unique = `Titular v0 ${Date.now()}`;
  await page.getByRole('button', { name: 'Novo assinante', exact: true }).click(); let editor = page.getByRole('dialog', { name: 'Novo assinante', exact: true });
  await editor.getByLabel('Nome / Razão social').fill(unique); await editor.getByLabel('CPF/CNPJ').fill('123'); await editor.getByRole('button', { name: 'Salvar', exact: true }).click(); await visible(editor.getByRole('alert'));
@@ -38,10 +39,10 @@ try {
  let downloading = page.waitForEvent('download'); await page.getByRole('button', { name: 'Baixar', exact: true }).click(); const document = await downloading; assert.equal(document.suggestedFilename(), 'validacao-v0.pdf');
  await page.getByRole('button', { name: 'Excluir', exact: true }).click(); await page.getByRole('dialog', { name: 'Confirme a ação', exact: true }).getByRole('button', { name: 'Confirmar', exact: true }).click(); await page.getByText('validacao-v0.pdf', { exact: true }).waitFor({ state: 'hidden' });
  downloading = page.waitForEvent('download'); await page.getByRole('button', { name: 'Exportar dados pessoais', exact: true }).click(); assert.match((await downloading).suggestedFilename(), /^dados-titular-/); checks.push('Upload, download, exclusão de documento e exportação de dados pessoais');
- const ending = await context.request.patch(`${base}/api/contracts/${contractId}`, { headers: { 'X-Nexo-CSRF': '1' }, data: { end: true } }); assert.equal(ending.ok(), true);
+ const ending = await context.request.patch(`${base}/api/contracts/${contractId}`, { headers: await csrf(context,base), data: { end: true } }); assert.equal(ending.ok(), true);
  await page.getByRole('button', { name: 'Anonimizar titular', exact: true }).click(); const privacy = page.getByRole('dialog', { name: 'Anonimizar titular', exact: true }); await privacy.getByLabel('Motivo e protocolo').fill('Validação isolada, protocolo V0-001'); await privacy.getByLabel(`Digite o nome: ${unique}`).fill(unique); await privacy.getByRole('button', { name: 'Anonimizar definitivamente', exact: true }).click(); await visible(page.getByText(/Anonimizado em/)); checks.push('Anonimização efetiva validada pelo Go em titular sem pendências');
  await page.keyboard.press('Escape'); await page.goto(`${base}/assinantes`);
- for (let i=0; i<4; i++) { const response = await context.request.post(`${base}/api/subscribers`, { headers: { 'X-Nexo-CSRF': '1' }, data: { name: `Paginação v0 ${Date.now()} ${i}` } }); assert.equal(response.ok(), true); }
+ for (let i=0; i<4; i++) { const response = await context.request.post(`${base}/api/subscribers`, { headers: await csrf(context,base), data: { name: `Paginação v0 ${Date.now()} ${i}` } }); assert.equal(response.ok(), true); }
  await page.reload(); await page.getByRole('button', { name: 'Próxima página', exact: true }).click(); await page.waitForURL(/pagina=2/); await page.reload(); await visible(page.getByRole('button', { name: 'Página anterior', exact: true })); assert.equal(await page.getByRole('button', { name: 'Página anterior', exact: true }).isDisabled(), false);
  await page.getByRole('textbox', { name: 'Buscar assinantes', exact: true }).fill('Paginação'); await page.waitForURL(/busca=/); assert.equal(new URL(page.url()).searchParams.has('pagina'), false); await page.reload(); await visible(page.getByRole('button', { name: /Abrir ficha de Paginação v0/ }).first()); checks.push('Paginação no servidor, filtros persistidos e reinício da página ao buscar');
  await page.route('**/api/subscribers?**', route => route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: 'Falha de validação controlada' }) })); await page.getByRole('textbox', { name: 'Buscar assinantes', exact: true }).fill('falha-isolada'); await visible(page.getByText('Falha de validação controlada').first()); assert.equal(await page.getByRole('button', { name: /Abrir ficha de/ }).count(), 0); assert.equal(await page.getByText('Mariana Oliveira', { exact: true }).count(), 0); await page.unroute('**/api/subscribers?**'); checks.push('Falha operacional exibida sem fallback para seeds');

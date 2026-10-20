@@ -2,6 +2,7 @@ import { chromium } from 'playwright';
 import { createHmac } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
+import { csrf } from './csrf.mjs';
 const base = process.env.BASE ?? 'http://127.0.0.1:3000';
 const output = new URL('../docs/integracao-v0/evidencias/', import.meta.url);
 function totp(secret) {
@@ -13,7 +14,7 @@ const setup = await browser.newContext(); const account = await browser.newConte
 try {
  assert.equal((await setup.request.post(`${base}/api/auth/login`, { data: { email: 'admin@alfa.demo', password: 'demo1234' } })).ok(), true);
  const email = `sessao-v0-${Date.now()}@example.invalid`;
- assert.equal((await setup.request.post(`${base}/api/users`, { headers: { 'X-Nexo-CSRF': '1' }, data: { name: 'Validação de sessão v0', email, role: 'attendant', password: 'demo1234' } })).ok(), true);
+ assert.equal((await setup.request.post(`${base}/api/users`, { headers: await csrf(setup,base), data: { name: 'Validação de sessão v0', email, role: 'attendant', password: 'demo1234' } })).ok(), true);
  await page.goto(`${base}/login`); await page.getByLabel('E-mail', { exact: true }).fill(email); await page.getByLabel('Senha', { exact: true }).fill('demo1234'); await page.getByRole('button', { name: 'Entrar', exact: true }).click(); await page.waitForURL(url => url.pathname !== '/login');
  const parallel = await browser.newContext(); assert.equal((await parallel.request.post(`${base}/api/auth/login`, { data: { email, password: 'demo1234' } })).ok(), true);
  await page.goto(`${base}/conta`); await page.getByLabel('Senha atual', { exact: true }).fill('demo1234'); await page.getByLabel('Nova senha', { exact: true }).fill('nova-senha-v0-1234'); await page.getByRole('button', { name: 'Alterar senha', exact: true }).click(); await page.getByRole('status').filter({ hasText: 'Senha alterada.' }).waitFor();
@@ -22,6 +23,6 @@ try {
  await page.getByRole('button', { name: 'Minha conta', exact: true }).click(); await page.getByRole('menuitem', { name: 'Sair', exact: true }).click(); await page.waitForURL(/\/login$/);
  await page.getByLabel('E-mail', { exact: true }).fill(email); await page.getByLabel('Senha', { exact: true }).fill('nova-senha-v0-1234'); await page.getByRole('button', { name: 'Entrar', exact: true }).click(); await page.getByLabel('Código do aplicativo autenticador', { exact: true }).waitFor(); await page.getByLabel('Código do aplicativo autenticador', { exact: true }).fill(totp(secret)); await page.getByRole('button', { name: 'Entrar', exact: true }).click(); await page.waitForURL(url => url.pathname !== '/login'); checks.push('Logout e novo login com desafio TOTP');
  await page.goto(`${base}/conta`); const panel = page.locator('.nexo-panel').filter({ has: page.getByRole('heading', { name: 'Verificação em duas etapas', exact: true }) }); await panel.getByLabel('Senha atual', { exact: true }).fill('nova-senha-v0-1234'); await panel.getByLabel('Código do aplicativo', { exact: true }).fill(totp(secret)); await page.getByRole('button', { name: 'Desativar verificação', exact: true }).click(); await page.getByRole('button', { name: 'Configurar autenticação', exact: true }).waitFor(); checks.push('Desativação TOTP exige senha e código reais');
- await page.goto(`${base}/assinantes`); await page.getByRole('button', { name: /Abrir ficha de/ }).first().waitFor(); await account.request.post(`${base}/api/auth/logout`, { headers: { 'X-Nexo-CSRF': '1' } }); await page.getByRole('textbox', { name: 'Buscar assinantes', exact: true }).fill('sessão-expirada'); await page.waitForURL(/\/login$/); assert.equal(await page.getByRole('button', { name: /Abrir ficha de/ }).count(), 0); checks.push('Expiração da sessão remove dados e retorna ao login sem fallback');
+ await page.goto(`${base}/assinantes`); await page.getByRole('button', { name: /Abrir ficha de/ }).first().waitFor(); await account.request.post(`${base}/api/auth/logout`, { headers: await csrf(account,base) }); await page.getByRole('textbox', { name: 'Buscar assinantes', exact: true }).fill('sessão-expirada'); await page.waitForURL(/\/login$/); assert.equal(await page.getByRole('button', { name: /Abrir ficha de/ }).count(), 0); checks.push('Expiração da sessão remove dados e retorna ao login sem fallback');
  await mkdir(output, { recursive: true }); await writeFile(new URL('integracao-sessao.json', output), JSON.stringify({ ok: true, checks }, null, 2) + '\n'); console.log(JSON.stringify({ ok: true, checks }));
 } finally { await setup.close(); await account.close(); await browser.close(); }

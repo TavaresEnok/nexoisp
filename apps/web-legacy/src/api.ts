@@ -1,17 +1,30 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 // A sessão fica em cookie HttpOnly definido pelo servidor: o JavaScript da página não tem acesso ao token.
+// O valor CSRF é derivado da sessão e chega por /me ou pela resposta do login.
+let csrf: string | null = null;
+async function csrfToken() {
+  if (!csrf) {
+    const res = await fetch('/api/me', { credentials: 'same-origin' }).catch(() => null);
+    if (res?.ok) csrf = (await res.json().catch(() => ({}))).csrf_token ?? null;
+  }
+  return csrf ?? '';
+}
 async function request(path: string, opts: { method?: string; body?: unknown } = {}) {
-  const headers: Record<string, string> = { 'X-Nexo-CSRF': '1' };
+  const method = opts.method ?? (opts.body !== undefined ? 'POST' : 'GET');
+  const headers: Record<string, string> = {};
+  if (method !== 'GET' && path !== '/auth/login') headers['X-Nexo-CSRF'] = await csrfToken();
   if (opts.body !== undefined) headers['Content-Type'] = 'application/json';
   let res: Response;
   try {
-    res = await fetch(`/api${path}`, { method: opts.method ?? (opts.body !== undefined ? 'POST' : 'GET'), headers, credentials: 'same-origin',
+    res = await fetch(`/api${path}`, { method, headers, credentials: 'same-origin',
       body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined });
   } catch {
     throw new Error('Não foi possível conectar ao servidor.');
   }
   const data = await res.json().catch(() => ({}));
+  if (path === '/auth/logout') csrf = null;
+  if ((path === '/me' || path === '/auth/login') && typeof data.csrf_token === 'string') csrf = data.csrf_token;
   if (res.status === 401 && path !== '/auth/login' && path !== '/me' && window.location.pathname !== '/login') window.location.href = '/login';
   if (!res.ok) throw new Error(data.error ?? `Erro ${res.status}`);
   return { data, total: Number(res.headers.get('x-total-count') ?? NaN) };
@@ -22,7 +35,7 @@ export async function api<T = any>(path: string, opts: { method?: string; body?:
 
 /** Baixa um arquivo de texto gerado pela API (script, CSV) sem sair da página. */
 export async function download(path: string, filename: string) {
-  const res = await fetch(`/api${path}`, { headers: { 'X-Nexo-CSRF': '1' }, credentials: 'same-origin' });
+  const res = await fetch(`/api${path}`, { credentials: 'same-origin' });
   if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? `Erro ${res.status}`);
   const a = document.createElement('a');
   a.href = URL.createObjectURL(await res.blob());

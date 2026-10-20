@@ -2,6 +2,7 @@ import { chromium } from "playwright";
 import assert from "node:assert/strict";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
+import { csrf } from "./csrf.mjs";
 
 // Mutações exclusivamente no harness descartável indicado explicitamente.
 const base = process.env.BASE;
@@ -46,7 +47,7 @@ async function command(ctx, path, body, method = "POST") {
     await ctx.request.fetch(`${base}/api${path}`, {
       method,
       data: body,
-      headers: { "X-Nexo-CSRF": "1" },
+      headers: await csrf(ctx,base),
     }),
   );
 }
@@ -367,7 +368,7 @@ try {
   assert.equal(
     (
       await beta.request.put(`${base}/api/contracts/${contract.id}/referral`, {
-        headers: { "X-Nexo-CSRF": "1" },
+        headers: await csrf(beta,base),
         data: { referrer_subscriber_id: null },
       })
     ).status(),
@@ -395,7 +396,7 @@ try {
       await finance.request.put(
         `${base}/api/contracts/${contract.id}/referral`,
         {
-          headers: { "X-Nexo-CSRF": "1" },
+          headers: await csrf(finance,base),
           data: { referrer_subscriber_id: null },
         },
       )

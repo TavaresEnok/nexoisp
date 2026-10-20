@@ -259,7 +259,7 @@ func (s Service) login(ctx context.Context, r *http.Request, b map[string]any) (
 		return endpoint.Result{}, err
 	}
 	err = s.DB.WithScope(ctx, tenancy.Scope{}, func(tx *db.Tx) error { return tx.Exec(ctx, query("helper:cleared", 0), "email:"+email) })
-	return endpoint.Result{Value: map[string]any{"token": token}, Cookie: cookie(r, token)}, err
+	return endpoint.Result{Value: map[string]any{"token": token, "csrf_token": auth.SessionCSRF(token)}, Cookie: cookie(r, token)}, err
 }
 func (s Service) handle(ctx context.Context, r *http.Request, key, id string, b map[string]any) (endpoint.Result, error) {
 	if key == "POST /api/auth/login" {

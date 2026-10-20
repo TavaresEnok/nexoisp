@@ -1,6 +1,7 @@
 import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
 import { writeFile } from 'node:fs/promises';
+import { csrf } from './csrf.mjs';
 const base = process.env.BASE ?? 'http://127.0.0.1:3000';
 const browser = await chromium.launch({ args: ['--no-sandbox'] });
 const context = await browser.newContext({ viewport: { width: 1342, height: 805 } });
@@ -9,7 +10,7 @@ const errors = []; const checks = []; page.on('pageerror', error => errors.push(
 const name = `Comercial v0 ${Date.now()}`;
 const dialog = title => page.getByRole('dialog', { name: title, exact: true });
 async function save(title, submit = 'Salvar') { await dialog(title).getByRole('button', { name: submit, exact: true }).click(); await dialog(title).waitFor({ state: 'hidden' }); }
-async function request(path, data, method = 'POST') { const res = await context.request.fetch(`${base}/api${path}`, { method, headers: { 'X-Nexo-CSRF': '1' }, ...(data ? { data } : {}) }); assert.equal(res.ok(), true, `${method} ${path}: ${await res.text()}`); return res.json(); }
+async function request(path, data, method = 'POST') { const res = await context.request.fetch(`${base}/api${path}`, { method, headers: await csrf(context,base), ...(data ? { data } : {}) }); assert.equal(res.ok(), true, `${method} ${path}: ${await res.text()}`); return res.json(); }
 async function confirm() { await dialog('Confirme a ação').getByRole('button', { name: 'Confirmar', exact: true }).click(); await dialog('Confirme a ação').waitFor({ state: 'hidden' }); }
 try {
  await page.goto(`${base}/login`); await page.getByLabel('E-mail', { exact: true }).fill('admin@alfa.demo'); await page.getByLabel('Senha', { exact: true }).fill('demo1234'); await page.getByRole('button', { name: 'Entrar', exact: true }).click(); await page.waitForURL(url => url.pathname !== '/login');

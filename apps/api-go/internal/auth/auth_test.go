@@ -61,7 +61,7 @@ func TestTokenPrecedenceAndCSRF(t *testing.T) {
 	for _, c := range []struct {
 		method, authorization, cookie, csrf, token string
 		status                                     int
-	}{{"POST", "", "nexo_session=invalid", "", "", 403}, {"POST", "Bearer bearer", "nexo_session=cookie", "", "bearer", 0}, {"GET", "", "nexo_session=cookie", "", "cookie", 0}, {"POST", "", "nexo_session=cookie", "1", "cookie", 0}, {"GET", "", "", "", "", 401}, {"POST", "Bearer ", "nexo_session=cookie", "", "", 403}} {
+	}{{"POST", "", "nexo_session=invalid", "", "", 403}, {"POST", "Bearer bearer", "nexo_session=cookie", "", "bearer", 0}, {"GET", "", "nexo_session=cookie", "", "cookie", 0}, {"POST", "", "nexo_session=cookie", SessionCSRF("cookie"), "cookie", 0}, {"POST", "", "nexo_session=cookie", "1", "", 403}, {"POST", "", "nexo_session=cookie", SessionCSRF("outra"), "", 403}, {"GET", "", "", "", "", 401}, {"POST", "Bearer ", "nexo_session=cookie", "", "", 403}} {
 		r := httptest.NewRequest(c.method, "/", nil)
 		r.Header.Set("Authorization", c.authorization)
 		r.Header.Set("Cookie", c.cookie)
