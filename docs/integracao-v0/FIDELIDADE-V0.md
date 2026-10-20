@@ -60,3 +60,7 @@ Comparação tela a tela, lado a lado, entre o v0 original e o ambiente conectad
 
 Validação: 163 testes locais, os 26 cenários da fumaça (dois segmentos; o primeiro revelou dois seletores antigos de teste, atualizados), referências operacionais regeneradas e conferidas sem atualização, e demonstração idêntica ao v0 original em 22 de 22 telas.
 
+
+## Tela de entrada (20/10/2026)
+
+A tela de login foi refeita com os tokens, fontes e temas do v0 (`features/session/login*.tsx`): palco à esquerda com cinco destaques de funcionalidades reais (acessos online, mapa, consulta legal de IP, ordens de serviço e cobrança), apresentados como exemplos ilustrativos com dados fictícios, com troca automática, pausa, abas com progresso e respeito a `prefers-reduced-motion`; formulário à direita com saudação pelo horário, campos com ícone, mostrar senha, etapa de código TOTP e erros no `Alert` do v0; troca de tema persistida pelo mesmo cookie do shell; contas de demonstração do servidor como atalhos apenas quando o servidor está em modo demo. No celular o palco é omitido. Não há "esqueci a senha" nem "manter conectado": o servidor não oferece essas operações, e a tela orienta procurar o administrador.
