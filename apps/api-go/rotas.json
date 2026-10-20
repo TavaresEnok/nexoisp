@@ -575,6 +575,10 @@
     },
     {
       "method": "GET",
+      "path": "/api/stock/items/:id/balances"
+    },
+    {
+      "method": "GET",
       "path": "/api/stock/items/:id/movements"
     },
     {
@@ -583,11 +587,23 @@
     },
     {
       "method": "GET",
+      "path": "/api/stock/purchases"
+    },
+    {
+      "method": "GET",
+      "path": "/api/stock/suppliers"
+    },
+    {
+      "method": "GET",
       "path": "/api/stock/units"
     },
     {
       "method": "GET",
       "path": "/api/stock/units/:id/events"
+    },
+    {
+      "method": "GET",
+      "path": "/api/stock/warehouses"
     },
     {
       "method": "GET",
@@ -792,6 +808,14 @@
     {
       "method": "PATCH",
       "path": "/api/stock/items/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/stock/suppliers/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/stock/warehouses/:id"
     },
     {
       "method": "PATCH",
@@ -1215,7 +1239,27 @@
     },
     {
       "method": "POST",
+      "path": "/api/stock/items/:id/transfer"
+    },
+    {
+      "method": "POST",
       "path": "/api/stock/items/:id/units"
+    },
+    {
+      "method": "POST",
+      "path": "/api/stock/purchases"
+    },
+    {
+      "method": "POST",
+      "path": "/api/stock/purchases/:id/receive"
+    },
+    {
+      "method": "POST",
+      "path": "/api/stock/purchases/:id/status"
+    },
+    {
+      "method": "POST",
+      "path": "/api/stock/suppliers"
     },
     {
       "method": "POST",
@@ -1224,6 +1268,10 @@
     {
       "method": "POST",
       "path": "/api/stock/units/:id/transfer"
+    },
+    {
+      "method": "POST",
+      "path": "/api/stock/warehouses"
     },
     {
       "method": "POST",

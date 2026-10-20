@@ -27,6 +27,9 @@ import { FormField } from "@/features/shared/form";
 import { useSession } from "@/features/session/provider";
 import { can } from "@/features/session/model";
 import { api } from "@/platform/erp-client";
+import { useSearchParams } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StockPurchases, StockSuppliers, StockWarehouses } from "./purchasing";
 import { normalize } from "@/lib/format";
 import { stockItemSchema, useStockRefresh, type StockItem } from "./models";
 import { StockMovements } from "./movements";
@@ -42,6 +45,12 @@ export function StockCatalog() {
     z.array(stockItemSchema).parse(await api("/stock/items")),
   );
   const [query, setQuery] = useState("");
+  const [params, setParams] = useSearchParams();
+  const tab = ["depositos", "fornecedores", "compras"].includes(
+    params.get("aba") ?? "",
+  )
+    ? params.get("aba")!
+    : "materiais";
   const [modal, setModal] = useState<{
     type: "new" | "edit" | "moves" | "units";
     id?: string;
@@ -67,140 +76,177 @@ export function StockCatalog() {
           )
         }
       />
-      <Panel
-        title="Catálogo de materiais"
-        description="Saldos calculados pelos movimentos registrados no ERP."
-        action={
-          <FormField label="Buscar no catálogo de estoque">
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Nome ou código"
-            />
-          </FormField>
+      <Tabs
+        value={tab}
+        onValueChange={(value) =>
+          setParams(
+            (current) => {
+              const next = new URLSearchParams(current);
+              value === "materiais"
+                ? next.delete("aba")
+                : next.set("aba", String(value));
+              return next;
+            },
+            { replace: true },
+          )
         }
       >
-        <QueryBoundary
-          loading={result.isLoading}
-          error={result.error}
-          retry={() => result.mutate()}
-        >
-          {rows.length ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  {[
-                    "Item / código",
-                    "Saldo",
-                    "Mínimo",
-                    "Situação",
-                    "Ações",
-                  ].map((label) => (
-                    <TableHead key={label}>{label}</TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>
-                      <strong>{item.name}</strong>
-                      <p className="profile-footnote">
-                        {item.sku || "Sem código"}
-                      </p>
-                      {item.serialized && (
-                        <Badge variant="outline">Por número de série</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {item.balance} {item.unit}
-                      {item.with_tech > 0 && (
-                        <p className="profile-footnote">
-                          {item.with_tech} com técnico
-                        </p>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {item.min_qty} {item.unit}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          !item.active
-                            ? "secondary"
-                            : item.low
-                              ? "warning"
-                              : "outline"
-                        }
-                      >
-                        {!item.active
-                          ? "Inativo"
-                          : item.low
-                            ? "Abaixo do mínimo"
-                            : "Saldo regular"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="erp-inline-actions">
-                        {item.serialized && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              setModal({ type: "units", id: item.id })
+        <div className="overflow-x-auto">
+          <TabsList variant="line" aria-label="Áreas do estoque">
+            <TabsTrigger value="materiais">Materiais</TabsTrigger>
+            <TabsTrigger value="depositos">Depósitos</TabsTrigger>
+            <TabsTrigger value="fornecedores">Fornecedores</TabsTrigger>
+            <TabsTrigger value="compras">Compras</TabsTrigger>
+          </TabsList>
+        </div>
+        <TabsContent value="depositos">
+          <StockWarehouses />
+        </TabsContent>
+        <TabsContent value="fornecedores">
+          <StockSuppliers />
+        </TabsContent>
+        <TabsContent value="compras">
+          <StockPurchases />
+        </TabsContent>
+        <TabsContent value="materiais">
+          <Panel
+            title="Catálogo de materiais"
+            description="Saldos calculados pelos movimentos registrados no ERP."
+            action={
+              <FormField label="Buscar no catálogo de estoque">
+                <Input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Nome ou código"
+                />
+              </FormField>
+            }
+          >
+            <QueryBoundary
+              loading={result.isLoading}
+              error={result.error}
+              retry={() => result.mutate()}
+            >
+              {rows.length ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      {[
+                        "Item / código",
+                        "Saldo",
+                        "Mínimo",
+                        "Situação",
+                        "Ações",
+                      ].map((label) => (
+                        <TableHead key={label}>{label}</TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {rows.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell>
+                          <strong>{item.name}</strong>
+                          <p className="profile-footnote">
+                            {item.sku || "Sem código"}
+                          </p>
+                          {item.serialized && (
+                            <Badge variant="outline">Por número de série</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {item.balance} {item.unit}
+                          {item.with_tech > 0 && (
+                            <p className="profile-footnote">
+                              {item.with_tech} com técnico
+                            </p>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {item.min_qty} {item.unit}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              !item.active
+                                ? "secondary"
+                                : item.low
+                                  ? "warning"
+                                  : "outline"
                             }
                           >
-                            Unidades
-                          </Button>
-                        )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            setModal({ type: "moves", id: item.id })
-                          }
-                        >
-                          Movimentos
-                        </Button>
-                        {writable && (
-                          <>
+                            {!item.active
+                              ? "Inativo"
+                              : item.low
+                                ? "Abaixo do mínimo"
+                                : "Saldo regular"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="erp-inline-actions">
+                            {item.serialized && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  setModal({ type: "units", id: item.id })
+                                }
+                              >
+                                Unidades
+                              </Button>
+                            )}
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() =>
-                                setModal({ type: "edit", id: item.id })
+                                setModal({ type: "moves", id: item.id })
                               }
                             >
-                              Editar item
+                              Movimentos
                             </Button>
-                            <ActionButton
-                              onClick={async () => {
-                                await api(`/stock/items/${item.id}`, {
-                                  method: "PATCH",
-                                  body: { active: !item.active },
-                                });
-                                await refresh();
-                              }}
-                            >
-                              {item.active ? "Desativar item" : "Ativar item"}
-                            </ActionButton>
-                          </>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <p className="profile-footnote">Nenhum item nesta consulta.</p>
-          )}
-          <p className="profile-footnote">
-            {rows.length} de {result.data?.length ?? 0} itens retornados pelo
-            servidor · busca nesta lista.
-          </p>
-        </QueryBoundary>
-      </Panel>
+                            {writable && (
+                              <>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() =>
+                                    setModal({ type: "edit", id: item.id })
+                                  }
+                                >
+                                  Editar item
+                                </Button>
+                                <ActionButton
+                                  onClick={async () => {
+                                    await api(`/stock/items/${item.id}`, {
+                                      method: "PATCH",
+                                      body: { active: !item.active },
+                                    });
+                                    await refresh();
+                                  }}
+                                >
+                                  {item.active
+                                    ? "Desativar item"
+                                    : "Ativar item"}
+                                </ActionButton>
+                              </>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <p className="profile-footnote">Nenhum item nesta consulta.</p>
+              )}
+              <p className="profile-footnote">
+                {rows.length} de {result.data?.length ?? 0} itens retornados
+                pelo servidor · busca nesta lista.
+              </p>
+            </QueryBoundary>
+          </Panel>
+        </TabsContent>
+      </Tabs>
       {modal?.type === "new" && (
         <StockItemEditor onClose={() => setModal(null)} refresh={refresh} />
       )}

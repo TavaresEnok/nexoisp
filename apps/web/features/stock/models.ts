@@ -42,7 +42,16 @@ export const movementSchema = z.object({
   created_by_name: z.string().nullable(),
   work_order_id: z.string().nullable(),
   work_order_number: z.coerce.number().nullable(),
+  warehouse_name: z.string().optional(),
+  purchase_order_number: z.number().nullable().optional(),
 });
+export const warehouseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  address: z.string(),
+  active: z.boolean(),
+});
+export type Warehouse = z.infer<typeof warehouseSchema>;
 export const unitEventSchema = z.object({
   at: z.string(),
   event: z.string(),
@@ -53,6 +62,7 @@ export const movementLabels: Record<string, string> = {
   in: "Entrada",
   out: "Saída",
   adjust: "Ajuste",
+  transfer: "Transferência",
 };
 export const unitLabels: Record<StockUnit["status"], string> = {
   in_stock: "No almoxarifado",

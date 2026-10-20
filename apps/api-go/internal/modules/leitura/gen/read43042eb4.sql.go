@@ -13,20 +13,25 @@ import (
 )
 
 const Read43042eb4 = `-- name: Read43042eb4 :many
-select m.id, m.qty, m.kind, m.note, m.created_at, m.work_order_id, w.number as work_order_number, u.name as created_by_name
+select m.id, m.qty, m.kind, m.note, m.created_at, m.work_order_id, w.number as work_order_number, u.name as created_by_name,
+                m.warehouse_id, coalesce(h.name, 'Depósito principal') as warehouse_name, p.number as purchase_order_number
          from stock_movements m left join work_orders w on w.id = m.work_order_id left join users u on u.id = m.created_by
+         left join stock_warehouses h on h.id = m.warehouse_id left join purchase_orders p on p.id = m.purchase_order_id
          where m.item_id = $1 order by m.id desc limit 200
 `
 
 type Read43042eb4Row struct {
-	ID              int64              `json:"id"`
-	Qty             int32              `json:"qty"`
-	Kind            string             `json:"kind"`
-	Note            pgtype.Text        `json:"note"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
-	WorkOrderID     pgtype.UUID        `json:"work_order_id"`
-	WorkOrderNumber pgtype.Int8        `json:"work_order_number"`
-	CreatedByName   pgtype.Text        `json:"created_by_name"`
+	ID                  int64              `json:"id"`
+	Qty                 int32              `json:"qty"`
+	Kind                string             `json:"kind"`
+	Note                pgtype.Text        `json:"note"`
+	CreatedAt           pgtype.Timestamptz `json:"created_at"`
+	WorkOrderID         pgtype.UUID        `json:"work_order_id"`
+	WorkOrderNumber     pgtype.Int8        `json:"work_order_number"`
+	CreatedByName       pgtype.Text        `json:"created_by_name"`
+	WarehouseID         pgtype.UUID        `json:"warehouse_id"`
+	WarehouseName       string             `json:"warehouse_name"`
+	PurchaseOrderNumber pgtype.Int4        `json:"purchase_order_number"`
 }
 
 func (q *Queries) Read43042eb4(ctx context.Context, itemID jsonx.UUID) ([]Read43042eb4Row, error) {
@@ -47,6 +52,9 @@ func (q *Queries) Read43042eb4(ctx context.Context, itemID jsonx.UUID) ([]Read43
 			&i.WorkOrderID,
 			&i.WorkOrderNumber,
 			&i.CreatedByName,
+			&i.WarehouseID,
+			&i.WarehouseName,
+			&i.PurchaseOrderNumber,
 		); err != nil {
 			return nil, err
 		}
