@@ -24,39 +24,3 @@ export function PortalSignOut() {
     </QueryBoundary>
   );
 }
-export const portalSections: Record<string, string> = {
-  planos: "Meus planos",
-  consumo: "Meu consumo",
-  faturas: "Minhas faturas",
-  dados: "Meus dados",
-  wifi: "Meu Wi-Fi",
-  religar: "Liberação por confiança",
-  atendimento: "Meus atendimentos",
-  documentos: "Meus documentos",
-  satisfacao: "Como foi o atendimento?",
-};
-export function usePortalSection(pathname: string, ready: boolean) {
-  useEffect(() => {
-    const target = portalSections[pathname.split("/")[2] ?? ""];
-    if (!target || !ready) return;
-    let observer: MutationObserver | undefined;
-    const focus = () => {
-      const heading = Array.from(
-        document.querySelectorAll<HTMLElement>("#main-content h2"),
-      ).find((node) => node.textContent?.startsWith(target));
-      if (!heading) return false;
-      heading.setAttribute("tabindex", "-1");
-      heading.focus({ preventScroll: true });
-      heading.scrollIntoView({ block: "start" });
-      return true;
-    };
-    if (!focus()) {
-      observer = new MutationObserver(() => {
-        if (focus()) observer?.disconnect();
-      });
-      const main = document.getElementById("main-content");
-      if (main) observer.observe(main, { subtree: true, childList: true });
-    }
-    return () => observer?.disconnect();
-  }, [pathname, ready]);
-}

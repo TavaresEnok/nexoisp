@@ -9,14 +9,24 @@ test("valores monetários rejeitam ausência em vez de virar zero", () => {
   assert.equal(cents().parse(1990), 1990);
   assert.equal(cents().parse("1990"), 1990);
   assert.equal(money().parse("2.50"), 2.5);
-  for (const value of [null, undefined, "", "abc", "1e3", 1.5]) assert.equal(cents().safeParse(value).success, false, String(value));
+  for (const value of [null, undefined, "", "abc", "1e3", 1.5])
+    assert.equal(cents().safeParse(value).success, false, String(value));
   assert.equal(cents().nullable().parse(null), null);
 });
 
 test("exportação informa quando o servidor cortou no limite", () => {
-  assert.deepEqual(exportCoverage("/invoices?status=open&format=csv&limit=5000", 7200), { total: 7200, limit: 5000, truncated: true });
-  assert.equal(exportCoverage("/invoices?format=csv&limit=5000", 5000).truncated, false);
-  assert.equal(exportCoverage("/invoices?format=csv&limit=5000", null).truncated, false);
+  assert.deepEqual(
+    exportCoverage("/invoices?status=open&format=csv&limit=5000", 7200),
+    { total: 7200, limit: 5000, truncated: true },
+  );
+  assert.equal(
+    exportCoverage("/invoices?format=csv&limit=5000", 5000).truncated,
+    false,
+  );
+  assert.equal(
+    exportCoverage("/invoices?format=csv&limit=5000", null).truncated,
+    false,
+  );
   assert.equal(exportCoverage("/invoices?format=csv", 9000).truncated, false);
 });
 
@@ -25,7 +35,24 @@ test("navegação interna usa o roteador em vez de recarregar a aplicação", ()
   for (const name of readdirSync("features", { recursive: true }).map(String)) {
     if (!name.endsWith(".tsx")) continue;
     const source = readFileSync(path.join("features", name), "utf8");
-    for (const match of source.matchAll(/<a\b[^>]*\bhref=(?:"\/(?!demonstracao\/|api\/)|\{`\/)/g)) offenders.push(`${name}: ${match[0].slice(0, 60)}`);
+    for (const match of source.matchAll(
+      /<a\b[^>]*\bhref=(?:"\/(?!demonstracao\/|api\/)|\{`\/)/g,
+    ))
+      offenders.push(`${name}: ${match[0].slice(0, 60)}`);
   }
   assert.deepEqual(offenders, []);
+});
+
+test("cada destino do portal no menu tem seção própria", async () => {
+  const { navigationPages } = await import("../lib/navigation");
+  const { portalSectionKeys } = await import("../features/portal/section-keys");
+  const destinations = navigationPages
+    .map((page) => page.href.split("/"))
+    .filter((parts) => parts[1] === "portal" && parts[2] && parts[2] !== "sair")
+    .map((parts) => parts[2]);
+  assert.ok(destinations.length >= 9);
+  assert.deepEqual(
+    [...new Set(destinations)].sort(),
+    [...portalSectionKeys].sort(),
+  );
 });

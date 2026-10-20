@@ -13,7 +13,7 @@ const cpe = z.object({
   wifi: z.array(wifi),
   last_inform: z.string().optional(),
 });
-export function PortalWifi() {
+export function PortalWifi({ standalone }: { standalone?: boolean } = {}) {
   const result = useSWR("portal-cpe", async () =>
     z.array(cpe).parse(await api("/portal/cpe")),
   );
@@ -28,11 +28,17 @@ export function PortalWifi() {
       error={result.error}
       retry={() => result.mutate()}
     >
-      {Boolean(result.data?.some((item) => item.wifi.length)) && (
+      {(standalone ||
+        Boolean(result.data?.some((item) => item.wifi.length))) && (
         <Panel
           title="Meu Wi-Fi"
           description="Alterações podem ser aplicadas imediatamente ou ficar na fila até o roteador contatar o servidor."
         >
+          {!result.data?.some((item) => item.wifi.length) && (
+            <p>
+              Nenhum roteador com Wi-Fi gerenciável vinculado aos seus planos.
+            </p>
+          )}
           <div className="erp-stack">
             {result.data?.flatMap((item) =>
               item.wifi.map((network) => (

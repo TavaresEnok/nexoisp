@@ -25,7 +25,9 @@ const ticketState = (value: string) =>
       closed: "Encerrado",
     }) as Record<string, string>
   )[value] ?? value;
-export function PortalAcceptances() {
+export function PortalAcceptances({
+  standalone,
+}: { standalone?: boolean } = {}) {
   const result = useSWR(
     "portal-acceptances",
     async () => z.array(acceptance).parse(await api("/portal/acceptances")),
@@ -39,11 +41,12 @@ export function PortalAcceptances() {
       error={result.error}
       retry={() => result.mutate()}
     >
-      {Boolean(result.data?.length) && (
+      {(standalone || Boolean(result.data?.length)) && (
         <Panel
           title="Meus documentos"
           description="Até cinquenta pedidos de aceite não cancelados, conforme a consulta do provedor."
         >
+          {!result.data?.length && <p>Nenhum documento aguardando aceite.</p>}
           <div className="erp-stack">
             {result.data?.map((item) => (
               <div className="erp-contract-card" key={item.id}>
@@ -124,7 +127,7 @@ export function PortalAcceptances() {
     </QueryBoundary>
   );
 }
-export function PortalSurveys() {
+export function PortalSurveys({ standalone }: { standalone?: boolean } = {}) {
   const result = useSWR("portal-surveys", async () =>
     z
       .array(z.object({ id: z.string(), work_order_number: z.coerce.number() }))
@@ -137,11 +140,14 @@ export function PortalSurveys() {
       error={result.error}
       retry={() => result.mutate()}
     >
-      {Boolean(result.data?.length) && (
+      {(standalone || Boolean(result.data?.length)) && (
         <Panel
           title="Como foi o atendimento?"
           description="Avalie as ordens de serviço concluídas."
         >
+          {!result.data?.length && (
+            <p>Nenhuma ordem de serviço aguardando avaliação.</p>
+          )}
           <div className="erp-stack">
             {result.data?.map((item) => (
               <div className="erp-contract-card" key={item.id}>
