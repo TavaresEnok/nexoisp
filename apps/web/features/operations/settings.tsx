@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Building2, ShieldCheck } from "lucide-react";
 import { PageHeading, Panel } from "@/components/workspace-ui";
 import { Badge } from "@/components/ui/badge";
@@ -64,9 +65,9 @@ export function OperationalSettings() {
             {links
               .filter(([path]) => canAccessPath(me, path))
               .map(([path, label]) => (
-                <a key={path} href={path} className="profile-text-action">
+                <Link key={path} to={path} className="profile-text-action">
                   {label}
-                </a>
+                </Link>
               ))}
           </div>
         </Panel>

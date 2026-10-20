@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { z } from "zod";
@@ -122,12 +123,12 @@ export function AnatelCollection() {
                 <p className="profile-footnote">
                   {result.data.pending.sem_cnpj} contratos sem CNPJ. Cadastre
                   uma empresa com CNPJ e confira o vínculo do contrato em{" "}
-                  <a
+                  <Link
                     className="profile-text-action"
-                    href="/administracao/empresas"
+                    to="/administracao/empresas"
                   >
                     Empresas faturadoras
-                  </a>
+                  </Link>
                   .
                 </p>
               )}

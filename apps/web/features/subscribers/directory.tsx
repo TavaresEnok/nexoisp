@@ -11,7 +11,8 @@ import {
 import { QueryBoundary, ConnectedNotice } from "@/features/shared/feedback";
 import { useSession } from "@/features/session/provider";
 import { can } from "@/features/session/model";
-import { api, download } from "@/platform/erp-client";
+import { api } from "@/platform/erp-client";
+import { exportCsv } from "@/features/shared/export";
 import { money } from "@/lib/format";
 import { readSubscribers, subscriberQuery } from "@/data/erp/subscribers";
 import type { SubscriberRecord } from "./model";
@@ -103,7 +104,7 @@ export function SubscriberDirectory() {
   const exportRows = async () => {
     setExporting(true);
     try {
-      await download(
+      await exportCsv(
         `/subscribers?${new URLSearchParams({ q: query, ...(status ? { status } : {}), ...(descending ? { order: "desc" } : {}), format: "csv", limit: "5000" })}`,
         "assinantes.csv",
       );

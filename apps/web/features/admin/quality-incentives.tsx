@@ -19,6 +19,7 @@ import { decimalToCents } from "@/features/contracts/models";
 import { money } from "@/lib/format";
 import { api } from "@/platform/erp-client";
 import { workKinds } from "./quality-sla";
+import { cents } from "@/features/shared/schema";
 const kit = z.object({
   id: z.string(),
   name: z.string(),
@@ -226,8 +227,8 @@ const rule = z.object({
   id: z.string(),
   subject: z.enum(["work_order", "sale"]),
   os_kind: z.string().nullable(),
-  assignee_cents: z.coerce.number(),
-  helper_cents: z.coerce.number(),
+  assignee_cents: cents(),
+  helper_cents: cents(),
 });
 const report = z.object({
   rows: z.array(
@@ -237,10 +238,10 @@ const report = z.object({
       os_assignee: z.coerce.number(),
       os_helper: z.coerce.number(),
       sales: z.coerce.number(),
-      total_cents: z.coerce.number(),
+      total_cents: cents(),
     }),
   ),
-  total_cents: z.coerce.number(),
+  total_cents: cents(),
   note: z.string(),
 });
 export function Commissions() {

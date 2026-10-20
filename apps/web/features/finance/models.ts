@@ -5,31 +5,32 @@ import {
   formatPhone,
   shortCode,
 } from "@/features/shared/format";
+import { cents, money } from "@/features/shared/schema";
 export const invoiceSchema = z.object({
   id: z.string().uuid(),
   contract_id: z.string().uuid(),
   subscriber_id: z.string().uuid(),
   subscriber_name: z.string(),
   plan_name: z.string(),
-  amount_cents: z.coerce.number().int(),
-  paid_cents: z.coerce.number().int(),
+  amount_cents: cents(),
+  paid_cents: cents(),
   due_date: z.string(),
   competence: z.string().nullable(),
   status: z.enum(["open", "paid", "canceled", "reconciling"]),
   overdue: z.boolean(),
   gateway: z.string().nullable(),
   gateway_charge_id: z.string().nullable(),
-  fee_cents: z.coerce.number().int(),
-  discount_cents: z.coerce.number().int(),
+  fee_cents: cents(),
+  discount_cents: cents(),
 });
 export type ErpInvoice = z.infer<typeof invoiceSchema>;
 export const summarySchema = z.object({
   open: z.coerce.number(),
-  open_cents: z.coerce.number(),
+  open_cents: cents(),
   overdue: z.coerce.number(),
-  overdue_cents: z.coerce.number(),
+  overdue_cents: cents(),
   reconciling: z.coerce.number(),
-  received_month_cents: z.coerce.number(),
+  received_month_cents: cents(),
 });
 export type FinanceSummary = z.infer<typeof summarySchema>;
 export type Due = {
@@ -110,7 +111,7 @@ export const policySchema = z.object({
   suspend_after_days: z.coerce.number().nullable(),
   trust_release_days: z.coerce.number(),
   trust_release_gap_days: z.coerce.number(),
-  late_fee_percent: z.coerce.number(),
+  late_fee_percent: money(),
   interest_monthly_percent: z.coerce.number(),
   suspension_mode: z.enum(["reject", "profile"]),
   suspension_profile: z.string().nullable(),

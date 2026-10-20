@@ -16,6 +16,7 @@ import {
   type ImportKind,
 } from "./import-models";
 import { ImportResults, ImportBatches } from "./import-batches";
+import { cents } from "@/features/shared/schema";
 const device = z.object({
   id: z.string(),
   name: z.string(),
@@ -24,7 +25,7 @@ const device = z.object({
 const plan = z.object({
   id: z.string(),
   name: z.string(),
-  price_cents: z.coerce.number(),
+  price_cents: cents(),
   active: z.boolean(),
 });
 export function DataImport() {

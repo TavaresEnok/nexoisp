@@ -1,10 +1,11 @@
 import { z } from "zod";
+import { cents } from "@/features/shared/schema";
 export const portalContract = z.object({
   id: z.string().uuid(),
   status: z.string(),
   due_day: z.coerce.number(),
   plan_name: z.string(),
-  price_cents: z.coerce.number(),
+  price_cents: cents(),
   down_kbps: z.coerce.number(),
   up_kbps: z.coerce.number(),
   desired_policy: z.string().nullable(),
@@ -24,7 +25,7 @@ export const portalInvoice = z.object({
   contract_id: z.string(),
   competence: z.string().nullable(),
   due_date: z.string(),
-  amount_cents: z.coerce.number(),
+  amount_cents: cents(),
   status: z.string(),
   gateway: z.string().nullable(),
   overdue: z.boolean(),

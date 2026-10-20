@@ -41,7 +41,8 @@ import {
 } from "@/features/field/create";
 import { useSession } from "@/features/session/provider";
 import { can, hasModule } from "@/features/session/model";
-import { api, download, erpClient } from "@/platform/erp-client";
+import { api, erpClient } from "@/platform/erp-client";
+import { exportCsv } from "@/features/shared/export";
 import { date } from "@/lib/format";
 import { TicketCatalogFields } from "./catalogs";
 import {
@@ -139,7 +140,7 @@ function TicketListing({ subscriberId }: { subscriberId?: string }) {
           setParams(next);
         }}
         onExport={() => {
-          void download(
+          void exportCsv(
             `/tickets?${filters}&format=csv&limit=5000`,
             "atendimentos.csv",
           ).catch((error) => toast.error((error as Error).message));

@@ -27,6 +27,10 @@ export function createApiClient(fetcher: typeof fetch, onUnauthorized: () => voi
       const total = count !== null && /^\d+$/.test(count) ? Number(count) : null;
       return { data: (res.status === 204 ? undefined : await res.json()) as T, total };
     },
-    async download(path: string) { return (await response(path)).blob(); },
+    async download(path: string) {
+      const res = await response(path);
+      const count = res.headers.get("X-Total-Count");
+      return { blob: await res.blob(), total: count !== null && /^\d+$/.test(count) ? Number(count) : null };
+    },
   };
 }

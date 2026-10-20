@@ -51,6 +51,8 @@ import {
 import { orderKinds, orderStates } from "@/features/field/labels";
 import { canAccessPath, canonicalErpPath } from "./navigation";
 
+import { cents } from "@/features/shared/schema";
+
 const n = z.coerce.number();
 const panelsSchema = z.object({
   offline: z.array(z.object({ label: z.string(), n })),
@@ -58,7 +60,7 @@ const panelsSchema = z.object({
   contracts_by_month: z.array(
     z.object({ month: z.string(), ativacoes: n, encerramentos: n }),
   ),
-  cash_today: z.object({ cents: n, pagamentos: n }).optional(),
+  cash_today: z.object({ cents: cents(), pagamentos: n }).optional(),
   without_invoice: n.optional(),
   recent_operations: z.array(
     z.object({

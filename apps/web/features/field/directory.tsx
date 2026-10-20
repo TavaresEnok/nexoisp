@@ -10,7 +10,8 @@ import { ConnectedNotice } from "@/features/shared/feedback";
 import { ServerPager, useUrlPage } from "@/features/shared/pagination";
 import { useSession } from "@/features/session/provider";
 import { can } from "@/features/session/model";
-import { api, erpClient, download } from "@/platform/erp-client";
+import { api, erpClient } from "@/platform/erp-client";
+import { exportCsv } from "@/features/shared/export";
 import { orderSchema, projectOrder } from "./models";
 import { orderStates } from "./labels";
 import { CreateWorkOrder } from "./create";
@@ -120,7 +121,7 @@ export function OperationalOrders() {
           )
         }
         onExport={() => {
-          void download(
+          void exportCsv(
             `/work-orders?${filters}&format=csv&limit=5000`,
             "ordens-de-servico.csv",
           ).catch((error) => toast.error((error as Error).message));

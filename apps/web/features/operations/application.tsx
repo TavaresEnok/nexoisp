@@ -12,6 +12,7 @@ import {
   useLocation,
   useParams,
   useSearchParams,
+  Link,
 } from "react-router-dom";
 import NotFound from "@/src/not-found";
 import { AppShell } from "@/components/app-shell";
@@ -535,7 +536,7 @@ function AccessDenied() {
         <p>
           Consulte o administrador do provedor para verificar suas permissões.
         </p>
-        <a href="/conta">Minha conta</a>
+        <Link to="/conta">Minha conta</Link>
       </Panel>
     </>
   );
@@ -605,13 +606,13 @@ function OperationalDirectory() {
             >
               <div className="erp-inline-actions">
                 {area.pages.map((page) => (
-                  <a
+                  <Link
                     className="profile-text-action"
                     key={page.href}
-                    href={page.href}
+                    to={page.href}
                   >
                     {page.label}
-                  </a>
+                  </Link>
                 ))}
               </div>
             </Panel>

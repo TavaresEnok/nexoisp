@@ -5,12 +5,13 @@ import {
   formatPhone,
   shortCode,
 } from "@/features/shared/format";
+import { cents } from "@/features/shared/schema";
 export const planSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
   active: z.boolean(),
   version: z.coerce.number(),
-  price_cents: z.coerce.number().int(),
+  price_cents: cents(),
   down_kbps: z.coerce.number(),
   up_kbps: z.coerce.number(),
   profile_name: z.string(),
@@ -84,7 +85,7 @@ export const contractRecordSchema = z.object({
   plan_id: z.string().uuid(),
   plan_name: z.string(),
   plan_version: z.coerce.number(),
-  price_cents: z.coerce.number(),
+  price_cents: cents(),
   down_kbps: z.coerce.number(),
   up_kbps: z.coerce.number(),
   due_day: z.coerce.number(),

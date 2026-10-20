@@ -7,7 +7,8 @@ import { ContractCatalog } from "@/components/contracts";
 import { ConnectedNotice } from "@/features/shared/feedback";
 import { ServerPager, useUrlPage } from "@/features/shared/pagination";
 import { useSession } from "@/features/session/provider";
-import { api, erpClient, download } from "@/platform/erp-client";
+import { api, erpClient } from "@/platform/erp-client";
+import { exportCsv } from "@/features/shared/export";
 import {
   contractRecordSchema,
   planSchema,
@@ -76,7 +77,7 @@ export function OperationalContracts() {
         onExport={async () => {
           setExporting(true);
           try {
-            await download(
+            await exportCsv(
               `/contracts?${filters}&format=csv&limit=5000`,
               "contratos.csv",
             );

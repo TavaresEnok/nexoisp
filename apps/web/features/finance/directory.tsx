@@ -21,6 +21,7 @@ import { ConnectedNotice, QueryBoundary } from "@/features/shared/feedback";
 import { useSession } from "@/features/session/provider";
 import { can } from "@/features/session/model";
 import { api, download, erpClient } from "@/platform/erp-client";
+import { exportCsv } from "@/features/shared/export";
 import { invoiceSchema, projectInvoice, summarySchema } from "./models";
 import { FinanceOverview } from "./overview";
 import { OperationalInvoice } from "./invoice";
@@ -135,7 +136,7 @@ export function OperationalInvoices() {
           </>
         }
         onExport={() => {
-          void download(
+          void exportCsv(
             `/invoices?${filters}&format=csv&limit=5000`,
             "faturas.csv",
           ).catch((error) => toast.error((error as Error).message));

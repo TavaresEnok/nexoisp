@@ -1,7 +1,7 @@
 import { useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { z } from "zod";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { Network, Users, Workflow, Shield } from "lucide-react";
 import { CoreNetworkFrame } from "@/components/core-network";
 import { coreTabs } from "./core-tabs";
@@ -669,9 +669,9 @@ export function ContractAddresses({ id }: { id: string }) {
             dinâmico.
           </p>
         )}
-        <a className="profile-text-action" href="/rede/enderecos-ip">
+        <Link className="profile-text-action" to="/rede/enderecos-ip">
           Gerenciar reservas
-        </a>
+        </Link>
       </QueryBoundary>
     </ProfileSection>
   );

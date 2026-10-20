@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { cents } from "@/features/shared/schema";
 const optionalText = z.string().nullable().optional();
 export const subscriberFields = {
   name: "",
@@ -55,7 +56,7 @@ export const subscriberContractSchema = z.object({
   plan_id: z.string().uuid(),
   plan_name: z.string(),
   plan_version: z.coerce.number(),
-  price_cents: z.coerce.number(),
+  price_cents: cents(),
   down_kbps: z.coerce.number(),
   up_kbps: z.coerce.number(),
   due_day: z.coerce.number(),

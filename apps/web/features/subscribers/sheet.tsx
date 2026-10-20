@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import {
   ArrowUpRight,
   CircleDollarSign,
@@ -878,12 +878,12 @@ function SubscriberDetails({
                           instant: true,
                           meta: ` · ${event.by ?? "Sistema"}`,
                           action: event.contract_id ? (
-                            <a
+                            <Link
                               className="profile-text-action"
-                              href={`/contratos/${event.contract_id}`}
+                              to={`/contratos/${event.contract_id}`}
                             >
                               Abrir contrato
-                            </a>
+                            </Link>
                           ) : undefined,
                         }))}
                     />
