@@ -188,7 +188,7 @@ export function AddressDirectory() {
       >
         <OperationalCatalog
           title="Blocos de endereços"
-          description="A reserva de prefixo IPv6 é cadastral; o servidor não o entrega automaticamente ao concentrador."
+          description="Com o RADIUS integrado, o prefixo reservado é entregue como Delegated-IPv6-Prefix no próximo provisionamento do acesso; concentradores por agente exigem configuração da equipe."
           columns={[
             "Bloco / nome",
             "Tipo",
@@ -412,7 +412,7 @@ function PoolReservations({
           <SheetDescription>
             {pool.cidr} ·{" "}
             {delegated
-              ? "Reserva cadastral de prefixos IPv6. A entrega ao assinante exige configuração pela equipe."
+              ? "Prefixo delegado ao roteador do assinante (DHCPv6-PD). No RADIUS integrado, reaplique o acesso para entregar; concentradores por agente exigem configuração da equipe."
               : "IPs fixos devem ficar fora da faixa dinâmica configurada no NAS."}
           </SheetDescription>
         </SheetHeader>

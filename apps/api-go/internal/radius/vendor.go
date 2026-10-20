@@ -81,6 +81,10 @@ func attributes(vendor string, p jsonx.Object, down, up any) ([]Attribute, []Att
 	if jsonx.Truthy(p.Get("framed_ip")) {
 		set("Framed-IP-Address", p.Get("framed_ip"))
 	}
+	// RFC 4818: prefixo delegado ao roteador do assinante (DHCPv6-PD), reservado no IPAM.
+	if !blocked && jsonx.Truthy(p.Get("delegated_ipv6_prefix")) {
+		set("Delegated-IPv6-Prefix", p.Get("delegated_ipv6_prefix"))
+	}
 	if jsonx.Truthy(p.Get("acct_interim")) {
 		set("Acct-Interim-Interval", p.Get("acct_interim"))
 	}
