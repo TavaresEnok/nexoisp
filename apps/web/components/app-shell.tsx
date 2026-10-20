@@ -254,7 +254,6 @@ export function AppShell({ children, initialAppearance }: { children: ReactNode;
             </DropdownMenu>
           </div>
         </header>
-        {account?.demo && <div className="erp-banner">Ambiente demonstrativo do servidor · dados sintéticos e integrações simuladas identificadas nas páginas.</div>}
         {account?.support && <div className="erp-banner"><span>Acesso de suporte a <strong>{account.tenant}</strong> · ações auditadas</span><Button variant="outline" size="sm" onClick={async () => { try { await shell?.exitSupport(); go("/provedores"); } catch (error) { toast.error((error as Error).message); } }}>Encerrar suporte</Button></div>}
         <main id="main-content" className="page-content" tabIndex={-1}>
           {children}
