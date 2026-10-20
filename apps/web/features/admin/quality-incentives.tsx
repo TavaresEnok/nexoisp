@@ -103,7 +103,7 @@ export function InstallKits() {
               <DialogTitle>Novo kit de instalação</DialogTitle>
               <DialogDescription>
                 De um a trinta materiais ativos, sem controle por número de
-                série. Itens repetidos são recusados pelo Go.
+                série. Itens repetidos são recusados pelo servidor.
               </DialogDescription>
             </DialogHeader>
             <QueryBoundary
@@ -272,7 +272,7 @@ export function Commissions() {
       >
         <OperationalCatalog
           title="Regras de comissão"
-          description="Uma nova regra substitui a vigente do mesmo tipo. O Go apura OS concluídas e prospectos ganhos; a apuração não executa pagamentos."
+          description="Uma nova regra substitui a vigente do mesmo tipo. O servidor apura OS concluídas e prospectos ganhos; a apuração não executa pagamentos."
           columns={["Abrangência", "Responsável ou vendedor", "Cada auxiliar"]}
           actions={
             <Button onClick={() => setCreating(true)}>

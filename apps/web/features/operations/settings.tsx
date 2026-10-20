@@ -52,7 +52,7 @@ export function OperationalSettings() {
             <ShieldCheck size={17} />
             <p>
               {me ? roleLabels[me.role] : ""} · Permissões, módulos e dados são
-              conferidos no Go em cada operação.
+              conferidos no servidor em cada operação.
             </p>
           </div>
         </Panel>

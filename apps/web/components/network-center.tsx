@@ -174,83 +174,10 @@ export function NetworkCenter() {
           </div>
         ))}
       </div>
-      <div className="network-top-grid">
-        <Panel
-          title="De ponta a ponta"
-          description="Tráfego por equipamento · leitura demonstrativa em Gbps"
-        >
-          <ChartContainer
-            config={{
-              traffic: { label: "Tráfego · Gbps", color: "var(--chart-1)" },
-            }}
-            className="traffic-chart"
-          >
-            <BarChart
-              accessibilityLayer
-              data={traffic}
-              margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
-            >
-              <CartesianGrid vertical={false} strokeDasharray="3 4" />
-              <XAxis
-                dataKey="name"
-                axisLine={false}
-                tickLine={false}
-                tickMargin={10}
-                interval={0}
-                fontSize={8}
-              />
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                fontSize={10}
-                tickFormatter={(v) => `${v}G`}
-              />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar
-                dataKey="traffic"
-                fill="var(--color-traffic)"
-                radius={[4, 4, 0, 0]}
-                maxBarSize={34}
-              />
-            </BarChart>
-          </ChartContainer>
-        </Panel>
-        <Panel
-          title="Sessões por concentrador"
-          description="Online e provisionadas são medidas diferentes"
-        >
-          <div className="concentrators">
-            {data.nodes
-              .filter((n) => n.type === "Concentrador")
-              .map((n) => (
-                <button key={n.id} onClick={() => setNode(n)}>
-                  <div>
-                    <span className="mono">{n.name}</span>
-                    <ArrowUpRight size={14} />
-                  </div>
-                  <strong>
-                    {number(n.sessions)}
-                    <small> / {number(n.capacity)}</small>
-                  </strong>
-                  <span className="concentrator-progress">
-                    <i
-                      style={{ width: `${(n.sessions / n.capacity) * 100}%` }}
-                    />
-                  </span>
-                  <p>
-                    {n.pop}
-                    <span>
-                      {((n.sessions / n.capacity) * 100)
-                        .toFixed(1)
-                        .replace(".", ",")}
-                      % com sessão
-                    </span>
-                  </p>
-                </button>
-              ))}
-          </div>
-        </Panel>
-      </div>
+      <NetworkTopGrid
+        chart={{ title: "De ponta a ponta", description: "Tráfego por equipamento · leitura demonstrativa em Gbps", label: "Tráfego · Gbps", unit: "G", rows: traffic.map(t => ({ name: t.name, value: t.traffic })) }}
+        concentrators={{ title: "Sessões por concentrador", description: "Online e provisionadas são medidas diferentes", rows: data.nodes.filter((n) => n.type === "Concentrador").map(n => ({ id: n.id, name: n.name, sessions: n.sessions, total: n.capacity, pop: n.pop, note: "com sessão", onClick: () => setNode(n) })) }}
+      />
       <NetworkEquipmentTable rows={rows} filter={filter} setFilter={setFilter} query={query} setQuery={setQuery} onOpen={n => setNode(n as NetworkNode)} />
       <DemoNotice>
         {isDemoMode ? "Telemetria sintética e estática do cenário local." : "Telemetria sintética e estática, armazenada no Neon."} Nenhum agente, concentrador ou OLT real está conectado.
@@ -500,4 +427,47 @@ return (<Panel
           <span>{operational ? "Estado conforme os relatos disponíveis no ERP" : "Endereços privados fictícios · somente leitura"}</span>
         </div>
       </Panel>);
+}
+
+export type ConcentratorRow = { id: string; name: string; sessions: number; total: number; pop: string; note: string; onClick: () => void };
+export function NetworkTopGrid({ chart, concentrators }: { chart: { title: string; description: string; label: string; unit: string; rows: { name: string; value: number }[]; empty?: ReactNode }; concentrators: { title: string; description: string; rows: ConcentratorRow[]; empty?: ReactNode } }) {
+  return <div className="network-top-grid">
+        <Panel title={chart.title} description={chart.description}>
+          {chart.rows.length ? <ChartContainer config={{ value: { label: chart.label, color: "var(--chart-1)" } }} className="traffic-chart">
+            <BarChart accessibilityLayer data={chart.rows} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+              <CartesianGrid vertical={false} strokeDasharray="3 4" />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={10} interval={0} fontSize={8} />
+              <YAxis axisLine={false} tickLine={false} fontSize={10} tickFormatter={(v) => `${v}${chart.unit}`} />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Bar dataKey="value" fill="var(--color-value)" radius={[4, 4, 0, 0]} maxBarSize={34} />
+            </BarChart>
+          </ChartContainer> : chart.empty}
+        </Panel>
+        <Panel title={concentrators.title} description={concentrators.description}>
+          <div className="concentrators">
+            {concentrators.rows.map((n) => (
+                <button key={n.id} onClick={n.onClick}>
+                  <div>
+                    <span className="mono">{n.name}</span>
+                    <ArrowUpRight size={14} />
+                  </div>
+                  <strong>
+                    {number(n.sessions)}
+                    <small> / {number(n.total)}</small>
+                  </strong>
+                  <span className="concentrator-progress">
+                    <i style={{ width: `${n.total ? (n.sessions / n.total) * 100 : 0}%` }} />
+                  </span>
+                  <p>
+                    {n.pop}
+                    <span>
+                      {(n.total ? (n.sessions / n.total) * 100 : 0).toFixed(1).replace(".", ",")}% {n.note}
+                    </span>
+                  </p>
+                </button>
+              ))}
+          </div>
+          {!concentrators.rows.length && concentrators.empty}
+        </Panel>
+      </div>;
 }

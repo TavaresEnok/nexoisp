@@ -99,7 +99,7 @@ export function useOperationalShell(): ShellAdapter {
       account: me
         ? {
             name: me.name,
-            initials: initials(me.name),
+            initials: initials(me.name).toUpperCase(),
             role: roleLabels[me.role],
             tenant: me.tenant?.name ?? null,
             demo: Boolean(me.demo),

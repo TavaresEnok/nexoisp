@@ -11,6 +11,7 @@ import {
 import { Panel } from "@/components/workspace-ui";
 import { Button } from "@/components/ui/button";
 import { RevenueChart } from "@/components/revenue-chart";
+import { EmptyState } from "@/components/workspace-feedback";
 import { QueryBoundary } from "@/features/shared/feedback";
 import { api } from "@/platform/erp-client";
 import { money } from "@/lib/format";
@@ -84,7 +85,15 @@ export function FinanceOverview({
             error={series.error}
             retry={() => series.mutate()}
           >
-            {series.data && (
+            {series.data &&
+              !series.data.some((month) => month.received_cents > 0) && (
+                <EmptyState
+                  icon={CircleDollarSign}
+                  title="Nenhum recebimento nos últimos meses"
+                  description="O gráfico aparece quando houver pagamentos registrados."
+                />
+              )}
+            {series.data?.some((month) => month.received_cents > 0) && (
               <RevenueChart
                 data={series.data.map((month) => ({
                   day: month.month.split("-").reverse().join("/"),

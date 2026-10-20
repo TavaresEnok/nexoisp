@@ -563,6 +563,7 @@ try {
     document: "11222333000181",
   });
   await page.goto(`${base}/financeiro/faturas`);
+  await page.getByRole("button", { name: "Contabilidade", exact: true }).click();
   await page
     .getByLabel("Empresa da exportação contábil", { exact: true })
     .selectOption(company.id);

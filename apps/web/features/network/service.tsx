@@ -453,7 +453,7 @@ function ProvisionAccess({
   return (
     <RecordEditor
       title="Provisionar acesso"
-      description="O Go valida o contrato e registra a intenção. A solicitação não comprova a aplicação no equipamento."
+      description="O servidor valida o contrato e registra a intenção. A solicitação não comprova a aplicação no equipamento."
       loading={devices.isLoading}
       error={devices.error}
       retry={() => devices.mutate()}

@@ -224,9 +224,9 @@ export function DataImport() {
             {busy ? "Processando arquivo…" : "Simular importação"}
           </Button>
           <p className="profile-footnote">
-            A simulação executa as validações do Go e desfaz a transação; ela
-            não grava um lote. O arquivo permanece somente na memória desta tela
-            durante a importação.
+            A simulação executa as validações do servidor e desfaz a transação;
+            ela não grava um lote. O arquivo permanece somente na memória desta
+            tela durante a importação.
           </p>
           {error && <p role="alert">{error}</p>}
         </Panel>
@@ -365,7 +365,7 @@ export function DataImport() {
               {!result.applied && (
                 <ActionButton
                   disabled={busy || stale || result.missing_required.length > 0}
-                  confirm={`Aplicar esta importação? A prévia indica ${result.totals.created} novos, ${result.totals.updated} atualizados e ${result.totals.error} linhas com erro que ficarão de fora. O Go revalida todos os registros ao aplicar.`}
+                  confirm={`Aplicar esta importação? A prévia indica ${result.totals.created} novos, ${result.totals.updated} atualizados e ${result.totals.error} linhas com erro que ficarão de fora. O servidor revalida todos os registros ao aplicar.`}
                   onClick={() => run(true)}
                 >
                   Aplicar importação

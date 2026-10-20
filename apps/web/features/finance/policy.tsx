@@ -187,7 +187,7 @@ function PolicyEditor({
         <DialogHeader>
           <DialogTitle>Editar política de cobrança</DialogTitle>
           <DialogDescription>
-            As alterações serão validadas pelo Go e aplicadas às operações
+            As alterações serão validadas pelo servidor e aplicadas às operações
             futuras.
           </DialogDescription>
         </DialogHeader>
@@ -223,7 +223,7 @@ function PolicyEditor({
         >
           <FormField
             label="Gateway de pagamento"
-            hint="A integração com gateway real depende da homologação existente no backend."
+            hint="A integração com gateway real depende da homologação existente no servidor."
           >
             <select
               className="commercial-select"

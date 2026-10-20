@@ -16,6 +16,11 @@ import { money } from "@/lib/format";
 import { readSubscribers, subscriberQuery } from "@/data/erp/subscribers";
 import type { SubscriberRecord } from "./model";
 import { SubscriberEditor } from "./form";
+import {
+  formatDocument,
+  formatPhone,
+  shortCode,
+} from "@/features/shared/format";
 
 export const subscriberPageSizes = [8, 25, 50];
 
@@ -23,9 +28,9 @@ export function subscriberListRow(row: SubscriberRecord): SubscriberListRow {
   const contracts = row.active_contracts ?? 0;
   return {
     id: row.id,
-    code: row.id.slice(0, 8),
+    code: shortCode(row.id),
     name: row.name,
-    contact: row.email || row.phone || "Sem contato principal",
+    contact: row.email || formatPhone(row.phone) || "Sem contato principal",
     plan: row.active_plan_names || "Sem plano ativo",
     status:
       contracts > 0

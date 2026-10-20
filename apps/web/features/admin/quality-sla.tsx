@@ -79,7 +79,7 @@ export function SlaPolicies() {
       >
         <OperationalCatalog
           title="Políticas de SLA"
-          description="Prazos em tempo corrido, sem calendário de expediente. A política mais específica prevalece; o Go aplica o escalonamento configurado."
+          description="Prazos em tempo corrido, sem calendário de expediente. A política mais específica prevalece; o servidor aplica o escalonamento configurado."
           columns={[
             "Política",
             "Abrangência",
@@ -381,7 +381,7 @@ export function Satisfaction() {
         </Panel>
         <OperationalCatalog
           title="Pesquisas de satisfação"
-          description="Respostas e pesquisas pendentes registradas pelo Go."
+          description="Respostas e pesquisas pendentes registradas pelo servidor."
           columns={[
             "OS",
             "Natureza",

@@ -23,9 +23,9 @@ export function Plans() {
   return <PlanCatalog {...getCommercialData(data)} />;
 }
 
-export function PlanCatalog({ plans, contracts, activeCounts, actions, detailActions }: {
+export function PlanCatalog({ plans, contracts, activeCounts, recurringTotal, actions, detailActions }: {
   plans: CatalogPlan[]; contracts: import("@/domain/commercial").ServiceContract[];
-  activeCounts?: Record<string, number>; actions?: ReactNode; detailActions?: (plan: CatalogPlan) => ReactNode;
+  activeCounts?: Record<string, number>; recurringTotal?: number | null; actions?: ReactNode; detailActions?: (plan: CatalogPlan) => ReactNode;
 }) {
   const operational = Boolean(activeCounts);
   const data = { subscribers: [], commercialPlans: plans, contracts };
@@ -52,7 +52,7 @@ export function PlanCatalog({ plans, contracts, activeCounts, actions, detailAct
     <div className={styles.metrics}>
       {[{ label: "Planos no catálogo", value: plans.length, detail: `${services.length - 1} ${services.length === 2 ? "tipo de serviço" : "tipos de serviço"}`, icon: Layers },
         { label: "Contratos ativos", value: activeCounts ? Object.values(activeCounts).reduce((sum, value) => sum + value, 0) : active.length, detail: operational ? "Contratos vigentes por plano" : `${contracts.length} contratos na base`, icon: Users },
-        { label: "Mensalidades ativas", value: operational ? "Nos contratos" : money(recurring), detail: operational ? "Consulte as condições de cada vínculo" : "Valores base · sem serviços adicionais", icon: Wallet },
+        { label: "Mensalidades ativas", value: operational ? (recurringTotal == null ? "—" : money(recurringTotal)) : money(recurring), detail: operational ? "Valores base dos contratos vigentes" : "Valores base · sem serviços adicionais", icon: Wallet },
         { label: "Maior perfil de banda", value: `${download} Mbps`, detail: "Download configurado no plano", icon: Gauge }].map(item => <section className={styles.metric} key={item.label}><div><span>{item.label}</span><item.icon size={16} aria-hidden="true" /></div><strong>{item.value}</strong><small>{item.detail}</small></section>)}
     </div>
 

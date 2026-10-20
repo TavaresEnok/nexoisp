@@ -15,8 +15,11 @@ export function ActionButton({
   confirm,
   danger = false,
   disabled = false,
+  label,
 }: {
   children: ReactNode;
+  /** Nome acessível completo quando o texto visível é curto. */
+  label?: string;
   onClick: () => Promise<unknown>;
   confirm?: string;
   danger?: boolean;
@@ -44,6 +47,7 @@ export function ActionButton({
       <Button
         variant={danger ? "destructive" : "outline"}
         size="sm"
+        aria-label={label}
         disabled={disabled || busy}
         onClick={() => (confirm ? setOpen(true) : void run())}
       >

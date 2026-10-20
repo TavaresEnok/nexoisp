@@ -29,12 +29,7 @@ export function OperationalInvoices() {
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
   const [generating, setGenerating] = useState(false);
-  const [generation, setGeneration] = useState<{
-    created: number;
-    already_existing: number;
-    gateway: string;
-    charges_emitted: number;
-  } | null>(null);
+  const [accounting, setAccounting] = useState(false);
   const [competence, setCompetence] = useState(
     new Date().toLocaleDateString("en-CA").slice(0, 7),
   );
@@ -103,11 +98,41 @@ export function OperationalInvoices() {
           setParams(next);
         }}
         actions={
-          can(me, "finance:write") && (
-            <Button onClick={() => setGenerating(true)}>
-              Gerar mensalidades
+          <>
+            <select
+              className="commercial-select"
+              aria-label="Empresa faturadora"
+              value={company}
+              onChange={(event) =>
+                setParams(
+                  (current) => {
+                    const next = new URLSearchParams(current);
+                    next.delete("pagina");
+                    event.target.value
+                      ? next.set("empresa", event.target.value)
+                      : next.delete("empresa");
+                    return next;
+                  },
+                  { replace: true },
+                )
+              }
+            >
+              <option value="">Todas as empresas</option>
+              {companies.data?.map((company) => (
+                <option key={company.id} value={company.id}>
+                  {company.name}
+                </option>
+              ))}
+            </select>
+            <Button variant="outline" onClick={() => setAccounting(true)}>
+              Contabilidade
             </Button>
-          )
+            {can(me, "finance:write") && (
+              <Button onClick={() => setGenerating(true)}>
+                Gerar mensalidades
+              </Button>
+            )}
+          </>
         }
         onExport={() => {
           void download(
@@ -123,44 +148,6 @@ export function OperationalInvoices() {
               error={summary.error}
               company={company}
             />
-            <div className="erp-inline-actions">
-              <FormField label="Empresa faturadora">
-                <select
-                  className="commercial-select"
-                  value={company}
-                  onChange={(event) =>
-                    setParams(
-                      (current) => {
-                        const next = new URLSearchParams(current);
-                        next.delete("pagina");
-                        event.target.value
-                          ? next.set("empresa", event.target.value)
-                          : next.delete("empresa");
-                        return next;
-                      },
-                      { replace: true },
-                    )
-                  }
-                >
-                  <option value="">Todas as empresas</option>
-                  {companies.data?.map((company) => (
-                    <option key={company.id} value={company.id}>
-                      {company.name}
-                    </option>
-                  ))}
-                </select>
-              </FormField>
-            </div>
-            {generation && (
-              <p role="status">
-                {generation.created} fatura(s) criada(s);{" "}
-                {generation.already_existing} já existente(s).{" "}
-                {generation.gateway === "none"
-                  ? "Sem gateway: cobranças não emitidas."
-                  : `${generation.charges_emitted} cobrança(s) emitida(s).`}
-              </p>
-            )}
-            <AccountingExport />
           </>
         }
         pagination={
@@ -186,13 +173,27 @@ export function OperationalInvoices() {
           }}
         />
       )}
+      {accounting && (
+        <Dialog open onOpenChange={setAccounting}>
+          <DialogContent className="erp-editor">
+            <DialogHeader>
+              <DialogTitle>Exportação para contabilidade</DialogTitle>
+              <DialogDescription>
+                Planilha de conferência; a emissão fiscal não é realizada pelo
+                NexoISP.
+              </DialogDescription>
+            </DialogHeader>
+            <AccountingExport />
+          </DialogContent>
+        </Dialog>
+      )}
       {generating && (
         <Dialog open onOpenChange={setGenerating}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Gerar mensalidades</DialogTitle>
               <DialogDescription>
-                O Go usa as versões e condições de cada contrato. Faturas
+                O servidor usa as versões e condições de cada contrato. Faturas
                 existentes da competência são preservadas.
               </DialogDescription>
             </DialogHeader>
@@ -200,8 +201,18 @@ export function OperationalInvoices() {
               submit="Gerar faturas"
               onCancel={() => setGenerating(false)}
               onSubmit={async () => {
-                setGeneration(
-                  await api("/finance/generate", { body: { competence } }),
+                const generation = await api<{
+                  created: number;
+                  already_existing: number;
+                  gateway: string;
+                  charges_emitted: number;
+                }>("/finance/generate", { body: { competence } });
+                toast.success(
+                  `${generation.created} fatura(s) criada(s); ${generation.already_existing} já existente(s). ${
+                    generation.gateway === "none"
+                      ? "Sem gateway: cobranças não emitidas."
+                      : `${generation.charges_emitted} cobrança(s) emitida(s).`
+                  }`,
                 );
                 setGenerating(false);
                 await refresh();
@@ -234,10 +245,7 @@ function AccountingExport() {
     to: today,
   });
   return (
-    <Panel
-      title="Exportação para contabilidade"
-      description="Planilha de conferência; a emissão fiscal não é realizada pelo NexoISP."
-    >
+    <div className="erp-stack">
       <div className="erp-columns">
         <FormField label="Empresa da exportação contábil">
           <QueryBoundary
@@ -296,6 +304,6 @@ function AccountingExport() {
       >
         Baixar CSV contábil
       </ActionButton>
-    </Panel>
+    </div>
   );
 }

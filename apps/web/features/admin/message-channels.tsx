@@ -22,7 +22,7 @@ export function MessageChannels() {
     >
       <OperationalCatalog
         title="Canais de envio ao assinante"
-        description="O destino recebe POST JSON com telefone e mensagem. Autorização é cifrada no Go e não reaparece na consulta."
+        description="O destino recebe POST JSON com telefone e mensagem. Autorização é cifrada no servidor e não reaparece na consulta."
         columns={["Canal", "Endereço", "Campos", "Autenticação", "Situação"]}
         actions={
           <Button onClick={() => setCreating(true)}>Novo canal de envio</Button>
@@ -75,7 +75,7 @@ export function MessageChannels() {
       {creating && (
         <RecordEditor
           title="Novo canal de envio"
-          description="O Go valida HTTPS e os destinos permitidos. A autorização informada será guardada cifrada."
+          description="O servidor valida HTTPS e os destinos permitidos. A autorização informada será guardada cifrada."
           initial={{
             name: "",
             url: "",

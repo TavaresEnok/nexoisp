@@ -19,7 +19,6 @@ const demoOnly: Record<string, string> = {
   "subscriber-diagnostic-tools.tsx": "coleta manual simulada da ficha demonstrativa",
   "subscriber-sheet.tsx": "orquestra as abas demonstrativas; cabeçalho, abas e visão geral da ficha vivem em subscriber-sheet-parts.tsx, usado pela operação",
   "subscriber-service.tsx": "registros de atendimento do seed; a operação usa filas paginadas reais",
-  "subscriber-technical-panels.tsx": "painéis da análise manual demonstrativa",
   "technical-workspace.tsx": "catálogo técnico lido somente do seed demonstrativo",
   "workspace-data-boundary.tsx": "fronteira do contrato demonstrativo WorkspaceData",
   "workspace-provider.tsx": "provedor do contrato demonstrativo WorkspaceData",

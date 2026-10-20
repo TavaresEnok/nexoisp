@@ -18,6 +18,9 @@ import { PlanDialog, type PlanDialogKind } from "./dialog";
 export function OperationalPlans() {
   const { me } = useSession();
   const { mutate } = useSWRConfig();
+  const dashboard = useSWR("erp-dashboard", () =>
+    api<{ mrr_cents: number }>("/dashboard"),
+  );
   const catalog = useSWR("erp-plans", async () =>
     z.array(planSchema).parse(await api("/plans")),
   );
@@ -97,6 +100,9 @@ export function OperationalPlans() {
           <PlanCatalog
             plans={catalog.data.map(projectPlan)}
             contracts={[]}
+            recurringTotal={
+              dashboard.data ? Number(dashboard.data.mrr_cents) / 100 : null
+            }
             activeCounts={Object.fromEntries(
               catalog.data.map((plan) => [plan.id, plan.active_contracts]),
             )}

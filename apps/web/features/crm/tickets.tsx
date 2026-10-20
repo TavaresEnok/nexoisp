@@ -51,6 +51,8 @@ import {
   categoryLabels,
   priorityLabels,
 } from "./models";
+import { FilterToggle } from "@/features/shared/filter-toggle";
+import { useStatusCounts } from "@/features/shared/status-counts";
 export function OperationalTickets() {
   return <TicketListing />;
 }
@@ -88,6 +90,19 @@ function TicketListing({ subscriberId }: { subscriberId?: string }) {
     ...(!embedded && params.get("meus") === "1" ? { mine: "1" } : {}),
   });
   const path = `/tickets?${filters}&limit=${embedded ? 8 : size}&offset=${embedded ? 0 : page * size}`;
+  const statusCounts = useStatusCounts(
+    "erp-tickets",
+    "/tickets",
+    filters,
+    {
+      Pendentes: "pending",
+      Todos: "",
+      "Aguardando o provedor": "open",
+      "Aguardando o assinante": "waiting",
+      Encerrado: "closed",
+    },
+    !embedded,
+  );
   const result = useSWR(
     ["erp-tickets", path],
     async ([, path]) => {
@@ -107,6 +122,7 @@ function TicketListing({ subscriberId }: { subscriberId?: string }) {
       <TicketQueue
         operational
         embedded={embedded}
+        statusCounts={statusCounts}
         tickets={(result.data?.rows ?? []).map(projectTicket)}
         total={result.data?.total}
         loading={result.isLoading}
@@ -131,21 +147,17 @@ function TicketListing({ subscriberId }: { subscriberId?: string }) {
         controls={
           !embedded && (
             <div className="commercial-toolbar">
-              <Label className="erp-inline-actions">
-                <input
-                  type="checkbox"
-                  checked={params.get("meus") === "1"}
-                  onChange={(event) => {
-                    const next = new URLSearchParams(params);
-                    next.delete("pagina");
-                    event.target.checked
-                      ? next.set("meus", "1")
-                      : next.delete("meus");
-                    setParams(next, { replace: true });
-                  }}
-                />
+              <FilterToggle
+                active={params.get("meus") === "1"}
+                onChange={(value) => {
+                  const next = new URLSearchParams(params);
+                  next.delete("pagina");
+                  value ? next.set("meus", "1") : next.delete("meus");
+                  setParams(next, { replace: true });
+                }}
+              >
                 Somente meus atendimentos
-              </Label>
+              </FilterToggle>
               {subscriber && (
                 <Button
                   variant="ghost"

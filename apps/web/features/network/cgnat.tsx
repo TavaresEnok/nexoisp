@@ -83,7 +83,7 @@ export function CgnatDirectory() {
     >
       <p className="profile-footnote">
         O script RouterOS exige revisão e aplicação manual pela equipe de rede.
-        O backend não aplica regras ao equipamento; a validação existente é de
+        O servidor não aplica regras ao equipamento; a validação existente é de
         laboratório.
       </p>
       <QueryBoundary
@@ -227,8 +227,8 @@ function PlanEditor({
         <DialogHeader>
           <DialogTitle>Novo plano de CGNAT</DialogTitle>
           <DialogDescription>
-            O Go calcula a capacidade e impede sobreposição de planos ativos.
-            Nada é aplicado ao NAS automaticamente.
+            O servidor calcula a capacidade e impede sobreposição de planos
+            ativos. Nada é aplicado ao NAS automaticamente.
           </DialogDescription>
         </DialogHeader>
         <QueryBoundary loading={loading} error={error} retry={retry}>

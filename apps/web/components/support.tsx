@@ -65,7 +65,7 @@ export function Support() {
   return <TicketQueue tickets={data.tickets} openSubscriber={openSubscriber} />;
 }
 type TicketDisplay = Omit<Ticket, "wait">;
-export function TicketQueue({ tickets, openSubscriber, operational = false, actions, controls, onOpen, onExport, pagination, loading, error, total, embedded = false }: { tickets: TicketDisplay[]; openSubscriber: (id: string) => void; operational?: boolean; actions?: ReactNode; controls?: ReactNode; onOpen?: (ticket: TicketDisplay) => void; onExport?: () => void; pagination?: ReactNode; loading?: boolean; error?: unknown; total?: number; embedded?: boolean }) {
+export function TicketQueue({ tickets, openSubscriber, operational = false, actions, controls, onOpen, onExport, pagination, loading, error, total, embedded = false, statusCounts }: { tickets: TicketDisplay[]; openSubscriber: (id: string) => void; operational?: boolean; actions?: ReactNode; controls?: ReactNode; onOpen?: (ticket: TicketDisplay) => void; onExport?: () => void; pagination?: ReactNode; loading?: boolean; error?: unknown; total?: number; embedded?: boolean; statusCounts?: Record<string, number> }) {
   const params = useSearchParams();
   const [filter, setFilter] = useQueryState("situacao", operational ? params.get("filtro") === "aguardando" ? "Aguardando o provedor" : "Pendentes" : params.get("filtro") === "aguardando" ? "Aguardando" : "Todos", operational ? ["Pendentes", "Todos", "Aguardando o provedor", "Aguardando o assinante", "Encerrado"] : ["Todos", "Em risco", ...tickets.map(t => t.status)], { resetPage: operational });
   const [query, setQuery] = useQueryState("busca", "", undefined, { resetPage: operational });
@@ -158,6 +158,7 @@ export function TicketQueue({ tickets, openSubscriber, operational = false, acti
                 <TabsTrigger key={s} value={s}>
                   {s === "Resolvido" ? "Resolvidos" : s}
                   {!operational && <span className={styles.filterCount}>{tickets.filter((ticket) => s === "Todos" || (s === "Em risco" ? ticket.sla === (operational ? "Estourado" : "Em risco") : ticket.status === s)).length}</span>}
+                  {operational && statusCounts?.[s] !== undefined && <span className={styles.filterCount}>{statusCounts[s]}</span>}
                 </TabsTrigger>
               ))}
             </TabsList>

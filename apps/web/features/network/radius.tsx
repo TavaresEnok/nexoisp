@@ -292,7 +292,7 @@ function RadiusEditor({
       description={
         device
           ? `As ${device.accounts} conta(s) passarão à autenticação integrada. O NAS precisa ser configurado com os comandos emitidos; isso não comprova conectividade remota.`
-          : "Cadastre o NAS e copie o segredo e as instruções emitidas pelo Go."
+          : "Cadastre o NAS e copie o segredo e as instruções emitidas pelo servidor."
       }
       initial={{
         name: device?.name ?? "",

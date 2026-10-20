@@ -182,7 +182,7 @@ function MessageRules() {
         )}
         <OperationalCatalog
           title="Regras de cobrança"
-          description="A janela segue o fuso do provedor. O Go aplica filtros, consentimento e uma vez por título/regra, além do intervalo mínimo."
+          description="A janela segue o fuso do provedor. O servidor aplica filtros, consentimento e uma vez por título/regra, além do intervalo mínimo."
           columns={[
             "Regra",
             "Quando",

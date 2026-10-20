@@ -134,23 +134,21 @@ export function AddressDirectory() {
       onTab={navigate}
       description="Blocos IPv4 e IPv6, reservas individuais e prefixos dos contratos."
       actions={
-        write && (
-          <Button onClick={() => setEditor("create")}>
-            Novo bloco de endereços
+        <>
+          <Button
+            variant="outline"
+            onClick={() => navigate("/rede/consulta-ip")}
+          >
+            Consulta legal de IP
           </Button>
-        )
+          {write && (
+            <Button onClick={() => setEditor("create")}>
+              Novo bloco de endereços
+            </Button>
+          )}
+        </>
       }
-    >
-      <div className="erp-inline-actions">
-        <a className="profile-text-action" href="/rede/consulta-ip">
-          Consulta legal de IP
-        </a>
-      </div>
-      <QueryBoundary
-        loading={result.isLoading}
-        error={result.error}
-        retry={() => result.mutate()}
-      >
+      metrics={
         <OpticalMetrics
           items={[
             {
@@ -174,14 +172,21 @@ export function AddressDirectory() {
             {
               label: "Blocos em CGNAT",
               value: pools.filter((p) => p.cgnat_plan_id).length,
-              detail: "Planejamento mantido no Go",
+              detail: "Com plano de tradução de portas",
               icon: Shield,
             },
           ]}
         />
+      }
+    >
+      <QueryBoundary
+        loading={result.isLoading}
+        error={result.error}
+        retry={() => result.mutate()}
+      >
         <OperationalCatalog
           title="Blocos de endereços"
-          description="A reserva de prefixo IPv6 é cadastral; o backend não o entrega automaticamente ao concentrador."
+          description="A reserva de prefixo IPv6 é cadastral; o servidor não o entrega automaticamente ao concentrador."
           columns={[
             "Bloco / nome",
             "Tipo",
@@ -234,7 +239,7 @@ export function AddressDirectory() {
                     </Button>
                     <ActionButton
                       danger
-                      confirm={`Excluir o bloco ${pool.cidr}? O Go verifica as reservas e os planos associados.`}
+                      confirm={`Excluir o bloco ${pool.cidr}? O servidor verifica as reservas e os planos associados.`}
                       onClick={async () => {
                         await api(`/ipam/pools/${pool.id}`, {
                           method: "DELETE",
@@ -281,7 +286,7 @@ function PoolEditor({
       description={
         pool
           ? "Nome, equipamento e observações podem ser atualizados. CIDR, finalidade e comprimento da delegação permanecem no cadastro original."
-          : "Informe o endereço de rede em CIDR. O Go valida sobreposição, finalidade e tamanho."
+          : "Informe o endereço de rede em CIDR. O servidor valida sobreposição, finalidade e tamanho."
       }
       loading={devices.isLoading}
       error={devices.error}
@@ -426,7 +431,7 @@ function PoolReservations({
               description={
                 delegated
                   ? "Não configura o RADIUS nem anuncia prefixos na rede."
-                  : "Alterações de IP fixo podem solicitar reaplicação no acesso; a resposta do Go informa o efeito."
+                  : "Alterações de IP fixo podem solicitar reaplicação no acesso; a resposta do servidor informa o efeito."
               }
               columns={[
                 "Endereço / prefixo",

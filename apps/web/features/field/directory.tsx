@@ -14,6 +14,8 @@ import { api, erpClient, download } from "@/platform/erp-client";
 import { orderSchema, projectOrder } from "./models";
 import { orderStates } from "./labels";
 import { CreateWorkOrder } from "./create";
+import { FilterToggle } from "@/features/shared/filter-toggle";
+import { useStatusCounts } from "@/features/shared/status-counts";
 export function OperationalOrders() {
   const { me } = useSession();
   const navigate = useNavigate();
@@ -40,6 +42,14 @@ export function OperationalOrders() {
     ...(params.get("contrato") ? { contract_id: params.get("contrato")! } : {}),
   });
   const path = `/work-orders?${filters}&limit=${size}&offset=${page * size}`;
+  const statusCounts = useStatusCounts("erp-orders", "/work-orders", filters, {
+    Pendentes: "pending",
+    Todas: "",
+    [orderStates.awaiting_schedule]: "awaiting_schedule",
+    [orderStates.scheduled]: "scheduled",
+    [orderStates.in_progress]: "in_progress",
+    [orderStates.done]: "done",
+  });
   const result = useSWR(
     ["erp-orders", path],
     async ([, path]) => {
@@ -81,7 +91,15 @@ export function OperationalOrders() {
         reference={result.data?.readAt ?? new Date().toISOString()}
         provider={me?.tenant?.name ?? "Provedor"}
         total={result.data?.total}
-        statusOptions={["Pendentes", "Todas", ...Object.values(orderStates)]}
+        statusOptions={[
+          "Pendentes",
+          "Todas",
+          orderStates.awaiting_schedule,
+          orderStates.scheduled,
+          orderStates.in_progress,
+          orderStates.done,
+        ]}
+        statusCounts={statusCounts}
         technicianOptions={
           staff.data?.map((user) => ({ value: user.id, label: user.name })) ??
           []
@@ -109,22 +127,18 @@ export function OperationalOrders() {
         }}
         controls={
           <div className="commercial-toolbar">
-            <Label className="erp-inline-actions">
-              <input
-                type="checkbox"
-                checked={mine}
-                onChange={(event) => {
-                  const next = new URLSearchParams(params);
-                  next.delete("pagina");
-                  next.delete("tecnico");
-                  event.target.checked
-                    ? next.set("minhas", "1")
-                    : next.delete("minhas");
-                  setParams(next, { replace: true });
-                }}
-              />
+            <FilterToggle
+              active={mine}
+              onChange={(value) => {
+                const next = new URLSearchParams(params);
+                next.delete("pagina");
+                next.delete("tecnico");
+                value ? next.set("minhas", "1") : next.delete("minhas");
+                setParams(next, { replace: true });
+              }}
+            >
               Somente minhas OS
-            </Label>
+            </FilterToggle>
             {(params.get("assinante") || params.get("contrato")) && (
               <Button
                 variant="ghost"

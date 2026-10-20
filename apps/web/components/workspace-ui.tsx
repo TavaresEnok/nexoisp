@@ -146,7 +146,7 @@ export function PersonAvatar({
         `avatar-tone-${name.length % 4}`,
       )}
     >
-      {initials(name)}
+      {initials(name).toUpperCase()}
     </span>
   );
 }

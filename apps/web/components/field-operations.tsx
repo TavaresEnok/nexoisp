@@ -53,7 +53,7 @@ export function FieldOperations() {
   const { data, openSubscriber } = useWorkspace();
   return <OrderWorkspace orders={data.orders} subscribers={data.subscribers} reference={data.snapshot.asOf} provider={data.snapshot.provider} openSubscriber={openSubscriber} />;
 }
-export function OrderWorkspace({ orders, subscribers = [], reference, provider, openSubscriber, operational = false, statusOptions, technicianOptions, total, actions, controls, onOpen, onExport, pagination, loading, error, onTechnician, onResetFilters }: { orders: WorkOrder[]; subscribers?: WorkOrderSubscriber[]; reference: string; provider: string; openSubscriber:(id:string)=>void; operational?:boolean; statusOptions?:string[]; technicianOptions?:{value:string;label:string}[]; total?:number; actions?:ReactNode; controls?:ReactNode; onOpen?:(order:WorkOrder)=>void; onExport?:()=>void; pagination?:ReactNode; loading?:boolean; error?:unknown; onTechnician?:(value:string)=>void; onResetFilters?:()=>void }) {
+export function OrderWorkspace({ orders, subscribers = [], reference, provider, openSubscriber, operational = false, statusOptions, technicianOptions, total, actions, controls, onOpen, onExport, pagination, loading, error, onTechnician, onResetFilters, statusCounts }: { statusCounts?: Record<string, number>; orders: WorkOrder[]; subscribers?: WorkOrderSubscriber[]; reference: string; provider: string; openSubscriber:(id:string)=>void; operational?:boolean; statusOptions?:string[]; technicianOptions?:{value:string;label:string}[]; total?:number; actions?:ReactNode; controls?:ReactNode; onOpen?:(order:WorkOrder)=>void; onExport?:()=>void; pagination?:ReactNode; loading?:boolean; error?:unknown; onTechnician?:(value:string)=>void; onResetFilters?:()=>void }) {
   const params = useSearchParams();
   const [filter, setFilter] = useQueryState("situacao", operational ? "Pendentes" : params.get("filtro") === "atrasadas" ? "Atrasada" : "Todas", statusOptions ?? ["Todas", ...orders.map(o => o.status)], { resetPage: operational });
   const [query, setQuery] = useQueryState("busca", "", undefined, { resetPage: operational });
@@ -158,6 +158,7 @@ export function OrderWorkspace({ orders, subscribers = [], reference, provider, 
                         ? "Concluídas"
                         : v}
                   {!operational && <span className={styles.filterCount}>{orders.filter((order) => (v === "Todas" || order.status === v) && (technician === "Todos" || order.technician === technician) && normalize(`${order.name} ${order.code} ${order.type} ${order.technician} ${order.neighborhood}`).includes(normalize(query.trim()))).length}</span>}
+                  {operational && statusCounts?.[v] !== undefined && <span className={styles.filterCount}>{statusCounts[v]}</span>}
                 </TabsTrigger>
               ))}
             </TabsList>

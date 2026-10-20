@@ -23,7 +23,7 @@ export function ReferralReport() {
     <>
       <PageHeading
         title="Relatório de indicações"
-        description="Contratos indicados por assinante, conforme os registros do Go."
+        description="Contratos indicados por assinante, conforme os registros do servidor."
       />
       <QueryBoundary
         loading={result.isLoading}

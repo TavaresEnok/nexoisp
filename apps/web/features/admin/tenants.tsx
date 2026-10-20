@@ -96,7 +96,7 @@ export function TenantDirectory() {
       >
         <OperationalCatalog
           title="Provedores da plataforma"
-          description="Indicadores de agentes e operações são informados pelo Go. A suspensão impede o acesso do provedor ao sistema."
+          description="Indicadores de agentes e operações são informados pelo servidor. A suspensão impede o acesso do provedor ao sistema."
           columns={[
             "Provedor",
             "Identificador",
@@ -311,8 +311,8 @@ function TenantModules({
           <DialogTitle>Módulos · {tenant.name}</DialogTitle>
           <DialogDescription>
             Cadastro, contratos, acesso, financeiro, portal, importação,
-            auditoria e agentes compõem o núcleo. O Go valida a liberação dos
-            módulos adicionais.
+            auditoria e agentes compõem o núcleo. O servidor valida a liberação
+            dos módulos adicionais.
           </DialogDescription>
         </DialogHeader>
         <MutationForm

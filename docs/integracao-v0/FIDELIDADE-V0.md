@@ -42,3 +42,21 @@ O teste de paridade percorre os 420 nós do catálogo com perfis de administrado
 ## Verificação
 
 Os resultados desta etapa estão em [VALIDACAO.md](VALIDACAO.md#fidelidade-v0).
+
+## Revisão de detalhes (20/10/2026)
+
+Comparação tela a tela, lado a lado, entre o v0 original e o ambiente conectado (28 telas) apontou diferenças de acabamento. Corrigido:
+
+- Selo "Conectado ao ERP" removido de todas as páginas; o v0 não tem esse elemento e o banner do shell já identifica o ambiente demonstrativo.
+- Textos visíveis sem jargão técnico ("Go", "backend" passam a "servidor").
+- Telefone, CPF/CNPJ e códigos curtos formatados (`(85) 98888-7777`, `100.007.919-89`, `74E4E75E`); iniciais de avatar em maiúsculas.
+- Ficha do assinante: cadastro com o bloco de endereço e os botões de copiar do v0, sem campos vazios; financeiro com a tabela "Títulos do contrato" do v0, sem cartões aninhados; atendimento com o cabeçalho, o resumo e as subabas de `subscriber-service`; conexão com o banner e o cabeçalho técnico do v0.
+- Indicadores sem texto no lugar de número (planos e contratos usam valores reais).
+- Faturas: empresa e exportação contábil no cabeçalho, como ações do v0.
+- Atendimentos e OS com contagem em cada aba e menos abas; filtros "somente meus/minhas" como botões.
+- Usuários com avatar, situação em selo e ações curtas.
+- Rede com "De ponta a ponta" e "Sessões por concentrador" alimentados pelas sessões online reais; mapa com camadas e situação na barra do v0; endereçamento com indicadores antes das abas.
+- Gráficos sem dados mostram estado vazio; painel inicial ganhou "Exportar resumo".
+
+Validação: 163 testes locais, os 26 cenários da fumaça (dois segmentos; o primeiro revelou dois seletores antigos de teste, atualizados), referências operacionais regeneradas e conferidas sem atualização, e demonstração idêntica ao v0 original em 22 de 22 telas.
+

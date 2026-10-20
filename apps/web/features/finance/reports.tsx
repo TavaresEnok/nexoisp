@@ -74,7 +74,7 @@ export function CollectionReports() {
     <>
       <PageHeading
         title="Relatórios de cobrança"
-        description="Carteira, recebimentos e pendências calculados pelo Go."
+        description="Carteira, recebimentos e pendências calculados pelo servidor."
         actions={
           <>
             <Button

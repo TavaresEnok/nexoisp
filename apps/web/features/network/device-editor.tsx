@@ -29,7 +29,7 @@ export function DeviceIdentityEditor({
   return (
     <RecordEditor
       title="Editar equipamento de rede"
-      description="As alterações atualizam o cadastro no Go. Conversão ao RADIUS integrado e reaplicação das contas são ações separadas."
+      description="As alterações atualizam o cadastro no servidor. Conversão ao RADIUS integrado e reaplicação das contas são ações separadas."
       initial={{
         name: device.name,
         driver: device.driver,

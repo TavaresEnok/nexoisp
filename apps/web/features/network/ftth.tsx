@@ -251,7 +251,7 @@ export function FiberDirectory() {
                             </Button>
                             <ActionButton
                               danger
-                              confirm={`Excluir a caixa ${box.name}? O Go verifica vínculos, reservas e caixas derivadas.`}
+                              confirm={`Excluir a caixa ${box.name}? O servidor verifica vínculos, reservas e caixas derivadas.`}
                               onClick={async () => {
                                 await api(`/ftth/boxes/${box.id}`, {
                                   method: "DELETE",
@@ -766,7 +766,7 @@ export function FiberDiagram({
       <p className="profile-footnote">
         Norte para cima · círculo: CTO · quadrado: CEO · linhas indicam a caixa
         anterior e não o trajeto físico do cabo. {boxes.length - pts.length}{" "}
-        caixa(s) sem coordenadas fora do desenho. O backend não mantém projeto
+        caixa(s) sem coordenadas fora do desenho. O servidor não mantém projeto
         completo de fibra, fusões ou OTDR.
       </p>
     </>

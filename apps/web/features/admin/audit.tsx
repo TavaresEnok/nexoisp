@@ -49,7 +49,7 @@ export function AuditDirectory() {
     <>
       <PageHeading
         title="Auditoria"
-        description="Ações e resultados registrados pelo Go no contexto do provedor."
+        description="Ações e resultados registrados pelo servidor no contexto do provedor."
       />
       <div className="erp-stack">
         {can(me, "settings:manage") && <RetentionSettings />}
@@ -167,7 +167,7 @@ function RetentionSettings() {
       {editing && data && (
         <RecordEditor
           title="Prazos de retenção"
-          description="Deixe vazio para usar o padrão da instalação. O Go valida os limites antes de salvar."
+          description="Deixe vazio para usar o padrão da instalação. O servidor valida os limites antes de salvar."
           initial={Object.fromEntries(
             Object.keys(retentionLabels).map((key) => [
               key,

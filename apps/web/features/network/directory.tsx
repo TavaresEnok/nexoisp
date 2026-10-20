@@ -3,7 +3,11 @@ import useSWR from "swr";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Activity, Network, Server, AlertTriangle } from "lucide-react";
 import { PageHeading } from "@/components/workspace-ui";
-import { NetworkEquipmentTable } from "@/components/network-center";
+import {
+  NetworkEquipmentTable,
+  NetworkTopGrid,
+} from "@/components/network-center";
+import { EmptyState } from "@/components/workspace-feedback";
 import { Button } from "@/components/ui/button";
 import { QueryBoundary, ConnectedNotice } from "@/features/shared/feedback";
 import { useSession } from "@/features/session/provider";
@@ -40,6 +44,25 @@ export function NetworkDirectory() {
   const selected = devices.data?.find(
     (device) => device.id === params.get("equipamento"),
   );
+  const online = useSWR(
+    "erp-online-summary",
+    async () =>
+      (
+        await api<{ rows: { nas: string; pop: string | null }[] }>(
+          "/network/online?q=",
+        )
+      ).rows,
+    { refreshInterval: 30000 },
+  );
+  const byNas = Object.entries(
+    (online.data ?? []).reduce<Record<string, { pop: string | null }[]>>(
+      (groups, row) => {
+        (groups[row.nas] ??= []).push(row);
+        return groups;
+      },
+      {},
+    ),
+  ).sort((a, b) => b[1].length - a[1].length);
   const rows = (devices.data ?? [])
     .map(projectDevice)
     .filter(
@@ -113,26 +136,48 @@ export function NetworkDirectory() {
           </div>
         )}
       </QueryBoundary>
-      <div className="erp-inline-actions">
-        {[
-          ["/pops", "POPs"],
-          ["/rede/online", "Conexões online"],
-          ["/noc", "NOC"],
-          ["/rede/onus", "ONUs"],
-          ["/rede/manutencoes", "Manutenções"],
-        ]
-          .filter(([path]) => canAccessPath(me, path))
-          .map(([path, label]) => (
-            <Button
-              key={path}
-              size="sm"
-              variant="outline"
-              onClick={() => navigate(path)}
-            >
-              {label}
-            </Button>
-          ))}
-      </div>
+      <NetworkTopGrid
+        chart={{
+          title: "De ponta a ponta",
+          description:
+            "Sessões online por concentrador · último accounting recebido",
+          label: "Sessões online",
+          unit: "",
+          rows: byNas.map(([name, rows]) => ({ name, value: rows.length })),
+          empty: (
+            <EmptyState
+              icon={Network}
+              title={
+                online.isLoading
+                  ? "Consultando sessões…"
+                  : "Nenhuma sessão online registrada"
+              }
+              description="O gráfico usa o accounting recebido dos concentradores."
+            />
+          ),
+        }}
+        concentrators={{
+          title: "Sessões por concentrador",
+          description: "Participação de cada concentrador nas sessões online",
+          rows: byNas.map(([name, rows]) => ({
+            id: name,
+            name,
+            sessions: rows.length,
+            total: online.data?.length ?? 0,
+            pop: rows[0]?.pop || "POP não informado",
+            note: "das sessões online",
+            onClick: () =>
+              navigate(`/rede/online?busca=${encodeURIComponent(name)}`),
+          })),
+          empty: (
+            <EmptyState
+              icon={Server}
+              title="Nenhum concentrador com sessão"
+              description="Concentradores aparecem aqui quando enviam accounting."
+            />
+          ),
+        }}
+      />
       <div className="erp-stack">
         <RadiusOverview />
         <QueryBoundary

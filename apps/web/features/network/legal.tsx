@@ -441,7 +441,7 @@ export function LegalIpLookup() {
         >
           <OperationalCatalog
             title="Histórico da consulta legal"
-            description="Requisição, responsável e período registrados pela auditoria do Go."
+            description="Requisição, responsável e período registrados pela auditoria do servidor."
             columns={[
               "Quando",
               "Quem",

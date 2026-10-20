@@ -5,6 +5,7 @@ import {
   CalendarDays,
   CircleDollarSign,
   ClipboardList,
+  Download,
   FileText,
   Gauge,
   Headphones,
@@ -35,7 +36,8 @@ import { RevenueChart } from "@/components/revenue-chart";
 import { EmptyState } from "@/components/workspace-feedback";
 import { useQueryState } from "@/lib/use-query-state";
 import { overviewAreas, type OverviewArea } from "@/lib/overview";
-import { clock, date, money, number } from "@/lib/format";
+import { clock, date, exportCsv, money, number } from "@/lib/format";
+import { Button } from "@/components/ui/button";
 import { QueryBoundary, ConnectedNotice } from "@/features/shared/feedback";
 import { useSession } from "@/features/session/provider";
 import { can, hasModule } from "@/features/session/model";
@@ -298,13 +300,21 @@ export function ErpOverview() {
         }
         legend={false}
         chart={
-          <RevenueChart
-            data={series.map((month) => ({
-              day: monthLabel(month.month),
-              current: month.received_cents / 100000,
-            }))}
-            monthly
-          />
+          series.some((month) => month.received_cents > 0) ? (
+            <RevenueChart
+              data={series.map((month) => ({
+                day: monthLabel(month.month),
+                current: month.received_cents / 100000,
+              }))}
+              monthly
+            />
+          ) : (
+            <EmptyState
+              icon={CircleDollarSign}
+              title="Nenhum recebimento nos últimos meses"
+              description="O gráfico aparece quando houver pagamentos registrados."
+            />
+          )
         }
         footerText={
           s
@@ -865,10 +875,53 @@ export function ErpOverview() {
         .toLocaleUpperCase("pt-BR")}
       description={`Olá, ${me?.name.split(" ")[0]}. Cada conexão conta. Tenha o todo à vista.`}
       actions={
-        <span className="date-chip">
-          <CalendarDays size={15} />
-          {date(new Date().toISOString())}
-        </span>
+        <>
+          <span className="date-chip">
+            <CalendarDays size={15} />
+            {date(new Date().toISOString())}
+          </span>
+          <Button
+            variant="outline"
+            disabled={!dashboard.data}
+            onClick={() =>
+              exportCsv(
+                `nexo-resumo-${new Date().toLocaleDateString("en-CA")}`,
+                ["Indicador", "Valor"],
+                [
+                  ["Assinantes ativos", dashboard.data?.subscribers ?? ""],
+                  ["Contratos vigentes", dashboard.data?.contracts ?? ""],
+                  ["Planos à venda", dashboard.data?.plans ?? ""],
+                  [
+                    "Receita contratada (R$)",
+                    dashboard.data
+                      ? Number(dashboard.data.mrr_cents) / 100
+                      : "",
+                  ],
+                  ...(s
+                    ? [
+                        ["Recebido no mês (R$)", s.received_month_cents / 100],
+                        ["Em aberto (R$)", s.open_cents / 100],
+                        ["Vencido (R$)", s.overdue_cents / 100],
+                      ]
+                    : []),
+                  ...(h
+                    ? [
+                        [
+                          "Agentes conectados",
+                          `${h.agents - h.agents_offline} / ${h.agents}`,
+                        ],
+                        ["Operações incertas", h.uncertain],
+                      ]
+                    : []),
+                  ["Pendências", items.reduce((sum, item) => sum + item.n, 0)],
+                ],
+              )
+            }
+          >
+            <Download data-icon="inline-start" />
+            Exportar resumo
+          </Button>
+        </>
       }
       before={<ConnectedNotice />}
       area={areas.some((item) => item.value === area) ? area : "overview"}

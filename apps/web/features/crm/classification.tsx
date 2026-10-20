@@ -96,7 +96,7 @@ export function TicketClassification({
   return (
     <RecordEditor
       title="Classificação do atendimento"
-      description="A alteração de prioridade ou tipo pode atualizar o prazo de SLA conforme as regras do Go."
+      description="A alteração de prioridade ou tipo pode atualizar o prazo de SLA conforme as regras do servidor."
       initial={{
         category: ticket.category,
         priority: ticket.priority,

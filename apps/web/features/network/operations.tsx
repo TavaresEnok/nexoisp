@@ -174,7 +174,7 @@ export function NetworkOperations() {
         </QueryBoundary>
         <Panel
           title="Fila de operações"
-          description="Estados e tentativas informados pelo Go; atualização a cada três segundos."
+          description="Estados e tentativas informados pelo servidor; atualização a cada três segundos."
         >
           <QueryBoundary
             loading={result.isLoading}

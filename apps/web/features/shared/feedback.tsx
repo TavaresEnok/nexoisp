@@ -1,17 +1,9 @@
 import type { ReactNode } from "react";
-import { Database, LoaderCircle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { LoaderCircle } from "lucide-react";
 export { QueryBoundary } from "@/components/query-boundary";
-/** O aviso de ambiente demonstrativo do servidor já aparece no topo do shell. */
+/** Telas conectadas não exibem selo próprio: o v0 não tem esse elemento e o banner do shell já identifica o ambiente demonstrativo. */
 export function ConnectedNotice(_props: { demo?: boolean } = {}) {
-  return (
-    <div className="erp-source">
-      <Badge variant="outline">
-        <Database size={13} />
-        Conectado ao ERP
-      </Badge>
-    </div>
-  );
+  return null;
 }
 export function Busy({ children }: { children: ReactNode }) {
   return (

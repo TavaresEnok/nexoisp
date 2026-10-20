@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { ArrowUpRight, FileText } from "lucide-react";
+import { EmptyState } from "@/components/workspace-feedback";
+import { shortCode } from "@/features/shared/format";
 import useSWR from "swr";
 import {
+  FinancialTotals,
   ProfileSection,
-  ProfileFacts,
 } from "@/components/subscriber-profile-sections";
 import { Status } from "@/components/workspace-ui";
 import { Button } from "@/components/ui/button";
@@ -32,6 +35,13 @@ import { decimalToCents } from "@/features/contracts/models";
 import { api } from "@/platform/erp-client";
 import { date, money } from "@/lib/format";
 import { invoiceStatus, type ErpInvoice } from "./models";
+
+function competenceLabel(competence: string) {
+  const label = new Date(
+    `${competence.slice(0, 7)}-01T12:00:00`,
+  ).toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+  return label.charAt(0).toUpperCase() + label.slice(1).replace(" de ", " / ");
+}
 import { OperationalInvoice } from "./invoice";
 type ContractBalance = {
   invoices: ErpInvoice[];
@@ -40,7 +50,15 @@ type ContractBalance = {
   overdue: number;
   reconciling: number;
 };
-export function ContractFinance({ id }: { id: string }) {
+export function ContractFinance({
+  id,
+  title = "Títulos do contrato",
+  totals = true,
+}: {
+  id: string;
+  title?: string;
+  totals?: boolean;
+}) {
   const { me } = useSession();
   const list = useSWR(["erp-contract-finance", id], ([, id]) =>
     api<ContractBalance>(`/contracts/${id}/finance`),
@@ -51,20 +69,69 @@ export function ContractFinance({ id }: { id: string }) {
   const refreshed = async () => {
     await list.mutate();
   };
+  const remaining = (row: ErpInvoice) =>
+    Math.max(0, row.amount_cents - row.paid_cents);
+  const rows = list.data?.invoices ?? [];
+  const overdue = rows.filter((row) => row.status === "open" && row.overdue);
   return (
     <div className="erp-stack">
+      {totals && list.data && (
+        <FinancialTotals
+          items={[
+            [
+              "Em aberto",
+              money(list.data.open_cents / 100),
+              `${list.data.open} título(s)`,
+            ],
+            [
+              "Vencido",
+              money(
+                overdue.reduce((sum, row) => sum + remaining(row), 0) / 100,
+              ),
+              `${list.data.overdue} título(s)`,
+            ],
+            [
+              "Em conciliação",
+              String(list.data.reconciling),
+              "Baixa não confirmada",
+            ],
+            [
+              "Pago nos títulos listados",
+              money(
+                rows
+                  .filter((row) => row.status === "paid")
+                  .reduce((sum, row) => sum + row.paid_cents, 0) / 100,
+              ),
+              `${rows.filter((row) => row.status === "paid").length} título(s)`,
+            ],
+          ]}
+        />
+      )}
       <ProfileSection
-        title="Faturas do contrato"
+        title={title}
+        caption="Saldo, multa e juros são calculados pelo servidor."
         action={
-          can(me, "finance:write") && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCreating(true)}
-            >
-              Nova fatura avulsa
-            </Button>
-          )
+          <div className="erp-inline-actions">
+            {can(me, "finance:write") &&
+              rows.some((row) => row.status === "open") && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setAgreement(true)}
+                >
+                  Acordo de pagamento
+                </Button>
+              )}
+            {can(me, "finance:write") && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCreating(true)}
+              >
+                Nova fatura avulsa
+              </Button>
+            )}
+          </div>
         }
       >
         <QueryBoundary
@@ -72,65 +139,59 @@ export function ContractFinance({ id }: { id: string }) {
           error={list.error}
           retry={() => list.mutate()}
         >
-          {list.data && (
-            <>
-              <ProfileFacts
-                items={[
-                  [
-                    "Em aberto",
-                    `${list.data.open} · ${money(list.data.open_cents / 100)}`,
-                  ],
-                  ["Vencidas", list.data.overdue],
-                  ["Em conciliação", list.data.reconciling],
-                ]}
-              />
-              {list.data.invoices.length ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Referência</TableHead>
-                      <TableHead>Vencimento</TableHead>
-                      <TableHead>Valor</TableHead>
-                      <TableHead>Situação</TableHead>
-                      <TableHead>Ação</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {list.data.invoices.map((row) => (
-                      <TableRow key={row.id}>
-                        <TableCell>
-                          {row.competence?.slice(0, 7) ?? "Avulsa"}
-                        </TableCell>
-                        <TableCell>{date(row.due_date)}</TableCell>
-                        <TableCell>{money(row.amount_cents / 100)}</TableCell>
-                        <TableCell>
-                          <Status value={invoiceStatus(row)} />
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setInvoice(row.id)}
-                          >
-                            Abrir fatura
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <p className="profile-footnote">
-                  Nenhuma cobrança neste contrato.
-                </p>
-              )}
-              {can(me, "finance:write") &&
-                list.data.invoices.some((row) => row.status === "open") && (
-                  <Button variant="outline" onClick={() => setAgreement(true)}>
-                    Acordo de pagamento
-                  </Button>
-                )}
-            </>
+          {rows.length ? (
+            <div className="profile-table-scroll">
+              <table className="profile-table">
+                <thead>
+                  <tr>
+                    <th>Título / referência</th>
+                    <th>Vencimento</th>
+                    <th>Situação</th>
+                    <th className="numeric">Valor</th>
+                    <th>
+                      <span className="sr-only">Abrir</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((row) => (
+                    <tr key={row.id}>
+                      <td>
+                        <strong>#{shortCode(row.id)}</strong>
+                        <small>
+                          {row.competence
+                            ? competenceLabel(row.competence)
+                            : "Cobrança avulsa"}
+                        </small>
+                      </td>
+                      <td>{date(row.due_date)}</td>
+                      <td>
+                        <Status value={invoiceStatus(row)} />
+                      </td>
+                      <td className="numeric">
+                        {money(row.amount_cents / 100)}
+                      </td>
+                      <td className="numeric">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label="Abrir fatura"
+                          onClick={() => setInvoice(row.id)}
+                        >
+                          <ArrowUpRight />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <EmptyState
+              icon={FileText}
+              title="Nenhum título vinculado"
+              description="Não há faturas registradas para este contrato."
+            />
           )}
         </QueryBoundary>
       </ProfileSection>

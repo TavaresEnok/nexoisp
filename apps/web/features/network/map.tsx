@@ -1,7 +1,7 @@
 import { useState, lazy, Suspense } from "react";
 import useSWR from "swr";
 import { z } from "zod";
-import { MapPin, Search, X, Radio } from "lucide-react";
+import { Check, Layers, ListFilter, MapPin, Radio, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -204,17 +204,23 @@ export function NetworkMap() {
           {(["contracts", "boxes", "pops"] as const)
             .filter((key) => key !== "boxes" || hasModule(me, "ftth"))
             .map((key) => (
-              <label key={key} className="erp-inline-actions">
-                <input
-                  type="checkbox"
-                  checked={layers[key]}
-                  onChange={(event) =>
-                    setLayers((previous) => ({
-                      ...previous,
-                      [key]: event.target.checked,
-                    }))
-                  }
-                />
+              <Button
+                key={key}
+                size="sm"
+                variant={layers[key] ? "secondary" : "outline"}
+                aria-pressed={layers[key]}
+                onClick={() =>
+                  setLayers((previous) => ({
+                    ...previous,
+                    [key]: !previous[key],
+                  }))
+                }
+              >
+                {layers[key] ? (
+                  <Check data-icon="inline-start" />
+                ) : (
+                  <Layers data-icon="inline-start" />
+                )}
                 {
                   {
                     contracts: "Contratos",
@@ -222,36 +228,35 @@ export function NetworkMap() {
                     pops: "POPs",
                   }[key]
                 }
-              </label>
+              </Button>
             ))}
-          <FormField label="Situação dos contratos no mapa">
-            <select
-              className="commercial-select"
-              value={status}
-              onChange={(event) => {
-                setStatus(event.target.value);
-                setSelected(null);
-              }}
-            >
-              <option value="">Todas as situações</option>
-              <option value="active">Vigentes</option>
-              <option value="suspended">Suspensos</option>
-              <option value="ended">Encerrados</option>
-            </select>
-          </FormField>
         </div>
       }
       toolbar={
         <>
-          <div className={styles.search}>
-            <Search size={15} />
+          <div className={styles.mapCounts}>
             <span>{rows.length} ponto(s) na área consultada</span>
           </div>
+          <select
+            className="commercial-select"
+            aria-label="Situação dos contratos no mapa"
+            value={status}
+            onChange={(event) => {
+              setStatus(event.target.value);
+              setSelected(null);
+            }}
+          >
+            <option value="">Todas as situações</option>
+            <option value="active">Vigentes</option>
+            <option value="suspended">Suspensos</option>
+            <option value="ended">Encerrados</option>
+          </select>
           <Button
             variant="outline"
             size="sm"
             onClick={() => setList((value) => !value)}
           >
+            <ListFilter data-icon="inline-start" />
             {list ? "Ocultar lista" : "Ver pontos no mapa"}
           </Button>
         </>

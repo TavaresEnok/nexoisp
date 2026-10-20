@@ -1,5 +1,10 @@
 import { z } from "zod";
 import type { CatalogPlan } from "@/domain/commercial";
+import {
+  formatDocument,
+  formatPhone,
+  shortCode,
+} from "@/features/shared/format";
 export const planSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
@@ -132,10 +137,10 @@ export function projectContract(
 ): import("@/domain/commercial").ServiceContract {
   return {
     id: contract.id,
-    code: contract.id.slice(0, 8),
+    code: shortCode(contract.id),
     subscriberId: contract.subscriber_id,
     planId: contract.plan_id,
-    label: "Contrato",
+    label: "Instalação",
     address:
       [
         contract.install_street,
@@ -144,7 +149,7 @@ export function projectContract(
         contract.install_state,
       ]
         .filter(Boolean)
-        .join(", ") || "Endereço específico não informado",
+        .join(", ") || "Mesmo endereço do titular",
     neighborhood: contract.install_district ?? "Não informado",
     pop: contract.pop_id ? "Consulte o vínculo de POP" : "Sem POP vinculado",
     price: contract.price_cents / 100,

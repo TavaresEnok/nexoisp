@@ -16,6 +16,11 @@ import { orderDetailSchema, projectOrder } from "./models";
 import { WorkActions } from "./work-actions";
 import { WorkCollaboration, WorkHistory } from "./work-log";
 import { WorkMaterials } from "./work-materials";
+import {
+  formatDocument,
+  formatPhone,
+  shortCode,
+} from "@/features/shared/format";
 export function OperationalOrderOverlay() {
   const { me } = useSession();
   const [params, setParams] = useSearchParams();
@@ -87,7 +92,7 @@ function LiveOrder({ id, onClose }: { id: string; onClose: () => void }) {
             subscriber={{
               id: order.subscriber_id,
               name: order.subscriber_name,
-              code: order.subscriber_id.slice(0, 8),
+              code: shortCode(order.subscriber_id),
               address:
                 order.subscriber_address || "Endereço cadastral não informado",
               phone: order.subscriber_phone || "Telefone não informado",
@@ -138,13 +143,13 @@ function LiveOrder({ id, onClose }: { id: string; onClose: () => void }) {
                   [
                     "Contrato",
                     order.contract_id
-                      ? `Contrato #${order.contract_id.slice(0, 8)}`
+                      ? `Contrato #${shortCode(order.contract_id)}`
                       : "Sem contrato específico",
                   ],
                   [
                     "Protocolo de origem",
                     order.ticket_id
-                      ? `Atendimento #${order.ticket_id.slice(0, 8)}`
+                      ? `Atendimento #${shortCode(order.ticket_id)}`
                       : "Sem protocolo vinculado",
                   ],
                 ]}

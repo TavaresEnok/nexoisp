@@ -17,6 +17,8 @@ import { TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Status } from "@/components/workspace-ui";
 import {
+  CopyValue,
+  RegistrationView,
   FinancialTotals,
   ProfileFacts,
   ProfileSection,
@@ -34,6 +36,8 @@ import { can, hasModule } from "@/features/session/model";
 import { useSession } from "@/features/session/provider";
 import { readSubscriber } from "@/data/erp/subscribers";
 import { api, erpClient } from "@/platform/erp-client";
+import { copyText } from "@/platform/browser";
+import { toast } from "sonner";
 import { date, exportCsv, money } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { SubscriberEditor } from "./form";
@@ -43,8 +47,17 @@ import { LazyLinkedOrders } from "@/features/field/lazy";
 import { LazySubscriberTickets } from "@/features/crm/lazy";
 import { LazyContractService } from "@/features/network/lazy";
 import { SubscriberSections } from "./sections";
+import { SubscriberServiceWorkspace } from "./service";
+import { TechnicalHeading } from "@/components/subscriber-technical-panels";
+import { EmptyState } from "@/components/workspace-feedback";
+import { Badge } from "@/components/ui/badge";
 import { SubscriberAlerts } from "./notes";
 import type { SubscriberDetail } from "./model";
+import {
+  formatDocument,
+  formatPhone,
+  shortCode,
+} from "@/features/shared/format";
 
 type ContractInvoice = {
   status: "open" | "paid" | "canceled" | "reconciling";
@@ -122,6 +135,12 @@ async function count(path: string) {
   return response.total;
 }
 
+function optionalFacts(
+  items: [string, string | null | undefined][],
+): [string, string][] {
+  return items.filter((item): item is [string, string] => Boolean(item[1]));
+}
+
 function contractAddress(
   contract: SubscriberDetail["contracts"][number],
   subscriber: SubscriberDetail,
@@ -156,6 +175,14 @@ function SubscriberDetails({
   const [editing, setEditing] = useState(false);
   const [creatingContract, setCreatingContract] = useState(false);
   const { mutate } = useSWRConfig();
+  const copy = async (value: string) => {
+    try {
+      await copyText(value);
+      toast.success("Copiado para a área de transferência.");
+    } catch {
+      toast.error("O navegador não permitiu copiar o texto.");
+    }
+  };
   const subscriber = useSWR(["erp-subscriber", id], ([, id]) =>
     readSubscriber(id),
   );
@@ -337,7 +364,7 @@ function SubscriberDetails({
       }
       contracts={s.contracts.map((contract) => ({
         id: contract.id,
-        title: `${contract.plan_name} · ${contract.id.slice(0, 8)}`,
+        title: `${contract.plan_name} · #${shortCode(contract.id)}`,
         status: contract.status === "active" ? "Vigente" : "Encerrado",
         plan: `${contract.plan_name} v${contract.plan_version} · ${contract.down_kbps / 1000} / ${contract.up_kbps / 1000} Mbps`,
         address: contractAddress(contract, s),
@@ -360,7 +387,7 @@ function SubscriberDetails({
     <>
       {s ? (
         <SubscriberSheetHeader
-          code={id.slice(0, 8)}
+          code={shortCode(id)}
           name={s.name}
           description={[
             `${s.contracts.length} contrato(s)`,
@@ -374,7 +401,7 @@ function SubscriberDetails({
         />
       ) : (
         <SubscriberSheetHeader
-          code={id.slice(0, 8)}
+          code={shortCode(id)}
           name={
             subscriber.error
               ? "Assinante não encontrado"
@@ -534,7 +561,7 @@ function SubscriberDetails({
                 ]}
                 contracts={contractList}
                 contact={{
-                  phone: s.phone,
+                  phone: formatPhone(s.phone),
                   email: s.email,
                   caption: "Informação útil no primeiro atendimento.",
                   facts: [
@@ -545,7 +572,7 @@ function SubscriberDetails({
                         .join(", ") || "—",
                     ],
                     ["Bairro", s.address_district || "—"],
-                    ["Documento", s.document || "—"],
+                    ["Documento", formatDocument(s.document) || "—"],
                     [
                       "Cidade / UF",
                       [s.address_city, s.address_state]
@@ -613,50 +640,82 @@ function SubscriberDetails({
             </TabsContent>
             <TabsContent value="cadastro">
               <div className="sheet-content-body">
-                <div className="profile-two-columns">
-                  <ProfileSection
-                    title="Identificação e contato"
-                    caption="Dados do titular disponíveis no cadastro."
-                  >
-                    <ProfileFacts
-                      items={[
-                        ["Nome / Razão social", s.name],
-                        ["CPF / CNPJ", s.document || "—"],
-                        ["Código do assinante", s.id.slice(0, 8)],
-                        ["Cliente desde", date(s.created_at)],
-                        ["E-mail principal", s.email || "—"],
-                        ["Telefone principal", s.phone || "—"],
-                        [
-                          "Nascimento / abertura",
-                          s.birth_date ? date(s.birth_date) : "—",
-                        ],
-                        [
-                          "RG / Emissor",
-                          [s.rg, s.rg_issuer].filter(Boolean).join(" / ") ||
-                            "—",
-                        ],
-                        ["Nome da mãe", s.mother_name || "—"],
-                        ["Nome fantasia", s.trade_name || "—"],
-                      ]}
-                    />
-                  </ProfileSection>
-                  <ProfileSection
-                    title="Endereço cadastral"
-                    caption="Endereço do titular; cada contrato pode ter o seu."
-                  >
-                    <ProfileFacts
-                      items={[
-                        ["Logradouro", s.address_street || "—"],
-                        ["Número", s.address_number || "—"],
-                        ["Bairro", s.address_district || "—"],
-                        ["Cidade", s.address_city || "—"],
-                        ["UF", s.address_state || "—"],
-                        ["CEP", s.address_zip || "—"],
-                        ["Observações", s.notes || "—"],
-                      ]}
-                    />
-                  </ProfileSection>
-                </div>
+                <RegistrationView
+                  identity={[
+                    ["Nome / Razão social", s.name],
+                    [
+                      "CPF / CNPJ",
+                      formatDocument(s.document) || "Não informado",
+                    ],
+                    ["Código do assinante", shortCode(s.id)],
+                    ["Cliente desde", date(s.created_at)],
+                    [
+                      "E-mail principal",
+                      s.email ? (
+                        <CopyValue
+                          key="email"
+                          href={`mailto:${s.email}`}
+                          value={s.email}
+                          label="Copiar e-mail"
+                          copy={copy}
+                        />
+                      ) : (
+                        "Não informado"
+                      ),
+                    ],
+                    [
+                      "Telefone principal",
+                      s.phone ? (
+                        <CopyValue
+                          key="phone"
+                          href={`tel:${s.phone.replace(/[^+\d]/g, "")}`}
+                          value={formatPhone(s.phone)}
+                          label="Copiar telefone"
+                          copy={copy}
+                        />
+                      ) : (
+                        "Não informado"
+                      ),
+                    ],
+                    ...optionalFacts([
+                      [
+                        "Nascimento / abertura",
+                        s.birth_date ? date(s.birth_date) : null,
+                      ],
+                      [
+                        "RG / Emissor",
+                        [s.rg, s.rg_issuer].filter(Boolean).join(" / ") || null,
+                      ],
+                      ["Nome da mãe", s.mother_name],
+                      ["Nome fantasia", s.trade_name],
+                    ]),
+                  ]}
+                  addressTitle="Endereço cadastral"
+                  addressCaption="Endereço do titular; cada contrato pode ter o seu."
+                  address={{
+                    line:
+                      [s.address_street, s.address_number]
+                        .filter(Boolean)
+                        .join(", ") || "Endereço não informado",
+                    detail:
+                      [s.address_district, s.address_city, s.address_state]
+                        .filter(Boolean)
+                        .join(" · ") || "Bairro e cidade não informados",
+                  }}
+                  addressFacts={[
+                    ["Bairro", s.address_district || "Não informado"],
+                    [
+                      "Cidade / UF",
+                      [s.address_city, s.address_state]
+                        .filter(Boolean)
+                        .join(" / ") || "Não informado",
+                    ],
+                    ...optionalFacts([
+                      ["CEP", s.address_zip],
+                      ["Observações", s.notes],
+                    ]),
+                  ]}
+                />
                 <SubscriberSections
                   subscriber={s}
                   section="cadastro"
@@ -708,13 +767,12 @@ function SubscriberDetails({
                   </QueryBoundary>
                   {s.contracts.length ? (
                     s.contracts.map((contract) => (
-                      <ProfileSection
+                      <ContractFinance
                         key={contract.id}
-                        title={`${contract.plan_name} · ${contract.id.slice(0, 8)}`}
-                        caption="Títulos, acordos e liberação por confiança deste contrato."
-                      >
-                        <ContractFinance id={contract.id} />
-                      </ProfileSection>
+                        id={contract.id}
+                        totals={false}
+                        title={`Títulos · ${contract.plan_name} · #${shortCode(contract.id)}`}
+                      />
                     ))
                   ) : (
                     <p className="profile-footnote">
@@ -730,29 +788,62 @@ function SubscriberDetails({
             )}
             {(crm || field) && (
               <TabsContent value="atendimento">
-                <div className="sheet-content-body erp-stack">
-                  {crm && <LazySubscriberTickets id={s.id} />}
-                  {field && <LazyLinkedOrders subscriberId={s.id} />}
+                <div className="sheet-content-body">
+                  <SubscriberServiceWorkspace
+                    firstName={s.name.split(" ")[0]}
+                    openTickets={crm ? (openTickets.data ?? null) : null}
+                    openOrders={field ? (openOrders.data ?? null) : null}
+                    events={timeline.data ? timeline.data.length : null}
+                    onHistory={() => setTab("historico")}
+                    tickets={
+                      crm ? <LazySubscriberTickets id={s.id} /> : undefined
+                    }
+                    orders={
+                      field ? (
+                        <LazyLinkedOrders subscriberId={s.id} />
+                      ) : undefined
+                    }
+                  />
                 </div>
               </TabsContent>
             )}
             {network && (
               <TabsContent value="conexao">
-                <div className="sheet-content-body erp-stack">
-                  {s.contracts.length ? (
-                    s.contracts.map((contract) => (
-                      <LazyContractService
-                        key={contract.id}
-                        id={contract.id}
-                        status={contract.status}
-                        planName={contract.plan_name}
+                <div className="sheet-content-body">
+                  <div className="technical-workspace">
+                    <div className="profile-manual-banner">
+                      <ShieldCheck size={18} />
+                      <div>
+                        <strong>Intenção e equipamento, lado a lado.</strong>
+                        <p>
+                          O estado desejado vem do ERP; a confirmação vem do
+                          relato do agente ou do concentrador. Ações remotas
+                          dependem da sua permissão.
+                        </p>
+                      </div>
+                      <Badge variant="outline">Por contrato</Badge>
+                    </div>
+                    {s.contracts.length ? (
+                      s.contracts.map((contract) => (
+                        <div className="erp-stack" key={contract.id}>
+                          <TechnicalHeading
+                            title={`Acesso · ${contract.plan_name}`}
+                            description={`Contrato #${shortCode(contract.id)} · ${contract.down_kbps / 1000} / ${contract.up_kbps / 1000} Mbps · ${contract.status === "active" ? "vigente" : "encerrado"}`}
+                          />
+                          <LazyContractService
+                            id={contract.id}
+                            status={contract.status}
+                          />
+                        </div>
+                      ))
+                    ) : (
+                      <EmptyState
+                        icon={Network}
+                        title="Nenhum contrato com acesso"
+                        description="O titular ainda não possui contratos."
                       />
-                    ))
-                  ) : (
-                    <p className="profile-footnote">
-                      O titular ainda não possui contratos.
-                    </p>
-                  )}
+                    )}
+                  </div>
                 </div>
               </TabsContent>
             )}

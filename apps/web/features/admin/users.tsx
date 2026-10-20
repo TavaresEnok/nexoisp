@@ -1,7 +1,7 @@
 import { useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { z } from "zod";
-import { PageHeading } from "@/components/workspace-ui";
+import { PersonAvatar, Status, PageHeading } from "@/components/workspace-ui";
 import { OperationalCatalog } from "@/components/operational-catalog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -58,7 +58,7 @@ export function TeamDirectory() {
     <>
       <PageHeading
         title="Equipe do provedor"
-        description="Perfis definidos pelo Go, restrição por POP e acesso dos usuários."
+        description="Quem acessa o provedor, com que perfil e em quais pontos de presença."
         actions={
           <Button onClick={() => setEditor("create")}>
             Novo usuário da equipe
@@ -72,7 +72,7 @@ export function TeamDirectory() {
       >
         <OperationalCatalog
           title="Usuários da equipe"
-          description="Os perfis controlam permissões no backend. Administradores acessam todos os POPs."
+          description="Administradores acessam todos os POPs; os demais perfis podem ser restritos."
           columns={[
             "Nome / e-mail",
             "Perfil",
@@ -85,18 +85,26 @@ export function TeamDirectory() {
           rows={rows.map((user) => ({
             id: user.id,
             cells: [
-              <>
-                <strong>{user.name}</strong>
-                <small className="table-subline">{user.email}</small>
-              </>,
+              <span className="table-person" key="person">
+                <PersonAvatar name={user.name} small />
+                <span>
+                  <strong>{user.name}</strong>
+                  <small>{user.email}</small>
+                </span>
+              </span>,
               roles[user.role],
               user.role === "admin" || !user.pops.length
                 ? "Todos os POPs"
                 : user.pops.map((pop) => pop.name).join(", "),
-              <Badge variant="outline">
-                {user.active ? "Ativo" : "Bloqueado"}
-              </Badge>,
-              user.mfa_enabled ? "Ativada" : "Não configurada",
+              <Status
+                key="status"
+                value={user.active ? "Ativo" : "Bloqueado"}
+              />,
+              <Status
+                key="mfa"
+                dot={false}
+                value={user.mfa_enabled ? "Ativada" : "Não configurada"}
+              />,
             ],
             actions: (
               <div className="erp-inline-actions">
@@ -105,18 +113,21 @@ export function TeamDirectory() {
                     <Button
                       variant="outline"
                       size="sm"
+                      aria-label={`Editar perfil de ${user.name}`}
                       onClick={() => setEditor({ kind: "profile", user })}
                     >
-                      Editar perfil de {user.name}
+                      Perfil
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
+                      aria-label={`Redefinir senha de ${user.name}`}
                       onClick={() => setEditor({ kind: "password", user })}
                     >
-                      Redefinir senha de {user.name}
+                      Senha
                     </Button>
                     <ActionButton
+                      label={`${user.active ? "Bloquear" : "Desbloquear"} ${user.name}`}
                       danger={user.active}
                       confirm={
                         user.active
@@ -131,10 +142,11 @@ export function TeamDirectory() {
                         await refresh();
                       }}
                     >
-                      {user.active ? "Bloquear" : "Desbloquear"} {user.name}
+                      {user.active ? "Bloquear" : "Desbloquear"}
                     </ActionButton>
                     {user.mfa_enabled && (
                       <ActionButton
+                        label={`Redefinir MFA de ${user.name}`}
                         confirm={`Remover a verificação em duas etapas de ${user.name}? O usuário precisará configurar novamente.`}
                         onClick={async () => {
                           await api(`/users/${user.id}`, {
@@ -144,7 +156,7 @@ export function TeamDirectory() {
                           await refresh();
                         }}
                       >
-                        Redefinir MFA de {user.name}
+                        Duas etapas
                       </ActionButton>
                     )}
                   </>
@@ -153,9 +165,10 @@ export function TeamDirectory() {
                   <Button
                     variant="outline"
                     size="sm"
+                    aria-label={`POPs de ${user.name}`}
                     onClick={() => setEditor({ kind: "pops", user })}
                   >
-                    POPs de {user.name}
+                    POPs
                   </Button>
                 )}
               </div>

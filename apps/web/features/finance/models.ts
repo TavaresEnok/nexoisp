@@ -1,5 +1,10 @@
 import { z } from "zod";
 import type { Invoice } from "@/domain/workspace";
+import {
+  formatDocument,
+  formatPhone,
+  shortCode,
+} from "@/features/shared/format";
 export const invoiceSchema = z.object({
   id: z.string().uuid(),
   contract_id: z.string().uuid(),
@@ -78,7 +83,7 @@ export function invoiceStatus(invoice: Pick<ErpInvoice, "status" | "overdue">) {
 export function projectInvoice(invoice: ErpInvoice): Invoice {
   return {
     id: invoice.id,
-    code: invoice.id.slice(0, 8),
+    code: shortCode(invoice.id),
     subscriberId: invoice.subscriber_id,
     name: invoice.subscriber_name,
     amount: invoice.amount_cents / 100,
