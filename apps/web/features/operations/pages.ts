@@ -117,6 +117,10 @@ export const operationalPages = {
     title: "ONUs e autorizações",
     aliases: ["/onus", "/rede/onus"],
   },
+  ponPorts: {
+    paths: ["/rede/ftth/fttx-pon"],
+    access: ["network:read", "olt"],
+  },
   onuCatalog: {
     paths: ["/rede/ftth/fttx-onu-tipo", "/rede/ftth/fttx-onu-template"],
     access: ["network:read", "olt"],

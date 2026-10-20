@@ -42,6 +42,11 @@ import {
   findNavigationPage,
   searchNavigation,
 } from "@/lib/navigation";
+const PonPorts = lazy(() =>
+  import("@/features/network/pon").then((module) => ({
+    default: module.PonPorts,
+  })),
+);
 const OnuCatalogPage = lazy(() =>
   import("@/features/network/onu-catalog").then((module) => ({
     default: module.OnuCatalogPage,
@@ -347,6 +352,7 @@ export function OperationalApplication() {
     onus: <NetworkOnus />,
     noc: <NetworkNoc />,
     onuCatalog: <OnuCatalogPage />,
+    ponPorts: <PonPorts />,
     online: <OnlineConnections />,
     operations: <NetworkOperations />,
     equipment: <NetworkDirectory />,

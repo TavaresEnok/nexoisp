@@ -463,6 +463,10 @@
     },
     {
       "method": "GET",
+      "path": "/api/olt/pon-ports"
+    },
+    {
+      "method": "GET",
       "path": "/api/onus"
     },
     {

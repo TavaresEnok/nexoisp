@@ -32,7 +32,6 @@ const extensionPages = Object.values(extensions).flat();
 
 // Recursos do desenho v0 sem suporte no backend Go.
 export const plannedPaths: ReadonlySet<string> = new Set([
-  "/rede/ftth/fttx-pon",
   "/rede/ftth/acs-template",
   "/assistente",
   "/acompanhamento",
