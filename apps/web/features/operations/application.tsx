@@ -4,7 +4,7 @@ import {
   resolveCatalogueNode,
   searchOperationalNavigation,
 } from "./catalogue";
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect, lazy, Suspense, type ReactElement } from "react";
 import {
   Navigate,
   Route,
@@ -31,6 +31,7 @@ import { SubscriberDirectory } from "@/features/subscribers/directory";
 import { OperationalSubscriberSheet } from "@/features/subscribers/sheet";
 import { canAccessPath, erpAliases, canonicalErpPath } from "./navigation";
 import { returnPath } from "./return-path";
+import { pageList, recordLinks, type OperationalPageId } from "./pages";
 import { operationalTitle } from "./status";
 import { ErpOverview } from "./overview";
 import { OperationalContracts } from "@/features/contracts/directory";
@@ -309,6 +310,58 @@ export function OperationalApplication() {
         ? "/provedores"
         : "/";
   const allowed = canAccessPath(me, location.pathname);
+  const pages: Record<OperationalPageId, ReactElement> = {
+    overview:
+      me.role === "subscriber" || !me.tenant ? (
+        <Navigate to={home} replace />
+      ) : (
+        <ErpOverview />
+      ),
+    referrals: <ReferralReport />,
+    settings: <OperationalSettings />,
+    dataImport: <DataImport />,
+    integrations: <Integrations />,
+    teamNotices: <TeamNotices />,
+    subscriberMessages: <SubscriberMessages />,
+    portalSignOut: <PortalSignOut />,
+    portal: <PortalHome />,
+    tenants: <TenantDirectory />,
+    anatel: <AnatelCollection />,
+    audit: <AuditDirectory />,
+    quality: <QualityAdministration />,
+    search: <OperationalSearch />,
+    team: <TeamDirectory />,
+    companies: <CompanyDirectory />,
+    map: <NetworkMap />,
+    legalIp: <LegalIpLookup />,
+    cgnat: <CgnatDirectory />,
+    addresses: <AddressDirectory />,
+    fiber: <FiberDirectory />,
+    pops: <NetworkPops />,
+    maintenance: <NetworkMaintenance />,
+    onus: <NetworkOnus />,
+    noc: <NetworkNoc />,
+    online: <OnlineConnections />,
+    operations: <NetworkOperations />,
+    equipment: <NetworkDirectory />,
+    stock: <StockCatalog />,
+    agenda: <OperationalAgenda />,
+    myWork: <MyWork />,
+    orders: <OperationalOrders />,
+    leads: <OperationalLeads />,
+    tickets: <OperationalTickets />,
+    crmReport: <CrmReport />,
+    collectionReports: <CollectionReports />,
+    financePolicy: <FinancePolicy />,
+    reconciliation: <FinanceReconciliation />,
+    invoices: <OperationalInvoices />,
+    contracts: <OperationalContracts />,
+    addons: <AddonCatalog />,
+    plans: <OperationalPlans />,
+    account: <Account />,
+    subscribers: <SubscriberDirectory />,
+    directory: <OperationalDirectory />,
+  };
   return (
     <OperationalWorkspaceProvider>
       <ShellProvider value={shell}>
@@ -322,130 +375,22 @@ export function OperationalApplication() {
           ) : (
             <Suspense fallback={<QueryBoundary loading>{null}</QueryBoundary>}>
               <Routes>
-                <Route
-                  path="/"
-                  element={
-                    me.role === "subscriber" || !me.tenant ? (
-                      <Navigate to={home} replace />
-                    ) : (
-                      <ErpOverview />
-                    )
-                  }
-                />
-                <Route
-                  path="/relatorios/indicacoes"
-                  element={<ReferralReport />}
-                />
-                <Route
-                  path="/configuracoes"
-                  element={<OperationalSettings />}
-                />
-                <Route
-                  path="/administracao/importacao"
-                  element={<DataImport />}
-                />
-                <Route
-                  path="/administracao/integracoes"
-                  element={<Integrations />}
-                />
-                <Route path="/administracao/avisos" element={<TeamNotices />} />
-                <Route
-                  path="/administracao/avisos-assinante"
-                  element={<SubscriberMessages />}
-                />
-                <Route path="/portal/sair" element={<PortalSignOut />} />
-                <Route path="/portal/*" element={<PortalHome />} />
-                <Route path="/provedores" element={<TenantDirectory />} />
-                <Route
-                  path="/administracao/anatel"
-                  element={<AnatelCollection />}
-                />
-                <Route path="/auditoria" element={<AuditDirectory />} />
-                <Route
-                  path="/administracao/catalogos-sla"
-                  element={<QualityAdministration />}
-                />
-                <Route path="/busca" element={<OperationalSearch />} />
-                <Route
-                  path="/administracao/usuarios"
-                  element={<TeamDirectory />}
-                />
-                <Route
-                  path="/administracao/empresas"
-                  element={<CompanyDirectory />}
-                />
-                <Route path="/rede/mapa" element={<NetworkMap />} />
-                <Route path="/rede/consulta-ip" element={<LegalIpLookup />} />
-                <Route
-                  path="/rede/enderecos-ip/planos-de-cgnat"
-                  element={<CgnatDirectory />}
-                />
-                <Route
-                  path="/rede/enderecos-ip"
-                  element={<AddressDirectory />}
-                />
-                <Route
-                  path="/rede/enderecos-ip/blocos-de-enderecos"
-                  element={<AddressDirectory />}
-                />
-                <Route path="/rede/ftth" element={<FiberDirectory />} />
-                <Route
-                  path="/rede/ftth/fttx-cto"
-                  element={<FiberDirectory />}
-                />
-                <Route path="/pops" element={<NetworkPops />} />
-                <Route
-                  path="/rede/manutencoes"
-                  element={<NetworkMaintenance />}
-                />
-                <Route path="/rede/onus" element={<NetworkOnus />} />
-                <Route path="/rede/ftth/fttx-onu" element={<NetworkOnus />} />
-                <Route path="/noc" element={<NetworkNoc />} />
-                <Route path="/rede/online" element={<OnlineConnections />} />
-                <Route path="/rede/operacoes" element={<NetworkOperations />} />
-                <Route
-                  path="/rede/equipamentos"
-                  element={<NetworkDirectory />}
-                />
-                <Route path="/estoque" element={<StockCatalog />} />
-                <Route path="/agenda" element={<OperationalAgenda />} />
-                <Route path="/meu-trabalho" element={<MyWork />} />
-                <Route
-                  path="/ordens-de-servico"
-                  element={<OperationalOrders />}
-                />
-                <Route path="/prospectos" element={<OperationalLeads />} />
-                <Route path="/atendimentos" element={<OperationalTickets />} />
-                <Route path="/relatorios/atendimento" element={<CrmReport />} />
-                <Route
-                  path="/relatorios/cobranca"
-                  element={<CollectionReports />}
-                />
-                <Route
-                  path="/financeiro/politica-de-cobranca"
-                  element={<FinancePolicy />}
-                />
-                <Route
-                  path="/financeiro/conciliacao"
-                  element={<FinanceReconciliation />}
-                />
-                <Route
-                  path="/financeiro/faturas"
-                  element={<OperationalInvoices />}
-                />
-                <Route path="/contratos" element={<OperationalContracts />} />
-                <Route
-                  path="/contratos/:id"
-                  element={<RecordLink base="/contratos" param="contrato" />}
-                />
-                <Route path="/produtos-adicionais" element={<AddonCatalog />} />
-                <Route path="/planos" element={<OperationalPlans />} />
-                <Route path="/conta/*" element={<Account />} />
-                <Route path="/assinantes" element={<SubscriberDirectory />} />
-                <Route
-                  path="/assinantes/:id"
-                  element={<RecordLink base="/assinantes" param="ficha" />}
-                />
+                {pageList.flatMap((page) =>
+                  page.paths.map((path) => (
+                    <Route
+                      key={path}
+                      path={page.nested ? `${path}/*` : path}
+                      element={pages[page.id]}
+                    />
+                  )),
+                )}
+                {recordLinks.map((link) => (
+                  <Route
+                    key={link.path}
+                    path={link.path}
+                    element={<RecordLink base={link.base} param={link.param} />}
+                  />
+                ))}
                 {Object.entries(erpAliases).map(([from, to]) => (
                   <Route
                     key={from}
@@ -455,7 +400,6 @@ export function OperationalApplication() {
                     }
                   />
                 ))}
-                <Route path="/estrutura" element={<OperationalDirectory />} />
                 <Route path="*" element={<CatalogueDestination />} />
               </Routes>
             </Suspense>

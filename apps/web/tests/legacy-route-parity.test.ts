@@ -15,6 +15,7 @@ import {
   searchOperationalNavigation,
 } from "../features/operations/catalogue";
 import { integrationStatus } from "../features/operations/status";
+import { routePaths } from "../features/operations/pages";
 import { findNavigationPage, navigationPages } from "../lib/navigation";
 import type { Session } from "../features/session/model";
 
@@ -50,7 +51,15 @@ function declaredRoutes(file: string) {
   visit(source);
   return paths;
 }
-const routes = declaredRoutes("features/operations/application.tsx");
+const routes = [...routePaths, "/login"];
+
+test("rotas operacionais vêm somente do registro de páginas", () => {
+  assert.deepEqual(
+    declaredRoutes("features/operations/application.tsx").sort(),
+    ["*", "*", "/login"],
+    "Declare a página em features/operations/pages.ts em vez de escrever <Route> à mão.",
+  );
+});
 const hasRoute = (path: string) =>
   routes.some(
     (route) =>
