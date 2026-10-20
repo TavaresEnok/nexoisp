@@ -13,7 +13,7 @@ import (
 )
 
 const Read6caaa707 = `-- name: Read6caaa707 :many
-select p.id, p.tenant_id, p.name, p.applies_to, p.priority, p.kind, p.type_id, p.resolution_minutes, p.escalate_to, p.active, p.created_at, u.name as escalate_to_name, t.name as type_name,
+select p.id, p.tenant_id, p.name, p.applies_to, p.priority, p.kind, p.type_id, p.resolution_minutes, p.escalate_to, p.active, p.created_at, p.business_hours, u.name as escalate_to_name, t.name as type_name,
                 (select count(*) from tickets x where x.sla_policy_id = p.id)::int + (select count(*) from work_orders x where x.sla_policy_id = p.id)::int as in_use
          from sla_policies p left join users u on u.id = p.escalate_to left join catalog_items t on t.id = p.type_id order by p.applies_to, p.name
 `
@@ -30,6 +30,7 @@ type Read6caaa707Row struct {
 	EscalateTo        pgtype.UUID        `json:"escalate_to"`
 	Active            bool               `json:"active"`
 	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	BusinessHours     bool               `json:"business_hours"`
 	EscalateToName    pgtype.Text        `json:"escalate_to_name"`
 	TypeName          pgtype.Text        `json:"type_name"`
 	InUse             int32              `json:"in_use"`
@@ -56,6 +57,7 @@ func (q *Queries) Read6caaa707(ctx context.Context) ([]Read6caaa707Row, error) {
 			&i.EscalateTo,
 			&i.Active,
 			&i.CreatedAt,
+			&i.BusinessHours,
 			&i.EscalateToName,
 			&i.TypeName,
 			&i.InUse,

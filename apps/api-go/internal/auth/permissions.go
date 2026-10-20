@@ -18,7 +18,7 @@ var moduleRoutes = []struct {
 	{[]string{"olt"}, regexp.MustCompile(`^/api/(olt/|onus(/|$)|contracts/[^/]+/onu$)`)},
 	{[]string{"ipam"}, regexp.MustCompile(`^/api/(ipam/|cgnat/|contracts/[^/]+/(ips|ipv6)$)`)},
 	{[]string{"field"}, regexp.MustCompile(`^/api/(work-orders(/|$)|stock/|contracts/[^/]+/equipment$|agenda(/|$)|surveys(/|$)|portal/surveys(/|$)|install-kits(/|$))`)},
-	{[]string{"crm", "field"}, regexp.MustCompile(`^/api/(sla-policies(/|$)|reports/sla$)`)},
+	{[]string{"crm", "field"}, regexp.MustCompile(`^/api/(sla-(policies|calendar|holidays)(/|$)|reports/sla$)`)},
 	{[]string{"ftth"}, regexp.MustCompile(`^/api/(ftth/|contracts/[^/]+/ftth$)`)},
 	{[]string{"crm"}, regexp.MustCompile(`^/api/(leads(/|$)|tickets(/|$)|crm/|portal/tickets(/|$))`)},
 	{[]string{"noc"}, regexp.MustCompile(`^/api/(noc/|contracts/[^/]+/diagnosis$)`)},

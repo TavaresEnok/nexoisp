@@ -67,6 +67,10 @@
     },
     {
       "method": "DELETE",
+      "path": "/api/sla-holidays/:id"
+    },
+    {
+      "method": "DELETE",
       "path": "/api/sla-policies/:id"
     },
     {
@@ -548,6 +552,14 @@
     {
       "method": "GET",
       "path": "/api/settings/retention"
+    },
+    {
+      "method": "GET",
+      "path": "/api/sla-calendar"
+    },
+    {
+      "method": "GET",
+      "path": "/api/sla-holidays"
     },
     {
       "method": "GET",
@@ -1187,6 +1199,10 @@
     },
     {
       "method": "POST",
+      "path": "/api/sla-holidays"
+    },
+    {
+      "method": "POST",
       "path": "/api/sla-policies"
     },
     {
@@ -1408,6 +1424,10 @@
     {
       "method": "PUT",
       "path": "/api/settings/retention"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/sla-calendar"
     },
     {
       "method": "PUT",

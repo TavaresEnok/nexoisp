@@ -34,9 +34,9 @@ func (s Service) configOperations(ops map[string]operation) {
 		addr = append(addr, f(key, text(max).Nullish().Then(nilEmpty, true)))
 	}
 	simple(ops, "PUT /api/contracts/:id/install-address", o(addr...), "contrato não encontrado", "contract.install_address", "contract", []string{":id", "street", "number", "district", "city", "state", "zip"}, true)
-	policy := o(f("name", name(2, 80)), f("applies_to", e("ticket", "work_order")), f("priority", e("low", "normal", "high").Nullish()), f("kind", e("install", "repair", "address_change", "removal", "other").Nullish()), f("type_id", uuid.Nullish()), f("resolution_minutes", n().Int().Min(5).Max(525600)), f("escalate_to", uuid.Nullish()), f("active", b().Def(true)))
+	policy := o(f("name", name(2, 80)), f("applies_to", e("ticket", "work_order")), f("priority", e("low", "normal", "high").Nullish()), f("kind", e("install", "repair", "address_change", "removal", "other").Nullish()), f("type_id", uuid.Nullish()), f("resolution_minutes", n().Int().Min(5).Max(525600)), f("escalate_to", uuid.Nullish()), f("active", b().Def(true)), f("business_hours", b().Def(false)))
 	ops["POST /api/sla-policies"] = operation{s.createSLA, obj(policy)}
-	ops["PATCH /api/sla-policies/:id"] = operation{s.updateSLA, obj(o(f("name", name(2, 80).Opt()), f("resolution_minutes", n().Int().Min(5).Max(525600).Opt()), f("escalate_to", uuid.Nullish()), f("active", b().Opt())))}
+	ops["PATCH /api/sla-policies/:id"] = operation{s.updateSLA, obj(o(f("name", name(2, 80).Opt()), f("resolution_minutes", n().Int().Min(5).Max(525600).Opt()), f("escalate_to", uuid.Nullish()), f("active", b().Opt()), f("business_hours", b().Opt())))}
 	ops["DELETE /api/sla-policies/:id"] = operation{s.deleteSLA, nil}
 	options := validate.Array(name(1, 60)).Min(1).Max(30)
 	ops["POST /api/custom-fields"] = operation{s.createCustomField, obj(o(f("entity", e("subscriber", "contract")), f("key", str().Pattern(`^[a-z][a-z0-9_]{1,29}$`, "identificador: minúsculas, números e _ (2 a 30)")), f("label", name(2, 60)), f("type", e("text", "number", "date", "boolean", "select")), f("options", options.Opt()), f("required", b().Def(false)), f("position", n().Int().Min(0).Max(999).Def(float64(0)))))}
@@ -232,7 +232,7 @@ func (s Service) createSLA(ctx context.Context, tx *db.Tx, _ string, b map[strin
 			return nil, apierr.New(400, "tipo de ocorrência inválido")
 		}
 	}
-	row, err := one(ctx, tx, key, 2, auth.From(ctx).TenantID, b["name"], b["applies_to"], b["priority"], b["kind"], b["type_id"], b["resolution_minutes"], b["escalate_to"], b["active"])
+	row, err := one(ctx, tx, key, 2, auth.From(ctx).TenantID, b["name"], b["applies_to"], b["priority"], b["kind"], b["type_id"], b["resolution_minutes"], b["escalate_to"], b["active"], b["business_hours"])
 	if err != nil {
 		return nil, err
 	}
@@ -249,7 +249,7 @@ func (s Service) updateSLA(ctx context.Context, tx *db.Tx, id string, b map[stri
 			return nil, apierr.New(400, "responsável de escalonamento não encontrado neste provedor")
 		}
 	}
-	row, err := mustRow(ctx, tx, key, 1, "política não encontrada", id, b["name"], b["resolution_minutes"], has(b, "escalate_to"), b["escalate_to"], b["active"])
+	row, err := mustRow(ctx, tx, key, 1, "política não encontrada", id, b["name"], b["resolution_minutes"], has(b, "escalate_to"), b["escalate_to"], b["active"], b["business_hours"])
 	if err != nil {
 		return nil, err
 	}

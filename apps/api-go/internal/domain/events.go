@@ -50,11 +50,11 @@ func ApplySLA(ctx context.Context, tx *db.Tx, entity string, id any) (jsonx.Obje
 	row := rows[0]
 	var policies []jsonx.Object
 	if entity == "ticket" {
-		policies, err = tx.Objects(ctx, `select id, resolution_minutes from sla_policies
+		policies, err = tx.Objects(ctx, `select id, resolution_minutes, business_hours from sla_policies
          where active and applies_to = 'ticket' and (priority is null or priority = $1) and (type_id is null or type_id = $2)
          order by ((priority is not null)::int + (type_id is not null)::int) desc, resolution_minutes limit 1`, row.Get("priority"), row.Get("type_id"))
 	} else {
-		policies, err = tx.Objects(ctx, `select id, resolution_minutes from sla_policies
+		policies, err = tx.Objects(ctx, `select id, resolution_minutes, business_hours from sla_policies
          where active and applies_to = 'work_order' and (kind is null or kind = $1)
          order by (kind is not null)::int desc, resolution_minutes limit 1`, row.Get("kind"))
 	}
@@ -63,10 +63,13 @@ func ApplySLA(ctx context.Context, tx *db.Tx, entity string, id any) (jsonx.Obje
 	}
 	var policy jsonx.Object
 	var policyID, minutes any
+	business := false
 	if len(policies) > 0 {
 		policy = policies[0]
 		policyID, minutes = policy.Get("id"), policy.Get("resolution_minutes")
+		business = policy.Get("business_hours") == true
 	}
-	err = tx.Exec(ctx, `update `+table+` set sla_policy_id = $2, sla_due_at = case when $2::uuid is null then null else created_at + make_interval(mins => $3::int) end, sla_breached_at = null where id = $1`, id, policyID, minutes)
+	// Políticas de expediente contam só minutos úteis do calendário do provedor (sla_due).
+	err = tx.Exec(ctx, `update `+table+` set sla_policy_id = $2, sla_due_at = case when $2::uuid is null then null else sla_due(tenant_id, created_at, $3::int, $4) end, sla_breached_at = null where id = $1`, id, policyID, minutes, business)
 	return policy, err
 }

@@ -8,6 +8,9 @@ import { RecordEditor } from "@/features/shared/record-editor";
 import { QueryBoundary } from "@/features/shared/feedback";
 import { ActionButton } from "@/features/shared/action";
 import { api } from "@/platform/erp-client";
+import { Input } from "@/components/ui/input";
+import { FormField } from "@/features/shared/form";
+import { toast } from "sonner";
 export const workKinds: Record<string, string> = {
   install: "Instalação",
   repair: "Reparo",
@@ -32,6 +35,7 @@ const policy = z.object({
   escalate_to: z.string().nullable(),
   escalate_to_name: z.string().nullable(),
   active: z.boolean(),
+  business_hours: z.boolean(),
   in_use: z.coerce.number(),
 });
 const report = z.object({
@@ -79,7 +83,7 @@ export function SlaPolicies() {
       >
         <OperationalCatalog
           title="Políticas de SLA"
-          description="Prazos em tempo corrido, sem calendário de expediente. A política mais específica prevalece; o servidor aplica o escalonamento configurado."
+          description="Prazos em tempo corrido ou só no expediente do calendário abaixo. A política mais específica prevalece; o servidor aplica o escalonamento configurado."
           columns={[
             "Política",
             "Abrangência",
@@ -106,7 +110,7 @@ export function SlaPolicies() {
                     .filter(Boolean)
                     .join(" · ")
                 : `OS · ${item.kind ? workKinds[item.kind] : "Todas as naturezas"}`,
-              minutes(item.resolution_minutes),
+              `${minutes(item.resolution_minutes)}${item.business_hours ? " úteis" : ""}`,
               item.escalate_to_name ?? "Sem escalonamento",
               item.in_use,
               item.active ? "Ativa" : "Inativa",
@@ -205,6 +209,8 @@ export function SlaPolicies() {
               editing === "new" ? 1440 : editing.resolution_minutes,
             ),
             escalate_to: editing === "new" ? "" : (editing.escalate_to ?? ""),
+            business_hours:
+              editing !== "new" && editing.business_hours ? "yes" : "no",
           }}
           fields={[
             {
@@ -277,6 +283,16 @@ export function SlaPolicies() {
               required: true,
             },
             {
+              key: "business_hours",
+              label: "Contagem do prazo",
+              type: "select",
+              options: [
+                { value: "no", label: "Tempo corrido" },
+                { value: "yes", label: "Somente no expediente" },
+              ],
+              hint: "No expediente, usa o calendário e os feriados desta aba; sem calendário, conta tempo corrido.",
+            },
+            {
               key: "escalate_to",
               label: "Escalonar para",
               type: "select",
@@ -295,6 +311,7 @@ export function SlaPolicies() {
               name: values.name,
               resolution_minutes: Number(values.resolution_minutes),
               escalate_to: values.escalate_to || null,
+              business_hours: values.business_hours === "yes",
             };
             await api(
               editing === "new"
@@ -328,7 +345,239 @@ export function SlaPolicies() {
           }}
         />
       )}
+      <SlaCalendar />
     </div>
+  );
+}
+const weekdays = [
+  "Domingo",
+  "Segunda-feira",
+  "Terça-feira",
+  "Quarta-feira",
+  "Quinta-feira",
+  "Sexta-feira",
+  "Sábado",
+];
+const timezones: Record<string, string> = {
+  "America/Sao_Paulo": "Brasília (São Paulo)",
+  "America/Fortaleza": "Fortaleza",
+  "America/Recife": "Recife",
+  "America/Bahia": "Salvador",
+  "America/Maceio": "Maceió",
+  "America/Belem": "Belém",
+  "America/Araguaina": "Araguaína",
+  "America/Manaus": "Manaus",
+  "America/Cuiaba": "Cuiabá",
+  "America/Campo_Grande": "Campo Grande",
+  "America/Porto_Velho": "Porto Velho",
+  "America/Boa_Vista": "Boa Vista",
+  "America/Rio_Branco": "Rio Branco",
+  "America/Santarem": "Santarém",
+  "America/Noronha": "Fernando de Noronha",
+};
+type Window = { start: string; end: string } | null;
+const calendarSchema = z.object({
+  timezone: z.string().nullable(),
+  hours: z
+    .array(z.object({ start: z.string(), end: z.string() }).nullable())
+    .nullable(),
+});
+const holidaySchema = z.object({
+  id: z.string(),
+  day: z.string(),
+  name: z.string(),
+});
+const defaultHours: Window[] = [
+  null,
+  ...Array.from({ length: 5 }, () => ({ start: "08:00", end: "18:00" })),
+  { start: "08:00", end: "12:00" },
+];
+// Expediente e feriados usados pelas políticas "Somente no expediente".
+function SlaCalendar() {
+  const calendar = useSWR("erp-sla-calendar", async () =>
+    calendarSchema.parse(await api("/sla-calendar")),
+  );
+  const holidays = useSWR("erp-sla-holidays", async () =>
+    z.array(holidaySchema).parse(await api("/sla-holidays")),
+  );
+  const [draft, setDraft] = useState<{
+    timezone: string;
+    hours: Window[];
+  } | null>(null);
+  const [adding, setAdding] = useState(false);
+  const current = draft ?? {
+    timezone: calendar.data?.timezone ?? "America/Sao_Paulo",
+    hours: calendar.data?.hours ?? defaultHours,
+  };
+  const update = (index: number, value: Window) =>
+    setDraft({
+      ...current,
+      hours: current.hours.map((item, position) =>
+        position === index ? value : item,
+      ),
+    });
+  return (
+    <>
+      <Panel
+        title="Calendário de expediente"
+        description={
+          calendar.data?.hours
+            ? "Prazos das políticas de expediente contam só estes horários, no fuso escolhido, sem os feriados. Prazos já atribuídos não são recalculados."
+            : "Sem calendário cadastrado, as políticas de expediente contam tempo corrido. Salve o expediente para ativá-las."
+        }
+      >
+        <QueryBoundary
+          loading={calendar.isLoading}
+          error={calendar.error}
+          retry={() => calendar.mutate()}
+        >
+          <div className="erp-stack">
+            <FormField label="Fuso do expediente">
+              <select
+                className="commercial-select"
+                value={current.timezone}
+                onChange={(event) =>
+                  setDraft({ ...current, timezone: event.target.value })
+                }
+              >
+                {Object.entries(timezones).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+            {weekdays.map((label, index) => {
+              const window = current.hours[index];
+              return (
+                <div className="erp-columns" key={label}>
+                  <FormField label={label}>
+                    <select
+                      className="commercial-select"
+                      value={window ? "open" : "closed"}
+                      onChange={(event) =>
+                        update(
+                          index,
+                          event.target.value === "open"
+                            ? { start: "08:00", end: "18:00" }
+                            : null,
+                        )
+                      }
+                    >
+                      <option value="open">Com expediente</option>
+                      <option value="closed">Sem expediente</option>
+                    </select>
+                  </FormField>
+                  {window && (
+                    <>
+                      <FormField label={`Início · ${label}`}>
+                        <Input
+                          type="time"
+                          value={window.start}
+                          onChange={(event) =>
+                            update(index, {
+                              ...window,
+                              start: event.target.value,
+                            })
+                          }
+                        />
+                      </FormField>
+                      <FormField label={`Fim · ${label}`}>
+                        <Input
+                          type="time"
+                          value={window.end}
+                          onChange={(event) =>
+                            update(index, {
+                              ...window,
+                              end: event.target.value,
+                            })
+                          }
+                        />
+                      </FormField>
+                    </>
+                  )}
+                </div>
+              );
+            })}
+            <div className="erp-inline-actions">
+              <ActionButton
+                onClick={async () => {
+                  await api("/sla-calendar", { method: "PUT", body: current });
+                  setDraft(null);
+                  await calendar.mutate();
+                  toast.success("Calendário de expediente salvo.");
+                }}
+              >
+                Salvar expediente
+              </ActionButton>
+            </div>
+          </div>
+        </QueryBoundary>
+      </Panel>
+      <QueryBoundary
+        loading={holidays.isLoading}
+        error={holidays.error}
+        retry={() => holidays.mutate()}
+      >
+        <OperationalCatalog
+          title="Feriados"
+          description="Dias sem expediente para os prazos de SLA, além dos dias marcados acima."
+          columns={["Data", "Feriado"]}
+          actions={
+            <Button onClick={() => setAdding(true)}>Novo feriado</Button>
+          }
+          rows={(holidays.data ?? []).map((item) => ({
+            id: item.id,
+            cells: [
+              new Date(`${item.day.slice(0, 10)}T12:00:00`).toLocaleDateString(
+                "pt-BR",
+              ),
+              item.name,
+            ],
+            actions: (
+              <ActionButton
+                confirm={`Excluir o feriado ${item.name}?`}
+                onClick={async () => {
+                  await api(`/sla-holidays/${item.id}`, { method: "DELETE" });
+                  await holidays.mutate();
+                }}
+              >
+                Excluir feriado
+              </ActionButton>
+            ),
+          }))}
+          empty="Nenhum feriado cadastrado."
+        />
+      </QueryBoundary>
+      {adding && (
+        <RecordEditor
+          title="Novo feriado"
+          description="O dia inteiro fica fora do expediente nos prazos de SLA."
+          initial={{ day: "", name: "" }}
+          fields={[
+            {
+              key: "day",
+              label: "Data do feriado",
+              type: "date",
+              required: true,
+            },
+            {
+              key: "name",
+              label: "Nome do feriado",
+              required: true,
+              maxLength: 80,
+            },
+          ]}
+          submit="Cadastrar feriado"
+          onClose={() => setAdding(false)}
+          onSubmit={async (values) => {
+            await api("/sla-holidays", { body: values });
+            setAdding(false);
+            await holidays.mutate();
+          }}
+        />
+      )}
+    </>
   );
 }
 const surveys = z.object({
