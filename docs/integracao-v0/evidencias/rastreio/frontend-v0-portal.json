@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-portal.mjs",
-  "recorded_at": "2026-10-20T15:23:39.804Z",
+  "recorded_at": "2026-10-20T20:31:31.014Z",
   "steps": [
     {
       "check": "Portal consulta somente cadastro, contratos e faturas próprios; plano sem provisionamento e manutenção são apresentados sem supor conexão online",

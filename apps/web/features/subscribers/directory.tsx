@@ -22,6 +22,7 @@ import {
   formatPhone,
   shortCode,
 } from "@/features/shared/format";
+import { useCreateRequest } from "@/features/shared/create-request";
 
 export const subscriberPageSizes = [8, 25, 50];
 
@@ -64,6 +65,11 @@ export function SubscriberDirectory() {
   const { me } = useSession();
   const [params, setParams] = useSearchParams();
   const [creating, setCreating] = useState(false);
+  useCreateRequest(
+    "assinante",
+    () => setCreating(true),
+    can(me, "subscribers:write"),
+  );
   const [exporting, setExporting] = useState(false);
   const query = params.get("busca") ?? "";
   const status = ["active", "inactive"].includes(params.get("cadastro") ?? "")

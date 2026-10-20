@@ -5,7 +5,7 @@ set -euo pipefail
 cd "$(dirname "$0")"; ROOT="$(cd ../.. && pwd)"
 C="docker compose"
 B=http://localhost:18080/api; J='content-type: application/json'
-login() { curl -s $B/auth/login -H "$J" -d '{"email":"admin@alfa.demo","password":"demo1234"}' | jq -r .token; }
+login() { curl -s $B/auth/login -H "$J" -d '{"email":"admin@alfa.demo","password":"demo1234","bearer":true}' | jq -r .token; }
 case "${1:-}" in
   up)
     [ -f chr/chr-7.24.5.img ] || { echo "baixe chr-7.24.5.img.zip de download.mikrotik.com/routeros/7.24.5/ e extraia em infra/lab/chr/"; exit 1; }

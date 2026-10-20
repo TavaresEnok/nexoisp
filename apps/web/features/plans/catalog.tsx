@@ -15,6 +15,7 @@ import {
   type ErpPlan,
 } from "@/features/contracts/models";
 import { PlanDialog, type PlanDialogKind } from "./dialog";
+import { useCreateRequest } from "@/features/shared/create-request";
 export function OperationalPlans() {
   const { me } = useSession();
   const { mutate } = useSWRConfig();
@@ -28,6 +29,11 @@ export function OperationalPlans() {
     kind: PlanDialogKind;
     id?: string;
   } | null>(null);
+  useCreateRequest(
+    "plano",
+    () => setDialog({ kind: "new" }),
+    can(me, "plans:write"),
+  );
   const refresh = async () => {
     await Promise.all([catalog.mutate(), mutate("erp-plans-for-contract")]);
   };

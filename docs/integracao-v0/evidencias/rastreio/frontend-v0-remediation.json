@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-remediation.mjs",
-  "recorded_at": "2026-10-20T15:24:31.027Z",
+  "recorded_at": "2026-10-20T20:32:21.222Z",
   "steps": [
     {
       "check": "R01: submenus NAS e OLT abrem equipamento operacional em vez de planejado",

@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-network.mjs",
-  "recorded_at": "2026-10-20T15:20:25.444Z",
+  "recorded_at": "2026-10-20T20:29:22.381Z",
   "steps": [
     {
       "check": "Agente criado no Go; token e chave pública exibidos na emissão, sem token na consulta posterior",

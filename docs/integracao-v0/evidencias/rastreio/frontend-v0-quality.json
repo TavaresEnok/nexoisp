@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-quality.mjs",
-  "recorded_at": "2026-10-20T15:22:03.067Z",
+  "recorded_at": "2026-10-20T20:30:58.116Z",
   "steps": [
     {
       "check": "Catálogo criado, renomeado e desativado/reativado; seleções operacionais respeitam itens ativos",

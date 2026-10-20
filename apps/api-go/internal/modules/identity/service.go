@@ -83,7 +83,7 @@ func Register(api huma.API, registry *endpoint.Registry, s Service) {
 	code := str().Trimmed().Min(6).Max(10)
 	role := e("admin", "attendant", "finance", "noc")
 	ops := map[string]operation{
-		"POST /api/auth/login":     {public: true, schema: rule(o(f("email", email), f("password", str().Min(1)), f("code", str().Trimmed().Max(10).Opt())))},
+		"POST /api/auth/login":     {public: true, schema: rule(o(f("email", email), f("password", str().Min(1)), f("code", str().Trimmed().Max(10).Opt()), f("bearer", b().Opt())))},
 		"POST /api/auth/logout":    {pending: true},
 		"POST /api/me/password":    {pending: true, schema: rule(o(f("current", str().Min(1)), f("next", password)))},
 		"POST /api/me/mfa/setup":   {pending: true},
@@ -259,7 +259,13 @@ func (s Service) login(ctx context.Context, r *http.Request, b map[string]any) (
 		return endpoint.Result{}, err
 	}
 	err = s.DB.WithScope(ctx, tenancy.Scope{}, func(tx *db.Tx) error { return tx.Exec(ctx, query("helper:cleared", 0), "email:"+email) })
-	return endpoint.Result{Value: map[string]any{"token": token, "csrf_token": auth.SessionCSRF(token)}, Cookie: cookie(r, token)}, err
+	// O navegador usa só o cookie HttpOnly; o token vai no corpo apenas para
+	// clientes de API que pedem Bearer explicitamente ("bearer": true).
+	value := map[string]any{"csrf_token": auth.SessionCSRF(token)}
+	if b["bearer"] == true {
+		value["token"] = token
+	}
+	return endpoint.Result{Value: value, Cookie: cookie(r, token)}, err
 }
 func (s Service) handle(ctx context.Context, r *http.Request, key, id string, b map[string]any) (endpoint.Result, error) {
 	if key == "POST /api/auth/login" {

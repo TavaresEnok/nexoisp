@@ -81,3 +81,9 @@ A tela de login foi refeita com os tokens, fontes e temas do v0 (`features/sessi
 | D11 · portal em um componente | Fechado. Seções em `features/portal/sections.tsx`; cada destino `/portal/<seção>` abre só a sua seção, com e2e por endereço. | `features/portal/home.tsx` |
 
 O que a prova visual não cobre: igualdade pixel a pixel entre tela conectada e v0 (os dados diferem) e telas fora da lista. A igualdade com o v0 original continua comprovada para a demonstração.
+
+## Pendências após a auditoria (20/10/2026)
+
+- **ONU duplicada no menu:** a extensão "ONUs e autorizações" em Rede / FTTx foi removida. A página de ONUs passa a ter como endereço o item original do v0, `Relatório > Consultar ONU` (`/relatorios/consultar-onu`); `/rede/onus` continua funcionando como atalho.
+- **Diálogos de criação por endereço:** os nós "Novo …" do catálogo do v0 voltam ao menu e abrem o diálogo da página (`?novo=<tipo>`, consumido ao abrir) em 19 destinos: assinante, plano, produto adicional, atendimento, prospecto, OS, item de estoque, geração de mensalidades, concentrador, agente, equipamento, OLT, bloco de IP, plano de CGNAT, aviso de manutenção, usuário, empresa, provedor e chamado do portal. Cada item só aparece, e o diálogo só abre, para quem pode usar o botão correspondente. Ações dentro de fichas (anotação, desconto, aditivo…) continuam abrindo pela ficha.
+- **Token da sessão no login:** a resposta do login não traz mais o token da sessão; o navegador usa só o cookie HttpOnly. Clientes de API que usam Bearer pedem o token explicitamente com `"bearer": true`.

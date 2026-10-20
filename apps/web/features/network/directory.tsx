@@ -21,6 +21,7 @@ import { projectDevice, healthSchema } from "./models";
 import { RadiusActions, RadiusOverview } from "./radius";
 import { AgentDirectory } from "./agents";
 import { DeviceCreator, DeviceDetails } from "./devices";
+import { useCreateRequest } from "@/features/shared/create-request";
 export function NetworkDirectory() {
   const { me } = useSession();
   const navigate = useNavigate();
@@ -32,6 +33,11 @@ export function NetworkDirectory() {
     { refreshInterval: 5000 },
   );
   const [creating, setCreating] = useState(false);
+  useCreateRequest(
+    "equipamento",
+    () => setCreating(true),
+    can(me, "network:write"),
+  );
   const statuses = [
     "Todos",
     "Operacional",

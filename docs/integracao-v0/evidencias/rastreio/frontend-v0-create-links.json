@@ -1,0 +1,168 @@
+{
+  "scenario": "frontend-v0-create-links.mjs",
+  "recorded_at": "2026-10-20T20:32:28.254Z",
+  "steps": [
+    {
+      "check": "Diálogo aberto por /assinantes/novo-assinante em /assinantes",
+      "requests": [
+        "GET /api/dashboard",
+        "GET /api/me",
+        "GET /api/subscribers",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Diálogo aberto por /planos/novo-plano em /planos",
+      "requests": [
+        "GET /api/dashboard",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Diálogo aberto por /produtos-adicionais/cadastrar-produto em /produtos-adicionais",
+      "requests": [
+        "GET /api/addons",
+        "GET /api/me",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Diálogo aberto por /atendimentos/novo-atendimento em /atendimentos",
+      "requests": [
+        "GET /api/catalogs",
+        "GET /api/me",
+        "GET /api/tickets",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Diálogo aberto por /prospectos/novo-prospecto em /prospectos",
+      "requests": [
+        "GET /api/leads",
+        "GET /api/leads/summary",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Diálogo aberto por /ordens-de-servico/nova-os em /ordens-de-servico",
+      "requests": [
+        "GET /api/catalogs",
+        "GET /api/me",
+        "GET /api/staff",
+        "GET /api/today",
+        "GET /api/work-orders"
+      ]
+    },
+    {
+      "check": "Diálogo aberto por /estoque/novo-item em /estoque",
+      "requests": [
+        "GET /api/me",
+        "GET /api/stock/items",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Diálogo aberto por /financeiro/faturas/gerar-mensalidades-por-competencia em /financeiro/faturas",
+      "requests": [
+        "GET /api/companies",
+        "GET /api/finance/monthly",
+        "GET /api/finance/summary",
+        "GET /api/invoices",
+        "GET /api/me",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Diálogo aberto por /rede/equipamentos/concentradores/novo-concentrador em /rede/equipamentos",
+      "requests": [
+        "GET /api/agents",
+        "GET /api/devices",
+        "GET /api/me",
+        "GET /api/network/health",
+        "GET /api/network/online",
+        "GET /api/radius/status",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Diálogo aberto por /rede/equipamentos/agentes-locais/novo-agente em /rede/equipamentos",
+      "requests": [
+        "GET /api/agents",
+        "GET /api/devices",
+        "GET /api/me",
+        "GET /api/network/health",
+        "GET /api/network/online",
+        "GET /api/radius/status",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Diálogo aberto por /rede/equipamentos/equipamentos-e-olts/novo-equipamento em /rede/equipamentos",
+      "requests": [
+        "GET /api/agents",
+        "GET /api/devices",
+        "GET /api/me",
+        "GET /api/network/health",
+        "GET /api/network/online",
+        "GET /api/radius/status",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Diálogo aberto por /rede/enderecos-ip/blocos-de-enderecos/novo-bloco em /rede/enderecos-ip/blocos-de-enderecos",
+      "requests": [
+        "GET /api/devices",
+        "GET /api/ipam/pools",
+        "GET /api/me",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Diálogo aberto por /rede/enderecos-ip/planos-de-cgnat/novo-plano em /rede/enderecos-ip/planos-de-cgnat",
+      "requests": [
+        "GET /api/cgnat/plans",
+        "GET /api/ipam/pools",
+        "GET /api/me",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Diálogo aberto por /rede/manutencoes/novo-aviso em /rede/manutencoes",
+      "requests": [
+        "GET /api/devices",
+        "GET /api/maintenance-notices",
+        "GET /api/me",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Diálogo aberto por /administracao/usuarios/novo-usuario em /administracao/usuarios",
+      "requests": [
+        "GET /api/me",
+        "GET /api/today",
+        "GET /api/users"
+      ]
+    },
+    {
+      "check": "Diálogo aberto por /administracao/empresas/nova-empresa em /administracao/empresas",
+      "requests": [
+        "GET /api/companies",
+        "GET /api/me",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Conta sem escrita não acessa a ação pelo menu nem abre o diálogo pela URL",
+      "requests": [
+        "GET /api/dashboard",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/today"
+      ]
+    }
+  ]
+}

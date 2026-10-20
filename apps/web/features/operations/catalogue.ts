@@ -26,7 +26,6 @@ const extensions: Record<string, NavigationNode[]> = {
   rede: [
     extension("Rede / FTTx", "/noc", "NOC"),
     extension("Rede / FTTx", "/pops", "Pontos de presença"),
-    extension("Rede / FTTx", "/rede/onus", "ONUs e autorizações"),
   ],
 };
 const extensionPages = Object.values(extensions).flat();
@@ -99,6 +98,85 @@ const destinations: Record<string, string | [string, Guard]> = {
     (me) => can(me, "finance:read"),
   ],
 };
+// Ações "Novo …" do menu do v0 abrem o diálogo da página (?novo=<tipo>) e só
+// aparecem para quem pode usar o botão correspondente.
+const write =
+  (permission: string, module?: string): Guard =>
+  (me) =>
+    can(me, permission) && (!module || hasModule(me, module));
+const creations: Record<string, [string, Guard]> = {
+  "/assinantes/novo-assinante": [
+    "/assinantes?novo=assinante",
+    write("subscribers:write"),
+  ],
+  "/planos/novo-plano": ["/planos?novo=plano", write("plans:write")],
+  "/produtos-adicionais/cadastrar-produto": [
+    "/produtos-adicionais?novo=produto",
+    write("plans:write"),
+  ],
+  "/atendimentos/novo-atendimento": [
+    "/atendimentos?novo=atendimento",
+    write("crm:write", "crm"),
+  ],
+  "/prospectos/novo-prospecto": [
+    "/prospectos?novo=prospecto",
+    write("crm:write", "crm"),
+  ],
+  "/ordens-de-servico/nova-os": [
+    "/ordens-de-servico?novo=os",
+    write("os:write", "field"),
+  ],
+  "/estoque/novo-item": ["/estoque?novo=item", write("stock:write", "field")],
+  "/financeiro/faturas/gerar-mensalidades-por-competencia": [
+    "/financeiro/faturas?novo=mensalidades",
+    write("finance:write"),
+  ],
+  "/rede/equipamentos/concentradores/novo-concentrador": [
+    "/rede/equipamentos?novo=concentrador",
+    write("network:write"),
+  ],
+  "/rede/equipamentos/agentes-locais/novo-agente": [
+    "/rede/equipamentos?novo=agente",
+    write("network:write"),
+  ],
+  "/rede/equipamentos/equipamentos-e-olts/novo-equipamento": [
+    "/rede/equipamentos?novo=equipamento",
+    write("network:write"),
+  ],
+  "/rede/equipamentos/equipamentos-e-olts/cadastrar-olt-e-vincular-ao-agente": [
+    "/rede/equipamentos?novo=equipamento",
+    write("network:write", "olt"),
+  ],
+  "/rede/enderecos-ip/blocos-de-enderecos/novo-bloco": [
+    "/rede/enderecos-ip/blocos-de-enderecos?novo=bloco",
+    write("network:write", "ipam"),
+  ],
+  "/rede/enderecos-ip/planos-de-cgnat/novo-plano": [
+    "/rede/enderecos-ip/planos-de-cgnat?novo=cgnat",
+    write("network:write", "ipam"),
+  ],
+  "/rede/manutencoes/novo-aviso": [
+    "/rede/manutencoes?novo=aviso",
+    write("network:write"),
+  ],
+  "/administracao/usuarios/novo-usuario": [
+    "/administracao/usuarios?novo=usuario",
+    write("users:manage"),
+  ],
+  "/administracao/empresas/nova-empresa": [
+    "/administracao/empresas?novo=empresa",
+    write("settings:manage"),
+  ],
+  "/provedores/novo-provedor-e-administrador-inicial": [
+    "/provedores?novo=provedor",
+    write("tenants:manage"),
+  ],
+  "/portal/atendimento/abrir-chamado": [
+    "/portal/atendimento?novo=chamado",
+    (me) => hasModule(me, "crm"),
+  ],
+};
+Object.assign(destinations, creations);
 const catalogue = new Map(navigationPages.map((page) => [page.href, page]));
 export type CatalogueResolution =
   | { kind: "page"; destination: string }

@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-import.mjs",
-  "recorded_at": "2026-10-20T15:24:02.653Z",
+  "recorded_at": "2026-10-20T20:31:53.826Z",
   "steps": [
     {
       "check": "CSV é lido, campos e plano são mapeados; prévia valida erros e senha ausente sem gravar assinantes e exige nova simulação após alterar mapa",

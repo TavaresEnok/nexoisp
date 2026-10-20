@@ -640,7 +640,7 @@ export function ErpOverview() {
               <OverviewBreakdownPanel
                 title="Sinal das ONUs · RX"
                 description="Distribuição das leituras ópticas disponíveis"
-                href="/rede/onus"
+                href="/relatorios/consultar-onu"
                 actionLabel="Abrir ONUs"
                 rows={p.signal.map((row) => ({
                   name: row.label,

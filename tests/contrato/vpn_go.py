@@ -44,7 +44,7 @@ try:
     for _ in range(80):
         if subprocess.run(['docker','exec',API,'wget','-qO-','http://127.0.0.1:8080/api/health'],capture_output=True).returncode==0:break
         time.sleep(.1)
-    token=call('/api/auth/login',{'email':'admin@alfa.demo','password':'demo1234'})['token']
+    token=call('/api/auth/login',{'email':'admin@alfa.demo','password':'demo1234','bearer':True})['token']
     call('/api/radius/devices',{'name':'NAS WireGuard isolado','vendor':'mikrotik','connection':'vpn'},token)
     call('/api/radius/devices',{'name':'NAS L2TP isolado','vendor':'mikrotik','connection':'l2tp'},token)
     for _ in range(80):

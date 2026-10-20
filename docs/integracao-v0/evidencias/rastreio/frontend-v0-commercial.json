@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-commercial.mjs",
-  "recorded_at": "2026-10-20T15:18:43.401Z",
+  "recorded_at": "2026-10-20T20:27:44.341Z",
   "steps": [
     {
       "check": "{\"ok\":true,\"checks\":[\"Plano criado pela UI; nova versão mantém o preço e a versão do contrato existente\",\"Políticas de cobrança/fidelidade e parâmetros de rede salvos; reaplicação reporta solicitações reais\",\"Filtros de plano/titular aplicados no Go com contagem correta e UUID inválido rejeitado\",\"Troca para versão atual do plano, vencimento e restrição de crédito persistidos\",\"Área, endereço específico e etiquetas do contrato salvos pelo layout v0\",\"Fidelidade/cotação, desconto e cancelamento, agendamento/cancelamento, aditivo e solicitação/cancelamento de aceite\",\"Adicional criado, contratado com quantidade e preço preservado após alteração do catálogo; encerramento registrado\",\"Encerramento definitivo em duas etapas, com multa dispensada e justificativa registrada pelo Go\",\"Isolamento entre provedores mantido nos detalhes e novos filtros comerciais\",\"Paginação, busca que reinicia a página, filtro de situação e exportação CSV comercial\"]}",

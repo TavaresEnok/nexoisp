@@ -44,10 +44,12 @@ import {
   stageLabels,
   type LeadDetail,
 } from "./models";
+import { useCreateRequest } from "@/features/shared/create-request";
 export function OperationalLeads() {
   const { me } = useSession();
   const [params, setParams] = useSearchParams();
   const [creating, setCreating] = useState(false);
+  useCreateRequest("prospecto", () => setCreating(true), can(me, "crm:write"));
   const [stage, setStage] = useQueryState(
     "etapa",
     "open",

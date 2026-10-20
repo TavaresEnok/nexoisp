@@ -262,10 +262,17 @@ test("menu e busca operacionais mostram páginas e abas, não subações sem des
     );
   }
   const hrefs = new Set(visible.map((node) => node.href));
+  // Ações "Novo …" do v0 aparecem ligadas ao diálogo da página; as demais
+  // subações continuam fora do menu.
   for (const href of [
     "/planos/novo-plano",
     "/assinantes/novo-assinante",
     "/financeiro/faturas/gerar-mensalidades-por-competencia",
+  ])
+    assert.ok(hrefs.has(href), href);
+  for (const href of [
+    "/assinantes/abrir-assinante/anotacoes/nova-anotacao",
+    "/contratos/abrir-contrato/aba-condicoes/descontos/novo-desconto",
   ])
     assert.ok(!hrefs.has(href), href);
   for (const href of [
@@ -277,7 +284,7 @@ test("menu e busca operacionais mostram páginas e abas, não subações sem des
   const network = operationalNavigationAreas().find(
     (area) => area.id === "rede",
   )!;
-  for (const href of ["/noc", "/pops", "/rede/onus"]) {
+  for (const href of ["/noc", "/pops"]) {
     assert.ok(
       network.pages.some((page) => page.href === href),
       href,
@@ -285,19 +292,43 @@ test("menu e busca operacionais mostram páginas e abas, não subações sem des
     assert.equal(navigate(href).kind, "page", href);
   }
   assert.ok(
-    !searchOperationalNavigation("novo plano").some(
+    searchOperationalNavigation("novo plano").some(
       (page) => page.href === "/planos/novo-plano",
     ),
   );
   assert.ok(
     searchOperationalNavigation("noc").some((page) => page.href === "/noc"),
   );
+  // ONUs ficam só no item original do v0 (Relatório > Consultar ONU).
+  const onuEntries = operationalNavigationAreas()
+    .flatMap((area) => area.pages)
+    .filter((page) => /onu/i.test(page.label) && !page.parentHref);
+  assert.deepEqual(
+    onuEntries.map((page) => page.href),
+    ["/relatorios/consultar-onu"],
+  );
+  assert.equal(navigate("/relatorios/consultar-onu").kind, "page");
+  assert.equal(canonicalErpPath("/rede/onus"), "/relatorios/consultar-onu");
 });
 test("subações redirecionam à página que as atende e abas levam o parâmetro da aba", () => {
   assert.deepEqual(resolveCatalogueNode("/planos/novo-plano"), {
-    kind: "subaction",
-    destination: "/planos",
+    kind: "page",
+    destination: "/planos?novo=plano",
   });
+  assert.equal(canonicalErpPath("/planos/novo-plano"), "/planos");
+  const reader = {
+    ...admin,
+    perms: admin.perms.filter((perm) => perm !== "plans:write"),
+  };
+  assert.equal(canAccessPath(reader, "/planos/novo-plano"), false);
+  assert.equal(canAccessPath(reader, "/planos"), true);
+  assert.deepEqual(
+    resolveCatalogueNode("/assinantes/abrir-assinante/anotacoes/nova-anotacao"),
+    {
+      kind: "subaction",
+      destination: "/assinantes",
+    },
+  );
   assert.deepEqual(
     resolveCatalogueNode("/administracao/catalogos-sla/aba-sla/nova-politica"),
     { kind: "subaction", destination: "/administracao/catalogos-sla?aba=sla" },

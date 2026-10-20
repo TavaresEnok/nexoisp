@@ -31,10 +31,12 @@ import { normalize } from "@/lib/format";
 import { stockItemSchema, useStockRefresh, type StockItem } from "./models";
 import { StockMovements } from "./movements";
 import { StockUnits } from "./units";
+import { useCreateRequest } from "@/features/shared/create-request";
 
 export function StockCatalog() {
   const { me } = useSession();
   const writable = can(me, "stock:write");
+  useCreateRequest("item", () => setModal({ type: "new" }), writable);
   const refresh = useStockRefresh();
   const result = useSWR("erp-stock-items", async () =>
     z.array(stockItemSchema).parse(await api("/stock/items")),

@@ -17,11 +17,13 @@ import { orderStates } from "./labels";
 import { CreateWorkOrder } from "./create";
 import { FilterToggle } from "@/features/shared/filter-toggle";
 import { useStatusCounts } from "@/features/shared/status-counts";
+import { useCreateRequest } from "@/features/shared/create-request";
 export function OperationalOrders() {
   const { me } = useSession();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const [creating, setCreating] = useState(false);
+  useCreateRequest("os", () => setCreating(true), can(me, "os:write"));
   const { page, setPage, size, setSize } = useUrlPage();
   const label = params.get("situacao") ?? "Pendentes";
   const status =

@@ -25,11 +25,17 @@ import { exportCsv } from "@/features/shared/export";
 import { invoiceSchema, projectInvoice, summarySchema } from "./models";
 import { FinanceOverview } from "./overview";
 import { OperationalInvoice } from "./invoice";
+import { useCreateRequest } from "@/features/shared/create-request";
 export function OperationalInvoices() {
   const { me } = useSession();
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
   const [generating, setGenerating] = useState(false);
+  useCreateRequest(
+    "mensalidades",
+    () => setGenerating(true),
+    can(me, "finance:write"),
+  );
   const [accounting, setAccounting] = useState(false);
   const [competence, setCompetence] = useState(
     new Date().toLocaleDateString("en-CA").slice(0, 7),

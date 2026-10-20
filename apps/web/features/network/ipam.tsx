@@ -39,6 +39,7 @@ import { normalize } from "@/lib/format";
 import { stamp } from "./models";
 import { useDevices } from "./queries";
 import styles from "@/components/technical.module.css";
+import { useCreateRequest } from "@/features/shared/create-request";
 export const poolSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
@@ -106,6 +107,7 @@ export function AddressDirectory() {
   const refresh = useIpamRefresh();
   const pools = result.data ?? [];
   const write = can(me, "network:write");
+  useCreateRequest("bloco", () => setEditor("create"), write);
   const selected = pools.find((p) => p.id === params.get("bloco"));
   const rows = pools.filter((pool) =>
     normalize(`${pool.name} ${pool.cidr} ${pool.device_name ?? ""}`).includes(

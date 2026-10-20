@@ -23,6 +23,7 @@ import { api } from "@/platform/erp-client";
 import { localDateTime } from "@/features/field/models";
 import { stamp } from "./models";
 import { useDevices } from "./queries";
+import { useCreateRequest } from "@/features/shared/create-request";
 const maintenanceSchema = z.object({
   id: z.string().uuid(),
   title: z.string(),
@@ -50,6 +51,7 @@ const severities: Record<string, string> = {
 export function NetworkMaintenance() {
   const { me } = useSession();
   const write = can(me, "network:write");
+  useCreateRequest("aviso", () => setCreating(true), write);
   const result = useSWR(
     "erp-maintenance",
     async () =>

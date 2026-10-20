@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "verified_at": "2026-10-20T19:00:51.534Z",
+  "verified_at": "2026-10-20T20:37:17.004Z",
   "proves": "Estrutura: fração das classes do v0 usadas na página demonstrativa que a tela conectada também usa, com piso registrado. Regressão: comparação pixel a pixel das telas conectadas (até 0,05% de pixels alterados) com relógio fixo, datas normalizadas e códigos de UUID mascarados. Não prova igualdade pixel a pixel com o v0, porque os dados diferem; a igualdade com o v0 original é provada para a demonstração.",
   "backend": "Go/PostgreSQL isolados; provedor exclusivo visual-v0 com dados sintéticos",
   "structure": [
@@ -546,80 +546,80 @@
     {
       "name": "inicio-claro",
       "identical": false,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "changed_pixels": 150,
+      "changed_ratio": 0.00012
     },
     {
       "name": "assinantes-claro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 150,
+      "changed_ratio": 0.00012
     },
     {
       "name": "ficha-claro",
       "identical": false,
-      "changed_pixels": 51,
-      "changed_ratio": 0.00004
+      "changed_pixels": 322,
+      "changed_ratio": 0.00025
     },
     {
       "name": "ficha-cadastro-claro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 305,
+      "changed_ratio": 0.00024
     },
     {
       "name": "ficha-financeiro-claro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 305,
+      "changed_ratio": 0.00024
     },
     {
       "name": "ficha-conexao-claro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 371,
+      "changed_ratio": 0.00029
     },
     {
       "name": "ficha-atendimento-claro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 305,
+      "changed_ratio": 0.00024
     },
     {
       "name": "ficha-historico-claro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 305,
+      "changed_ratio": 0.00024
     },
     {
       "name": "contratos-claro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 150,
+      "changed_ratio": 0.00012
     },
     {
       "name": "planos-claro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 150,
+      "changed_ratio": 0.00012
     },
     {
       "name": "faturas-claro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 50,
+      "changed_ratio": 0.00004
     },
     {
       "name": "atendimentos-claro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 200,
+      "changed_ratio": 0.00015
     },
     {
       "name": "ordens-claro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 200,
+      "changed_ratio": 0.00015
     },
     {
       "name": "rede-claro",
@@ -665,49 +665,49 @@
     },
     {
       "name": "configuracoes-claro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 150,
+      "changed_ratio": 0.00012
     },
     {
       "name": "contrato-claro",
       "identical": false,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "changed_pixels": 156,
+      "changed_ratio": 0.00012
     },
     {
       "name": "prospectos-claro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 200,
+      "changed_ratio": 0.00015
     },
     {
       "name": "agenda-claro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 200,
+      "changed_ratio": 0.00015
     },
     {
       "name": "estoque-claro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 200,
+      "changed_ratio": 0.00015
     },
     {
       "name": "usuarios-claro",
       "identical": false,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "changed_pixels": 100,
+      "changed_ratio": 0.00008
     },
     {
       "name": "politica-claro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 50,
+      "changed_ratio": 0.00004
     },
     {
       "name": "noc-claro",
-      "identical": true,
+      "identical": false,
       "changed_pixels": 0,
       "changed_ratio": 0
     },
@@ -720,8 +720,8 @@
     {
       "name": "faturas-escuro",
       "identical": false,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "changed_pixels": 50,
+      "changed_ratio": 0.00004
     },
     {
       "name": "faturas-celular",
@@ -731,9 +731,9 @@
     },
     {
       "name": "ordens-escuro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 200,
+      "changed_ratio": 0.00015
     },
     {
       "name": "ordens-celular",
@@ -755,9 +755,9 @@
     },
     {
       "name": "atendimentos-escuro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 200,
+      "changed_ratio": 0.00015
     },
     {
       "name": "atendimentos-celular",
@@ -767,9 +767,9 @@
     },
     {
       "name": "usuarios-escuro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 100,
+      "changed_ratio": 0.00008
     },
     {
       "name": "usuarios-celular",
@@ -779,9 +779,9 @@
     },
     {
       "name": "assinantes-escuro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 150,
+      "changed_ratio": 0.00012
     },
     {
       "name": "assinantes-celular",
@@ -791,15 +791,15 @@
     },
     {
       "name": "portal-claro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 50,
+      "changed_ratio": 0.00004
     },
     {
       "name": "portal-escuro",
-      "identical": true,
-      "changed_pixels": 0,
-      "changed_ratio": 0
+      "identical": false,
+      "changed_pixels": 50,
+      "changed_ratio": 0.00004
     },
     {
       "name": "portal-celular",

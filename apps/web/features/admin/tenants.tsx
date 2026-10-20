@@ -18,6 +18,7 @@ import { QueryBoundary } from "@/features/shared/feedback";
 import { ActionButton } from "@/features/shared/action";
 import { useSession } from "@/features/session/provider";
 import { api } from "@/platform/erp-client";
+import { useCreateRequest } from "@/features/shared/create-request";
 const tenant = z.object({
   id: z.string(),
   name: z.string(),
@@ -80,6 +81,7 @@ export function TenantDirectory() {
   const [editor, setEditor] = useState<
     "create" | { kind: "modules" | "support" | "name"; tenant: Tenant } | null
   >(null);
+  useCreateRequest("provedor", () => setEditor("create"));
   return (
     <>
       <PageHeading

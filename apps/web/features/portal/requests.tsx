@@ -17,6 +17,7 @@ import { MutationForm, FormField } from "@/features/shared/form";
 import { QueryBoundary } from "@/features/shared/feedback";
 import { api } from "@/platform/erp-client";
 import { acceptance, ticket, ticketDetail, portalDate } from "./models";
+import { useCreateRequest } from "@/features/shared/create-request";
 const ticketState = (value: string) =>
   (
     ({
@@ -215,6 +216,7 @@ export function PortalTickets() {
     { refreshInterval: 20000 },
   );
   const [creating, setCreating] = useState(false);
+  useCreateRequest("chamado", () => setCreating(true));
   const [opened, setOpened] = useState<string | null>(null);
   return (
     <>

@@ -35,6 +35,7 @@ import {
   type ContractAddon,
   type ContractDetail,
 } from "./models";
+import { useCreateRequest } from "@/features/shared/create-request";
 type Addon = {
   id: string;
   name: string;
@@ -50,6 +51,11 @@ export function AddonCatalog() {
     name: string;
     price: string;
   } | null>(null);
+  useCreateRequest(
+    "produto",
+    () => setEditor({ name: "", price: "" }),
+    can(me, "plans:write"),
+  );
   return (
     <>
       <PageHeading

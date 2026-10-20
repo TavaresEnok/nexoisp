@@ -30,6 +30,7 @@ import { can } from "@/features/session/model";
 import { api } from "@/platform/erp-client";
 import { useAgents, useNetworkRefresh } from "./queries";
 import { stamp } from "./models";
+import { useCreateRequest } from "@/features/shared/create-request";
 const credentialSchema = z.object({
   id: z.string().uuid(),
   token: z.string().min(1),
@@ -41,6 +42,7 @@ export function AgentDirectory() {
   const result = useAgents();
   const refresh = useNetworkRefresh();
   const [creating, setCreating] = useState(false);
+  useCreateRequest("agente", () => setCreating(true), writable);
   const [credential, setCredential] = useState<z.infer<
     typeof credentialSchema
   > | null>(null);

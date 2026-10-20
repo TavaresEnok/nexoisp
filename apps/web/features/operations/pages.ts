@@ -111,10 +111,11 @@ export const operationalPages = {
     aliases: ["/manutencoes"],
   },
   onus: {
-    paths: ["/rede/onus", "/rede/ftth/fttx-onu"],
+    // Destino do item "Relatório > Consultar ONU" do menu original do v0.
+    paths: ["/relatorios/consultar-onu", "/rede/ftth/fttx-onu"],
     access: ["network:read", "olt"],
     title: "ONUs e autorizações",
-    aliases: ["/onus", "/relatorios/consultar-onu"],
+    aliases: ["/onus", "/rede/onus"],
   },
   noc: { paths: ["/noc"], access: ["network:read", "noc"], title: "NOC" },
   online: {

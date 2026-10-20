@@ -50,7 +50,7 @@ def run():
         bases=['http://127.0.0.1:18881','http://127.0.0.1:18882']
         def call(path,body=None,base=bases[0],method=None,token=None):
             return request(base,path,token=token,method=method or ('POST' if body is not None else 'GET'),headers={'Content-Type':'application/json'} if body is not None else {},body=json.dumps(body).encode() if body is not None else None)
-        login=call('/api/auth/login',{'email':'admin@alfa.demo','password':'demo1234'});assert login['status']==200,login['json'];token=login['json']['token']
+        login=call('/api/auth/login',{'email':'admin@alfa.demo','password':'demo1234','bearer':True});assert login['status']==200,login['json'];token=login['json']['token']
         def api(path,body=None,base=bases[0],method=None):return call(path,body,base,method,token)
         plan=api('/api/plans',{'name':'Plano nativo','price_cents':3500,'down_kbps':1000,'up_kbps':1000,'profile_name':'native'})['json']
         sub=api('/api/subscribers',{'name':'Assinante nativo'})['json']

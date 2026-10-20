@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-stock.mjs",
-  "recorded_at": "2026-10-20T15:20:01.614Z",
+  "recorded_at": "2026-10-20T20:28:58.735Z",
   "steps": [
     {
       "check": "Catálogo cadastra material com código, unidade e mínimo; alerta usa saldo real",

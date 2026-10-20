@@ -19,6 +19,7 @@ import { ActionButton } from "@/features/shared/action";
 import { useSession } from "@/features/session/provider";
 import { api } from "@/platform/erp-client";
 import { normalize } from "@/lib/format";
+import { useCreateRequest } from "@/features/shared/create-request";
 const roles = {
   admin: "Administrador",
   attendant: "Atendimento",
@@ -45,6 +46,7 @@ export function TeamDirectory() {
   const [editor, setEditor] = useState<
     "create" | { kind: "profile" | "password" | "pops"; user: TeamUser } | null
   >(null);
+  useCreateRequest("usuario", () => setEditor("create"));
   const rows =
     result.data?.filter((user) =>
       normalize(`${user.name} ${user.email} ${roles[user.role]}`).includes(

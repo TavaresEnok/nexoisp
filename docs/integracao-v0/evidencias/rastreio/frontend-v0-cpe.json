@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-cpe.mjs",
-  "recorded_at": "2026-10-20T15:19:18.051Z",
+  "recorded_at": "2026-10-20T20:28:00.443Z",
   "steps": [
     {
       "check": "Pesquisa por série, confirmação e vínculo TR-098 persistem no Go com WAN e Wi-Fi reais do ACS sintético",

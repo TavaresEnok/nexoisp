@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-workspace.mjs",
-  "recorded_at": "2026-10-20T15:21:15.114Z",
+  "recorded_at": "2026-10-20T20:30:11.360Z",
   "steps": [
     {
       "check": "Contas sintéticas só aparecem com health.demo; preencher uma conta não cria sessão nem contorna o login Go",

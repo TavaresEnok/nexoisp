@@ -42,7 +42,7 @@ def main():
                 return result['json']
 
             def login(email):
-                return call('/auth/login', {'email': email, 'password': 'demo1234'})['token']
+                return call('/auth/login', {'email': email, 'password': 'demo1234', 'bearer': True})['token']
 
             admin = login('admin@alfa.demo')
             other = login('admin@beta.demo')

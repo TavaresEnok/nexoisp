@@ -11,6 +11,7 @@ import { ActionButton } from "@/features/shared/action";
 import { useSession } from "@/features/session/provider";
 import { can } from "@/features/session/model";
 import { api } from "@/platform/erp-client";
+import { useCreateRequest } from "@/features/shared/create-request";
 const companySchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
@@ -27,6 +28,7 @@ export function CompanyDirectory() {
   );
   const [creating, setCreating] = useState(false);
   const write = can(me, "settings:manage");
+  useCreateRequest("empresa", () => setCreating(true), write);
   const refresh = async () => {
     await Promise.all([
       result.mutate(),

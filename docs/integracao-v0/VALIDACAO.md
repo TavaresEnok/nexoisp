@@ -229,3 +229,7 @@ Limites: não houve execução da CI remota, homologação de equipamento nem pu
 - Fumaça completa (26 cenários) contra Go/PostgreSQL descartável, com rastreio por verificação, e os cenários dirigidos `frontend-v0-cpe.mjs`, `frontend-v0-portal-wifi.mjs` (ACS sintético) e `frontend-v0-network-final.mjs`, todos aprovados com o CSRF derivado da sessão. Correções de teste: espera da resposta antes de consultar o agente no cenário óptico (disputa de tempo) e título com contador nas seções do portal.
 - Evidência por unidade: 149 de 149 unidades validadas com verificação de interface que chamou endpoint declarado ([por-unidade.json](evidencias/por-unidade.json)).
 - Prova visual das telas conectadas: 21 medições estruturais e 44 capturas dentro da tolerância, conferidas em dois ambientes recriados do zero ([visual-operacional.json](evidencias/visual-operacional.json)).
+
+## Pendências após a auditoria (20/10/2026)
+
+Fumaça completa com 27 cenários (inclui o novo `frontend-v0-create-links.mjs`: 16 destinos "Novo …" abrem o diálogo e removem o pedido da URL; conta sem escrita não acessa) e os cenários dirigidos de CPE, Wi-Fi do portal e rede final, todos aprovados. O cenário de sessão confirma que o login do navegador não expõe o token e que o pedido explícito de Bearer funciona. Prova visual: as seis capturas da área Rede foram atualizadas por causa do menu (ONU duplicada removida, ações "Novo …" visíveis); 44 capturas dentro da tolerância. Evidência por unidade: 149 de 149.

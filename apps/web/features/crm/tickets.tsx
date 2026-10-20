@@ -54,6 +54,7 @@ import {
 } from "./models";
 import { FilterToggle } from "@/features/shared/filter-toggle";
 import { useStatusCounts } from "@/features/shared/status-counts";
+import { useCreateRequest } from "@/features/shared/create-request";
 export function OperationalTickets() {
   return <TicketListing />;
 }
@@ -65,6 +66,11 @@ function TicketListing({ subscriberId }: { subscriberId?: string }) {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const [creating, setCreating] = useState(false);
+  useCreateRequest(
+    "atendimento",
+    () => setCreating(true),
+    can(me, "crm:write"),
+  );
   const { page, setPage, size, setSize } = useUrlPage();
   const embedded = Boolean(subscriberId);
   const statusLabel =

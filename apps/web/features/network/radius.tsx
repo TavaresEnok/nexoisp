@@ -27,6 +27,7 @@ import { api } from "@/platform/erp-client";
 import { CodePreview } from "@/components/technical-ui";
 import { vendors, stamp, type Device } from "./models";
 import { useNetworkRefresh } from "./queries";
+import { useCreateRequest } from "@/features/shared/create-request";
 const statusSchema = z.object({
   enabled: z.boolean(),
   host: z.string(),
@@ -87,6 +88,11 @@ export function RadiusOverview() {
   const { me } = useSession();
   const result = useRadiusStatus();
   const [creating, setCreating] = useState(false);
+  useCreateRequest(
+    "concentrador",
+    () => setCreating(true),
+    result.data ? can(me, "network:write") && result.data.enabled : undefined,
+  );
   const [shown, setShown] = useState<Setup | null>(null);
   return (
     <Panel

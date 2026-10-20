@@ -1,150 +1,155 @@
 {
-  "generated_at": "2026-10-20T18:42:20.773Z",
+  "generated_at": "2026-10-20T20:37:17.362Z",
   "method": "Chamadas à API feitas pelas páginas entre uma verificação e a anterior, gravadas por e2e/request-trace.mjs durante a fumaça; preparação via context.request não conta.",
   "scenarios": [
     {
       "scenario": "frontend-v0-access.mjs",
-      "recorded_at": "2026-10-20T15:20:42.487Z",
+      "recorded_at": "2026-10-20T20:29:39.407Z",
       "checks": 12
     },
     {
       "scenario": "frontend-v0-admin-reports.mjs",
-      "recorded_at": "2026-10-20T15:22:09.563Z",
+      "recorded_at": "2026-10-20T20:31:05.026Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-admin-team.mjs",
-      "recorded_at": "2026-10-20T15:21:52.325Z",
+      "recorded_at": "2026-10-20T20:30:47.933Z",
       "checks": 7
     },
     {
       "scenario": "frontend-v0-cgnat-legal.mjs",
-      "recorded_at": "2026-10-20T15:21:39.310Z",
+      "recorded_at": "2026-10-20T20:30:35.283Z",
       "checks": 6
     },
     {
       "scenario": "frontend-v0-commercial.mjs",
-      "recorded_at": "2026-10-20T15:18:43.401Z",
+      "recorded_at": "2026-10-20T20:27:44.341Z",
       "checks": 1
     },
     {
       "scenario": "frontend-v0-cpe.mjs",
-      "recorded_at": "2026-10-20T15:19:18.051Z",
+      "recorded_at": "2026-10-20T20:28:00.443Z",
       "checks": 5
     },
     {
+      "scenario": "frontend-v0-create-links.mjs",
+      "recorded_at": "2026-10-20T20:32:28.254Z",
+      "checks": 17
+    },
+    {
       "scenario": "frontend-v0-crm.mjs",
-      "recorded_at": "2026-10-20T15:19:23.540Z",
+      "recorded_at": "2026-10-20T20:28:20.000Z",
       "checks": 1
     },
     {
       "scenario": "frontend-v0-field.mjs",
-      "recorded_at": "2026-10-20T15:19:48.993Z",
+      "recorded_at": "2026-10-20T20:28:46.139Z",
       "checks": 16
     },
     {
       "scenario": "frontend-v0-finance-access.mjs",
-      "recorded_at": "2026-10-20T15:24:09.319Z",
+      "recorded_at": "2026-10-20T20:32:00.034Z",
       "checks": 4
     },
     {
       "scenario": "frontend-v0-finance.mjs",
-      "recorded_at": "2026-10-20T15:19:08.775Z",
+      "recorded_at": "2026-10-20T20:28:06.214Z",
       "checks": 1
     },
     {
       "scenario": "frontend-v0-ftth.mjs",
-      "recorded_at": "2026-10-20T15:21:24.315Z",
+      "recorded_at": "2026-10-20T20:30:20.310Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-import.mjs",
-      "recorded_at": "2026-10-20T15:24:02.653Z",
+      "recorded_at": "2026-10-20T20:31:53.826Z",
       "checks": 6
     },
     {
       "scenario": "frontend-v0-integrations.mjs",
-      "recorded_at": "2026-10-20T15:23:57.147Z",
+      "recorded_at": "2026-10-20T20:31:48.218Z",
       "checks": 6
     },
     {
       "scenario": "frontend-v0-ipam.mjs",
-      "recorded_at": "2026-10-20T15:21:35.317Z",
+      "recorded_at": "2026-10-20T20:30:31.075Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-maintenance.mjs",
-      "recorded_at": "2026-10-20T15:21:01.679Z",
+      "recorded_at": "2026-10-20T20:29:58.360Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-map.mjs",
-      "recorded_at": "2026-10-20T15:21:44.135Z",
+      "recorded_at": "2026-10-20T20:30:39.847Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-messages.mjs",
-      "recorded_at": "2026-10-20T15:23:49.752Z",
+      "recorded_at": "2026-10-20T20:31:40.675Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-network-final.mjs",
-      "recorded_at": "2026-10-20T15:19:43.940Z",
+      "recorded_at": "2026-10-20T20:28:08.954Z",
       "checks": 3
     },
     {
       "scenario": "frontend-v0-network.mjs",
-      "recorded_at": "2026-10-20T15:20:25.444Z",
+      "recorded_at": "2026-10-20T20:29:22.381Z",
       "checks": 13
     },
     {
       "scenario": "frontend-v0-optical.mjs",
-      "recorded_at": "2026-10-20T15:20:55.162Z",
+      "recorded_at": "2026-10-20T20:29:51.826Z",
       "checks": 6
     },
     {
       "scenario": "frontend-v0-portal-wifi.mjs",
-      "recorded_at": "2026-10-20T15:19:21.127Z",
+      "recorded_at": "2026-10-20T20:28:02.835Z",
       "checks": 1
     },
     {
       "scenario": "frontend-v0-portal.mjs",
-      "recorded_at": "2026-10-20T15:23:39.804Z",
+      "recorded_at": "2026-10-20T20:31:31.014Z",
       "checks": 9
     },
     {
       "scenario": "frontend-v0-quality.mjs",
-      "recorded_at": "2026-10-20T15:22:03.067Z",
+      "recorded_at": "2026-10-20T20:30:58.116Z",
       "checks": 8
     },
     {
       "scenario": "frontend-v0-remediation.mjs",
-      "recorded_at": "2026-10-20T15:24:31.027Z",
+      "recorded_at": "2026-10-20T20:32:21.222Z",
       "checks": 13
     },
     {
       "scenario": "frontend-v0-saas.mjs",
-      "recorded_at": "2026-10-20T15:22:14.011Z",
+      "recorded_at": "2026-10-20T20:31:09.295Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-session.mjs",
-      "recorded_at": "2026-10-20T15:18:24.973Z",
+      "recorded_at": "2026-10-20T20:27:23.650Z",
       "checks": 1
     },
     {
       "scenario": "frontend-v0-stock.mjs",
-      "recorded_at": "2026-10-20T15:20:01.614Z",
+      "recorded_at": "2026-10-20T20:28:58.735Z",
       "checks": 11
     },
     {
       "scenario": "frontend-v0-workspace.mjs",
-      "recorded_at": "2026-10-20T15:21:15.114Z",
+      "recorded_at": "2026-10-20T20:30:11.360Z",
       "checks": 6
     },
     {
       "scenario": "frontend-v0.mjs",
-      "recorded_at": "2026-10-20T15:18:20.772Z",
+      "recorded_at": "2026-10-20T20:27:19.235Z",
       "checks": 1
     }
   ],
@@ -313,6 +318,125 @@
         {
           "scenario": "frontend-v0-cpe.mjs",
           "check": "Pesquisa por série, confirmação e vínculo TR-098 persistem no Go com WAN e Wi-Fi reais do ACS sintético",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /assinantes/novo-assinante em /assinantes",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /planos/novo-plano em /planos",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /produtos-adicionais/cadastrar-produto em /produtos-adicionais",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /atendimentos/novo-atendimento em /atendimentos",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /prospectos/novo-prospecto em /prospectos",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /ordens-de-servico/nova-os em /ordens-de-servico",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /estoque/novo-item em /estoque",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /financeiro/faturas/gerar-mensalidades-por-competencia em /financeiro/faturas",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/equipamentos/concentradores/novo-concentrador em /rede/equipamentos",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/equipamentos/agentes-locais/novo-agente em /rede/equipamentos",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/equipamentos/equipamentos-e-olts/novo-equipamento em /rede/equipamentos",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/enderecos-ip/blocos-de-enderecos/novo-bloco em /rede/enderecos-ip/blocos-de-enderecos",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/enderecos-ip/planos-de-cgnat/novo-plano em /rede/enderecos-ip/planos-de-cgnat",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/manutencoes/novo-aviso em /rede/manutencoes",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /administracao/usuarios/novo-usuario em /administracao/usuarios",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /administracao/empresas/nova-empresa em /administracao/empresas",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Conta sem escrita não acessa a ação pelo menu nem abre o diálogo pela URL",
           "endpoints": [
             "GET /api/me"
           ]
@@ -839,7 +963,7 @@
         },
         {
           "scenario": "frontend-v0-session.mjs",
-          "check": "{\"ok\":true,\"checks\":[\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
+          "check": "{\"ok\":true,\"checks\":[\"Login do navegador não expõe o token da sessão no corpo; cliente de API recebe Bearer só ao pedir explicitamente\",\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
           "endpoints": [
             "POST /api/auth/login",
             "POST /api/auth/logout",
@@ -1001,7 +1125,7 @@
         },
         {
           "scenario": "frontend-v0-session.mjs",
-          "check": "{\"ok\":true,\"checks\":[\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
+          "check": "{\"ok\":true,\"checks\":[\"Login do navegador não expõe o token da sessão no corpo; cliente de API recebe Bearer só ao pedir explicitamente\",\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
           "endpoints": [
             "GET /api/health",
             "POST /api/auth/login"
@@ -1223,6 +1347,125 @@
         {
           "scenario": "frontend-v0-cpe.mjs",
           "check": "Pesquisa por série, confirmação e vínculo TR-098 persistem no Go com WAN e Wi-Fi reais do ACS sintético",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /assinantes/novo-assinante em /assinantes",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /planos/novo-plano em /planos",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /produtos-adicionais/cadastrar-produto em /produtos-adicionais",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /atendimentos/novo-atendimento em /atendimentos",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /prospectos/novo-prospecto em /prospectos",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /ordens-de-servico/nova-os em /ordens-de-servico",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /estoque/novo-item em /estoque",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /financeiro/faturas/gerar-mensalidades-por-competencia em /financeiro/faturas",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/equipamentos/concentradores/novo-concentrador em /rede/equipamentos",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/equipamentos/agentes-locais/novo-agente em /rede/equipamentos",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/equipamentos/equipamentos-e-olts/novo-equipamento em /rede/equipamentos",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/enderecos-ip/blocos-de-enderecos/novo-bloco em /rede/enderecos-ip/blocos-de-enderecos",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/enderecos-ip/planos-de-cgnat/novo-plano em /rede/enderecos-ip/planos-de-cgnat",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/manutencoes/novo-aviso em /rede/manutencoes",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /administracao/usuarios/novo-usuario em /administracao/usuarios",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /administracao/empresas/nova-empresa em /administracao/empresas",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Conta sem escrita não acessa a ação pelo menu nem abre o diálogo pela URL",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1734,7 +1977,7 @@
         },
         {
           "scenario": "frontend-v0-session.mjs",
-          "check": "{\"ok\":true,\"checks\":[\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
+          "check": "{\"ok\":true,\"checks\":[\"Login do navegador não expõe o token da sessão no corpo; cliente de API recebe Bearer só ao pedir explicitamente\",\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1991,6 +2234,128 @@
           ]
         },
         {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /assinantes/novo-assinante em /assinantes",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /planos/novo-plano em /planos",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /produtos-adicionais/cadastrar-produto em /produtos-adicionais",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /atendimentos/novo-atendimento em /atendimentos",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /prospectos/novo-prospecto em /prospectos",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /ordens-de-servico/nova-os em /ordens-de-servico",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /estoque/novo-item em /estoque",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /financeiro/faturas/gerar-mensalidades-por-competencia em /financeiro/faturas",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/equipamentos/concentradores/novo-concentrador em /rede/equipamentos",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/equipamentos/agentes-locais/novo-agente em /rede/equipamentos",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/equipamentos/equipamentos-e-olts/novo-equipamento em /rede/equipamentos",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/enderecos-ip/blocos-de-enderecos/novo-bloco em /rede/enderecos-ip/blocos-de-enderecos",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/enderecos-ip/planos-de-cgnat/novo-plano em /rede/enderecos-ip/planos-de-cgnat",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/manutencoes/novo-aviso em /rede/manutencoes",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /administracao/usuarios/novo-usuario em /administracao/usuarios",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /administracao/empresas/nova-empresa em /administracao/empresas",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Conta sem escrita não acessa a ação pelo menu nem abre o diálogo pela URL",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
           "scenario": "frontend-v0-crm.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Prospecto valida contato obrigatório no Go; cadastro, edição e ficha usam UUID real\",\"Etapas, motivo da perda, retomada e contato persistidos com histórico\",\"Conversão cria assinante relacionado ao prospecto, marca ganho e abre a ficha\",\"Protocolo com titular/contrato/prioridade e mensagem inicial, sem incidente fictício ou SLA presumido\",\"Responsável atribuído; nota interna e resposta pública preservam visibilidade e estado do protocolo\",\"OS real criada pelo atendimento, preservando protocolo, titular, contrato e endereço informado\",\"Encerramento e reabertura persistidos; URL restaura a ficha após recarregar\",\"Fila do titular abre o mesmo protocolo e fecha preservando a ficha do assinante\",\"Busca e exportação reais de atendimentos; relatório CRM por período carrega dados do Go\",\"Prospectos usam paginação do servidor e busca reinicia a página sem navegação tardia\",\"Nota interna permanece ausente no portal; perfil financeiro não oferece ações de equipe técnica\",\"Prospectos e protocolos isolados entre provedores\"]}",
           "endpoints": [
@@ -2440,7 +2805,7 @@
         },
         {
           "scenario": "frontend-v0-session.mjs",
-          "check": "{\"ok\":true,\"checks\":[\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
+          "check": "{\"ok\":true,\"checks\":[\"Login do navegador não expõe o token da sessão no corpo; cliente de API recebe Bearer só ao pedir explicitamente\",\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
           "endpoints": [
             "GET /api/dashboard",
             "GET /api/today"
@@ -2598,7 +2963,7 @@
       "checks": [
         {
           "scenario": "frontend-v0-session.mjs",
-          "check": "{\"ok\":true,\"checks\":[\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
+          "check": "{\"ok\":true,\"checks\":[\"Login do navegador não expõe o token da sessão no corpo; cliente de API recebe Bearer só ao pedir explicitamente\",\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
           "endpoints": [
             "POST /api/me/password"
           ]
@@ -2622,7 +2987,7 @@
       "checks": [
         {
           "scenario": "frontend-v0-session.mjs",
-          "check": "{\"ok\":true,\"checks\":[\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
+          "check": "{\"ok\":true,\"checks\":[\"Login do navegador não expõe o token da sessão no corpo; cliente de API recebe Bearer só ao pedir explicitamente\",\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
           "endpoints": [
             "POST /api/me/mfa/setup",
             "POST /api/me/mfa/enable",
@@ -2666,6 +3031,13 @@
         {
           "scenario": "frontend-v0-admin-reports.mjs",
           "check": "Tipo de ocorrência selecionado na UI de atendimento aplica a política específica de SLA no Go",
+          "endpoints": [
+            "GET /api/subscribers"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /assinantes/novo-assinante em /assinantes",
           "endpoints": [
             "GET /api/subscribers"
           ]
@@ -2735,7 +3107,7 @@
         },
         {
           "scenario": "frontend-v0-session.mjs",
-          "check": "{\"ok\":true,\"checks\":[\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
+          "check": "{\"ok\":true,\"checks\":[\"Login do navegador não expõe o token da sessão no corpo; cliente de API recebe Bearer só ao pedir explicitamente\",\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
           "endpoints": [
             "GET /api/subscribers"
           ]
@@ -3416,6 +3788,27 @@
           ]
         },
         {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /planos/novo-plano em /planos",
+          "endpoints": [
+            "GET /api/plans"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /prospectos/novo-prospecto em /prospectos",
+          "endpoints": [
+            "GET /api/plans"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Conta sem escrita não acessa a ação pelo menu nem abre o diálogo pela URL",
+          "endpoints": [
+            "GET /api/plans"
+          ]
+        },
+        {
           "scenario": "frontend-v0-crm.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Prospecto valida contato obrigatório no Go; cadastro, edição e ficha usam UUID real\",\"Etapas, motivo da perda, retomada e contato persistidos com histórico\",\"Conversão cria assinante relacionado ao prospecto, marca ganho e abre a ficha\",\"Protocolo com titular/contrato/prioridade e mensagem inicial, sem incidente fictício ou SLA presumido\",\"Responsável atribuído; nota interna e resposta pública preservam visibilidade e estado do protocolo\",\"OS real criada pelo atendimento, preservando protocolo, titular, contrato e endereço informado\",\"Encerramento e reabertura persistidos; URL restaura a ficha após recarregar\",\"Fila do titular abre o mesmo protocolo e fecha preservando a ficha do assinante\",\"Busca e exportação reais de atendimentos; relatório CRM por período carrega dados do Go\",\"Prospectos usam paginação do servidor e busca reinicia a página sem navegação tardia\",\"Nota interna permanece ausente no portal; perfil financeiro não oferece ações de equipe técnica\",\"Prospectos e protocolos isolados entre provedores\"]}",
           "endpoints": [
@@ -3722,6 +4115,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /produtos-adicionais/cadastrar-produto em /produtos-adicionais",
+          "endpoints": [
+            "GET /api/addons"
+          ]
+        },
+        {
           "scenario": "frontend-v0-field.mjs",
           "check": "Fichas do titular e do contrato consultam apenas as OS do vínculo e preservam o contexto ao fechar",
           "endpoints": [
@@ -3738,6 +4138,13 @@
         {
           "scenario": "frontend-v0-finance-access.mjs",
           "check": "Confiança concedida pela equipe registra autor, dias e motivo; liberação ativa impede suspensão por cobrança e o Go rejeita repetição",
+          "endpoints": [
+            "GET /api/addons"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-finance-access.mjs",
+          "check": "(sem verificação posterior)",
           "endpoints": [
             "GET /api/addons"
           ]
@@ -4429,6 +4836,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-finance-access.mjs",
+          "check": "(sem verificação posterior)",
+          "endpoints": [
+            "GET /api/contracts/:id/states"
+          ]
+        },
+        {
           "scenario": "frontend-v0-finance.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Geração pela UI repetida preserva uma mensalidade por contrato/competência\",\"Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor\",\"Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento\",\"Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI\",\"Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos\",\"Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada\",\"Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido\",\"Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go\",\"Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis\",\"Faturas isoladas entre provedores e ações financeiras restritas pelo perfil\"]}",
           "endpoints": [
@@ -4769,6 +5183,20 @@
             "GET /api/companies",
             "PUT /api/contracts/:id/company",
             "PUT /api/contracts/:id/service-area"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /financeiro/faturas/gerar-mensalidades-por-competencia em /financeiro/faturas",
+          "endpoints": [
+            "GET /api/companies"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /administracao/empresas/nova-empresa em /administracao/empresas",
+          "endpoints": [
+            "GET /api/companies"
           ]
         },
         {
@@ -5589,6 +6017,15 @@
       "not_exercised_by_interface": [],
       "checks": [
         {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /prospectos/novo-prospecto em /prospectos",
+          "endpoints": [
+            "GET /api/leads",
+            "GET /api/leads/summary",
+            "GET /api/leads/:id"
+          ]
+        },
+        {
           "scenario": "frontend-v0-crm.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Prospecto valida contato obrigatório no Go; cadastro, edição e ficha usam UUID real\",\"Etapas, motivo da perda, retomada e contato persistidos com histórico\",\"Conversão cria assinante relacionado ao prospecto, marca ganho e abre a ficha\",\"Protocolo com titular/contrato/prioridade e mensagem inicial, sem incidente fictício ou SLA presumido\",\"Responsável atribuído; nota interna e resposta pública preservam visibilidade e estado do protocolo\",\"OS real criada pelo atendimento, preservando protocolo, titular, contrato e endereço informado\",\"Encerramento e reabertura persistidos; URL restaura a ficha após recarregar\",\"Fila do titular abre o mesmo protocolo e fecha preservando a ficha do assinante\",\"Busca e exportação reais de atendimentos; relatório CRM por período carrega dados do Go\",\"Prospectos usam paginação do servidor e busca reinicia a página sem navegação tardia\",\"Nota interna permanece ausente no portal; perfil financeiro não oferece ações de equipe técnica\",\"Prospectos e protocolos isolados entre provedores\"]}",
           "endpoints": [
@@ -5718,6 +6155,13 @@
         {
           "scenario": "frontend-v0-admin-reports.mjs",
           "check": "Tipo de ocorrência selecionado na UI de atendimento aplica a política específica de SLA no Go",
+          "endpoints": [
+            "GET /api/tickets"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /atendimentos/novo-atendimento em /atendimentos",
           "endpoints": [
             "GET /api/tickets"
           ]
@@ -5962,6 +6406,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /ordens-de-servico/nova-os em /ordens-de-servico",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
           "scenario": "frontend-v0-crm.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Prospecto valida contato obrigatório no Go; cadastro, edição e ficha usam UUID real\",\"Etapas, motivo da perda, retomada e contato persistidos com histórico\",\"Conversão cria assinante relacionado ao prospecto, marca ganho e abre a ficha\",\"Protocolo com titular/contrato/prioridade e mensagem inicial, sem incidente fictício ou SLA presumido\",\"Responsável atribuído; nota interna e resposta pública preservam visibilidade e estado do protocolo\",\"OS real criada pelo atendimento, preservando protocolo, titular, contrato e endereço informado\",\"Encerramento e reabertura persistidos; URL restaura a ficha após recarregar\",\"Fila do titular abre o mesmo protocolo e fecha preservando a ficha do assinante\",\"Busca e exportação reais de atendimentos; relatório CRM por período carrega dados do Go\",\"Prospectos usam paginação do servidor e busca reinicia a página sem navegação tardia\",\"Nota interna permanece ausente no portal; perfil financeiro não oferece ações de equipe técnica\",\"Prospectos e protocolos isolados entre provedores\"]}",
           "endpoints": [
@@ -6160,6 +6611,13 @@
       ],
       "not_exercised_by_interface": [],
       "checks": [
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /ordens-de-servico/nova-os em /ordens-de-servico",
+          "endpoints": [
+            "GET /api/staff"
+          ]
+        },
         {
           "scenario": "frontend-v0-crm.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Prospecto valida contato obrigatório no Go; cadastro, edição e ficha usam UUID real\",\"Etapas, motivo da perda, retomada e contato persistidos com histórico\",\"Conversão cria assinante relacionado ao prospecto, marca ganho e abre a ficha\",\"Protocolo com titular/contrato/prioridade e mensagem inicial, sem incidente fictício ou SLA presumido\",\"Responsável atribuído; nota interna e resposta pública preservam visibilidade e estado do protocolo\",\"OS real criada pelo atendimento, preservando protocolo, titular, contrato e endereço informado\",\"Encerramento e reabertura persistidos; URL restaura a ficha após recarregar\",\"Fila do titular abre o mesmo protocolo e fecha preservando a ficha do assinante\",\"Busca e exportação reais de atendimentos; relatório CRM por período carrega dados do Go\",\"Prospectos usam paginação do servidor e busca reinicia a página sem navegação tardia\",\"Nota interna permanece ausente no portal; perfil financeiro não oferece ações de equipe técnica\",\"Prospectos e protocolos isolados entre provedores\"]}",
@@ -6516,6 +6974,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /ordens-de-servico/nova-os em /ordens-de-servico",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
           "scenario": "frontend-v0-crm.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Prospecto valida contato obrigatório no Go; cadastro, edição e ficha usam UUID real\",\"Etapas, motivo da perda, retomada e contato persistidos com histórico\",\"Conversão cria assinante relacionado ao prospecto, marca ganho e abre a ficha\",\"Protocolo com titular/contrato/prioridade e mensagem inicial, sem incidente fictício ou SLA presumido\",\"Responsável atribuído; nota interna e resposta pública preservam visibilidade e estado do protocolo\",\"OS real criada pelo atendimento, preservando protocolo, titular, contrato e endereço informado\",\"Encerramento e reabertura persistidos; URL restaura a ficha após recarregar\",\"Fila do titular abre o mesmo protocolo e fecha preservando a ficha do assinante\",\"Busca e exportação reais de atendimentos; relatório CRM por período carrega dados do Go\",\"Prospectos usam paginação do servidor e busca reinicia a página sem navegação tardia\",\"Nota interna permanece ausente no portal; perfil financeiro não oferece ações de equipe técnica\",\"Prospectos e protocolos isolados entre provedores\"]}",
           "endpoints": [
@@ -6730,6 +7195,13 @@
       ],
       "not_exercised_by_interface": [],
       "checks": [
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /estoque/novo-item em /estoque",
+          "endpoints": [
+            "GET /api/stock/items"
+          ]
+        },
         {
           "scenario": "frontend-v0-field.mjs",
           "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
@@ -7032,6 +7504,15 @@
           "endpoints": [
             "GET /api/invoices",
             "GET /api/finance/summary"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /financeiro/faturas/gerar-mensalidades-por-competencia em /financeiro/faturas",
+          "endpoints": [
+            "GET /api/invoices",
+            "GET /api/finance/summary",
+            "GET /api/finance/monthly"
           ]
         },
         {
@@ -7573,6 +8054,47 @@
           ]
         },
         {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/equipamentos/concentradores/novo-concentrador em /rede/equipamentos",
+          "endpoints": [
+            "GET /api/network/health",
+            "GET /api/agents",
+            "GET /api/devices"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/equipamentos/agentes-locais/novo-agente em /rede/equipamentos",
+          "endpoints": [
+            "GET /api/network/health",
+            "GET /api/agents",
+            "GET /api/devices"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/equipamentos/equipamentos-e-olts/novo-equipamento em /rede/equipamentos",
+          "endpoints": [
+            "GET /api/network/health",
+            "GET /api/agents",
+            "GET /api/devices"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/enderecos-ip/blocos-de-enderecos/novo-bloco em /rede/enderecos-ip/blocos-de-enderecos",
+          "endpoints": [
+            "GET /api/devices"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/manutencoes/novo-aviso em /rede/manutencoes",
+          "endpoints": [
+            "GET /api/devices"
+          ]
+        },
+        {
           "scenario": "frontend-v0-field.mjs",
           "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
           "endpoints": [
@@ -7936,6 +8458,27 @@
         {
           "scenario": "frontend-v0-access.mjs",
           "check": "Driver demonstrativo criado pela UI somente no servidor de demonstração identifica explicitamente a leitura sintética, sem acesso a NAS físico",
+          "endpoints": [
+            "GET /api/radius/status"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/equipamentos/concentradores/novo-concentrador em /rede/equipamentos",
+          "endpoints": [
+            "GET /api/radius/status"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/equipamentos/agentes-locais/novo-agente em /rede/equipamentos",
+          "endpoints": [
+            "GET /api/radius/status"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/equipamentos/equipamentos-e-olts/novo-equipamento em /rede/equipamentos",
           "endpoints": [
             "GET /api/radius/status"
           ]
@@ -8374,6 +8917,27 @@
         {
           "scenario": "frontend-v0-access.mjs",
           "check": "Driver demonstrativo criado pela UI somente no servidor de demonstração identifica explicitamente a leitura sintética, sem acesso a NAS físico",
+          "endpoints": [
+            "GET /api/network/online"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/equipamentos/concentradores/novo-concentrador em /rede/equipamentos",
+          "endpoints": [
+            "GET /api/network/online"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/equipamentos/agentes-locais/novo-agente em /rede/equipamentos",
+          "endpoints": [
+            "GET /api/network/online"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/equipamentos/equipamentos-e-olts/novo-equipamento em /rede/equipamentos",
           "endpoints": [
             "GET /api/network/online"
           ]
@@ -9145,6 +9709,20 @@
           ]
         },
         {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/enderecos-ip/blocos-de-enderecos/novo-bloco em /rede/enderecos-ip/blocos-de-enderecos",
+          "endpoints": [
+            "GET /api/ipam/pools"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /rede/enderecos-ip/planos-de-cgnat/novo-plano em /rede/enderecos-ip/planos-de-cgnat",
+          "endpoints": [
+            "GET /api/ipam/pools"
+          ]
+        },
+        {
           "scenario": "frontend-v0-ipam.mjs",
           "check": "Cadastro e edição de pool IPv4 preservam CIDR; reserva automática ignora endereço de rede e grava descrição no Go",
           "endpoints": [
@@ -9521,6 +10099,13 @@
             "GET /api/users",
             "PATCH /api/users/:id"
           ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /administracao/usuarios/novo-usuario em /administracao/usuarios",
+          "endpoints": [
+            "GET /api/users"
+          ]
         }
       ]
     },
@@ -9659,6 +10244,20 @@
           "endpoints": [
             "GET /api/companies",
             "PUT /api/contracts/:id/company"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /financeiro/faturas/gerar-mensalidades-por-competencia em /financeiro/faturas",
+          "endpoints": [
+            "GET /api/companies"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /administracao/empresas/nova-empresa em /administracao/empresas",
+          "endpoints": [
+            "GET /api/companies"
           ]
         },
         {
@@ -10111,6 +10710,20 @@
         {
           "scenario": "frontend-v0-commercial.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Plano criado pela UI; nova versão mantém o preço e a versão do contrato existente\",\"Políticas de cobrança/fidelidade e parâmetros de rede salvos; reaplicação reporta solicitações reais\",\"Filtros de plano/titular aplicados no Go com contagem correta e UUID inválido rejeitado\",\"Troca para versão atual do plano, vencimento e restrição de crédito persistidos\",\"Área, endereço específico e etiquetas do contrato salvos pelo layout v0\",\"Fidelidade/cotação, desconto e cancelamento, agendamento/cancelamento, aditivo e solicitação/cancelamento de aceite\",\"Adicional criado, contratado com quantidade e preço preservado após alteração do catálogo; encerramento registrado\",\"Encerramento definitivo em duas etapas, com multa dispensada e justificativa registrada pelo Go\",\"Isolamento entre provedores mantido nos detalhes e novos filtros comerciais\",\"Paginação, busca que reinicia a página, filtro de situação e exportação CSV comercial\"]}",
+          "endpoints": [
+            "GET /api/catalogs"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /atendimentos/novo-atendimento em /atendimentos",
+          "endpoints": [
+            "GET /api/catalogs"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /ordens-de-servico/nova-os em /ordens-de-servico",
           "endpoints": [
             "GET /api/catalogs"
           ]
@@ -10737,7 +11350,7 @@
         },
         {
           "scenario": "frontend-v0-session.mjs",
-          "check": "{\"ok\":true,\"checks\":[\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
+          "check": "{\"ok\":true,\"checks\":[\"Login do navegador não expõe o token da sessão no corpo; cliente de API recebe Bearer só ao pedir explicitamente\",\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
           "endpoints": [
             "POST /api/auth/logout"
           ]

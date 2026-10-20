@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-optical.mjs",
-  "recorded_at": "2026-10-20T15:20:55.162Z",
+  "recorded_at": "2026-10-20T20:29:51.826Z",
   "steps": [
     {
       "check": "Descoberta relatada pelo agente é vinculada pela UI ao contrato, PON, perfis e VLAN; driver Huawei mantém a limitação de homologação explícita",

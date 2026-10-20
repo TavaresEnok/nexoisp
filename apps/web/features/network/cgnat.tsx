@@ -29,6 +29,7 @@ import { api, download } from "@/platform/erp-client";
 import { stamp } from "./models";
 import { poolSchema, useIpamRefresh, type AddressPool } from "./ipam";
 import styles from "@/components/technical.module.css";
+import { useCreateRequest } from "@/features/shared/create-request";
 const n = z.coerce.number();
 const capacitySchema = z.object({
   private_ips: n,
@@ -68,6 +69,7 @@ export function CgnatDirectory() {
   const [creating, setCreating] = useState(false);
   const [mapped, setMapped] = useState<Plan | null>(null);
   const write = can(me, "network:write");
+  useCreateRequest("cgnat", () => setCreating(true), write);
   return (
     <CoreNetworkFrame
       tab="cgnat"
