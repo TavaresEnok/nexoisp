@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-finance.mjs",
-  "recorded_at": "2026-10-20T20:28:06.214Z",
+  "recorded_at": "2026-10-20T21:07:11.976Z",
   "steps": [
     {
       "check": "{\"ok\":true,\"checks\":[\"Geração pela UI repetida preserva uma mensalidade por contrato/competência\",\"Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor\",\"Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento\",\"Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI\",\"Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos\",\"Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada\",\"Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido\",\"Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go\",\"Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis\",\"Faturas isoladas entre provedores e ações financeiras restritas pelo perfil\"]}",

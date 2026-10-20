@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-finance-access.mjs",
-  "recorded_at": "2026-10-20T20:32:00.034Z",
+  "recorded_at": "2026-10-20T21:17:05.578Z",
   "steps": [
     {
       "check": "Política salva na UI executa verificação real de inadimplência e solicita suspensão no Go sem inventar confirmação de equipamento",
@@ -54,11 +54,9 @@
     {
       "check": "(sem verificação posterior)",
       "requests": [
-        "GET /api/addons",
         "GET /api/contracts",
         "GET /api/contracts/:id",
         "GET /api/contracts/:id/addons",
-        "GET /api/contracts/:id/states",
         "GET /api/plans"
       ]
     }

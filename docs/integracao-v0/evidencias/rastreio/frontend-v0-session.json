@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-session.mjs",
-  "recorded_at": "2026-10-20T20:27:23.650Z",
+  "recorded_at": "2026-10-20T21:06:32.548Z",
   "steps": [
     {
       "check": "{\"ok\":true,\"checks\":[\"Login do navegador não expõe o token da sessão no corpo; cliente de API recebe Bearer só ao pedir explicitamente\",\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",

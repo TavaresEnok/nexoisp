@@ -109,7 +109,7 @@ def run():
         schema=request('http://127.0.0.1:19881','/openapi.json')['json']
         import re
         actual={(method.upper(),re.sub(r'\{([^}]+)\}',r':\1',path)) for path,item in schema['paths'].items() for method in item if method.upper() in ['GET','POST','PUT','PATCH','DELETE']}
-        assert manifest==actual,(manifest-actual,actual-manifest);checks.append('336 operações reais iguais ao inventário')
+        assert manifest==actual,(manifest-actual,actual-manifest);checks.append('operações reais iguais ao inventário')
     finally:
         for p,log in processes:
             p.terminate()

@@ -79,6 +79,11 @@ const operationalOnly = [
   ["politica", "/financeiro/politica-de-cobranca"],
   ["noc", "/noc"],
   ["conta", "/conta"],
+  ["pon", "/rede/ftth/fttx-pon"],
+  ["onu-modelos", "/rede/ftth/fttx-onu-tipo"],
+  ["onu-templates", "/rede/ftth/fttx-onu-template"],
+  ["estoque-compras", "/estoque?aba=compras"],
+  ["sla", "/administracao/catalogos-sla?aba=sla"],
 ];
 // Uma tela por área em tema escuro e no celular.
 const areas = [

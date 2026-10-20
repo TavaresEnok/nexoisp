@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-admin-reports.mjs",
-  "recorded_at": "2026-10-20T20:31:05.026Z",
+  "recorded_at": "2026-10-20T21:16:10.123Z",
   "steps": [
     {
       "check": "Auditoria pagina registros reais e exibe detalhes; retenção salva no Go e rejeita prazo de conexão abaixo do limite",

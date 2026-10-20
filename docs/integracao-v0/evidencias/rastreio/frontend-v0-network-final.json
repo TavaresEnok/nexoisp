@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-network-final.mjs",
-  "recorded_at": "2026-10-20T20:28:08.954Z",
+  "recorded_at": "2026-10-20T21:10:10.300Z",
   "steps": [
     {
       "check": "Associação de certificado preparada no banco isolado é removida pela UI e pelo Go com confirmação; não há alegação de novo handshake mTLS",

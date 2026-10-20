@@ -28,7 +28,7 @@ O código inclui configuração de produção, preflight, backup/restauração e
 | RADIUS e acesso | Huawei/Cisco, IPoE/hotspot e demais combinações precisam de prova no equipamento utilizado; laboratório CHR não homologa fabricantes diferentes |
 | Suspensão e perfis | Perfil de bloqueio/redução, pool por plano, limite simultâneo e redirecionamento da página de aviso no NAS real |
 | CGNAT | Revisão/importação do `.rsc`, interface de saída, escala, tráfego real e comportamento com jogos/VoIP; não há aplicação automática pelo agente |
-| IPv6 | Prefixos são planejamento/registro; entrega pelo RADIUS ainda precisa de implementação e laboratório apropriado |
+| IPv6 | O RADIUS integrado entrega o prefixo reservado (Delegated-IPv6-Prefix, desde 20/10/2026); falta laboratório com DHCPv6-PD no concentrador real e entrega para concentradores por agente |
 | TR-069 | Modelos reais de roteadores, autenticação CWMP e mudanças de Wi-Fi; GenieACS integrado não homologa todos os CPEs |
 | NOC | Limiares ópticos e detecção coletiva ajustados com leituras e incidentes reais |
 | Comunicação | Canal HTTP de avisos e webhooks no serviço real, com consentimento e confirmação dos resultados |
@@ -53,10 +53,10 @@ Não bloqueia automaticamente o primeiro piloto; priorizar conforme o uso real:
 - Fiscal integrado: emissor, documento e regras do provedor; emissão por empresa e certificados quando aplicável.
 - Gateway: juros/multa na cobrança emitida e estorno pelo gateway; segundo gateway somente depois do primeiro homologado.
 - Campo: trabalho sem conexão, fotos/assinatura na OS e check-in/check-out; armazenamento e acesso precisam de definição.
-- SLA: calendário de expediente/feriados; hoje a contagem usa minutos corridos.
-- Estoque: depósitos adicionais, compras e fornecedores além dos movimentos e rastreio atuais.
+- SLA: calendário de expediente e feriados feito em 20/10/2026; falta validar com a operação real (feriados municipais, plantões).
+- Estoque: depósitos, transferências, fornecedores e pedidos de compra feitos em 20/10/2026; faltam cotação, contas a pagar e custo médio.
 - Comercial: viabilidade pública, regras adicionais de comissão e identidade visual do provedor no portal.
-- OLT: perfis/VLANs automatizados e fabricantes adicionais, um equipamento homologado por vez.
+- OLT: perfis/VLANs automatizados e fabricantes adicionais, um equipamento homologado por vez. O catálogo de modelos/templates de ONU e a consulta de portas PON existem desde 20/10/2026 como documentação e consulta; não aplicam nada na OLT.
 - IA assistiva e novos canais: decisão de produto, serviço externo e regras de uso dos dados; sem escrita irrestrita em rede.
 
 Não reabrir como pendência busca global, linha do tempo, avisos de saída, degraus de cobrança, API pública, SLA básico, agenda, campos personalizados, combos ou migração Go: esses recursos já possuem implementação. As pendências acima tratam das lacunas e validações restantes.

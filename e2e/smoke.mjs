@@ -34,7 +34,8 @@ const scenarios = [
   'frontend-v0-import.mjs',
   'frontend-v0-finance-access.mjs',
   'frontend-v0-remediation.mjs',
-  'frontend-v0-create-links.mjs'
+  'frontend-v0-create-links.mjs',
+  'frontend-v0-evolution.mjs'
 ];
 const from = process.env.FROM ? scenarios.indexOf(process.env.FROM) : 0;
 if (from < 0) throw new Error(`cenário desconhecido: ${process.env.FROM}`);

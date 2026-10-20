@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-map.mjs",
-  "recorded_at": "2026-10-20T20:30:39.847Z",
+  "recorded_at": "2026-10-20T21:15:44.812Z",
   "steps": [
     {
       "check": "Localização do contrato é gravada pelo endpoint Go, sem geocodificação nem aproximação de endereço",

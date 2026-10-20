@@ -8,7 +8,7 @@ Depois de uma auditoria independente, as telas de maior destaque (painel inicial
 
 As sete etapas estão concluídas no código e na validação da integração. A aplicação oficial em `apps/web` utiliza o frontend do v0 e cobre as funcionalidades disponíveis no NexoISP Go, respeitando suas limitações existentes.
 
-O fechamento registra **149 unidades integradas e validadas** (12 delas refletem capacidade demonstrativa ou parcial do Go: AC-02, FI-15, FI-16, RE-13, IN-03, IN-06, IN-11, IN-13, IN-15, AD-02, AD-17 e AD-18), **20 serviços internos, contratos externos ou limitações de backend preservados**, **zero pendentes** e **zero parciais de integração**. Esses estados descrevem a adaptação da interface; não transformam uma capacidade parcial do backend em capacidade completa. A matriz mantém separadamente o estado original do Go.
+O fechamento registra **154 unidades integradas e validadas** (cinco acrescentadas em 20/10/2026: catálogo de ONU, portas PON, calendário do SLA, depósitos e compras) (12 delas refletem capacidade demonstrativa ou parcial do Go: AC-02, FI-15, FI-16, RE-13, IN-03, IN-06, IN-11, IN-13, IN-15, AD-02, AD-17 e AD-18), **20 serviços internos, contratos externos ou limitações de backend preservados**, **zero pendentes** e **zero parciais de integração**. Esses estados descrevem a adaptação da interface; não transformam uma capacidade parcial do backend em capacidade completa. A matriz mantém separadamente o estado original do Go.
 
 Evidências: [fechamento das sete etapas](evidencias/fechamento-sete-etapas.json), [matriz funcional](MATRIZ_FUNCIONAL.md), [validações por incremento](VALIDACAO.md) e [execução e operação](OPERACAO.md).
 

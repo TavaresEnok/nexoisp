@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-stock.mjs",
-  "recorded_at": "2026-10-20T20:28:58.735Z",
+  "recorded_at": "2026-10-20T21:08:05.318Z",
   "steps": [
     {
       "check": "Catálogo cadastra material com código, unidade e mínimo; alerta usa saldo real",
@@ -17,6 +17,7 @@
       "check": "Entradas, saídas e ajuste com sinal preservam os três movimentos e saldo calculado pelo Go",
       "requests": [
         "GET /api/stock/items",
+        "GET /api/stock/items/:id/balances",
         "GET /api/stock/items/:id/movements",
         "POST /api/stock/items/:id/movements"
       ]

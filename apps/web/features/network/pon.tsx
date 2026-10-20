@@ -58,9 +58,10 @@ export function PonPorts() {
   const query = params.get("busca") ?? "";
   const olt = params.get("olt") ?? "";
   const selectedId = params.get("pon");
-  const result = useSWR("erp-pon-ports", async () =>
-    z.array(portSchema).parse(await api("/olt/pon-ports")),
-  );
+  const result = useSWR("erp-pon-ports", async () => ({
+    ports: z.array(portSchema).parse(await api("/olt/pon-ports")),
+    at: new Date().toISOString(),
+  }));
   const change = (key: string, value: string | null) =>
     setParams(
       (current) => {
@@ -70,7 +71,7 @@ export function PonPorts() {
       },
       { replace: true },
     );
-  const ports = result.data ?? [];
+  const ports = result.data?.ports ?? [];
   const rows = ports.filter(
     (port) =>
       (!olt || port.olt === olt) &&
@@ -199,7 +200,12 @@ export function PonPorts() {
           )}
         </QueryBoundary>
       </Panel>
-      <SourceFooter sample="Inventário óptico do provedor · sem alterações em equipamentos" />
+      {result.data && (
+        <SourceFooter
+          asOf={result.data.at}
+          sample="Inventário óptico do provedor · sem alterações em equipamentos"
+        />
+      )}
       <Sheet
         open={Boolean(selected)}
         onOpenChange={(open) => {

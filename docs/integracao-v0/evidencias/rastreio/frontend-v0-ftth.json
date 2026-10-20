@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-ftth.mjs",
-  "recorded_at": "2026-10-20T20:30:20.310Z",
+  "recorded_at": "2026-10-20T21:09:25.254Z",
   "steps": [
     {
       "check": "Cadastro CEO/CTO, coordenadas em conjunto, hierarquia, OLT/PON e edição persistem no Go",

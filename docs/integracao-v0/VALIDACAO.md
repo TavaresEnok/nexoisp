@@ -232,4 +232,17 @@ Limites: não houve execução da CI remota, homologação de equipamento nem pu
 
 ## Pendências após a auditoria (20/10/2026)
 
-Fumaça completa com 27 cenários (inclui o novo `frontend-v0-create-links.mjs`: 16 destinos "Novo …" abrem o diálogo e removem o pedido da URL; conta sem escrita não acessa) e os cenários dirigidos de CPE, Wi-Fi do portal e rede final, todos aprovados. O cenário de sessão confirma que o login do navegador não expõe o token e que o pedido explícito de Bearer funciona. Prova visual: as seis capturas da área Rede foram atualizadas por causa do menu (ONU duplicada removida, ações "Novo …" visíveis); 44 capturas dentro da tolerância. Evidência por unidade: 149 de 149.
+Fumaça completa com 27 cenários (inclui o novo `frontend-v0-create-links.mjs`: 16 destinos "Novo …" abrem o diálogo e removem o pedido da URL; conta sem escrita não acessa) e os cenários dirigidos de CPE, Wi-Fi do portal e rede final, todos aprovados. O cenário de sessão confirma que o login do navegador não expõe o token e que o pedido explícito de Bearer funciona. Prova visual: as seis capturas da área Rede foram atualizadas por causa do menu (ONU duplicada removida, ações "Novo …" visíveis); 49 capturas dentro da tolerância (cinco telas novas incluídas: PON, modelos e templates de ONU, compras e SLA). Evidência por unidade: 149 de 149.
+
+## Evoluções sem decisão do dono (20/10/2026)
+
+Entregues com backend Go, migrações 00058–00060 e interface:
+
+- Catálogo de modelos e templates de ONU (FTTx - ONU Tipo/Template) e portas PON (FTTx - PON), deixando de ser recursos planejados; telas pelos componentes originais do v0.
+- SLA com calendário de expediente e feriados (função `sla_due`, segundos exatos no fuso do provedor).
+- Estoque com depósitos, transferências, fornecedores e pedidos de compra.
+- Entrega de prefixo IPv6 delegado pelo RADIUS integrado (Delegated-IPv6-Prefix), com teste do pacote `radius`.
+
+Validação: testes Go dos pacotes alterados e testes locais aprovados; fumaça com 29 cenários, incluindo `frontend-v0-evolution.mjs` (catálogo, PON, SLA e estoque pela interface e relidos no Go), e os cenários com ACS sintético. O cenário CGNAT oscilou duas vezes no ambiente principal na borda do segundo da consulta (período de duração zero) e passou duas vezes no segundo ambiente; o código da consulta legal não foi alterado. Demonstração: as quatro telas do v0 tocadas (modelos, ficha de modelo, templates e PON) são idênticas à referência; a configuração de plano difere em 7 pixels num canto de borda, tela que não usa nenhum componente alterado. Prova visual operacional: referências de Estoque (abas) e Endereçamento IP (texto do IPv6) atualizadas; 49 capturas dentro da tolerância (cinco telas novas incluídas: PON, modelos e templates de ONU, compras e SLA).
+
+Fica para o dono: template ACS (aplicar parâmetros em roteadores de clientes), assistente com IA, gateway de pagamento, emissão fiscal, fotos e assinatura na OS, homologações em equipamento real e entrada em produção.

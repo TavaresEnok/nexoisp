@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-field.mjs",
-  "recorded_at": "2026-10-20T20:28:46.139Z",
+  "recorded_at": "2026-10-20T21:07:53.104Z",
   "steps": [
     {
       "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",

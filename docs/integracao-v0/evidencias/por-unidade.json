@@ -1,160 +1,165 @@
 {
-  "generated_at": "2026-10-20T20:37:17.362Z",
+  "generated_at": "2026-10-20T21:26:24.938Z",
   "method": "Chamadas à API feitas pelas páginas entre uma verificação e a anterior, gravadas por e2e/request-trace.mjs durante a fumaça; preparação via context.request não conta.",
   "scenarios": [
     {
       "scenario": "frontend-v0-access.mjs",
-      "recorded_at": "2026-10-20T20:29:39.407Z",
+      "recorded_at": "2026-10-20T21:08:45.925Z",
       "checks": 12
     },
     {
       "scenario": "frontend-v0-admin-reports.mjs",
-      "recorded_at": "2026-10-20T20:31:05.026Z",
+      "recorded_at": "2026-10-20T21:16:10.123Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-admin-team.mjs",
-      "recorded_at": "2026-10-20T20:30:47.933Z",
+      "recorded_at": "2026-10-20T21:15:52.827Z",
       "checks": 7
     },
     {
       "scenario": "frontend-v0-cgnat-legal.mjs",
-      "recorded_at": "2026-10-20T20:30:35.283Z",
+      "recorded_at": "2026-10-20T21:15:31.517Z",
       "checks": 6
     },
     {
       "scenario": "frontend-v0-commercial.mjs",
-      "recorded_at": "2026-10-20T20:27:44.341Z",
+      "recorded_at": "2026-10-20T21:06:48.954Z",
       "checks": 1
     },
     {
       "scenario": "frontend-v0-cpe.mjs",
-      "recorded_at": "2026-10-20T20:28:00.443Z",
+      "recorded_at": "2026-10-20T21:10:02.004Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-create-links.mjs",
-      "recorded_at": "2026-10-20T20:32:28.254Z",
+      "recorded_at": "2026-10-20T21:17:34.352Z",
       "checks": 17
     },
     {
       "scenario": "frontend-v0-crm.mjs",
-      "recorded_at": "2026-10-20T20:28:20.000Z",
+      "recorded_at": "2026-10-20T21:07:26.716Z",
       "checks": 1
     },
     {
+      "scenario": "frontend-v0-evolution.mjs",
+      "recorded_at": "2026-10-20T21:19:07.773Z",
+      "checks": 5
+    },
+    {
       "scenario": "frontend-v0-field.mjs",
-      "recorded_at": "2026-10-20T20:28:46.139Z",
+      "recorded_at": "2026-10-20T21:07:53.104Z",
       "checks": 16
     },
     {
       "scenario": "frontend-v0-finance-access.mjs",
-      "recorded_at": "2026-10-20T20:32:00.034Z",
+      "recorded_at": "2026-10-20T21:17:05.578Z",
       "checks": 4
     },
     {
       "scenario": "frontend-v0-finance.mjs",
-      "recorded_at": "2026-10-20T20:28:06.214Z",
+      "recorded_at": "2026-10-20T21:07:11.976Z",
       "checks": 1
     },
     {
       "scenario": "frontend-v0-ftth.mjs",
-      "recorded_at": "2026-10-20T20:30:20.310Z",
+      "recorded_at": "2026-10-20T21:09:25.254Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-import.mjs",
-      "recorded_at": "2026-10-20T20:31:53.826Z",
+      "recorded_at": "2026-10-20T21:16:59.767Z",
       "checks": 6
     },
     {
       "scenario": "frontend-v0-integrations.mjs",
-      "recorded_at": "2026-10-20T20:31:48.218Z",
+      "recorded_at": "2026-10-20T21:16:53.835Z",
       "checks": 6
     },
     {
       "scenario": "frontend-v0-ipam.mjs",
-      "recorded_at": "2026-10-20T20:30:31.075Z",
+      "recorded_at": "2026-10-20T21:09:37.729Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-maintenance.mjs",
-      "recorded_at": "2026-10-20T20:29:58.360Z",
+      "recorded_at": "2026-10-20T21:09:04.671Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-map.mjs",
-      "recorded_at": "2026-10-20T20:30:39.847Z",
+      "recorded_at": "2026-10-20T21:15:44.812Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-messages.mjs",
-      "recorded_at": "2026-10-20T20:31:40.675Z",
+      "recorded_at": "2026-10-20T21:16:45.697Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-network-final.mjs",
-      "recorded_at": "2026-10-20T20:28:08.954Z",
+      "recorded_at": "2026-10-20T21:10:10.300Z",
       "checks": 3
     },
     {
       "scenario": "frontend-v0-network.mjs",
-      "recorded_at": "2026-10-20T20:29:22.381Z",
+      "recorded_at": "2026-10-20T21:08:28.708Z",
       "checks": 13
     },
     {
       "scenario": "frontend-v0-optical.mjs",
-      "recorded_at": "2026-10-20T20:29:51.826Z",
+      "recorded_at": "2026-10-20T21:08:58.403Z",
       "checks": 6
     },
     {
       "scenario": "frontend-v0-portal-wifi.mjs",
-      "recorded_at": "2026-10-20T20:28:02.835Z",
+      "recorded_at": "2026-10-20T21:10:04.470Z",
       "checks": 1
     },
     {
       "scenario": "frontend-v0-portal.mjs",
-      "recorded_at": "2026-10-20T20:31:31.014Z",
+      "recorded_at": "2026-10-20T21:16:36.283Z",
       "checks": 9
     },
     {
       "scenario": "frontend-v0-quality.mjs",
-      "recorded_at": "2026-10-20T20:30:58.116Z",
+      "recorded_at": "2026-10-20T21:16:03.395Z",
       "checks": 8
     },
     {
       "scenario": "frontend-v0-remediation.mjs",
-      "recorded_at": "2026-10-20T20:32:21.222Z",
+      "recorded_at": "2026-10-20T21:17:27.631Z",
       "checks": 13
     },
     {
       "scenario": "frontend-v0-saas.mjs",
-      "recorded_at": "2026-10-20T20:31:09.295Z",
+      "recorded_at": "2026-10-20T21:16:14.531Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-session.mjs",
-      "recorded_at": "2026-10-20T20:27:23.650Z",
+      "recorded_at": "2026-10-20T21:06:32.548Z",
       "checks": 1
     },
     {
       "scenario": "frontend-v0-stock.mjs",
-      "recorded_at": "2026-10-20T20:28:58.735Z",
+      "recorded_at": "2026-10-20T21:08:05.318Z",
       "checks": 11
     },
     {
       "scenario": "frontend-v0-workspace.mjs",
-      "recorded_at": "2026-10-20T20:30:11.360Z",
+      "recorded_at": "2026-10-20T21:09:16.701Z",
       "checks": 6
     },
     {
       "scenario": "frontend-v0.mjs",
-      "recorded_at": "2026-10-20T20:27:19.235Z",
+      "recorded_at": "2026-10-20T21:06:28.159Z",
       "checks": 1
     }
   ],
-  "validated_units": 149,
-  "units_with_interface_check": 149,
+  "validated_units": 154,
+  "units_with_interface_check": 154,
   "units": [
     {
       "id": "AC-01",
@@ -448,6 +453,34 @@
             "POST /api/auth/login",
             "GET /api/me",
             "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "Catálogo de ONU: modelo e template cadastrados pela tela original do v0, associação persistida e exclusão de modelo em uso recusada pelo Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "Portas PON: 3 porta(s) derivadas das ONUs e descobertas; assinantes da porta abertos pela tela do v0",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "SLA: calendário de expediente, feriado e política \"Somente no expediente\" gravados pela interface e relidos no Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "Estoque: depósito, fornecedor e pedido de compra pela interface; recebimento gera entrada no depósito e a transferência move o saldo para o principal",
+          "endpoints": [
+            "GET /api/me"
           ]
         },
         {
@@ -1478,6 +1511,34 @@
           ]
         },
         {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "Catálogo de ONU: modelo e template cadastrados pela tela original do v0, associação persistida e exclusão de modelo em uso recusada pelo Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "Portas PON: 3 porta(s) derivadas das ONUs e descobertas; assinantes da porta abertos pela tela do v0",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "SLA: calendário de expediente, feriado e política \"Somente no expediente\" gravados pela interface e relidos no Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "Estoque: depósito, fornecedor e pedido de compra pela interface; recebimento gera entrada no depósito e a transferência move o saldo para o principal",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
           "scenario": "frontend-v0-field.mjs",
           "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
           "endpoints": [
@@ -2360,6 +2421,34 @@
           "check": "{\"ok\":true,\"checks\":[\"Prospecto valida contato obrigatório no Go; cadastro, edição e ficha usam UUID real\",\"Etapas, motivo da perda, retomada e contato persistidos com histórico\",\"Conversão cria assinante relacionado ao prospecto, marca ganho e abre a ficha\",\"Protocolo com titular/contrato/prioridade e mensagem inicial, sem incidente fictício ou SLA presumido\",\"Responsável atribuído; nota interna e resposta pública preservam visibilidade e estado do protocolo\",\"OS real criada pelo atendimento, preservando protocolo, titular, contrato e endereço informado\",\"Encerramento e reabertura persistidos; URL restaura a ficha após recarregar\",\"Fila do titular abre o mesmo protocolo e fecha preservando a ficha do assinante\",\"Busca e exportação reais de atendimentos; relatório CRM por período carrega dados do Go\",\"Prospectos usam paginação do servidor e busca reinicia a página sem navegação tardia\",\"Nota interna permanece ausente no portal; perfil financeiro não oferece ações de equipe técnica\",\"Prospectos e protocolos isolados entre provedores\"]}",
           "endpoints": [
             "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "Catálogo de ONU: modelo e template cadastrados pela tela original do v0, associação persistida e exclusão de modelo em uso recusada pelo Go",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "Portas PON: 3 porta(s) derivadas das ONUs e descobertas; assinantes da porta abertos pela tela do v0",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "SLA: calendário de expediente, feriado e política \"Somente no expediente\" gravados pela interface e relidos no Go",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "Estoque: depósito, fornecedor e pedido de compra pela interface; recebimento gera entrada no depósito e a transferência move o saldo para o principal",
+          "endpoints": [
             "GET /api/today"
           ]
         },
@@ -4143,13 +4232,6 @@
           ]
         },
         {
-          "scenario": "frontend-v0-finance-access.mjs",
-          "check": "(sem verificação posterior)",
-          "endpoints": [
-            "GET /api/addons"
-          ]
-        },
-        {
           "scenario": "frontend-v0-finance.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Geração pela UI repetida preserva uma mensalidade por contrato/competência\",\"Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor\",\"Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento\",\"Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI\",\"Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos\",\"Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada\",\"Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido\",\"Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go\",\"Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis\",\"Faturas isoladas entre provedores e ações financeiras restritas pelo perfil\"]}",
           "endpoints": [
@@ -4836,13 +4918,6 @@
           ]
         },
         {
-          "scenario": "frontend-v0-finance-access.mjs",
-          "check": "(sem verificação posterior)",
-          "endpoints": [
-            "GET /api/contracts/:id/states"
-          ]
-        },
-        {
           "scenario": "frontend-v0-finance.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Geração pela UI repetida preserva uma mensalidade por contrato/competência\",\"Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor\",\"Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento\",\"Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI\",\"Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos\",\"Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada\",\"Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido\",\"Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go\",\"Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis\",\"Faturas isoladas entre provedores e ações financeiras restritas pelo perfil\"]}",
           "endpoints": [
@@ -5000,13 +5075,6 @@
           "endpoints": [
             "GET /api/tags",
             "POST /api/tags"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-remediation.mjs",
-          "check": "R04/BE-05: prospecto convertido para assinante existente sem duplicar cadastro",
-          "endpoints": [
-            "GET /api/tags"
           ]
         },
         {
@@ -6626,6 +6694,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "SLA: calendário de expediente, feriado e política \"Somente no expediente\" gravados pela interface e relidos no Go",
+          "endpoints": [
+            "GET /api/staff"
+          ]
+        },
+        {
           "scenario": "frontend-v0-field.mjs",
           "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
           "endpoints": [
@@ -7203,6 +7278,20 @@
           ]
         },
         {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "Estoque: depósito, fornecedor e pedido de compra pela interface; recebimento gera entrada no depósito e a transferência move o saldo para o principal",
+          "endpoints": [
+            "GET /api/stock/items"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "(sem verificação posterior)",
+          "endpoints": [
+            "GET /api/stock/items"
+          ]
+        },
+        {
           "scenario": "frontend-v0-field.mjs",
           "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
           "endpoints": [
@@ -7375,6 +7464,20 @@
       "not_exercised_by_interface": [],
       "checks": [
         {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "Estoque: depósito, fornecedor e pedido de compra pela interface; recebimento gera entrada no depósito e a transferência move o saldo para o principal",
+          "endpoints": [
+            "GET /api/stock/items/:id/movements"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "(sem verificação posterior)",
+          "endpoints": [
+            "GET /api/stock/items/:id/movements"
+          ]
+        },
+        {
           "scenario": "frontend-v0-stock.mjs",
           "check": "Entradas, saídas e ajuste com sinal preservam os três movimentos e saldo calculado pelo Go",
           "endpoints": [
@@ -7470,6 +7573,89 @@
           "check": "Histórico por série preserva entrada, custódia, instalação, retirada, defeito, conserto, baixa, autor e data",
           "endpoints": [
             "GET /api/stock/units/:id/events"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "OS-15",
+      "functionality": "Depósitos e transferência de saldo",
+      "declared_endpoints": [
+        "GET /api/stock/warehouses",
+        "POST /api/stock/warehouses",
+        "PATCH /api/stock/warehouses/:id",
+        "GET /api/stock/items/:id/balances",
+        "POST /api/stock/items/:id/transfer"
+      ],
+      "exercised_by_interface": [
+        "GET /api/stock/items/:id/balances",
+        "GET /api/stock/warehouses",
+        "POST /api/stock/items/:id/transfer",
+        "POST /api/stock/warehouses"
+      ],
+      "not_exercised_by_interface": [
+        "PATCH /api/stock/warehouses/:id"
+      ],
+      "checks": [
+        {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "Estoque: depósito, fornecedor e pedido de compra pela interface; recebimento gera entrada no depósito e a transferência move o saldo para o principal",
+          "endpoints": [
+            "GET /api/stock/warehouses",
+            "POST /api/stock/warehouses",
+            "GET /api/stock/items/:id/balances",
+            "POST /api/stock/items/:id/transfer"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "(sem verificação posterior)",
+          "endpoints": [
+            "GET /api/stock/items/:id/balances"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-stock.mjs",
+          "check": "Entradas, saídas e ajuste com sinal preservam os três movimentos e saldo calculado pelo Go",
+          "endpoints": [
+            "GET /api/stock/items/:id/balances"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "OS-16",
+      "functionality": "Fornecedores e pedidos de compra",
+      "declared_endpoints": [
+        "GET /api/stock/suppliers",
+        "POST /api/stock/suppliers",
+        "PATCH /api/stock/suppliers/:id",
+        "GET /api/stock/purchases",
+        "POST /api/stock/purchases",
+        "POST /api/stock/purchases/:id/status",
+        "POST /api/stock/purchases/:id/receive"
+      ],
+      "exercised_by_interface": [
+        "GET /api/stock/purchases",
+        "GET /api/stock/suppliers",
+        "POST /api/stock/purchases",
+        "POST /api/stock/purchases/:id/receive",
+        "POST /api/stock/suppliers"
+      ],
+      "not_exercised_by_interface": [
+        "PATCH /api/stock/suppliers/:id",
+        "POST /api/stock/purchases/:id/status"
+      ],
+      "checks": [
+        {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "Estoque: depósito, fornecedor e pedido de compra pela interface; recebimento gera entrada no depósito e a transferência move o saldo para o principal",
+          "endpoints": [
+            "GET /api/stock/suppliers",
+            "POST /api/stock/suppliers",
+            "GET /api/stock/purchases",
+            "POST /api/stock/purchases",
+            "POST /api/stock/purchases/:id/receive"
           ]
         }
       ]
@@ -8875,6 +9061,13 @@
             "GET /api/operations",
             "GET /api/operations/:id"
           ]
+        },
+        {
+          "scenario": "frontend-v0-network.mjs",
+          "check": "Inventário oficial mantém navegação e consulta no celular",
+          "endpoints": [
+            "GET /api/operations"
+          ]
         }
       ]
     },
@@ -9204,6 +9397,65 @@
             "GET /api/contracts/:id/usage",
             "GET /api/contracts/:id/usage-series",
             "GET /api/contracts/:id/availability"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "RE-15",
+      "functionality": "Catálogo de modelos e templates de ONU",
+      "declared_endpoints": [
+        "GET /api/olt/onu-models",
+        "POST /api/olt/onu-models",
+        "PATCH /api/olt/onu-models/:id",
+        "DELETE /api/olt/onu-models/:id",
+        "GET /api/olt/onu-templates",
+        "POST /api/olt/onu-templates",
+        "PATCH /api/olt/onu-templates/:id",
+        "DELETE /api/olt/onu-templates/:id"
+      ],
+      "exercised_by_interface": [
+        "DELETE /api/olt/onu-models/:id",
+        "GET /api/olt/onu-models",
+        "GET /api/olt/onu-templates",
+        "POST /api/olt/onu-models",
+        "POST /api/olt/onu-templates"
+      ],
+      "not_exercised_by_interface": [
+        "PATCH /api/olt/onu-models/:id",
+        "PATCH /api/olt/onu-templates/:id",
+        "DELETE /api/olt/onu-templates/:id"
+      ],
+      "checks": [
+        {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "Catálogo de ONU: modelo e template cadastrados pela tela original do v0, associação persistida e exclusão de modelo em uso recusada pelo Go",
+          "endpoints": [
+            "GET /api/olt/onu-models",
+            "POST /api/olt/onu-models",
+            "DELETE /api/olt/onu-models/:id",
+            "GET /api/olt/onu-templates",
+            "POST /api/olt/onu-templates"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "RE-16",
+      "functionality": "Portas PON identificadas",
+      "declared_endpoints": [
+        "GET /api/olt/pon-ports"
+      ],
+      "exercised_by_interface": [
+        "GET /api/olt/pon-ports"
+      ],
+      "not_exercised_by_interface": [],
+      "checks": [
+        {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "Portas PON: 3 porta(s) derivadas das ONUs e descobertas; assinantes da porta abertos pela tela do v0",
+          "endpoints": [
+            "GET /api/olt/pon-ports"
           ]
         }
       ]
@@ -10736,6 +10988,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "SLA: calendário de expediente, feriado e política \"Somente no expediente\" gravados pela interface e relidos no Go",
+          "endpoints": [
+            "GET /api/catalogs"
+          ]
+        },
+        {
           "scenario": "frontend-v0-field.mjs",
           "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
           "endpoints": [
@@ -10821,6 +11080,15 @@
       ],
       "not_exercised_by_interface": [],
       "checks": [
+        {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "SLA: calendário de expediente, feriado e política \"Somente no expediente\" gravados pela interface e relidos no Go",
+          "endpoints": [
+            "GET /api/sla-policies",
+            "POST /api/sla-policies",
+            "GET /api/reports/sla"
+          ]
+        },
         {
           "scenario": "frontend-v0-quality.mjs",
           "check": "SLA com tipo, prioridade e escalonamento aplica prazo real ao atendimento; edição, ativação e relatório preservam política em uso",
@@ -11267,6 +11535,54 @@
           "endpoints": [
             "GET /api/settings/retention",
             "PUT /api/settings/retention"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AD-22",
+      "functionality": "Calendário de expediente e feriados do SLA",
+      "declared_endpoints": [
+        "GET /api/sla-calendar",
+        "PUT /api/sla-calendar",
+        "GET /api/sla-holidays",
+        "POST /api/sla-holidays",
+        "DELETE /api/sla-holidays/:id"
+      ],
+      "exercised_by_interface": [
+        "GET /api/sla-calendar",
+        "GET /api/sla-holidays",
+        "POST /api/sla-holidays",
+        "PUT /api/sla-calendar"
+      ],
+      "not_exercised_by_interface": [
+        "DELETE /api/sla-holidays/:id"
+      ],
+      "checks": [
+        {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "SLA: calendário de expediente, feriado e política \"Somente no expediente\" gravados pela interface e relidos no Go",
+          "endpoints": [
+            "GET /api/sla-calendar",
+            "PUT /api/sla-calendar",
+            "GET /api/sla-holidays",
+            "POST /api/sla-holidays"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-quality.mjs",
+          "check": "SLA com tipo, prioridade e escalonamento aplica prazo real ao atendimento; edição, ativação e relatório preservam política em uso",
+          "endpoints": [
+            "GET /api/sla-calendar",
+            "GET /api/sla-holidays"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "R03/R05: matriz nenhum módulo / CRM / campo respeita controles e consultas, com habilitação positiva",
+          "endpoints": [
+            "GET /api/sla-calendar",
+            "GET /api/sla-holidays"
           ]
         }
       ]

@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-portal-wifi.mjs",
-  "recorded_at": "2026-10-20T20:28:02.835Z",
+  "recorded_at": "2026-10-20T21:10:04.470Z",
   "steps": [
     {
       "check": "Titular altera SSID e senha do próprio TR-098 pela UI; ACS sintético confirma aplicação imediata e a consulta registra o nome observado\nTR-181 enfileirado mantém SSID observado anterior; mensagem explica que a mudança depende do próximo contato do roteador\nWi-Fi do portal rejeita contrato de outro titular e preserva layout utilizável no celular",

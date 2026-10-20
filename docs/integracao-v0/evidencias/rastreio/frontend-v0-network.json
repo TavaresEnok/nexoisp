@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-network.mjs",
-  "recorded_at": "2026-10-20T20:29:22.381Z",
+  "recorded_at": "2026-10-20T21:08:28.708Z",
   "steps": [
     {
       "check": "Agente criado no Go; token e chave pública exibidos na emissão, sem token na consulta posterior",
@@ -114,6 +114,7 @@
         "GET /api/me",
         "GET /api/network/health",
         "GET /api/network/online",
+        "GET /api/operations",
         "GET /api/radius/status",
         "GET /api/today"
       ]

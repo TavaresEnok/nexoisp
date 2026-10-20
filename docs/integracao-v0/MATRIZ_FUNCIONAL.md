@@ -1,6 +1,6 @@
 # Matriz de cobertura funcional
 
-Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades parciais, demonstrativas e internas; os estados do backend são preservados. O JSON correspondente mantém endpoints, restrições e evidências. A situação de cada unidade é independente da presença de uma página ou de um menu.
+Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 174 unidades incluem capacidades parciais, demonstrativas e internas; os estados do backend são preservados. O JSON correspondente mantém endpoints, restrições e evidências. A situação de cada unidade é independente da presença de uma página ou de um menu.
 
 | ID | Estado histórico no backend | Funcionalidade | Integração |
 |---|---|---|---|
@@ -68,6 +68,8 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | OS-12 | Implementada | Entradas, saídas, ajustes e consulta | Integrada e validada |
 | OS-13 | Implementada | Receber lote e distribuir unidades | Integrada e validada |
 | OS-14 | Implementada | Retirada, defeito, conserto, baixa e histórico | Integrada e validada |
+| OS-15 | Implementada | Depósitos e transferência de saldo | Integrada e validada |
+| OS-16 | Implementada | Fornecedores e pedidos de compra | Integrada e validada |
 | FI-01 | Implementada | Listagem, filtros e visão financeira | Integrada e validada |
 | FI-02 | Implementada | Geração idempotente por competência | Integrada e validada |
 | FI-03 | Implementada | Consulta detalhada e saldo devido | Integrada e validada |
@@ -99,6 +101,8 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | RE-12 | Implementada | Vincular equipamento e administrar Wi-Fi | Integrada e validada |
 | RE-13 | Demonstrativa | Equipamentos e observações simuladas | Integrada e validada |
 | RE-14 | Implementada | Visualizar uso e disponibilidade estimada | Integrada e validada |
+| RE-15 | Implementada | Catálogo de modelos e templates de ONU | Integrada e validada |
+| RE-16 | Implementada | Portas PON identificadas | Integrada e validada |
 | IN-01 | Implementada | Descobrir e vincular ONU ao contrato | Integrada e validada |
 | IN-02 | Implementada | Enviar comandos e acompanhar execução | Integrada e validada |
 | IN-03 | Parcial | Cobertura de equipamentos OLT | Integrada e validada |
@@ -137,6 +141,7 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | AD-19 | Implementada | Importar CSV em lotes e conferir erros | Integrada e validada |
 | AD-20 | Parcial | Migração automatizada de qualquer instalação SGP | Backend preservado / limitação |
 | AD-21 | Implementada | Consultar eventos e retenção | Integrada e validada |
+| AD-22 | Implementada | Calendário de expediente e feriados do SLA | Integrada e validada |
 | PO-01 | Implementada | Situação dos planos e acesso | Integrada e validada |
 | PO-02 | Implementada | Consultar títulos e abrir meios de pagamento | Integrada e validada |
 | PO-03 | Implementada | Liberação temporária por confiança | Integrada e validada |
@@ -174,4 +179,4 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | BE-26 | Somente backend | Criar cobrança avulsa | Integrada e validada |
 | BE-27 | Somente backend | Excluir etiqueta do catálogo | Integrada e validada |
 
-Cobertura de interface: **149 unidades integradas e validadas**, sem unidade operacional pendente ou parcial; 12 delas refletem capacidade demonstrativa (AC-02, FI-15, FI-16, RE-13) ou parcial (IN-03, IN-06, IN-11, IN-13, IN-15, AD-02, AD-17, AD-18) do Go e aparecem identificadas na interface. A evidência de cada unidade está em [por-unidade.json](evidencias/por-unidade.json). As **20 unidades preservadas** são 14 serviços internos, dois contratos de API externa e quatro limitações existentes. A [triagem individual](CAPACIDADES-BACKEND.md) explica a classificação; o JSON mantém os comportamentos históricos e acrescenta notas sobre a apresentação atual, sem alterar o estado original do backend.
+Cobertura de interface: **154 unidades integradas e validadas**, sem unidade operacional pendente ou parcial; 12 delas refletem capacidade demonstrativa (AC-02, FI-15, FI-16, RE-13) ou parcial (IN-03, IN-06, IN-11, IN-13, IN-15, AD-02, AD-17, AD-18) do Go e aparecem identificadas na interface. A evidência de cada unidade está em [por-unidade.json](evidencias/por-unidade.json). As **20 unidades preservadas** são 14 serviços internos, dois contratos de API externa e quatro limitações existentes. A [triagem individual](CAPACIDADES-BACKEND.md) explica a classificação; o JSON mantém os comportamentos históricos e acrescenta notas sobre a apresentação atual, sem alterar o estado original do backend.

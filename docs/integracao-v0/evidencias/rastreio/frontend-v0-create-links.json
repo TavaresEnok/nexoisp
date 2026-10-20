@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-create-links.mjs",
-  "recorded_at": "2026-10-20T20:32:28.254Z",
+  "recorded_at": "2026-10-20T21:17:34.352Z",
   "steps": [
     {
       "check": "Diálogo aberto por /assinantes/novo-assinante em /assinantes",

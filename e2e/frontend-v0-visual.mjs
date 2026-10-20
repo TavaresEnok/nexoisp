@@ -30,6 +30,10 @@ try {
   { name: 'plano-configuracao', path: '/planos', heading: 'Planos & ofertas', action: 'Abrir configuração de', width: 1342, height: 805, theme: 'dark' },
   { name: 'contratos-desktop', path: '/contratos', heading: 'Contratos dos assinantes', width: 1342, height: 805, theme: 'light' },
   { name: 'contrato-ficha', path: '/contratos', heading: 'Contratos dos assinantes', action: 'Detalhes do contrato', width: 1342, height: 805, theme: 'dark' },
+  { name: 'onu-modelos', path: '/rede/ftth/fttx-onu-tipo', heading: 'Hardware com perfil definido.', width: 1342, height: 805, theme: 'light' },
+  { name: 'onu-modelo-ficha', path: '/rede/ftth/fttx-onu-tipo', heading: 'Hardware com perfil definido.', action: 'Detalhes do modelo ', width: 1342, height: 805, theme: 'dark' },
+  { name: 'onu-templates', path: '/rede/ftth/fttx-onu-template', heading: 'Templates de provisionamento.', width: 1342, height: 805, theme: 'light' },
+  { name: 'pon-portas', path: '/rede/ftth/fttx-pon', heading: 'Portas PON', width: 1342, height: 805, theme: 'light' },
  ].filter(variant=>!process.env.VISUAL_VARIANTS||process.env.VISUAL_VARIANTS.split(',').includes(variant.name))) {
   const screenshots = [];
   for (const [name, base] of [['referencia', process.env.V0_REFERENCE ?? 'http://127.0.0.1:3001'], ['oficial', `${process.env.BASE ?? 'http://127.0.0.1:3000'}/demonstracao`]]) {

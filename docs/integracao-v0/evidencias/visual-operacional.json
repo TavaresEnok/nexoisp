@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "verified_at": "2026-10-20T20:37:17.004Z",
+  "verified_at": "2026-10-20T21:26:18.563Z",
   "proves": "Estrutura: fração das classes do v0 usadas na página demonstrativa que a tela conectada também usa, com piso registrado. Regressão: comparação pixel a pixel das telas conectadas (até 0,05% de pixels alterados) com relógio fixo, datas normalizadas e códigos de UUID mascarados. Não prova igualdade pixel a pixel com o v0, porque os dados diferem; a igualdade com o v0 original é provada para a demonstração.",
   "backend": "Go/PostgreSQL isolados; provedor exclusivo visual-v0 com dados sintéticos",
   "structure": [
@@ -558,8 +558,8 @@
     {
       "name": "ficha-claro",
       "identical": false,
-      "changed_pixels": 322,
-      "changed_ratio": 0.00025
+      "changed_pixels": 339,
+      "changed_ratio": 0.00026
     },
     {
       "name": "ficha-cadastro-claro",
@@ -576,8 +576,8 @@
     {
       "name": "ficha-conexao-claro",
       "identical": false,
-      "changed_pixels": 371,
-      "changed_ratio": 0.00029
+      "changed_pixels": 305,
+      "changed_ratio": 0.00024
     },
     {
       "name": "ficha-atendimento-claro",
@@ -635,7 +635,7 @@
     },
     {
       "name": "mapa-claro",
-      "identical": false,
+      "identical": true,
       "changed_pixels": 0,
       "changed_ratio": 0
     },
@@ -689,9 +689,9 @@
     },
     {
       "name": "estoque-claro",
-      "identical": false,
-      "changed_pixels": 200,
-      "changed_ratio": 0.00015
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
     },
     {
       "name": "usuarios-claro",
@@ -713,6 +713,36 @@
     },
     {
       "name": "conta-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "pon-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "onu-modelos-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "onu-templates-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "estoque-compras-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "sla-claro",
       "identical": true,
       "changed_pixels": 0,
       "changed_ratio": 0
@@ -773,7 +803,7 @@
     },
     {
       "name": "usuarios-celular",
-      "identical": true,
+      "identical": false,
       "changed_pixels": 0,
       "changed_ratio": 0
     },

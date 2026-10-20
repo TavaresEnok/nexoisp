@@ -1,0 +1,68 @@
+{
+  "scenario": "frontend-v0-evolution.mjs",
+  "recorded_at": "2026-10-20T21:19:07.773Z",
+  "steps": [
+    {
+      "check": "Catálogo de ONU: modelo e template cadastrados pela tela original do v0, associação persistida e exclusão de modelo em uso recusada pelo Go",
+      "requests": [
+        "DELETE /api/olt/onu-models/:id",
+        "GET /api/me",
+        "GET /api/olt/onu-models",
+        "GET /api/olt/onu-templates",
+        "GET /api/today",
+        "POST /api/olt/onu-models",
+        "POST /api/olt/onu-templates"
+      ]
+    },
+    {
+      "check": "Portas PON: 3 porta(s) derivadas das ONUs e descobertas; assinantes da porta abertos pela tela do v0",
+      "requests": [
+        "GET /api/me",
+        "GET /api/olt/pon-ports",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "SLA: calendário de expediente, feriado e política \"Somente no expediente\" gravados pela interface e relidos no Go",
+      "requests": [
+        "GET /api/catalogs",
+        "GET /api/me",
+        "GET /api/reports/sla",
+        "GET /api/sla-calendar",
+        "GET /api/sla-holidays",
+        "GET /api/sla-policies",
+        "GET /api/staff",
+        "GET /api/today",
+        "POST /api/sla-holidays",
+        "POST /api/sla-policies",
+        "PUT /api/sla-calendar"
+      ]
+    },
+    {
+      "check": "Estoque: depósito, fornecedor e pedido de compra pela interface; recebimento gera entrada no depósito e a transferência move o saldo para o principal",
+      "requests": [
+        "GET /api/me",
+        "GET /api/stock/items",
+        "GET /api/stock/items/:id/balances",
+        "GET /api/stock/items/:id/movements",
+        "GET /api/stock/purchases",
+        "GET /api/stock/suppliers",
+        "GET /api/stock/warehouses",
+        "GET /api/today",
+        "POST /api/stock/items/:id/transfer",
+        "POST /api/stock/purchases",
+        "POST /api/stock/purchases/:id/receive",
+        "POST /api/stock/suppliers",
+        "POST /api/stock/warehouses"
+      ]
+    },
+    {
+      "check": "(sem verificação posterior)",
+      "requests": [
+        "GET /api/stock/items",
+        "GET /api/stock/items/:id/balances",
+        "GET /api/stock/items/:id/movements"
+      ]
+    }
+  ]
+}

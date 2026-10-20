@@ -2,7 +2,7 @@
 
 API, rotinas River, VPN e administração são executáveis nativos Go. O frontend React é servido pelo Caddy; o agente Python, FreeRADIUS e GenieACS continuam como serviços separados.
 
-- `cmd/api`: 336 operações HTTP e dez rotas de agentes em listener mTLS.
+- `cmd/api`: 362 operações HTTP e dez rotas de agentes em listener mTLS.
 - `cmd/nexo-db`: instalação/adoção de banco, migrations, operador, rotação, preflight e seed de laboratório.
 - `cmd/nexo-vpn`: WireGuard, L2TP/IPsec, sincronização e relay CoA.
 

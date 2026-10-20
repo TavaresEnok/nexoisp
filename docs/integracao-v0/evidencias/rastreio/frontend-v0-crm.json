@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-crm.mjs",
-  "recorded_at": "2026-10-20T20:28:20.000Z",
+  "recorded_at": "2026-10-20T21:07:26.716Z",
   "steps": [
     {
       "check": "{\"ok\":true,\"checks\":[\"Prospecto valida contato obrigatório no Go; cadastro, edição e ficha usam UUID real\",\"Etapas, motivo da perda, retomada e contato persistidos com histórico\",\"Conversão cria assinante relacionado ao prospecto, marca ganho e abre a ficha\",\"Protocolo com titular/contrato/prioridade e mensagem inicial, sem incidente fictício ou SLA presumido\",\"Responsável atribuído; nota interna e resposta pública preservam visibilidade e estado do protocolo\",\"OS real criada pelo atendimento, preservando protocolo, titular, contrato e endereço informado\",\"Encerramento e reabertura persistidos; URL restaura a ficha após recarregar\",\"Fila do titular abre o mesmo protocolo e fecha preservando a ficha do assinante\",\"Busca e exportação reais de atendimentos; relatório CRM por período carrega dados do Go\",\"Prospectos usam paginação do servidor e busca reinicia a página sem navegação tardia\",\"Nota interna permanece ausente no portal; perfil financeiro não oferece ações de equipe técnica\",\"Prospectos e protocolos isolados entre provedores\"]}",

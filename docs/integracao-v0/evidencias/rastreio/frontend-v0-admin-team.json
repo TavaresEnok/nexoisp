@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-admin-team.mjs",
-  "recorded_at": "2026-10-20T20:30:47.933Z",
+  "recorded_at": "2026-10-20T21:15:52.827Z",
   "steps": [
     {
       "check": "Usuário criado pela UI autentica no Go; perfil é atualizado sem expor senha na listagem",

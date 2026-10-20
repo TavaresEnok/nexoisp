@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-remediation.mjs",
-  "recorded_at": "2026-10-20T20:32:21.222Z",
+  "recorded_at": "2026-10-20T21:17:27.631Z",
   "steps": [
     {
       "check": "R01: submenus NAS e OLT abrem equipamento operacional em vez de planejado",
@@ -127,7 +127,6 @@
         "GET /api/plans",
         "GET /api/subscribers",
         "GET /api/subscribers/:id",
-        "GET /api/tags",
         "GET /api/today",
         "POST /api/leads/:id/convert"
       ]
@@ -215,6 +214,8 @@
         "GET /api/plans",
         "GET /api/pops",
         "GET /api/reports/sla",
+        "GET /api/sla-calendar",
+        "GET /api/sla-holidays",
         "GET /api/sla-policies",
         "GET /api/today"
       ]

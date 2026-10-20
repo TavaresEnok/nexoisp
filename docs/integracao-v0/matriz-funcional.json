@@ -1003,6 +1003,38 @@
     "integrationClassification": "business-ui"
   },
   {
+    "id": "OS-15",
+    "backendState": "Implementada",
+    "entry": "/estoque → Depósitos",
+    "functionality": "Depósitos e transferência de saldo",
+    "behavior": "Depósitos além do principal, saldo por depósito e transferência com conferência do saldo de origem. Movimentos manuais e de OS usam o depósito principal; itens por número de série seguem pelas unidades.",
+    "endpoints": "GET /api/stock/warehouses; POST /api/stock/warehouses; PATCH /api/stock/warehouses/:id; GET /api/stock/items/:id/balances; POST /api/stock/items/:id/transfer",
+    "evidence": "E/estoque_compras.go; M/00060_estoque_depositos_compras.sql",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-evolution.mjs",
+      "docs/integracao-v0/evidencias/integracao-evolucao.json"
+    ],
+    "integrationClassification": "business-ui",
+    "integrationNote": "Adicionada em 20/10/2026 com backend e interface."
+  },
+  {
+    "id": "OS-16",
+    "backendState": "Implementada",
+    "entry": "/estoque → Fornecedores e Compras",
+    "functionality": "Fornecedores e pedidos de compra",
+    "behavior": "Cadastro de fornecedores e pedidos com itens e custos (rascunho, enviado, recebido, cancelado); o recebimento gera as entradas no depósito escolhido.",
+    "endpoints": "GET /api/stock/suppliers; POST /api/stock/suppliers; PATCH /api/stock/suppliers/:id; GET /api/stock/purchases; POST /api/stock/purchases; POST /api/stock/purchases/:id/status; POST /api/stock/purchases/:id/receive",
+    "evidence": "E/estoque_compras.go; M/00060_estoque_depositos_compras.sql",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-evolution.mjs",
+      "docs/integracao-v0/evidencias/integracao-evolucao.json"
+    ],
+    "integrationClassification": "business-ui",
+    "integrationNote": "Adicionada em 20/10/2026 com backend e interface."
+  },
+  {
     "id": "FI-01",
     "backendState": "Implementada",
     "entry": "/faturas",
@@ -1503,6 +1535,38 @@
     "integrationClassification": "business-ui"
   },
   {
+    "id": "RE-15",
+    "backendState": "Implementada",
+    "entry": "/rede/ftth/fttx-onu-tipo · fttx-onu-template",
+    "functionality": "Catálogo de modelos e templates de ONU",
+    "behavior": "Cadastrar modelos de ONU (portas, Wi-Fi, modo, perfil, OLTs de referência) e templates GPON/WAN associados, com testador de variáveis. Documentação técnica por provedor: nada é enviado à OLT; compatibilidade de referência não substitui homologação.",
+    "endpoints": "GET /api/olt/onu-models; POST /api/olt/onu-models; PATCH /api/olt/onu-models/:id; DELETE /api/olt/onu-models/:id; GET /api/olt/onu-templates; POST /api/olt/onu-templates; PATCH /api/olt/onu-templates/:id; DELETE /api/olt/onu-templates/:id",
+    "evidence": "E/onu_catalogo.go; M/00058_catalogo_onu.sql; C/onu-catalog.tsx",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-evolution.mjs",
+      "docs/integracao-v0/evidencias/integracao-evolucao.json"
+    ],
+    "integrationClassification": "business-ui",
+    "integrationNote": "Adicionada em 20/10/2026 com backend e interface."
+  },
+  {
+    "id": "RE-16",
+    "backendState": "Implementada",
+    "entry": "/rede/ftth/fttx-pon",
+    "functionality": "Portas PON identificadas",
+    "behavior": "Portas derivadas das ONUs vinculadas e das descobertas da OLT, com ONUs, online, sinal médio e assinantes por porta. Sem coleta SNMP; capacidade e VLAN da porta não são cadastradas.",
+    "endpoints": "GET /api/olt/pon-ports",
+    "evidence": "E/pon.go; C/optical-network.tsx",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-evolution.mjs",
+      "docs/integracao-v0/evidencias/integracao-evolucao.json"
+    ],
+    "integrationClassification": "business-ui",
+    "integrationNote": "Adicionada em 20/10/2026 com backend e interface."
+  },
+  {
     "id": "IN-01",
     "backendState": "Implementada",
     "entry": "/onus e Contrato → ONU",
@@ -1694,7 +1758,8 @@
     "validationNotes": [
       "Reserva e liberação de prefixo validadas; a entrega automática IPv6 ao NAS não existe no backend e permanece explícita na interface."
     ],
-    "integrationClassification": "business-ui"
+    "integrationClassification": "business-ui",
+    "integrationNote": " Desde 20/10/2026 o RADIUS integrado entrega o prefixo reservado como Delegated-IPv6-Prefix no provisionamento; concentradores por agente continuam sem entrega automática e não há homologação em equipamento."
   },
   {
     "id": "IN-12",
@@ -2143,6 +2208,22 @@
       "docs/integracao-v0/evidencias/producao-auditoria-anatel.json"
     ],
     "integrationClassification": "business-ui"
+  },
+  {
+    "id": "AD-22",
+    "backendState": "Implementada",
+    "entry": "/administracao/catalogos-sla → SLA",
+    "functionality": "Calendário de expediente e feriados do SLA",
+    "behavior": "Fuso, expediente por dia da semana e feriados; políticas marcadas como 'somente no expediente' contam só minutos úteis (sla_due). Prazos já atribuídos não são recalculados.",
+    "endpoints": "GET /api/sla-calendar; PUT /api/sla-calendar; GET /api/sla-holidays; POST /api/sla-holidays; DELETE /api/sla-holidays/:id",
+    "evidence": "E/sla_calendario.go; D/events.go; M/00059_sla_expediente.sql",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-evolution.mjs",
+      "docs/integracao-v0/evidencias/integracao-evolucao.json"
+    ],
+    "integrationClassification": "business-ui",
+    "integrationNote": "Adicionada em 20/10/2026 com backend e interface."
   },
   {
     "id": "PO-01",
