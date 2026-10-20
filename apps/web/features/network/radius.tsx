@@ -58,6 +58,13 @@ const setupSchema = z.object({
   }),
 });
 type RadiusStatus = z.infer<typeof statusSchema>;
+const nasSchema = z.object({
+  vendor: z.string(),
+  nas_ip: z.string().nullable(),
+  coa_host: z.string().nullable(),
+  coa_port: z.coerce.number(),
+});
+type Nas = z.infer<typeof nasSchema>;
 type Setup = z.infer<typeof setupSchema>;
 function useRadiusStatus() {
   return useSWR("erp-radius-status", async () =>
@@ -154,6 +161,7 @@ export function RadiusActions({ device }: { device: Device }) {
   const refresh = useNetworkRefresh();
   const [shown, setShown] = useState<Setup | null>(null);
   const [converting, setConverting] = useState(false);
+  const [editing, setEditing] = useState<Nas | null>(null);
   const integrated = device.driver === "radius";
   return (
     <ProfileSection
@@ -197,6 +205,17 @@ export function RadiusActions({ device }: { device: Device }) {
                 }
               >
                 Instruções do concentrador
+              </ActionButton>
+              <ActionButton
+                onClick={async () =>
+                  setEditing(
+                    nasSchema.parse(
+                      await api(`/radius/devices/${device.id}/setup`),
+                    ),
+                  )
+                }
+              >
+                Editar concentrador
               </ActionButton>
               <ActionButton
                 confirm="Gerar um novo segredo? O atual deixa de valer em até dois minutos e precisa ser trocado também no concentrador."
@@ -268,6 +287,13 @@ export function RadiusActions({ device }: { device: Device }) {
               `${value.accounts_requested ?? 0} conta(s) reenviada(s) · ${value.accounts_without_secret ?? 0} sem senha cadastrada.`,
             );
           }}
+        />
+      )}
+      {editing && (
+        <NasEditor
+          device={device}
+          nas={editing}
+          onClose={() => setEditing(null)}
         />
       )}
       {shown && <RadiusSetup value={shown} onClose={() => setShown(null)} />}
@@ -376,6 +402,93 @@ function RadiusEditor({
           ),
         );
         onDone(value);
+        await refresh();
+      }}
+    />
+  );
+}
+// Ajusta fabricante, IP de origem e destino da desconexão (CoA) do NAS integrado.
+function NasEditor({
+  device,
+  nas,
+  onClose,
+}: {
+  device: Device;
+  nas: Nas;
+  onClose: () => void;
+}) {
+  const refresh = useNetworkRefresh();
+  return (
+    <RecordEditor
+      title="Editar concentrador"
+      description="Dados usados pela autenticação integrada. Depois de trocar o fabricante, aplique novamente as instruções no concentrador."
+      initial={{
+        vendor: nas.vendor,
+        nas_ip: nas.nas_ip ?? "",
+        coa_host: nas.coa_host ?? "",
+        coa_port: String(nas.coa_port),
+      }}
+      fields={[
+        {
+          key: "vendor",
+          label: "Fabricante do concentrador",
+          type: "select",
+          options: Object.entries(vendors).map(([value, label]) => ({
+            value,
+            label: value === "mikrotik" ? label : `${label} · não homologado`,
+          })),
+        },
+        ...(!device.tunnel
+          ? [
+              {
+                key: "nas_ip",
+                label: "IP de origem do concentrador",
+                required: true,
+                hint: "Endereço de origem dos pacotes que chegam ao NexoISP.",
+              },
+            ]
+          : []),
+        {
+          key: "coa_host",
+          label: "Endereço para desconexão (CoA)",
+          maxLength: 200,
+          hint: "Deixe em branco para usar o IP de origem do concentrador.",
+        },
+        {
+          key: "coa_port",
+          label: "Porta de desconexão (CoA)",
+          type: "number",
+          required: true,
+          min: 1,
+          max: 65535,
+        },
+      ]}
+      submit="Salvar concentrador"
+      onClose={onClose}
+      onSubmit={async (values) => {
+        const result = z
+          .object({ reapply_needed: z.boolean().optional() })
+          .parse(
+            await api(`/radius/devices/${device.id}`, {
+              method: "PATCH",
+              body: {
+                ...(values.vendor !== nas.vendor
+                  ? { vendor: values.vendor }
+                  : {}),
+                ...(!device.tunnel && values.nas_ip !== (nas.nas_ip ?? "")
+                  ? { nas_ip: values.nas_ip }
+                  : {}),
+                coa_host: values.coa_host.trim() || null,
+                coa_port: Number(values.coa_port),
+              },
+            }),
+          );
+        toast.success(
+          result.reapply_needed
+            ? "Concentrador atualizado. Aplique novamente as instruções no equipamento."
+            : "Concentrador atualizado.",
+        );
+        onClose();
         await refresh();
       }}
     />

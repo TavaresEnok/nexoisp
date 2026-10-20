@@ -48,8 +48,10 @@ def main():
         acs_port = int(os.getenv("NEXO_V0_ACS_PORT", "18982"))
         acs_server = start(acs_port)
         env["NEXO_ACS_URL"] = f"http://127.0.0.1:{acs_port}"
+        env["NEXO_ACS_PUBLIC_URL"] = "https://acs.exemplo.invalid:7547"
     else:
         env.pop("NEXO_ACS_URL", None)
+        env.pop("NEXO_ACS_PUBLIC_URL", None)
     process = None
     log = open(LOCAL / ('frontend-v0-api.log' if api_port == 18881 else f'frontend-v0-api-{api_port}.log'), 'w')
     try:

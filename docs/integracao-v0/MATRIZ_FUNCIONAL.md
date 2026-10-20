@@ -89,7 +89,7 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 169 unidades incluem capacidades p
 | RE-02 | Implementada | Cadastrar e administrar agente | Integrada e validada |
 | RE-03 | Implementada | Cadastrar equipamento conectado a agente | Integrada e validada |
 | RE-04 | Implementada | Adicionar NAS RADIUS integrado | Integrada e validada |
-| RE-05 | Implementada | Parâmetros, segredo, túnel e reaplicação | Integrada e validada |
+| RE-05 | Implementada | Dados do NAS, parâmetros, segredo, túnel e reaplicação | Integrada e validada |
 | RE-06 | Implementada | Converter concentrador legado ao integrado | Integrada e validada |
 | RE-07 | Implementada | Criar acesso e manter credenciais | Integrada e validada |
 | RE-08 | Implementada | Provisionar, suspender, reativar e desconectar | Integrada e validada |

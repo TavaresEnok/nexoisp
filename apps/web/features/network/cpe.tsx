@@ -42,6 +42,10 @@ const cpeSchema = z.object({
   linked: z.boolean(),
   device: cpeDeviceSchema.nullable().optional(),
 });
+const acsStatusSchema = z.object({
+  enabled: z.boolean(),
+  public_url: z.string().nullable(),
+});
 const candidatesSchema = z.array(
   z.object({
     id: z.string(),
@@ -65,6 +69,10 @@ export function ContractCpe({ id }: { id: string }) {
   > | null>(null);
   const [wifi, setWifi] = useState<{ index: string; ssid: string } | null>(
     null,
+  );
+  const unlinked = result.data?.enabled && !result.data.linked;
+  const acs = useSWR(unlinked ? "erp-acs-status" : null, async () =>
+    acsStatusSchema.parse(await api("/acs/status")),
   );
   const d = result.data?.device;
   const action = async (kind: string) => {
@@ -98,6 +106,18 @@ export function ContractCpe({ id }: { id: string }) {
                     Nenhum roteador vinculado. Procure pela conta PPPoE do
                     contrato ou pelo número de série da etiqueta.
                   </p>
+                  {acs.data?.public_url && (
+                    <ProfileFacts
+                      items={[
+                        [
+                          "Endereço de gerência para o roteador",
+                          <code key="acs" className="mono">
+                            {acs.data.public_url}
+                          </code>,
+                        ],
+                      ]}
+                    />
+                  )}
                   {operate && (
                     <>
                       <FormField

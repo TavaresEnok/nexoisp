@@ -1338,8 +1338,8 @@
     "id": "RE-05",
     "backendState": "Implementada",
     "entry": "Concentrador → Configuração",
-    "functionality": "Parâmetros, segredo, túnel e reaplicação",
-    "behavior": "Alterar parâmetros de sessões simultâneas e intervalo de accounting; rodar novo segredo/túnel, inspecionar handshake e reaplicar contas. Operações não demonstram conectividade real por si só.",
+    "functionality": "Dados do NAS, parâmetros, segredo, túnel e reaplicação",
+    "behavior": "Editar fabricante, IP de origem e destino de desconexão (CoA) do NAS integrado; alterar sessões simultâneas e intervalo de accounting; rodar novo segredo/túnel, inspecionar handshake e reaplicar contas. Troca de fabricante pede nova aplicação das instruções. Operações não demonstram conectividade real por si só.",
     "endpoints": "PATCH /api/radius/devices/:id; POST /api/radius/devices/:id/secret; POST /api/radius/devices/:id/tunnel; POST /api/devices/:id/reapply",
     "evidence": "P/Concentradores.tsx; E/radius.go; E/rede.go; G/vpn/vpn.go",
     "integrationState": "validated",
@@ -1351,7 +1351,7 @@
       "docs/integracao-v0/evidencias/integracao-rede-complementar.json",
       "docs/integracao-v0/evidencias/producao-rede-complementar.json"
     ],
-    "integrationNote": "Parâmetros, segredo e reaplicação validados; emissão/rotação WireGuard e L2TP e leitura de handshake sintético validadas em harness separado. Chaves privadas aparecem na emissão e consultas posteriores usam marcadores. Nenhum túnel físico foi aberto.",
+    "integrationNote": "Parâmetros, segredo e reaplicação validados; emissão/rotação WireGuard e L2TP e leitura de handshake sintético validadas em harness separado. Chaves privadas aparecem na emissão e consultas posteriores usam marcadores. Nenhum túnel físico foi aberto. Edição do NAS integrado (PATCH /api/radius/devices/:id) validada pela interface em 20/10/2026 com releitura no Go.",
     "integrationClassification": "business-ui"
   },
   {
@@ -1455,8 +1455,8 @@
     "backendState": "Implementada",
     "entry": "Contrato → CPE",
     "functionality": "Vincular equipamento e administrar Wi-Fi",
-    "behavior": "Busca candidatos no ACS, vincula/desvincula, mostra dados, atualiza parâmetros, reinicia e configura rede Wi-Fi quando o dispositivo expõe os parâmetros. Envia tarefas ao ACS; execução assíncrona e compatibilidade por modelo não são comprovadas pela simples aceitação da tarefa.",
-    "endpoints": "GET /api/contracts/:id/cpe; GET /api/contracts/:id/cpe/candidates; POST /api/contracts/:id/cpe/link; DELETE /api/contracts/:id/cpe/link; POST /api/contracts/:id/cpe/wifi; POST /api/contracts/:id/cpe/reboot; POST /api/contracts/:id/cpe/refresh",
+    "behavior": "Mostra o endereço público do servidor de gerência para configurar o roteador, busca candidatos no ACS, vincula/desvincula, mostra dados, atualiza parâmetros, reinicia e configura rede Wi-Fi quando o dispositivo expõe os parâmetros. Envia tarefas ao ACS; execução assíncrona e compatibilidade por modelo não são comprovadas pela simples aceitação da tarefa.",
+    "endpoints": "GET /api/acs/status; GET /api/contracts/:id/cpe; GET /api/contracts/:id/cpe/candidates; POST /api/contracts/:id/cpe/link; DELETE /api/contracts/:id/cpe/link; POST /api/contracts/:id/cpe/wifi; POST /api/contracts/:id/cpe/reboot; POST /api/contracts/:id/cpe/refresh",
     "evidence": "P/Cpe.tsx; E/cpe.go; G/acs/",
     "integrationState": "validated",
     "validation": [
@@ -1465,7 +1465,8 @@
       "docs/integracao-v0/evidencias/producao-cpe.json"
     ],
     "validationNotes": [
-      "ACS sintético TR-098/TR-181: vínculo, leitura, Wi-Fi aplicado/enfileirado, reinício, releitura e desvínculo; sem roteador físico."
+      "ACS sintético TR-098/TR-181: vínculo, leitura, Wi-Fi aplicado/enfileirado, reinício, releitura e desvínculo; sem roteador físico.",
+      "Endereço público do ACS (GET /api/acs/status) exibido no contrato sem roteador vinculado; harness com NEXO_ACS_PUBLIC_URL sintético."
     ],
     "integrationClassification": "business-ui"
   },
