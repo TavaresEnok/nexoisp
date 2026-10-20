@@ -1,0 +1,23 @@
+{
+  "inicio": 0.871,
+  "assinantes": 0.921,
+  "ficha": 0.775,
+  "ficha-cadastro": 0.776,
+  "ficha-financeiro": 0.757,
+  "ficha-conexao": 0.755,
+  "ficha-atendimento": 0.771,
+  "ficha-historico": 0.748,
+  "contratos": 0.901,
+  "planos": 0.935,
+  "faturas": 0.717,
+  "atendimentos": 0.878,
+  "ordens": 0.923,
+  "rede": 0.614,
+  "online": 0.863,
+  "mapa": 0.807,
+  "ftth": 0.635,
+  "ipam": 0.734,
+  "cgnat": 0.707,
+  "consulta-ip": 0.553,
+  "configuracoes": 0.571
+}

@@ -1,0 +1,53 @@
+{
+  "scenario": "frontend-v0-map.mjs",
+  "recorded_at": "2026-10-20T15:21:44.135Z",
+  "steps": [
+    {
+      "check": "Localização do contrato é gravada pelo endpoint Go, sem geocodificação nem aproximação de endereço",
+      "requests": [
+        "GET /api/contracts",
+        "GET /api/map/coverage",
+        "GET /api/map/points",
+        "GET /api/me",
+        "GET /api/pops",
+        "GET /api/today",
+        "PUT /api/contracts/:id/location"
+      ]
+    },
+    {
+      "check": "Mapa e lista consultam contratos, POPs e caixas com coordenadas reais; caixa abre a ocupação de portas",
+      "requests": [
+        "GET /api/ftth/boxes",
+        "GET /api/ftth/boxes/:id",
+        "GET /api/map/coverage",
+        "GET /api/map/points",
+        "PUT /api/pops/:id/location"
+      ]
+    },
+    {
+      "check": "Clique no mapa move o contrato com coordenadas exatas e confirmação do Go",
+      "requests": [
+        "GET /api/map/coverage",
+        "GET /api/map/points",
+        "GET /api/me",
+        "GET /api/pops",
+        "GET /api/today",
+        "PUT /api/contracts/:id/location"
+      ]
+    },
+    {
+      "check": "Remoção de coordenadas exige confirmação; camadas e situação alteram a consulta sem inventar pontos",
+      "requests": [
+        "GET /api/map/coverage",
+        "GET /api/map/points",
+        "PUT /api/contracts/:id/location"
+      ]
+    },
+    {
+      "check": "Mapa mantém consulta no celular, isolamento por provedor e CSP; blocos OSM foram interceptados apenas no teste",
+      "requests": [
+        "GET /api/map/points"
+      ]
+    }
+  ]
+}

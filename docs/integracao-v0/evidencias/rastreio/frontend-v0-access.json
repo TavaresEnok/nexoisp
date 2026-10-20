@@ -1,0 +1,184 @@
+{
+  "scenario": "frontend-v0-access.mjs",
+  "recorded_at": "2026-10-20T15:20:42.487Z",
+  "steps": [
+    {
+      "check": "Provisionamento pela ficha usa equipamento real, emite senha apenas uma vez e mantém intenção separada da leitura ausente",
+      "requests": [
+        "GET /api/addons",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/cpe",
+        "GET /api/contracts/:id/ftth",
+        "GET /api/contracts/:id/ips",
+        "GET /api/contracts/:id/ipv6",
+        "GET /api/contracts/:id/onu",
+        "GET /api/contracts/:id/service",
+        "GET /api/contracts/:id/states",
+        "GET /api/devices",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/today",
+        "POST /api/contracts/:id/service"
+      ]
+    },
+    {
+      "check": "Troca de senha valida tamanho, solicita reaplicação e vínculo MAC é normalizado pelo Go",
+      "requests": [
+        "GET /api/contracts/:id/service",
+        "PATCH /api/resources/:id/mac",
+        "PATCH /api/resources/:id/secret"
+      ]
+    },
+    {
+      "check": "Suspensão, reativação, reaplicação e desconexão geram operações no Go sem inventar confirmação do NAS",
+      "requests": [
+        "GET /api/contracts/:id/onu",
+        "GET /api/contracts/:id/service",
+        "POST /api/resources/:id/disconnect",
+        "POST /api/resources/:id/provision",
+        "POST /api/resources/:id/resume",
+        "POST /api/resources/:id/suspend"
+      ]
+    },
+    {
+      "check": "Evidências preservam a ficha e a seção Conexão do titular consulta o mesmo acesso real",
+      "requests": [
+        "GET /api/contracts/:id/finance",
+        "GET /api/contracts/:id/service",
+        "GET /api/contracts/:id/states",
+        "GET /api/dashboard",
+        "GET /api/me",
+        "GET /api/operations/:id",
+        "GET /api/subscribers",
+        "GET /api/subscribers/:id",
+        "GET /api/subscribers/:id/notes",
+        "GET /api/subscribers/:id/timeline",
+        "GET /api/tickets",
+        "GET /api/today",
+        "GET /api/work-orders"
+      ]
+    },
+    {
+      "check": "Consulta de conexões usa o endpoint operacional e não trata intenção ativa sem leitura como sessão online",
+      "requests": [
+        "GET /api/me",
+        "GET /api/network/online",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Relatos sintéticos do agente alimentam sessão, consumo mensal, exportação, séries e disponibilidade sem estimar tráfego ausente",
+      "requests": [
+        "GET /api/addons",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/availability",
+        "GET /api/contracts/:id/radius-log",
+        "GET /api/contracts/:id/sessions",
+        "GET /api/contracts/:id/states",
+        "GET /api/contracts/:id/usage",
+        "GET /api/contracts/:id/usage-series",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Consulta de sessão observada permite busca, CSV e desconexão selecionada com motivo registrado no Go",
+      "requests": [
+        "GET /api/me",
+        "GET /api/network/online",
+        "GET /api/today",
+        "POST /api/network/disconnect"
+      ]
+    },
+    {
+      "check": "Desconexão recusada pelo Go permanece explícita e não é apresentada como execução bem-sucedida",
+      "requests": [
+        "GET /api/network/online",
+        "POST /api/network/disconnect"
+      ]
+    },
+    {
+      "check": "RADIUS integrado oferece IPoE por MAC sem senha e Hotspot com credencial; ambos preservam o tipo de acesso no Go",
+      "requests": [
+        "GET /api/addons",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/cpe",
+        "GET /api/contracts/:id/ftth",
+        "GET /api/contracts/:id/ips",
+        "GET /api/contracts/:id/ipv6",
+        "GET /api/contracts/:id/onu",
+        "GET /api/contracts/:id/service",
+        "GET /api/contracts/:id/states",
+        "GET /api/devices",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/today",
+        "POST /api/contracts/:id/service"
+      ]
+    },
+    {
+      "check": "Driver demonstrativo criado pela UI somente no servidor de demonstração identifica explicitamente a leitura sintética, sem acesso a NAS físico",
+      "requests": [
+        "GET /api/addons",
+        "GET /api/agents",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/cpe",
+        "GET /api/contracts/:id/ftth",
+        "GET /api/contracts/:id/ips",
+        "GET /api/contracts/:id/ipv6",
+        "GET /api/contracts/:id/onu",
+        "GET /api/contracts/:id/service",
+        "GET /api/contracts/:id/states",
+        "GET /api/devices",
+        "GET /api/me",
+        "GET /api/network/health",
+        "GET /api/network/online",
+        "GET /api/plans",
+        "GET /api/radius/status",
+        "GET /api/today",
+        "POST /api/devices"
+      ]
+    },
+    {
+      "check": "Conta financeira sem permissão de rede não recebe a seção de conexão; Go nega alterações e acesso entre provedores",
+      "requests": [
+        "GET /api/contracts/:id/finance",
+        "GET /api/contracts/:id/states",
+        "GET /api/dashboard",
+        "GET /api/me",
+        "GET /api/subscribers",
+        "GET /api/subscribers/:id",
+        "GET /api/subscribers/:id/notes",
+        "GET /api/subscribers/:id/timeline",
+        "GET /api/tickets",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Erro de consulta de serviço exibe falha e não oferece criar um acesso substituto",
+      "requests": [
+        "GET /api/contracts/:id/finance",
+        "GET /api/contracts/:id/service",
+        "GET /api/contracts/:id/states",
+        "GET /api/dashboard",
+        "GET /api/me",
+        "GET /api/subscribers",
+        "GET /api/subscribers/:id",
+        "GET /api/subscribers/:id/notes",
+        "GET /api/subscribers/:id/timeline",
+        "GET /api/tickets",
+        "GET /api/today",
+        "GET /api/work-orders"
+      ]
+    }
+  ]
+}

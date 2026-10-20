@@ -1,0 +1,81 @@
+{
+  "scenario": "frontend-v0-quality.mjs",
+  "recorded_at": "2026-10-20T15:22:03.067Z",
+  "steps": [
+    {
+      "check": "Catálogo criado, renomeado e desativado/reativado; seleções operacionais respeitam itens ativos",
+      "requests": [
+        "GET /api/catalogs",
+        "GET /api/me",
+        "GET /api/today",
+        "PATCH /api/catalogs/:id",
+        "POST /api/catalogs"
+      ]
+    },
+    {
+      "check": "SLA com tipo, prioridade e escalonamento aplica prazo real ao atendimento; edição, ativação e relatório preservam política em uso",
+      "requests": [
+        "GET /api/catalogs",
+        "GET /api/me",
+        "GET /api/reports/sla",
+        "GET /api/sla-policies",
+        "GET /api/staff",
+        "GET /api/today",
+        "PATCH /api/sla-policies/:id",
+        "POST /api/sla-policies"
+      ]
+    },
+    {
+      "check": "SLA de OS aceita filtro por natureza e exclusão confirmada apenas quando não utilizado",
+      "requests": [
+        "DELETE /api/sla-policies/:id",
+        "GET /api/catalogs",
+        "GET /api/reports/sla",
+        "GET /api/sla-policies",
+        "POST /api/sla-policies"
+      ]
+    },
+    {
+      "check": "Definições de campo conservam tipo e identificador; opções, ordem, valores e ativação usam o Go",
+      "requests": [
+        "GET /api/custom-fields",
+        "PATCH /api/custom-fields/:id",
+        "POST /api/custom-fields"
+      ]
+    },
+    {
+      "check": "Kit criado na UI exclui itens serializados; aplicação em OS baixa quantidades reais do estoque e conserva ativação",
+      "requests": [
+        "GET /api/install-kits",
+        "GET /api/stock/items",
+        "PATCH /api/install-kits/:id",
+        "POST /api/install-kits"
+      ]
+    },
+    {
+      "check": "Regra de comissão mantém centavos e apura OS concluída com responsável real; relatório explicita regras vigentes sem executar pagamento",
+      "requests": [
+        "GET /api/commission-rules",
+        "GET /api/me",
+        "GET /api/reports/commissions",
+        "GET /api/today",
+        "POST /api/commission-rules"
+      ]
+    },
+    {
+      "check": "Pesquisa nasce da conclusão da OS; resposta autenticada do assinante aparece na administração com nota e comentário",
+      "requests": [
+        "GET /api/me",
+        "GET /api/surveys",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Cadastros e configurações respeitam permissões e isolamento por provedor",
+      "requests": [
+        "GET /api/me",
+        "GET /api/today"
+      ]
+    }
+  ]
+}

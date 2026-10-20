@@ -1,0 +1,63 @@
+{
+  "scenario": "frontend-v0-ftth.mjs",
+  "recorded_at": "2026-10-20T15:21:24.315Z",
+  "steps": [
+    {
+      "check": "Cadastro CEO/CTO, coordenadas em conjunto, hierarquia, OLT/PON e edição persistem no Go",
+      "requests": [
+        "GET /api/devices",
+        "GET /api/ftth/boxes",
+        "GET /api/me",
+        "GET /api/today",
+        "PATCH /api/ftth/boxes/:id",
+        "POST /api/ftth/boxes"
+      ]
+    },
+    {
+      "check": "Reserva e vínculo a contrato ocupam portas reais; o Go impede ocupação concorrente da mesma porta",
+      "requests": [
+        "GET /api/contracts",
+        "GET /api/ftth/boxes",
+        "GET /api/ftth/boxes/:id",
+        "POST /api/ftth/boxes/:id/drops"
+      ]
+    },
+    {
+      "check": "Ficha de portas restaura pela URL e liberação confirmada devolve reserva e contrato à capacidade livre",
+      "requests": [
+        "DELETE /api/ftth/drops/:id",
+        "GET /api/addons",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/cpe",
+        "GET /api/contracts/:id/ftth",
+        "GET /api/contracts/:id/ips",
+        "GET /api/contracts/:id/ipv6",
+        "GET /api/contracts/:id/onu",
+        "GET /api/contracts/:id/service",
+        "GET /api/contracts/:id/states",
+        "GET /api/ftth/boxes",
+        "GET /api/ftth/boxes/:id",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Go bloqueia ciclos de hierarquia e exclusão de caixa com derivadas",
+      "requests": [
+        "DELETE /api/ftth/boxes/:id",
+        "GET /api/devices",
+        "PATCH /api/ftth/boxes/:id"
+      ]
+    },
+    {
+      "check": "Caixas sem dependências podem ser excluídas; consulta preserva isolamento por provedor",
+      "requests": [
+        "DELETE /api/ftth/boxes/:id",
+        "GET /api/ftth/boxes"
+      ]
+    }
+  ]
+}

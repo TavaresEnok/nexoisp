@@ -1,0 +1,50 @@
+{
+  "scenario": "frontend-v0-finance.mjs",
+  "recorded_at": "2026-10-20T15:19:08.775Z",
+  "steps": [
+    {
+      "check": "{\"ok\":true,\"checks\":[\"Geração pela UI repetida preserva uma mensalidade por contrato/competência\",\"Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor\",\"Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento\",\"Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI\",\"Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos\",\"Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada\",\"Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido\",\"Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go\",\"Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis\",\"Faturas isoladas entre provedores e ações financeiras restritas pelo perfil\"]}",
+      "requests": [
+        "GET /api/addons",
+        "GET /api/companies",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/finance",
+        "GET /api/contracts/:id/states",
+        "GET /api/contracts/:id/trust-release",
+        "GET /api/finance/export",
+        "GET /api/finance/monthly",
+        "GET /api/finance/reconciliation",
+        "GET /api/finance/reports/aging",
+        "GET /api/finance/reports/receipts",
+        "GET /api/finance/reports/to-cancel",
+        "GET /api/finance/reports/without-invoice",
+        "GET /api/finance/settings",
+        "GET /api/finance/summary",
+        "GET /api/health",
+        "GET /api/invoices",
+        "GET /api/invoices/:id",
+        "GET /api/invoices/:id/due",
+        "GET /api/me",
+        "GET /api/notice-page",
+        "GET /api/plans",
+        "GET /api/pops",
+        "GET /api/tags",
+        "GET /api/today",
+        "POST /api/auth/login",
+        "POST /api/contracts/:id/agreement",
+        "POST /api/demo-gateway/pay",
+        "POST /api/finance/generate",
+        "POST /api/finance/reconcile",
+        "POST /api/invoices",
+        "POST /api/invoices/:id/cancel",
+        "POST /api/invoices/:id/manual-payment",
+        "POST /api/invoices/:id/payments/:id/reverse",
+        "POST /api/invoices/:id/resolve",
+        "PUT /api/finance/settings",
+        "PUT /api/notice-page"
+      ]
+    }
+  ]
+}

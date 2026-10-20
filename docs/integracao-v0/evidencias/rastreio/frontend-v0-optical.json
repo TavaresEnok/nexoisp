@@ -1,0 +1,85 @@
+{
+  "scenario": "frontend-v0-optical.mjs",
+  "recorded_at": "2026-10-20T15:20:55.162Z",
+  "steps": [
+    {
+      "check": "Descoberta relatada pelo agente é vinculada pela UI ao contrato, PON, perfis e VLAN; driver Huawei mantém a limitação de homologação explícita",
+      "requests": [
+        "GET /api/addons",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/cpe",
+        "GET /api/contracts/:id/ftth",
+        "GET /api/contracts/:id/ips",
+        "GET /api/contracts/:id/ipv6",
+        "GET /api/contracts/:id/onu",
+        "GET /api/contracts/:id/service",
+        "GET /api/contracts/:id/states",
+        "GET /api/devices",
+        "GET /api/me",
+        "GET /api/olt/discoveries",
+        "GET /api/onus",
+        "GET /api/plans",
+        "GET /api/today",
+        "POST /api/contracts/:id/onu"
+      ]
+    },
+    {
+      "check": "Relato sintético da tentativa confirma versão e potências; reaplicação solicita nova operação sem alegar homologação física",
+      "requests": [
+        "GET /api/contracts/:id/onu",
+        "GET /api/contracts/:id/service",
+        "POST /api/onus/:id/authorize"
+      ]
+    },
+    {
+      "check": "NOC consulta contadores, alertas e PON reais; limiares são definidos pelo provedor e gravados pelo Go",
+      "requests": [
+        "GET /api/me",
+        "GET /api/noc/overview",
+        "GET /api/today",
+        "PUT /api/noc/settings"
+      ]
+    },
+    {
+      "check": "Diagnóstico apresenta conclusão, limites e evidências datadas do Go sem executar teste remoto",
+      "requests": [
+        "GET /api/addons",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/cpe",
+        "GET /api/contracts/:id/diagnosis",
+        "GET /api/contracts/:id/ftth",
+        "GET /api/contracts/:id/ips",
+        "GET /api/contracts/:id/ipv6",
+        "GET /api/contracts/:id/onu",
+        "GET /api/contracts/:id/service",
+        "GET /api/contracts/:id/states",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Desautorização exige confirmação e só permite substituição após ausência confirmada pela OLT sintética",
+      "requests": [
+        "GET /api/contracts/:id/onu",
+        "GET /api/contracts/:id/service",
+        "GET /api/devices",
+        "POST /api/contracts/:id/onu",
+        "POST /api/onus/:id/deauthorize"
+      ]
+    },
+    {
+      "check": "Falha de consulta, permissões do NOC e isolamento das ONUs entre provedores são preservados",
+      "requests": [
+        "GET /api/me",
+        "GET /api/olt/discoveries",
+        "GET /api/onus",
+        "GET /api/today"
+      ]
+    }
+  ]
+}

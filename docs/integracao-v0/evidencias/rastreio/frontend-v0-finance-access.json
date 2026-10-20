@@ -1,0 +1,64 @@
+{
+  "scenario": "frontend-v0-finance-access.mjs",
+  "recorded_at": "2026-10-20T15:24:09.319Z",
+  "steps": [
+    {
+      "check": "Política salva na UI executa verificação real de inadimplência e solicita suspensão no Go sem inventar confirmação de equipamento",
+      "requests": [
+        "GET /api/finance/settings",
+        "GET /api/me",
+        "GET /api/notice-page",
+        "GET /api/today",
+        "POST /api/finance/run-auto-suspend",
+        "PUT /api/finance/settings"
+      ]
+    },
+    {
+      "check": "Confiança concedida pela equipe registra autor, dias e motivo; liberação ativa impede suspensão por cobrança e o Go rejeita repetição",
+      "requests": [
+        "GET /api/addons",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/finance",
+        "GET /api/contracts/:id/states",
+        "GET /api/contracts/:id/trust-release",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/today",
+        "POST /api/contracts/:id/trust-release"
+      ]
+    },
+    {
+      "check": "Ficha do titular conserva cadastro, versão e preço dos contratos; novo contrato é criado na ficha e abre sua consulta operacional",
+      "requests": [
+        "GET /api/catalogs",
+        "GET /api/contracts/:id/finance",
+        "GET /api/contracts/:id/states",
+        "GET /api/custom-fields",
+        "GET /api/dashboard",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/subscribers",
+        "GET /api/subscribers/:id",
+        "GET /api/subscribers/:id/contacts",
+        "GET /api/subscribers/:id/notes",
+        "GET /api/subscribers/:id/portal-access",
+        "GET /api/subscribers/:id/timeline",
+        "GET /api/tickets",
+        "GET /api/today",
+        "GET /api/work-orders",
+        "POST /api/contracts"
+      ]
+    },
+    {
+      "check": "(sem verificação posterior)",
+      "requests": [
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/plans"
+      ]
+    }
+  ]
+}

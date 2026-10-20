@@ -1,0 +1,78 @@
+{
+  "scenario": "frontend-v0-admin-team.mjs",
+  "recorded_at": "2026-10-20T15:21:52.325Z",
+  "steps": [
+    {
+      "check": "Usuário criado pela UI autentica no Go; perfil é atualizado sem expor senha na listagem",
+      "requests": [
+        "GET /api/me",
+        "GET /api/today",
+        "GET /api/users",
+        "PATCH /api/users/:id",
+        "POST /api/users"
+      ]
+    },
+    {
+      "check": "Administrador redefine senha real e remove MFA com confirmação; senha antiga deixa de autenticar",
+      "requests": [
+        "GET /api/me",
+        "GET /api/today",
+        "GET /api/users",
+        "PATCH /api/users/:id"
+      ]
+    },
+    {
+      "check": "Escopo por POP restringe contratos de outro POP e conserva contratos do POP selecionado e sem POP",
+      "requests": [
+        "GET /api/pops",
+        "GET /api/users",
+        "PUT /api/users/:id/pops"
+      ]
+    },
+    {
+      "check": "Bloqueio e desbloqueio afetam login; remoção do próprio acesso de administrador é impedida no Go",
+      "requests": [
+        "GET /api/users",
+        "PATCH /api/users/:id"
+      ]
+    },
+    {
+      "check": "Empresas são cadastradas, ativadas e definidas como padrão; o Go conserva uma única padrão e impede inativá-la",
+      "requests": [
+        "GET /api/companies",
+        "GET /api/me",
+        "GET /api/today",
+        "PATCH /api/companies/:id",
+        "POST /api/companies"
+      ]
+    },
+    {
+      "check": "Empresa do contrato usa cadastro real e filtro de faturas conserva o vínculo na URL",
+      "requests": [
+        "GET /api/addons",
+        "GET /api/companies",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/equipment",
+        "GET /api/contracts/:id/states",
+        "GET /api/custom-fields",
+        "GET /api/finance/monthly",
+        "GET /api/finance/summary",
+        "GET /api/invoices",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/pops",
+        "GET /api/today",
+        "PUT /api/contracts/:id/company"
+      ]
+    },
+    {
+      "check": "Administração mantém permissões do Go e isolamento de usuários e empresas por provedor",
+      "requests": [
+        "GET /api/finance/summary",
+        "GET /api/invoices"
+      ]
+    }
+  ]
+}

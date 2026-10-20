@@ -1,0 +1,22 @@
+{
+  "scenario": "frontend-v0-session.mjs",
+  "recorded_at": "2026-10-20T15:18:24.973Z",
+  "steps": [
+    {
+      "check": "{\"ok\":true,\"checks\":[\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
+      "requests": [
+        "GET /api/dashboard",
+        "GET /api/health",
+        "GET /api/me",
+        "GET /api/subscribers",
+        "GET /api/today",
+        "POST /api/auth/login",
+        "POST /api/auth/logout",
+        "POST /api/me/mfa/disable",
+        "POST /api/me/mfa/enable",
+        "POST /api/me/mfa/setup",
+        "POST /api/me/password"
+      ]
+    }
+  ]
+}

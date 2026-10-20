@@ -1,0 +1,78 @@
+{
+  "scenario": "frontend-v0-ipam.mjs",
+  "recorded_at": "2026-10-20T15:21:35.317Z",
+  "steps": [
+    {
+      "check": "Cadastro e edição de pool IPv4 preservam CIDR; reserva automática ignora endereço de rede e grava descrição no Go",
+      "requests": [
+        "GET /api/devices",
+        "GET /api/ipam/pools",
+        "GET /api/ipam/pools/:id/allocations",
+        "GET /api/me",
+        "GET /api/today",
+        "PATCH /api/ipam/pools/:id",
+        "POST /api/ipam/pools",
+        "POST /api/ipam/pools/:id/allocations"
+      ]
+    },
+    {
+      "check": "Reserva a contrato, unicidade do IP e restauração da ficha pela URL seguem o Go",
+      "requests": [
+        "GET /api/contracts",
+        "GET /api/ipam/pools",
+        "GET /api/ipam/pools/:id/allocations",
+        "GET /api/me",
+        "GET /api/today",
+        "POST /api/ipam/pools/:id/allocations"
+      ]
+    },
+    {
+      "check": "Delegação automática /56 é registrada no contrato com aviso explícito de que o backend não entrega IPv6 ao NAS",
+      "requests": [
+        "GET /api/addons",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/cpe",
+        "GET /api/contracts/:id/ftth",
+        "GET /api/contracts/:id/ips",
+        "GET /api/contracts/:id/ipv6",
+        "GET /api/contracts/:id/onu",
+        "GET /api/contracts/:id/service",
+        "GET /api/contracts/:id/states",
+        "GET /api/devices",
+        "GET /api/ipam/pools",
+        "GET /api/ipam/pools/:id/delegations",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/today",
+        "POST /api/ipam/pools",
+        "POST /api/ipam/pools/:id/delegations"
+      ]
+    },
+    {
+      "check": "Reserva e liberação de IPv6 individual exigem endereço explícito e não se confundem com delegação de prefixo",
+      "requests": [
+        "DELETE /api/ipam/allocations/:id",
+        "GET /api/devices",
+        "GET /api/ipam/pools",
+        "GET /api/ipam/pools/:id/allocations",
+        "GET /api/me",
+        "GET /api/today",
+        "POST /api/ipam/pools",
+        "POST /api/ipam/pools/:id/allocations"
+      ]
+    },
+    {
+      "check": "Liberação de prefixo e endereços atualiza a ocupação e permite excluir blocos sem vínculos",
+      "requests": [
+        "DELETE /api/ipam/allocations/:id",
+        "DELETE /api/ipam/delegations/:id",
+        "DELETE /api/ipam/pools/:id",
+        "GET /api/ipam/pools",
+        "GET /api/ipam/pools/:id/allocations",
+        "GET /api/ipam/pools/:id/delegations"
+      ]
+    }
+  ]
+}

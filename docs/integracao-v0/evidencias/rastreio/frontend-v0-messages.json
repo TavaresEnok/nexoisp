@@ -1,0 +1,61 @@
+{
+  "scenario": "frontend-v0-messages.mjs",
+  "recorded_at": "2026-10-20T15:23:49.752Z",
+  "steps": [
+    {
+      "check": "Webhook da equipe é configurado pela UI, recebe teste e entrega aviso real originado por chamado do portal no receptor local",
+      "requests": [
+        "GET /api/me",
+        "GET /api/notifications",
+        "GET /api/today",
+        "POST /api/notifications/deliver",
+        "POST /api/notifications/test",
+        "PUT /api/notifications/settings"
+      ]
+    },
+    {
+      "check": "Canal guarda autorização sem expô-la e envia teste com campos corretos; ativação usa o backend",
+      "requests": [
+        "GET /api/me",
+        "GET /api/notice-channels",
+        "GET /api/today",
+        "PATCH /api/notice-channels/:id",
+        "POST /api/notice-channels",
+        "POST /api/notice-channels/:id/test"
+      ]
+    },
+    {
+      "check": "Modelo com variáveis é criado e a prévia ilustrativa é renderizada pelo Go sem disparar mensagens",
+      "requests": [
+        "GET /api/notice-templates",
+        "POST /api/notice-templates"
+      ]
+    },
+    {
+      "check": "Régua filtra plano e data, respeita consentimento e não repete envio do mesmo título/regra; modelo em uso não é excluído",
+      "requests": [
+        "GET /api/notice-rules",
+        "GET /api/plans",
+        "GET /api/pops",
+        "GET /api/tags",
+        "POST /api/notice-rules",
+        "POST /api/notice-rules/run"
+      ]
+    },
+    {
+      "check": "Histórico conserva envio e recusa por consentimento; regras, modelos e canais podem ser excluídos após remover referências",
+      "requests": [
+        "DELETE /api/notice-channels/:id",
+        "DELETE /api/notice-rules/:id",
+        "DELETE /api/notice-templates/:id",
+        "GET /api/me",
+        "GET /api/notice-channels",
+        "GET /api/notice-log",
+        "GET /api/notice-rules",
+        "GET /api/notice-templates",
+        "GET /api/today",
+        "PATCH /api/notice-rules/:id"
+      ]
+    }
+  ]
+}

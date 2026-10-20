@@ -1,0 +1,110 @@
+{
+  "scenario": "frontend-v0-stock.mjs",
+  "recorded_at": "2026-10-20T15:20:01.614Z",
+  "steps": [
+    {
+      "check": "Catálogo cadastra material com código, unidade e mínimo; alerta usa saldo real",
+      "requests": [
+        "GET /api/health",
+        "GET /api/me",
+        "GET /api/stock/items",
+        "GET /api/today",
+        "POST /api/auth/login",
+        "POST /api/stock/items"
+      ]
+    },
+    {
+      "check": "Entradas, saídas e ajuste com sinal preservam os três movimentos e saldo calculado pelo Go",
+      "requests": [
+        "GET /api/stock/items",
+        "GET /api/stock/items/:id/movements",
+        "POST /api/stock/items/:id/movements"
+      ]
+    },
+    {
+      "check": "Edição, ativação e mínimo persistem; Go bloqueia mudar serialização após movimento",
+      "requests": [
+        "GET /api/stock/items",
+        "PATCH /api/stock/items/:id"
+      ]
+    },
+    {
+      "check": "Lote normaliza séries no Go e duplicidade desfaz toda a entrada, sem unidade ou saldo parcial",
+      "requests": [
+        "GET /api/staff",
+        "GET /api/stock/items",
+        "GET /api/stock/items/:id/units",
+        "POST /api/stock/items",
+        "POST /api/stock/items/:id/units"
+      ]
+    },
+    {
+      "check": "Distribuição ao técnico e retorno ao almoxarifado preservam saldo e atualizam custódia",
+      "requests": [
+        "GET /api/stock/items",
+        "GET /api/stock/items/:id/units",
+        "POST /api/stock/units/:id/transfer"
+      ]
+    },
+    {
+      "check": "Contrato mostra série, comodato e OS; retirada confirmada devolve a unidade ao saldo e encerra a pendência de recolhimento",
+      "requests": [
+        "GET /api/addons",
+        "GET /api/companies",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/equipment",
+        "GET /api/contracts/:id/states",
+        "GET /api/custom-fields",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/pops",
+        "GET /api/staff",
+        "GET /api/stock/items",
+        "GET /api/stock/items/:id/units",
+        "GET /api/today",
+        "POST /api/stock/units/:id/status"
+      ]
+    },
+    {
+      "check": "Defeito e conserto mantêm a unidade rastreável; baixa exige motivo, reduz saldo e não pode ser desfeita",
+      "requests": [
+        "GET /api/stock/items",
+        "GET /api/stock/items/:id/units",
+        "POST /api/stock/units/:id/status"
+      ]
+    },
+    {
+      "check": "Histórico por série preserva entrada, custódia, instalação, retirada, defeito, conserto, baixa, autor e data",
+      "requests": [
+        "GET /api/stock/units/:id/events"
+      ]
+    },
+    {
+      "check": "Catálogo operacional permanece navegável no celular com a tabela oficial do v0",
+      "requests": [
+        "GET /api/me",
+        "GET /api/stock/items",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Atendimento consulta unidades e histórico sem controles nem autorização para movimentar estoque",
+      "requests": [
+        "GET /api/me",
+        "GET /api/stock/items",
+        "GET /api/stock/items/:id/units",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Erro na consulta de estoque não introduz catálogo ou saldos demonstrativos",
+      "requests": [
+        "GET /api/me",
+        "GET /api/stock/items",
+        "GET /api/today"
+      ]
+    }
+  ]
+}

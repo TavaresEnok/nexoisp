@@ -1,0 +1,223 @@
+{
+  "scenario": "frontend-v0-remediation.mjs",
+  "recorded_at": "2026-10-20T15:24:31.027Z",
+  "steps": [
+    {
+      "check": "R01: submenus NAS e OLT abrem equipamento operacional em vez de planejado",
+      "requests": [
+        "GET /api/agents",
+        "GET /api/devices",
+        "GET /api/me",
+        "GET /api/network/health",
+        "GET /api/network/online",
+        "GET /api/radius/status",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "R02: alerta aparece pela lista e URL direta na aba inicial; anotação comum não vira alerta",
+      "requests": [
+        "GET /api/contracts/:id/finance",
+        "GET /api/contracts/:id/states",
+        "GET /api/dashboard",
+        "GET /api/me",
+        "GET /api/subscribers",
+        "GET /api/subscribers/:id",
+        "GET /api/subscribers/:id/notes",
+        "GET /api/subscribers/:id/timeline",
+        "GET /api/tickets",
+        "GET /api/today",
+        "GET /api/work-orders"
+      ]
+    },
+    {
+      "check": "R02: arquivamento atualiza também o alerta global da ficha",
+      "requests": [
+        "GET /api/catalogs",
+        "GET /api/contracts/:id/finance",
+        "GET /api/contracts/:id/states",
+        "GET /api/custom-fields",
+        "GET /api/subscribers/:id/contacts",
+        "GET /api/subscribers/:id/notes",
+        "GET /api/subscribers/:id/portal-access",
+        "GET /api/subscribers/:id/timeline",
+        "GET /api/tickets",
+        "GET /api/work-orders",
+        "PATCH /api/notes/:id"
+      ]
+    },
+    {
+      "check": "R04: indicação cadastrada pela interface, persistida e apresentada no relatório real",
+      "requests": [
+        "GET /api/addons",
+        "GET /api/companies",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/equipment",
+        "GET /api/contracts/:id/states",
+        "GET /api/custom-fields",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/pops",
+        "GET /api/reports/referrals",
+        "GET /api/subscribers",
+        "GET /api/subscribers/:id",
+        "GET /api/today",
+        "PUT /api/contracts/:id/referral"
+      ]
+    },
+    {
+      "check": "R04: financeiro consulta sem poder alterar; outro provedor não altera indicação",
+      "requests": [
+        "GET /api/addons",
+        "GET /api/companies",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/equipment",
+        "GET /api/contracts/:id/states",
+        "GET /api/custom-fields",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/pops",
+        "GET /api/reports/referrals",
+        "GET /api/subscribers",
+        "GET /api/subscribers/:id",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "R04: remoção da indicação pela interface preserva o contrato",
+      "requests": [
+        "GET /api/addons",
+        "GET /api/companies",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/equipment",
+        "GET /api/contracts/:id/states",
+        "GET /api/custom-fields",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/pops",
+        "GET /api/subscribers/:id",
+        "GET /api/today",
+        "PUT /api/contracts/:id/referral"
+      ]
+    },
+    {
+      "check": "R04/BE-27: exclusão global de etiqueta confirmada e persistida",
+      "requests": [
+        "DELETE /api/tags/:id",
+        "GET /api/tags",
+        "POST /api/tags"
+      ]
+    },
+    {
+      "check": "R04/BE-05: prospecto convertido para assinante existente sem duplicar cadastro",
+      "requests": [
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/leads",
+        "GET /api/leads/:id",
+        "GET /api/leads/summary",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/subscribers",
+        "GET /api/subscribers/:id",
+        "GET /api/tags",
+        "GET /api/today",
+        "POST /api/leads/:id/convert"
+      ]
+    },
+    {
+      "check": "R04/BE-05: causa-raiz e prioridade editadas na interface e relidas no Go",
+      "requests": [
+        "GET /api/catalogs",
+        "GET /api/dashboard",
+        "GET /api/me",
+        "GET /api/staff",
+        "GET /api/subscribers",
+        "GET /api/subscribers/:id/notes",
+        "GET /api/subscribers/:id/timeline",
+        "GET /api/tickets",
+        "GET /api/tickets/:id",
+        "GET /api/today",
+        "GET /api/work-orders",
+        "PATCH /api/tickets/:id"
+      ]
+    },
+    {
+      "check": "R04/BE-09: filtros de carteira e empresa na exportação contábil chegam ao Go",
+      "requests": [
+        "GET /api/companies",
+        "GET /api/finance/export",
+        "GET /api/finance/monthly",
+        "GET /api/finance/reports/aging",
+        "GET /api/finance/summary",
+        "GET /api/invoices",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/pops",
+        "GET /api/tags",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "R04/BE-07: propriedades do equipamento editadas e relidas sem comando em hardware",
+      "requests": [
+        "GET /api/agents",
+        "GET /api/devices",
+        "GET /api/me",
+        "GET /api/network/health",
+        "GET /api/network/online",
+        "GET /api/radius/status",
+        "GET /api/today",
+        "PATCH /api/devices/:id"
+      ]
+    },
+    {
+      "check": "R05: perfis atendimento e NOC respeitam escrita de indicação e leitura financeira",
+      "requests": [
+        "GET /api/addons",
+        "GET /api/companies",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/equipment",
+        "GET /api/contracts/:id/states",
+        "GET /api/custom-fields",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/pops",
+        "GET /api/reports/referrals",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "R03/R05: matriz nenhum módulo / CRM / campo respeita controles e consultas, com habilitação positiva",
+      "requests": [
+        "GET /api/addons",
+        "GET /api/agents",
+        "GET /api/catalogs",
+        "GET /api/companies",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/equipment",
+        "GET /api/contracts/:id/states",
+        "GET /api/custom-fields",
+        "GET /api/devices",
+        "GET /api/me",
+        "GET /api/network/health",
+        "GET /api/plans",
+        "GET /api/pops",
+        "GET /api/reports/sla",
+        "GET /api/sla-policies",
+        "GET /api/today"
+      ]
+    }
+  ]
+}

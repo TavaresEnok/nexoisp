@@ -1,0 +1,52 @@
+{
+  "scenario": "frontend-v0-saas.mjs",
+  "recorded_at": "2026-10-20T15:22:14.011Z",
+  "steps": [
+    {
+      "check": "Novo provedor e primeiro administrador criados na UI autenticam no Go com contexto próprio",
+      "requests": [
+        "GET /api/me",
+        "GET /api/tenants",
+        "POST /api/tenants"
+      ]
+    },
+    {
+      "check": "Nome e módulos são atualizados na plataforma; o Go libera CRM e campo e conserva NOC bloqueado",
+      "requests": [
+        "GET /api/tenants",
+        "PATCH /api/tenants/:id"
+      ]
+    },
+    {
+      "check": "Suspensão confirmada impede acesso e login; reativação restaura autenticação do administrador",
+      "requests": [
+        "GET /api/tenants",
+        "PATCH /api/tenants/:id"
+      ]
+    },
+    {
+      "check": "Entrada de suporte exige motivo, identifica o contexto e audita ações; saída restaura a plataforma sem permitir gestão SaaS dentro do provedor",
+      "requests": [
+        "GET /api/agenda",
+        "GET /api/dashboard",
+        "GET /api/dashboard/panels",
+        "GET /api/finance/monthly",
+        "GET /api/finance/summary",
+        "GET /api/me",
+        "GET /api/network/health",
+        "GET /api/tenants",
+        "GET /api/tickets",
+        "GET /api/today",
+        "POST /api/support/enter",
+        "POST /api/support/exit"
+      ]
+    },
+    {
+      "check": "Administrador de provedor não acessa catálogo ou gestão de provedores",
+      "requests": [
+        "GET /api/me",
+        "GET /api/today"
+      ]
+    }
+  ]
+}

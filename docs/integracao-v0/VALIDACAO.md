@@ -222,3 +222,10 @@ A matriz atual registra 149 unidades validadas e 20 preservadas: 14 serviços in
 
 Limites: não houve execução da CI remota, homologação de equipamento nem publicação em servidor. O mapa operacional mantém seu próprio canvas Leaflet (o do v0 usa tiles ArcGIS fora da CSP de produção) dentro da moldura original.
 
+
+## Achados D2 a D11 (20/10/2026)
+
+- 171 testes locais, verificação de tipos (agora incluindo `tests/`), formatação e build aprovados; testes Go de `internal/auth` e `internal/modules/leitura` aprovados.
+- Fumaça completa (26 cenários) contra Go/PostgreSQL descartável, com rastreio por verificação, e os cenários dirigidos `frontend-v0-cpe.mjs`, `frontend-v0-portal-wifi.mjs` (ACS sintético) e `frontend-v0-network-final.mjs`, todos aprovados com o CSRF derivado da sessão. Correções de teste: espera da resposta antes de consultar o agente no cenário óptico (disputa de tempo) e título com contador nas seções do portal.
+- Evidência por unidade: 149 de 149 unidades validadas com verificação de interface que chamou endpoint declarado ([por-unidade.json](evidencias/por-unidade.json)).
+- Prova visual das telas conectadas: 21 medições estruturais e 44 capturas dentro da tolerância, conferidas em dois ambientes recriados do zero ([visual-operacional.json](evidencias/visual-operacional.json)).

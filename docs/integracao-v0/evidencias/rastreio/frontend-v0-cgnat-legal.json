@@ -1,0 +1,57 @@
+{
+  "scenario": "frontend-v0-cgnat-legal.mjs",
+  "recorded_at": "2026-10-20T15:21:39.310Z",
+  "steps": [
+    {
+      "check": "UI consulta capacidade no Go, cria plano imutável, apresenta mapa/lookup e exporta script sem aplicá-lo ao NAS",
+      "requests": [
+        "GET /api/cgnat/plans",
+        "GET /api/cgnat/plans/:id/lookup",
+        "GET /api/cgnat/plans/:id/map",
+        "GET /api/cgnat/plans/:id/script",
+        "GET /api/ipam/pools",
+        "GET /api/me",
+        "GET /api/today",
+        "POST /api/cgnat/plans",
+        "POST /api/cgnat/plans/check"
+      ]
+    },
+    {
+      "check": "Rastreio exibe holders_at do accounting no instante consultado e distingue reservas e sessão atual",
+      "requests": [
+        "GET /api/cgnat/trace"
+      ]
+    },
+    {
+      "check": "Encerramento preserva rastreabilidade histórica e o Go impede apagar blocos usados por planos encerrados",
+      "requests": [
+        "GET /api/cgnat/plans",
+        "GET /api/ipam/pools",
+        "POST /api/cgnat/plans/:id/retire"
+      ]
+    },
+    {
+      "check": "Consulta legal aplica fuso explícito, IP/porta e referência auditada; CSV e impressão isolada contêm o mesmo resultado",
+      "requests": [
+        "GET /api/legal/ip-lookup/history",
+        "GET /api/me",
+        "GET /api/today",
+        "POST /api/legal/ip-lookup"
+      ]
+    },
+    {
+      "check": "Consulta direta de IP usa sessões históricas sem exigir porta CGNAT",
+      "requests": [
+        "GET /api/legal/ip-lookup/history",
+        "POST /api/legal/ip-lookup"
+      ]
+    },
+    {
+      "check": "Consulta IPv6 expõe o prefixo cadastrado e a limitação histórica existente em vez de presumir titulares anteriores",
+      "requests": [
+        "GET /api/legal/ip-lookup/history",
+        "POST /api/legal/ip-lookup"
+      ]
+    }
+  ]
+}

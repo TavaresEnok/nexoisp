@@ -1,0 +1,217 @@
+{
+  "scenario": "frontend-v0-field.mjs",
+  "recorded_at": "2026-10-20T15:19:48.993Z",
+  "steps": [
+    {
+      "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
+      "requests": [
+        "GET /api/agenda",
+        "GET /api/catalogs",
+        "GET /api/dashboard",
+        "GET /api/dashboard/panels",
+        "GET /api/finance/monthly",
+        "GET /api/finance/summary",
+        "GET /api/health",
+        "GET /api/install-kits",
+        "GET /api/me",
+        "GET /api/network/health",
+        "GET /api/staff",
+        "GET /api/stock/items",
+        "GET /api/subscribers",
+        "GET /api/subscribers/:id",
+        "GET /api/tickets",
+        "GET /api/today",
+        "GET /api/work-orders",
+        "GET /api/work-orders/:id",
+        "POST /api/auth/login",
+        "POST /api/work-orders"
+      ]
+    },
+    {
+      "check": "Atribuição e agendamento persistem no Go, com conversão correta do horário local",
+      "requests": [
+        "GET /api/install-kits",
+        "GET /api/stock/items",
+        "GET /api/work-orders",
+        "GET /api/work-orders/:id",
+        "PATCH /api/work-orders/:id"
+      ]
+    },
+    {
+      "check": "Agenda em fuso do provedor mostra sobreposição, janela livre real, fila de espera e abre a ficha compartilhada",
+      "requests": [
+        "GET /api/agenda",
+        "GET /api/agenda/free",
+        "GET /api/install-kits",
+        "GET /api/me",
+        "GET /api/staff",
+        "GET /api/stock/items",
+        "GET /api/today",
+        "GET /api/work-orders/:id"
+      ]
+    },
+    {
+      "check": "Meu trabalho exibe a fila real do responsável no celular, com telefone, mapa e abertura da OS",
+      "requests": [
+        "GET /api/install-kits",
+        "GET /api/me",
+        "GET /api/staff",
+        "GET /api/stock/items",
+        "GET /api/today",
+        "GET /api/work-orders",
+        "GET /api/work-orders/:id"
+      ]
+    },
+    {
+      "check": "Fichas do titular e do contrato consultam apenas as OS do vínculo e preservam o contexto ao fechar",
+      "requests": [
+        "GET /api/addons",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/finance",
+        "GET /api/contracts/:id/states",
+        "GET /api/dashboard",
+        "GET /api/install-kits",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/staff",
+        "GET /api/stock/items",
+        "GET /api/subscribers",
+        "GET /api/subscribers/:id",
+        "GET /api/subscribers/:id/notes",
+        "GET /api/subscribers/:id/timeline",
+        "GET /api/tickets",
+        "GET /api/today",
+        "GET /api/work-orders",
+        "GET /api/work-orders/:id"
+      ]
+    },
+    {
+      "check": "Auxiliar adicionado/removido e checklist concluído com registro do autor",
+      "requests": [
+        "DELETE /api/work-orders/:id/helpers/:id",
+        "GET /api/install-kits",
+        "GET /api/me",
+        "GET /api/staff",
+        "GET /api/stock/items",
+        "GET /api/today",
+        "GET /api/work-orders",
+        "GET /api/work-orders/:id",
+        "POST /api/work-orders/:id/checklist",
+        "POST /api/work-orders/:id/checklist/:id",
+        "POST /api/work-orders/:id/helpers"
+      ]
+    },
+    {
+      "check": "Go rejeita saída sem saldo e devolução superior ao consumo da OS sem alterar o estoque",
+      "requests": [
+        "POST /api/work-orders/:id/materials"
+      ]
+    },
+    {
+      "check": "Material lançado, devolvido e kit aplicado com saldos reais e históricos preservados",
+      "requests": [
+        "GET /api/install-kits",
+        "GET /api/stock/items",
+        "GET /api/work-orders",
+        "GET /api/work-orders/:id",
+        "POST /api/work-orders/:id/kit",
+        "POST /api/work-orders/:id/materials"
+      ]
+    },
+    {
+      "check": "Instalação por série vincula equipamento ao contrato em comodato",
+      "requests": [
+        "GET /api/install-kits",
+        "GET /api/stock/items",
+        "GET /api/stock/units",
+        "GET /api/work-orders",
+        "GET /api/work-orders/:id",
+        "POST /api/work-orders/:id/units"
+      ]
+    },
+    {
+      "check": "Espera, reagendamento, deslocamento, execução e conclusão registram datas; OS finalizada preserva anotações sem reabrir controles",
+      "requests": [
+        "GET /api/install-kits",
+        "GET /api/stock/items",
+        "GET /api/work-orders",
+        "GET /api/work-orders/:id",
+        "PATCH /api/work-orders/:id",
+        "POST /api/work-orders/:id/notes",
+        "POST /api/work-orders/:id/status"
+      ]
+    },
+    {
+      "check": "Filtro por técnico validado no Go e exportação CSV operacional",
+      "requests": [
+        "GET /api/me",
+        "GET /api/staff",
+        "GET /api/today",
+        "GET /api/work-orders"
+      ]
+    },
+    {
+      "check": "Cancelamento exige motivo e atribuir somente responsável preserva a situação de espera",
+      "requests": [
+        "GET /api/install-kits",
+        "GET /api/me",
+        "GET /api/staff",
+        "GET /api/stock/items",
+        "GET /api/today",
+        "GET /api/work-orders",
+        "GET /api/work-orders/:id",
+        "PATCH /api/work-orders/:id",
+        "POST /api/work-orders/:id/status"
+      ]
+    },
+    {
+      "check": "Listagem pagina oito registros no servidor e reinicia página junto à busca, mantendo o filtro do titular",
+      "requests": [
+        "GET /api/me",
+        "GET /api/staff",
+        "GET /api/today",
+        "GET /api/work-orders"
+      ]
+    },
+    {
+      "check": "Falha operacional exibe erro de consulta sem introduzir ordens demonstrativas",
+      "requests": [
+        "GET /api/me",
+        "GET /api/staff",
+        "GET /api/today",
+        "GET /api/work-orders"
+      ]
+    },
+    {
+      "check": "Contrato encerrado mostra o equipamento em comodato a recolher",
+      "requests": [
+        "GET /api/addons",
+        "GET /api/companies",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/equipment",
+        "GET /api/contracts/:id/states",
+        "GET /api/custom-fields",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/pops",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Perfil Técnico/NOC usa sua fila pessoal; Financeiro não acessa OS nem executa comandos",
+      "requests": [
+        "GET /api/install-kits",
+        "GET /api/me",
+        "GET /api/staff",
+        "GET /api/stock/items",
+        "GET /api/today",
+        "GET /api/work-orders",
+        "GET /api/work-orders/:id"
+      ]
+    }
+  ]
+}

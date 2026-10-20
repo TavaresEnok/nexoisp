@@ -1,0 +1,146 @@
+{
+  "scenario": "frontend-v0-network.mjs",
+  "recorded_at": "2026-10-20T15:20:25.444Z",
+  "steps": [
+    {
+      "check": "Agente criado no Go; token e chave pública exibidos na emissão, sem token na consulta posterior",
+      "requests": [
+        "GET /api/agents",
+        "GET /api/devices",
+        "GET /api/health",
+        "GET /api/me",
+        "GET /api/network/health",
+        "GET /api/network/online",
+        "GET /api/radius/status",
+        "GET /api/today",
+        "POST /api/agents",
+        "POST /api/auth/login"
+      ]
+    },
+    {
+      "check": "Rotação invalida token anterior; revogação bloqueia o agente; hello e sincronização sintéticos registram versão e contato após reativação",
+      "requests": [
+        "GET /api/agents",
+        "GET /api/devices",
+        "GET /api/network/health",
+        "GET /api/radius/status",
+        "PATCH /api/agents/:id"
+      ]
+    },
+    {
+      "check": "Equipamento usa agente e referência local reais; ausência de telemetria permanece explícita e sem incidente demonstrativo",
+      "requests": [
+        "GET /api/agents",
+        "GET /api/devices",
+        "GET /api/network/health",
+        "GET /api/radius/status",
+        "POST /api/devices"
+      ]
+    },
+    {
+      "check": "Parâmetros e manutenção são gravados no Go; mudanças de intenção não são apresentadas como confirmação do NAS",
+      "requests": [
+        "GET /api/agents",
+        "GET /api/devices",
+        "GET /api/network/health",
+        "GET /api/radius/status",
+        "PATCH /api/devices/:id"
+      ]
+    },
+    {
+      "check": "Concentrador emite segredo mesmo com falha de atualização do inventário; instruções posteriores não recuperam o segredo",
+      "requests": [
+        "GET /api/agents",
+        "GET /api/devices",
+        "GET /api/network/health",
+        "GET /api/radius/devices/:id/setup",
+        "GET /api/radius/status",
+        "POST /api/radius/devices"
+      ]
+    },
+    {
+      "check": "Rotação do segredo exige confirmação e emite outro valor apenas na janela de emissão",
+      "requests": [
+        "GET /api/agents",
+        "GET /api/devices",
+        "GET /api/network/health",
+        "GET /api/radius/status",
+        "POST /api/radius/devices/:id/secret"
+      ]
+    },
+    {
+      "check": "Edição do NAS integrado altera fabricante e destino de CoA pelo PATCH do Go e pede nova aplicação das instruções",
+      "requests": [
+        "GET /api/agents",
+        "GET /api/devices",
+        "GET /api/network/health",
+        "GET /api/radius/devices/:id/setup",
+        "GET /api/radius/status",
+        "PATCH /api/radius/devices/:id"
+      ]
+    },
+    {
+      "check": "Go bloqueia conversão com operação em aberto; relato sintético encerra a tentativa sem acessar NAS físico",
+      "requests": [
+        "POST /api/devices/:id/convert-to-integrated"
+      ]
+    },
+    {
+      "check": "Reaplicação solicita uma conta sem pendência e ignora conta já em operação; conversão preserva a conta e emite configuração integrada sem afirmar conectividade física",
+      "requests": [
+        "GET /api/agents",
+        "GET /api/devices",
+        "GET /api/network/health",
+        "GET /api/radius/status",
+        "POST /api/devices/:id/convert-to-integrated",
+        "POST /api/devices/:id/reapply"
+      ]
+    },
+    {
+      "check": "Fila e ficha de operações exibem intenção, idempotência, tentativa e evidências reais, com filtro e restauração pela URL",
+      "requests": [
+        "GET /api/me",
+        "GET /api/network/drift",
+        "GET /api/operations",
+        "GET /api/operations/:id",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Inventário oficial mantém navegação e consulta no celular",
+      "requests": [
+        "GET /api/agents",
+        "GET /api/devices",
+        "GET /api/me",
+        "GET /api/network/health",
+        "GET /api/network/online",
+        "GET /api/radius/status",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Permissões de consulta/escrita e isolamento entre provedores são aplicados pelo Go",
+      "requests": [
+        "GET /api/agents",
+        "GET /api/devices",
+        "GET /api/me",
+        "GET /api/network/health",
+        "GET /api/network/online",
+        "GET /api/radius/status",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Falha no inventário operacional exibe erro sem equipamentos demonstrativos",
+      "requests": [
+        "GET /api/agents",
+        "GET /api/devices",
+        "GET /api/me",
+        "GET /api/network/health",
+        "GET /api/network/online",
+        "GET /api/radius/status",
+        "GET /api/today"
+      ]
+    }
+  ]
+}

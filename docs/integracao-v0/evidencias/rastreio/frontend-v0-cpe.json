@@ -1,0 +1,63 @@
+{
+  "scenario": "frontend-v0-cpe.mjs",
+  "recorded_at": "2026-10-20T15:19:18.051Z",
+  "steps": [
+    {
+      "check": "Pesquisa por série, confirmação e vínculo TR-098 persistem no Go com WAN e Wi-Fi reais do ACS sintético",
+      "requests": [
+        "GET /api/acs/status",
+        "GET /api/addons",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/cpe",
+        "GET /api/contracts/:id/cpe/candidates",
+        "GET /api/contracts/:id/ftth",
+        "GET /api/contracts/:id/ips",
+        "GET /api/contracts/:id/ipv6",
+        "GET /api/contracts/:id/onu",
+        "GET /api/contracts/:id/service",
+        "GET /api/contracts/:id/states",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/today",
+        "POST /api/contracts/:id/cpe/link"
+      ]
+    },
+    {
+      "check": "Alteração de Wi-Fi valida senha e distingue aplicação imediata; consultas de estado não recuperam a senha",
+      "requests": [
+        "GET /api/contracts/:id/cpe",
+        "POST /api/contracts/:id/cpe/wifi"
+      ]
+    },
+    {
+      "check": "Releitura e reinício enviam tarefas ao ACS e reinício exige confirmação explícita",
+      "requests": [
+        "GET /api/contracts/:id/cpe",
+        "POST /api/contracts/:id/cpe/reboot",
+        "POST /api/contracts/:id/cpe/refresh"
+      ]
+    },
+    {
+      "check": "TR-181 enfileirado mantém o SSID observado e informa que a alteração depende do próximo contato do roteador",
+      "requests": [
+        "DELETE /api/contracts/:id/cpe/link",
+        "GET /api/acs/status",
+        "GET /api/contracts/:id/cpe",
+        "GET /api/contracts/:id/cpe/candidates",
+        "GET /api/contracts/:id/onu",
+        "GET /api/contracts/:id/service",
+        "POST /api/contracts/:id/cpe/link",
+        "POST /api/contracts/:id/cpe/wifi"
+      ]
+    },
+    {
+      "check": "Isolamento por provedor, apresentação no celular e desvínculo são validados sem tocar em roteador físico; após o desvínculo, o endereço público do ACS (GET /api/acs/status) orienta a configuração",
+      "requests": [
+        "DELETE /api/contracts/:id/cpe/link",
+        "GET /api/contracts/:id/cpe"
+      ]
+    }
+  ]
+}

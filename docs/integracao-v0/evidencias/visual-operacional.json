@@ -1,0 +1,811 @@
+{
+  "ok": true,
+  "verified_at": "2026-10-20T19:00:51.534Z",
+  "proves": "Estrutura: fração das classes do v0 usadas na página demonstrativa que a tela conectada também usa, com piso registrado. Regressão: comparação pixel a pixel das telas conectadas (até 0,05% de pixels alterados) com relógio fixo, datas normalizadas e códigos de UUID mascarados. Não prova igualdade pixel a pixel com o v0, porque os dados diferem; a igualdade com o v0 original é provada para a demonstração.",
+  "backend": "Go/PostgreSQL isolados; provedor exclusivo visual-v0 com dados sintéticos",
+  "structure": [
+    {
+      "name": "inicio",
+      "demo": "/",
+      "operational": "/",
+      "v0_classes": 294,
+      "shared": 256,
+      "ratio": 0.871,
+      "globals_css": {
+        "classes": 63,
+        "shared": 47,
+        "missing": [
+          "activity-copy",
+          "activity-icon",
+          "activity-icon-warning",
+          "activity-row",
+          "avatar-tone-3",
+          "chart-legend",
+          "footer-divider",
+          "order-time",
+          "person-avatar",
+          "person-avatar-small",
+          "source-footer",
+          "status",
+          "status-dot",
+          "today-order",
+          "today-technician",
+          "tone-danger"
+        ]
+      }
+    },
+    {
+      "name": "assinantes",
+      "demo": "/assinantes",
+      "operational": "/assinantes",
+      "v0_classes": 278,
+      "shared": 256,
+      "ratio": 0.921,
+      "globals_css": {
+        "classes": 34,
+        "shared": 27,
+        "missing": [
+          "avatar-tone-3",
+          "demo-notice",
+          "footer-divider",
+          "live-dot",
+          "module-navigation",
+          "scope-child-links",
+          "source-footer"
+        ]
+      }
+    },
+    {
+      "name": "ficha",
+      "demo": "/assinantes?ficha=sub-1",
+      "operational": "/assinantes?ficha={SUB}",
+      "v0_classes": 449,
+      "shared": 348,
+      "ratio": 0.775,
+      "globals_css": {
+        "classes": 69,
+        "shared": 51,
+        "missing": [
+          "avatar-tone-3",
+          "demo-notice",
+          "footer-divider",
+          "live-dot",
+          "module-navigation",
+          "profile-manual-banner",
+          "scope-child-links",
+          "source-footer",
+          "technical-action-grid",
+          "technical-capabilities",
+          "technical-evidence-input",
+          "technical-heading",
+          "technical-location-fields",
+          "technical-metrics",
+          "technical-overview",
+          "technical-script-toolbar",
+          "technical-tab-scroll",
+          "technical-workspace"
+        ]
+      }
+    },
+    {
+      "name": "ficha-cadastro",
+      "demo": "/assinantes?ficha=sub-1&abaFicha=cadastro",
+      "operational": "/assinantes?ficha={SUB}&abaFicha=cadastro",
+      "v0_classes": 442,
+      "shared": 343,
+      "ratio": 0.776,
+      "globals_css": {
+        "classes": 65,
+        "shared": 46,
+        "missing": [
+          "avatar-tone-3",
+          "demo-notice",
+          "footer-divider",
+          "live-dot",
+          "module-navigation",
+          "profile-manual-banner",
+          "profile-text-action",
+          "scope-child-links",
+          "source-footer",
+          "technical-action-grid",
+          "technical-capabilities",
+          "technical-evidence-input",
+          "technical-heading",
+          "technical-location-fields",
+          "technical-metrics",
+          "technical-overview",
+          "technical-script-toolbar",
+          "technical-tab-scroll",
+          "technical-workspace"
+        ]
+      }
+    },
+    {
+      "name": "ficha-financeiro",
+      "demo": "/assinantes?ficha=sub-1&abaFicha=financeiro",
+      "operational": "/assinantes?ficha={SUB}&abaFicha=financeiro",
+      "v0_classes": 441,
+      "shared": 334,
+      "ratio": 0.757,
+      "globals_css": {
+        "classes": 66,
+        "shared": 46,
+        "missing": [
+          "avatar-tone-3",
+          "demo-notice",
+          "footer-divider",
+          "live-dot",
+          "module-navigation",
+          "profile-facts",
+          "profile-manual-banner",
+          "profile-text-action",
+          "scope-child-links",
+          "source-footer",
+          "technical-action-grid",
+          "technical-capabilities",
+          "technical-evidence-input",
+          "technical-heading",
+          "technical-location-fields",
+          "technical-metrics",
+          "technical-overview",
+          "technical-script-toolbar",
+          "technical-tab-scroll",
+          "technical-workspace"
+        ]
+      }
+    },
+    {
+      "name": "ficha-conexao",
+      "demo": "/assinantes?ficha=sub-1&abaFicha=conexao",
+      "operational": "/assinantes?ficha={SUB}&abaFicha=conexao",
+      "v0_classes": 437,
+      "shared": 330,
+      "ratio": 0.755,
+      "globals_css": {
+        "classes": 62,
+        "shared": 45,
+        "missing": [
+          "avatar-tone-3",
+          "demo-notice",
+          "footer-divider",
+          "live-dot",
+          "module-navigation",
+          "profile-facts",
+          "profile-text-action",
+          "scope-child-links",
+          "source-footer",
+          "technical-action-grid",
+          "technical-capabilities",
+          "technical-evidence-input",
+          "technical-location-fields",
+          "technical-metrics",
+          "technical-overview",
+          "technical-script-toolbar",
+          "technical-tab-scroll"
+        ]
+      }
+    },
+    {
+      "name": "ficha-atendimento",
+      "demo": "/assinantes?ficha=sub-1&abaFicha=atendimento",
+      "operational": "/assinantes?ficha={SUB}&abaFicha=atendimento",
+      "v0_classes": 437,
+      "shared": 337,
+      "ratio": 0.771,
+      "globals_css": {
+        "classes": 62,
+        "shared": 40,
+        "missing": [
+          "avatar-tone-3",
+          "demo-notice",
+          "footer-divider",
+          "live-dot",
+          "module-navigation",
+          "profile-facts",
+          "profile-footnote",
+          "profile-manual-banner",
+          "profile-section",
+          "profile-text-action",
+          "scope-child-links",
+          "source-footer",
+          "technical-action-grid",
+          "technical-capabilities",
+          "technical-evidence-input",
+          "technical-heading",
+          "technical-location-fields",
+          "technical-metrics",
+          "technical-overview",
+          "technical-script-toolbar",
+          "technical-tab-scroll",
+          "technical-workspace"
+        ]
+      }
+    },
+    {
+      "name": "ficha-historico",
+      "demo": "/assinantes?ficha=sub-1&abaFicha=historico",
+      "operational": "/assinantes?ficha={SUB}&abaFicha=historico",
+      "v0_classes": 440,
+      "shared": 329,
+      "ratio": 0.748,
+      "globals_css": {
+        "classes": 64,
+        "shared": 44,
+        "missing": [
+          "avatar-tone-3",
+          "demo-notice",
+          "footer-divider",
+          "live-dot",
+          "module-navigation",
+          "profile-facts",
+          "profile-footnote",
+          "profile-manual-banner",
+          "scope-child-links",
+          "source-footer",
+          "technical-action-grid",
+          "technical-capabilities",
+          "technical-evidence-input",
+          "technical-heading",
+          "technical-location-fields",
+          "technical-metrics",
+          "technical-overview",
+          "technical-script-toolbar",
+          "technical-tab-scroll",
+          "technical-workspace"
+        ]
+      }
+    },
+    {
+      "name": "contratos",
+      "demo": "/contratos",
+      "operational": "/contratos",
+      "v0_classes": 232,
+      "shared": 209,
+      "ratio": 0.901,
+      "globals_css": {
+        "classes": 31,
+        "shared": 23,
+        "missing": [
+          "avatar-tone-1",
+          "avatar-tone-3",
+          "demo-notice",
+          "footer-divider",
+          "live-dot",
+          "module-navigation",
+          "scope-child-links",
+          "source-footer"
+        ]
+      }
+    },
+    {
+      "name": "planos",
+      "demo": "/planos",
+      "operational": "/planos",
+      "v0_classes": 199,
+      "shared": 186,
+      "ratio": 0.935,
+      "globals_css": {
+        "classes": 11,
+        "shared": 6,
+        "missing": [
+          "footer-divider",
+          "live-dot",
+          "module-navigation",
+          "scope-child-links",
+          "source-footer"
+        ]
+      }
+    },
+    {
+      "name": "faturas",
+      "demo": "/financeiro/faturas",
+      "operational": "/financeiro/faturas",
+      "v0_classes": 304,
+      "shared": 218,
+      "ratio": 0.717,
+      "globals_css": {
+        "classes": 40,
+        "shared": 28,
+        "missing": [
+          "avatar-tone-1",
+          "avatar-tone-3",
+          "demo-notice",
+          "footer-divider",
+          "live-dot",
+          "module-navigation",
+          "recharts-cartesian-axis-tick-value",
+          "revenue-chart",
+          "scope-child-links",
+          "source-footer",
+          "text-success",
+          "trend"
+        ]
+      }
+    },
+    {
+      "name": "atendimentos",
+      "demo": "/atendimentos",
+      "operational": "/atendimentos",
+      "v0_classes": 245,
+      "shared": 215,
+      "ratio": 0.878,
+      "globals_css": {
+        "classes": 31,
+        "shared": 22,
+        "missing": [
+          "avatar-tone-1",
+          "avatar-tone-3",
+          "demo-notice",
+          "footer-divider",
+          "live-dot",
+          "module-navigation",
+          "scope-child-links",
+          "source-footer",
+          "text-success"
+        ]
+      }
+    },
+    {
+      "name": "ordens",
+      "demo": "/ordens-de-servico",
+      "operational": "/ordens-de-servico",
+      "v0_classes": 287,
+      "shared": 265,
+      "ratio": 0.923,
+      "globals_css": {
+        "classes": 26,
+        "shared": 19,
+        "missing": [
+          "avatar-tone-3",
+          "demo-notice",
+          "footer-divider",
+          "module-navigation",
+          "scope-child-links",
+          "source-footer",
+          "text-success"
+        ]
+      }
+    },
+    {
+      "name": "rede",
+      "demo": "/rede/equipamentos",
+      "operational": "/rede/equipamentos",
+      "v0_classes": 298,
+      "shared": 183,
+      "ratio": 0.614,
+      "globals_css": {
+        "classes": 38,
+        "shared": 15,
+        "missing": [
+          "concentrator-progress",
+          "cpu-meter",
+          "date-chip",
+          "demo-notice",
+          "footer-divider",
+          "incident-link",
+          "live-dot",
+          "module-navigation",
+          "mono",
+          "network-incident-banner",
+          "node-icon",
+          "node-identity",
+          "priority-icon",
+          "recharts-cartesian-axis-tick-value",
+          "scope-child-links",
+          "source-footer",
+          "status",
+          "status-dot",
+          "subtle",
+          "table-subline",
+          "text-success",
+          "tone-warning",
+          "traffic-chart"
+        ]
+      }
+    },
+    {
+      "name": "online",
+      "demo": "/rede/online",
+      "operational": "/rede/online",
+      "v0_classes": 205,
+      "shared": 177,
+      "ratio": 0.863,
+      "globals_css": {
+        "classes": 3,
+        "shared": 1,
+        "missing": [
+          "module-navigation",
+          "scope-child-links"
+        ]
+      }
+    },
+    {
+      "name": "mapa",
+      "demo": "/rede/mapa",
+      "operational": "/rede/mapa",
+      "v0_classes": 145,
+      "shared": 117,
+      "ratio": 0.807,
+      "globals_css": {
+        "classes": 3,
+        "shared": 1,
+        "missing": [
+          "module-navigation",
+          "scope-child-links"
+        ]
+      }
+    },
+    {
+      "name": "ftth",
+      "demo": "/rede/ftth/fttx-cto",
+      "operational": "/rede/ftth",
+      "v0_classes": 181,
+      "shared": 115,
+      "ratio": 0.635,
+      "globals_css": {
+        "classes": 15,
+        "shared": 10,
+        "missing": [
+          "footer-divider",
+          "live-dot",
+          "module-navigation",
+          "scope-child-links",
+          "source-footer"
+        ]
+      }
+    },
+    {
+      "name": "ipam",
+      "demo": "/rede/enderecos-ip",
+      "operational": "/rede/enderecos-ip",
+      "v0_classes": 218,
+      "shared": 160,
+      "ratio": 0.734,
+      "globals_css": {
+        "classes": 14,
+        "shared": 9,
+        "missing": [
+          "footer-divider",
+          "live-dot",
+          "module-navigation",
+          "scope-child-links",
+          "source-footer"
+        ]
+      }
+    },
+    {
+      "name": "cgnat",
+      "demo": "/rede/enderecos-ip/planos-de-cgnat",
+      "operational": "/rede/enderecos-ip/planos-de-cgnat",
+      "v0_classes": 215,
+      "shared": 152,
+      "ratio": 0.707,
+      "globals_css": {
+        "classes": 14,
+        "shared": 5,
+        "missing": [
+          "footer-divider",
+          "live-dot",
+          "metric-card",
+          "metric-heading",
+          "metric-main",
+          "metrics-grid",
+          "module-navigation",
+          "scope-child-links",
+          "source-footer"
+        ]
+      }
+    },
+    {
+      "name": "consulta-ip",
+      "demo": "/rede/consulta-ip",
+      "operational": "/rede/consulta-ip",
+      "v0_classes": 228,
+      "shared": 126,
+      "ratio": 0.553,
+      "globals_css": {
+        "classes": 11,
+        "shared": 5,
+        "missing": [
+          "footer-divider",
+          "heading-actions",
+          "live-dot",
+          "module-navigation",
+          "scope-child-links",
+          "source-footer"
+        ]
+      }
+    },
+    {
+      "name": "configuracoes",
+      "demo": "/configuracoes",
+      "operational": "/configuracoes",
+      "v0_classes": 191,
+      "shared": 109,
+      "ratio": 0.571,
+      "globals_css": {
+        "classes": 19,
+        "shared": 8,
+        "missing": [
+          "eyebrow",
+          "footer-divider",
+          "heading-actions",
+          "integration-icon",
+          "integration-list",
+          "live-dot",
+          "readiness-grid",
+          "source-footer",
+          "status",
+          "status-dot",
+          "summary-icon"
+        ]
+      }
+    }
+  ],
+  "visuals": [
+    {
+      "name": "inicio-claro",
+      "identical": false,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "assinantes-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "ficha-claro",
+      "identical": false,
+      "changed_pixels": 51,
+      "changed_ratio": 0.00004
+    },
+    {
+      "name": "ficha-cadastro-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "ficha-financeiro-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "ficha-conexao-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "ficha-atendimento-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "ficha-historico-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "contratos-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "planos-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "faturas-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "atendimentos-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "ordens-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "rede-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "online-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "mapa-claro",
+      "identical": false,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "ftth-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "ipam-claro",
+      "identical": false,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "cgnat-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "consulta-ip-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "configuracoes-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "contrato-claro",
+      "identical": false,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "prospectos-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "agenda-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "estoque-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "usuarios-claro",
+      "identical": false,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "politica-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "noc-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "conta-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "faturas-escuro",
+      "identical": false,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "faturas-celular",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "ordens-escuro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "ordens-celular",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "rede-escuro",
+      "identical": false,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "rede-celular",
+      "identical": false,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "atendimentos-escuro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "atendimentos-celular",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "usuarios-escuro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "usuarios-celular",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "assinantes-escuro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "assinantes-celular",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "portal-claro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "portal-escuro",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    },
+    {
+      "name": "portal-celular",
+      "identical": true,
+      "changed_pixels": 0,
+      "changed_ratio": 0
+    }
+  ]
+}

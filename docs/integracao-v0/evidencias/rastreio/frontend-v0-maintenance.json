@@ -1,0 +1,50 @@
+{
+  "scenario": "frontend-v0-maintenance.mjs",
+  "recorded_at": "2026-10-20T15:21:01.679Z",
+  "steps": [
+    {
+      "check": "Cadastro, edição, normalização de UF e ativação/inativação de POP persistem no Go",
+      "requests": [
+        "GET /api/me",
+        "GET /api/pops",
+        "GET /api/today",
+        "PATCH /api/pops/:id",
+        "POST /api/pops"
+      ]
+    },
+    {
+      "check": "Manutenção valida intervalo, grava público por concentrador e calcula dois assinantes atingidos no Go",
+      "requests": [
+        "GET /api/devices",
+        "GET /api/maintenance-notices",
+        "GET /api/maintenance-notices/channels",
+        "GET /api/me",
+        "GET /api/today",
+        "POST /api/maintenance-notices"
+      ]
+    },
+    {
+      "check": "Avisos de início e normalização exigem confirmação e consentimento; somente o contato sintético autorizado entra na fila do canal local",
+      "requests": [
+        "GET /api/maintenance-notices",
+        "POST /api/maintenance-notices/:id/notify"
+      ]
+    },
+    {
+      "check": "Cancelamento retira o aviso do portal e a consulta mantém a apresentação no celular",
+      "requests": [
+        "GET /api/maintenance-notices",
+        "POST /api/maintenance-notices/:id/cancel"
+      ]
+    },
+    {
+      "check": "Atendimento consulta avisos sem receber comandos administrativos; o Go nega cancelamento sem permissão",
+      "requests": [
+        "GET /api/devices",
+        "GET /api/maintenance-notices",
+        "GET /api/me",
+        "GET /api/today"
+      ]
+    }
+  ]
+}

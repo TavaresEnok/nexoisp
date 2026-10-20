@@ -64,3 +64,20 @@ Validação: 163 testes locais, os 26 cenários da fumaça (dois segmentos; o pr
 ## Tela de entrada (20/10/2026)
 
 A tela de login foi refeita com os tokens, fontes e temas do v0 (`features/session/login*.tsx`): palco à esquerda com cinco destaques de funcionalidades reais (acessos online, mapa, consulta legal de IP, ordens de serviço e cobrança), apresentados como exemplos ilustrativos com dados fictícios, com troca automática, pausa, abas com progresso e respeito a `prefers-reduced-motion`; formulário à direita com saudação pelo horário, campos com ícone, mostrar senha, etapa de código TOTP e erros no `Alert` do v0; troca de tema persistida pelo mesmo cookie do shell; contas de demonstração do servidor como atalhos apenas quando o servidor está em modo demo. No celular o palco é omitido. Não há "esqueci a senha" nem "manter conectado": o servidor não oferece essas operações, e a tela orienta procurar o administrador.
+
+## Achados D2 a D11 da auditoria independente (20/10/2026)
+
+| Achado | Situação | Onde |
+|---|---|---|
+| D2 · prova visual só da demonstração | Fechado. `e2e/frontend-v0-operational-visual.mjs` mede, em 21 telas com par no v0, a fração das classes da página original presentes na tela conectada (55% a 94%, piso em `e2e/visual-baselines/operacional/estrutura.json`), e compara pixel a pixel 44 capturas conectadas: 29 telas claras, tema escuro e celular de seis áreas e o portal. Relógio do navegador fixo, datas da API normalizadas e códigos de UUID mascarados; tolerância de 0,05% de pixels para antisserrilhamento. Conferido em dois ambientes recriados do zero. A captura no celular revelou rolagem horizontal em Faturas (ações do cabeçalho sem quebra), corrigida em `src/erp.css`. | [visual-operacional.json](evidencias/visual-operacional.json) |
+| D3 · quatro listas manuais de rotas e permissões | Fechado. `features/operations/pages.ts` é a fonte única: `<Routes>`, permissões, módulos, títulos, aliases e situação de integração derivam dele, e um teste impede `<Route>` escrito à mão. A comparação com a lógica anterior em 291.840 combinações de perfil e caminho só diferiu em `/conta/*`, agora corretamente conectado. | `tests/legacy-route-parity.test.ts` |
+| D4 · PATCH do NAS integrado e `/acs/status` | Fechado. "Editar concentrador" altera fabricante, IP de origem e CoA; o contrato sem roteador mostra o endereço público do ACS. RE-05 e RE-12 atualizados na matriz. | `features/network/radius.tsx`, `cpe.tsx` |
+| D5 · evidência por cenário | Fechado. A fumaça grava, por verificação, as chamadas à API feitas pela interface (`evidencias/rastreio/`); `e2e/unit-evidence.mjs` cruza com os endpoints de cada unidade. As 149 unidades validadas têm verificação de interface própria, travado por teste. | [por-unidade.json](evidencias/por-unidade.json) |
+| D6 · CSRF com cabeçalho fixo | Fechado. O Go exige em `X-Nexo-CSRF` um valor derivado do hash da sessão, entregue em `/api/me` e no login, comparado em tempo constante; o valor `1` é recusado. | `internal/auth/auth.go` |
+| D7 · CSV cortado em 5.000 linhas sem aviso | Fechado. As cinco exportações avisam quando `X-Total-Count` passa do limite. | `features/shared/export.ts` |
+| D8 · `z.coerce.number` em dinheiro | Fechado. Campos monetários usam `cents()`/`money()`: nulo ou ausente é erro, nunca R$ 0,00. | `features/shared/schema.ts` |
+| D9 · `tests/` fora do `tsc` | Fechado. | `tsconfig.json` |
+| D10 · `<a href>` interno | Fechado. Links internos usam o roteador; teste impede regressão. `/assistente` e `/acompanhamento` têm destino (página de recurso planejado). | `tests/audit-hardening.test.ts` |
+| D11 · portal em um componente | Fechado. Seções em `features/portal/sections.tsx`; cada destino `/portal/<seção>` abre só a sua seção, com e2e por endereço. | `features/portal/home.tsx` |
+
+O que a prova visual não cobre: igualdade pixel a pixel entre tela conectada e v0 (os dados diferem) e telas fora da lista. A igualdade com o v0 original continua comprovada para a demonstração.

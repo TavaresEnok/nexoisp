@@ -1,0 +1,91 @@
+{
+  "scenario": "frontend-v0-workspace.mjs",
+  "recorded_at": "2026-10-20T15:21:15.114Z",
+  "steps": [
+    {
+      "check": "Contas sintéticas só aparecem com health.demo; preencher uma conta não cria sessão nem contorna o login Go",
+      "requests": [
+        "GET /api/agenda",
+        "GET /api/dashboard",
+        "GET /api/dashboard/panels",
+        "GET /api/finance/monthly",
+        "GET /api/finance/summary",
+        "GET /api/health",
+        "GET /api/me",
+        "GET /api/network/health",
+        "GET /api/tickets",
+        "GET /api/today",
+        "POST /api/auth/login"
+      ]
+    },
+    {
+      "check": "Busca operacional encontra nome, login, IP, MAC, ONU e OS e abre fichas reais de assinante e contrato",
+      "requests": [
+        "GET /api/addons",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/finance",
+        "GET /api/contracts/:id/states",
+        "GET /api/dashboard",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/search",
+        "GET /api/subscribers",
+        "GET /api/subscribers/:id",
+        "GET /api/subscribers/:id/notes",
+        "GET /api/subscribers/:id/timeline",
+        "GET /api/tickets",
+        "GET /api/today",
+        "GET /api/work-orders"
+      ]
+    },
+    {
+      "check": "Visão inicial usa indicadores, caixa, ativações/encerramentos e prioridades do Go; o alerta abre o NOC correspondente",
+      "requests": [
+        "GET /api/agenda",
+        "GET /api/dashboard",
+        "GET /api/dashboard/panels",
+        "GET /api/finance/monthly",
+        "GET /api/finance/summary",
+        "GET /api/me",
+        "GET /api/network/health",
+        "GET /api/noc/overview",
+        "GET /api/tickets",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Tema persiste após recarga e navegação móvel utiliza o shell oficial",
+      "requests": [
+        "GET /api/me",
+        "GET /api/noc/overview",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Resultados respeitam a apresentação por perfil; suporte mantém provedor visível e saída real restaura a conta SaaS",
+      "requests": [
+        "GET /api/agenda",
+        "GET /api/dashboard",
+        "GET /api/dashboard/panels",
+        "GET /api/finance/monthly",
+        "GET /api/finance/summary",
+        "GET /api/me",
+        "GET /api/network/health",
+        "GET /api/search",
+        "GET /api/tickets",
+        "GET /api/today",
+        "POST /api/support/exit"
+      ]
+    },
+    {
+      "check": "Falha na busca operacional não seleciona registros demonstrativos",
+      "requests": [
+        "GET /api/me",
+        "GET /api/search",
+        "GET /api/today"
+      ]
+    }
+  ]
+}

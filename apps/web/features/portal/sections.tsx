@@ -18,6 +18,7 @@ import { QueryBoundary } from "@/features/shared/feedback";
 import { ActionButton } from "@/features/shared/action";
 import { FormField } from "@/features/shared/form";
 import { money } from "@/lib/format";
+import { shortCode } from "@/features/shared/format";
 import { bytes } from "@/features/network/telemetry";
 import { api } from "@/platform/erp-client";
 import {
@@ -306,7 +307,7 @@ export function PortalUsage({
           >
             {contracts.map((item) => (
               <option value={item.id} key={item.id}>
-                {item.plan_name} · {item.id.slice(0, 8)}
+                {item.plan_name} · {shortCode(item.id)}
               </option>
             ))}
           </select>

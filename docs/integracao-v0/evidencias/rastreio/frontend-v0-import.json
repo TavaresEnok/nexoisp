@@ -1,0 +1,60 @@
+{
+  "scenario": "frontend-v0-import.mjs",
+  "recorded_at": "2026-10-20T15:24:02.653Z",
+  "steps": [
+    {
+      "check": "CSV é lido, campos e plano são mapeados; prévia valida erros e senha ausente sem gravar assinantes e exige nova simulação após alterar mapa",
+      "requests": [
+        "GET /api/devices",
+        "GET /api/import/batches",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/today",
+        "POST /api/import/preview"
+      ]
+    },
+    {
+      "check": "Aplicação grava somente linhas válidas e registra lote/avisos; contas importadas ficam sem provisionamento e conta sem senha continua bloqueada",
+      "requests": [
+        "GET /api/import/batches",
+        "GET /api/import/batches/:id",
+        "POST /api/import/apply"
+      ]
+    },
+    {
+      "check": "Provisionamento explícito solicita operação somente para conta com senha; reimportação da mesma origem não duplica assinantes nem contas",
+      "requests": [
+        "GET /api/import/batches",
+        "POST /api/import/apply",
+        "POST /api/import/batches/:id/provision",
+        "POST /api/import/preview"
+      ]
+    },
+    {
+      "check": "Títulos importados preservam centavos, pagamento parcial e cancelamento; titular inexistente é erro explícito e título aberto não recebe cobrança automática",
+      "requests": [
+        "GET /api/import/batches",
+        "POST /api/import/apply",
+        "POST /api/import/preview"
+      ]
+    },
+    {
+      "check": "Histórico mantém datas originais, importa atendimento/OS/anotação sem abrir SLA nem disparar avisos e não duplica registros na reimportação",
+      "requests": [
+        "GET /api/import/batches",
+        "POST /api/import/apply",
+        "POST /api/import/preview"
+      ]
+    },
+    {
+      "check": "Lotes e provisionamento respeitam isolamento e permissões; importação preserva layout do v0 no celular",
+      "requests": [
+        "GET /api/devices",
+        "GET /api/import/batches",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/today"
+      ]
+    }
+  ]
+}

@@ -44,7 +44,9 @@
     "format:features": "prettier --write \"features/**/*.{ts,tsx}\"",
     "format:check": "prettier --check \"features/**/*.{ts,tsx}\"",
     "test:remediation": "node ../../e2e/frontend-v0-remediation.mjs",
-    "test:visual:operational": "V0_OPERATIONAL_VISUAL=1 node ../../e2e/frontend-v0-remediation.mjs"
+    "test:visual:operational": "V0_OPERATIONAL_VISUAL=1 node ../../e2e/frontend-v0-remediation.mjs",
+    "test:visual:screens": "node ../../e2e/frontend-v0-operational-visual.mjs",
+    "evidence:units": "node ../../e2e/unit-evidence.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.5.0",

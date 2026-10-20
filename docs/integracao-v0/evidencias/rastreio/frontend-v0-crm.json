@@ -1,0 +1,42 @@
+{
+  "scenario": "frontend-v0-crm.mjs",
+  "recorded_at": "2026-10-20T15:19:23.540Z",
+  "steps": [
+    {
+      "check": "{\"ok\":true,\"checks\":[\"Prospecto valida contato obrigatório no Go; cadastro, edição e ficha usam UUID real\",\"Etapas, motivo da perda, retomada e contato persistidos com histórico\",\"Conversão cria assinante relacionado ao prospecto, marca ganho e abre a ficha\",\"Protocolo com titular/contrato/prioridade e mensagem inicial, sem incidente fictício ou SLA presumido\",\"Responsável atribuído; nota interna e resposta pública preservam visibilidade e estado do protocolo\",\"OS real criada pelo atendimento, preservando protocolo, titular, contrato e endereço informado\",\"Encerramento e reabertura persistidos; URL restaura a ficha após recarregar\",\"Fila do titular abre o mesmo protocolo e fecha preservando a ficha do assinante\",\"Busca e exportação reais de atendimentos; relatório CRM por período carrega dados do Go\",\"Prospectos usam paginação do servidor e busca reinicia a página sem navegação tardia\",\"Nota interna permanece ausente no portal; perfil financeiro não oferece ações de equipe técnica\",\"Prospectos e protocolos isolados entre provedores\"]}",
+      "requests": [
+        "GET /api/catalogs",
+        "GET /api/contracts/:id/finance",
+        "GET /api/contracts/:id/states",
+        "GET /api/crm/report",
+        "GET /api/dashboard",
+        "GET /api/health",
+        "GET /api/leads",
+        "GET /api/leads/:id",
+        "GET /api/leads/summary",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/staff",
+        "GET /api/subscribers",
+        "GET /api/subscribers/:id",
+        "GET /api/subscribers/:id/notes",
+        "GET /api/subscribers/:id/timeline",
+        "GET /api/tickets",
+        "GET /api/tickets/:id",
+        "GET /api/today",
+        "GET /api/work-orders",
+        "PATCH /api/leads/:id",
+        "PATCH /api/tickets/:id",
+        "POST /api/auth/login",
+        "POST /api/leads",
+        "POST /api/leads/:id/convert",
+        "POST /api/leads/:id/notes",
+        "POST /api/leads/:id/stage",
+        "POST /api/tickets",
+        "POST /api/tickets/:id/messages",
+        "POST /api/tickets/:id/status",
+        "POST /api/work-orders"
+      ]
+    }
+  ]
+}

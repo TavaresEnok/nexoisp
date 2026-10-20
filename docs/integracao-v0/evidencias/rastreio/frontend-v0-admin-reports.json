@@ -1,0 +1,53 @@
+{
+  "scenario": "frontend-v0-admin-reports.mjs",
+  "recorded_at": "2026-10-20T15:22:09.563Z",
+  "steps": [
+    {
+      "check": "Auditoria pagina registros reais e exibe detalhes; retenção salva no Go e rejeita prazo de conexão abaixo do limite",
+      "requests": [
+        "GET /api/audit",
+        "GET /api/me",
+        "GET /api/settings/retention",
+        "GET /api/today",
+        "PUT /api/settings/retention"
+      ]
+    },
+    {
+      "check": "Prazos vazios retornam aos padrões da instalação, preservando faturas, pagamentos, aceites e auditoria",
+      "requests": [
+        "GET /api/settings/retention",
+        "PUT /api/settings/retention"
+      ]
+    },
+    {
+      "check": "Coleta DICI usa competência, empresa e contrato reais; correções de IBGE e tecnologia alimentam prévia e CSV sem transmissão externa",
+      "requests": [
+        "GET /api/anatel/dici",
+        "GET /api/me",
+        "GET /api/today",
+        "PUT /api/anatel/municipalities",
+        "PUT /api/plans/:id/technology"
+      ]
+    },
+    {
+      "check": "Tipo de ocorrência selecionado na UI de atendimento aplica a política específica de SLA no Go",
+      "requests": [
+        "GET /api/catalogs",
+        "GET /api/me",
+        "GET /api/subscribers",
+        "GET /api/subscribers/:id",
+        "GET /api/tickets",
+        "GET /api/today",
+        "POST /api/tickets"
+      ]
+    },
+    {
+      "check": "Coleta respeita isolamento por provedor e configuração de qualidade permanece acessível no celular",
+      "requests": [
+        "GET /api/custom-fields",
+        "GET /api/me",
+        "GET /api/today"
+      ]
+    }
+  ]
+}

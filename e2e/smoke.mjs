@@ -2,29 +2,45 @@
 // docs/integracao-v0/MATRIZ_FUNCIONAL.md. Os cenários da interface anterior
 // foram preservados em legacy-smoke.mjs como referência para as próximas etapas.
 if (!process.env.BASE) throw new Error('Informe BASE explicitamente para o laboratório descartável antes de executar a fumaça operacional.');
-await import('./frontend-v0.mjs');
-await import('./frontend-v0-session.mjs');
-await import('./frontend-v0-commercial.mjs');
-await import('./frontend-v0-finance.mjs');
-await import('./frontend-v0-crm.mjs');
-await import('./frontend-v0-field.mjs');
-await import('./frontend-v0-stock.mjs');
-await import('./frontend-v0-network.mjs');
-await import('./frontend-v0-access.mjs');
-await import('./frontend-v0-optical.mjs');
-await import('./frontend-v0-maintenance.mjs');
-await import('./frontend-v0-workspace.mjs');
-await import('./frontend-v0-ftth.mjs');
-await import('./frontend-v0-ipam.mjs');
-await import('./frontend-v0-cgnat-legal.mjs');
-await import('./frontend-v0-map.mjs');
-await import('./frontend-v0-admin-team.mjs');
-await import('./frontend-v0-quality.mjs');
-await import('./frontend-v0-admin-reports.mjs');
-await import('./frontend-v0-saas.mjs');
-await import('./frontend-v0-portal.mjs');
-await import('./frontend-v0-messages.mjs');
-await import('./frontend-v0-integrations.mjs');
-await import('./frontend-v0-import.mjs');
-await import('./frontend-v0-finance-access.mjs');
-await import('./frontend-v0-remediation.mjs');
+import { begin, end } from './request-trace.mjs';
+// Cada cenário grava em docs/integracao-v0/evidencias/rastreio/ as chamadas à API
+// feitas pela interface em cada verificação (evidência por unidade da matriz).
+// FROM retoma a fumaça a partir de um cenário; ONLY roda cenários avulsos, como
+// os que exigem o ACS sintético (frontend-v0-cpe.mjs, frontend-v0-portal-wifi.mjs).
+const scenarios = [
+  'frontend-v0.mjs',
+  'frontend-v0-session.mjs',
+  'frontend-v0-commercial.mjs',
+  'frontend-v0-finance.mjs',
+  'frontend-v0-crm.mjs',
+  'frontend-v0-field.mjs',
+  'frontend-v0-stock.mjs',
+  'frontend-v0-network.mjs',
+  'frontend-v0-access.mjs',
+  'frontend-v0-optical.mjs',
+  'frontend-v0-maintenance.mjs',
+  'frontend-v0-workspace.mjs',
+  'frontend-v0-ftth.mjs',
+  'frontend-v0-ipam.mjs',
+  'frontend-v0-cgnat-legal.mjs',
+  'frontend-v0-map.mjs',
+  'frontend-v0-admin-team.mjs',
+  'frontend-v0-quality.mjs',
+  'frontend-v0-admin-reports.mjs',
+  'frontend-v0-saas.mjs',
+  'frontend-v0-portal.mjs',
+  'frontend-v0-messages.mjs',
+  'frontend-v0-integrations.mjs',
+  'frontend-v0-import.mjs',
+  'frontend-v0-finance-access.mjs',
+  'frontend-v0-remediation.mjs'
+];
+const from = process.env.FROM ? scenarios.indexOf(process.env.FROM) : 0;
+if (from < 0) throw new Error(`cenário desconhecido: ${process.env.FROM}`);
+const selected = process.env.ONLY ? process.env.ONLY.split(',') : scenarios.slice(from);
+for (const scenario of selected) {
+  console.log(`>>> ${scenario}`);
+  begin(scenario);
+  await import(`./${scenario}`);
+  await end();
+}

@@ -1,0 +1,45 @@
+{
+  "scenario": "frontend-v0-network-final.mjs",
+  "recorded_at": "2026-10-20T15:19:43.940Z",
+  "steps": [
+    {
+      "check": "Associação de certificado preparada no banco isolado é removida pela UI e pelo Go com confirmação; não há alegação de novo handshake mTLS",
+      "requests": [
+        "GET /api/agents",
+        "GET /api/devices",
+        "GET /api/me",
+        "GET /api/network/health",
+        "GET /api/network/online",
+        "GET /api/radius/status",
+        "GET /api/today",
+        "PATCH /api/agents/:id"
+      ]
+    },
+    {
+      "check": "WireGuard é emitido e regenerado na UI com credencial privada apenas na emissão; instruções posteriores usam marcadores e ausência de handshake permanece explícita",
+      "requests": [
+        "GET /api/agents",
+        "GET /api/devices",
+        "GET /api/network/health",
+        "GET /api/radius/devices/:id/setup",
+        "GET /api/radius/status",
+        "POST /api/radius/devices",
+        "POST /api/radius/devices/:id/tunnel"
+      ]
+    },
+    {
+      "check": "Leitura de handshake sintético aparece na ficha; troca para L2TP e regeneração produzem novas credenciais, depois ocultas por marcadores, sem abrir túnel físico",
+      "requests": [
+        "GET /api/agents",
+        "GET /api/devices",
+        "GET /api/me",
+        "GET /api/network/health",
+        "GET /api/network/online",
+        "GET /api/radius/devices/:id/setup",
+        "GET /api/radius/status",
+        "GET /api/today",
+        "POST /api/radius/devices/:id/tunnel"
+      ]
+    }
+  ]
+}

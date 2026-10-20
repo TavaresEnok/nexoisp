@@ -33,3 +33,6 @@
 
 /* Caixas de seleção nativas em formulários seguem a cor primária do v0. */
 input[type="checkbox"] { accent-color: var(--primary); width: 16px; height: 16px; }
+
+/* Telas conectadas podem ter mais ações no cabeçalho que a demonstração; no celular elas quebram linha em vez de alargar a página. */
+@media (max-width: 700px) { .heading-actions { flex-wrap: wrap; } }

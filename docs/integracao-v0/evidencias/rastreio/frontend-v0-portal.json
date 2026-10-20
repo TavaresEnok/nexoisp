@@ -1,0 +1,115 @@
+{
+  "scenario": "frontend-v0-portal.mjs",
+  "recorded_at": "2026-10-20T15:23:39.804Z",
+  "steps": [
+    {
+      "check": "Portal consulta somente cadastro, contratos e faturas próprios; plano sem provisionamento e manutenção são apresentados sem supor conexão online",
+      "requests": [
+        "GET /api/me",
+        "GET /api/portal/acceptances",
+        "GET /api/portal/overview"
+      ]
+    },
+    {
+      "check": "Fatura sem cobrança informa ausência de meio online; gateway demo exibe somente códigos reais retornados pelo Go e indicação de simulação",
+      "requests": [
+        "GET /api/me",
+        "GET /api/portal/acceptances",
+        "GET /api/portal/cpe",
+        "GET /api/portal/overview",
+        "GET /api/portal/surveys",
+        "GET /api/portal/tickets"
+      ]
+    },
+    {
+      "check": "Aceite autenticado registra texto e prova com hashes conferidos; comprovante na ficha imprime somente o documento, sem executar texto informado",
+      "requests": [
+        "GET /api/acceptances/:id/evidence",
+        "GET /api/addons",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/acceptances",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/amendments",
+        "GET /api/contracts/:id/discounts",
+        "GET /api/contracts/:id/scheduled-changes",
+        "GET /api/contracts/:id/states",
+        "GET /api/contracts/:id/termination-quote",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/portal/acceptances",
+        "GET /api/portal/cpe",
+        "GET /api/portal/overview",
+        "GET /api/portal/surveys",
+        "GET /api/portal/tickets",
+        "GET /api/today",
+        "POST /api/portal/acceptances/:id/accept"
+      ]
+    },
+    {
+      "check": "Chamado e mensagens do titular chegam ao Go; respostas públicas aparecem, notas internas permanecem ocultas e protocolo encerrado não permite nova mensagem",
+      "requests": [
+        "GET /api/me",
+        "GET /api/portal/acceptances",
+        "GET /api/portal/cpe",
+        "GET /api/portal/overview",
+        "GET /api/portal/surveys",
+        "GET /api/portal/tickets",
+        "GET /api/portal/tickets/:id",
+        "POST /api/portal/tickets",
+        "POST /api/portal/tickets/:id/messages"
+      ]
+    },
+    {
+      "check": "Pesquisa de OS é respondida pela UI do portal e registrada uma única vez na administração",
+      "requests": [
+        "GET /api/me",
+        "GET /api/portal/acceptances",
+        "GET /api/portal/cpe",
+        "GET /api/portal/overview",
+        "GET /api/portal/surveys",
+        "GET /api/portal/tickets",
+        "POST /api/portal/surveys/:id"
+      ]
+    },
+    {
+      "check": "Confiança solicitada com confirmação respeita elegibilidade e intervalo no Go; gera intenção de reativação sem alegar execução no NAS",
+      "requests": [
+        "GET /api/me",
+        "GET /api/portal/acceptances",
+        "GET /api/portal/cpe",
+        "GET /api/portal/overview",
+        "GET /api/portal/surveys",
+        "GET /api/portal/tickets",
+        "POST /api/portal/trust-release"
+      ]
+    },
+    {
+      "check": "Consumo mensal exibe accounting recebido do agente; séries consultam o contrato escolhido e conservam ausência de dados explícita",
+      "requests": [
+        "GET /api/me",
+        "GET /api/portal/acceptances",
+        "GET /api/portal/overview",
+        "GET /api/portal/usage-series"
+      ]
+    },
+    {
+      "check": "Titulares do mesmo provedor permanecem isolados em protocolos, consumo e aceite; portal abre cada seção em página própria pelo endereço do menu, recusa seção inexistente, encerra sessão e é utilizável em tela de celular",
+      "requests": [
+        "GET /api/me",
+        "GET /api/portal/acceptances",
+        "GET /api/portal/cpe",
+        "GET /api/portal/overview",
+        "GET /api/portal/surveys",
+        "GET /api/portal/tickets",
+        "POST /api/auth/logout"
+      ]
+    },
+    {
+      "check": "(sem verificação posterior)",
+      "requests": [
+        "GET /api/health"
+      ]
+    }
+  ]
+}

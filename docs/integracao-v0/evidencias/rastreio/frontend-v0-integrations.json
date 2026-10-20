@@ -1,0 +1,54 @@
+{
+  "scenario": "frontend-v0-integrations.mjs",
+  "recorded_at": "2026-10-20T15:23:57.147Z",
+  "steps": [
+    {
+      "check": "Token criado na UI aparece uma vez, autentica a API pública e respeita escopo, validade e limite de chamadas do Go",
+      "requests": [
+        "GET /api/api-tokens",
+        "GET /api/integrations/catalog",
+        "GET /api/me",
+        "GET /api/today",
+        "POST /api/api-tokens"
+      ]
+    },
+    {
+      "check": "Revogação confirmada invalida imediatamente o token na API pública",
+      "requests": [
+        "DELETE /api/api-tokens/:id",
+        "GET /api/api-tokens"
+      ]
+    },
+    {
+      "check": "Destino criado envia evento assinado real ao receptor local e distingue HTTP 200 de falha HTTP 500",
+      "requests": [
+        "GET /api/webhook-endpoints",
+        "POST /api/webhook-endpoints",
+        "POST /api/webhook-endpoints/:id/test"
+      ]
+    },
+    {
+      "check": "Rotação mostra novo segredo uma vez; edição, pausa e ativação conservam a assinatura correta no próximo teste",
+      "requests": [
+        "GET /api/integrations/catalog",
+        "GET /api/webhook-endpoints",
+        "PATCH /api/webhook-endpoints/:id",
+        "POST /api/webhook-endpoints/:id/rotate-secret",
+        "POST /api/webhook-endpoints/:id/test"
+      ]
+    },
+    {
+      "check": "Evento real gera entrega pendente e histórico filtrado; reenvio de falha exige fixture explícita em banco descartável",
+      "requests": [
+        "GET /api/webhook-deliveries"
+      ]
+    },
+    {
+      "check": "Exclusão confirmada remove destino e histórico; outro provedor não pode excluir o webhook",
+      "requests": [
+        "DELETE /api/webhook-endpoints/:id",
+        "GET /api/webhook-endpoints"
+      ]
+    }
+  ]
+}
