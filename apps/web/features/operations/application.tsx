@@ -42,6 +42,11 @@ import {
   findNavigationPage,
   searchNavigation,
 } from "@/lib/navigation";
+const OnuCatalogPage = lazy(() =>
+  import("@/features/network/onu-catalog").then((module) => ({
+    default: module.OnuCatalogPage,
+  })),
+);
 const ReferralReport = lazy(() =>
   import("@/features/finance/referrals").then((module) => ({
     default: module.ReferralReport,
@@ -341,6 +346,7 @@ export function OperationalApplication() {
     maintenance: <NetworkMaintenance />,
     onus: <NetworkOnus />,
     noc: <NetworkNoc />,
+    onuCatalog: <OnuCatalogPage />,
     online: <OnlineConnections />,
     operations: <NetworkOperations />,
     equipment: <NetworkDirectory />,

@@ -55,6 +55,14 @@
     },
     {
       "method": "DELETE",
+      "path": "/api/olt/onu-models/:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/olt/onu-templates/:id"
+    },
+    {
+      "method": "DELETE",
       "path": "/api/scheduled-changes/:id"
     },
     {
@@ -447,6 +455,14 @@
     },
     {
       "method": "GET",
+      "path": "/api/olt/onu-models"
+    },
+    {
+      "method": "GET",
+      "path": "/api/olt/onu-templates"
+    },
+    {
+      "method": "GET",
       "path": "/api/onus"
     },
     {
@@ -724,6 +740,14 @@
     {
       "method": "PATCH",
       "path": "/api/notice-rules/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/olt/onu-models/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/olt/onu-templates/:id"
     },
     {
       "method": "PATCH",
@@ -1088,6 +1112,14 @@
     {
       "method": "POST",
       "path": "/api/notifications/test"
+    },
+    {
+      "method": "POST",
+      "path": "/api/olt/onu-models"
+    },
+    {
+      "method": "POST",
+      "path": "/api/olt/onu-templates"
     },
     {
       "method": "POST",

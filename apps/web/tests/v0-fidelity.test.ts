@@ -13,8 +13,6 @@ const demoOnly: Record<string, string> = {
   "navigation-directory.tsx": "diretório do catálogo demonstrativo; a operação usa o mapa filtrado por permissão",
   "navigation-scope.tsx": "escopo pendente do catálogo demonstrativo",
   "navigation-views.tsx": "views do roteador demonstrativo",
-  "onu-catalog.tsx": "catálogo de modelos e templates de ONU; o Go não possui esse cadastro (recurso planejado)",
-  "provisioning-playground.tsx": "simulador explícito de provisionamento, sem equipamento",
   "subscriber-connection.tsx": "análise de evidência manual temporária; a operação usa provisionamento e telemetria reais",
   "subscriber-diagnostic-tools.tsx": "coleta manual simulada da ficha demonstrativa",
   "subscriber-sheet.tsx": "orquestra as abas demonstrativas; cabeçalho, abas e visão geral da ficha vivem em subscriber-sheet-parts.tsx, usado pela operação",

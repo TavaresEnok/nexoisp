@@ -86,11 +86,7 @@ test("destinos antigos e aliases apontam a elementos Route existentes, além do 
   }
 });
 test("views do catálogo v0 disponíveis no Go têm destino operacional; catálogos sem backend continuam explícitos", () => {
-  const futureViews = new Set([
-    "network-pon",
-    "network-onu-models",
-    "network-onu-templates",
-  ]);
+  const futureViews = new Set(["network-pon"]);
   for (const node of navigationPages.filter((node) => node.view)) {
     if (futureViews.has(node.view!)) {
       assert.equal(integrationStatus(node.href), "pending", node.href);
@@ -102,12 +98,7 @@ test("views do catálogo v0 disponíveis no Go têm destino operacional; catálo
 });
 
 // Recursos do v0 sem suporte no Go; qualquer outro nó deve chegar a uma página real.
-const planned = [
-  "/rede/ftth/fttx-pon",
-  "/rede/ftth/fttx-onu-tipo",
-  "/rede/ftth/fttx-onu-template",
-  "/rede/ftth/acs-template",
-];
+const planned = ["/rede/ftth/fttx-pon", "/rede/ftth/acs-template"];
 const session = (role: Session["role"], perms: string[]): Session => ({
   id: role,
   name: role,
