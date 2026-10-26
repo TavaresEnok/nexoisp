@@ -1,3 +1,4 @@
+import { FinancialConnections } from "./financial-connections";
 import { lazy, Suspense, useState } from "react";
 import useSWR from "swr";
 import { useSearchParams } from "react-router-dom";
@@ -31,7 +32,7 @@ import {
 } from "./integration-shared";
 export function Integrations() {
   const [params, setParams] = useSearchParams();
-  const tab = ["tokens", "webhooks", "entregas"].includes(
+  const tab = ["tokens", "webhooks", "entregas", "financeiro"].includes(
     params.get("aba") ?? "",
   )
     ? params.get("aba")!
@@ -55,10 +56,13 @@ export function Integrations() {
           <TabsTrigger value="tokens">Tokens da API</TabsTrigger>
           <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
           <TabsTrigger value="entregas">Entregas</TabsTrigger>
+          <TabsTrigger value="financeiro">Conexões financeiras</TabsTrigger>
         </TabsList>
         <TabsContent value={tab}>
           <Suspense fallback={<QueryBoundary loading>{null}</QueryBoundary>}>
-            {tab === "tokens" ? (
+            {tab === "financeiro" ? (
+              <FinancialConnections />
+            ) : tab === "tokens" ? (
               <ApiTokens />
             ) : tab === "webhooks" ? (
               <WebhookEndpoints />
