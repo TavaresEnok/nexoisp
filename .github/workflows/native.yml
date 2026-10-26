@@ -30,6 +30,9 @@ jobs:
           npm -w apps/web run build
       - name: Instalação, administração, financeiro e outbox com duas réplicas Go
         run: python3 tests/contrato/nativo.py
+      - name: Migração 64 para 65 e vínculos financeiros pendentes
+        env: {NEXO_PAYMENT_LAB: '1'}
+        run: python3 tests/contrato/financial_connections_migration.py
       - name: Isolamento, RLS, locks e reinício Go com PostgreSQL descartável
         run: python3 tests/contrato/go_integration.py
       - name: Falha por provedor, filas, limites compartilhados e recuperação

@@ -31,6 +31,7 @@ const scenarios = [
   'frontend-v0-portal.mjs',
   'frontend-v0-messages.mjs',
   'frontend-v0-integrations.mjs',
+  'frontend-v0-financial-connections.mjs',
   'frontend-v0-import.mjs',
   'frontend-v0-finance-access.mjs',
   'frontend-v0-remediation.mjs',
