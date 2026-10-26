@@ -2,18 +2,20 @@
 
 Estado: **B07 parcialmente implementado**, sem adapter real habilitado. O usuário confirmou interesse em Pix imediato, Pix com vencimento e boleto/Bolix; não são protocolos intercambiáveis. Este incremento entrega transporte Pix sandbox, adapter Cob e journal persistente. Não entrega todos os produtos nem integração operacional pronta.
 
+Atualização transacional: a migração 69 e [o incremento seguinte](LOTE07-B07-TRANSACIONAL.md) acrescentam reserva durável na fatura e vinculação atômica da resposta. O relatório externo 20 preserva o estado histórico anterior.
+
 ## Código e limites
 
 - `internal/finance/providers/efi/transport.go`: endpoint sandbox fixo, sem override por env/URL; mTLS TLS≥1.2, par certificado/chave e validade conferidos antes de construir cliente, OAuth por conexão, timeout, cache sincronizado com margem de expiração, bloqueio de redirects/proxy ambiente, corpo limitado e erros sem payload/segredos. Rotação cria outro cliente/transport/cache. Não há certificado ou credencial real no código.
 - `immediate.go`: PUT/GET Cob com txid determinístico por tenant/conexão/ambiente/conta/intenção, dinheiro decimal sem float, validação de chave/txid/valor/estado e pagamentos. Datas da fatura não se convertem silenciosamente em expiração Pix. A expiração é configuração explícita; CobV será separado. Resposta concluída sem detalhes de recebimento e devoluções exigem revisão, não geram baixa presumida.
 - `internal/finance/issuance.go` + migração 68: uma intenção imutável por fatura, JSON do pedido e hash da configuração de cobrança (não credenciais); incerteza comitada antes de chamar adapter fora da transação. Após erro/reinício, somente consulta da mesma intenção; mesmo 404 não libera nova escrita. Concorrentes conferem o ID persistido. RLS oculta outros tenants, portal e POP restrito. Sem DELETE/downgrade destrutivo.
-- Registry `providers.Executable`, restrição SQL de ativação em `financial_connections` e rotas continuam fechados para Efí. O novo serviço é uma fronteira interna, não uma autorização HTTP. Nenhum job ou endpoint de produção o invoca. Não registra pagamento nem vincula automaticamente a resposta à fatura.
+- Registry `providers.Executable`, restrição SQL de ativação em `financial_connections` e rotas continuam fechados para Efí. O novo serviço é uma fronteira interna, não uma autorização HTTP. Nenhum job ou endpoint de produção o invoca. Não registra pagamento. Desde a migração 69, a transição issued vincula a resposta à fatura na mesma transação.
 
 O hash de configuração do adapter inclui produto, chave Pix e expiração. Trocar credencial/certificado não muda a intenção; trocar semântica de cobrança requer revisão. Não guardar certificado, senha OAuth ou token no journal.
 
 ## Recuperação
 
-`prepared → uncertain → issued` é o caminho automático. `review` é terminal reservado para decisão explícita; ainda não há tela/endpoint de resolução. Uma falha depois do commit de uncertain e antes do envio pode exigir intervenção: não presumir que 404 prova ausência de efeito. `issued` significa resposta identificada no journal, não recebimento ou equipamento liberado.
+`prepared → uncertain → issued` é o caminho automático. `review` é terminal reservado para decisão explícita; ainda não há tela/endpoint de resolução. Uma falha depois do commit de uncertain e antes do envio pode exigir intervenção: não presumir que 404 prova ausência de efeito. Desde a migração 69, `issued` significa resposta identificada no journal e vinculada à fatura; não equivale a recebimento ou equipamento liberado.
 
 Migração 68 é aditiva e não altera faturas, pagamentos, movimentos ou efeitos anteriores. Retorno de código conserva o journal; não executar down destrutivo nem resetar uncertain para prepared. Bundle/tag pré-B07 e teste de dump/restauração lógica sustentam recuperação local. Isso não homologa PITR, restore físico ou produção.
 
@@ -25,11 +27,11 @@ Usar apenas PostgreSQL descartável e variável `NEXO_GO_TEST_DATABASE_URL` do l
 - `NEXO_PAYMENT_LAB=1 python3 tests/contrato/provider_issuance_migration.py`
 - `python3 tests/contrato/nativo.py` e geração `sqlc generate`.
 
-HTTP adverso roda em TLS/mTLS loopback com certificados gerados no teste; nenhum teste consulta a conta Efí. O teste do journal usa banco real descartável e adapter sintético; recria o serviço, não afirma SIGKILL do processo Efí. Testes de integração são pulados sem DB por convenção do projeto; na evidência deste incremento o DB foi fornecido e não houve skips.
+HTTP adverso roda em TLS/mTLS loopback com certificados gerados no teste; nenhum teste consulta a conta Efí. O teste do journal usa banco real descartável e adapter sintético; recria o serviço; o incremento transacional também testa SIGKILL do processo do serviço com adapter sintético, sem afirmar homologação Efí. Testes de integração são pulados sem DB por convenção do projeto; na evidência deste incremento o DB foi fornecido e não houve skips.
 
 ## Próximo fechamento interno antes de ativação
 
-1. Ligar journal a autorização financeira e faturamento com vinculação atômica da resposta; impedir alteração/baixa/cancelamento/troca de banco durante emissão pendente. A checagem atual anterior ao envio não fecha a janela entre commit e chamada externa: nenhuma ativação é permitida antes dessa proteção.
+1. Ligar journal à entrada operacional autorizada e ao consumidor financeiro. A reserva durável, a proteção contra alterações/baixa/cancelamento/troca de banco durante emissão e a vinculação atômica foram implementadas na migração 69; ver incremento transacional. Ativação real permanece bloqueada até completar os demais contratos e testes.
 2. Receiver Efí com validação mTLS da cadeia esperada, inbox durável, consulta autoritativa e contabilização idempotente. Não reutilizar HMAC demo como autenticação Efí.
 3. Cancelamento/devolução: intenção própria, confirmação por consulta e lançamentos de reversão, sem confundir solicitação em processamento com devolução liquidada.
 4. Pix CobV (dados devedor/vencimento/encargos) e boleto/Bolix (API Cobranças, autorização e notificações próprias). Todos mantidos no escopo; SDK/protocolo Pix não prova compatibilidade Bolix.
