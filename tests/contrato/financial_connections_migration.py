@@ -12,7 +12,12 @@ from lib import sql,go_env,command,DB_CONTAINER
 temporary=tempfile.TemporaryDirectory(prefix='nexo-b03-migration-')
 stage=Path(temporary.name)
 shutil.copytree(repo/'db',stage/'db',dirs_exist_ok=True)
-(stage/'db/migrations/00065_financial_connections.sql').unlink()
+for migration in (stage/'db/migrations').glob('*.sql'):
+ if int(migration.name.split('_')[0])>64: migration.unlink()
+target=stage/'target65'
+shutil.copytree(repo/'db',target/'db')
+for migration in (target/'db/migrations').glob('*.sql'):
+ if int(migration.name.split('_')[0])>65: migration.unlink()
 cli=[str(repo/'apps/api-go/bin/nexo-db')]
 try:
  assert subprocess.run(['docker','inspect',DB_CONTAINER],capture_output=True).returncode!=0
@@ -38,7 +43,7 @@ try:
  'intents',(select jsonb_agg(m order by intent_id) from manual_payment_intents m),
  'demo',(select jsonb_agg(to_jsonb(d)-'financial_connection_id'-'id' order by charge_id) from demo_gateway_charges d))"""
  before=sql(snapshot,'nexo_test');assert sql('select max(version_id) from goose_db_version','nexo_test')=='64'
- command(cli+['prepare'],cwd=repo,env=env);command(cli+['prepare'],cwd=repo,env=env)
+ command(cli+['prepare'],cwd=target,env=env);command(cli+['prepare'],cwd=target,env=env)
  assert before==sql(snapshot,'nexo_test')
  assert sql('select count(*) from financial_connections','nexo_test')=='1'
  assert sql("select count(*) from invoices where gateway='demo' and financial_connection_id is not null",'nexo_test')=='1'

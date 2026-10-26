@@ -115,6 +115,8 @@ def run():
         checks.append('intenção persistente: replay concorrente, conflito, estorno e resumos residuais')
         command([sys.executable,str(ROOT/'tests/contrato/financial_connections.py')],env=dict(env,NEXO_PAYMENT_LAB='1',NEXO_PAYMENT_LAB_URL=bases[0],NEXO_PAYMENT_LAB_URL_2=bases[1]))
         checks.append('B03: conexões, assinatura, inbox e IDs financeiros isolados')
+        command([sys.executable,str(ROOT/'tests/contrato/financial_movements.py')],env=dict(env,NEXO_PAYMENT_LAB='1',NEXO_PAYMENT_LAB_URL=bases[0]))
+        checks.append('B04: movimentos alocações acordos shadow-read e RLS')
     finally:
         for p,log in processes:
             p.terminate()
