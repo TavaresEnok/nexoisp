@@ -164,6 +164,15 @@ func Agreement(ctx context.Context, tx *db.Tx, tenant, user, id string, b map[st
 		return nil, e
 	}
 	for _, invoice := range ids {
+		// Preserve the residual transferred to this agreement without copying cash.
+		if e = tx.Exec(ctx, `insert into agreement_sources
+		 (tenant_id,agreement_id,invoice_id,nominal_cents,fee_cents,discount_cents,received_cents,transferred_cents)
+		 select tenant_id,$2,id,amount_cents,$3,discount_cents,
+		 coalesce((select sum(signed_cents) from payments where invoice_id=i.id),0),
+		 amount_cents::bigint+$3-discount_cents-coalesce((select sum(signed_cents) from payments where invoice_id=i.id),0)
+		 from invoices i where id=$1`, invoice, a.Get("id"), fees[invoice]); e != nil {
+			return nil, e
+		}
 		if e = exec(ctx, tx, "createAgreement", 3, invoice, fees[invoice], "renegociada no acordo "+a.Get("id").(string)[:8]); e != nil {
 			return nil, e
 		}

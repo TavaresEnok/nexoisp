@@ -71,6 +71,18 @@ type Agreement struct {
 	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 }
 
+type AgreementSource struct {
+	TenantID         jsonx.UUID         `json:"tenant_id"`
+	AgreementID      jsonx.UUID         `json:"agreement_id"`
+	InvoiceID        jsonx.UUID         `json:"invoice_id"`
+	NominalCents     int64              `json:"nominal_cents"`
+	FeeCents         int64              `json:"fee_cents"`
+	DiscountCents    int64              `json:"discount_cents"`
+	ReceivedCents    int64              `json:"received_cents"`
+	TransferredCents int64              `json:"transferred_cents"`
+	RecordedAt       pgtype.Timestamptz `json:"recorded_at"`
+}
+
 type ApiIdempotency struct {
 	TenantID  jsonx.UUID         `json:"tenant_id"`
 	TokenID   jsonx.UUID         `json:"token_id"`
@@ -327,6 +339,39 @@ type Document struct {
 	DeletedBy    pgtype.UUID        `json:"deleted_by"`
 }
 
+type FinancialAgreementShadow struct {
+	ID               jsonx.UUID  `json:"id"`
+	TenantID         jsonx.UUID  `json:"tenant_id"`
+	OriginalCents    int32       `json:"original_cents"`
+	TotalCents       int32       `json:"total_cents"`
+	DiscountCents    int32       `json:"discount_cents"`
+	SourceCents      int64       `json:"source_cents"`
+	InstallmentCents int64       `json:"installment_cents"`
+	SourceUnproven   interface{} `json:"source_unproven"`
+	Matches          interface{} `json:"matches"`
+}
+
+type FinancialBalanceShadow struct {
+	InvoiceID           jsonx.UUID  `json:"invoice_id"`
+	TenantID            jsonx.UUID  `json:"tenant_id"`
+	CompanyID           pgtype.UUID `json:"company_id"`
+	ContractID          jsonx.UUID  `json:"contract_id"`
+	Status              interface{} `json:"status"`
+	LegacyStatus        string      `json:"legacy_status"`
+	NominalCents        int64       `json:"nominal_cents"`
+	FeeCents            int64       `json:"fee_cents"`
+	DiscountCents       int64       `json:"discount_cents"`
+	ReceivedCents       int64       `json:"received_cents"`
+	LegacyNominalCents  int64       `json:"legacy_nominal_cents"`
+	LegacyFeeCents      int64       `json:"legacy_fee_cents"`
+	LegacyDiscountCents int64       `json:"legacy_discount_cents"`
+	LegacyReceivedCents int64       `json:"legacy_received_cents"`
+	ResidualCents       interface{} `json:"residual_cents"`
+	ExcessCents         interface{} `json:"excess_cents"`
+	CollectibleCents    interface{} `json:"collectible_cents"`
+	Matches             interface{} `json:"matches"`
+}
+
 type FinancialConnection struct {
 	ID               jsonx.UUID         `json:"id"`
 	TenantID         jsonx.UUID         `json:"tenant_id"`
@@ -348,6 +393,17 @@ type FinancialConnectionPending struct {
 	TenantID jsonx.UUID  `json:"tenant_id"`
 	Provider pgtype.Text `json:"provider"`
 	Reason   string      `json:"reason"`
+}
+
+type FinancialPaymentAllocation struct {
+	PaymentID             jsonx.UUID         `json:"payment_id"`
+	TenantID              jsonx.UUID         `json:"tenant_id"`
+	InvoiceID             jsonx.UUID         `json:"invoice_id"`
+	AllocatedCents        int64              `json:"allocated_cents"`
+	Kind                  string             `json:"kind"`
+	ReversalOf            pgtype.UUID        `json:"reversal_of"`
+	FinancialConnectionID pgtype.UUID        `json:"financial_connection_id"`
+	PaidAt                pgtype.Timestamptz `json:"paid_at"`
 }
 
 type FtthBox struct {
@@ -470,6 +526,18 @@ type InvoiceItem struct {
 	InvoiceID   jsonx.UUID `json:"invoice_id"`
 	Description string     `json:"description"`
 	AmountCents int32      `json:"amount_cents"`
+}
+
+type InvoiceMovement struct {
+	ID            int64              `json:"id"`
+	TenantID      jsonx.UUID         `json:"tenant_id"`
+	InvoiceID     jsonx.UUID         `json:"invoice_id"`
+	Origin        string             `json:"origin"`
+	NominalDelta  int64              `json:"nominal_delta"`
+	FeeDelta      int64              `json:"fee_delta"`
+	DiscountDelta int64              `json:"discount_delta"`
+	StatusAfter   string             `json:"status_after"`
+	RecordedAt    pgtype.Timestamptz `json:"recorded_at"`
 }
 
 type Ip6Delegation struct {
