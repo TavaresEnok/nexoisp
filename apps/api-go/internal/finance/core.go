@@ -10,6 +10,7 @@ import (
 	"nexoisp/api-go/internal/apierr"
 	"nexoisp/api-go/internal/db"
 	"nexoisp/api-go/internal/domain"
+	"nexoisp/api-go/internal/finance/providers"
 	"nexoisp/api-go/internal/jsonx"
 	"nexoisp/api-go/internal/modules/leitura"
 	"nexoisp/api-go/internal/validate"
@@ -126,10 +127,19 @@ func Charges(ctx context.Context, tx *db.Tx, tenant string) (int, error) {
 		if err != nil {
 			return 0, err
 		}
-		charge := "demo_ch_" + i.Get("id").(string)
-		if e = tx.Exec(ctx, `insert into demo_gateway_charges (charge_id,tenant_id,amount_cents,financial_connection_id) values ($1,$2,$3,$4) on conflict (financial_connection_id,charge_id) where financial_connection_id is not null do nothing`, charge, i.Get("tenant_id"), i.Get("amount_cents"), connection); e != nil {
-			return 0, e
+		adapter, scope, err := adapterFor(ctx, tx, connection)
+		if err != nil {
+			return 0, err
 		}
+		issued, err := adapter.CreateCharge(ctx, providers.Create{Scope: scope, IntentKey: "invoice:" + jsonx.String(i.Get("id")), InvoiceID: jsonx.String(i.Get("id")), Money: providers.Money{Cents: int64(num(i.Get("amount_cents"))), Currency: "BRL"}, DueDate: jsonx.String(i.Get("due_date"))})
+		if err != nil {
+			var failure *providers.Failure
+			if errors.As(err, &failure) && failure.Kind == providers.Conflict {
+				return 0, apierr.New(409, "intenção de cobrança já registrada com valor diferente")
+			}
+			return 0, err
+		}
+		charge := issued.ID
 		methods, e := jsonx.Encode(map[string]any{"pix_copia_e_cola": "DEMONSTRACAO-NAO-PAGAVEL-PIX-" + i.Get("id").(string)[:8], "boleto_linha_digitavel": "00000.00000 00000.000000 00000.000000 0 DEMONSTRACAO", "aviso": "Meios de pagamento fictícios do gateway de demonstração."})
 		if e != nil {
 			return 0, e

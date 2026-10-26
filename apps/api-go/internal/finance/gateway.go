@@ -2,10 +2,11 @@ package finance
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"math"
 	"nexoisp/api-go/internal/apierr"
 	"nexoisp/api-go/internal/db"
+	"nexoisp/api-go/internal/finance/providers"
 	"nexoisp/api-go/internal/jsonx"
 	"nexoisp/api-go/internal/modules/leitura"
 	"nexoisp/api-go/internal/network"
@@ -27,13 +28,23 @@ func Payment(ctx context.Context, tx *db.Tx, id, gateway, connection string, p j
 	}
 	if count == 0 {
 		var same bool
-		if e = tx.QueryRow(ctx, `select invoice_id=$2::uuid and amount_cents=$3 from payments where financial_connection_id=$1 and gateway_payment_id=$4`, connection, id, p.Get("amount_cents"), p.Get("id")).Scan(&same); e != nil {
+		if e = tx.QueryRow(ctx, `select invoice_id=$2::uuid and amount_cents=$3 and paid_at=$5::timestamptz and coalesce(method,'')=coalesce($6,'') from payments where financial_connection_id=$1 and gateway_payment_id=$4`, connection, id, p.Get("amount_cents"), p.Get("id"), p.Get("paid_at"), p.Get("method")).Scan(&same); e != nil {
 			return false, "", e
 		}
 		if !same {
 			return false, "", apierr.New(409, "identificador de pagamento já usado com dados diferentes")
 		}
 		return true, fmt.Sprint(inv.Get("status")), nil
+	}
+	// A later confirmation must not silently clear a refund/chargeback review.
+	// Record received cash, but require the existing explicit reconciliation path.
+	var disputed bool
+	if e = tx.QueryRow(ctx, `select exists(select 1 from gateway_events where financial_connection_id=$1 and charge_id=$2 and type in ('payment.refunded','payment.chargeback') and status='divergent')`, connection, inv.Get("gateway_charge_id")).Scan(&disputed); e != nil {
+		return false, "", e
+	}
+	if disputed {
+		e = tx.Exec(ctx, `update invoices set status='reconciling',status_note='estorno/contestação informado; confirmação posterior exige decisão manual' where id=$1`, id)
+		return false, "reconciling", e
 	}
 	status, e := settle(ctx, tx, inv, false)
 	return false, status, e
@@ -42,17 +53,28 @@ func chargePayments(ctx context.Context, tx *db.Tx, gateway, charge, connection 
 	if !Demo(gateway) || connection == nil {
 		return nil, false, nil
 	}
-	rs, e := tx.Objects(ctx, `select d.payments from demo_gateway_charges d join financial_connections c on c.id=d.financial_connection_id where d.charge_id=$1 and c.id=$2 and c.status='active' and c.provider='demo' and c.environment='sandbox'`, charge, connection)
-	if e != nil || len(rs) == 0 {
-		return nil, false, e
+	var available bool
+	if err := tx.QueryRow(ctx, `select exists(select 1 from financial_connections where id=$1 and provider='demo' and environment='sandbox' and status='active')`, connection).Scan(&available); err != nil {
+		return nil, false, err
 	}
-	out := []jsonx.Object{}
-	if values, ok := rs[0].Get("payments").([]any); ok {
-		for _, v := range values {
-			if o, ok := v.(jsonx.Object); ok {
-				out = append(out, o)
-			}
+	if !available {
+		return nil, false, nil
+	}
+	adapter, scope, err := adapterFor(ctx, tx, jsonx.String(connection))
+	if err != nil {
+		return nil, false, err
+	}
+	snapshot, err := adapter.Lookup(ctx, providers.Reference{Scope: scope, ChargeID: jsonx.String(charge)})
+	if err != nil {
+		var failure *providers.Failure
+		if errors.As(err, &failure) && failure.Kind == providers.Unavailable {
+			return nil, false, nil
 		}
+		return nil, false, err
+	}
+	out := make([]jsonx.Object, 0, len(snapshot.Payments))
+	for _, payment := range snapshot.Payments {
+		out = append(out, paymentObject(payment))
 	}
 	return out, true, nil
 }
@@ -106,6 +128,10 @@ func Event(ctx context.Context, database *db.DB, connection jsonx.Object, ev jso
 	if e != nil {
 		return nil, e
 	}
+	normalized, err := providers.DecodeDemo(payload)
+	if err != nil {
+		return nil, apierr.New(400, err.Error())
+	}
 	eventID := jsonx.String(ev.Get("id"))
 	kind := jsonx.String(ev.Get("type"))
 	charge := jsonx.String(ev.Get("charge_id"))
@@ -148,12 +174,8 @@ func Event(ctx context.Context, database *db.DB, connection jsonx.Object, ev jso
 		}
 		status = "ignored"
 		var note any = "tipo de evento sem tratamento: " + kind
-		p, _ := ev.Get("payment").(jsonx.Object)
 		if kind == "payment.confirmed" {
-			amount := num(p.Get("amount_cents"))
-			if p == nil || jsonx.String(p.Get("id")) == "" || amount <= 0 || amount != math.Trunc(amount) || jsonx.String(p.Get("paid_at")) == "" {
-				return apierr.New(400, "pagamento inválido")
-			}
+			p := paymentObject(*normalized.Payment)
 			duplicate, settled, err := Payment(ctx, tx, jsonx.String(rows[0].Get("id")), gateway, cid, p, "gateway_event")
 			if err != nil {
 				return err

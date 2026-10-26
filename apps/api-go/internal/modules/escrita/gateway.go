@@ -14,6 +14,7 @@ import (
 	"nexoisp/api-go/internal/db"
 	"nexoisp/api-go/internal/endpoint"
 	"nexoisp/api-go/internal/finance"
+	"nexoisp/api-go/internal/finance/providers"
 	"nexoisp/api-go/internal/jsonx"
 	"nexoisp/api-go/internal/tenancy"
 	"nexoisp/api-go/internal/validate"
@@ -55,6 +56,9 @@ func RegisterGateway(api huma.API, registry *endpoint.Registry, s Service) {
 		signature := "sha256=" + hex.EncodeToString(mac.Sum(nil))
 		if secret == "" || ts == "" || math.IsNaN(n) || math.IsInf(n, 0) || math.Abs(float64(time.Now().UnixNano())/1e9-n) > 300 || !hmac.Equal([]byte(signature), []byte(r.Header.Get("x-nexo-signature"))) {
 			return endpoint.Result{}, apierr.New(401, "assinatura inválida")
+		}
+		if _, err := providers.DecodeDemo(raw); err != nil {
+			return endpoint.Result{}, apierr.New(400, err.Error())
 		}
 		ev, ok := jsonx.JSON(raw).(jsonx.Object)
 		if !ok {
