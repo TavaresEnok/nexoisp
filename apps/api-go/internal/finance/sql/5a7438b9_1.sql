@@ -1,1 +1,1 @@
-update invoices set gateway = $2, gateway_charge_id = $3, payment_methods = $4 where id = $1
+update invoices set gateway = $2, gateway_charge_id = $3, payment_methods = $4, financial_connection_id=$5 where id = $1

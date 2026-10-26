@@ -14,7 +14,7 @@ import (
 
 const Group152f5ccd0 = `-- name: Group152f5ccd0 :many
 
-  select i.id, i.tenant_id, i.contract_id, i.subscriber_id, i.kind, i.competence, i.due_date, i.amount_cents, i.status, i.status_note, i.gateway, i.gateway_charge_id, i.payment_methods, i.external_source, i.external_id, i.created_at, i.paid_at, i.canceled_at, i.fee_cents, i.discount_cents, i.agreement_id, i.company_id, s.name as subscriber_name, p.name as plan_name,
+  select i.id, i.tenant_id, i.contract_id, i.subscriber_id, i.kind, i.competence, i.due_date, i.amount_cents, i.status, i.status_note, i.gateway, i.gateway_charge_id, i.payment_methods, i.external_source, i.external_id, i.created_at, i.paid_at, i.canceled_at, i.fee_cents, i.discount_cents, i.agreement_id, i.company_id, i.financial_connection_id, s.name as subscriber_name, p.name as plan_name,
          (i.status = 'open' and i.due_date < (now() at time zone coalesce(ts.timezone, 'America/Sao_Paulo'))::date) as overdue,
          (select coalesce(sum(signed_cents),0)::int from payments x where x.invoice_id = i.id) as paid_cents
   from invoices i join subscribers s on s.id = i.subscriber_id join contracts k on k.id = i.contract_id
@@ -23,32 +23,33 @@ const Group152f5ccd0 = `-- name: Group152f5ccd0 :many
 `
 
 type Group152f5ccd0Row struct {
-	ID              jsonx.UUID         `json:"id"`
-	TenantID        jsonx.UUID         `json:"tenant_id"`
-	ContractID      jsonx.UUID         `json:"contract_id"`
-	SubscriberID    jsonx.UUID         `json:"subscriber_id"`
-	Kind            string             `json:"kind"`
-	Competence      pgtype.Date        `json:"competence"`
-	DueDate         pgtype.Date        `json:"due_date"`
-	AmountCents     int32              `json:"amount_cents"`
-	Status          string             `json:"status"`
-	StatusNote      pgtype.Text        `json:"status_note"`
-	Gateway         pgtype.Text        `json:"gateway"`
-	GatewayChargeID pgtype.Text        `json:"gateway_charge_id"`
-	PaymentMethods  []byte             `json:"payment_methods"`
-	ExternalSource  pgtype.Text        `json:"external_source"`
-	ExternalID      pgtype.Text        `json:"external_id"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
-	PaidAt          pgtype.Timestamptz `json:"paid_at"`
-	CanceledAt      pgtype.Timestamptz `json:"canceled_at"`
-	FeeCents        int32              `json:"fee_cents"`
-	DiscountCents   int32              `json:"discount_cents"`
-	AgreementID     pgtype.UUID        `json:"agreement_id"`
-	CompanyID       pgtype.UUID        `json:"company_id"`
-	SubscriberName  string             `json:"subscriber_name"`
-	PlanName        string             `json:"plan_name"`
-	Overdue         pgtype.Bool        `json:"overdue"`
-	PaidCents       int32              `json:"paid_cents"`
+	ID                    jsonx.UUID         `json:"id"`
+	TenantID              jsonx.UUID         `json:"tenant_id"`
+	ContractID            jsonx.UUID         `json:"contract_id"`
+	SubscriberID          jsonx.UUID         `json:"subscriber_id"`
+	Kind                  string             `json:"kind"`
+	Competence            pgtype.Date        `json:"competence"`
+	DueDate               pgtype.Date        `json:"due_date"`
+	AmountCents           int32              `json:"amount_cents"`
+	Status                string             `json:"status"`
+	StatusNote            pgtype.Text        `json:"status_note"`
+	Gateway               pgtype.Text        `json:"gateway"`
+	GatewayChargeID       pgtype.Text        `json:"gateway_charge_id"`
+	PaymentMethods        []byte             `json:"payment_methods"`
+	ExternalSource        pgtype.Text        `json:"external_source"`
+	ExternalID            pgtype.Text        `json:"external_id"`
+	CreatedAt             pgtype.Timestamptz `json:"created_at"`
+	PaidAt                pgtype.Timestamptz `json:"paid_at"`
+	CanceledAt            pgtype.Timestamptz `json:"canceled_at"`
+	FeeCents              int32              `json:"fee_cents"`
+	DiscountCents         int32              `json:"discount_cents"`
+	AgreementID           pgtype.UUID        `json:"agreement_id"`
+	CompanyID             pgtype.UUID        `json:"company_id"`
+	FinancialConnectionID pgtype.UUID        `json:"financial_connection_id"`
+	SubscriberName        string             `json:"subscriber_name"`
+	PlanName              string             `json:"plan_name"`
+	Overdue               pgtype.Bool        `json:"overdue"`
+	PaidCents             int32              `json:"paid_cents"`
 }
 
 func (q *Queries) Group152f5ccd0(ctx context.Context) ([]Group152f5ccd0Row, error) {
@@ -83,6 +84,7 @@ func (q *Queries) Group152f5ccd0(ctx context.Context) ([]Group152f5ccd0Row, erro
 			&i.DiscountCents,
 			&i.AgreementID,
 			&i.CompanyID,
+			&i.FinancialConnectionID,
 			&i.SubscriberName,
 			&i.PlanName,
 			&i.Overdue,

@@ -116,7 +116,7 @@ func rotate(ctx context.Context, c *sql.DB, out io.Writer) error {
 		return e
 	}
 	done := 0
-	for _, field := range [][2]string{{"service_resources", "secret_enc"}, {"users", "mfa_secret_enc"}, {"webhook_endpoints", "secret_enc"}, {"notice_channels", "headers_enc"}} {
+	for _, field := range [][2]string{{"service_resources", "secret_enc"}, {"users", "mfa_secret_enc"}, {"webhook_endpoints", "secret_enc"}, {"notice_channels", "headers_enc"}, {"financial_connections", "webhook_secret_enc"}} {
 		rows, e := tx.QueryContext(ctx, "select id,"+field[1]+" from "+field[0]+" where "+field[1]+" is not null for update")
 		if e != nil {
 			return e

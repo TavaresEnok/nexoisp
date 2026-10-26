@@ -323,6 +323,14 @@
     },
     {
       "method": "GET",
+      "path": "/api/financial-connections"
+    },
+    {
+      "method": "GET",
+      "path": "/api/financial-connections/pending"
+    },
+    {
+      "method": "GET",
       "path": "/api/ftth/boxes"
     },
     {
@@ -747,6 +755,10 @@
     },
     {
       "method": "PATCH",
+      "path": "/api/financial-connections/:id"
+    },
+    {
+      "method": "PATCH",
       "path": "/api/ftth/boxes/:id"
     },
     {
@@ -1016,6 +1028,10 @@
     {
       "method": "POST",
       "path": "/api/finance/run-auto-suspend"
+    },
+    {
+      "method": "POST",
+      "path": "/api/financial-connections"
     },
     {
       "method": "POST",

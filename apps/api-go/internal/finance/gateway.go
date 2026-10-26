@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"nexoisp/api-go/internal/apierr"
 	"nexoisp/api-go/internal/db"
 	"nexoisp/api-go/internal/jsonx"
 	"nexoisp/api-go/internal/modules/leitura"
@@ -12,26 +13,36 @@ import (
 	"strings"
 )
 
-func Payment(ctx context.Context, tx *db.Tx, id, gateway string, p jsonx.Object, source string) (bool, string, error) {
+func Payment(ctx context.Context, tx *db.Tx, id, gateway, connection string, p jsonx.Object, source string) (bool, string, error) {
 	inv, e := one(ctx, tx, "applyGatewayPayment", 0, id)
 	if e != nil {
 		return false, "", e
 	}
-	count, e := tx.Affected(ctx, query("applyGatewayPayment", 1), inv.Get("tenant_id"), id, p.Get("amount_cents"), p.Get("paid_at"), p.Get("method"), source, gateway, p.Get("id"))
+	if inv == nil || connection == "" || inv.Get("financial_connection_id") != connection || inv.Get("gateway") != gateway {
+		return false, "", apierr.New(409, "pagamento sem vínculo com a conexão da fatura")
+	}
+	count, e := tx.Affected(ctx, query("applyGatewayPayment", 1), inv.Get("tenant_id"), id, p.Get("amount_cents"), p.Get("paid_at"), p.Get("method"), source, gateway, p.Get("id"), connection)
 	if e != nil {
 		return false, "", e
 	}
 	if count == 0 {
+		var same bool
+		if e = tx.QueryRow(ctx, `select invoice_id=$2::uuid and amount_cents=$3 from payments where financial_connection_id=$1 and gateway_payment_id=$4`, connection, id, p.Get("amount_cents"), p.Get("id")).Scan(&same); e != nil {
+			return false, "", e
+		}
+		if !same {
+			return false, "", apierr.New(409, "identificador de pagamento já usado com dados diferentes")
+		}
 		return true, fmt.Sprint(inv.Get("status")), nil
 	}
 	status, e := settle(ctx, tx, inv, false)
 	return false, status, e
 }
-func chargePayments(ctx context.Context, tx *db.Tx, gateway, charge any) ([]jsonx.Object, bool, error) {
-	if !Demo(gateway) {
+func chargePayments(ctx context.Context, tx *db.Tx, gateway, charge, connection any) ([]jsonx.Object, bool, error) {
+	if !Demo(gateway) || connection == nil {
 		return nil, false, nil
 	}
-	rs, e := tx.Objects(ctx, "select payments from demo_gateway_charges where charge_id = $1", charge)
+	rs, e := tx.Objects(ctx, `select d.payments from demo_gateway_charges d join financial_connections c on c.id=d.financial_connection_id where d.charge_id=$1 and c.id=$2 and c.status='active' and c.provider='demo' and c.environment='sandbox'`, charge, connection)
 	if e != nil || len(rs) == 0 {
 		return nil, false, e
 	}
@@ -53,7 +64,7 @@ func Reconcile(ctx context.Context, tx *db.Tx, tenant string) (map[string]any, e
 	out := map[string]any{"checked": 0, "recovered": 0, "divergent": 0, "unavailable": 0}
 	inc := func(k string) { out[k] = out[k].(int) + 1 }
 	for _, inv := range invs {
-		payments, available, e := chargePayments(ctx, tx, inv.Get("gateway"), inv.Get("gateway_charge_id"))
+		payments, available, e := chargePayments(ctx, tx, inv.Get("gateway"), inv.Get("gateway_charge_id"), inv.Get("financial_connection_id"))
 		if e != nil {
 			return nil, e
 		}
@@ -63,7 +74,7 @@ func Reconcile(ctx context.Context, tx *db.Tx, tenant string) (map[string]any, e
 		}
 		inc("checked")
 		for _, p := range payments {
-			duplicate, status, e := Payment(ctx, tx, inv.Get("id").(string), inv.Get("gateway").(string), p, "reconciliation")
+			duplicate, status, e := Payment(ctx, tx, inv.Get("id").(string), inv.Get("gateway").(string), jsonx.String(inv.Get("financial_connection_id")), p, "reconciliation")
 			if e != nil {
 				return nil, e
 			}
@@ -82,55 +93,70 @@ func Reconcile(ctx context.Context, tx *db.Tx, tenant string) (map[string]any, e
 	}
 	return out, nil
 }
-func Event(ctx context.Context, database *db.DB, gateway string, ev jsonx.Object) (map[string]any, error) {
-	const key = "processGatewayEvent"
-	var tenant any
-	charge := ev.Get("charge_id")
-	eventID := jsonx.String(ev.Get("id"))
-	kind := jsonx.String(ev.Get("type"))
+
+// Event accepts a connection authenticated by the transport, never tenant/account
+// identifiers from an untrusted event body. Re-read status inside the transaction.
+func Event(ctx context.Context, database *db.DB, connection jsonx.Object, ev jsonx.Object) (map[string]any, error) {
+	tenant := jsonx.String(connection.Get("tenant_id"))
+	cid := jsonx.String(connection.Get("id"))
+	if tenant == "" || cid == "" {
+		return nil, apierr.New(401, "conexão não autenticada")
+	}
 	payload, e := jsonx.Encode(ev)
 	if e != nil {
 		return nil, e
 	}
-	if jsonx.Truthy(charge) {
-		matches, _, err := database.Lookup(ctx, query(key, 0), gateway, jsonx.String(charge))
-		if err != nil {
-			return nil, err
-		}
-		if len(matches) > 0 {
-			tenant = matches[0].Get("t")
-		}
-	}
-	if tenant == nil {
-		e = database.WithScope(ctx, tenancy.Scope{}, func(tx *db.Tx) error { return exec(ctx, tx, key, 1, gateway, eventID, kind, charge, payload) })
-	}
-	if e != nil {
-		return nil, e
-	}
-	if tenant == nil {
-		return map[string]any{"status": "unmatched"}, nil
+	eventID := jsonx.String(ev.Get("id"))
+	kind := jsonx.String(ev.Get("type"))
+	charge := jsonx.String(ev.Get("charge_id"))
+	if eventID == "" || kind == "" {
+		return nil, apierr.New(400, "evento inválido")
 	}
 	out := map[string]any{}
-	e = database.WithScope(ctx, tenancy.Scope{TenantID: tenant.(string)}, func(tx *db.Tx) error {
-		ins, e := one(ctx, tx, key, 2, tenant, gateway, eventID, kind, charge, payload)
-		if e != nil {
-			return e
+	e = database.WithScope(ctx, tenancy.Scope{TenantID: tenant}, func(tx *db.Tx) error {
+		cs, err := tx.Objects(ctx, `select provider,environment,status from financial_connections where id=$1`, cid)
+		if err != nil {
+			return err
 		}
-		if ins == nil {
+		if len(cs) != 1 || cs[0].Get("status") != "active" || cs[0].Get("environment") != "sandbox" || !Demo(cs[0].Get("provider")) {
+			return apierr.New(409, "conexão indisponível")
+		}
+		gateway := jsonx.String(cs[0].Get("provider"))
+		if err = tx.Exec(ctx, `insert into gateway_events(tenant_id,financial_connection_id,gateway,event_id,type,charge_id,payload) values($1,$2,$3,$4,$5,$6,$7) on conflict(financial_connection_id,event_id) where financial_connection_id is not null do nothing`, tenant, cid, gateway, eventID, kind, charge, payload); err != nil {
+			return err
+		}
+		var eventRow int64
+		var status string
+		var same bool
+		if err = tx.QueryRow(ctx, `select id,status,payload=$3::jsonb from gateway_events where financial_connection_id=$1 and event_id=$2 for update`, cid, eventID, payload).Scan(&eventRow, &status, &same); err != nil {
+			return err
+		}
+		if !same {
+			return apierr.New(409, "evento já recebido com conteúdo diferente")
+		}
+		if status != "received" && status != "unmatched" {
 			out["status"] = "duplicate"
 			return nil
 		}
-		inv, e := one(ctx, tx, key, 3, gateway, charge)
-		if e != nil {
-			return e
+		rows, err := tx.Objects(ctx, `select id from invoices where financial_connection_id=$1 and gateway_charge_id=$2`, cid, charge)
+		if err != nil {
+			return err
 		}
-		status := "ignored"
+		if len(rows) == 0 {
+			out["status"] = "unmatched"
+			return tx.Exec(ctx, `update gateway_events set status='unmatched',note='cobrança não encontrada nesta conexão' where id=$1`, eventRow)
+		}
+		status = "ignored"
 		var note any = "tipo de evento sem tratamento: " + kind
 		p, _ := ev.Get("payment").(jsonx.Object)
-		if amount := num(p.Get("amount_cents")); kind == "payment.confirmed" && p != nil && amount > 0 && amount == math.Trunc(amount) {
-			duplicate, settled, e := Payment(ctx, tx, inv.Get("id").(string), gateway, p, "gateway_event")
-			if e != nil {
-				return e
+		if kind == "payment.confirmed" {
+			amount := num(p.Get("amount_cents"))
+			if p == nil || jsonx.String(p.Get("id")) == "" || amount <= 0 || amount != math.Trunc(amount) || jsonx.String(p.Get("paid_at")) == "" {
+				return apierr.New(400, "pagamento inválido")
+			}
+			duplicate, settled, err := Payment(ctx, tx, jsonx.String(rows[0].Get("id")), gateway, cid, p, "gateway_event")
+			if err != nil {
+				return err
 			}
 			status, note = "processed", nil
 			if settled == "reconciling" {
@@ -140,13 +166,13 @@ func Event(ctx context.Context, database *db.DB, gateway string, ev jsonx.Object
 				note = "pagamento já registrado anteriormente"
 			}
 		} else if kind == "payment.refunded" || kind == "payment.chargeback" {
-			if e = exec(ctx, tx, key, 4, inv.Get("id"), "gateway informou "+kind+"; tratar manualmente"); e != nil {
-				return e
+			if err = exec(ctx, tx, "processGatewayEvent", 4, rows[0].Get("id"), "gateway informou "+kind+"; tratar manualmente"); err != nil {
+				return err
 			}
 			status, note = "divergent", "estorno/contestação exige decisão manual"
 		}
-		if e = exec(ctx, tx, key, 5, ins.Get("id"), status, note); e != nil {
-			return e
+		if err = tx.Exec(ctx, `update gateway_events set status=$2,note=$3,processed_at=now() where id=$1`, eventRow, status, note); err != nil {
+			return err
 		}
 		out["status"] = status
 		return nil
@@ -184,12 +210,12 @@ func AutoSuspend(ctx context.Context, tx *db.Tx, tenant string, contract any) (i
 			continue
 		}
 		if Demo(inv.Get("gateway")) && inv.Get("gateway_charge_id") != nil {
-			payments, _, e := chargePayments(ctx, tx, inv.Get("gateway"), inv.Get("gateway_charge_id"))
+			payments, _, e := chargePayments(ctx, tx, inv.Get("gateway"), inv.Get("gateway_charge_id"), inv.Get("financial_connection_id"))
 			if e != nil {
 				return count, e
 			}
 			for _, p := range payments {
-				if _, _, e = Payment(ctx, tx, inv.Get("id").(string), inv.Get("gateway").(string), p, "reconciliation"); e != nil {
+				if _, _, e = Payment(ctx, tx, inv.Get("id").(string), inv.Get("gateway").(string), jsonx.String(inv.Get("financial_connection_id")), p, "reconciliation"); e != nil {
 					return count, e
 				}
 			}

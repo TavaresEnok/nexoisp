@@ -17,7 +17,6 @@ import (
 	"nexoisp/api-go/internal/jsonx"
 	"nexoisp/api-go/internal/tenancy"
 	"nexoisp/api-go/internal/validate"
-	"os"
 	"time"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -30,17 +29,31 @@ func RegisterGateway(api huma.API, registry *endpoint.Registry, s Service) {
 		if !finance.Demo(chi.URLParam(r, "gateway")) {
 			return endpoint.Result{}, apierr.New(404, "gateway não habilitado")
 		}
+		connectionID := r.Header.Get("X-Nexo-Connection")
+		if err := validate.UUID(connectionID); err != nil {
+			return endpoint.Result{}, apierr.New(400, "X-Nexo-Connection UUID obrigatório")
+		}
+		connection, err := finance.LookupConnection(ctx, s.DB, connectionID)
+		if err != nil {
+			return endpoint.Result{}, err
+		}
+		if connection.Get("provider") != chi.URLParam(r, "gateway") || connection.Get("status") != "active" || connection.Get("environment") != "sandbox" {
+			return endpoint.Result{}, apierr.New(404, "conexão não habilitada")
+		}
+		secret, err := finance.ConnectionSecret(connection)
+		if err != nil {
+			return endpoint.Result{}, apierr.New(401, "credencial indisponível")
+		}
 		raw, err := io.ReadAll(http.MaxBytesReader(nil, r.Body, 20<<20))
 		if err != nil {
 			return endpoint.Result{}, apierr.New(400, "JSON inválido")
 		}
 		ts := r.Header.Get("x-nexo-timestamp")
-		secret := os.Getenv("NEXO_GATEWAY_WEBHOOK_SECRET")
 		n := validate.JSNumber(ts)
 		mac := hmac.New(sha256.New, []byte(secret))
-		_, _ = mac.Write([]byte(ts + "." + string(raw)))
+		_, _ = mac.Write([]byte(ts + "." + connectionID + "." + string(raw)))
 		signature := "sha256=" + hex.EncodeToString(mac.Sum(nil))
-		if secret == "" || ts == "" || math.Abs(float64(time.Now().UnixNano())/1e9-n) > 300 || !hmac.Equal([]byte(signature), []byte(r.Header.Get("x-nexo-signature"))) {
+		if secret == "" || ts == "" || math.IsNaN(n) || math.IsInf(n, 0) || math.Abs(float64(time.Now().UnixNano())/1e9-n) > 300 || !hmac.Equal([]byte(signature), []byte(r.Header.Get("x-nexo-signature"))) {
 			return endpoint.Result{}, apierr.New(401, "assinatura inválida")
 		}
 		ev, ok := jsonx.JSON(raw).(jsonx.Object)
@@ -50,7 +63,7 @@ func RegisterGateway(api huma.API, registry *endpoint.Registry, s Service) {
 		if jsonx.String(ev.Get("id")) == "" || jsonx.String(ev.Get("type")) == "" {
 			return endpoint.Result{}, apierr.New(400, "evento inválido")
 		}
-		out, err := finance.Event(ctx, s.DB, "demo", ev)
+		out, err := finance.Event(ctx, s.DB, connection, ev)
 		return endpoint.Result{Value: out}, err
 	})
 }
@@ -60,6 +73,7 @@ func (s Service) demoPay(ctx context.Context, _ *db.Tx, _ string, b map[string]a
 	}
 	var pay jsonx.Object
 	var charge any
+	var connectionID string
 	err := s.DB.WithScope(ctx, auth.From(ctx).Scope, func(tx *db.Tx) error {
 		inv, e := one(ctx, tx, "POST /api/demo-gateway/pay", 0, b["invoice_id"])
 		if e != nil {
@@ -67,6 +81,13 @@ func (s Service) demoPay(ctx context.Context, _ *db.Tx, _ string, b map[string]a
 		}
 		if inv == nil {
 			return apierr.New(400, "fatura sem cobrança no gateway de demonstração")
+		}
+		var active bool
+		if e = tx.QueryRow(ctx, `select exists(select 1 from financial_connections where id=$1 and status='active' and provider='demo' and environment='sandbox')`, inv.Get("financial_connection_id")).Scan(&active); e != nil {
+			return e
+		}
+		if !active {
+			return apierr.New(409, "conexão demonstrativa indisponível neste escopo")
 		}
 		amount := num(inv.Get("amount_cents"))
 		if b["mode"] == "divergent" {
@@ -78,7 +99,8 @@ func (s Service) demoPay(ctx context.Context, _ *db.Tx, _ string, b map[string]a
 			return e
 		}
 		charge = inv.Get("gateway_charge_id")
-		return tx.Exec(ctx, query("POST /api/demo-gateway/pay", 1), charge, encoded)
+		connectionID = jsonx.String(inv.Get("financial_connection_id"))
+		return tx.Exec(ctx, query("POST /api/demo-gateway/pay", 1), charge, encoded, connectionID)
 	})
 	if err != nil {
 		return nil, err
@@ -87,22 +109,17 @@ func (s Service) demoPay(ctx context.Context, _ *db.Tx, _ string, b map[string]a
 		return map[string]any{"simulated": true, "webhook": "não enviado (perda simulada); use a conciliação para recuperar"}, nil
 	}
 	ev := jsonx.Object{{Name: "id", Value: "demo_evt_" + uuid.NewString()}, {Name: "type", Value: "payment.confirmed"}, {Name: "charge_id", Value: charge}, {Name: "payment", Value: pay}}
-	var out any
-	if os.Getenv("NEXO_GATEWAY_WEBHOOK_SECRET") == "" {
-		out = map[string]any{"error": "assinatura inválida"}
-	} else {
-		out, err = finance.Event(ctx, s.DB, "demo", ev)
-		if err != nil {
-			return nil, err
-		}
+	connection, err := finance.LookupConnection(ctx, s.DB, connectionID)
+	if err != nil {
+		return nil, err
+	}
+	out, err := finance.Event(ctx, s.DB, connection, ev)
+	if err != nil {
+		return nil, err
 	}
 	r := map[string]any{"simulated": true, "webhook": out}
 	if b["mode"] == "duplicate" {
-		if os.Getenv("NEXO_GATEWAY_WEBHOOK_SECRET") == "" {
-			r["webhook_repeated"] = out
-		} else {
-			r["webhook_repeated"], err = finance.Event(ctx, s.DB, "demo", ev)
-		}
+		r["webhook_repeated"], err = finance.Event(ctx, s.DB, connection, ev)
 	}
 	return r, err
 }

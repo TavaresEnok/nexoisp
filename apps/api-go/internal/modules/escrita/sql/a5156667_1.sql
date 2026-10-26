@@ -1,1 +1,1 @@
-update demo_gateway_charges set payments = payments || $2::jsonb where charge_id = $1
+update demo_gateway_charges set payments = payments || $2::jsonb where charge_id = $1 and financial_connection_id=$3

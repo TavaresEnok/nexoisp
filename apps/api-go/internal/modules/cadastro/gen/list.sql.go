@@ -13,7 +13,9 @@ import (
 )
 
 const listSubscribersUnpaged = `-- name: ListSubscribersUnpaged :many
-select s.id, s.tenant_id, s.name, s.document, s.email, s.phone, s.address_street, s.address_number, s.address_district, s.address_city, s.address_state, s.address_zip, s.notes, s.status, s.external_source, s.external_id, s.created_at, s.updated_at, s.birth_date, s.rg, s.rg_issuer, s.mother_name, s.trade_name, s.custom, s.anonymized_at, s.anonymized_reason, (select count(*) from contracts c where c.subscriber_id = s.id and c.status = 'active') as active_contracts
+select s.id, s.tenant_id, s.name, s.document, s.email, s.phone, s.address_street, s.address_number, s.address_district, s.address_city, s.address_state, s.address_zip, s.notes, s.status, s.external_source, s.external_id, s.created_at, s.updated_at, s.birth_date, s.rg, s.rg_issuer, s.mother_name, s.trade_name, s.custom, s.anonymized_at, s.anonymized_reason, (select count(*) from contracts c where c.subscriber_id = s.id and c.status = 'active') as active_contracts,
+       (select string_agg(distinct p.name, ' + ' order by p.name) from contracts c join plan_versions pv on pv.id = c.plan_version_id join plans p on p.id = pv.plan_id where c.subscriber_id = s.id and c.status = 'active') as active_plan_names,
+       (select sum(pv.price_cents) from contracts c join plan_versions pv on pv.id = c.plan_version_id where c.subscriber_id = s.id and c.status = 'active') as active_base_cents
          from subscribers s
          where ($1::text is null or s.name ilike '%'||$1||'%' or s.email ilike '%'||$1||'%' or ($2 <> '' and (s.document like '%'||$2||'%' or s.phone like '%'||$2||'%')))
            and ($3::text is null or s.status = $3)
@@ -54,6 +56,8 @@ type ListSubscribersUnpagedRow struct {
 	AnonymizedAt     pgtype.Timestamptz `json:"anonymized_at"`
 	AnonymizedReason pgtype.Text        `json:"anonymized_reason"`
 	ActiveContracts  int64              `json:"active_contracts"`
+	ActivePlanNames  []byte             `json:"active_plan_names"`
+	ActiveBaseCents  int64              `json:"active_base_cents"`
 }
 
 func (q *Queries) ListSubscribersUnpaged(ctx context.Context, arg ListSubscribersUnpagedParams) ([]ListSubscribersUnpagedRow, error) {
@@ -93,6 +97,8 @@ func (q *Queries) ListSubscribersUnpaged(ctx context.Context, arg ListSubscriber
 			&i.AnonymizedAt,
 			&i.AnonymizedReason,
 			&i.ActiveContracts,
+			&i.ActivePlanNames,
+			&i.ActiveBaseCents,
 		); err != nil {
 			return nil, err
 		}

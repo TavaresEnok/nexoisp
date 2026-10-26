@@ -1,1 +1,1 @@
-select id, gateway, gateway_charge_id from invoices where id = $1 and status = 'open' for update
+select id, gateway, gateway_charge_id, financial_connection_id from invoices where id = $1 and status = 'open' for update

@@ -19,6 +19,7 @@ import (
 )
 
 func registerCustom(api huma.API, registry *endpoint.Registry, s Service) {
+	registerFinancialConnections(api, registry, s)
 	registerOnuCatalog(api, registry, s)
 	registerPonPorts(api, registry, s)
 	registerSlaCalendar(api, registry, s)

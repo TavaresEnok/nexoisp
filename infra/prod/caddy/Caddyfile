@@ -3700,6 +3700,50 @@
         lb_try_duration 0
       }
     }
+    @fc0 {
+      method GET
+      path /api/financial-connections
+    }
+    handle @fc0 {
+      log_append nexo_route "GET /api/financial-connections"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @fc1 {
+      method POST
+      path /api/financial-connections
+    }
+    handle @fc1 {
+      log_append nexo_route "POST /api/financial-connections"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @fc2 {
+      method PATCH
+      path_regexp fc2 ^/api/financial-connections/[^/]+$
+    }
+    handle @fc2 {
+      log_append nexo_route "PATCH /api/financial-connections/:id"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
+    @fc3 {
+      method GET
+      path /api/financial-connections/pending
+    }
+    handle @fc3 {
+      log_append nexo_route "GET /api/financial-connections/pending"
+      log_append nexo_upstream {http.reverse_proxy.upstream.address}
+      reverse_proxy {$NEXO_GO_UPSTREAM:api-go:8080} {
+        lb_try_duration 0
+      }
+    }
     @backend path /api /api/* /public /public/* /aviso /aviso/*
     handle @backend {
       log_append nexo_route unmatched-api

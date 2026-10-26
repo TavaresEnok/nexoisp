@@ -283,11 +283,13 @@ type CustomField struct {
 }
 
 type DemoGatewayCharge struct {
-	ChargeID    string             `json:"charge_id"`
-	TenantID    jsonx.UUID         `json:"tenant_id"`
-	AmountCents int32              `json:"amount_cents"`
-	Payments    []byte             `json:"payments"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	ChargeID              string             `json:"charge_id"`
+	TenantID              jsonx.UUID         `json:"tenant_id"`
+	AmountCents           int32              `json:"amount_cents"`
+	Payments              []byte             `json:"payments"`
+	CreatedAt             pgtype.Timestamptz `json:"created_at"`
+	FinancialConnectionID pgtype.UUID        `json:"financial_connection_id"`
+	ID                    jsonx.UUID         `json:"id"`
 }
 
 type Device struct {
@@ -325,6 +327,29 @@ type Document struct {
 	DeletedBy    pgtype.UUID        `json:"deleted_by"`
 }
 
+type FinancialConnection struct {
+	ID               jsonx.UUID         `json:"id"`
+	TenantID         jsonx.UUID         `json:"tenant_id"`
+	CompanyID        pgtype.UUID        `json:"company_id"`
+	Provider         string             `json:"provider"`
+	Environment      string             `json:"environment"`
+	AccountRef       string             `json:"account_ref"`
+	Name             string             `json:"name"`
+	Status           string             `json:"status"`
+	IsDefault        bool               `json:"is_default"`
+	WebhookSecretEnc pgtype.Text        `json:"webhook_secret_enc"`
+	LegacyDemo       bool               `json:"legacy_demo"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+}
+
+type FinancialConnectionPending struct {
+	Entity   string      `json:"entity"`
+	ID       string      `json:"id"`
+	TenantID jsonx.UUID  `json:"tenant_id"`
+	Provider pgtype.Text `json:"provider"`
+	Reason   string      `json:"reason"`
+}
+
 type FtthBox struct {
 	ID        jsonx.UUID         `json:"id"`
 	TenantID  jsonx.UUID         `json:"tenant_id"`
@@ -352,17 +377,18 @@ type FtthDrop struct {
 }
 
 type GatewayEvent struct {
-	ID          int64              `json:"id"`
-	TenantID    pgtype.UUID        `json:"tenant_id"`
-	Gateway     string             `json:"gateway"`
-	EventID     string             `json:"event_id"`
-	Type        string             `json:"type"`
-	ChargeID    pgtype.Text        `json:"charge_id"`
-	Payload     []byte             `json:"payload"`
-	Status      string             `json:"status"`
-	Note        pgtype.Text        `json:"note"`
-	ReceivedAt  pgtype.Timestamptz `json:"received_at"`
-	ProcessedAt pgtype.Timestamptz `json:"processed_at"`
+	ID                    int64              `json:"id"`
+	TenantID              pgtype.UUID        `json:"tenant_id"`
+	Gateway               string             `json:"gateway"`
+	EventID               string             `json:"event_id"`
+	Type                  string             `json:"type"`
+	ChargeID              pgtype.Text        `json:"charge_id"`
+	Payload               []byte             `json:"payload"`
+	Status                string             `json:"status"`
+	Note                  pgtype.Text        `json:"note"`
+	ReceivedAt            pgtype.Timestamptz `json:"received_at"`
+	ProcessedAt           pgtype.Timestamptz `json:"processed_at"`
+	FinancialConnectionID pgtype.UUID        `json:"financial_connection_id"`
 }
 
 type ImportBatch struct {
@@ -374,6 +400,16 @@ type ImportBatch struct {
 	Totals    []byte             `json:"totals"`
 	CreatedBy pgtype.UUID        `json:"created_by"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
+type ImportEntity struct {
+	TenantID    jsonx.UUID         `json:"tenant_id"`
+	Source      string             `json:"source"`
+	Kind        string             `json:"kind"`
+	ExternalID  string             `json:"external_id"`
+	EntityID    jsonx.UUID         `json:"entity_id"`
+	Fingerprint string             `json:"fingerprint"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 }
 
 type ImportRow struct {
@@ -403,28 +439,29 @@ type InstallKitItem struct {
 }
 
 type Invoice struct {
-	ID              jsonx.UUID         `json:"id"`
-	TenantID        jsonx.UUID         `json:"tenant_id"`
-	ContractID      jsonx.UUID         `json:"contract_id"`
-	SubscriberID    jsonx.UUID         `json:"subscriber_id"`
-	Kind            string             `json:"kind"`
-	Competence      pgtype.Date        `json:"competence"`
-	DueDate         pgtype.Date        `json:"due_date"`
-	AmountCents     int32              `json:"amount_cents"`
-	Status          string             `json:"status"`
-	StatusNote      pgtype.Text        `json:"status_note"`
-	Gateway         pgtype.Text        `json:"gateway"`
-	GatewayChargeID pgtype.Text        `json:"gateway_charge_id"`
-	PaymentMethods  []byte             `json:"payment_methods"`
-	ExternalSource  pgtype.Text        `json:"external_source"`
-	ExternalID      pgtype.Text        `json:"external_id"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
-	PaidAt          pgtype.Timestamptz `json:"paid_at"`
-	CanceledAt      pgtype.Timestamptz `json:"canceled_at"`
-	FeeCents        int32              `json:"fee_cents"`
-	DiscountCents   int32              `json:"discount_cents"`
-	AgreementID     pgtype.UUID        `json:"agreement_id"`
-	CompanyID       pgtype.UUID        `json:"company_id"`
+	ID                    jsonx.UUID         `json:"id"`
+	TenantID              jsonx.UUID         `json:"tenant_id"`
+	ContractID            jsonx.UUID         `json:"contract_id"`
+	SubscriberID          jsonx.UUID         `json:"subscriber_id"`
+	Kind                  string             `json:"kind"`
+	Competence            pgtype.Date        `json:"competence"`
+	DueDate               pgtype.Date        `json:"due_date"`
+	AmountCents           int32              `json:"amount_cents"`
+	Status                string             `json:"status"`
+	StatusNote            pgtype.Text        `json:"status_note"`
+	Gateway               pgtype.Text        `json:"gateway"`
+	GatewayChargeID       pgtype.Text        `json:"gateway_charge_id"`
+	PaymentMethods        []byte             `json:"payment_methods"`
+	ExternalSource        pgtype.Text        `json:"external_source"`
+	ExternalID            pgtype.Text        `json:"external_id"`
+	CreatedAt             pgtype.Timestamptz `json:"created_at"`
+	PaidAt                pgtype.Timestamptz `json:"paid_at"`
+	CanceledAt            pgtype.Timestamptz `json:"canceled_at"`
+	FeeCents              int32              `json:"fee_cents"`
+	DiscountCents         int32              `json:"discount_cents"`
+	AgreementID           pgtype.UUID        `json:"agreement_id"`
+	CompanyID             pgtype.UUID        `json:"company_id"`
+	FinancialConnectionID pgtype.UUID        `json:"financial_connection_id"`
 }
 
 type InvoiceItem struct {
@@ -443,6 +480,17 @@ type Ip6Delegation struct {
 	ContractID jsonx.UUID         `json:"contract_id"`
 	CreatedBy  pgtype.UUID        `json:"created_by"`
 	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+}
+
+type Ip6DelegationHistory struct {
+	ID           jsonx.UUID         `json:"id"`
+	DelegationID jsonx.UUID         `json:"delegation_id"`
+	TenantID     jsonx.UUID         `json:"tenant_id"`
+	ContractID   jsonx.UUID         `json:"contract_id"`
+	PoolID       jsonx.UUID         `json:"pool_id"`
+	Prefix       netip.Prefix       `json:"prefix"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	ReleasedAt   pgtype.Timestamptz `json:"released_at"`
 }
 
 type IpAllocation struct {
@@ -535,6 +583,16 @@ type MaintenanceNotice struct {
 	CreatedAt          pgtype.Timestamptz `json:"created_at"`
 	NotifiedStartAt    pgtype.Timestamptz `json:"notified_start_at"`
 	NotifiedResolvedAt pgtype.Timestamptz `json:"notified_resolved_at"`
+}
+
+type ManualPaymentIntent struct {
+	TenantID     jsonx.UUID         `json:"tenant_id"`
+	IntentID     jsonx.UUID         `json:"intent_id"`
+	InvoiceID    jsonx.UUID         `json:"invoice_id"`
+	CreatedBy    jsonx.UUID         `json:"created_by"`
+	RequestHash  string             `json:"request_hash"`
+	ResultStatus pgtype.Text        `json:"result_status"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 }
 
 type Municipality struct {
@@ -653,6 +711,42 @@ type OnuDiscovery struct {
 	LastSeenAt  pgtype.Timestamptz `json:"last_seen_at"`
 }
 
+type OnuModel struct {
+	ID             jsonx.UUID         `json:"id"`
+	TenantID       jsonx.UUID         `json:"tenant_id"`
+	Code           string             `json:"code"`
+	Vendor         string             `json:"vendor"`
+	Description    string             `json:"description"`
+	Ports          string             `json:"ports"`
+	Wifi           string             `json:"wifi"`
+	Mode           string             `json:"mode"`
+	Profile        string             `json:"profile"`
+	CompatibleOlts []string           `json:"compatible_olts"`
+	Notes          string             `json:"notes"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+}
+
+type OnuTemplate struct {
+	ID             jsonx.UUID         `json:"id"`
+	TenantID       jsonx.UUID         `json:"tenant_id"`
+	Name           string             `json:"name"`
+	Vendor         string             `json:"vendor"`
+	Mode           string             `json:"mode"`
+	CompatibleOlts []string           `json:"compatible_olts"`
+	Gpon           string             `json:"gpon"`
+	Wan            string             `json:"wan"`
+	Notes          string             `json:"notes"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+}
+
+type OnuTemplateModel struct {
+	TenantID   jsonx.UUID `json:"tenant_id"`
+	TemplateID jsonx.UUID `json:"template_id"`
+	ModelID    jsonx.UUID `json:"model_id"`
+}
+
 type Operation struct {
 	ID               jsonx.UUID         `json:"id"`
 	TenantID         jsonx.UUID         `json:"tenant_id"`
@@ -694,22 +788,29 @@ type OperationAttempt struct {
 	FinishedAt  pgtype.Timestamptz `json:"finished_at"`
 }
 
+type PanelSessionRate struct {
+	TokenHash string             `json:"token_hash"`
+	Bucket    pgtype.Timestamptz `json:"bucket"`
+	Calls     int32              `json:"calls"`
+}
+
 type Payment struct {
-	ID               jsonx.UUID         `json:"id"`
-	TenantID         jsonx.UUID         `json:"tenant_id"`
-	InvoiceID        jsonx.UUID         `json:"invoice_id"`
-	AmountCents      int32              `json:"amount_cents"`
-	PaidAt           pgtype.Timestamptz `json:"paid_at"`
-	Method           pgtype.Text        `json:"method"`
-	Source           string             `json:"source"`
-	Gateway          pgtype.Text        `json:"gateway"`
-	GatewayPaymentID pgtype.Text        `json:"gateway_payment_id"`
-	Note             pgtype.Text        `json:"note"`
-	CreatedBy        pgtype.UUID        `json:"created_by"`
-	CreatedAt        pgtype.Timestamptz `json:"created_at"`
-	Kind             string             `json:"kind"`
-	ReversalOf       pgtype.UUID        `json:"reversal_of"`
-	SignedCents      pgtype.Int4        `json:"signed_cents"`
+	ID                    jsonx.UUID         `json:"id"`
+	TenantID              jsonx.UUID         `json:"tenant_id"`
+	InvoiceID             jsonx.UUID         `json:"invoice_id"`
+	AmountCents           int32              `json:"amount_cents"`
+	PaidAt                pgtype.Timestamptz `json:"paid_at"`
+	Method                pgtype.Text        `json:"method"`
+	Source                string             `json:"source"`
+	Gateway               pgtype.Text        `json:"gateway"`
+	GatewayPaymentID      pgtype.Text        `json:"gateway_payment_id"`
+	Note                  pgtype.Text        `json:"note"`
+	CreatedBy             pgtype.UUID        `json:"created_by"`
+	CreatedAt             pgtype.Timestamptz `json:"created_at"`
+	Kind                  string             `json:"kind"`
+	ReversalOf            pgtype.UUID        `json:"reversal_of"`
+	SignedCents           pgtype.Int4        `json:"signed_cents"`
+	FinancialConnectionID pgtype.UUID        `json:"financial_connection_id"`
 }
 
 type Plan struct {
@@ -753,6 +854,31 @@ type Pop struct {
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 	Latitude  pgtype.Numeric     `json:"latitude"`
 	Longitude pgtype.Numeric     `json:"longitude"`
+}
+
+type PurchaseOrder struct {
+	ID          jsonx.UUID         `json:"id"`
+	TenantID    jsonx.UUID         `json:"tenant_id"`
+	Number      int32              `json:"number"`
+	SupplierID  jsonx.UUID         `json:"supplier_id"`
+	WarehouseID pgtype.UUID        `json:"warehouse_id"`
+	Status      string             `json:"status"`
+	ExpectedAt  pgtype.Date        `json:"expected_at"`
+	Note        string             `json:"note"`
+	CreatedBy   pgtype.UUID        `json:"created_by"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	OrderedAt   pgtype.Timestamptz `json:"ordered_at"`
+	ReceivedAt  pgtype.Timestamptz `json:"received_at"`
+	ReceivedBy  pgtype.UUID        `json:"received_by"`
+}
+
+type PurchaseOrderItem struct {
+	ID            jsonx.UUID `json:"id"`
+	TenantID      jsonx.UUID `json:"tenant_id"`
+	OrderID       jsonx.UUID `json:"order_id"`
+	ItemID        jsonx.UUID `json:"item_id"`
+	Qty           int32      `json:"qty"`
+	UnitCostCents int32      `json:"unit_cost_cents"`
 }
 
 type RadiusAccount struct {
@@ -915,6 +1041,20 @@ type Session struct {
 	CreatedAt       pgtype.Timestamptz `json:"created_at"`
 }
 
+type SlaCalendar struct {
+	TenantID  jsonx.UUID         `json:"tenant_id"`
+	Timezone  string             `json:"timezone"`
+	Hours     []byte             `json:"hours"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+}
+
+type SlaHoliday struct {
+	ID       jsonx.UUID  `json:"id"`
+	TenantID jsonx.UUID  `json:"tenant_id"`
+	Day      pgtype.Date `json:"day"`
+	Name     string      `json:"name"`
+}
+
 type SlaPolicy struct {
 	ID                jsonx.UUID         `json:"id"`
 	TenantID          jsonx.UUID         `json:"tenant_id"`
@@ -927,6 +1067,7 @@ type SlaPolicy struct {
 	EscalateTo        pgtype.UUID        `json:"escalate_to"`
 	Active            bool               `json:"active"`
 	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	BusinessHours     bool               `json:"business_hours"`
 }
 
 type StockItem struct {
@@ -942,15 +1083,17 @@ type StockItem struct {
 }
 
 type StockMovement struct {
-	ID          int64              `json:"id"`
-	TenantID    jsonx.UUID         `json:"tenant_id"`
-	ItemID      jsonx.UUID         `json:"item_id"`
-	Qty         int32              `json:"qty"`
-	Kind        string             `json:"kind"`
-	WorkOrderID pgtype.UUID        `json:"work_order_id"`
-	Note        pgtype.Text        `json:"note"`
-	CreatedBy   pgtype.UUID        `json:"created_by"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	ID              int64              `json:"id"`
+	TenantID        jsonx.UUID         `json:"tenant_id"`
+	ItemID          jsonx.UUID         `json:"item_id"`
+	Qty             int32              `json:"qty"`
+	Kind            string             `json:"kind"`
+	WorkOrderID     pgtype.UUID        `json:"work_order_id"`
+	Note            pgtype.Text        `json:"note"`
+	CreatedBy       pgtype.UUID        `json:"created_by"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	WarehouseID     pgtype.UUID        `json:"warehouse_id"`
+	PurchaseOrderID pgtype.UUID        `json:"purchase_order_id"`
 }
 
 type StockUnit struct {
@@ -975,6 +1118,15 @@ type StockUnitEvent struct {
 	ActorID  pgtype.UUID        `json:"actor_id"`
 	Event    string             `json:"event"`
 	Detail   []byte             `json:"detail"`
+}
+
+type StockWarehouse struct {
+	ID        jsonx.UUID         `json:"id"`
+	TenantID  jsonx.UUID         `json:"tenant_id"`
+	Name      string             `json:"name"`
+	Address   string             `json:"address"`
+	Active    bool               `json:"active"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 type Subscriber struct {
@@ -1031,6 +1183,18 @@ type SubscriberNote struct {
 	ArchivedAt     pgtype.Timestamptz `json:"archived_at"`
 	ExternalSource pgtype.Text        `json:"external_source"`
 	ExternalID     pgtype.Text        `json:"external_id"`
+}
+
+type Supplier struct {
+	ID        jsonx.UUID         `json:"id"`
+	TenantID  jsonx.UUID         `json:"tenant_id"`
+	Name      string             `json:"name"`
+	Document  pgtype.Text        `json:"document"`
+	Email     pgtype.Text        `json:"email"`
+	Phone     pgtype.Text        `json:"phone"`
+	Notes     string             `json:"notes"`
+	Active    bool               `json:"active"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 type Tag struct {

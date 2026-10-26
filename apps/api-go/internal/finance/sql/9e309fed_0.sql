@@ -1,1 +1,1 @@
-select id, gateway, gateway_charge_id from invoices where status in ('open','reconciling') and gateway_charge_id is not null
+select id, gateway, gateway_charge_id, financial_connection_id from invoices where status in ('open','reconciling') and gateway_charge_id is not null

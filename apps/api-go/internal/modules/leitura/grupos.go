@@ -92,7 +92,7 @@ func (s Service) grupo(ctx context.Context, tx *db.Tx, spec grupo, id string) (a
 			if spec.Path == "/api/invoices/{id}" && key == "events" {
 				events := []jsonx.Object{}
 				if result.Get("gateway_charge_id") != nil {
-					events, err = query(i+1, result.Get("gateway"), result.Get("gateway_charge_id"))
+					events, err = query(i+1, result.Get("gateway"), result.Get("gateway_charge_id"),id)
 				}
 				if err != nil {
 					return nil, err

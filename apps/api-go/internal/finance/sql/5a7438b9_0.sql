@@ -1,1 +1,1 @@
-select id, tenant_id, amount_cents, due_date from invoices where status = 'open' and gateway_charge_id is null and external_source is null for update skip locked
+select id, tenant_id, amount_cents, due_date, company_id from invoices where status = 'open' and gateway_charge_id is null and external_source is null for update skip locked

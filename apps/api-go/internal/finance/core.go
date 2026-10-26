@@ -102,6 +102,15 @@ func Competence(ctx context.Context, tx *db.Tx, tz any) (any, error) {
 	return r.Get("d"), e
 }
 func Charges(ctx context.Context, tx *db.Tx, tenant string) (int, error) {
+	// POP-scoped operators can register visible invoices, but cannot consume
+	// tenant-wide account credentials. Full-scope billing issues them later.
+	var restricted bool
+	if err := tx.QueryRow(ctx, "select app_pops() is not null").Scan(&restricted); err != nil {
+		return 0, err
+	}
+	if restricted {
+		return 0, nil
+	}
 	s, e := leitura.GetSettings(ctx, tx, tenant)
 	if e != nil {
 		return 0, e
@@ -114,15 +123,19 @@ func Charges(ctx context.Context, tx *db.Tx, tenant string) (int, error) {
 		return 0, e
 	}
 	for _, i := range rs {
+		connection, err := DemoConnection(ctx, tx, tenant, i.Get("company_id"))
+		if err != nil {
+			return 0, err
+		}
 		charge := "demo_ch_" + i.Get("id").(string)
-		if e = tx.Exec(ctx, `insert into demo_gateway_charges (charge_id,tenant_id,amount_cents) values ($1,$2,$3) on conflict (charge_id) do nothing`, charge, i.Get("tenant_id"), i.Get("amount_cents")); e != nil {
+		if e = tx.Exec(ctx, `insert into demo_gateway_charges (charge_id,tenant_id,amount_cents,financial_connection_id) values ($1,$2,$3,$4) on conflict (financial_connection_id,charge_id) where financial_connection_id is not null do nothing`, charge, i.Get("tenant_id"), i.Get("amount_cents"), connection); e != nil {
 			return 0, e
 		}
 		methods, e := jsonx.Encode(map[string]any{"pix_copia_e_cola": "DEMONSTRACAO-NAO-PAGAVEL-PIX-" + i.Get("id").(string)[:8], "boleto_linha_digitavel": "00000.00000 00000.000000 00000.000000 0 DEMONSTRACAO", "aviso": "Meios de pagamento fictícios do gateway de demonstração."})
 		if e != nil {
 			return 0, e
 		}
-		if e = exec(ctx, tx, "ensureCharges", 1, i.Get("id"), "demo", charge, methods); e != nil {
+		if e = exec(ctx, tx, "ensureCharges", 1, i.Get("id"), "demo", charge, methods, connection); e != nil {
 			return 0, e
 		}
 	}
