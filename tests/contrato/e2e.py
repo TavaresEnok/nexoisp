@@ -14,7 +14,7 @@ def main():
     go('build','-o','bin/nexo-db','./cmd/nexo-db')
     go('build','-o','bin/api','./cmd/api')
     sql('drop database if exists nexo_test with (force);create database nexo_test;','postgres')
-    env=go_env('nexo_test');env.update(NEXO_DEMO_MODE='1',NEXO_REQUIRE_ADMIN_MFA='0',NEXO_GO_ADDR='127.0.0.1:18181',NEXO_GO_INTERNAL_ADDR='127.0.0.1:19181',NEXO_GO_AGENT_ADDR='127.0.0.1:18544',NEXO_GO_JOBS='0',
+    env=go_env('nexo_test');env.update(NEXO_DEMO_MODE='1',NEXO_REQUIRE_ADMIN_MFA='0',NEXO_GO_ADDR='127.0.0.1:18181',NEXO_GO_INTERNAL_ADDR='127.0.0.1:19181',NEXO_GO_AGENT_ADDR='127.0.0.1:18544',NEXO_GO_JOBS='1',NEXO_GO_JOB_PAYMENT_EFFECTS='1',NEXO_GO_JOB_RADIUS='0',
         NEXO_RADIUS_KEY='radius-chave-sintetica-e2e-000001',NEXO_RADIUS_DB_PASSWORD='radius-senha-sintetica-e2e',NEXO_REPLICA_PASSWORD='replica-senha-sintetica-e2e',
         NEXO_GATEWAY_WEBHOOK_SECRET=base64.b64encode(os.urandom(32)).decode(),NEXO_SECRET_KEY=base64.b64encode(os.urandom(32)).decode(),
         NEXO_OP_SIGNING_KEY=base64.b64encode(subprocess.check_output(['openssl','genpkey','-algorithm','ed25519','-outform','DER'])).decode())

@@ -36,6 +36,12 @@ jobs:
       - name: Migração 65 para 66 e movimentos financeiros históricos
         env: {NEXO_PAYMENT_LAB: '1'}
         run: python3 tests/contrato/financial_movements_migration.py
+      - name: Migração 66 para 67 sem reativacoes retroativas
+        env: {NEXO_PAYMENT_LAB: '1'}
+        run: python3 tests/contrato/payment_effects_migration.py
+      - name: Recebimento independente de falha tecnica e retomada
+        env: {NEXO_PAYMENT_LAB: '1'}
+        run: python3 tests/contrato/payment_effects.py
       - name: Isolamento, RLS, locks e reinício Go com PostgreSQL descartável
         run: python3 tests/contrato/go_integration.py
       - name: Falha por provedor, filas, limites compartilhados e recuperação

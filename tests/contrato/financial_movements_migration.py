@@ -13,6 +13,9 @@ with tempfile.TemporaryDirectory(prefix='nexo-b04-migration-') as tmp:
  stage=Path(tmp);shutil.copytree(repo/'db',stage/'db')
  for migration in (stage/'db/migrations').glob('*.sql'):
   if int(migration.name.split('_')[0])>65:migration.unlink()
+ target=stage/'target66';shutil.copytree(repo/'db',target/'db')
+ for migration in (target/'db/migrations').glob('*.sql'):
+  if int(migration.name.split('_')[0])>66:migration.unlink()
  assert subprocess.run(['docker','inspect',DB_CONTAINER],capture_output=True).returncode!=0
  try:
   up();sql('create database nexo_test','postgres')
@@ -26,7 +29,7 @@ with tempfile.TemporaryDirectory(prefix='nexo-b04-migration-') as tmp:
    """,'nexo_test')
   snapshot="select jsonb_build_object('invoices',(select jsonb_agg(i order by id) from invoices i),'payments',(select jsonb_agg(p order by id) from payments p),'agreements',(select jsonb_agg(a order by id) from agreements a))"
   before=sql(snapshot,'nexo_test');assert sql('select max(version_id) from goose_db_version','nexo_test')=='65'
-  command(cli+['prepare'],cwd=repo,env=env);command(cli+['prepare'],cwd=repo,env=env)
+  command(cli+['prepare'],cwd=target,env=env);command(cli+['prepare'],cwd=target,env=env)
   assert before==sql(snapshot,'nexo_test')
   assert sql("select count(*) from invoice_movements where origin='opening'",'nexo_test')=='1'
   assert sql('select count(*) from financial_balance_shadow where matches and residual_cents=5500','nexo_test')=='1'
