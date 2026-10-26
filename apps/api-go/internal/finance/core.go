@@ -12,7 +12,6 @@ import (
 	"nexoisp/api-go/internal/domain"
 	"nexoisp/api-go/internal/jsonx"
 	"nexoisp/api-go/internal/modules/leitura"
-	"nexoisp/api-go/internal/network"
 	"nexoisp/api-go/internal/validate"
 	"os"
 	"strings"
@@ -198,26 +197,11 @@ func Paid(ctx context.Context, tx *db.Tx, inv jsonx.Object) error {
 			return e
 		}
 	}
-	if s.Get("auto_resume_on_payment") != true {
-		return nil
-	}
-	r, e := one(ctx, tx, "onInvoicePaid", 3, inv.Get("contract_id"))
-	if e != nil {
-		return e
-	}
-	if r == nil || r.Get("desired_policy") != "suspended" || !strings.HasPrefix(fmt.Sprint(r.Get("desired_reason")), "inadimplência") || r.Get("status") != "active" {
-		return nil
-	}
-	still, e := one(ctx, tx, "onInvoicePaid", 4, inv.Get("contract_id"), inv.Get("id"), s.Get("suspend_after_days"), s.Get("timezone"))
-	if e != nil || still != nil {
-		return e
-	}
-	op, e := network.Request(ctx, tx, tenant, r.Get("id").(string), "subscriber.resume", network.Authz{Type: "system", ID: "billing.payment", Reason: "pagamento confirmado"}, "", "")
-	if e != nil {
-		return e
-	}
-	return SysAudit(ctx, tx, tenant, "service.auto_resume", "service_resource", r.Get("id"), map[string]any{"invoice_id": inv.Get("id"), "operation_id": op.Get("id")}, "ok")
+	// The settlement trigger persists technical effects. A network planning
+	// failure must never roll back this confirmed receipt.
+	return nil
 }
+
 func Manual(ctx context.Context, tx *db.Tx, id, user string, b map[string]any) (string, error) {
 	inv, e := first(ctx, tx, "manualPayment", 0, "fatura não encontrada", id)
 	if e != nil {

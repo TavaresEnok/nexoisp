@@ -60,7 +60,7 @@ func (w *operationWorker) Work(ctx context.Context, j *river.Job[jobargs.Operati
 
 func tenantTask(task string) bool {
 	switch task {
-	case "BILLING", "RECONCILE", "NOTICES", "SCHEDULED", "SLA", "PURGE", "TRUST", "SUSPEND", "NOTIFICATIONS", "WEBHOOKS":
+	case "PAYMENT_EFFECTS", "BILLING", "RECONCILE", "NOTICES", "SCHEDULED", "SLA", "PURGE", "TRUST", "SUSPEND", "NOTIFICATIONS", "WEBHOOKS":
 		return true
 	}
 	return false
@@ -152,6 +152,8 @@ func (w *worker) runTenant(ctx context.Context, task, tenant string) (err error)
 		return err
 	}
 	switch task {
+	case "PAYMENT_EFFECTS":
+		return finance.ProcessPaidEffects(ctx, w.db, tenant)
 	case "NOTIFICATIONS":
 		_, err = outbound.Notifications(ctx, w.db, tenant)
 		return err
@@ -266,7 +268,7 @@ func Start(ctx context.Context, database *db.DB, registerers ...prometheus.Regis
 	river.AddWorker(workers, w)
 	river.AddWorker(workers, &operationWorker{radius: w.radius})
 	periodic := []*river.PeriodicJob{}
-	for _, task := range []string{"BILLING", "RECONCILE", "NOTICES", "SCHEDULED", "SLA", "PURGE", "TRUST", "SUSPEND", "NOTIFICATIONS", "WEBHOOKS", "ALERTS", "CLEANUP", "RADIUS", "RADIUS_SYNC"} {
+	for _, task := range []string{"PAYMENT_EFFECTS", "BILLING", "RECONCILE", "NOTICES", "SCHEDULED", "SLA", "PURGE", "TRUST", "SUSPEND", "NOTIFICATIONS", "WEBHOOKS", "ALERTS", "CLEANUP", "RADIUS", "RADIUS_SYNC"} {
 		if os.Getenv("NEXO_GO_JOB_"+task) != "1" {
 			continue
 		}

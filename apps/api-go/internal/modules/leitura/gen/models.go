@@ -518,6 +518,7 @@ type Invoice struct {
 	AgreementID           pgtype.UUID        `json:"agreement_id"`
 	CompanyID             pgtype.UUID        `json:"company_id"`
 	FinancialConnectionID pgtype.UUID        `json:"financial_connection_id"`
+	SettlementVersion     int64              `json:"settlement_version"`
 }
 
 type InvoiceItem struct {
@@ -879,6 +880,21 @@ type Payment struct {
 	ReversalOf            pgtype.UUID        `json:"reversal_of"`
 	SignedCents           pgtype.Int4        `json:"signed_cents"`
 	FinancialConnectionID pgtype.UUID        `json:"financial_connection_id"`
+}
+
+type PaymentEffect struct {
+	ID                jsonx.UUID         `json:"id"`
+	TenantID          jsonx.UUID         `json:"tenant_id"`
+	InvoiceID         jsonx.UUID         `json:"invoice_id"`
+	SettlementVersion int64              `json:"settlement_version"`
+	Status            string             `json:"status"`
+	OperationID       pgtype.UUID        `json:"operation_id"`
+	Attempts          int32              `json:"attempts"`
+	NextAttemptAt     pgtype.Timestamptz `json:"next_attempt_at"`
+	LastError         pgtype.Text        `json:"last_error"`
+	Outcome           pgtype.Text        `json:"outcome"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	ProcessedAt       pgtype.Timestamptz `json:"processed_at"`
 }
 
 type Plan struct {
