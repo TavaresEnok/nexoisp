@@ -27,6 +27,8 @@ func Map(err error) *Error {
 	var p *pgconn.PgError
 	if errors.As(err, &p) {
 		switch p.Code {
+		case "N6901":
+			return New(409, "fatura com emissão no fornecedor: concilie ou cancele a cobrança antes de alterar ou baixar")
 		case "23505":
 			return &Error{Status: 409, Message: "registro duplicado: já existe um cadastro com estes dados", Detail: p.ConstraintName}
 		case "23503":

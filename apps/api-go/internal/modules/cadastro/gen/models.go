@@ -519,6 +519,7 @@ type Invoice struct {
 	CompanyID             pgtype.UUID        `json:"company_id"`
 	FinancialConnectionID pgtype.UUID        `json:"financial_connection_id"`
 	SettlementVersion     int64              `json:"settlement_version"`
+	ProviderIssuanceID    pgtype.UUID        `json:"provider_issuance_id"`
 }
 
 type InvoiceItem struct {

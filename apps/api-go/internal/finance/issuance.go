@@ -25,6 +25,16 @@ type Issuance struct {
 	ConfigHash          string
 }
 
+// Every issuance transaction takes the invoice lock before the journal lock,
+// matching ordinary receipts and the reservation/payment guards in PostgreSQL.
+func lockIssuanceInvoice(ctx context.Context, tx *db.Tx, id string) error {
+	var invoice string
+	if err := tx.QueryRow(ctx, `select invoice_id from provider_issuance where id=$1`, id).Scan(&invoice); err != nil {
+		return err
+	}
+	return tx.QueryRow(ctx, `select id from invoices where id=$1 for update`, invoice).Scan(&invoice)
+}
+
 func (s SandboxIssuance) Prepare(ctx context.Context, scope tenancy.Scope, r providers.Create, configHash string) (Issuance, error) {
 	var out Issuance
 	hash, err := hex.DecodeString(configHash)
@@ -36,6 +46,10 @@ func (s SandboxIssuance) Prepare(ctx context.Context, scope tenancy.Scope, r pro
 		return out, err
 	}
 	err = s.DB.WithScope(ctx, scope, func(tx *db.Tx) error {
+		var invoice string
+		if err := tx.QueryRow(ctx, `select id from invoices where id=$1 for update`, r.InvoiceID).Scan(&invoice); err != nil {
+			return err
+		}
 		// Scope and account cannot be selected from provider response/payload.
 		var valid bool
 		if err := tx.QueryRow(ctx, `select exists(select 1 from financial_connections c join invoices i on i.tenant_id=c.tenant_id and i.company_id is not distinct from c.company_id where c.id=$1 and c.provider=$2 and c.environment=$3 and c.account_ref=$4 and c.status<>'disabled' and i.id=$5)`, r.Scope.ConnectionID, r.Scope.Provider, r.Scope.Environment, r.Scope.AccountRef, r.InvoiceID).Scan(&valid); err != nil {
@@ -44,7 +58,7 @@ func (s SandboxIssuance) Prepare(ctx context.Context, scope tenancy.Scope, r pro
 		if !valid {
 			return errors.New("invoice/account not visible or disabled")
 		}
-		if err := tx.Exec(ctx, `insert into provider_issuance(tenant_id,invoice_id,financial_connection_id,intent_key,request,config_hash) values($1,$2,$3,$4,$5::jsonb,$6) on conflict(tenant_id,invoice_id) do nothing`, r.Scope.TenantID, r.InvoiceID, r.Scope.ConnectionID, r.IntentKey, string(raw), configHash); err != nil {
+		if err := tx.Exec(ctx, `insert into provider_issuance(tenant_id,invoice_id,financial_connection_id,intent_key,request,config_hash) select $1,$2,$3,$4,$5::jsonb,$6 where not exists(select 1 from provider_issuance where invoice_id=$2)`, r.Scope.TenantID, r.InvoiceID, r.Scope.ConnectionID, r.IntentKey, string(raw), configHash); err != nil {
 			return err
 		}
 		var stored []byte
@@ -69,6 +83,9 @@ func (s SandboxIssuance) Run(ctx context.Context, scope tenancy.Scope, id string
 	var item Issuance
 	var send bool
 	err := s.DB.WithScope(ctx, scope, func(tx *db.Tx) error {
+		if err := lockIssuanceInvoice(ctx, tx, id); err != nil {
+			return err
+		}
 		var raw []byte
 		if err := tx.QueryRow(ctx, `select id,state,coalesce(charge_id,''),request,config_hash from provider_issuance where id=$1 for update`, id).Scan(&item.ID, &item.State, &item.ChargeID, &raw, &item.ConfigHash); err != nil {
 			return err
@@ -84,7 +101,7 @@ func (s SandboxIssuance) Run(ctx context.Context, scope tenancy.Scope, id string
 		}
 		if item.State == "prepared" {
 			var valid bool
-			if err := tx.QueryRow(ctx, `select exists(select 1 from invoices i join financial_connections c on c.id=$2 and c.tenant_id=i.tenant_id and c.company_id is not distinct from i.company_id where i.id=$1 and i.status='open' and i.gateway_charge_id is null and i.financial_connection_id is null and i.amount_cents=$3 and i.due_date=$4::date and i.fee_cents=0 and i.discount_cents=0 and c.status<>'disabled' and c.account_ref=$5 and not exists(select 1 from payments p where p.invoice_id=i.id))`, item.Request.InvoiceID, item.Request.Scope.ConnectionID, item.Request.Money.Cents, item.Request.DueDate, item.Request.Scope.AccountRef).Scan(&valid); err != nil {
+			if err := tx.QueryRow(ctx, `select exists(select 1 from invoices i join financial_connections c on c.id=$2 and c.tenant_id=i.tenant_id and c.company_id is not distinct from i.company_id where i.id=$1 and i.provider_issuance_id=$6 and i.status='open' and i.gateway_charge_id is null and i.financial_connection_id is null and i.amount_cents=$3 and i.due_date=$4::date and i.fee_cents=0 and i.discount_cents=0 and c.status<>'disabled' and c.account_ref=$5 and not exists(select 1 from payments p where p.invoice_id=i.id))`, item.Request.InvoiceID, item.Request.Scope.ConnectionID, item.Request.Money.Cents, item.Request.DueDate, item.Request.Scope.AccountRef, id).Scan(&valid); err != nil {
 				return err
 			}
 			if !valid {
@@ -117,8 +134,13 @@ func (s SandboxIssuance) Run(ctx context.Context, scope tenancy.Scope, id string
 	if err = providers.ValidateIssued(item.Request, charge); err != nil {
 		return providers.Charge{}, err
 	}
-	// If this commit/acknowledgement is lost, another Run reads uncertain and GETs.
+	// The journal transition binds the invoice in the same transaction (migration
+	// 69). If commit/acknowledgement is lost, another Run reads uncertain and GETs,
+	// or reads the already committed response without issuing again.
 	err = s.DB.WithScope(ctx, scope, func(tx *db.Tx) error {
+		if err := lockIssuanceInvoice(ctx, tx, id); err != nil {
+			return err
+		}
 		var state, storedID string
 		if err := tx.QueryRow(ctx, `select state,coalesce(charge_id,'') from provider_issuance where id=$1 for update`, id).Scan(&state, &storedID); err != nil {
 			return err
