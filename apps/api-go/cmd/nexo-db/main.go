@@ -11,7 +11,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "uso: nexo-db prepare | bootstrap [--init-app-role] | baseline | up | jobs-up | verificar | create-operator <email> <nome> | rotate-secrets | preflight | seed-demo | totp <segredo>")
+		fmt.Fprintln(os.Stderr, "uso: nexo-db prepare | bootstrap [--init-app-role] | baseline | up | jobs-up | verificar | create-operator <email> <nome> | rotate-secrets | preflight | verify-restore | seed-demo | totp <segredo>")
 		os.Exit(2)
 	}
 	if os.Args[1] == "totp" {
@@ -27,7 +27,7 @@ func main() {
 		fmt.Println(code)
 		return
 	}
-	if os.Args[1] == "create-operator" || os.Args[1] == "rotate-secrets" || os.Args[1] == "preflight" || os.Args[1] == "seed-demo" {
+	if os.Args[1] == "create-operator" || os.Args[1] == "rotate-secrets" || os.Args[1] == "preflight" || os.Args[1] == "seed-demo" || os.Args[1] == "verify-restore" {
 		if err := db.Operate(context.Background(), os.Args[1:], os.Stdout); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)

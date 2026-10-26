@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { cents } from "@/features/shared/schema";
-export const importKind = z.enum(["subscribers", "invoices", "history"]);
+export const importKind = z.enum(["subscribers", "contracts", "invoices", "history", "network", "documents", "users"]);
 export type ImportKind = z.infer<typeof importKind>;
 export const totals = z.object({
   rows: z.coerce.number(),
@@ -53,11 +53,24 @@ export type ImportBatch = z.infer<typeof batch>;
 export type ImportRow = z.infer<typeof importRow>;
 export const kindLabels: Record<ImportKind, string> = {
   subscribers: "Assinantes, contratos e contas PPPoE",
+  contracts: "Contratos e serviços por assinante",
+  network: "Inventário de rede, IPAM e FTTH",
+  documents: "Documentos dos assinantes",
+  users: "Equipe e escopo de POP",
   invoices: "Títulos e histórico financeiro",
   history: "Histórico de atendimento, OS e anotações",
 };
 export const fieldLabels: Record<string, string> = {
   id_externo: "Identificador na origem",
+  id_externo_contrato: "Identificador do contrato na origem",
+  equipamento: "NAS de destino",
+  pai: "Referência ao contrato, pool ou caixa",
+  dados: "Dados do cadastro em JSON",
+  conteudo_base64: "Conteúdo do documento em base64",
+  perfil: "Perfil de acesso",
+  senha: "Nova senha",
+  ativo: "Ativar acesso",
+  pops: "POPs autorizados",
   id_externo_assinante: "Identificador do assinante na origem",
   nome: "Nome",
   cpf_cnpj: "CPF/CNPJ",

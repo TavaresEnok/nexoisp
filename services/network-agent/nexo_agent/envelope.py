@@ -2,11 +2,12 @@
 import base64
 import json
 from datetime import datetime, timezone
+from ipaddress import IPv6Network
 from typing import Literal, Optional, Union
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 SCHEMA_VERSION = 1
 
@@ -41,6 +42,18 @@ class Parameters(BaseModel):
     # MAC vinculado à conta (agente 0.4.0+): o RADIUS só autentica a conta vinda desse equipamento. Ausente = sem vínculo.
     mac: Optional[str] = Field(default=None, pattern=r"^([0-9A-F]{2}:){5}[0-9A-F]{2}$")
     # Agente 0.5.0+. Todos opcionais; ausente = não gravar o atributo (vale o que o perfil do NAS define).
+    delegated_ipv6_prefix: Optional[str] = None
+
+    @field_validator("delegated_ipv6_prefix")
+    @classmethod
+    def _ipv6_prefix(cls, value):
+        if value is None:
+            return value
+        prefix = IPv6Network(value, strict=True)
+        if not 48 <= prefix.prefixlen <= 64:
+            raise ValueError("prefixo IPv6 deve ter comprimento entre /48 e /64")
+        return str(prefix)
+
     reconnect: Optional[bool] = None          # derrubar a sessão atual mesmo sem mudança de autorização (subscriber.disconnect)
     rate_limit: Optional[str] = Field(default=None, pattern=r"^\d{1,7}[kKmM]?/\d{1,7}[kKmM]?( \d{1,7}[kKmM]?/\d{1,7}[kKmM]?){0,3}( [1-8]( \d{1,7}[kKmM]?/\d{1,7}[kKmM]?)?)?$")
     address_pool: Optional[str] = Field(default=None, pattern=r"^[A-Za-z0-9_.-]{1,60}$")

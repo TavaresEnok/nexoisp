@@ -84,6 +84,9 @@ func (s Service) createONU(ctx context.Context, tx *db.Tx, id string, b map[stri
 	if err != nil {
 		return nil, err
 	}
+	if ctx.Value(importOnlyKey{}) == true {
+		return onu, record(ctx, tx, "onu.import", "onu", onu.Get("id"), map[string]any{"provisioned": false})
+	}
 	reason := "autorização inicial"
 	if prev != nil {
 		if err = record(ctx, tx, "onu.replace", "onu", onu.Get("id"), map[string]any{"previous_serial": prev.Get("serial"), "serial": b["serial"]}); err != nil {

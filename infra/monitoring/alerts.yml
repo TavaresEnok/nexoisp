@@ -1,0 +1,32 @@
+groups:
+  - name: nexoisp
+    rules:
+      - alert: NexoApiUnavailable
+        expr: up{job="nexoisp"} == 0
+        for: 1m
+        labels: {severity: critical}
+        annotations:
+          summary: 'API indisponível em {{ $labels.instance }}'
+      - alert: NexoQueueMetricsUnavailable
+        expr: nexo_jobs_scrape_success{job="nexoisp"} == 0 or (up{job="nexoisp"} unless on(job,instance) nexo_jobs_scrape_success{job="nexoisp"})
+        for: 1m
+        labels: {severity: critical}
+        annotations:
+          summary: 'Não foi possível consultar a fila durável'
+      - alert: NexoQueueDelayed
+        expr: nexo_jobs_oldest_due_seconds{state=~"available|pending|retryable|running"} > 300
+        for: 2m
+        labels: {severity: warning}
+        annotations:
+          summary: 'Fila {{ $labels.queue }} atrasada no estado {{ $labels.state }}'
+      - alert: NexoJobsDiscarded
+        expr: nexo_jobs_count{state="discarded"} > 0
+        for: 1m
+        labels: {severity: critical}
+        annotations:
+          summary: 'Tarefas esgotaram suas tentativas; revisar antes de reprocessar'
+      - alert: NexoTenantTaskFailing
+        expr: increase(nexo_tenant_job_failures_total[15m]) > 0
+        labels: {severity: warning}
+        annotations:
+          summary: 'Rotina {{ $labels.task }} falhou para o provedor {{ $labels.tenant }}'

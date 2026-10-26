@@ -10,10 +10,8 @@ import (
 	"strings"
 	"text/template"
 
-	"nexoisp/api-go/internal/db"
 	"nexoisp/api-go/internal/endpoint"
 	"nexoisp/api-go/internal/jsonx"
-	"nexoisp/api-go/internal/tenancy"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -34,11 +32,8 @@ func (s Service) notice(ctx context.Context, r *http.Request) (endpoint.Result, 
 	slug := chi.URLParam(r, "slug")
 	var tenant jsonx.Object
 	if noticeSlug.MatchString(slug) {
-		err := s.DB.WithScope(ctx, tenancy.Scope{}, func(tx *db.Tx) error {
-			rows, err := tx.Objects(ctx, "select * from notice_page_get($1)", slug)
-			tenant = object(rows)
-			return err
-		})
+		rows, _, err := s.DB.Lookup(ctx, "select * from notice_page_get($1)", slug)
+		tenant = object(rows)
 		if err != nil {
 			return result, err
 		}

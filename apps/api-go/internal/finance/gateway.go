@@ -92,19 +92,18 @@ func Event(ctx context.Context, database *db.DB, gateway string, ev jsonx.Object
 	if e != nil {
 		return nil, e
 	}
-	e = database.WithScope(ctx, tenancy.Scope{}, func(tx *db.Tx) error {
-		if jsonx.Truthy(charge) {
-			r, e := one(ctx, tx, key, 0, gateway, jsonx.String(charge))
-			if e != nil {
-				return e
-			}
-			tenant = r.Get("t")
+	if jsonx.Truthy(charge) {
+		matches, _, err := database.Lookup(ctx, query(key, 0), gateway, jsonx.String(charge))
+		if err != nil {
+			return nil, err
 		}
-		if tenant == nil {
-			return exec(ctx, tx, key, 1, gateway, eventID, kind, charge, payload)
+		if len(matches) > 0 {
+			tenant = matches[0].Get("t")
 		}
-		return nil
-	})
+	}
+	if tenant == nil {
+		e = database.WithScope(ctx, tenancy.Scope{}, func(tx *db.Tx) error { return exec(ctx, tx, key, 1, gateway, eventID, kind, charge, payload) })
+	}
 	if e != nil {
 		return nil, e
 	}

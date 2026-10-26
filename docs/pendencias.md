@@ -29,7 +29,7 @@ O código inclui configuração de produção, preflight, backup/restauração e
 | Suspensão e perfis | Perfil de bloqueio/redução, pool por plano, limite simultâneo e redirecionamento da página de aviso no NAS real |
 | CGNAT | Revisão/importação do `.rsc`, interface de saída, escala, tráfego real e comportamento com jogos/VoIP; não há aplicação automática pelo agente |
 | IPv6 | O RADIUS integrado entrega o prefixo reservado (Delegated-IPv6-Prefix, desde 20/10/2026); falta laboratório com DHCPv6-PD no concentrador real e entrega para concentradores por agente |
-| TR-069 | Modelos reais de roteadores, autenticação CWMP e mudanças de Wi-Fi; GenieACS integrado não homologa todos os CPEs |
+| TR-069 | Certificado HTTPS, autenticação CWMP por dispositivo e rejeição de CPE sem credenciais; modelos reais de roteadores e mudanças de Wi-Fi. GenieACS integrado não homologa todos os CPEs |
 | NOC | Limiares ópticos e detecção coletiva ajustados com leituras e incidentes reais |
 | Comunicação | Canal HTTP de avisos e webhooks no serviço real, com consentimento e confirmação dos resultados |
 | Recuperação do site | Atualização que efetivamente altere o schema local, rollback e falhas de disco no ambiente do provedor |

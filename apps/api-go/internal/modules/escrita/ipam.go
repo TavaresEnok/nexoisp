@@ -298,11 +298,11 @@ func (s Service) legalIP(ctx context.Context, tx *db.Tx, _ string, b map[string]
 	if address.Is6() {
 		mode = "ipv6"
 		var err error
-		ipv6, err = rows(ctx, tx, key, 0, ip, hi)
+		ipv6, err = rows(ctx, tx, key, 0, ip, lo, hi)
 		if err != nil {
 			return nil, err
 		}
-		notes = append(notes, "IPv6: o resultado é a delegação de prefixo registrada para o contrato. O sistema não guarda histórico de titulares anteriores do mesmo prefixo.")
+		notes = append(notes, "IPv6: delegações cujo período de titularidade intersecta o intervalo consultado. A liberação encerra o período sem apagar o histórico. Delegações removidas antes da implantação deste histórico não são recuperadas; o registro cadastral não comprova uma sessão de rede.")
 		if b["port"] != nil {
 			notes = append(notes, "A porta não se aplica a IPv6 (não há CGNAT).")
 		}

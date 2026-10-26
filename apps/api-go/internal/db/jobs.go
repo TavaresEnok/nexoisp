@@ -12,11 +12,44 @@ import (
 	"github.com/riverqueue/river/riverdriver"
 	"github.com/riverqueue/river/riverdriver/riverpgxv5"
 	"github.com/riverqueue/river/rivermigrate"
+	"github.com/riverqueue/river/rivertype"
 )
 
 // River uses an isolated schema. Business data still goes through WithScope.
 func (d *DB) JobsDriver() riverdriver.Driver[pgx.Tx]         { return riverpgxv5.New(d.pool) }
 func (d *DB) SetOperationQueue(client *river.Client[pgx.Tx]) { d.operationQueue.Store(client) }
+func (t *Tx) EnqueuePeriodic(ctx context.Context, task, tenant string) error {
+	client := t.db.operationQueue.Load()
+	if client == nil {
+		return fmt.Errorf("fila periódica indisponível")
+	}
+	_, err := client.InsertTx(ctx, t.raw, jobargs.Periodic{Task: task, TenantID: tenant}, &river.InsertOpts{
+		Queue: "tenant", MaxAttempts: 3,
+		UniqueOpts: river.UniqueOpts{ByArgs: true, ByState: []rivertype.JobState{
+			rivertype.JobStateAvailable, rivertype.JobStatePending, rivertype.JobStateRunning,
+			rivertype.JobStateRetryable, rivertype.JobStateScheduled,
+		}},
+	})
+	return err
+}
+
+// A busy tenant must not occupy a worker while waiting for another replica.
+func (d *DB) TryTenantWorkerLock(ctx context.Context, tenant string, fn func() error) (bool, error) {
+	c, err := pgx.ConnectConfig(ctx, d.config.Copy())
+	if err != nil {
+		return false, err
+	}
+	defer func() {
+		cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
+		defer cancel()
+		_ = c.Close(cleanup)
+	}()
+	var acquired bool
+	if err = c.QueryRow(ctx, "select pg_try_advisory_lock(hashtextextended($1,7411002))", "nexo-tenant:"+tenant).Scan(&acquired); err != nil || !acquired {
+		return false, err
+	}
+	return true, fn()
+}
 func (t *Tx) EnqueueOperation(ctx context.Context, tenant, id string) error {
 	if t.db == nil {
 		return nil

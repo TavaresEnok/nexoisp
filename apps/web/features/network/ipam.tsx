@@ -188,7 +188,7 @@ export function AddressDirectory() {
       >
         <OperationalCatalog
           title="Blocos de endereços"
-          description="Com o RADIUS integrado, o prefixo reservado é entregue como Delegated-IPv6-Prefix no próximo provisionamento do acesso; concentradores por agente exigem configuração da equipe."
+          description="O prefixo reservado é entregue como Delegated-IPv6-Prefix no próximo provisionamento pelo RADIUS integrado ou pelo agente 0.6.0 ou superior."
           columns={[
             "Bloco / nome",
             "Tipo",
@@ -647,7 +647,7 @@ export function ContractAddresses({ id }: { id: string }) {
   return (
     <ProfileSection
       title="Endereços do contrato"
-      caption="Reservas cadastrais e endereços fixos. A delegação IPv6 não é entregue automaticamente ao NAS."
+      caption="Reservas cadastrais e endereços fixos. O próximo provisionamento entrega o prefixo IPv6 pelo RADIUS integrado ou agente 0.6.0+."
     >
       <QueryBoundary
         loading={ips.isLoading || v6.isLoading}

@@ -155,11 +155,23 @@ func (s Service) publicAuth(ctx context.Context, r *http.Request, scope string) 
 		if !strings.HasPrefix(raw, "nxk_") {
 			return nil
 		}
-		token, e = one(ctx, tx, key, 2, cryptox.SHA256(raw))
-		return e
+		return nil
 	})
 	if err != nil {
 		return nil, err
+	}
+	rawKey := r.Header.Get("X-API-Key")
+	if h := r.Header.Get("Authorization"); strings.HasPrefix(h, "Bearer ") {
+		rawKey = h[7:]
+	}
+	if strings.HasPrefix(rawKey, "nxk_") {
+		found, _, e := s.DB.Lookup(ctx, query(key, 2), cryptox.SHA256(rawKey))
+		if e != nil {
+			return nil, e
+		}
+		if len(found) > 0 {
+			token = found[0]
+		}
 	}
 	if token == nil {
 		if err = s.DB.WithScope(ctx, tenancy.Scope{}, func(tx *db.Tx) error { return tx.Exec(ctx, query(key, 1), throttle, 600) }); err != nil {

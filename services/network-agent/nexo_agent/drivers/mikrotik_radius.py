@@ -22,7 +22,7 @@ create table if not exists nexo_accounts (
 EXTRA_COLUMNS = (("by_profile", "integer not null default 0"),)
 # Atributos opcionais (agente 0.5.0). Resposta: velocidade com rajada, pool de endereços e intervalo de accounting.
 # Conferência: Simultaneous-Use (exige a seção "session" do FreeRADIUS consultando o accounting).
-REPLY_ATTRS = {"rate_limit": "Mikrotik-Rate-Limit", "address_pool": "Framed-Pool", "acct_interim": "Acct-Interim-Interval"}
+REPLY_ATTRS = {"rate_limit": "Mikrotik-Rate-Limit", "address_pool": "Framed-Pool", "acct_interim": "Acct-Interim-Interval", "delegated_ipv6_prefix": "Delegated-IPv6-Prefix"}
 CHECK_ATTRS = {"simultaneous_use": "Simultaneous-Use"}
 _UPTIME = re.compile(r"(?:(\d+)w)?(?:(\d+)d)?(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$")
 

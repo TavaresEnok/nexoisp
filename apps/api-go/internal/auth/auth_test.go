@@ -91,6 +91,21 @@ func TestRate(t *testing.T) {
 		}
 	}
 }
+
+type failingRateLoader struct{ err error }
+
+func (l failingRateLoader) Load(context.Context, string) (*Ctx, error)          { return nil, l.err }
+func (l failingRateLoader) Rate(context.Context, string, int) (int, int, error) { return 0, 0, l.err }
+
+func TestSharedRateFailureDoesNotFallBack(t *testing.T) {
+	want := errors.New("contador compartilhado indisponível")
+	a := newTest(t, failingRateLoader{err: want})
+	c := &Ctx{Role: "admin", MFAEnabled: true, TokenHash: "synthetic"}
+	err := a.Guard(context.Background(), httptest.NewRecorder(), httptest.NewRequest("GET", "/api/me", nil), c, "", false)
+	if !errors.Is(err, want) {
+		t.Fatalf("falha no contador foi ignorada: %v", err)
+	}
+}
 func TestCacheInvalidationAndDisconnect(t *testing.T) {
 	var n atomic.Int64
 	l := loaderFunc(func(ctx context.Context, h string) (*Ctx, error) {

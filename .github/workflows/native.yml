@@ -30,6 +30,10 @@ jobs:
           npm -w apps/web run build
       - name: Instalação, administração, financeiro e outbox com duas réplicas Go
         run: python3 tests/contrato/nativo.py
+      - name: Falha por provedor, filas, limites compartilhados e recuperação
+        run: python3 tests/contrato/resilience.py
+      - name: Ferramentas de operação e conferência de migração
+        run: python3 -m unittest discover -s tests/operacao
       - name: Integridade de cadastro, campos personalizados, equipe e estoque
         run: python3 tests/contrato/sgp_auditoria.py
       - name: Painel real contra Go
@@ -47,7 +51,7 @@ jobs:
         with: {name: verificacao-go, path: tests/contrato/relatorios/}
       - name: Limpeza do laboratório
         if: always()
-        run: docker rm -f nexo-fase1-db || true
+        run: docker rm -f nexo-fase1-db nexo-resilience-db || true
   agente:
     runs-on: ubuntu-24.04
     steps:

@@ -44,7 +44,8 @@ def expected_attrs(p) -> dict:
     """Atributos opcionais que devem estar gravados. Suspensa por perfil, velocidade e pool são os do perfil de bloqueio."""
     blocked = block_profile(p) is not None
     out = {"rate_limit": None if blocked else p.rate_limit, "address_pool": None if blocked else p.address_pool,
-           "simultaneous_use": p.simultaneous_use, "acct_interim": p.acct_interim}
+           "simultaneous_use": p.simultaneous_use, "acct_interim": p.acct_interim,
+           "delegated_ipv6_prefix": p.delegated_ipv6_prefix if p.policy == "active" and not blocked else None}
     return {k: v for k, v in out.items() if v is not None}
 
 

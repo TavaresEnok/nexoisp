@@ -29,9 +29,10 @@ func Load() (Config, error) {
 	}
 	if v := os.Getenv("NEXO_PANEL_RATE_PER_MIN"); v != "" {
 		n, e := strconv.Atoi(v)
-		if e == nil && n != 0 {
-			c.Rate = max(30, n)
+		if e != nil || n < 30 || n > 1000000 {
+			return c, fmt.Errorf("NEXO_PANEL_RATE_PER_MIN precisa estar entre 30 e 1000000")
 		}
+		c.Rate = n
 	}
 	if v := os.Getenv("NEXO_GO_AUTH_CACHE_TTL"); v != "" {
 		n, e := strconv.ParseFloat(v, 64)

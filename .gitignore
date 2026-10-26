@@ -27,3 +27,8 @@ nexo-sgp-saida/
 *.tsbuildinfo
 **/test-results/
 **/playwright-report/
+/bench/pilot-real/rust/target/
+/bench/nexoisp-benchmark-ia-completo-20261015.zip
+/bench/nexoisp-benchmark-ia-ampliado-20261015.zip
+/docs/nexoisp-comparativo-corrigido-20261015.zip
+/docs/nexoisp-piloto-real-20261015-completo.zip

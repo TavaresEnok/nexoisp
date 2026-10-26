@@ -74,7 +74,7 @@ func Server(database *db.DB) (*http.Server, error) {
 	if addr == "" {
 		addr = ":8443"
 	}
-	s := &http.Server{Addr: addr, Handler: (Service{DB: database}).Handler(), ReadHeaderTimeout: 5 * time.Second, IdleTimeout: 60 * time.Second}
+	s := &http.Server{Addr: addr, Handler: (Service{DB: database}).Handler(), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 2 * time.Minute, IdleTimeout: 60 * time.Second}
 	if off {
 		return s, nil
 	}
@@ -99,11 +99,10 @@ func (s Service) authenticate(ctx context.Context, r *http.Request) (jsonx.Objec
 		return nil, apierr.New(401, "agente não autenticado")
 	}
 	var a jsonx.Object
-	e := s.DB.WithScope(ctx, tenancy.Scope{}, func(tx *db.Tx) error {
-		var e error
-		a, e = one(ctx, tx, "helper:authAgent", 0, cryptox.SHA256(h[7:]))
-		return e
-	})
+	rows, _, e := s.DB.Lookup(ctx, query("helper:authAgent", 0), cryptox.SHA256(h[7:]))
+	if len(rows) > 0 {
+		a = rows[0]
+	}
 	if e != nil {
 		return nil, e
 	}

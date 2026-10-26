@@ -16,6 +16,7 @@ type Ctx struct {
 	Support, MFAEnabled                                          bool
 	PopIDs, Modules, Permissions                                 []string
 	ExpiresAt                                                    time.Time
+	SessionCell                                                  string
 	Scope                                                        tenancy.Scope
 }
 type key struct{}
@@ -28,8 +29,37 @@ type Loader interface {
 }
 type DBLoader struct{ DB *db.DB }
 
+// Rate shares the same atomic counter across all API replicas, without exposing
+// session counters or credentials to application roles.
+func (l DBLoader) Rate(ctx context.Context, hash string, limit int) (int, int, error) {
+	var calls, retry int
+	rows, cell, lookupErr := l.DB.Lookup(ctx, "select * from nexo_go_session_get($1)", hash)
+	if lookupErr != nil {
+		return 0, 0, lookupErr
+	}
+	if len(rows) == 0 {
+		return 0, 0, apierr.New(401, "sessão inválida ou expirada")
+	}
+	ctx = db.WithCell(ctx, cell)
+	err := l.DB.WithScope(ctx, tenancy.Scope{}, func(tx *db.Tx) error {
+		return tx.QueryRow(ctx, "select calls,retry_after from nexo_panel_rate_take($1,$2)", hash, limit).Scan(&calls, &retry)
+	})
+	if errors.Is(err, pgx.ErrNoRows) {
+		err = apierr.New(401, "sessão inválida ou expirada")
+	}
+	return calls, retry, err
+}
+
 func (l DBLoader) Load(ctx context.Context, hash string) (*Ctx, error) {
-	c := &Ctx{TokenHash: hash}
+	rows, sessionCell, lookupErr := l.DB.Lookup(ctx, "select * from nexo_go_session_get($1)", hash)
+	if lookupErr != nil {
+		return nil, lookupErr
+	}
+	if len(rows) == 0 {
+		return nil, apierr.New(401, "sessão inválida ou expirada")
+	}
+	ctx = db.WithCell(ctx, sessionCell)
+	c := &Ctx{TokenHash: hash, SessionCell: sessionCell}
 	var tenant, subscriber, support *string
 	err := l.DB.WithScope(ctx, tenancy.Scope{}, func(tx *db.Tx) error {
 		err := tx.QueryRow(ctx, "select * from nexo_go_session_get($1)", hash).Scan(&c.UserID, &tenant, &c.Role, &c.Name, &c.Email, &subscriber, &support, &c.MFAEnabled, &c.ExpiresAt)
@@ -52,12 +82,15 @@ func (l DBLoader) Load(ctx context.Context, hash string) (*Ctx, error) {
 				c.Support = true
 			}
 		}
+		return nil
+	})
+	if err != nil {
+		return c, err
+	}
+	err = l.DB.WithScope(ctx, tenancy.Scope{TenantID: c.TenantID}, func(tx *db.Tx) error {
 		cell, err := l.DB.Resolve(ctx, c.TenantID)
 		if err != nil {
 			return err
-		}
-		if cell != "c1" {
-			return errors.New("sessão em célula sem pool")
 		}
 		modules, pops, err := tx.AuthData(ctx, c.TenantID, c.UserID)
 		if err != nil {

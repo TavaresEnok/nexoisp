@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"crypto/tls"
 	"crypto/x509"
 	"database/sql"
 	"encoding/base64"
@@ -9,6 +10,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -52,12 +54,21 @@ func Operate(ctx context.Context, args []string, out io.Writer) error {
 	if e != nil {
 		return fmt.Errorf("DATABASE_URL_OWNER inválida")
 	}
+	if args[0] == "verify-restore" {
+		database := os.Getenv("NEXO_RESTORE_DATABASE")
+		if !regexp.MustCompile(`^nexo_restore_check_[0-9]+_[0-9]+$`).MatchString(database) {
+			return fmt.Errorf("verify-restore exige banco temporário de restore-check")
+		}
+		cfg.Database = database
+	}
 	c := stdlib.OpenDB(*cfg)
 	defer c.Close()
 	if e = c.PingContext(ctx); e != nil {
 		return e
 	}
 	switch args[0] {
+	case "verify-restore":
+		return verifyRestore(ctx, c, out)
 	case "seed-demo":
 		return seedDemo(ctx, c, out)
 	case "create-operator":
@@ -186,6 +197,39 @@ func preflight(ctx context.Context, c *sql.DB, out io.Writer) error {
 	check(os.Getenv("NEXO_SECRET_KEY_PREVIOUS") == "", true, "nenhuma rotação pendente")
 	check(os.Getenv("NEXO_ALERT_WEBHOOK_URL") != "", true, "webhook de alerta configurado")
 	check(os.Getenv("NEXO_REPLICA_PASSWORD") != "", true, "réplica configurada")
+	if acsRaw := strings.TrimSpace(os.Getenv("NEXO_ACS_URL")); acsRaw != "" {
+		acsURL, acsErr := url.Parse(acsRaw)
+		check(acsErr == nil && acsURL != nil && (acsURL.Scheme == "http" || acsURL.Scheme == "https") && acsURL.Host != "" && acsURL.User == nil, false, "URL interna do ACS válida")
+
+		publicRaw := strings.TrimSpace(os.Getenv("NEXO_ACS_PUBLIC_URL"))
+		publicURL, publicErr := url.Parse(publicRaw)
+		publicValid := publicErr == nil && publicURL != nil && publicURL.Scheme == "https" && publicURL.Host != "" && publicURL.User == nil
+		check(publicValid, false, "URL pública do ACS usa HTTPS")
+		check(os.Getenv("NEXO_ACS_CWMP_AUTH_CONFIRMED") == "1", false, "autenticação CWMP por dispositivo confirmada pelo operador")
+		uiSecret := os.Getenv("NEXO_ACS_UI_SECRET")
+		check(len(uiSecret) >= 32 && uiSecret != "nao-usado-a-interface-nao-e-publicada", false, "segredo próprio da interface GenieACS")
+
+		certPath := os.Getenv("NEXO_ACS_TLS_CERT")
+		if certPath == "" {
+			certPath = "/certs/acs.crt"
+		}
+		keyPath := os.Getenv("NEXO_ACS_TLS_KEY")
+		if keyPath == "" {
+			keyPath = "/certs/acs.key"
+		}
+		certPEM, certErr := os.ReadFile(certPath)
+		keyPEM, keyErr := os.ReadFile(keyPath)
+		pair, pairErr := tls.X509KeyPair(certPEM, keyPEM)
+		certValid := certErr == nil && keyErr == nil && pairErr == nil && len(pair.Certificate) > 0
+		if certValid {
+			cert, parseErr := x509.ParseCertificate(pair.Certificate[0])
+			certValid = parseErr == nil && time.Now().After(cert.NotBefore) && time.Now().Before(cert.NotAfter)
+			if certValid && publicValid {
+				certValid = cert.VerifyHostname(publicURL.Hostname()) == nil
+			}
+		}
+		check(certValid, false, "certificado TLS do ACS válido, vigente e correspondente à URL pública")
+	}
 	root, e := Root()
 	if e != nil {
 		return e

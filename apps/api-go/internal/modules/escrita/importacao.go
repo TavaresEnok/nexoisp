@@ -25,9 +25,21 @@ import (
 
 var importFields = map[string][]string{
 	"subscribers": strings.Split("id_externo,nome,cpf_cnpj,email,telefone,logradouro,numero,bairro,cidade,uf,cep,observacoes,situacao,plano,vencimento_dia,pppoe_usuario,pppoe_senha,nascimento,rg,nome_mae,nome_fantasia,celular,whatsapp,aceita_avisos,inicio_contrato,mac,etiquetas,pop,fidelidade_ate,multa_valor,multa_modelo,indicado_por", ","),
-	"invoices":    strings.Split("id_externo,id_externo_assinante,vencimento,valor,competencia,descricao,situacao,pago_em,valor_pago,forma_pagamento", ","),
+	"invoices":    strings.Split("id_externo,id_externo_contrato,id_externo_assinante,vencimento,valor,competencia,descricao,situacao,pago_em,valor_pago,forma_pagamento", ","),
 	"history":     strings.Split("id_externo,id_externo_assinante,tipo,data,assunto,descricao,situacao,encerrado_em,solucao,responsavel,categoria,tipo_os", ","),
 }
+
+func init() {
+	importFields["contracts"] = strings.Split("id_externo,id_externo_assinante,plano,vencimento_dia,inicio_contrato,pppoe_usuario,pppoe_senha,equipamento,pop,etiquetas,fidelidade_ate,multa_valor,multa_modelo,indicado_por", ",")
+	importFields["network"] = []string{"id_externo", "tipo", "pai", "dados"}
+	importFields["documents"] = []string{"id_externo", "id_externo_assinante", "id_externo_contrato", "nome", "tipo", "conteudo_base64"}
+	importFields["users"] = []string{"id_externo", "nome", "email", "perfil", "senha", "ativo", "pops"}
+	importRequired["contracts"] = []string{"id_externo", "id_externo_assinante", "plano", "vencimento_dia"}
+	importRequired["network"] = []string{"id_externo", "tipo", "dados"}
+	importRequired["documents"] = []string{"id_externo", "id_externo_assinante", "nome", "tipo", "conteudo_base64"}
+	importRequired["users"] = []string{"id_externo", "nome", "email", "perfil"}
+}
+
 var importRequired = map[string][]string{"subscribers": {"id_externo", "nome"}, "invoices": {"id_externo", "id_externo_assinante", "vencimento", "valor"}, "history": {"id_externo", "id_externo_assinante", "tipo", "data", "descricao"}}
 
 type rowError string
@@ -181,7 +193,7 @@ var previewRollback = errors.New("prévia de importação concluída")
 
 func (s Service) importOperations(ops map[string]operation) {
 	f, o, str := validate.F, validate.Object, validate.String
-	schema := obj(o(f("kind", validate.Enum("subscribers", "invoices", "history")), f("source", str().Pattern(`^[a-z0-9-]{2,40}$`, "origem: minúsculas, números e hífen").Def("csv-intermediario")), f("filename", str().Max(200).Opt()), f("csv", str().Min(1).Max(15*1024*1024)), f("mapping", validate.Record(str()).Opt()), f("plan_map", validate.Record(str().UUID()).Opt()), f("device_id", str().UUID().Nullish())))
+	schema := obj(o(f("kind", validate.Enum("subscribers", "contracts", "invoices", "history", "network", "documents", "users")), f("source", str().Pattern(`^[a-z0-9-]{2,40}$`, "origem: minúsculas, números e hífen").Def("csv-intermediario")), f("filename", str().Max(200).Opt()), f("csv", str().Min(1).Max(15*1024*1024)), f("mapping", validate.Record(str()).Opt()), f("plan_map", validate.Record(str().UUID()).Opt()), f("device_id", str().UUID().Nullish())))
 	ops["POST /api/import/preview"] = operation{nil, schema}
 	ops["POST /api/import/apply"] = operation{nil, schema}
 }
@@ -229,6 +241,9 @@ func (s Service) importCSV(ctx context.Context, b map[string]any, apply bool) (a
 	results := []map[string]any{}
 	var batch any
 	c := auth.From(ctx)
+	if (kind == "network" || kind == "users" || kind == "contracts" || kind == "documents") && len(c.PopIDs) > 0 {
+		return nil, apierr.New(403, "importação estrutural exige administrador sem restrição de POP")
+	}
 	e := s.DB.WithScope(ctx, c.Scope, func(tx *db.Tx) error {
 		if len(missing) == 0 {
 			plans, e := tx.Objects(ctx, `select p.id,p.name,v.id as version_id,v.version,v.profile_name from plans p join lateral (select * from plan_versions x where x.plan_id=p.id order by version desc limit 1) v on true where p.active`)
@@ -260,10 +275,20 @@ func (s Service) importCSV(ctx context.Context, b map[string]any, apply bool) (a
 				}
 				var result map[string]any
 				var rowErr error
-				if r["id_externo"] != "" && seen[r["id_externo"]] {
+				rowKey := r["id_externo"]
+				if kind == "network" {
+					rowKey = r["tipo"] + ":" + rowKey
+				}
+				before := map[string]any{}
+				for key, value := range totals {
+					if _, ok := value.(float64); ok {
+						before[key] = value
+					}
+				}
+				if r["id_externo"] != "" && seen[rowKey] {
 					rowErr = rowError(fmt.Sprintf("id_externo \"%s\" repetido no arquivo", r["id_externo"]))
 				} else {
-					seen[r["id_externo"]] = true
+					seen[rowKey] = true
 					switch kind {
 					case "subscribers":
 						result, rowErr = importSubscriber(ctx, tx, b, r, plans, totals, mapped)
@@ -271,9 +296,14 @@ func (s Service) importCSV(ctx context.Context, b map[string]any, apply bool) (a
 						result, rowErr = importInvoice(ctx, tx, b, r, totals)
 					case "history":
 						result, rowErr = importHistory(ctx, tx, b, r, totals)
+					default:
+						result, rowErr = s.importExtended(ctx, tx, b, r, plans, totals, mapped)
 					}
 				}
 				if rowErr != nil {
+					for key, value := range before {
+						totals[key] = value
+					}
 					if e = tx.Exec(ctx, "rollback to savepoint import_row"); e != nil {
 						return e
 					}
@@ -711,7 +741,29 @@ func importInvoice(ctx context.Context, tx *db.Tx, b map[string]any, r map[strin
 		}
 		comp = r["competencia"] + "-01"
 	}
-	k, e := one(ctx, tx, key, 0, b["source"], r["id_externo_assinante"])
+	var k jsonx.Object
+	var e error
+	if r["id_externo_contrato"] != "" {
+		k, e = importOne(ctx, tx, "select id,subscriber_id from contracts where external_source=$1 and external_id=$2", b["source"], r["id_externo_contrato"])
+		if e == nil && k != nil && r["id_externo_assinante"] != "" {
+			owner, oe := importOne(ctx, tx, "select id from subscribers where external_source=$1 and external_id=$2", b["source"], r["id_externo_assinante"])
+			if oe != nil {
+				return nil, oe
+			}
+			if owner == nil || owner.Get("id") != k.Get("subscriber_id") {
+				return fail("contrato não pertence ao assinante informado")
+			}
+		}
+	} else {
+		matches, qe := tx.Objects(ctx, "select k.id,k.subscriber_id from contracts k join subscribers s on s.id=k.subscriber_id where s.external_source=$1 and s.external_id=$2 order by k.created_at,k.id", b["source"], r["id_externo_assinante"])
+		e = qe
+		if len(matches) > 1 {
+			return fail("assinante possui múltiplos contratos; informe id_externo_contrato")
+		}
+		if len(matches) == 1 {
+			k = matches[0]
+		}
+	}
 	if e != nil {
 		return nil, e
 	}

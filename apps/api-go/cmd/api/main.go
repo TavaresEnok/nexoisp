@@ -123,8 +123,11 @@ func run() error {
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{"ok":true}`))
 	})
-	servers := []*http.Server{{Addr: cfg.Addr, Handler: router, ReadHeaderTimeout: 5 * time.Second, IdleTimeout: 60 * time.Second}, {Addr: cfg.InternalAddr, Handler: internal, ReadHeaderTimeout: 5 * time.Second, IdleTimeout: 60 * time.Second}}
-	stopJobs, err := jobs.Start(ctx, database)
+	servers := []*http.Server{
+		{Addr: cfg.Addr, Handler: router, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 2 * time.Minute, IdleTimeout: 60 * time.Second},
+		{Addr: cfg.InternalAddr, Handler: internal, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second, IdleTimeout: 60 * time.Second},
+	}
+	stopJobs, err := jobs.Start(ctx, database, reg)
 	if err != nil {
 		return err
 	}

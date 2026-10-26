@@ -24,6 +24,8 @@ import (
 )
 
 type DB struct {
+	cellID         string
+	cells          map[string]*DB
 	operationQueue atomic.Pointer[river.Client[pgx.Tx]]
 	pool           *pgxpool.Pool
 	config         *pgx.ConnConfig
@@ -39,7 +41,7 @@ type Tx struct {
 	Queries *gen.Queries
 }
 
-func Open(ctx context.Context, url, mode string, maxConns int, reg prometheus.Registerer) (*DB, error) {
+func openSingle(ctx context.Context, url, mode string, maxConns int, reg prometheus.Registerer) (*DB, error) {
 	cfg, err := pgxpool.ParseConfig(url)
 	if err != nil {
 		return nil, err
@@ -64,13 +66,13 @@ func Open(ctx context.Context, url, mode string, maxConns int, reg prometheus.Re
 		p.Close()
 		return nil, err
 	}
-	if err = d.RefreshDirectory(ctx); err != nil {
-		p.Close()
-		return nil, err
-	}
 	return d, nil
 }
-func (d *DB) Close() { d.pool.Close() }
+func (d *DB) Close() {
+	for _, c := range d.Cells() {
+		c.pool.Close()
+	}
+}
 func (d *DB) Verify(ctx context.Context) error {
 	var unsafe bool
 	err := d.pool.QueryRow(ctx, `select exists(select 1 from pg_roles where pg_has_role(current_user,oid,'MEMBER') and (rolsuper or rolbypassrls)) or exists(select 1 from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind in ('r','p') and pg_has_role(current_user,c.relowner,'MEMBER'))`).Scan(&unsafe)
@@ -91,9 +93,10 @@ func (d *DB) Verify(ctx context.Context) error {
 }
 func (d *DB) WithScope(ctx context.Context, s tenancy.Scope, fn func(*Tx) error) error {
 	started := time.Now()
+	routedCell := d.CellID()
 	defer func() {
 		if d.RouteTime != nil {
-			d.RouteTime.WithLabelValues(requestctx.Route(ctx), "c1").Observe(time.Since(started).Seconds())
+			d.RouteTime.WithLabelValues(requestctx.Route(ctx), routedCell).Observe(time.Since(started).Seconds())
 		}
 	}()
 	if fault.Active("sem_pop") {
@@ -106,19 +109,26 @@ func (d *DB) WithScope(ctx context.Context, s tenancy.Scope, fn func(*Tx) error)
 		s.TenantID = ""
 	}
 	cell, err := d.Resolve(ctx, s.TenantID)
+	if s.TenantID == "" {
+		if selected, ok := ctx.Value(cellContextKey{}).(string); ok && selected != "" {
+			cell = selected
+		}
+	}
 	if err != nil {
 		return err
 	}
 	if s.Cell != "" && s.Cell != cell {
 		return fmt.Errorf("célula divergente")
 	}
-	if cell != "c1" {
-		return fmt.Errorf("pool da célula não configurado")
+	target, err := d.cell(cell)
+	if err != nil {
+		return err
 	}
+	routedCell = cell
 	start := time.Now()
 	// pg.Pool no produto aguarda até obter conexão ou cancelar a requisição.
 	// Um timeout exclusivo do Go mudaria o contrato sob contenção.
-	c, err := d.pool.Acquire(ctx)
+	c, err := target.pool.Acquire(ctx)
 	d.Wait.Observe(time.Since(start).Seconds())
 	if err != nil {
 		return err
@@ -147,7 +157,7 @@ func (d *DB) WithScope(ctx context.Context, s tenancy.Scope, fn func(*Tx) error)
 	}
 	d.Transactions.Inc()
 	defer func() { d.Queries.Observe(time.Since(start).Seconds()) }()
-	if err = fn(&Tx{raw: tx, Queries: gen.New(tx), db: d}); err != nil {
+	if err = fn(&Tx{raw: tx, Queries: gen.New(tx), db: target}); err != nil {
 		return err
 	}
 	return tx.Commit(ctx)
@@ -205,18 +215,41 @@ func (t *Tx) AuthData(ctx context.Context, tenant, user string) ([]string, []str
 	return modules, pops, err
 }
 func (d *DB) RefreshDirectory(ctx context.Context) error {
-	return d.WithScope(ctx, tenancy.Scope{}, func(t *Tx) error {
-		objects, err := t.Objects(ctx, "select * from nexo_go_directory()")
+	entries := map[string]string{}
+	for _, cell := range d.Cells() {
+		rows, err := cell.pool.Query(ctx, "select * from nexo_go_directory()")
 		if err != nil {
+			d.Directory.Disable()
 			return err
 		}
-		entries := map[string]string{}
-		for _, o := range objects {
-			entries[o.Get("tenant_id").(string)] = o.Get("cell_id").(string)
+		for rows.Next() {
+			var tenant, id string
+			if err = rows.Scan(&tenant, &id); err != nil {
+				rows.Close()
+				d.Directory.Disable()
+				return err
+			}
+			if id != cell.CellID() {
+				rows.Close()
+				d.Directory.Disable()
+				return fmt.Errorf("diretório de célula divergente para provedor %s", tenant)
+			}
+			if _, exists := entries[tenant]; exists {
+				rows.Close()
+				d.Directory.Disable()
+				return fmt.Errorf("provedor duplicado entre células: %s", tenant)
+			}
+			entries[tenant] = id
 		}
-		d.Directory.Replace(entries)
-		return nil
-	})
+		err = rows.Err()
+		rows.Close()
+		if err != nil {
+			d.Directory.Disable()
+			return err
+		}
+	}
+	d.Directory.Replace(entries)
+	return nil
 }
 
 type Notification struct {
@@ -228,7 +261,7 @@ type Notification struct {
 }
 
 // Dedicated connection: LISTEN never occupies or leaks session state into the request pool.
-func (d *DB) Listen(ctx context.Context, event func(Notification), state func(bool)) {
+func (d *DB) listenOne(ctx context.Context, event func(Notification), state func(bool)) {
 	for ctx.Err() == nil {
 		state(false)
 		d.Directory.Disable()
@@ -280,6 +313,9 @@ func (d *DB) Listen(ctx context.Context, event func(Notification), state func(bo
 }
 
 func (d *DB) Resolve(ctx context.Context, tenant string) (string, error) {
+	if tenant == "" {
+		return d.CellID(), nil
+	}
 	cell, err := d.Directory.Resolve(tenant)
 	if err != nil {
 		if err = d.RefreshDirectory(ctx); err != nil {

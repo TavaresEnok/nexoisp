@@ -18,7 +18,7 @@ func OperatorScope(reason string) (Scope, error) {
 	if reason != "auditoria_negativa" && reason != "listar_provedores" && reason != "gerenciar_provedores" && reason != "alertas_operacionais" {
 		return Scope{}, fmt.Errorf("escopo de operador não autorizado: %s", reason)
 	}
-	return Scope{Cell: "c1", operator: true}, nil
+	return Scope{operator: true}, nil
 }
 func (s Scope) IsOperator() bool { return s.operator }
 

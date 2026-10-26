@@ -203,7 +203,11 @@ func (s Service) login(ctx context.Context, r *http.Request, b map[string]any) (
 		return endpoint.Result{}, apierr.New(429, fmt.Sprintf("muitas tentativas; aguarde %.0f minuto(s)", math.Ceil(wait/60)))
 	}
 	var u jsonx.Object
-	err = s.DB.WithScope(ctx, tenancy.Scope{}, func(tx *db.Tx) error { var err error; u, err = one(ctx, tx, key, 0, b["email"]); return err })
+	found, loginCell, findErr := s.DB.Lookup(ctx, query(key, 0), b["email"])
+	err = findErr
+	if len(found) > 0 {
+		u = found[0]
+	}
 	if err != nil {
 		return endpoint.Result{}, err
 	}
@@ -247,6 +251,7 @@ func (s Service) login(ctx context.Context, r *http.Request, b map[string]any) (
 		}
 		return endpoint.Result{}, apierr.New(401, "e-mail ou senha inválidos")
 	}
+	ctx = db.WithCell(ctx, loginCell)
 	token, err := cryptox.RandomToken(32)
 	if err != nil {
 		return endpoint.Result{}, err
@@ -258,7 +263,7 @@ func (s Service) login(ctx context.Context, r *http.Request, b map[string]any) (
 	if err = s.Audit.Write(ctx, c, "auth.login", "user", c.UserID, nil, "ok"); err != nil {
 		return endpoint.Result{}, err
 	}
-	err = s.DB.WithScope(ctx, tenancy.Scope{}, func(tx *db.Tx) error { return tx.Exec(ctx, query("helper:cleared", 0), "email:"+email) })
+	err = s.DB.WithScope(db.WithCell(ctx, "c1"), tenancy.Scope{}, func(tx *db.Tx) error { return tx.Exec(ctx, query("helper:cleared", 0), "email:"+email) })
 	// O navegador usa só o cookie HttpOnly; o token vai no corpo apenas para
 	// clientes de API que pedem Bearer explicitamente ("bearer": true).
 	value := map[string]any{"csrf_token": auth.SessionCSRF(token)}

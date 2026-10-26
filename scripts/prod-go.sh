@@ -31,7 +31,7 @@ case "${1:-}" in
     backup_args=(backup "${2:-${backup_dir:-backups}}")
     env "${backup_env[@]}" NEXO_DB_CONTAINER="$project-db-1" bash scripts/backup.sh "${backup_args[@]}"
     ;;
-  restore-check) NEXO_DB_CONTAINER="$project-db-1" bash scripts/backup.sh "$@" ;;
+  restore-check) NEXO_DB_CONTAINER="$project-db-1" NEXO_RESTORE_VERIFY="bash scripts/restore-verify-prod.sh" bash scripts/backup.sh "$@" ;;
   restore)
     running=();while read -r service;do case "$service" in api|api-go|vpn|radius|radius2) running+=("$service");; esac;done < <("${compose[@]}" ps --services --filter status=running)
     # The restore tool validates its --yes argument and checksum before stopping anything.

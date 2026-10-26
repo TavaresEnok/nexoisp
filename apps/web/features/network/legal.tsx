@@ -58,7 +58,7 @@ const resultSchema = z.object({
   subscribers: z.number(),
   sessions: z.array(sessionSchema),
   ipv6: z.array(
-    identitySchema.extend({ prefix: z.string(), created_at: z.string() }),
+    identitySchema.extend({ prefix: z.string(), created_at: z.string(), released_at: nullable }),
   ),
   fixed: z.array(z.object({ ip: z.string(), name: z.string() })),
 });
@@ -312,12 +312,13 @@ export function LegalIpLookup() {
           {result.mode === "ipv6" ? (
             <OperationalCatalog
               title="Delegações IPv6 encontradas"
-              description="O sistema não guarda histórico completo de titulares anteriores de prefixos liberados."
+              description="Períodos de titularidade preservados após a liberação do prefixo."
               columns={[
                 "Assinante",
                 "Documento",
                 "Prefixo delegado",
-                "Registrado em",
+                "Início da titularidade",
+                "Fim da titularidade",
                 "Contato / endereço",
               ]}
               rows={result.ipv6.map((row, index) => ({
@@ -335,6 +336,7 @@ export function LegalIpLookup() {
                   row.document || "—",
                   row.prefix,
                   legalStamp(row.created_at, zone),
+                  row.released_at ? legalStamp(row.released_at, zone) : "Em uso",
                   <>
                     {[row.phone, row.email].filter(Boolean).join(" · ")}
                     <small className="table-subline">
@@ -488,6 +490,7 @@ function legalPrint(result: z.infer<typeof resultSchema>, zone: string) {
           row.document,
           row.prefix,
           legalStamp(row.created_at, zone),
+                  row.released_at ? legalStamp(row.released_at, zone) : "Em uso",
           [row.phone, row.email, row.address].filter(Boolean).join(" · "),
         ])
       : result.sessions.map((row) => [
@@ -506,7 +509,7 @@ function legalPrint(result: z.infer<typeof resultSchema>, zone: string) {
         ]);
   const columns =
     result.mode === "ipv6"
-      ? ["Assinante", "Documento", "Prefixo", "Desde", "Contato / endereço"]
+      ? ["Assinante", "Documento", "Prefixo", "Desde", "Até", "Contato / endereço"]
       : [
           "Assinante",
           "Documento",

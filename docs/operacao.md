@@ -150,13 +150,14 @@ O servidor de autenticação sobe junto com o sistema (`radius` no compose). O p
 
 ### Gerência de roteadores do cliente — TR-069 (perfil `acs`)
 
-- Suba com `--profile acs` e defina `NEXO_ACS_URL=http://acs:7557` (API interna, não publicada) e `NEXO_ACS_PUBLIC_URL=http://<endereço público>:7547/`
-  (o que se configura no roteador do cliente como "URL do ACS"). Só a porta 7547 é publicada (`NEXO_ACS_BIND`); a interface própria do servidor de gerência não é.
+- O perfil exige certificado e chave para CWMP. Instale-os em `infra/prod/certs/acs.crt` e `infra/prod/certs/acs.key` ou configure `NEXO_ACS_TLS_CERT` e `NEXO_ACS_TLS_KEY` com caminhos dentro de `/certs`.
+- Defina `NEXO_ACS_URL=http://acs:7557` (API interna, não publicada) e `NEXO_ACS_PUBLIC_URL=https://<endereço público>:7547/` (URL configurada nos roteadores). A publicação local da porta 7547 usa `127.0.0.1` por padrão; para CPEs externos, defina explicitamente `NEXO_ACS_BIND` para o IP de entrada apropriado e libere a porta no firewall.
+- Antes de expor a porta aos CPEs, configure `cwmp.auth` no GenieACS com credenciais por dispositivo e confirme que conexões sem credenciais são recusadas ([autenticação CPE](https://docs.genieacs.com/en/stable/cpe-authentication.html)). A autenticação CWMP não é automatizada pelo painel. Depois da verificação, configure `NEXO_ACS_CWMP_AUTH_CONFIRMED=1`; o preflight também exige um `NEXO_ACS_UI_SECRET` próprio com pelo menos 32 caracteres.
+- Execute `./nexo prod db preflight` antes de habilitar o perfil. Ele valida a URL pública HTTPS, o certificado, a chave correspondente, o segredo da interface GenieACS e a confirmação da autenticação CWMP.
 - No contrato (aba Acesso): procurar o roteador (pela conta PPPoE que ele informa ou pelo número de série da etiqueta), vincular, ver estado, trocar nome/senha
   do Wi-Fi, reiniciar e reler. O assinante troca o próprio Wi-Fi no portal. Um roteador só pode estar vinculado a um contrato em toda a plataforma.
 - Respostas: "aplicado agora", "na fila" (o roteador não atendeu; vale no próximo contato) ou "o roteador recusou: <motivo>" (a tarefa é removida).
-- Segurança: qualquer roteador que conheça o endereço pode se registrar no servidor de gerência, mas só aparece para um provedor depois de vinculado com prova de
-  posse. Para restringir o registro, use autenticação CWMP (usuário/senha) no servidor de gerência e no roteador — não automatizado pelo painel.
+- A interface própria do servidor de gerência não é publicada pelo Compose. Mantenha o acesso administrativo restrito durante a configuração de `cwmp.auth`.
 
 ### Réplica do banco (perfil `ha`)
 
@@ -263,12 +264,12 @@ Não há envio nativo por e-mail/WhatsApp: use o webhook com o serviço escolhid
 
 ```bash
 ./nexo backup [dir]                 # pg_dump custom + SHA-256 (diário via cron; copiar para fora do host)
-./nexo restore-check <arquivo>      # restaura em banco temporário e confere contagens e políticas RLS
+./nexo restore-check <arquivo>      # restaura em banco temporário e confere snapshot, totais e isolamento RLS
 ./nexo restore <arquivo> --yes      # substitui o banco principal (para a API durante a operação)
 ```
 
 Em produção use `./nexo prod backup`, `./nexo prod restore-check <arquivo>` e `./nexo prod restore <arquivo> --yes`, com `NEXO_BACKUP_COPY=<comando ou script>` para levar cada backup para **fora do host**
-(o comando recebe o arquivo e o `.sha256`; se falhar, o script termina com erro para o agendador alertar). Sem ele o script avisa que o backup está no mesmo domínio de falha do banco.
+(o comando recebe `.dump`, `.sha256` e `.manifest.json`; se falhar, o script termina com erro para o agendador alertar). Sem ele o script avisa que o backup está no mesmo domínio de falha do banco.
 
 Defina também `NEXO_BACKUP_DIR` no `infra/prod/.env` (por exemplo, `/var/lib/nexoisp/backups`) e crie o diretório com permissão `700`. O comando de produção lê esses dois valores do arquivo de ambiente, sem executá-lo como script.
 
@@ -337,3 +338,7 @@ O volume do piloto ainda precisa ser definido. Medições anteriores usaram dado
 - [ ] Monitor externo em `/api/health` e responsável por olhar "Operações com problema".
 
 **Ação de virada que depende de autorização explícita:** importar a base real, clicar "Provisionar N conta(s)" no lote e reapontar o RADIUS do NAS do grupo piloto para o RADIUS local. Nada disso foi executado.
+
+## Robustez operacional e novos backups
+
+Os backups agora incluem um manifesto do mesmo snapshot e a prova de restauração confere políticas, isolamento e chaves. O host exige Python 3; `NEXO_BACKUP_COPY` deve copiar os três argumentos (`.dump`, `.sha256`, `.manifest.json`). Para atualização coordenada de workers, monitoramento, capacidade e conferência de migração, consulte [Robustez operacional](ROBUSTEZ-OPERACIONAL.md). A homologação externa e os critérios de produção permanecem pendentes até execução no destino.

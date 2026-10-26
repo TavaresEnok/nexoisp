@@ -53,7 +53,7 @@ export function DataImport() {
     source,
     filename: file?.name ?? "",
     csv: file?.text ?? "",
-    device_id: kind === "subscribers" ? deviceId || null : null,
+    device_id: ["subscribers", "contracts"].includes(kind) ? deviceId || null : null,
     ...(mapping ? { mapping } : {}),
     plan_map: planMap,
   };
@@ -184,7 +184,7 @@ export function DataImport() {
                 }}
               />
             </FormField>
-            {kind === "subscribers" && (
+            {["subscribers", "contracts"].includes(kind) && (
               <FormField
                 label="Equipamento das contas PPPoE"
                 hint="Sem equipamento, não são criadas contas PPPoE. A importação não aplica a configuração no concentrador."

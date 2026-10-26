@@ -212,13 +212,16 @@ func Request(ctx context.Context, tx *db.Tx, tenant, resource, action string, au
 		params.Set("mac", r.Get("mac"))
 	}
 	// Prefixo IPv6 delegado (IPAM) entregue como Delegated-IPv6-Prefix. Só o
-	// RADIUS integrado recebe o parâmetro; o agente não conhece este campo.
-	if r.Get("agent_internal") == true && !profileSuspension && policy != "suspended" {
+	// RADIUS integrado e agentes 0.6.0+ recebem o parâmetro.
+	if !profileSuspension && policy != "suspended" {
 		delegated, err := tx.Objects(ctx, "select host(prefix) || '/' || masklen(prefix) as prefix from ip6_delegations where contract_id = $1", r.Get("contract_id"))
 		if err != nil {
 			return nil, err
 		}
 		if len(delegated) > 0 {
+			if r.Get("agent_internal") != true && !AgentAtLeast(agentVersion, "0.6.0") {
+				return nil, apierr.New(409, "delegação IPv6 exige agente 0.6.0 ou superior; atualize o agente antes de provisionar")
+			}
 			params.Set("delegated_ipv6_prefix", delegated[0].Get("prefix"))
 		}
 	}

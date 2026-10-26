@@ -202,23 +202,39 @@ func Token(r *http.Request) (string, error) {
 	}
 	return token, nil
 }
-func (a *Auth) Guard(ctx context.Context, w http.ResponseWriter, r *http.Request, c *Ctx, perm string, allowMFA bool) error {
+func (a *Auth) takeRate(ctx context.Context, hash string) (int, int, error) {
+	if shared, ok := a.loader.(interface {
+		Rate(context.Context, string, int) (int, int, error)
+	}); ok {
+		return shared.Rate(ctx, hash, a.Limit)
+	}
+	// In-memory loaders are used by isolated unit tests; DBLoader always uses SQL.
 	minute := time.Now().Unix() / 60
 	a.mu.Lock()
+	defer a.mu.Unlock()
 	if a.minute != minute {
 		a.minute = minute
 		a.rates = map[string]rateEntry{}
 	}
-	entry := a.rates[c.TokenHash]
+	entry := a.rates[hash]
 	if entry.minute != minute {
 		entry = rateEntry{minute: minute}
 	}
 	entry.n++
-	a.rates[c.TokenHash] = entry
-	a.mu.Unlock()
-	if !fault.Active("limite_desligado") && entry.n > a.Limit {
-		w.Header().Set("Retry-After", strconv.Itoa(60-time.Now().Second()))
-		return &apierr.Error{Status: 429, Message: "muitas requisições desta sessão; aguarde um instante", Code: "rate_limited"}
+	a.rates[hash] = entry
+	return entry.n, 60 - time.Now().Second(), nil
+}
+
+func (a *Auth) Guard(ctx context.Context, w http.ResponseWriter, r *http.Request, c *Ctx, perm string, allowMFA bool) error {
+	if !fault.Active("limite_desligado") {
+		calls, retry, err := a.takeRate(ctx, c.TokenHash)
+		if err != nil {
+			return err
+		}
+		if calls > a.Limit {
+			w.Header().Set("Retry-After", strconv.Itoa(retry))
+			return &apierr.Error{Status: 429, Message: "muitas requisições desta sessão; aguarde um instante", Code: "rate_limited"}
+		}
 	}
 	if !fault.Active("sem_mfa") && a.RequireMFA && (c.Role == "admin" || c.Role == "saas_operator") && !c.MFAEnabled && !allowMFA {
 		return &apierr.Error{Status: 403, Message: "configure a verificação em duas etapas para continuar", Code: "mfa_setup_required"}
@@ -261,7 +277,7 @@ func (a *Auth) Require(perm string, allowMFA bool, next http.Handler) http.Handl
 				if matched, ok := r.Context().Value(routeKey{}).(string); ok {
 					route = matched
 				}
-				a.Requests.WithLabelValues(current.TenantID, route, strconv.Itoa(recorded.status), "c1").Inc()
+				a.Requests.WithLabelValues(current.TenantID, route, strconv.Itoa(recorded.status), current.Scope.Cell).Inc()
 			}
 		}()
 		token, err := Token(r)
@@ -290,7 +306,7 @@ func (a *Auth) Require(perm string, allowMFA bool, next http.Handler) http.Handl
 			copy.Scope.TenantID = r.Header.Get("X-Bench-Tenant")
 			c = &copy
 		}
-		next.ServeHTTP(w, r.WithContext(With(r.Context(), c)))
+		next.ServeHTTP(w, r.WithContext(With(db.WithCell(r.Context(), c.SessionCell), c)))
 	})
 }
 
