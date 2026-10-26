@@ -26,6 +26,8 @@ def main():
         command(['docker','cp','nexo-fase1-web-build:/srv/.',str(web)])
     finally:subprocess.run(['docker','rm','nexo-fase1-web-build'],capture_output=True)
     command(['npm','ci'],cwd=ROOT/'e2e')
+    command(['node','--test','visual-compare.test.mjs'],cwd=ROOT/'e2e')
+    command(['docker','build','--network','host','-t','nexo-fase1-playwright:local','e2e'],cwd=ROOT)
     log=open(LOCAL/'e2e-go.log','w')
     api=subprocess.Popen([str(ROOT/'apps/api-go/bin/api')],cwd=ROOT,env=env,stdout=log,stderr=subprocess.STDOUT)
     try:
@@ -41,12 +43,22 @@ def main():
             assert r['status']==200 and r['body']==(web/'index.html').read_bytes()
             assert r['headers']['x-content-type-options']=='nosniff' and r['headers']['x-frame-options']=='DENY'
             assert "frame-ancestors 'none'" in r['headers']['content-security-policy']
-        command(['docker','run','--rm','--network','host','--ipc=host','--security-opt','seccomp=unconfined',
+        selected = []
+        if os.environ.get('NEXO_E2E_ONLY'):
+            selected = ['-e', 'ONLY='+os.environ['NEXO_E2E_ONLY']]
+        command(['docker','run','--rm','--network','host','--shm-size','1g',
                  '-v',str(ROOT/'e2e')+':/e2e',
                  '-v',str(ROOT/'docs/integracao-v0/evidencias')+':/docs/integracao-v0/evidencias',
                  '-w','/e2e','-e','BASE=http://127.0.0.1:18380','-e','V0_AGENT_URL=http://127.0.0.1:18544',
                  '-e','V0_OPERATIONAL_VISUAL=1',
-                 'mcr.microsoft.com/playwright:v1.55.1-jammy','node','smoke.mjs'])
+                 *selected,'nexo-fase1-playwright:local','node','smoke.mjs'])
+        command(['docker','run','--rm','--network','host','--shm-size','1g',
+                 '-v',str(ROOT/'e2e')+':/e2e',
+                 '-v',str(ROOT/'docs/integracao-v0/evidencias')+':/evidence',
+                 '-w','/e2e','-e','BASE=http://127.0.0.1:18380',
+                 '-e','NEXO_PAYMENT_LAB=1',
+                 '-e','LAB_UI_SCREENSHOT=/evidence/lote01-payment-intent-ci.png',
+                 'nexo-fase1-playwright:local','node','lote01-payment-intent.mjs'])
     finally:
         api.terminate()
         try:api.wait(timeout=15)

@@ -2,6 +2,11 @@
   "name": "nexoisp-e2e",
   "private": true,
   "type": "module",
-  "scripts": { "smoke": "node smoke.mjs" },
-  "dependencies": { "playwright": "1.55.1" }
+  "scripts": {
+    "smoke": "node smoke.mjs"
+  },
+  "dependencies": {
+    "playwright": "1.55.1",
+    "pngjs": "7.0.0"
+  }
 }

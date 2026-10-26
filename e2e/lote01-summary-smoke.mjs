@@ -1,0 +1,7 @@
+import {chromium} from 'playwright';import assert from 'node:assert/strict';
+const base=process.env.BASE;assert.equal(new URL(base).hostname,'127.0.0.1');assert.equal(process.env.NEXO_PAYMENT_LAB,'1');
+const browser=await chromium.launch({executablePath:process.env.LAB_CHROMIUM,args:['--no-sandbox']});
+try {const context=await browser.newContext(),page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(base+'/login');await page.getByLabel('E-mail',{exact:true}).fill('admin@alfa.demo');await page.getByLabel('Senha',{exact:true}).fill('demo1234');await page.getByRole('button',{name:'Entrar',exact:true}).click();await page.waitForURL(u=>u.pathname!='/login');
+ const results=[];for(const width of [1342,390]) {await page.setViewportSize({width,height:850});await page.goto(base+'/financeiro/faturas');await page.locator('.financial-metrics').waitFor();await page.locator('.financial-metrics').getByText(/nominal.*recebido/).waitFor();const text=await page.locator('.financial-metrics').innerText();assert.ok(!text.includes('NaN'));assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);await page.screenshot({path:process.env.LAB_UI_DIR+'/summary-'+width+'.png'});results.push({width,metrics:text})}assert.deepEqual(errors,[]);console.log(JSON.stringify({results,errors}));
+}finally{await browser.close()}

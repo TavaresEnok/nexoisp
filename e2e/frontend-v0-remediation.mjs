@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { csrf } from "./csrf.mjs";
+import { compareVisual } from "./visual-compare.mjs";
 
 // Mutações exclusivamente no harness descartável indicado explicitamente.
 const base = process.env.BASE;
@@ -133,14 +134,13 @@ async function snapshot(
     await mkdir(baseline, { recursive: true });
     await writeFile(new URL(`${name}.png`, baseline), bytes);
   }
-  const expected = createHash("sha256")
-    .update(await readFile(new URL(`${name}.png`, baseline)))
-    .digest("hex");
-  visuals.push({ name, identical: actual === expected, actual, expected });
-  assert.equal(
-    actual,
-    expected,
-    `${name}: regressão visual operacional; examine as capturas, sem atualizar a referência automaticamente.`,
+  const reference = await readFile(new URL(`${name}.png`, baseline));
+  const expected = createHash("sha256").update(reference).digest("hex");
+  const comparison = compareVisual(reference, bytes);
+  visuals.push({ name, identical: actual === expected, actual, expected, ...comparison });
+  assert.ok(
+    comparison.passed,
+    `${name}: regressão visual operacional ${JSON.stringify(comparison)}; examine as capturas, sem atualizar a referência automaticamente.`,
   );
   await p.close();
   console.log("Captura aprovada:", name);
