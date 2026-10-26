@@ -940,6 +940,20 @@ type Pop struct {
 	Longitude pgtype.Numeric     `json:"longitude"`
 }
 
+type ProviderIssuance struct {
+	ID                    jsonx.UUID         `json:"id"`
+	TenantID              jsonx.UUID         `json:"tenant_id"`
+	InvoiceID             jsonx.UUID         `json:"invoice_id"`
+	FinancialConnectionID jsonx.UUID         `json:"financial_connection_id"`
+	IntentKey             string             `json:"intent_key"`
+	Request               []byte             `json:"request"`
+	ConfigHash            string             `json:"config_hash"`
+	State                 string             `json:"state"`
+	ChargeID              pgtype.Text        `json:"charge_id"`
+	CreatedAt             pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt             pgtype.Timestamptz `json:"updated_at"`
+}
+
 type PurchaseOrder struct {
 	ID          jsonx.UUID         `json:"id"`
 	TenantID    jsonx.UUID         `json:"tenant_id"`
