@@ -53,7 +53,9 @@ export function DataImport() {
     source,
     filename: file?.name ?? "",
     csv: file?.text ?? "",
-    device_id: ["subscribers", "contracts"].includes(kind) ? deviceId || null : null,
+    device_id: ["subscribers", "contracts"].includes(kind)
+      ? deviceId || null
+      : null,
     ...(mapping ? { mapping } : {}),
     plan_map: planMap,
   };

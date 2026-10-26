@@ -1,6 +1,6 @@
-FROM node:22-alpine AS web
+FROM node:22.23.4-alpine AS web
 WORKDIR /app
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json .npmrc ./
 COPY apps/web/package.json apps/web/
 RUN npm ci
 COPY apps/web apps/web

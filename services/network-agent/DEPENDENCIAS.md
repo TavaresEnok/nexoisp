@@ -1,0 +1,17 @@
+# Lock do agente — revisão B01
+
+`requirements.in` preserva as sete dependências diretas recebidas. `requirements.txt` fecha 30 pacotes diretos/transitivos com versões e hashes PyPI; `--require-hashes` é obrigatório no próprio arquivo, no Dockerfile e no CI. Duas instalações Python 3.12/Linux limpas produziram o mesmo freeze e passaram pelos 50 testes. O lock preserva versões, sem atualização automática do transporte de equipamentos. Atualizações futuras devem resolver a cadeia completa e repetir testes de envelope, recuperação e drivers.
+
+A consulta por versão ao PyPI em 26/10/2026 encontrou sete advisories distintos (aliases não são novas falhas): seis em cryptography 44.0.0 e um em Paramiko 3.5.0. Evidência completa: `fechamento-03/evidencias/agent-dependencies.json` da entrega. A aprovação da instalação/suíte não equivale a eliminação desses alertas.
+
+| Advisory | Alcance examinado / disposição |
+|---|---|
+| GHSA-79v4-65xg-pq4g | Wheel inclui OpenSSL com falha de autenticação TLS RPK. O agente não habilita RPK: HTTPX usa TLS do módulo ssl, e envelope usa Ed25519 raw. Manter a restrição; nova integração TLS com RPK exige revisão/upgrade. [Fonte OpenSSL](https://openssl-library.org/news/secadv/20250211.txt). |
+| GHSA-r6ph-v2qm-q3c2 | Subgrupos de curvas SECT. Envelope usa Ed25519 e Paramiko usa ECDSA nas curvas NIST, sem SECT no caminho examinado. Não aceitar novos tipos de chave sem reavaliar o lock. |
+| GHSA-m959-cc7f-wv43 | Verificação X.509/name constraints por cryptography. O agente não usa seu PolicyBuilder; TLS de HTTPX é via ssl. Não estender a análise a qualquer biblioteca TLS do sistema. |
+| GHSA-537c-gmf6-5ccf | Conjunto de falhas no OpenSSL embarcado nos wheels. Não foi demonstrada exploração nos caminhos Ed25519/SSH exercitados. Não declarar todo OpenSSL inalcançável: atualização da cadeia deve ser avaliada antes de habilitar novos protocolos/formatos. [Fonte OpenSSL](https://openssl-library.org/news/secadv/20260609.txt). |
+| GHSA-g6cj-pr64-35w5 | Oráculo na decriptação PKCS7/S-MIME. Não há chamada desses métodos na aplicação; o envelope assinado do agente é JSON/Ed25519, não PKCS7. Nova importação de mensagens desse tipo exige biblioteca corrigida. |
+| GHSA-jwv3-5hgf-82ww | Consumo excessivo na construção de cadeia X.509 pelo PolicyBuilder. Não usado no agente examinado; não equivale a avaliação universal de certificados recebidos. |
+| GHSA-r374-rxx8-8654 | Paramiko permite assinatura RSA/SHA-1. **Alcançável condicionalmente no SSH Huawei**: `nexo_agent/drivers/olt_huawei.py`, `NetmikoCli.__init__`, não define política de algoritmos. Mantido no backlog de transporte seguro da frente OLT, antes de habilitação física: restringir algoritmos e validar negociação/readback no firmware alvo. O lote não altera silenciosamente a compatibilidade SSH da frota. [Advisory](https://github.com/advisories/GHSA-r374-rxx8-8654), [código do mantenedor](https://github.com/paramiko/paramiko/blob/3.5.0/paramiko/transport.py). |
+
+A atualização de cryptography para uma versão corrigida, como a linha 50, é uma ação de segurança proposta, não foi aplicada nem homologada neste lote: [changelog oficial](https://cryptography.io/en/latest/changelog/) registra também remoção de curvas e alterações nos parsers. O lock documenta o estado reproduzido e os limites; **não é selo de segurança para operação de equipamentos**. As restrições são internas, não dependem de conta bancária/contador. Hardware é necessário para homologar a mudança de transporte, não para implementar/testar a política em laboratório.

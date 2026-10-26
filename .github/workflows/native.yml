@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.27.2'
+          go-version-file: apps/api-go/go.mod
           cache-dependency-path: apps/api-go/go.sum
       - name: Build, análise e testes Go
         working-directory: apps/api-go
@@ -20,7 +20,7 @@ jobs:
       - uses: golangci/golangci-lint-action@v8
         with: {version: v2.14.0, working-directory: apps/api-go}
       - uses: actions/setup-node@v4
-        with: {node-version: 22, cache: npm}
+        with: {node-version-file: .nvmrc, cache: npm}
       - name: Frontend preservado
         run: |
           npm ci
@@ -30,6 +30,8 @@ jobs:
           npm -w apps/web run build
       - name: Instalação, administração, financeiro e outbox com duas réplicas Go
         run: python3 tests/contrato/nativo.py
+      - name: Isolamento, RLS, locks e reinício Go com PostgreSQL descartável
+        run: python3 tests/contrato/go_integration.py
       - name: Falha por provedor, filas, limites compartilhados e recuperação
         run: python3 tests/contrato/resilience.py
       - name: Ferramentas de operação e conferência de migração
@@ -58,6 +60,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
-      - run: pip install -r services/network-agent/requirements.txt
+      - run: pip install --require-hashes -r services/network-agent/requirements.txt && pip check
       - working-directory: services/network-agent
         run: python -m unittest discover -s tests -t .

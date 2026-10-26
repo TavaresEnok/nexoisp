@@ -1,6 +1,14 @@
 import { z } from "zod";
 import { cents } from "@/features/shared/schema";
-export const importKind = z.enum(["subscribers", "contracts", "invoices", "history", "network", "documents", "users"]);
+export const importKind = z.enum([
+  "subscribers",
+  "contracts",
+  "invoices",
+  "history",
+  "network",
+  "documents",
+  "users",
+]);
 export type ImportKind = z.infer<typeof importKind>;
 export const totals = z.object({
   rows: z.coerce.number(),
