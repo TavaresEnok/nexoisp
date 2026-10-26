@@ -12,6 +12,9 @@ with tempfile.TemporaryDirectory(prefix='nexo-b07tx-migration-') as tmp:
  stage=Path(tmp);shutil.copytree(repo/'db',stage/'db')
  for migration in (stage/'db/migrations').glob('*.sql'):
   if int(migration.name.split('_')[0])>68:migration.unlink()
+ target=stage/'target69';shutil.copytree(repo/'db',target/'db')
+ for migration in (target/'db/migrations').glob('*.sql'):
+  if int(migration.name.split('_')[0])>69:migration.unlink()
  assert subprocess.run(['docker','inspect',DB_CONTAINER],capture_output=True).returncode!=0
  try:
   up();sql('create database nexo_test','postgres')
@@ -28,7 +31,7 @@ with tempfile.TemporaryDirectory(prefix='nexo-b07tx-migration-') as tmp:
    update provider_issuance j set state='issued',charge_id='legacy-issued' from invoices i where i.id=j.invoice_id and i.status_note='issued';""",'nexo_test')
   unchanged="select jsonb_build_object('invoices',(select jsonb_agg(to_jsonb(i)-'provider_issuance_id' order by id) from invoices i),'journal',(select jsonb_agg(j order by id) from provider_issuance j))"
   before_failure=sql(unchanged,'nexo_test')
-  try:command(cli+['prepare'],cwd=repo,env=env,capture_output=True)
+  try:command(cli+['prepare'],cwd=target,env=env,capture_output=True)
   except subprocess.CalledProcessError as e:assert 'reconcile at version 68' in e.stderr+e.stdout
   else:raise AssertionError('ambiguous old request silently upgraded')
   assert before_failure==sql(unchanged,'nexo_test')
@@ -40,7 +43,7 @@ with tempfile.TemporaryDirectory(prefix='nexo-b07tx-migration-') as tmp:
     from invoices i join financial_connections c on c.tenant_id=i.tenant_id and c.account_ref='fixture' where i.status_note='ambiguous';""",'nexo_test')
   financial="select jsonb_build_object('invoices',(select jsonb_agg(jsonb_build_object('id',id,'status',status,'amount',amount_cents,'fee',fee_cents,'discount',discount_cents,'due',due_date) order by id) from invoices),'payments',(select jsonb_agg(p order by id) from payments p),'movements',(select jsonb_agg(m order by id) from invoice_movements m),'effects',(select jsonb_agg(e order by id) from payment_effects e))"
   before=sql(financial,'nexo_test')
-  command(cli+['prepare'],cwd=repo,env=env);command(cli+['prepare'],cwd=repo,env=env)
+  command(cli+['prepare'],cwd=target,env=env);command(cli+['prepare'],cwd=target,env=env)
   assert before==sql(financial,'nexo_test')
   assert sql('select count(*) from invoices where provider_issuance_id is not null','nexo_test')=='4'
   assert sql("select gateway_charge_id from invoices where status_note='issued'",'nexo_test')=='legacy-issued'

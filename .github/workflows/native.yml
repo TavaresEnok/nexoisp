@@ -45,6 +45,9 @@ jobs:
       - name: Reserva de emissao, vinculo e recuperacao da migracao 69
         env: {NEXO_PAYMENT_LAB: '1'}
         run: python3 tests/contrato/provider_issuance_reservation_migration.py
+      - name: Cofre, despacho e inbox 69 para 72 com restauracao logica
+        env: {NEXO_PAYMENT_LAB: '1'}
+        run: python3 tests/contrato/provider_pipeline_migration.py
       - name: Recebimento independente de falha tecnica e retomada
         env: {NEXO_PAYMENT_LAB: '1'}
         run: python3 tests/contrato/payment_effects.py

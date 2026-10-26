@@ -14,7 +14,7 @@ import (
 	"nexoisp/api-go/internal/validate"
 )
 
-const connectionColumns = `id,company_id,provider,environment,account_ref,name,status,is_default,legacy_demo,(webhook_secret_enc is not null) as has_webhook_secret,created_at`
+const connectionColumns = `id,company_id,provider,environment,account_ref,name,status,is_default,legacy_demo,(webhook_secret_enc is not null) as has_webhook_secret,credential_version_id,created_at`
 
 func registerFinancialConnections(api huma.API, registry *endpoint.Registry, s Service) {
 	f, o, en, b := validate.F, validate.Object, validate.Enum, validate.Boolean
@@ -73,7 +73,8 @@ func registerFinancialConnections(api huma.API, registry *endpoint.Registry, s S
 						}
 						secret = enc
 					}
-					// Registration never enables a real adapter. Explicit activation is demo-only.
+					// Registration does not activate dispatch. Sandbox activation has
+					// its own explicit gate and requires credentials below.
 					rows, e := tx.Objects(ctx, `insert into financial_connections(tenant_id,company_id,provider,environment,account_ref,name,is_default,webhook_secret_enc) values($1,$2,$3,$4,$5,$6,$7,$8) on conflict do nothing returning `+connectionColumns, actor.TenantID, body["company_id"], body["provider"], body["environment"], body["account_ref"], body["name"], body["is_default"] == true, secret)
 					if e != nil {
 						return e
@@ -99,8 +100,17 @@ func registerFinancialConnections(api huma.API, registry *endpoint.Registry, s S
 					return apierr.New(404, "conexão não encontrada")
 				}
 				c := rows[0]
-				if body["status"] == "active" && (!finance.Demo(c.Get("provider")) || c.Get("environment") != "sandbox" || (c.Get("has_webhook_secret") != true && c.Get("legacy_demo") != true)) {
-					return apierr.New(409, "ativação exige demonstração sandbox com credencial; adapters reais não habilitados")
+				if body["status"] == "active" {
+					demo := finance.Demo(c.Get("provider")) && c.Get("environment") == "sandbox" && (c.Get("has_webhook_secret") == true || c.Get("legacy_demo") == true)
+					efi := false
+					if finance.EFISandboxEnabled() && c.Get("provider") == "efi" && c.Get("environment") == "sandbox" {
+						if err := tx.QueryRow(ctx, `select exists(select 1 from financial_credential_versions v join financial_connections c on c.credential_version_id=v.id where c.id=$1 and (v.kind='efi_charges' or v.certificate_expires_at>now()))`, id).Scan(&efi); err != nil {
+							return err
+						}
+					}
+					if !demo && !efi {
+						return apierr.New(409, "ativação exige demonstração ou Efí sandbox explicitamente habilitado com credencial válida")
+					}
 				}
 				if body["is_default"] == true {
 					if e = tx.Exec(ctx, `update financial_connections set is_default=false where id<>$1 and company_id is not distinct from $2::uuid and provider=$3 and environment=$4 and is_default`, id, c.Get("company_id"), c.Get("provider"), c.Get("environment")); e != nil {

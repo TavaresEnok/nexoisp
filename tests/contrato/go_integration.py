@@ -25,7 +25,11 @@ def main():
             "insert into pops(tenant_id,name) select id,'POP sintético B' from tenants;"
             "update contracts c set pop_id=(select id from pops p where p.tenant_id=c.tenant_id order by p.id limit 1)",
             'nexo_test')
-        go('test', '-count=1', '-race', '-json', './internal/db', './internal/jobs',
+        # Packages share a seeded disposable tenant. Jobs deliberately installs an
+        # invalid tenant timezone; serialize packages so that fault injection cannot
+        # contaminate finance receipts. Goroutine/race concurrency inside each test
+        # remains enabled, including multi-worker receipt/idempotency tests.
+        go('test', '-count=1', '-race', '-p', '1', '-json', './...',
            env=dict(env, NEXO_GO_TEST_DATABASE_URL=env['DATABASE_URL_GO']))
     finally:
         subprocess.run(['docker', 'rm', '-f', '-v', DB_CONTAINER], capture_output=True)

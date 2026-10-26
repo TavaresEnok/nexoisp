@@ -25,6 +25,7 @@ import (
 	"nexoisp/api-go/internal/modules/escrita"
 	"nexoisp/api-go/internal/modules/identity"
 	"nexoisp/api-go/internal/modules/leitura"
+	"nexoisp/api-go/internal/psphook"
 	_ "time/tzdata"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -142,6 +143,13 @@ func run() error {
 	}
 	if agentServer != nil {
 		servers = append(servers, agentServer)
+	}
+	providerServer, err := psphook.Server(database)
+	if err != nil {
+		return err
+	}
+	if providerServer != nil {
+		servers = append(servers, providerServer)
 	}
 	fail := make(chan error, len(servers))
 	for _, s := range servers {

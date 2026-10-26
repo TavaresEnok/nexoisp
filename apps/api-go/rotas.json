@@ -327,6 +327,14 @@
     },
     {
       "method": "GET",
+      "path": "/api/financial-connections/:id/credentials"
+    },
+    {
+      "method": "GET",
+      "path": "/api/financial-connections/:id/issuance/:issuanceId"
+    },
+    {
+      "method": "GET",
       "path": "/api/financial-connections/pending"
     },
     {
@@ -1035,6 +1043,14 @@
     },
     {
       "method": "POST",
+      "path": "/api/financial-connections/:id/credentials"
+    },
+    {
+      "method": "POST",
+      "path": "/api/financial-connections/:id/issuance"
+    },
+    {
+      "method": "POST",
       "path": "/api/ftth/boxes"
     },
     {
@@ -1504,6 +1520,10 @@
     {
       "method": "PUT",
       "path": "/api/users/:id/pops"
+    },
+    {
+      "method": "POST",
+      "path": "/api/financial-connections/:id/issuance/:issuanceId/retry-lookup"
     }
   ]
 }

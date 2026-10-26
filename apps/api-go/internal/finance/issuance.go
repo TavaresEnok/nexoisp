@@ -6,21 +6,25 @@ import (
 	"encoding/json"
 	"errors"
 
+	"nexoisp/api-go/internal/apierr"
 	"nexoisp/api-go/internal/db"
 	"nexoisp/api-go/internal/finance/providers"
 	"nexoisp/api-go/internal/tenancy"
 )
 
-// SandboxIssuance is an internal preparation boundary, not an HTTP authorization
-// boundary. No production job/route calls it. Caller authorization remains required
-// before future wiring; keep the registry closed until all activation gates pass.
-type SandboxIssuance struct{ DB *db.DB }
+// SandboxIssuance is an internal sandbox boundary. HTTP callers must authorize
+// tenant scope; operational dispatch additionally requires explicit feature gates.
+type SandboxIssuance struct {
+	DB         *db.DB
+	OnPrepared func(context.Context, *db.Tx, Issuance) error
+}
 type ConfiguredAdapter interface {
 	providers.Adapter
 	ConfigurationHash() string
 }
 type Issuance struct {
 	ID, State, ChargeID string
+	CredentialID        string
 	Request             providers.Create
 	ConfigHash          string
 }
@@ -36,7 +40,26 @@ func lockIssuanceInvoice(ctx context.Context, tx *db.Tx, id string) error {
 }
 
 func (s SandboxIssuance) Prepare(ctx context.Context, scope tenancy.Scope, r providers.Create, configHash string) (Issuance, error) {
+	return s.prepare(ctx, scope, r, configHash, "")
+}
+
+func (s SandboxIssuance) PrepareWithCredential(ctx context.Context, scope tenancy.Scope, r providers.Create, configHash, credentialID string) (Issuance, error) {
+	if credentialID == "" {
+		return Issuance{}, errors.New("operational issuance requires a credential version")
+	}
+	return s.prepare(ctx, scope, r, configHash, credentialID)
+}
+
+func (s SandboxIssuance) prepare(ctx context.Context, scope tenancy.Scope, r providers.Create, configHash, credentialID string) (Issuance, error) {
+	return s.prepareOptions(ctx, scope, r, configHash, credentialID, IssuanceOptions{Product: "pix_cob", Expiration: 3600})
+}
+
+func (s SandboxIssuance) prepareOptions(ctx context.Context, scope tenancy.Scope, r providers.Create, configHash, credentialID string, options IssuanceOptions) (Issuance, error) {
 	var out Issuance
+	optionJSON, err := json.Marshal(options)
+	if err != nil {
+		return out, err
+	}
 	hash, err := hex.DecodeString(configHash)
 	if err != nil || len(hash) != 32 || r.Validate() != nil || r.Scope.TenantID != scope.TenantID || r.Scope.Provider != "efi" || r.Scope.Environment != "sandbox" {
 		return out, errors.New("invalid sandbox issuance")
@@ -56,20 +79,24 @@ func (s SandboxIssuance) Prepare(ctx context.Context, scope tenancy.Scope, r pro
 			return err
 		}
 		if !valid {
-			return errors.New("invoice/account not visible or disabled")
+			return apierr.New(409, "fatura ou conexão indisponível para emissão")
 		}
-		if err := tx.Exec(ctx, `insert into provider_issuance(tenant_id,invoice_id,financial_connection_id,intent_key,request,config_hash) select $1,$2,$3,$4,$5::jsonb,$6 where not exists(select 1 from provider_issuance where invoice_id=$2)`, r.Scope.TenantID, r.InvoiceID, r.Scope.ConnectionID, r.IntentKey, string(raw), configHash); err != nil {
+		inserted, err := tx.Objects(ctx, `insert into provider_issuance(tenant_id,invoice_id,financial_connection_id,intent_key,request,config_hash,credential_version_id,product,product_options) select $1,$2,$3,$4,$5::jsonb,$6,nullif($7,'')::uuid,$8,$9::jsonb where not exists(select 1 from provider_issuance where invoice_id=$2) returning id`, r.Scope.TenantID, r.InvoiceID, r.Scope.ConnectionID, r.IntentKey, string(raw), configHash, credentialID, options.Product, string(optionJSON))
+		if err != nil {
 			return err
 		}
 		var stored []byte
-		if err := tx.QueryRow(ctx, `select id,state,coalesce(charge_id,''),request,config_hash from provider_issuance where invoice_id=$1`, r.InvoiceID).Scan(&out.ID, &out.State, &out.ChargeID, &stored, &out.ConfigHash); err != nil {
+		if err := tx.QueryRow(ctx, `select id,state,coalesce(charge_id,''),request,config_hash,coalesce(credential_version_id::text,'') from provider_issuance where invoice_id=$1`, r.InvoiceID).Scan(&out.ID, &out.State, &out.ChargeID, &stored, &out.ConfigHash, &out.CredentialID); err != nil {
 			return err
 		}
 		if err := json.Unmarshal(stored, &out.Request); err != nil {
 			return err
 		}
-		if out.Request != r || out.ConfigHash != configHash {
-			return errors.New("invoice already has another frozen issuance")
+		if out.Request != r || out.ConfigHash != configHash || out.CredentialID != credentialID {
+			return apierr.New(409, "fatura já possui outra intenção de emissão")
+		}
+		if len(inserted) > 0 && s.OnPrepared != nil {
+			return s.OnPrepared(ctx, tx, out)
 		}
 		return nil
 	})

@@ -35,6 +35,7 @@ type Config struct {
 type Client struct {
 	scope            providers.Scope
 	id, secret, base string
+	authPath         string
 	http             *http.Client
 	mu               sync.Mutex
 	token            string
@@ -68,7 +69,7 @@ func NewSandbox(cfg Config) (*Client, error) {
 	transport.TLSClientConfig = &tls.Config{MinVersion: tls.VersionTLS12, Certificates: []tls.Certificate{cert}}
 	transport.TLSHandshakeTimeout = timeout
 	client := &http.Client{Transport: transport, Timeout: timeout, CheckRedirect: func(*http.Request, []*http.Request) error { return errors.New("provider redirects disabled") }}
-	return &Client{scope: cfg.Scope, id: cfg.ClientID, secret: cfg.ClientSecret, base: sandboxURL, http: client}, nil
+	return &Client{scope: cfg.Scope, id: cfg.ClientID, secret: cfg.ClientSecret, base: sandboxURL, authPath: "/oauth/token", http: client}, nil
 }
 
 func (c *Client) Close() { c.http.CloseIdleConnections() }
@@ -99,7 +100,7 @@ func (c *Client) accessToken(ctx context.Context) (string, error) {
 	if c.token != "" && time.Now().Before(c.expires) {
 		return c.token, nil
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.base+"/oauth/token", strings.NewReader(`{"grant_type":"client_credentials"}`))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.base+c.authPath, strings.NewReader(`{"grant_type":"client_credentials"}`))
 	if err != nil {
 		return "", err
 	}
@@ -205,4 +206,24 @@ func (c *Client) request(ctx context.Context, method, path string, body any, tar
 		return failure(kind, "invalid provider response; lookup required")
 	}
 	return nil
+}
+
+// NewChargesSandbox uses the distinct Cobranças authorization protocol. It does
+// not inherit the Pix certificate requirement or permit configurable base URLs.
+func NewChargesSandbox(scope providers.Scope, id, secret string, timeout time.Duration) (*Client, error) {
+	if scope.Validate() != nil || scope.Provider != "efi" || scope.Environment != "sandbox" || id == "" || secret == "" || strings.Contains(id, ":") {
+		return nil, errors.New("invalid Cobranças sandbox credentials")
+	}
+	if timeout == 0 {
+		timeout = 15 * time.Second
+	}
+	if timeout < time.Second || timeout > time.Minute {
+		return nil, errors.New("invalid provider timeout")
+	}
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.Proxy = nil
+	transport.TLSClientConfig = &tls.Config{MinVersion: tls.VersionTLS12}
+	transport.TLSHandshakeTimeout = timeout
+	client := &http.Client{Transport: transport, Timeout: timeout, CheckRedirect: func(*http.Request, []*http.Request) error { return errors.New("provider redirects disabled") }}
+	return &Client{scope: scope, id: id, secret: secret, base: "https://cobrancas-h.api.efipay.com.br", authPath: "/v1/authorize", http: client}, nil
 }

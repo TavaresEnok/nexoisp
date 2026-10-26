@@ -28,7 +28,7 @@ type Immediate struct {
 var _ providers.Adapter = (*Immediate)(nil)
 
 func NewImmediate(c *Client, r providers.Create, pixKey string, expirationSeconds int) (*Immediate, error) {
-	if c == nil || r.Validate() != nil || r.Scope != c.scope || pixKey == "" || expirationSeconds < 1 || expirationSeconds > 31536000 {
+	if c == nil || c.authPath != "/oauth/token" || r.Validate() != nil || r.Scope != c.scope || pixKey == "" || expirationSeconds < 1 || expirationSeconds > 31536000 {
 		return nil, errors.New("invalid immediate charge configuration")
 	}
 	return &Immediate{client: c, request: r, key: pixKey, expiration: expirationSeconds}, nil
@@ -56,6 +56,11 @@ func cents(value string) (int64, error) {
 }
 
 type pixCharge struct {
+	Calendar struct {
+		DueDate   string `json:"dataDeVencimento"`
+		ValidDays int    `json:"validadeAposVencimento"`
+	} `json:"calendario"`
+	Debtor Debtor `json:"devedor"`
 	TxID   string `json:"txid"`
 	Status string `json:"status"`
 	Key    string `json:"chave"`

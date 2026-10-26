@@ -121,6 +121,8 @@ def run():
         checks.append('B06: contrato provider callback adverso conciliacao e isolamento')
         command([sys.executable,str(ROOT/'tests/contrato/issuance_conflicts.py')],env=dict(env,NEXO_PAYMENT_LAB='1',NEXO_PAYMENT_LAB_URL=bases[0],NEXO_PAYMENT_LAB_URL_2=bases[1]))
         checks.append('B07: reserva de emissao bloqueia baixas e cancelamentos concorrentes')
+        command([sys.executable,str(ROOT/'tests/contrato/financial_credentials.py')],env=dict(env,NEXO_PAYMENT_LAB='1',NEXO_PAYMENT_LAB_URL=bases[0]))
+        checks.append('B07: cofre financeiro versionado cifrado e autorizado')
     finally:
         for p,log in processes:
             p.terminate()

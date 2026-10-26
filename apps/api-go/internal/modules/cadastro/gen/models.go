@@ -373,18 +373,19 @@ type FinancialBalanceShadow struct {
 }
 
 type FinancialConnection struct {
-	ID               jsonx.UUID         `json:"id"`
-	TenantID         jsonx.UUID         `json:"tenant_id"`
-	CompanyID        pgtype.UUID        `json:"company_id"`
-	Provider         string             `json:"provider"`
-	Environment      string             `json:"environment"`
-	AccountRef       string             `json:"account_ref"`
-	Name             string             `json:"name"`
-	Status           string             `json:"status"`
-	IsDefault        bool               `json:"is_default"`
-	WebhookSecretEnc pgtype.Text        `json:"webhook_secret_enc"`
-	LegacyDemo       bool               `json:"legacy_demo"`
-	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	ID                  jsonx.UUID         `json:"id"`
+	TenantID            jsonx.UUID         `json:"tenant_id"`
+	CompanyID           pgtype.UUID        `json:"company_id"`
+	Provider            string             `json:"provider"`
+	Environment         string             `json:"environment"`
+	AccountRef          string             `json:"account_ref"`
+	Name                string             `json:"name"`
+	Status              string             `json:"status"`
+	IsDefault           bool               `json:"is_default"`
+	WebhookSecretEnc    pgtype.Text        `json:"webhook_secret_enc"`
+	LegacyDemo          bool               `json:"legacy_demo"`
+	CreatedAt           pgtype.Timestamptz `json:"created_at"`
+	CredentialVersionID pgtype.UUID        `json:"credential_version_id"`
 }
 
 type FinancialConnectionPending struct {
@@ -393,6 +394,19 @@ type FinancialConnectionPending struct {
 	TenantID jsonx.UUID  `json:"tenant_id"`
 	Provider pgtype.Text `json:"provider"`
 	Reason   string      `json:"reason"`
+}
+
+type FinancialCredentialVersion struct {
+	ID                    jsonx.UUID         `json:"id"`
+	TenantID              jsonx.UUID         `json:"tenant_id"`
+	FinancialConnectionID jsonx.UUID         `json:"financial_connection_id"`
+	Version               int32              `json:"version"`
+	Kind                  string             `json:"kind"`
+	SecretEnc             string             `json:"secret_enc"`
+	CertificateSha256     string             `json:"certificate_sha256"`
+	CertificateExpiresAt  pgtype.Timestamptz `json:"certificate_expires_at"`
+	CreatedAt             pgtype.Timestamptz `json:"created_at"`
+	CreatedBy             jsonx.UUID         `json:"created_by"`
 }
 
 type FinancialPaymentAllocation struct {
@@ -953,6 +967,30 @@ type ProviderIssuance struct {
 	ChargeID              pgtype.Text        `json:"charge_id"`
 	CreatedAt             pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt             pgtype.Timestamptz `json:"updated_at"`
+	CredentialVersionID   pgtype.UUID        `json:"credential_version_id"`
+	Product               string             `json:"product"`
+	ProductOptions        []byte             `json:"product_options"`
+	Attempts              int32              `json:"attempts"`
+	NextAttemptAt         pgtype.Timestamptz `json:"next_attempt_at"`
+	ReceiptAttempts       int32              `json:"receipt_attempts"`
+	ReceiptNextAt         pgtype.Timestamptz `json:"receipt_next_at"`
+	ReceiptCheckedAt      pgtype.Timestamptz `json:"receipt_checked_at"`
+	ReceiptLastError      pgtype.Text        `json:"receipt_last_error"`
+	ReceiptReview         bool               `json:"receipt_review"`
+	LastError             pgtype.Text        `json:"last_error"`
+}
+
+type ProviderNotice struct {
+	ID                    jsonx.UUID         `json:"id"`
+	TenantID              jsonx.UUID         `json:"tenant_id"`
+	FinancialConnectionID jsonx.UUID         `json:"financial_connection_id"`
+	PayloadHash           string             `json:"payload_hash"`
+	ChargeID              string             `json:"charge_id"`
+	PaymentID             string             `json:"payment_id"`
+	Payload               []byte             `json:"payload"`
+	Status                string             `json:"status"`
+	CreatedAt             pgtype.Timestamptz `json:"created_at"`
+	ProcessedAt           pgtype.Timestamptz `json:"processed_at"`
 }
 
 type PurchaseOrder struct {
