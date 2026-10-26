@@ -7,6 +7,7 @@ import { QueryBoundary } from "@/features/shared/feedback";
 import { ActionButton } from "@/features/shared/action";
 import { RecordEditor } from "@/features/shared/record-editor";
 import { api } from "@/platform/erp-client";
+import { FinancialCredentials } from "./financial-credentials";
 
 const providers = [
   ["demo", "Demonstração"],
@@ -32,6 +33,7 @@ const schema = z.object({
   is_default: z.boolean(),
   legacy_demo: z.boolean(),
   has_webhook_secret: z.boolean(),
+  credential_version_id: z.string().nullable().optional(),
 });
 export function FinancialConnections() {
   const result = useSWR("erp-financial-connections", async () =>
@@ -55,6 +57,9 @@ export function FinancialConnections() {
       .parse(await api("/financial-connections/pending")),
   );
   const [creating, setCreating] = useState(false);
+  const [credentials, setCredentials] = useState<z.infer<typeof schema> | null>(
+    null,
+  );
   return (
     <>
       <QueryBoundary
@@ -64,7 +69,7 @@ export function FinancialConnections() {
       >
         <OperationalCatalog
           title="Conexões financeiras"
-          description="Uma conexão identifica empresa, conta e ambiente. Cadastrar um fornecedor não habilita cobrança real; apenas a demonstração sandbox pode ser ativada."
+          description="Uma conexão identifica empresa, conta e ambiente. O cadastro de uma conexão ou credencial não inicia cobranças automaticamente."
           columns={[
             "Nome",
             "Empresa",
@@ -95,7 +100,7 @@ export function FinancialConnections() {
                 item.status
               ] ?? item.status,
               item.is_default ? "Sim" : "Não",
-              item.has_webhook_secret
+              item.has_webhook_secret || !!item.credential_version_id
                 ? "Configurada"
                 : item.legacy_demo
                   ? "Demonstração preservada"
@@ -103,6 +108,11 @@ export function FinancialConnections() {
             ],
             actions: (
               <>
+                {item.provider === "efi" && item.environment === "sandbox" && (
+                  <Button onClick={() => setCredentials(item)}>
+                    Credenciais
+                  </Button>
+                )}
                 <ActionButton
                   confirm={`${item.status === "active" ? "Desativar" : "Ativar"} ${item.name}? As referências financeiras existentes serão preservadas.`}
                   onClick={async () => {
@@ -164,6 +174,13 @@ export function FinancialConnections() {
           }))}
         />
       </QueryBoundary>
+      {credentials && (
+        <FinancialCredentials
+          connection={credentials}
+          onClose={() => setCredentials(null)}
+          onSaved={() => result.mutate()}
+        />
+      )}
       {creating && (
         <RecordEditor
           title="Nova conexão financeira"
