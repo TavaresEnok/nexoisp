@@ -200,20 +200,24 @@ func (s Service) grupo(ctx context.Context, tx *db.Tx, spec grupo, id string) (a
 		if err != nil {
 			return nil, err
 		}
-		open, overdue, reconciling, cents := 0, 0, 0, float64(0)
-		for _, row := range rows {
-			if row.Get("status") == "open" {
-				open++
-				cents += num(row.Get("amount_cents"))
-			}
-			if row.Get("overdue") == true {
-				overdue++
-			}
-			if row.Get("status") == "reconciling" {
-				reconciling++
-			}
+		// Aggregate all titles, independently from the paginated/latest-24 list.
+		totals, err := tx.Objects(ctx, `select
+          count(*) filter (where status='open') as open,
+          count(*) filter (where status='open' and due_date < (now() at time zone coalesce((select timezone from tenant_settings where tenant_id=app_tenant()),'America/Sao_Paulo'))::date) as overdue,
+          count(*) filter (where status='reconciling') as reconciling,
+          coalesce(sum(amount_cents) filter (where status='open'),0)::bigint as nominal_open_cents,
+          coalesce(sum(paid_cents) filter (where status='open'),0)::bigint as received_open_cents,
+          coalesce(sum(paid_cents),0)::bigint as received_cents,
+          coalesce(sum(greatest(0,amount_cents+fee_cents-discount_cents-paid_cents)) filter (where status='open'),0)::bigint as open_cents,
+          coalesce(sum(greatest(0,amount_cents+fee_cents-discount_cents-paid_cents)) filter (where status='open' and due_date < (now() at time zone coalesce((select timezone from tenant_settings where tenant_id=app_tenant()),'America/Sao_Paulo'))::date),0)::bigint as overdue_cents
+          from (select i.*, (select coalesce(sum(p.signed_cents),0) from payments p where p.invoice_id=i.id) as paid_cents
+                from invoices i where i.contract_id=$1) x`, id)
+		if err != nil {
+			return nil, err
 		}
-		return map[string]any{"invoices": rows, "open": open, "overdue": overdue, "reconciling": reconciling, "open_cents": cents}, nil
+		result := object(totals)
+		result.Set("invoices", rows)
+		return result, nil
 	case "/api/finance/monthly":
 		settings, err := tx.Objects(ctx, "select timezone from tenant_settings where tenant_id=$1", c.TenantID)
 		if err != nil {

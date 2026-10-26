@@ -47,6 +47,10 @@ type ContractBalance = {
   invoices: ErpInvoice[];
   open: number;
   open_cents: number;
+  overdue_cents: number;
+  received_cents: number;
+  nominal_open_cents: number;
+  received_open_cents: number;
   overdue: number;
   reconciling: number;
 };
@@ -70,9 +74,11 @@ export function ContractFinance({
     await list.mutate();
   };
   const remaining = (row: ErpInvoice) =>
-    Math.max(0, row.amount_cents - row.paid_cents);
+    Math.max(
+      0,
+      row.amount_cents + row.fee_cents - row.discount_cents - row.paid_cents,
+    );
   const rows = list.data?.invoices ?? [];
-  const overdue = rows.filter((row) => row.status === "open" && row.overdue);
   return (
     <div className="erp-stack">
       {totals && list.data && (
@@ -81,13 +87,11 @@ export function ContractFinance({
             [
               "Em aberto",
               money(list.data.open_cents / 100),
-              `${list.data.open} título(s)`,
+              `${list.data.open} título(s); nominal ${money(list.data.nominal_open_cents / 100)}; recebido ${money(list.data.received_open_cents / 100)}`,
             ],
             [
               "Vencido",
-              money(
-                overdue.reduce((sum, row) => sum + remaining(row), 0) / 100,
-              ),
+              money(list.data.overdue_cents / 100),
               `${list.data.overdue} título(s)`,
             ],
             [
@@ -96,13 +100,9 @@ export function ContractFinance({
               "Baixa não confirmada",
             ],
             [
-              "Pago nos títulos listados",
-              money(
-                rows
-                  .filter((row) => row.status === "paid")
-                  .reduce((sum, row) => sum + row.paid_cents, 0) / 100,
-              ),
-              `${rows.filter((row) => row.status === "paid").length} título(s)`,
+              "Recebido no contrato",
+              money(list.data.received_cents / 100),
+              "Inclui parciais e desconta estornos",
             ],
           ]}
         />

@@ -1,4 +1,4 @@
 select count(*) filter (where i.status = 'open' and i.due_date < (now() at time zone coalesce(ts.timezone, 'America/Sao_Paulo'))::date)::int as overdue,
-                  coalesce(sum(i.amount_cents) filter (where i.status = 'open' and i.due_date < (now() at time zone coalesce(ts.timezone, 'America/Sao_Paulo'))::date), 0)::int as overdue_cents,
+                  coalesce(sum(greatest(0, i.amount_cents + i.fee_cents - i.discount_cents - (select coalesce(sum(p.signed_cents),0) from payments p where p.invoice_id=i.id))) filter (where i.status = 'open' and i.due_date < (now() at time zone coalesce(ts.timezone, 'America/Sao_Paulo'))::date), 0)::int as overdue_cents,
                   count(*) filter (where i.status = 'reconciling')::int as reconciling
            from invoices i left join tenant_settings ts on ts.tenant_id = i.tenant_id

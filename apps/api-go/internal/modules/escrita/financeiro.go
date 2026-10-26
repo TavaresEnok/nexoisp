@@ -2,7 +2,11 @@ package escrita
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/jackc/pgx/v5"
 	"nexoisp/api-go/internal/apierr"
 	"nexoisp/api-go/internal/auth"
 	"nexoisp/api-go/internal/db"
@@ -23,7 +27,7 @@ func (s Service) financeOperations(ops map[string]operation) {
 	ops["POST /api/finance/generate"] = operation{s.generateInvoices, obj(o(f("competence", str().Pattern(`^\d{4}-(0[1-9]|1[0-2])$`, "Invalid").Opt())))}
 	ops["POST /api/invoices"] = operation{s.invoiceCreate, obj(o(f("contract_id", uuid), f("description", text(200).Min(2)), f("amount_cents", n().Int().Positive().Max(100000000)), f("due_date", date)))}
 	ops["POST /api/invoices/:id/cancel"] = operation{s.invoiceCancel, obj(o(f("reason", str().Trimmed().Min(3, "informe o motivo"))))}
-	ops["POST /api/invoices/:id/manual-payment"] = operation{s.invoicePayment, obj(o(f("amount_cents", n().Int().Positive()), f("paid_at", date), f("method", text(40).Nullish()), f("note", str().Trimmed().Min(3, "informe uma observação")), f("apply_fees", b().Opt()), f("partial", b().Opt()), f("discount_cents", n().Int().Positive().Opt()), f("discount_reason", text(200).Min(3).Opt())))}
+	ops["POST /api/invoices/:id/manual-payment"] = operation{s.invoicePayment, obj(o(f("intent_id", uuid), f("amount_cents", n().Int().Positive()), f("paid_at", date), f("method", text(40).Nullish()), f("note", str().Trimmed().Min(3, "informe uma observação")), f("apply_fees", b().Opt()), f("partial", b().Opt()), f("discount_cents", n().Int().Positive().Opt()), f("discount_reason", text(200).Min(3).Opt())))}
 	ops["POST /api/invoices/:id/payments/:paymentId/reverse"] = operation{s.invoiceReverse, obj(o(f("reason", text(200).Min(5, "descreva o motivo do estorno"))))}
 	ops["POST /api/contracts/:id/agreement"] = operation{s.contractAgreement, obj(o(f("invoice_ids", validate.Array(uuid).Min(1).Max(24)), f("installments", n().Int().Min(1).Max(24)), f("first_due_date", date), f("discount_cents", n().Int().Min(0).Opt()), f("reason", text(200).Min(5, "descreva o acordo")), f("apply_fees", b().Opt()), f("release_service", b().Opt())))}
 	ops["POST /api/contracts/:id/trust-release"] = operation{s.trustGrant, obj(o(f("days", n().Int().Min(1).Max(30).Opt()), f("reason", text(200).Min(3, "informe o motivo"))))}
@@ -96,9 +100,46 @@ func (s Service) invoiceCancel(ctx context.Context, tx *db.Tx, id string, b map[
 	return map[string]any{"ok": true}, record(ctx, tx, "invoice.cancel", "invoice", id, b)
 }
 func (s Service) invoicePayment(ctx context.Context, tx *db.Tx, id string, b map[string]any) (any, error) {
+	// Lock a visible invoice even on replay: authorization/RLS must still apply.
+	var visible string
+	if err := tx.QueryRow(ctx, "select id from invoices where id=$1 for update", id).Scan(&visible); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, apierr.New(404, "fatura não encontrada")
+		}
+		return nil, err
+	}
+	actor := auth.From(ctx)
+	payload, err := json.Marshal(b)
+	if err != nil {
+		return nil, err
+	}
+	hash := fmt.Sprintf("%x", sha256.Sum256(payload))
+	if err = tx.Exec(ctx, `insert into manual_payment_intents(tenant_id,intent_id,invoice_id,created_by,request_hash)
+ values($1,$2,$3,$4,$5) on conflict (tenant_id,intent_id) do nothing`, actor.TenantID, b["intent_id"], id, actor.UserID, hash); err != nil {
+		return nil, err
+	}
+	var invoice, user, previousHash string
+	var previousStatus *string
+	err = tx.QueryRow(ctx, `select invoice_id,created_by,request_hash,result_status from manual_payment_intents
+ where tenant_id=$1 and intent_id=$2 for update`, actor.TenantID, b["intent_id"]).Scan(&invoice, &user, &previousHash, &previousStatus)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, apierr.New(409, "intenção já utilizada em outro escopo")
+	}
+	if err != nil {
+		return nil, err
+	}
+	if invoice != id || user != actor.UserID || previousHash != hash {
+		return nil, apierr.New(409, "intenção já utilizada com dados diferentes")
+	}
+	if previousStatus != nil {
+		return map[string]any{"status": *previousStatus}, nil
+	}
 	b["paid_at"] = fmt.Sprint(b["paid_at"]) + "T12:00:00Z"
 	status, err := finance.Manual(ctx, tx, id, auth.From(ctx).UserID, b)
 	if err != nil {
+		return nil, err
+	}
+	if err = tx.Exec(ctx, "update manual_payment_intents set result_status=$3 where tenant_id=$1 and intent_id=$2", actor.TenantID, b["intent_id"], status); err != nil {
 		return nil, err
 	}
 	discount := b["discount_cents"]

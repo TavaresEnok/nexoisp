@@ -39,7 +39,7 @@ export function FinanceOverview({
               {
                 title: "Em aberto",
                 value: money(summary.open_cents / 100),
-                detail: `${summary.open} fatura(s); inclui as vencidas`,
+                detail: `${summary.open} fatura(s); nominal ${money(summary.nominal_open_cents / 100)}; recebido ${money(summary.received_open_cents / 100)}`,
                 icon: CircleDollarSign,
               },
               {

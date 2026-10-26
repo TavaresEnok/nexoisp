@@ -27,6 +27,8 @@ export type ErpInvoice = z.infer<typeof invoiceSchema>;
 export const summarySchema = z.object({
   open: z.coerce.number(),
   open_cents: cents(),
+  nominal_open_cents: cents(),
+  received_open_cents: cents(),
   overdue: z.coerce.number(),
   overdue_cents: cents(),
   reconciling: z.coerce.number(),
