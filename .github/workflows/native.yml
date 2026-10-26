@@ -39,6 +39,9 @@ jobs:
       - name: Migração 66 para 67 sem reativacoes retroativas
         env: {NEXO_PAYMENT_LAB: '1'}
         run: python3 tests/contrato/payment_effects_migration.py
+      - name: Provider issuance migration and logical recovery
+        env: {NEXO_PAYMENT_LAB: '1'}
+        run: python3 tests/contrato/provider_issuance_migration.py
       - name: Recebimento independente de falha tecnica e retomada
         env: {NEXO_PAYMENT_LAB: '1'}
         run: python3 tests/contrato/payment_effects.py
