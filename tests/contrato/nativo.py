@@ -119,6 +119,8 @@ def run():
         checks.append('B04: movimentos alocações acordos shadow-read e RLS')
         command([sys.executable,str(ROOT/'tests/contrato/provider_contract.py')],env=dict(env,NEXO_PAYMENT_LAB='1',NEXO_PAYMENT_LAB_URL=bases[0],NEXO_PAYMENT_LAB_URL_2=bases[1]))
         checks.append('B06: contrato provider callback adverso conciliacao e isolamento')
+        command([sys.executable,str(ROOT/'tests/contrato/issuance_conflicts.py')],env=dict(env,NEXO_PAYMENT_LAB='1',NEXO_PAYMENT_LAB_URL=bases[0],NEXO_PAYMENT_LAB_URL_2=bases[1]))
+        checks.append('B07: reserva de emissao bloqueia baixas e cancelamentos concorrentes')
     finally:
         for p,log in processes:
             p.terminate()

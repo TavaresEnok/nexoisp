@@ -9,7 +9,10 @@ from nativo import up
 from lib import sql,go_env,command,DB_CONTAINER,DB_PORT
 cli=[str(repo/'apps/api-go/bin/nexo-db')]
 with tempfile.TemporaryDirectory(prefix='nexo-b07-migration-') as tmp:
- stage=Path(tmp);shutil.copytree(repo/'db',stage/'db')
+ stage=Path(tmp)/'before';stage.mkdir();shutil.copytree(repo/'db',stage/'db')
+ target=Path(tmp)/'version68';target.mkdir();shutil.copytree(repo/'db',target/'db')
+ for migration in (target/'db/migrations').glob('*.sql'):
+  if int(migration.name.split('_')[0])>68:migration.unlink()
  for migration in (stage/'db/migrations').glob('*.sql'):
   if int(migration.name.split('_')[0])>67:migration.unlink()
  assert subprocess.run(['docker','inspect',DB_CONTAINER],capture_output=True).returncode!=0
@@ -20,7 +23,7 @@ with tempfile.TemporaryDirectory(prefix='nexo-b07-migration-') as tmp:
   sql("insert into invoices(tenant_id,contract_id,subscriber_id,kind,due_date,amount_cents) select tenant_id,id,subscriber_id,'manual',current_date,12345 from contracts limit 1;",'nexo_test')
   snapshot="select jsonb_build_object('invoices',(select jsonb_agg(i order by id) from invoices i),'payments',(select jsonb_agg(p order by id) from payments p),'movements',(select jsonb_agg(m order by id) from invoice_movements m),'effects',(select jsonb_agg(e order by id) from payment_effects e))"
   before=sql(snapshot,'nexo_test')
-  command(cli+['prepare'],cwd=repo,env=env);command(cli+['prepare'],cwd=repo,env=env)
+  command(cli+['prepare'],cwd=target,env=env);command(cli+['prepare'],cwd=target,env=env)
   assert before==sql(snapshot,'nexo_test')
   assert sql('select count(*) from provider_issuance','nexo_test')=='0'
   sql("""insert into financial_connections(tenant_id,company_id,provider,environment,account_ref,name) select tenant_id,company_id,'efi','sandbox','fixture','Migration B07' from invoices;

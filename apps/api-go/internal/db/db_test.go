@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"errors"
+	"fmt"
 	"nexoisp/api-go/internal/tenancy"
 	"os"
 	"testing"
@@ -119,20 +120,39 @@ func TestPopRLS(t *testing.T) {
 		tenant = k
 		break
 	}
-	var pop string
-	if err := d.WithScope(ctx, tenancy.Scope{TenantID: tenant}, func(tx *Tx) error { return tx.QueryRow(ctx, "select id from pops order by id limit 1").Scan(&pop) }); err != nil {
-		t.Fatal(err)
-	}
-	if err := d.WithScope(ctx, tenancy.Scope{TenantID: tenant, PopIDs: []string{pop}}, func(tx *Tx) error {
-		var count int
-		if err := tx.QueryRow(ctx, "select count(*) from contracts where pop_id is not null and pop_id<>$1", pop).Scan(&count); err != nil {
+	rollback := errors.New("rollback POP RLS fixture")
+	err := d.WithScope(ctx, tenancy.Scope{TenantID: tenant}, func(tx *Tx) error {
+		var allowed, denied, contract string
+		if err := tx.QueryRow(ctx, `insert into pops(tenant_id,name) values($1,'RLS allowed '||gen_random_uuid()) returning id`, tenant).Scan(&allowed); err != nil {
 			return err
 		}
-		if count != 0 {
-			return errors.New("POP de outro usuário visível")
+		if err := tx.QueryRow(ctx, `insert into pops(tenant_id,name) values($1,'RLS denied '||gen_random_uuid()) returning id`, tenant).Scan(&denied); err != nil {
+			return err
 		}
-		return nil
-	}); err != nil {
+		if err := tx.QueryRow(ctx, `select id from contracts order by id limit 1`).Scan(&contract); err != nil {
+			return err
+		}
+		if err := tx.Exec(ctx, `update contracts set pop_id=$2 where id=$1`, contract, allowed); err != nil {
+			return err
+		}
+		for _, test := range []struct {
+			pop  string
+			want int
+		}{{allowed, 1}, {denied, 0}} {
+			if err := tx.Exec(ctx, `select set_config('app.pop_ids',$1,true)`, test.pop); err != nil {
+				return err
+			}
+			var n int
+			if err := tx.QueryRow(ctx, `select count(*) from contracts where id=$1`, contract).Scan(&n); err != nil {
+				return err
+			}
+			if n != test.want {
+				return fmt.Errorf("POP visibility=%d want=%d", n, test.want)
+			}
+		}
+		return rollback
+	})
+	if !errors.Is(err, rollback) {
 		t.Fatal(err)
 	}
 }

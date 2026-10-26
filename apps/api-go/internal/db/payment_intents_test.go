@@ -30,10 +30,10 @@ func TestManualPaymentIntentRLS(t *testing.T) {
 		if err := tx.QueryRow(ctx, "select id from users where tenant_id=$1 order by id limit 1", tenants[0]).Scan(&user); err != nil {
 			return err
 		}
-		if err := tx.QueryRow(ctx, "select id from pops order by id limit 1").Scan(&pop); err != nil {
+		if err := tx.QueryRow(ctx, `insert into pops(tenant_id,name) values($1,'Intent RLS allowed '||gen_random_uuid()) returning id`, tenants[0]).Scan(&pop); err != nil {
 			return err
 		}
-		if err := tx.QueryRow(ctx, "select id from pops where id<>$1 order by id limit 1", pop).Scan(&otherPop); err != nil {
+		if err := tx.QueryRow(ctx, `insert into pops(tenant_id,name) values($1,'Intent RLS denied '||gen_random_uuid()) returning id`, tenants[0]).Scan(&otherPop); err != nil {
 			return err
 		}
 		if err := tx.Exec(ctx, "update contracts set pop_id=$2 where id=$1", contract, pop); err != nil {

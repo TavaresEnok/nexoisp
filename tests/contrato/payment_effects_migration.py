@@ -12,6 +12,9 @@ with tempfile.TemporaryDirectory(prefix='nexo-b05-migration-') as tmp:
  stage=Path(tmp);shutil.copytree(repo/'db',stage/'db')
  for migration in (stage/'db/migrations').glob('*.sql'):
   if int(migration.name.split('_')[0])>66:migration.unlink()
+ target=stage/'target67';shutil.copytree(repo/'db',target/'db')
+ for migration in (target/'db/migrations').glob('*.sql'):
+  if int(migration.name.split('_')[0])>67:migration.unlink()
  assert subprocess.run(['docker','inspect',DB_CONTAINER],capture_output=True).returncode!=0
  try:
   up();sql('create database nexo_test','postgres')
@@ -22,7 +25,7 @@ with tempfile.TemporaryDirectory(prefix='nexo-b05-migration-') as tmp:
    insert into payments(tenant_id,invoice_id,amount_cents,paid_at,source) select tenant_id,id,10000,now(),'manual' from invoices;""",'nexo_test')
   snapshot="select jsonb_build_object('invoices',(select jsonb_agg(to_jsonb(i)-'settlement_version' order by id) from invoices i),'payments',(select jsonb_agg(p order by id) from payments p),'movements',(select jsonb_agg(m order by id) from invoice_movements m))"
   before=sql(snapshot,'nexo_test')
-  command(cli+['prepare'],cwd=repo,env=env);command(cli+['prepare'],cwd=repo,env=env)
+  command(cli+['prepare'],cwd=target,env=env);command(cli+['prepare'],cwd=target,env=env)
   assert before==sql(snapshot,'nexo_test')
   # Preserve the current importer contract: an inserted historical paid title
   # must not request network work. Rollback isolates it from the cycle counts.
