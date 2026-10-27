@@ -191,6 +191,10 @@
     },
     {
       "method": "GET",
+      "path": "/api/contracts/:id/cpe/tasks"
+    },
+    {
+      "method": "GET",
       "path": "/api/contracts/:id/diagnosis"
     },
     {
@@ -327,11 +331,23 @@
     },
     {
       "method": "GET",
+      "path": "/api/financial-connections/:id/callback"
+    },
+    {
+      "method": "GET",
       "path": "/api/financial-connections/:id/credentials"
     },
     {
       "method": "GET",
       "path": "/api/financial-connections/:id/issuance/:issuanceId"
+    },
+    {
+      "method": "GET",
+      "path": "/api/financial-connections/:id/issuance/:issuanceId/operations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/financial-connections/:id/notices"
     },
     {
       "method": "GET",
@@ -376,6 +392,10 @@
     {
       "method": "GET",
       "path": "/api/invoices/:id/due"
+    },
+    {
+      "method": "GET",
+      "path": "/api/invoices/:id/provider-billing"
     },
     {
       "method": "GET",
@@ -519,6 +539,10 @@
     },
     {
       "method": "GET",
+      "path": "/api/portal/cpe/:id/tasks"
+    },
+    {
+      "method": "GET",
       "path": "/api/portal/overview"
     },
     {
@@ -536,6 +560,10 @@
     {
       "method": "GET",
       "path": "/api/portal/usage-series"
+    },
+    {
+      "method": "GET",
+      "path": "/api/radius/accounting/events"
     },
     {
       "method": "GET",
@@ -907,6 +935,10 @@
     },
     {
       "method": "POST",
+      "path": "/api/acs/ownership/assign"
+    },
+    {
+      "method": "POST",
       "path": "/api/addons"
     },
     {
@@ -924,6 +956,10 @@
     {
       "method": "POST",
       "path": "/api/auth/logout"
+    },
+    {
+      "method": "POST",
+      "path": "/api/callbacks/efi/charges/:id"
     },
     {
       "method": "POST",
@@ -980,6 +1016,10 @@
     {
       "method": "POST",
       "path": "/api/contracts/:id/cpe/refresh"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/cpe/tasks/:taskId/retry-lookup"
     },
     {
       "method": "POST",
@@ -1043,11 +1083,31 @@
     },
     {
       "method": "POST",
+      "path": "/api/financial-connections/:id/callback"
+    },
+    {
+      "method": "POST",
       "path": "/api/financial-connections/:id/credentials"
     },
     {
       "method": "POST",
       "path": "/api/financial-connections/:id/issuance"
+    },
+    {
+      "method": "POST",
+      "path": "/api/financial-connections/:id/issuance/:issuanceId/operations"
+    },
+    {
+      "method": "POST",
+      "path": "/api/financial-connections/:id/issuance/:issuanceId/operations/:operationId/retry-lookup"
+    },
+    {
+      "method": "POST",
+      "path": "/api/financial-connections/:id/issuance/:issuanceId/retry-lookup"
+    },
+    {
+      "method": "POST",
+      "path": "/api/financial-connections/:id/notices/:notice/review"
     },
     {
       "method": "POST",
@@ -1223,6 +1283,10 @@
     },
     {
       "method": "POST",
+      "path": "/api/portal/cpe/:id/tasks/:taskId/retry-lookup"
+    },
+    {
+      "method": "POST",
       "path": "/api/portal/surveys/:id"
     },
     {
@@ -1236,6 +1300,14 @@
     {
       "method": "POST",
       "path": "/api/portal/trust-release"
+    },
+    {
+      "method": "POST",
+      "path": "/api/radius/accounting/events/:event/dismiss"
+    },
+    {
+      "method": "POST",
+      "path": "/api/radius/accounting/events/:event/reconcile"
     },
     {
       "method": "POST",
@@ -1520,58 +1592,6 @@
     {
       "method": "PUT",
       "path": "/api/users/:id/pops"
-    },
-    {
-      "method": "POST",
-      "path": "/api/financial-connections/:id/issuance/:issuanceId/retry-lookup"
-    },
-    {
-      "method": "POST",
-      "path": "/api/financial-connections/:id/issuance/:issuanceId/operations"
-    },
-    {
-      "method": "GET",
-      "path": "/api/financial-connections/:id/issuance/:issuanceId/operations"
-    },
-    {
-      "method": "POST",
-      "path": "/api/financial-connections/:id/issuance/:issuanceId/operations/:operationId/retry-lookup"
-    },
-    {
-      "method": "GET",
-      "path": "/api/invoices/:id/provider-billing"
-    },
-    {
-      "method": "POST",
-      "path": "/api/callbacks/efi/charges/:id"
-    },
-    {
-      "method": "GET",
-      "path": "/api/financial-connections/:id/callback"
-    },
-    {
-      "method": "POST",
-      "path": "/api/financial-connections/:id/callback"
-    },
-    {
-      "method": "GET",
-      "path": "/api/contracts/:id/cpe/tasks"
-    },
-    {
-      "method": "POST",
-      "path": "/api/contracts/:id/cpe/tasks/:taskId/retry-lookup"
-    },
-    {
-      "method": "GET",
-      "path": "/api/portal/cpe/:id/tasks"
-    },
-    {
-      "method": "POST",
-      "path": "/api/portal/cpe/:id/tasks/:taskId/retry-lookup"
-    },
-    {
-      "method": "POST",
-      "path": "/api/acs/ownership/assign"
     }
   ]
 }
