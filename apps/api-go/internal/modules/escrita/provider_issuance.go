@@ -19,6 +19,8 @@ import (
 
 func registerProviderIssuance(api huma.API, registry *endpoint.Registry, s Service) {
 	registerInvoiceProviderBilling(api, registry, s)
+	registerChargesCallback(api, registry, s)
+	registerCallbackConfig(api, registry, s)
 	registry.Handle(api, http.MethodPost, "/api/financial-connections/{id}/issuance/{issuanceId}/retry-lookup", "finance:write", func(ctx context.Context, r *http.Request) (endpoint.Result, error) {
 		actor := auth.From(ctx)
 		if actor.SubscriberID != "" || len(actor.PopIDs) > 0 {
@@ -70,7 +72,7 @@ func registerProviderIssuance(api huma.API, registry *endpoint.Registry, s Servi
 			return endpoint.Result{}, apierr.New(400, "fatura e intenção devem ser UUIDs válidos")
 		}
 		// Recovery's search window is server-owned, never selected by the client.
-		if body.Options.IssuedOn != "" {
+		if body.Options.IssuedOn != "" || body.Options.NotificationURL != "" {
 			return endpoint.Result{}, apierr.New(400, "data de emissão é definida pelo servidor")
 		}
 		if body.Options.Product == "pix_cob" && body.Options.Expiration == 0 {
@@ -112,11 +114,17 @@ func registerProviderIssuance(api huma.API, registry *endpoint.Registry, s Servi
 						return err
 					}
 					body.Options.IssuedOn = old.IssuedOn
+					body.Options.NotificationURL = old.NotificationURL
 				}
 			}
 			if body.Options.Product == "bolix" && body.Options.IssuedOn == "" {
 				zone, _ := time.LoadLocation("America/Sao_Paulo")
 				body.Options.IssuedOn = time.Now().In(zone).Format("2006-01-02")
+				var err error
+				body.Options.NotificationURL, err = finance.ChargesCallbackURL(connection)
+				if err != nil {
+					return err
+				}
 			}
 			return nil
 		})

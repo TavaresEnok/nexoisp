@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { QueryBoundary } from "@/features/shared/feedback";
 import { FormField, MutationForm } from "@/features/shared/form";
 import { api } from "@/platform/erp-client";
+import { FinancialCallback } from "./financial-callback";
 
 const versionSchema = z.object({
   id: z.string(),
@@ -169,6 +170,7 @@ export function FinancialCredentials({
               )}
             </div>
           </MutationForm>
+          {current && <FinancialCallback connection={connection.id} />}
         </QueryBoundary>
       </DialogContent>
     </Dialog>

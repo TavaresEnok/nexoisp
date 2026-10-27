@@ -71,9 +71,20 @@ try {
  await form.waitFor({state: 'hidden'});
  await page.getByText('Resultado desconhecido · consultar antes de decidir', { exact: true }).waitFor();
  checks.push('Review action queues lookup only, never resends creation');
+ if (fixture.artifact) {
+  await open(fixture.artifact);
+  await page.getByRole('img',{name:'QR Code Pix retornado pelo provedor',exact:true}).waitFor();
+  await context.grantPermissions(['clipboard-read','clipboard-write'],{origin:base});
+  await page.getByRole('button',{name:'Copiar Pix',exact:true}).click();
+  assert.equal(await page.evaluate(()=>navigator.clipboard.readText()),fixture.copy);
+  checks.push('Stored provider QR renders as image and copy action writes the exact Pix payload');
+ }
  await page.screenshot({ path: '/evidence/billing-desktop.png', fullPage: true });
  await page.setViewportSize({ width: 390, height: 844 }); await open(fixture.refund);
  await page.getByText('Synthetic UI partial refund', { exact: true }).waitFor();
+ await page.getByText('Cobrança no provedor',{exact:true}).scrollIntoViewIfNeeded();
+ const dialog=page.getByRole('dialog').first();
+ if (fixture.artifact) assert.equal(await dialog.evaluate(el=>el.scrollWidth<=el.clientWidth+2),true,'operational invoice overflows horizontally');
  await page.screenshot({ path: '/evidence/billing-mobile.png', fullPage: true });
  await context.request.post(base + '/api/auth/logout', { headers: await csrf(context, base), data: {} });
  await login('atendimento@alfa.demo'); await open(fixture.refund);

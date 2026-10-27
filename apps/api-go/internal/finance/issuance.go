@@ -181,7 +181,10 @@ func (s SandboxIssuance) Run(ctx context.Context, scope tenancy.Scope, id string
 		if state != "uncertain" {
 			return errors.New("issuance no longer eligible for automatic confirmation")
 		}
-		return tx.Exec(ctx, `update provider_issuance set state='issued',charge_id=$2 where id=$1`, id, charge.ID)
+		if err := tx.Exec(ctx, `update provider_issuance set state='issued',charge_id=$2 where id=$1`, id, charge.ID); err != nil {
+			return err
+		}
+		return storeProviderArtifacts(ctx, tx, id, charge, true)
 	})
 	return charge, err
 }

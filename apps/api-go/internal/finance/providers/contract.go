@@ -75,11 +75,12 @@ type Reference struct {
 	IntentKey string `json:"intent_key,omitempty"`
 }
 type Charge struct {
-	Scope     Scope  `json:"scope"`
-	ID        string `json:"id"`
-	IntentKey string `json:"intent_key"`
-	InvoiceID string `json:"invoice_id"`
-	Money     Money  `json:"money"`
+	Scope     Scope             `json:"scope"`
+	ID        string            `json:"id"`
+	IntentKey string            `json:"intent_key"`
+	InvoiceID string            `json:"invoice_id"`
+	Money     Money             `json:"money"`
+	Artifacts *PaymentArtifacts `json:"payment_methods,omitempty"`
 }
 
 func ValidateIssued(r Create, c Charge) error {
@@ -197,6 +198,7 @@ const (
 
 type Failure struct {
 	Kind       FailureKind
+	HTTPStatus int
 	RetryAfter time.Duration
 	Cause      error
 }

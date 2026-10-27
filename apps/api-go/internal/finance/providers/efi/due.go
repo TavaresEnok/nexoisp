@@ -86,6 +86,9 @@ func (a *Due) CreateCharge(ctx context.Context, r providers.Create) (providers.C
 		return providers.Charge{}, err
 	}
 	s, err := a.normalize(response)
+	if err == nil {
+		a.base.enrichArtifacts(ctx, response, &s)
+	}
 	return s.Charge, err
 }
 func (a *Due) Lookup(ctx context.Context, r providers.Reference) (providers.Snapshot, error) {
@@ -96,5 +99,9 @@ func (a *Due) Lookup(ctx context.Context, r providers.Reference) (providers.Snap
 	if err := a.base.client.request(ctx, http.MethodGet, "/v2/cobv/"+TxID(a.base.request), nil, &response); err != nil {
 		return providers.Snapshot{}, err
 	}
-	return a.normalize(response)
+	s, err := a.normalize(response)
+	if err == nil {
+		a.base.enrichArtifacts(ctx, response, &s)
+	}
+	return s, err
 }

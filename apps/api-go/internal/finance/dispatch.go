@@ -16,12 +16,13 @@ import (
 )
 
 type IssuanceOptions struct {
-	Product    string             `json:"product"`
-	Expiration int                `json:"expiration_seconds,omitempty"`
-	ValidDays  int                `json:"valid_days,omitempty"`
-	Debtor     efi.Debtor         `json:"debtor,omitempty"`
-	Customer   efi.BilletCustomer `json:"customer,omitempty"`
-	IssuedOn   string             `json:"issued_on,omitempty"`
+	Product         string             `json:"product"`
+	Expiration      int                `json:"expiration_seconds,omitempty"`
+	ValidDays       int                `json:"valid_days,omitempty"`
+	Debtor          efi.Debtor         `json:"debtor,omitempty"`
+	Customer        efi.BilletCustomer `json:"customer,omitempty"`
+	IssuedOn        string             `json:"issued_on,omitempty"`
+	NotificationURL string             `json:"notification_url,omitempty"`
 }
 type AdapterFactory func(context.Context, providers.Create, string, IssuanceOptions) (ConfiguredAdapter, func(), error)
 
@@ -38,7 +39,12 @@ func StoredAdapterFactory(database *db.DB, scope tenancy.Scope) AdapterFactory {
 		case "pix_cobv":
 			a, err = efi.NewDue(c, r, secret.PixKey, o.Debtor, o.ValidDays)
 		case "bolix":
-			a, err = efi.NewBolix(c, r, o.Customer, o.IssuedOn)
+			var billet *efi.Bolix
+			billet, err = efi.NewBolix(c, r, o.Customer, o.IssuedOn)
+			if err == nil {
+				err = billet.SetNotificationURL(o.NotificationURL)
+				a = billet
+			}
 		default:
 			err = errors.New("unsupported issuance product")
 		}

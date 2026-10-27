@@ -17,6 +17,9 @@ func ProcessProviderReceipts(ctx context.Context, database *db.DB, tenant string
 		return nil
 	}
 	scope := tenancy.Scope{TenantID: tenant}
+	if err := ReconcileChargesNotices(ctx, database, scope, storedChargesNotificationLookup(database, scope)); err != nil {
+		return err
+	}
 	return ReconcileProviderReceipts(ctx, database, scope, StoredAdapterFactory(database, scope))
 }
 func ReconcileProviderReceipts(ctx context.Context, database *db.DB, scope tenancy.Scope, factory AdapterFactory) error {
@@ -79,6 +82,9 @@ func ReconcileProviderReceipts(ctx context.Context, database *db.DB, scope tenan
 				}
 				if !eligible {
 					return nil
+				}
+				if e := storeProviderArtifacts(opctx, tx, id, snapshot.Charge, snapshot.Status == "active"); e != nil {
+					return e
 				}
 				forceReview := snapshot.ReviewRequired || len(snapshot.Refunds) > 0 || snapshot.Status == "removed"
 				for _, payment := range snapshot.Payments {

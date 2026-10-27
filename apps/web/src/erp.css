@@ -1,5 +1,11 @@
 /* Extensões operacionais sobre os tokens e componentes oficiais do v0. */
 .erp-stack { display: flex; flex-direction: column; gap: var(--section-gap); }
+/* Constrain the operational invoice grid; long IDs/tables must not enlarge
+   the dialog's implicit grid column on narrow screens. Official v0 is intact. */
+.invoice-dialog.erp-editor { grid-template-columns: minmax(0, 1fr); }
+.invoice-dialog.erp-editor > *, .invoice-dialog.erp-editor .erp-stack { min-width: 0; }
+.invoice-dialog.erp-editor .detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.invoice-dialog.erp-editor .erp-stack p { overflow-wrap: anywhere; }
 .erp-source { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; color: var(--muted-foreground); font-size: var(--text-caption); }
 .erp-field { display: flex; flex-direction: column; align-items: stretch; gap: 8px; line-height: 1.5; }
 .erp-field small { font-weight: 400; }

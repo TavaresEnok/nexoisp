@@ -47,10 +47,11 @@ func (c BilletCustomer) Validate() error {
 }
 
 type Bolix struct {
-	client   *Client
-	request  providers.Create
-	customer BilletCustomer
-	issuedOn string
+	client          *Client
+	request         providers.Create
+	customer        BilletCustomer
+	issuedOn        string
+	notificationURL string
 }
 
 var _ providers.Adapter = (*Bolix)(nil)
@@ -66,12 +67,24 @@ func NewBolix(c *Client, r providers.Create, customer BilletCustomer, issuedOn s
 }
 func (a *Bolix) ConfigurationHash() string {
 	raw, _ := json.Marshal(struct {
-		Product  string
-		Customer BilletCustomer
-		IssuedOn string
-	}{"bolix", a.customer, a.issuedOn})
+		Product         string
+		Customer        BilletCustomer
+		IssuedOn        string
+		NotificationURL string `json:",omitempty"`
+	}{"bolix", a.customer, a.issuedOn, a.notificationURL})
 	h := sha256.Sum256(raw)
 	return hex.EncodeToString(h[:])
+}
+
+func (a *Bolix) SetNotificationURL(raw string) error {
+	if raw != "" {
+		u, e := url.Parse(raw)
+		if e != nil || u.Scheme != "https" || u.Hostname() == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" {
+			return errors.New("invalid callback URL")
+		}
+	}
+	a.notificationURL = raw
+	return nil
 }
 
 var chargeNumber = regexp.MustCompile(`^[1-9][0-9]{0,18}$`)
@@ -91,6 +104,12 @@ type billetCharge struct {
 		PaidAt    string `json:"paid_at"`
 		Billet    struct {
 			Expires string `json:"expire_at"`
+			Barcode string `json:"barcode"`
+			Link    string `json:"link"`
+			Pix     struct {
+				Code  string `json:"qrcode"`
+				Image string `json:"qrcode_image"`
+			} `json:"pix"`
 		} `json:"banking_billet"`
 	} `json:"payment"`
 }
@@ -151,6 +170,10 @@ func (a *Bolix) normalized(v billetCharge, knownID string) (providers.Snapshot, 
 	default:
 		return providers.Snapshot{}, failure(providers.Conflict, "Bolix state requires review")
 	}
+	if snapshot.Status == "active" {
+		v := v.Payment.Billet
+		snapshot.Charge.Artifacts = (providers.PaymentArtifacts{BoletoURL: v.Link, BoletoBarcode: v.Barcode, PixCopyPaste: v.Pix.Code, PixQRCode: v.Pix.Image}).Clean()
+	}
 	return snapshot, nil
 }
 
@@ -161,6 +184,9 @@ func (a *Bolix) CreateCharge(ctx context.Context, r providers.Create) (providers
 		return providers.Charge{}, failure(providers.Conflict, "Bolix intention changed")
 	}
 	body := map[string]any{"items": []any{map[string]any{"name": "NexoISP " + r.InvoiceID, "value": r.Money.Cents, "amount": 1}}, "metadata": map[string]string{"custom_id": TxID(r)}, "payment": map[string]any{"banking_billet": map[string]any{"expire_at": r.DueDate, "customer": a.customer}}}
+	if a.notificationURL != "" {
+		body["metadata"].(map[string]string)["notification_url"] = a.notificationURL
+	}
 	var issued billetEnvelope
 	if err := a.client.request(ctx, http.MethodPost, "/v1/charge/one-step", body, &issued); err != nil {
 		return providers.Charge{}, err

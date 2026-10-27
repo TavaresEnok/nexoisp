@@ -56,6 +56,10 @@ func cents(value string) (int64, error) {
 }
 
 type pixCharge struct {
+	CopyPaste string `json:"pixCopiaECola"`
+	Location  struct {
+		ID int64 `json:"id"`
+	} `json:"loc"`
 	Calendar struct {
 		DueDate   string `json:"dataDeVencimento"`
 		ValidDays int    `json:"validadeAposVencimento"`
@@ -87,6 +91,9 @@ func (a *Immediate) normalized(v pixCharge) (providers.Snapshot, error) {
 		return s, failure(providers.Conflict, "charge state requires review")
 	}
 	s.Charge = providers.Charge{Scope: a.request.Scope, ID: v.TxID, IntentKey: a.request.IntentKey, InvoiceID: a.request.InvoiceID, Money: a.request.Money}
+	if v.Status == "ATIVA" {
+		s.Charge.Artifacts = (providers.PaymentArtifacts{PixCopyPaste: v.CopyPaste}).Clean()
+	}
 	s.Status = map[string]string{"ATIVA": "active", "CONCLUIDA": "paid", "REMOVIDA_PELO_USUARIO_RECEBEDOR": "removed", "REMOVIDA_PELO_PSP": "removed"}[v.Status]
 	for _, p := range v.Pix {
 		n, err := cents(p.Value)
@@ -129,6 +136,7 @@ func (a *Immediate) CreateCharge(ctx context.Context, r providers.Create) (provi
 	if err != nil {
 		return providers.Charge{}, err
 	}
+	a.enrichArtifacts(ctx, response, &s)
 	return s.Charge, providers.ValidateIssued(r, s.Charge)
 }
 func (a *Immediate) Lookup(ctx context.Context, r providers.Reference) (providers.Snapshot, error) {
@@ -139,7 +147,29 @@ func (a *Immediate) Lookup(ctx context.Context, r providers.Reference) (provider
 	if err := a.client.request(ctx, http.MethodGet, "/v2/cob/"+TxID(a.request), nil, &response); err != nil {
 		return providers.Snapshot{}, err
 	}
-	return a.normalized(response)
+	s, err := a.normalized(response)
+	if err == nil {
+		a.enrichArtifacts(ctx, response, &s)
+	}
+	return s, err
+}
+
+func (a *Immediate) enrichArtifacts(ctx context.Context, v pixCharge, s *providers.Snapshot) {
+	if s.Status != "active" || v.Location.ID <= 0 {
+		return
+	}
+	var qr struct {
+		Code  string `json:"qrcode"`
+		Image string `json:"imagemQrcode"`
+	}
+	// An optional presentation lookup never blocks financial reconciliation.
+	if a.client.request(ctx, http.MethodGet, fmt.Sprintf("/v2/loc/%d/qrcode", v.Location.ID), nil, &qr) != nil {
+		return
+	}
+	if v.CopyPaste != "" && qr.Code != v.CopyPaste {
+		return
+	}
+	s.Charge.Artifacts = (providers.PaymentArtifacts{PixCopyPaste: qr.Code, PixQRCode: qr.Image}).Clean()
 }
 
 // ConfigurationHash freezes payment semantics, not OAuth credentials/certificate;

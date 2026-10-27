@@ -158,7 +158,7 @@ func responseFailure(r *http.Response, uncertain providers.FailureKind) error {
 		}
 	}
 	// Never expose provider bodies, URLs, tokens or credentials in errors/logs.
-	return &providers.Failure{Kind: kind, RetryAfter: delay, Cause: fmt.Errorf("Efí HTTP %d", r.StatusCode)}
+	return &providers.Failure{Kind: kind, HTTPStatus: r.StatusCode, RetryAfter: delay, Cause: fmt.Errorf("Efí HTTP %d", r.StatusCode)}
 }
 
 func (c *Client) request(ctx context.Context, method, path string, body any, target any) error {
@@ -191,7 +191,7 @@ func (c *Client) request(ctx context.Context, method, path string, body any, tar
 	if err != nil {
 		return failure(kind, "provider transport failed; lookup required before write retry")
 	}
-	if r.StatusCode != 200 && r.StatusCode != 201 {
+	if r.StatusCode != 200 && r.StatusCode != 201 && !(r.StatusCode == 204 && target == nil) {
 		if r.StatusCode == 401 {
 			c.mu.Lock()
 			if c.token == token {
@@ -201,6 +201,11 @@ func (c *Client) request(ctx context.Context, method, path string, body any, tar
 			c.mu.Unlock()
 		}
 		return responseFailure(r, kind)
+	}
+	if target == nil {
+		defer r.Body.Close()
+		_, _ = io.Copy(io.Discard, io.LimitReader(r.Body, maxBody))
+		return nil
 	}
 	if err = readJSON(r, target); err != nil {
 		return failure(kind, "invalid provider response; lookup required")

@@ -1540,6 +1540,18 @@
     {
       "method": "GET",
       "path": "/api/invoices/:id/provider-billing"
+    },
+    {
+      "method": "POST",
+      "path": "/api/callbacks/efi/charges/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/financial-connections/:id/callback"
+    },
+    {
+      "method": "POST",
+      "path": "/api/financial-connections/:id/callback"
     }
   ]
 }

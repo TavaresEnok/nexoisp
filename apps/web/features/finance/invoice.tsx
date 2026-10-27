@@ -7,7 +7,6 @@ import {
   ProfileFacts,
 } from "@/components/subscriber-profile-sections";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableHeader,
@@ -31,6 +30,7 @@ import {
 } from "./models";
 import { InvoiceActions } from "./actions";
 import { ProviderBilling } from "./provider-billing";
+import { PaymentMethods } from "./payment-methods";
 export function OperationalInvoice({
   id,
   onClose,
@@ -134,27 +134,10 @@ export function OperationalInvoice({
             </Table>
           </ProfileSection>
           {invoice.payment_methods && invoice.status === "open" && (
-            <ProfileSection title="Meios de pagamento">
-              {invoice.gateway === "demo" && (
-                <Badge variant="warning">
-                  Simulado · sem movimentação de dinheiro
-                </Badge>
-              )}
-              <ProfileFacts
-                items={Object.entries(invoice.payment_methods).map(
-                  ([key, value]) => [
-                    (
-                      {
-                        pix_copy_paste: "Pix copia e cola",
-                        boleto_url: "Endereço do boleto",
-                        boleto_barcode: "Código de barras",
-                      } as Record<string, string>
-                    )[key] ?? key.replaceAll("_", " "),
-                    String(value),
-                  ],
-                )}
-              />
-            </ProfileSection>
+            <PaymentMethods
+              methods={invoice.payment_methods}
+              demo={invoice.gateway === "demo"}
+            />
           )}
           <ProfileSection title="Pagamentos">
             {invoice.payments.length ? (
@@ -241,7 +224,11 @@ export function OperationalInvoice({
               </Table>
             </ProfileSection>
           )}
-          <ProviderBilling key={invoice.id} invoice={invoice} refresh={refresh} />
+          <ProviderBilling
+            key={invoice.id}
+            invoice={invoice}
+            refresh={refresh}
+          />
           {writable && due.data && (
             <InvoiceActions
               invoice={invoice}
