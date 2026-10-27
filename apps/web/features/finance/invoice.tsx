@@ -168,9 +168,10 @@ export function OperationalInvoice({
                 </TableHeader>
                 <TableBody>
                   {invoice.payments.map((payment) => {
-                    const reversed = invoice.payments.some(
-                      (row) => row.reversal_of === payment.id,
-                    );
+                    const reversedCents = invoice.payments
+                      .filter((row) => row.reversal_of === payment.id)
+                      .reduce((total, row) => total + row.amount_cents, 0);
+                    const reversed = reversedCents > 0;
                     return (
                       <TableRow key={payment.id}>
                         <TableCell>{date(payment.paid_at)}</TableCell>
@@ -193,7 +194,10 @@ export function OperationalInvoice({
                         </TableCell>
                         <TableCell>
                           {payment.note ?? payment.method}
-                          {reversed && " · Estornada"}
+                          {reversed &&
+                            (reversedCents >= payment.amount_cents
+                              ? " · Estornada"
+                              : ` · Devolução parcial: ${money(reversedCents / 100)}`)}
                         </TableCell>
                         <TableCell>
                           {writable &&

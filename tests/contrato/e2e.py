@@ -19,6 +19,29 @@ def main():
         NEXO_GATEWAY_WEBHOOK_SECRET=base64.b64encode(os.urandom(32)).decode(),NEXO_SECRET_KEY=base64.b64encode(os.urandom(32)).decode(),
         NEXO_OP_SIGNING_KEY=base64.b64encode(subprocess.check_output(['openssl','genpkey','-algorithm','ed25519','-outform','DER'])).decode())
     for cmd in ['prepare','seed-demo']:command([str(ROOT/'apps/api-go/bin/nexo-db'),cmd],cwd=ROOT,env=env)
+    # Synthetic owner fixtures exercise partial/full refund presentation only;
+    # actual refund posting/authorization are covered by Go/native contracts.
+    sql("""do $$ declare tid uuid; cid uuid; sid uuid; inv uuid; conn uuid; original uuid; mode text; returned int;
+    begin
+      select c.tenant_id,c.id,c.subscriber_id into tid,cid,sid from contracts c join tenants t on t.id=c.tenant_id where t.slug='alfa' order by c.id limit 1;
+      foreach mode in array array['partial','full'] loop
+        insert into invoices(tenant_id,contract_id,subscriber_id,kind,status_note,due_date,amount_cents,status)
+        values(tid,cid,sid,'manual','UI provider refund fixture '||mode,'2026-11-15',12345,'reconciling') returning id into inv;
+        if conn is null then
+          insert into financial_connections(tenant_id,company_id,provider,environment,account_ref,name,status,legacy_demo)
+          select tid,company_id,'demo','sandbox','ui-refunds','UI synthetic refund fixture','active',true from invoices where id=inv returning id into conn;
+        end if;
+        update invoices set financial_connection_id=conn,gateway='demo',gateway_charge_id='ui-refund-'||mode where id=inv;
+        insert into payments(tenant_id,invoice_id,amount_cents,paid_at,method,source,gateway,gateway_payment_id,financial_connection_id,note)
+        values(tid,inv,12345,'2026-10-26T12:00:00Z','pix','reconciliation','demo','ui-payment-'||mode,conn,'synthetic-original-'||mode) returning id into original;
+        returned=case when mode='partial' then 4000 else 12345 end;
+        insert into payments(tenant_id,invoice_id,amount_cents,paid_at,method,source,gateway,financial_connection_id,kind,reversal_of,provider_refund_id,provider_return_id)
+        values(tid,inv,returned,'2026-10-26T13:00:00Z','pix','reconciliation','demo',conn,'reversal',original,'ui-refund-'||mode,'ui-return-'||mode);
+      end loop;
+    end $$;""",'nexo_test')
+    fixture=sql("select json_object_agg(replace(status_note,'UI provider refund fixture ',''),id) from invoices where status_note like 'UI provider refund fixture %'",'nexo_test')
+    evidence=ROOT/'docs/integracao-v0/evidencias';evidence.mkdir(parents=True,exist_ok=True)
+    (evidence/'provider-refund-fixture.json').write_text(fixture+'\n')
     command(['docker','build','--network','host','-f','infra/prod/caddy/Dockerfile','-t','nexo-fase1-caddy-web:local','.'],cwd=ROOT)
     command(['docker','create','--name','nexo-fase1-web-build','nexo-fase1-caddy-web:local'],capture_output=True)
     try:

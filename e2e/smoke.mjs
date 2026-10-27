@@ -12,6 +12,7 @@ const scenarios = [
   'frontend-v0-session.mjs',
   'frontend-v0-commercial.mjs',
   'frontend-v0-finance.mjs',
+  'frontend-v0-provider-refunds.mjs',
   'frontend-v0-crm.mjs',
   'frontend-v0-field.mjs',
   'frontend-v0-stock.mjs',
