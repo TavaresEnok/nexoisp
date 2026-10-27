@@ -15,8 +15,10 @@ import (
 
 type pipelineFake struct {
 	issuanceFake
-	fail     bool
-	payments []providers.Payment
+	fail           bool
+	payments       []providers.Payment
+	refunds        []providers.Refund
+	reviewRequired bool
 }
 
 func (f *pipelineFake) CreateCharge(ctx context.Context, r providers.Create) (providers.Charge, error) {
@@ -28,7 +30,7 @@ func (f *pipelineFake) CreateCharge(ctx context.Context, r providers.Create) (pr
 }
 func (f *pipelineFake) Lookup(context.Context, providers.Reference) (providers.Snapshot, error) {
 	f.reads.Add(1)
-	return providers.Snapshot{Charge: f.charge(), Payments: f.payments}, nil
+	return providers.Snapshot{Charge: f.charge(), Payments: f.payments, Refunds: f.refunds, ReviewRequired: f.reviewRequired}, nil
 }
 func preparePipeline(t *testing.T, d *db.DB, scope tenancy.Scope) (Issuance, *pipelineFake) {
 	t.Helper()

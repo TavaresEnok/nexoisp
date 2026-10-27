@@ -114,8 +114,11 @@ func (p Payment) Validate() error {
 }
 
 type Snapshot struct {
-	Charge   Charge    `json:"charge"`
-	Payments []Payment `json:"payments"`
+	Charge         Charge    `json:"charge"`
+	Payments       []Payment `json:"payments"`
+	Refunds        []Refund  `json:"refunds,omitempty"`
+	Status         string    `json:"status,omitempty"` // active, paid, removed; empty for legacy adapters
+	ReviewRequired bool      `json:"review_required,omitempty"`
 }
 
 func ValidateSnapshot(r Reference, s Snapshot) error {
@@ -137,6 +140,41 @@ func ValidateSnapshot(r Reference, s Snapshot) error {
 			return errors.New("conflicting payment in provider snapshot")
 		}
 		seen[p.ID] = p
+	}
+	refunds := map[string]Refund{}
+	returns := map[string]string{}
+	totals := map[string]int64{}
+	for _, refund := range s.Refunds {
+		if err := refund.Validate(); err != nil {
+			return err
+		}
+		original, ok := seen[refund.PaymentID]
+		if !ok {
+			return errors.New("refund without original receipt in snapshot")
+		}
+		settled, _ := time.Parse(time.RFC3339Nano, refund.SettledAt)
+		received, _ := time.Parse(time.RFC3339Nano, original.PaidAt)
+		if settled.Before(received) {
+			return errors.New("refund precedes original receipt")
+		}
+		if prior, ok := refunds[refund.ID]; ok {
+			if prior != refund {
+				return errors.New("conflicting refund identity")
+			}
+			continue
+		}
+		if id, ok := returns[refund.ReturnID]; ok && id != refund.ID {
+			return errors.New("return identity reused")
+		}
+		refunds[refund.ID] = refund
+		returns[refund.ReturnID] = refund.ID
+		totals[refund.PaymentID] += refund.AmountCents
+		if totals[refund.PaymentID] > original.AmountCents {
+			return errors.New("refund total exceeds received cash")
+		}
+	}
+	if s.Status != "" && s.Status != "active" && s.Status != "paid" && s.Status != "removed" {
+		return errors.New("unknown normalized charge state")
 	}
 	return nil
 }

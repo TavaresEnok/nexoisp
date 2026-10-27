@@ -22,6 +22,7 @@ func registerCustom(api huma.API, registry *endpoint.Registry, s Service) {
 	registerFinancialConnections(api, registry, s)
 	registerFinancialCredentials(api, registry, s)
 	registerProviderIssuance(api, registry, s)
+	registerProviderOperations(api, registry, s)
 	registerOnuCatalog(api, registry, s)
 	registerPonPorts(api, registry, s)
 	registerSlaCalendar(api, registry, s)

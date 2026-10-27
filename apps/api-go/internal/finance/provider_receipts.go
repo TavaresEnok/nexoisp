@@ -80,8 +80,9 @@ func ReconcileProviderReceipts(ctx context.Context, database *db.DB, scope tenan
 				if !eligible {
 					return nil
 				}
+				forceReview := snapshot.ReviewRequired || len(snapshot.Refunds) > 0 || snapshot.Status == "removed"
 				for _, payment := range snapshot.Payments {
-					duplicate, status, e := Payment(opctx, tx, request.InvoiceID, request.Scope.Provider, request.Scope.ConnectionID, paymentObject(payment), "reconciliation")
+					duplicate, status, e := paymentWithReview(opctx, tx, request.InvoiceID, request.Scope.Provider, request.Scope.ConnectionID, paymentObject(payment), "reconciliation", forceReview)
 					if e != nil {
 						return e
 					}
@@ -89,6 +90,16 @@ func ReconcileProviderReceipts(ctx context.Context, database *db.DB, scope tenan
 						if e = SysAudit(opctx, tx, scope.TenantID, "finance.provider.receipt", "invoice", request.InvoiceID, map[string]any{"provider_issuance_id": id, "payment_id": payment.ID, "amount_cents": payment.AmountCents, "status": status}, "ok"); e != nil {
 							return e
 						}
+					}
+				}
+				for _, refund := range snapshot.Refunds {
+					if _, e := ApplyProviderRefund(opctx, tx, request.InvoiceID, request.Scope.ConnectionID, refund); e != nil {
+						return e
+					}
+				}
+				if forceReview {
+					if e := tx.Exec(opctx, `update invoices set status='reconciling',status_note='fornecedor informa remoção ou devolução; revisar obrigação e saldo' where id=$1 and status<>'canceled'`, request.InvoiceID); e != nil {
+						return e
 					}
 				}
 				return tx.Exec(opctx, `update provider_notices set status='processed',processed_at=now() where financial_connection_id=$1 and charge_id=$2 and status='pending'`, request.Scope.ConnectionID, charge)
@@ -116,6 +127,9 @@ func ReconcileProviderReceipts(ctx context.Context, database *db.DB, scope tenan
 			if errors.As(err, &conflict) && conflict.Status == 409 {
 				// A previously posted payment ID with different money/date is a
 				// financial divergence, not a transient transport failure.
+				code, review = "provider_conflict", true
+			}
+			if apierr.IsFinancialConflict(err) {
 				code, review = "provider_conflict", true
 			}
 			if delay > time.Hour {

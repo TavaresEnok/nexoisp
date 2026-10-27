@@ -15,6 +15,9 @@ import (
 )
 
 func Payment(ctx context.Context, tx *db.Tx, id, gateway, connection string, p jsonx.Object, source string) (bool, string, error) {
+	return paymentWithReview(ctx, tx, id, gateway, connection, p, source, false)
+}
+func paymentWithReview(ctx context.Context, tx *db.Tx, id, gateway, connection string, p jsonx.Object, source string, forceReview bool) (bool, string, error) {
 	inv, e := one(ctx, tx, "applyGatewayPayment", 0, id)
 	if e != nil {
 		return false, "", e
@@ -22,6 +25,8 @@ func Payment(ctx context.Context, tx *db.Tx, id, gateway, connection string, p j
 	if inv == nil || connection == "" || inv.Get("financial_connection_id") != connection || inv.Get("gateway") != gateway {
 		return false, "", apierr.New(409, "pagamento sem vínculo com a conexão da fatura")
 	}
+	// Cancellation never proves a later payment impossible (notably Bolix).
+	forceReview = forceReview || inv.Get("status") == "canceled" || inv.Get("provider_canceled_at") != nil
 	count, e := tx.Affected(ctx, query("applyGatewayPayment", 1), inv.Get("tenant_id"), id, p.Get("amount_cents"), p.Get("paid_at"), p.Get("method"), source, gateway, p.Get("id"), connection)
 	if e != nil {
 		return false, "", e
@@ -39,10 +44,10 @@ func Payment(ctx context.Context, tx *db.Tx, id, gateway, connection string, p j
 	// A later confirmation must not silently clear a refund/chargeback review.
 	// Record received cash, but require the existing explicit reconciliation path.
 	var disputed bool
-	if e = tx.QueryRow(ctx, `select exists(select 1 from gateway_events where financial_connection_id=$1 and charge_id=$2 and type in ('payment.refunded','payment.chargeback') and status='divergent')`, connection, inv.Get("gateway_charge_id")).Scan(&disputed); e != nil {
+	if e = tx.QueryRow(ctx, `select exists(select 1 from gateway_events where financial_connection_id=$1 and charge_id=$2 and type in ('payment.refunded','payment.chargeback') and status='divergent') or exists(select 1 from payments where invoice_id=$3 and kind='reversal' and source<>'manual')`, connection, inv.Get("gateway_charge_id"), id).Scan(&disputed); e != nil {
 		return false, "", e
 	}
-	if disputed {
+	if disputed || forceReview {
 		e = tx.Exec(ctx, `update invoices set status='reconciling',status_note='estorno/contestação informado; confirmação posterior exige decisão manual' where id=$1`, id)
 		return false, "reconciling", e
 	}

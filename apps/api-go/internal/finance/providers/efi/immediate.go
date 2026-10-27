@@ -68,13 +68,11 @@ type pixCharge struct {
 		Original string `json:"original"`
 	} `json:"valor"`
 	Pix []struct {
-		ID      string `json:"endToEndId"`
-		TxID    string `json:"txid"`
-		Value   string `json:"valor"`
-		Time    string `json:"horario"`
-		Returns []struct {
-			Status string `json:"status"`
-		} `json:"devolucoes"`
+		ID      string      `json:"endToEndId"`
+		TxID    string      `json:"txid"`
+		Value   string      `json:"valor"`
+		Time    string      `json:"horario"`
+		Returns []pixRefund `json:"devolucoes"`
 	} `json:"pix"`
 }
 
@@ -85,23 +83,33 @@ func (a *Immediate) normalized(v pixCharge) (providers.Snapshot, error) {
 		return s, failure(providers.Conflict, "charge identity, key or amount mismatch")
 	}
 	// Removed or unknown states require explicit review, never a cash assumption.
-	if v.Status != "ATIVA" && v.Status != "CONCLUIDA" {
+	if v.Status != "ATIVA" && v.Status != "CONCLUIDA" && v.Status != "REMOVIDA_PELO_USUARIO_RECEBEDOR" && v.Status != "REMOVIDA_PELO_PSP" {
 		return s, failure(providers.Conflict, "charge state requires review")
 	}
 	s.Charge = providers.Charge{Scope: a.request.Scope, ID: v.TxID, IntentKey: a.request.IntentKey, InvoiceID: a.request.InvoiceID, Money: a.request.Money}
+	s.Status = map[string]string{"ATIVA": "active", "CONCLUIDA": "paid", "REMOVIDA_PELO_USUARIO_RECEBEDOR": "removed", "REMOVIDA_PELO_PSP": "removed"}[v.Status]
 	for _, p := range v.Pix {
 		n, err := cents(p.Value)
 		if err != nil || p.TxID != v.TxID {
 			return s, failure(providers.Conflict, "payment identity or amount mismatch")
-		}
-		if len(p.Returns) > 0 {
-			return s, failure(providers.Conflict, "refund history requires explicit reconciliation")
 		}
 		payment := providers.Payment{ID: p.ID, AmountCents: n, PaidAt: p.Time, Method: "pix", Currency: "BRL"}
 		if err = payment.Validate(); err != nil {
 			return s, failure(providers.Conflict, "invalid payment metadata")
 		}
 		s.Payments = append(s.Payments, payment)
+		for _, returned := range p.Returns {
+			result, err := returned.normalize(p.ID)
+			if err != nil {
+				return providers.Snapshot{}, err
+			}
+			if result.Refund != nil {
+				s.Refunds = append(s.Refunds, *result.Refund)
+			}
+			if result.State == "pending" {
+				s.ReviewRequired = true
+			}
+		}
 	}
 	if v.Status == "CONCLUIDA" && len(s.Payments) == 0 {
 		return s, failure(providers.Unavailable, "completed charge without confirmed payment details")

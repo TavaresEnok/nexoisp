@@ -65,6 +65,9 @@ financial="select jsonb_build_object('invoices',(select jsonb_agg(jsonb_build_ob
 
 with tempfile.TemporaryDirectory(prefix='nexo-b07-pipeline-') as tmp, tempfile.TemporaryFile() as log:
     stage=Path(tmp); shutil.copytree(ROOT/'db',stage/'db')
+    target=stage/'target72';shutil.copytree(ROOT/'db',target/'db')
+    for migration in (target/'db/migrations').glob('*.sql'):
+        if int(migration.name.split('_')[0])>72:migration.unlink()
     for migration in (stage/'db/migrations').glob('*.sql'):
         if int(migration.name.split('_')[0])>69: migration.unlink()
     assert subprocess.run(['docker','inspect',DB_CONTAINER],capture_output=True).returncode!=0
@@ -81,11 +84,17 @@ with tempfile.TemporaryDirectory(prefix='nexo-b07-pipeline-') as tmp, tempfile.T
           from invoices i join financial_connections c on c.tenant_id=i.tenant_id and c.account_ref='legacy69' where i.status_note='legacy69';
           update provider_issuance set state='uncertain' where financial_connection_id in(select id from financial_connections where account_ref='legacy69');""",'nexo_test')
         before=sql(financial,'nexo_test')
-        command(cli+['prepare'],cwd=ROOT,env=env,capture_output=True)
-        command(cli+['prepare'],cwd=ROOT,env=env,capture_output=True)
+        command(cli+['prepare'],cwd=target,env=env,capture_output=True)
+        command(cli+['prepare'],cwd=target,env=env,capture_output=True)
         assert sql(financial,'nexo_test')==before
         assert sql("select count(*) from provider_issuance where state='uncertain' and credential_version_id is null and product='pix_cob'",'nexo_test')=='1'
         assert sql('select max(version_id) from goose_db_version','nexo_test')=='72'
+        # The historical 69->72 data contract is asserted above. Current generated
+        # API readers may require later additive columns; recovery/API checks use
+        # the current schema, not an unsupported new-binary/old-schema pairing.
+        command(cli+['prepare'],cwd=ROOT,env=env,capture_output=True)
+        assert sql(financial,'nexo_test')==before
+        api_schema=int(sql('select max(version_id) from goose_db_version','nexo_test'))
         cert=stage/'client.pem'; key=stage/'client.key'
         command(['openssl','req','-x509','-newkey','ec','-pkeyopt','ec_paramgen_curve:P-256','-nodes','-days','1','-subj','/CN=synthetic-pipeline','-keyout',str(key),'-out',str(cert)],capture_output=True)
         secret={'client_id':'SYNTHETIC-PIPELINE-CLIENT','client_secret':'SYNTHETIC-PIPELINE-SECRET',
@@ -138,7 +147,7 @@ with tempfile.TemporaryDirectory(prefix='nexo-b07-pipeline-') as tmp, tempfile.T
             try: sql((ROOT/'db/migrations'/name).read_text().split('-- +goose Down')[1],'nexo_test')
             except subprocess.CalledProcessError as e: assert 'Preserve' in e.stderr
             else: raise AssertionError('destructive down was accepted: '+name)
-        report={'ok':True,'from':69,'to':72,'financial_history_preserved':True,'legacy_uncertain_not_rebound':True,
+        report={'ok':True,'from':69,'to':72,'api_recovery_schema':api_schema,'financial_history_preserved':True,'legacy_uncertain_not_rebound':True,
                 'rekey_frozen_semantics':True,'new_key_only':True,'logical_restore':True,'restored_api_replay':True,
                 'wrong_key_rejected':True,'down_rejected':[70,71,72],'physical_restore':False,'provider_called':False}
         target=ROOT/'tests/contrato/relatorios/provider-pipeline-migration.json'

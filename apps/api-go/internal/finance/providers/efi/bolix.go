@@ -121,8 +121,11 @@ func (a *Bolix) normalized(v billetCharge, knownID string) (providers.Snapshot, 
 		}
 	}
 	snapshot := providers.Snapshot{Charge: providers.Charge{Scope: a.request.Scope, ID: id, IntentKey: a.request.IntentKey, InvoiceID: a.request.InvoiceID, Money: a.request.Money}}
+	snapshot.Status = "active"
 	switch v.Status {
 	case "new", "waiting", "unpaid", "identified":
+	case "canceled":
+		snapshot.Status = "removed"
 	case "paid":
 		amount := v.PaidValue
 		if amount == nil {
@@ -143,6 +146,7 @@ func (a *Bolix) normalized(v billetCharge, knownID string) (providers.Snapshot, 
 			return providers.Snapshot{}, failure(providers.Conflict, "Bolix confirmed receipt lacks valid cents/timestamp")
 		}
 		snapshot.Payments = []providers.Payment{payment}
+		snapshot.Status = "paid"
 	// settled is a provider-side manual write-off, not proof of bank receipt.
 	default:
 		return providers.Snapshot{}, failure(providers.Conflict, "Bolix state requires review")

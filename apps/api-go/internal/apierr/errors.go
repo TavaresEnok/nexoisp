@@ -19,6 +19,10 @@ type Error struct {
 func (e *Error) Error() string              { return e.Message }
 func (e *Error) GetStatus() int             { return e.Status }
 func New(status int, message string) *Error { return &Error{Status: status, Message: message} }
+func IsFinancialConflict(err error) bool {
+	var p *pgconn.PgError
+	return errors.As(err, &p) && p.Code == "N7301"
+}
 func Map(err error) *Error {
 	var h *Error
 	if errors.As(err, &h) {
@@ -27,6 +31,8 @@ func Map(err error) *Error {
 	var p *pgconn.PgError
 	if errors.As(err, &p) {
 		switch p.Code {
+		case "N7301":
+			return New(409, "devolução incompatível com o recebimento ou identidade já utilizada")
 		case "N6901":
 			return New(409, "fatura com emissão no fornecedor: concilie ou cancele a cobrança antes de alterar ou baixar")
 		case "23505":

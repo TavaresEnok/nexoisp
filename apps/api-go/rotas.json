@@ -1524,6 +1524,18 @@
     {
       "method": "POST",
       "path": "/api/financial-connections/:id/issuance/:issuanceId/retry-lookup"
+    },
+    {
+      "method": "POST",
+      "path": "/api/financial-connections/:id/issuance/:issuanceId/operations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/financial-connections/:id/issuance/:issuanceId/operations"
+    },
+    {
+      "method": "POST",
+      "path": "/api/financial-connections/:id/issuance/:issuanceId/operations/:operationId/retry-lookup"
     }
   ]
 }

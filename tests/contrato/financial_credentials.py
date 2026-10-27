@@ -113,6 +113,49 @@ with tempfile.TemporaryFile() as log:
   assert call('/financial-connections/'+pix['id']+'/credentials',{'kind':'efi_charges','client_id':'other','client_secret':'other'},admin)['status']==409
   assert sql("select count(*) from provider_issuance where id in("+','.join(quote(x['id']) for x in [one,due,bolix])+") and state='prepared' and attempts=0",'nexo_test')=='3'
   check('Pix Cob, CobV and Bolix prepare with distinct validated contracts; mixed API credentials refused; no provider request executed')
+  # Owner changes only synthetic journal fixtures to represent issued responses;
+  # no provider request is executed by this staging API.
+  sql("update provider_issuance set state='uncertain' where id="+quote(one['id'])+";update provider_issuance set state='issued',charge_id='synthetic-operations-charge' where id="+quote(one['id']),'nexo_test')
+  operations=path+'/'+one['id']+'/operations'
+  cancel_body={'intent_id':str(uuid.uuid4()),'kind':'cancel','reason':'Synthetic unpaid provider cancellation'}
+  with concurrent.futures.ThreadPoolExecutor(4) as pool:
+   replies=list(pool.map(lambda _:call(operations,cancel_body,admin),range(12)))
+  assert all(r['status']==200 for r in replies),replies
+  operation_id=replies[0]['json']['id'];assert all(r['json']['id']==operation_id for r in replies)
+  assert call(operations,dict(cancel_body,reason='Changed intention reason for replay'),admin)['status']==409
+  for token,read_status,write_status in [(beta,404,404),(attendant,200,403),(limited,403,403)]:
+   result=call(operations,token=token);assert result['status']==read_status,(result['status'],read_status)
+   result=call(operations,cancel_body,token);assert result['status']==write_status,(result['status'],write_status)
+  assert len(api(operations))==1 and api(operations)[0]['state']=='prepared'
+  assert sql("select count(*) from audit_events where action='finance.provider.operation_prepare' and entity_id="+quote(operation_id),'nexo_test')=='1'
+  retry=operations+'/'+operation_id+'/retry-lookup';reason={'reason':'Synthetic operator requests lookup after credential repair'}
+  assert call(retry,reason,admin)['status']==409
+  sql("update provider_operations set state='uncertain' where id="+quote(operation_id)+";update provider_operations set state='review' where id="+quote(operation_id),'nexo_test')
+  assert api(retry,reason)=={'queued':True,'lookup_only':True}
+  assert api(operations)[0]['state']=='uncertain'
+  assert sql('select count(*) from payments where invoice_id='+quote(first_invoice['id']),'nexo_test')=='0'
+  assert sql('select provider_canceled_at is null from invoices where id='+quote(first_invoice['id']),'nexo_test')=='t'
+  check('operation preparation is concurrent/replay-safe and authorized; lookup retry cannot cancel locally or post cash; audit once')
+  sql("update provider_issuance set state='uncertain' where id="+quote(due['id'])+";update provider_issuance set state='issued',charge_id='synthetic-refund-operations-charge' where id="+quote(due['id']),'nexo_test')
+  due_invoice=api(path+'/'+due['id'])['invoice_id'];payment_id=str(uuid.uuid4())
+  sql("insert into payments(id,tenant_id,invoice_id,amount_cents,paid_at,method,source,gateway,gateway_payment_id,financial_connection_id) select "+quote(payment_id)+",tenant_id,id,12345,'2026-10-26T12:00:00Z','pix','reconciliation','efi','synthetic-refund-original',financial_connection_id from invoices where id="+quote(due_invoice),'nexo_test')
+  refund_path=path+'/'+due['id']+'/operations'
+  refund={'intent_id':str(uuid.uuid4()),'kind':'refund','payment_id':payment_id,'amount_cents':4000,'reason':'Synthetic partial refund reservation'}
+  first_refund=api(refund_path,refund);assert api(refund_path,refund)['id']==first_refund['id']
+  assert call(refund_path,dict(refund,amount_cents=4001),admin)['status']==409
+  second_refund=api(refund_path,dict(refund,intent_id=str(uuid.uuid4())));assert second_refund['id']!=first_refund['id']
+  assert call(refund_path,dict(refund,intent_id=str(uuid.uuid4()),amount_cents=5000),admin)['status']==409
+  audit_body=dict(refund,intent_id=str(uuid.uuid4()),amount_cents=1000)
+  sql("create function provider_operation_fail_audit() returns trigger language plpgsql as $$begin if new.action='finance.provider.operation_prepare' then raise exception 'synthetic operation audit failure';end if;return new;end$$; create trigger provider_operation_fail_audit before insert on audit_events for each row execute function provider_operation_fail_audit()",'nexo_test')
+  try:
+   assert call(refund_path,audit_body,admin)['status']==500
+   assert len(api(refund_path))==2
+  finally:sql('drop trigger provider_operation_fail_audit on audit_events;drop function provider_operation_fail_audit()','nexo_test')
+  assert api(refund_path,audit_body)['state']=='prepared'
+  assert sql("select count(*) from payments where invoice_id="+quote(due_invoice)+" and kind='reversal'",'nexo_test')=='0'
+  check('partial refund intentions reserve cumulative cents without posting cash; changed replay refused; audit failure rolls back reservation')
+
+
  finally:
   BASE=original;process.terminate()
   try:process.wait(timeout=10)

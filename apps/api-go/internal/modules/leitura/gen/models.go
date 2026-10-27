@@ -534,6 +534,7 @@ type Invoice struct {
 	FinancialConnectionID pgtype.UUID        `json:"financial_connection_id"`
 	SettlementVersion     int64              `json:"settlement_version"`
 	ProviderIssuanceID    pgtype.UUID        `json:"provider_issuance_id"`
+	ProviderCanceledAt    pgtype.Timestamptz `json:"provider_canceled_at"`
 }
 
 type InvoiceItem struct {
@@ -895,6 +896,8 @@ type Payment struct {
 	ReversalOf            pgtype.UUID        `json:"reversal_of"`
 	SignedCents           pgtype.Int4        `json:"signed_cents"`
 	FinancialConnectionID pgtype.UUID        `json:"financial_connection_id"`
+	ProviderRefundID      pgtype.Text        `json:"provider_refund_id"`
+	ProviderReturnID      pgtype.Text        `json:"provider_return_id"`
 }
 
 type PaymentEffect struct {
@@ -991,6 +994,27 @@ type ProviderNotice struct {
 	Status                string             `json:"status"`
 	CreatedAt             pgtype.Timestamptz `json:"created_at"`
 	ProcessedAt           pgtype.Timestamptz `json:"processed_at"`
+}
+
+type ProviderOperation struct {
+	ID                    jsonx.UUID         `json:"id"`
+	TenantID              jsonx.UUID         `json:"tenant_id"`
+	InvoiceID             jsonx.UUID         `json:"invoice_id"`
+	FinancialConnectionID jsonx.UUID         `json:"financial_connection_id"`
+	IssuanceID            jsonx.UUID         `json:"issuance_id"`
+	IntentID              jsonx.UUID         `json:"intent_id"`
+	Kind                  string             `json:"kind"`
+	RemoteID              string             `json:"remote_id"`
+	PaymentID             pgtype.UUID        `json:"payment_id"`
+	AmountCents           pgtype.Int4        `json:"amount_cents"`
+	Reason                string             `json:"reason"`
+	CreatedBy             jsonx.UUID         `json:"created_by"`
+	State                 string             `json:"state"`
+	Attempts              int32              `json:"attempts"`
+	NextAttemptAt         pgtype.Timestamptz `json:"next_attempt_at"`
+	LastError             pgtype.Text        `json:"last_error"`
+	CreatedAt             pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt             pgtype.Timestamptz `json:"updated_at"`
 }
 
 type PurchaseOrder struct {
