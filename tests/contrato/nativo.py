@@ -8,6 +8,7 @@ from pathlib import Path
 import subprocess
 import sys
 import time
+import traceback
 import uuid
 
 from lib import ROOT, LOCAL, DB_CONTAINER, DB_PORT, command, go, go_env, sql, quote, request, wait
@@ -139,4 +140,18 @@ def run():
 
 if __name__=='__main__':
     if len(sys.argv)>1 and sys.argv[1]=='up':up()
-    else:run()
+    else:
+        try:
+            run()
+        except Exception as exc:
+            if os.getenv('GITHUB_ACTIONS') == 'true':
+                # Public annotations identify the failing source expression,
+                # never exception values, response bodies, tokens or env values.
+                for frame in traceback.extract_tb(exc.__traceback__):
+                    path = Path(frame.filename).resolve()
+                    if not path.is_relative_to(ROOT):
+                        continue
+                    message = (type(exc).__name__ + ': ' + (frame.line or frame.name))
+                    message = message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+                    print(f'::error file={path.relative_to(ROOT)},line={frame.lineno},title=Contrato nativo::{message}', flush=True)
+            raise
