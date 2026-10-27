@@ -45,6 +45,17 @@ const selected = process.env.ONLY ? process.env.ONLY.split(',') : scenarios.slic
 for (const scenario of selected) {
   console.log(`>>> ${scenario}`);
   begin(scenario);
-  await import(`./${scenario}`);
-  await end();
+  try {
+    await import(`./${scenario}`);
+  } catch (error) {
+    // Hosted logs need a source location, not response bodies, cookies or tokens.
+    // Keep the failing scenario/exit code intact and never loosen assertions.
+    for (const line of String(error?.stack ?? '').split('\n')) {
+      const frame = line.match(/(?:file:\/\/)?\/e2e\/([a-zA-Z0-9_./-]+\.mjs):(\d+):\d+/);
+      if (frame) console.error(`::error file=e2e/${frame[1]},line=${frame[2]},title=Fumaça operacional::${error?.constructor?.name ?? 'Error'} in ${scenario}`);
+    }
+    throw error;
+  } finally {
+    await end();
+  }
 }
