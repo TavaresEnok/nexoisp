@@ -57,6 +57,9 @@ export const serviceSchema = z.object({
           online: z.boolean().optional(),
           unknown: z.boolean().optional(),
           ip: z.string().nullable().optional(),
+          ipv6_address: z.string().nullable().optional(),
+          ipv6_prefix: z.string().nullable().optional(),
+          delegated_ipv6_prefix: z.string().nullable().optional(),
         })
         .passthrough()
         .nullable(),
@@ -204,6 +207,30 @@ export function ContractService({
                             : "Sem sessão",
                     ],
                     ["IP", r.observed_session?.ip || "Não informado"],
+                    ...(r.observed_session?.ipv6_address
+                      ? [
+                          ["IPv6", r.observed_session.ipv6_address] as [
+                            string,
+                            string,
+                          ],
+                        ]
+                      : []),
+                    ...(r.observed_session?.ipv6_prefix
+                      ? [
+                          ["Prefixo IPv6", r.observed_session.ipv6_prefix] as [
+                            string,
+                            string,
+                          ],
+                        ]
+                      : []),
+                    ...(r.observed_session?.delegated_ipv6_prefix
+                      ? [
+                          [
+                            "Prefixo delegado",
+                            r.observed_session.delegated_ipv6_prefix,
+                          ] as [string, string],
+                        ]
+                      : []),
                     ["Leitura", stamp(r.observed_at)],
                   ]}
                 />

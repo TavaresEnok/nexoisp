@@ -261,6 +261,47 @@ func TestRadiusDisconnectJournalRecoversWithoutResendAndScopesNAS(t *testing.T) 
 	if finished, err := executor.RunOperation(ctx, tenant, unknownOp); err != nil || finished || state(unknownOp) != "UNCERTAIN" || sends.Load() != before {
 		t.Fatal("legacy version divergence discarded unknown effect", finished, state(unknownOp), err)
 	}
+
+	// Restarting the consumer must not count cumulative counters twice, and
+	// another NAS's open row must not become the current resource observation.
+	if _, err := owner.ExecContext(ctx, `update radius_acct set bytes_in=123456 where tenant_id=$1 and username=$2 and nas_ip='127.0.0.1'`, tenant, accepted.User); err != nil {
+		t.Fatal(err)
+	}
+	if err := executor.Sync(ctx, tenant); err != nil {
+		t.Fatal("accounting sync", err)
+	}
+	var usageBefore, usageAfter int64
+	if err := owner.QueryRowContext(ctx, `select coalesce(sum(bytes_in),0) from usage_daily where tenant_id=$1`, tenant).Scan(&usageBefore); err != nil {
+		t.Fatal(err)
+	}
+	restarted := &Executor{DB: database}
+	if err := restarted.Sync(ctx, tenant); err != nil {
+		t.Fatal("restarted sync", err)
+	}
+	if err := owner.QueryRowContext(ctx, `select coalesce(sum(bytes_in),0) from usage_daily where tenant_id=$1`, tenant).Scan(&usageAfter); err != nil || usageBefore < 123456 || usageAfter != usageBefore {
+		t.Fatal("restart double count", usageBefore, usageAfter, err)
+	}
+	if err := owner.QueryRowContext(ctx, `select observed_session is null from service_resources where id=$1`, accepted.ID).Scan(&closed); err != nil || !closed {
+		t.Fatal("foreign NAS became live observation", err)
+	}
+	// Retention cannot erase exact proof referenced by an unresolved operation.
+	var protected, ordinary int64
+	for _, target := range []*int64{&protected, &ordinary} {
+		if err := owner.QueryRowContext(ctx, `insert into radius_acct(tenant_id,unique_id,session_id,username,nas_ip,started_at,updated_at,stopped_at) values($1,$2,'synthetic-retention',$3,'127.0.0.1',now()-interval '502 days',now()-interval '501 days',now()-interval '501 days') returning id`, tenant, uuid.NewString(), unknown.User).Scan(target); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := owner.ExecContext(ctx, `update operation_attempts set steps=steps||jsonb_build_array(jsonb_build_object('radius_disconnect',(select jsonb_build_object('accounting_id',id::text,'session_id',session_id,'nas_ip',host(nas_ip),'started_at',started_at,'outcome','uncertain') from radius_acct where id=$2::bigint))) where id=(select id from operation_attempts where operation_id=$1 order by started_at desc limit 1)`, unknownOp, protected); err != nil {
+		t.Fatal(err)
+	}
+	if err := database.WithScope(ctx, scope, func(tx *db.Tx) error { return Purge(ctx, tx, tenant) }); err != nil {
+		t.Fatal("bounded retention", err)
+	}
+	var kept, dropped bool
+	if err := owner.QueryRowContext(ctx, `select exists(select 1 from radius_acct where id=$1),not exists(select 1 from radius_acct where id=$2)`, protected, ordinary).Scan(&kept, &dropped); err != nil || !kept || !dropped {
+		t.Fatal("unresolved proof retention", kept, dropped, err)
+	}
+
 	var paymentsAfter, movementsAfter int
 	if err := owner.QueryRowContext(ctx, `select (select count(*) from payments),(select count(*) from invoice_movements)`).Scan(&paymentsAfter, &movementsAfter); err != nil {
 		t.Fatal(err)

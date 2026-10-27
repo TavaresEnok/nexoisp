@@ -1,1 +1,1 @@
-select 1 from radius_acct where tenant_id = $1 and username = $2 and nas_ip=$3::inet limit 1
+select 1 from radius_acct where tenant_id = $1 and username = $2 and (nas_device_id=$4::uuid or (nas_device_id is null and nas_ip=$3::inet)) limit 1

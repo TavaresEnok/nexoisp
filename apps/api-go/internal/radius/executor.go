@@ -329,12 +329,12 @@ func (x *Executor) execute(ctx context.Context, tenant, agent string, d jsonx.Ob
 			}
 			step("autorização no RADIUS", "ok", map[string]any{"policy": p.Get("policy"), "profile": acc.Get("profile"), "atributos": names})
 		}
-		seen, e := one(ctx, tx, "executeOne", 2, tenant, p.Get("username"), dev.Get("nas_host"))
+		seen, e := one(ctx, tx, "executeOne", 2, tenant, p.Get("username"), dev.Get("nas_host"), dev.Get("nas_device_id"))
 		if e != nil {
 			return e
 		}
 		everSeen = seen != nil
-		sessions, e = tx.Objects(ctx, query("openSessions", 0), tenant, p.Get("username"), dev.Get("nas_host"))
+		sessions, e = tx.Objects(ctx, query("openSessions", 0), tenant, p.Get("username"), dev.Get("nas_host"), dev.Get("nas_device_id"))
 		return e
 	})
 	fail := func(e error) error {
@@ -478,7 +478,7 @@ func (x *Executor) execute(ctx context.Context, tenant, agent string, d jsonx.Ob
 		if e != nil {
 			return e
 		}
-		sessions, e = tx.Objects(ctx, query("openSessions", 0), tenant, p.Get("username"), dev.Get("nas_host"))
+		sessions, e = tx.Objects(ctx, query("openSessions", 0), tenant, p.Get("username"), dev.Get("nas_host"), dev.Get("nas_device_id"))
 		return e
 	})
 	if e != nil {
@@ -576,10 +576,18 @@ func Purge(ctx context.Context, tx *db.Tx, tenant string) error {
 		table, col string
 		days       any
 	}{{"radius_postauth", "at", auth}, {"radius_acct", "stopped_at", keep}, {"service_sessions", "stopped_at", keep}} {
-		sql := strings.NewReplacer("{{table}}", r.table, "{{col}}", r.col).Replace(template("purgeRadius", 2))
+		protection := ""
+		// Unknown Disconnects retain the exact accounting proof needed for recovery.
+		if r.table == "radius_acct" {
+			protection = ` and not exists(select 1 from operation_attempts a join operations o on o.id=a.operation_id cross join lateral jsonb_array_elements(a.steps) item where o.tenant_id=$1 and o.status in ('RESERVED','EXECUTING','VERIFYING','UNCERTAIN') and item->'radius_disconnect'->>'accounting_id'=radius_acct.id::text)`
+		}
+		sql := strings.NewReplacer("{{table}}", r.table, "{{col}}", r.col, "{{protection}}", protection).Replace(template("purgeRadius", 2))
 		if e = tx.Exec(ctx, sql, tenant, r.days, 5000); e != nil {
 			return e
 		}
+	}
+	if e = tx.Exec(ctx, `select radius_purge_accounting_events($1,5000)`, days("NEXO_RADIUS_EVENT_KEEP_DAYS", 60, 35)); e != nil {
+		return e
 	}
 	if e = tx.Exec(ctx, query("purgeRadius", 3), tenant, hours(), 20000); e != nil {
 		return e

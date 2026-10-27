@@ -1,1 +1,1 @@
-delete from {{table}} where ctid in (select ctid from {{table}} where tenant_id = $1 and {{col}} < now() - make_interval(days => $2::int) limit $3)
+delete from {{table}} where ctid in (select ctid from {{table}} where tenant_id = $1 and {{col}} < now() - make_interval(days => $2::int) {{protection}} limit $3)

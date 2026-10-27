@@ -1,3 +1,4 @@
+import { RadiusAccountingReview } from "./radius-accounting";
 import { useState } from "react";
 import useSWR from "swr";
 import { z } from "zod";
@@ -33,12 +34,16 @@ const statusSchema = z.object({
     authorization_store_reachable: z.boolean(),
     disconnect_write_enabled: z.boolean(),
     accounting_sync_enabled: z.boolean(),
+    accounting_review_allowed: z.boolean(),
     counts: z.object({
       accounts: z.coerce.number(),
       nas: z.coerce.number(),
       recent_nas: z.coerce.number(),
       open_sessions: z.coerce.number(),
       stale_sessions: z.coerce.number(),
+      quarantined_events: z.coerce.number(),
+      unmapped_sessions: z.coerce.number(),
+      ipv6_sessions: z.coerce.number(),
       uncertain_operations: z.coerce.number(),
     }),
   }),
@@ -157,6 +162,18 @@ export function RadiusOverview() {
                     ? "Consumidor habilitado"
                     : "Consumidor desabilitado",
                 ],
+                [
+                  "Accounting em quarentena",
+                  String(result.data.capabilities.counts.quarantined_events),
+                ],
+                [
+                  "Histórico sem NAS comprovado",
+                  String(result.data.capabilities.counts.unmapped_sessions),
+                ],
+                [
+                  "Sessões com IPv6 informado",
+                  String(result.data.capabilities.counts.ipv6_sessions),
+                ],
                 ["Endereço do servidor", result.data.host],
                 [
                   "Autenticação / accounting",
@@ -184,6 +201,9 @@ export function RadiusOverview() {
           </>
         )}
       </QueryBoundary>
+      {result.data?.capabilities.accounting_review_allowed && (
+        <RadiusAccountingReview />
+      )}
       {creating && (
         <RadiusEditor
           status={result.data}

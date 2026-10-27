@@ -1,6 +1,7 @@
 # Servidor RADIUS integrado do NexoISP. Sobe junto com o sistema e lê o banco do próprio NexoISP: o provedor não instala nada.
 # Só copia configuração (sem instalar pacotes): a imagem base já traz o driver do PostgreSQL.
-FROM freeradius/freeradius-server:latest-3.2
+# FreeRADIUS 3.2.10, imagem efetivamente usada no laboratório UDP.
+FROM freeradius/freeradius-server@sha256:337856ea35b77472f15dad159064ce46219a54b499bef5f6a7cba38aefd39fe9
 COPY sql /etc/raddb/mods-available/sql
 COPY queries.conf /etc/raddb/mods-config/sql/main/postgresql/queries.conf
 COPY clients.conf /etc/raddb/clients.conf
