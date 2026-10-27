@@ -36,7 +36,8 @@ try {
  assert.equal((await creation).ok(), true, 'contract mutation must succeed');
  await contractDialog.waitFor({ state: 'hidden' });
  await page.waitForURL(url => url.searchParams.get('abaFicha') === 'contrato');
- assert.equal(await page.getByRole('tab', { name: 'Contratos', exact: true }).getAttribute('aria-selected'), 'true');
+ // SPA history changes before React commits the tab; wait for that state.
+ await page.getByRole('tab', { name: 'Contratos', exact: true, selected: true }).waitFor();
  await page.getByRole('tabpanel', { name: 'Contratos', exact: true }).getByRole('button', { name: 'Abrir contrato', exact: true }).waitFor();
  const detail = await (await context.request.get(`${base}/api/subscribers/${id}`)).json(); const contractId = detail.contracts[0].id; assert.equal(detail.contracts[0].due_day, 12);
  await page.getByRole('tab', { name: 'Histórico', exact: true }).click(); await visible(page.getByText('Contrato criado', { exact: true })); checks.push('Contrato criado pela ficha com versão do plano e evento na linha do tempo');
