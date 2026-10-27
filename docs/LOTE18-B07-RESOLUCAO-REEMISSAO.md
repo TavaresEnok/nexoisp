@@ -16,7 +16,7 @@ QR/boleto são retirados quando a obrigação entra em revisão ou está liquida
 
 ## Retenção
 
-`NEXO_PROVIDER_NOTICE_PAYLOAD_KEEP_DAYS=0` mantém a rotina desligada por padrão. Valor explícito de 30 a 3650 habilita lotes de até 1000 corpos por execução de PURGE; esse número é um limite técnico, não parecer jurídico sobre prazo obrigatório. Apenas avisos processados, antigos e com consulta posterior sem revisão/erro/operação incerta são elegíveis. Pending/unmatched/review e simples ACK são preservados.
+`NEXO_PROVIDER_NOTICE_PAYLOAD_KEEP_DAYS=0` mantém a rotina desligada por padrão. Valor explícito de 30 a 3650 habilita lotes de até 1000 corpos por execução de PURGE; esse número é um limite técnico, não parecer jurídico sobre prazo obrigatório. Apenas avisos processados, antigos e com consulta posterior sem revisão/erro/operação incerta são elegíveis. Pending/unmatched/review e simples ACK são preservados. Reagendar uma consulta mantém a classificação do último erro até nova prova autenticada; o simples retry não torna o corpo elegível para redação.
 
 O corpo vira `{}` e recebe data de redação. ID, conta, fingerprint, estado, datas e histórico/auditoria permanecem; a chave de deduplicação não é removida. App não recebe UPDATE direto sobre o corpo. A função SQL restringe tenant/portal/POP, usa search_path fixo e registra lote/IDs na auditoria. Escolha do prazo depende da política do operador; não há expurgo automático de journals, pagamentos ou evidências.
 

@@ -30,7 +30,7 @@ func RetryProviderLookup(ctx context.Context, tx *db.Tx, id, connection string) 
 	case "review", "uncertain":
 		return tx.Exec(ctx, `update provider_issuance set state='uncertain',next_attempt_at=now(),last_error=null where id=$1`, id)
 	case "issued":
-		return tx.Exec(ctx, `update provider_issuance set receipt_review=false,receipt_next_at=now(),receipt_last_error=null where id=$1`, id)
+		return tx.Exec(ctx, `update provider_issuance set receipt_review=false,receipt_next_at=now() where id=$1`, id)
 	default:
 		return apierr.New(409, "intenção ainda não enviada; consulta não autoriza emissão")
 	}

@@ -349,6 +349,30 @@ func TestProviderNoticeRetentionPreservesDedupeAndAudit(t *testing.T) {
 	}); e == nil {
 		t.Fatal("direct redaction granted")
 	}
+
+	// Queueing a failed lookup is not new authenticated proof for retention.
+	if e := d.WithScope(ctx, scope, func(tx *db.Tx) error {
+		if e := tx.Exec(ctx, `insert into provider_notices(tenant_id,financial_connection_id,payload_hash,charge_id,payment_id,payload,status,created_at,processed_at) values(app_tenant(),$1,$2,$3,'retry-receipt','{"synthetic":true}','processed',now()-interval '91 days',now()-interval '90 days')`, r.Scope.ConnectionID, strings.Repeat("d", 64), a.snapshot.Charge.ID); e != nil {
+			return e
+		}
+		if e := tx.Exec(ctx, `update provider_issuance set receipt_review=true,receipt_last_error='provider_conflict' where id=$1`, item.ID); e != nil {
+			return e
+		}
+		if e := RetryProviderLookup(ctx, tx, item.ID, r.Scope.ConnectionID); e != nil {
+			return e
+		}
+		return tx.QueryRow(ctx, `select redact_provider_notice_payloads(30,1000)`).Scan(&n)
+	}); e != nil || n != 0 {
+		t.Fatal("retry without proof permitted redaction", e, n)
+	}
+	if _, e := ResolveProviderResult(ctx, d, scope, r.Scope.ConnectionID, item.ID, user, "resolve", ResolutionInput{uuid.NewString(), "Nova prova autenticada antes de permitir retenção"}, resolutionFactory(a)); e != nil {
+		t.Fatal(e)
+	}
+	if e := d.WithScope(ctx, scope, func(tx *db.Tx) error {
+		return tx.QueryRow(ctx, `select redact_provider_notice_payloads(30,1000)`).Scan(&n)
+	}); e != nil || n != 1 {
+		t.Fatal("new proof did not unblock eligible retention", e, n)
+	}
 }
 
 func TestProviderResolutionPartialAndUnresolvedReservation(t *testing.T) {
