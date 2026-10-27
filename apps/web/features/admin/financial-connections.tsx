@@ -7,6 +7,8 @@ import { QueryBoundary } from "@/features/shared/feedback";
 import { ActionButton } from "@/features/shared/action";
 import { RecordEditor } from "@/features/shared/record-editor";
 import { api } from "@/platform/erp-client";
+import { FinancialNotices } from "./financial-notices";
+import { useSession } from "@/features/session/provider";
 import { FinancialCredentials } from "./financial-credentials";
 
 const providers = [
@@ -36,6 +38,10 @@ const schema = z.object({
   credential_version_id: z.string().nullable().optional(),
 });
 export function FinancialConnections() {
+  const { me } = useSession();
+  const [notices, setNotices] = useState<{ id: string; name: string } | null>(
+    null,
+  );
   const result = useSWR("erp-financial-connections", async () =>
     z.array(schema).parse(await api("/financial-connections")),
   );
@@ -113,6 +119,11 @@ export function FinancialConnections() {
                     Credenciais
                   </Button>
                 )}
+                {item.provider === "efi" && !me?.support && (
+                  <Button onClick={() => setNotices(item)}>
+                    Triagem de avisos
+                  </Button>
+                )}
                 <ActionButton
                   confirm={`${item.status === "active" ? "Desativar" : "Ativar"} ${item.name}? As referências financeiras existentes serão preservadas.`}
                   onClick={async () => {
@@ -174,6 +185,12 @@ export function FinancialConnections() {
           }))}
         />
       </QueryBoundary>
+      {notices && (
+        <FinancialNotices
+          connection={notices}
+          onClose={() => setNotices(null)}
+        />
+      )}
       {credentials && (
         <FinancialCredentials
           connection={credentials}
