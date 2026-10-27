@@ -1,9 +1,13 @@
-package radius
+package db_test
 
 import (
+	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/md5"
 	"database/sql"
 	"encoding/base64"
+	"encoding/binary"
 	"errors"
 	"net"
 	"os"
@@ -18,6 +22,7 @@ import (
 	"nexoisp/api-go/internal/db"
 	"nexoisp/api-go/internal/jsonx"
 	"nexoisp/api-go/internal/network"
+	"nexoisp/api-go/internal/radius"
 	"nexoisp/api-go/internal/tenancy"
 )
 
@@ -56,7 +61,7 @@ func TestRadiusDisconnectJournalRecoversWithoutResendAndScopesNAS(t *testing.T) 
 		t.Fatal(e)
 	}
 	scope := tenancy.Scope{TenantID: tenant}
-	executor := &Executor{DB: database}
+	executor := &radius.Executor{DB: database}
 	server, e := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1)})
 	if e != nil {
 		t.Fatal(e)
@@ -104,7 +109,7 @@ func TestRadiusDisconnectJournalRecoversWithoutResendAndScopesNAS(t *testing.T) 
 	defer func() { _ = server.Close(); <-done }()
 	if e = database.WithScope(ctx, scope, func(tx *db.Tx) error {
 		var err error
-		agent, err = EnsureAgent(ctx, tx, tenant)
+		agent, err = radius.EnsureAgent(ctx, tx, tenant)
 		if err != nil {
 			return err
 		}
@@ -274,7 +279,7 @@ func TestRadiusDisconnectJournalRecoversWithoutResendAndScopesNAS(t *testing.T) 
 	if err := owner.QueryRowContext(ctx, `select coalesce(sum(bytes_in),0) from usage_daily where tenant_id=$1`, tenant).Scan(&usageBefore); err != nil {
 		t.Fatal(err)
 	}
-	restarted := &Executor{DB: database}
+	restarted := &radius.Executor{DB: database}
 	if err := restarted.Sync(ctx, tenant); err != nil {
 		t.Fatal("restarted sync", err)
 	}
@@ -294,7 +299,7 @@ func TestRadiusDisconnectJournalRecoversWithoutResendAndScopesNAS(t *testing.T) 
 	if _, err := owner.ExecContext(ctx, `update operation_attempts set steps=steps||jsonb_build_array(jsonb_build_object('radius_disconnect',(select jsonb_build_object('accounting_id',id::text,'session_id',session_id,'nas_ip',host(nas_ip),'started_at',started_at,'outcome','uncertain') from radius_acct where id=$2::bigint))) where id=(select id from operation_attempts where operation_id=$1 order by started_at desc limit 1)`, unknownOp, protected); err != nil {
 		t.Fatal(err)
 	}
-	if err := database.WithScope(ctx, scope, func(tx *db.Tx) error { return Purge(ctx, tx, tenant) }); err != nil {
+	if err := database.WithScope(ctx, scope, func(tx *db.Tx) error { return radius.Purge(ctx, tx, tenant) }); err != nil {
 		t.Fatal("bounded retention", err)
 	}
 	var kept, dropped bool
@@ -310,4 +315,27 @@ func TestRadiusDisconnectJournalRecoversWithoutResendAndScopesNAS(t *testing.T) 
 		t.Fatal("Disconnect changed financial history")
 	}
 
+}
+
+// Synthetic NAS responder for this cross-package integration test.
+const syntheticRadiusSecret = "synthetic-radius-secret-32-bytes"
+
+func testReply(request []byte, code byte, attrs []byte, withMAC bool) []byte {
+	p := make([]byte, 20)
+	p[0], p[1] = code, request[1]
+	copy(p[4:20], request[4:20])
+	p = append(p, attrs...)
+	if withMAC {
+		p = append(p, 80, 18)
+		p = append(p, make([]byte, 16)...)
+	}
+	binary.BigEndian.PutUint16(p[2:4], uint16(len(p)))
+	if withMAC {
+		mac := hmac.New(md5.New, []byte(syntheticRadiusSecret))
+		_, _ = mac.Write(p)
+		copy(p[len(p)-16:], mac.Sum(nil))
+	}
+	sum := md5.Sum(append(bytes.Clone(p), []byte(syntheticRadiusSecret)...))
+	copy(p[4:20], sum[:])
+	return p
 }

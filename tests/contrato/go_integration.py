@@ -30,7 +30,8 @@ def main():
         # contaminate finance receipts. Goroutine/race concurrency inside each test
         # remains enabled, including multi-worker receipt/idempotency tests.
         go('test', '-count=1', '-race', '-p', '1', '-json', './...',
-           env=dict(env, NEXO_GO_TEST_DATABASE_URL=env['DATABASE_URL_GO']))
+           env=dict(env, NEXO_GO_TEST_DATABASE_URL=env['DATABASE_URL_GO'],
+                    NEXO_GO_TEST_DATABASE_OWNER_URL=env['DATABASE_URL_OWNER']))
     finally:
         subprocess.run(['docker', 'rm', '-f', '-v', DB_CONTAINER], capture_output=True)
 

@@ -1,4 +1,4 @@
-package radius
+package db_test
 
 import (
 	"context"
