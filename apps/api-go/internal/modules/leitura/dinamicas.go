@@ -111,6 +111,15 @@ func registerDinamicas(api huma.API, registry *endpoint.Registry, s Service) {
 				scope = tenancy.Scope{}
 			}
 			err = s.DB.WithScope(ctx, scope, func(tx *db.Tx) error { var err error; result, err = handler(ctx, tx, r, input); return err })
+			if err == nil && path == "/api/radius/status" {
+				// VPN configuration is installation-wide in c1. Tenant/POP
+				// metrics need their own actor/cell scope after that TX closes.
+				var capabilities map[string]any
+				err = s.DB.WithScope(ctx, auth.From(ctx).Scope, func(tx *db.Tx) error { var e error; capabilities, e = s.radiusCapabilities(ctx, tx); return e })
+				if err == nil {
+					result.Value.(map[string]any)["capabilities"] = capabilities
+				}
+			}
 			if err == nil && path == "/api/invoices" {
 				return s.export(ctx, r, result)
 			}

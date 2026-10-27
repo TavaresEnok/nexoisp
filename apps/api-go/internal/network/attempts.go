@@ -82,6 +82,10 @@ func Begin(ctx context.Context, tx *db.Tx, agent, attempt string) (map[string]an
 		return no("not_owner"), nil
 	}
 	if op.Get("lease_expired") == true {
+		if op.Get("attempt_recover") == true {
+			_, err := MarkUncertain(ctx, tx, agent, attempt, []any{}, "reserva de recuperação expirou; efeito anterior preservado")
+			return no("recovery_lease_expired"), err
+		}
 		if err = tx.Exec(ctx, query("begin", 0), op.Get("id")); err != nil {
 			return nil, err
 		}
@@ -105,15 +109,31 @@ func Begin(ctx context.Context, tx *db.Tx, agent, attempt string) (map[string]an
 		return no(reason), finishAttempt(ctx, tx, attempt, status, nil)
 	}
 	if number(r.Get("desired_version")) != number(op.Get("desired_version")) {
+		if op.Get("attempt_recover") == true {
+			_, err := MarkUncertain(ctx, tx, agent, attempt, []any{}, "versão mudou durante efeito desconhecido; revisão sem novo comando")
+			return no("recovery_version_changed"), err
+		}
 		return stop("SUPERSEDED", fmt.Sprintf("intenção atual é a versão %s; esta tarefa (v%s) não foi aplicada", jsonx.String(r.Get("desired_version")), jsonx.String(op.Get("desired_version"))), "superseded")
 	}
-	if op.Get("validity_expired") == true {
+	if op.Get("validity_expired") == true && !(op.Get("attempt_recover") == true && op.Get("internal_agent") == true) {
+		if op.Get("attempt_recover") == true {
+			_, err := MarkUncertain(ctx, tx, agent, attempt, []any{}, "efeito anterior sem confirmação após validade; revisão de recuperação necessária")
+			return no("recovery_expired"), err
+		}
 		return stop("EXPIRED", "prazo de validade vencido", "expired")
 	}
-	if op.Get("action") != "subscriber.suspend" && op.Get("action") != "onu.deauthorize" && r.Get("contract_status") != "active" {
+	if op.Get("action") != "subscriber.suspend" && op.Get("action") != "onu.deauthorize" && r.Get("contract_status") != "active" && !(op.Get("attempt_recover") == true && op.Get("internal_agent") == true) {
+		if op.Get("attempt_recover") == true {
+			_, err := MarkUncertain(ctx, tx, agent, attempt, []any{}, "contrato encerrado durante efeito desconhecido; revisão de recuperação necessária")
+			return no("recovery_contract_changed"), err
+		}
 		return stop("CANCELED", "contrato não está mais vigente", "contract_ineligible")
 	}
-	if r.Get("maintenance") == true {
+	if r.Get("maintenance") == true && !(op.Get("attempt_recover") == true && op.Get("internal_agent") == true) {
+		if op.Get("attempt_recover") == true {
+			_, err := MarkUncertain(ctx, tx, agent, attempt, []any{}, "equipamento em manutenção; efeito anterior preservado para conferência")
+			return no("recovery_maintenance"), err
+		}
 		if err = tx.Exec(ctx, query("begin", 4), op.Get("id")); err != nil {
 			return nil, err
 		}
@@ -305,6 +325,13 @@ func RequestONU(ctx context.Context, tx *db.Tx, tenant, onu, action string, auth
 	if n == nil {
 		return nil, apierr.New(404, "ONU não encontrada")
 	}
+	var unresolved bool
+	if err = tx.QueryRow(ctx, `select exists(select 1 from operations where onu_id=$1 and status in ('RESERVED','EXECUTING','VERIFYING','UNCERTAIN'))`, onu).Scan(&unresolved); err != nil {
+		return nil, err
+	}
+	if unresolved {
+		return nil, apierr.New(409, "ONU possui operação em execução ou efeito desconhecido; aguarde confirmação antes de nova intenção")
+	}
 	if n.Get("agent_id") == nil {
 		return nil, apierr.New(400, fmt.Sprintf("OLT \"%v\" não tem agente associado", n.Get("device_name")))
 	}
@@ -348,4 +375,27 @@ func RequestONU(ctx context.Context, tx *db.Tx, tenant, onu, action string, auth
 		return nil, err
 	}
 	return one(ctx, tx, name, 4, id, tenant, onu, n.Get("device_id"), n.Get("agent_id"), action, version, params, key, validUntil, auth, envelope, signature, authz.Reason)
+}
+
+// MarkUncertain preserves an internal executor's unknown external effect. It
+// cannot be turned into FAILED/PENDING simply by exhausting automatic retries.
+func MarkUncertain(ctx context.Context, tx *db.Tx, agent, attempt string, steps any, message string) (map[string]any, error) {
+	op, err := lockAttempt(ctx, tx, agent, attempt)
+	if err != nil {
+		return nil, err
+	}
+	if op.Get("current_attempt_id") != attempt || !(slices.Contains([]any{"EXECUTING", "VERIFYING"}, op.Get("status")) || (op.Get("status") == "RESERVED" && op.Get("attempt_recover") == true)) {
+		return map[string]any{"ack": false}, nil
+	}
+	raw, err := encode(map[string]any{"outcome": "UNCERTAIN", "steps": steps, "error": message, "attempt_id": attempt})
+	if err != nil {
+		return nil, err
+	}
+	if err = tx.Exec(ctx, `update operations set status='UNCERTAIN',result=$2,note=$3,lease_until=null,current_attempt_id=null,next_attempt_at=now()+interval '30 seconds',updated_at=now(),finished_at=null where id=$1`, op.Get("id"), raw, message); err != nil {
+		return nil, err
+	}
+	if err = finishAttempt(ctx, tx, attempt, "UNCERTAIN", steps); err != nil {
+		return nil, err
+	}
+	return map[string]any{"ack": true, "status": "UNCERTAIN"}, nil
 }

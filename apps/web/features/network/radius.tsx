@@ -29,6 +29,19 @@ import { vendors, stamp, type Device } from "./models";
 import { useNetworkRefresh } from "./queries";
 import { useCreateRequest } from "@/features/shared/create-request";
 const statusSchema = z.object({
+  capabilities: z.object({
+    authorization_store_reachable: z.boolean(),
+    disconnect_write_enabled: z.boolean(),
+    accounting_sync_enabled: z.boolean(),
+    counts: z.object({
+      accounts: z.coerce.number(),
+      nas: z.coerce.number(),
+      recent_nas: z.coerce.number(),
+      open_sessions: z.coerce.number(),
+      stale_sessions: z.coerce.number(),
+      uncertain_operations: z.coerce.number(),
+    }),
+  }),
   enabled: z.boolean(),
   host: z.string(),
   host_configured: z.boolean(),
@@ -124,6 +137,26 @@ export function RadiusOverview() {
                     ? "Habilitada nesta instalação"
                     : "Não habilitada nesta instalação",
                 ],
+                [
+                  "Registro de autorização",
+                  result.data.capabilities.authorization_store_reachable
+                    ? `${result.data.capabilities.counts.accounts} conta(s) · banco acessível`
+                    : "Indisponível",
+                ],
+                [
+                  "Sessões informadas",
+                  `${result.data.capabilities.counts.open_sessions} abertas · ${result.data.capabilities.counts.stale_sessions} sem atualização há 15 min`,
+                ],
+                [
+                  "Desconexão de sessão",
+                  `${result.data.capabilities.disconnect_write_enabled ? "Envio habilitado" : "Envio desabilitado"} · ${result.data.capabilities.counts.uncertain_operations} resultado(s) desconhecido(s)`,
+                ],
+                [
+                  "Leitura de accounting",
+                  result.data.capabilities.accounting_sync_enabled
+                    ? "Consumidor habilitado"
+                    : "Consumidor desabilitado",
+                ],
                 ["Endereço do servidor", result.data.host],
                 [
                   "Autenticação / accounting",
@@ -138,7 +171,10 @@ export function RadiusOverview() {
             <p className="profile-footnote">
               Os comandos de configuração não são aplicados automaticamente ao
               concentrador. Túneis dependem dos recursos habilitados nesta
-              instalação.
+              instalação. Pacote recente e banco acessível não comprovam a
+              aplicação de perfil no equipamento. Sessões antigas são
+              sinalizadas para conferência; esta tela não as encerra
+              automaticamente.
             </p>
             {!result.data.host_configured && (
               <Badge variant="warning" className="h-auto whitespace-normal">

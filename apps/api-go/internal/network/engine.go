@@ -115,6 +115,13 @@ func Request(ctx context.Context, tx *db.Tx, tenant, resource, action string, au
 			return dup, nil
 		}
 	}
+	var unresolved bool
+	if err = tx.QueryRow(ctx, `select exists(select 1 from operations where resource_id=$1 and status in ('RESERVED','EXECUTING','VERIFYING','UNCERTAIN'))`, resource).Scan(&unresolved); err != nil {
+		return nil, err
+	}
+	if unresolved {
+		return nil, apierr.New(409, "recurso possui operação em execução ou efeito desconhecido; aguarde confirmação antes de nova intenção")
+	}
 	if r.Get("agent_id") == nil {
 		return nil, apierr.New(400, fmt.Sprintf("equipamento \"%v\" não tem agente associado", r.Get("device_name")))
 	}

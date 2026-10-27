@@ -95,7 +95,14 @@ func (x *Executor) RunOperation(ctx context.Context, tenant, id string) (bool, e
 		return false, e
 	}
 	e = x.execute(ctx, tenant, jsonx.String(op.Get("agent_id")), object(jsonx.JSON(b)))
-	return e == nil, e
+	if e != nil {
+		return false, e
+	}
+	var state string
+	e = x.scope(ctx, tenant, func(tx *db.Tx) error {
+		return tx.QueryRow(ctx, `select status from operations where id=$1`, id).Scan(&state)
+	})
+	return state != "PENDING" && state != "UNCERTAIN", e
 }
 func (x *Executor) Run(ctx context.Context, syncAccounting bool) error {
 	if _, e := Key(); e != nil {
@@ -111,7 +118,12 @@ func (x *Executor) Run(ctx context.Context, syncAccounting bool) error {
 		if e = x.scope(ctx, tenant, func(tx *db.Tx) error { return tx.Exec(ctx, query("runHostedOnce", 1), agent) }); e != nil {
 			return e
 		}
-		for i := 0; i < 200; i++ {
+		limit := int(number(os.Getenv("NEXO_RADIUS_MAX_OPS_PER_TENANT")))
+		if limit <= 0 {
+			limit = 8
+		}
+		limit = min(limit, 32)
+		for i := 0; i < limit; i++ {
 			var task any
 			e = x.scope(ctx, tenant, func(tx *db.Tx) error { var e error; task, e = network.Reserve(ctx, tx, agent); return e })
 			if e != nil {
@@ -239,6 +251,8 @@ func (x *Executor) execute(ctx context.Context, tenant, agent string, d jsonx.Ob
 		return e
 	}
 	steps := []map[string]any{}
+	uncertain := d.Get("recover") == true
+	history := map[string]disconnectMarker{}
 	step := func(name, status string, detail any) {
 		v := map[string]any{"name": name, "status": status, "at": time.Now().UTC().Format("2006-01-02T15:04:05.000Z")}
 		if detail != nil {
@@ -255,9 +269,18 @@ func (x *Executor) execute(ctx context.Context, tenant, agent string, d jsonx.Ob
 			if message != nil {
 				b["error"] = message
 			}
-			r, e := network.Result(ctx, tx, agent, attempt, b)
+			var r map[string]any
+			var e error
+			if outcome == "UNCERTAIN" {
+				r, e = network.MarkUncertain(ctx, tx, agent, attempt, steps, jsonx.String(message))
+			} else {
+				r, e = network.Result(ctx, tx, agent, attempt, b)
+			}
 			if e != nil {
 				return e
+			}
+			if r["ack"] == false {
+				return fmt.Errorf("posse da operação mudou antes de registrar o resultado")
 			}
 			encoded, _ := jsonx.Encode(map[string]any{"status": r["status"]})
 			result := "failed"
@@ -279,6 +302,10 @@ func (x *Executor) execute(ctx context.Context, tenant, agent string, d jsonx.Ob
 		if dev == nil {
 			return fmt.Errorf("concentrador sem cadastro no RADIUS integrado")
 		}
+		history, e = disconnectHistory(ctx, tx, jsonx.String(env.Get("operation_id")))
+		if e != nil {
+			return e
+		}
 		before, e := readAccount(ctx, tx, tenant, p.Get("username"))
 		if e != nil {
 			return e
@@ -288,6 +315,9 @@ func (x *Executor) execute(ctx context.Context, tenant, agent string, d jsonx.Ob
 			acc = before
 			step("autorização no RADIUS", "ok", "já aplicada nesta versão")
 		} else {
+			if d.Get("recover") == true {
+				return fmt.Errorf("recuperação exige autorização já confirmável; nenhuma nova escrita será enviada")
+			}
 			var reply []Attribute
 			acc, reply, e = account(ctx, tx, tenant, p, env.Get("desired_version"), begin["secret"], dev)
 			if e != nil {
@@ -299,12 +329,12 @@ func (x *Executor) execute(ctx context.Context, tenant, agent string, d jsonx.Ob
 			}
 			step("autorização no RADIUS", "ok", map[string]any{"policy": p.Get("policy"), "profile": acc.Get("profile"), "atributos": names})
 		}
-		seen, e := one(ctx, tx, "executeOne", 2, tenant, p.Get("username"))
+		seen, e := one(ctx, tx, "executeOne", 2, tenant, p.Get("username"), dev.Get("nas_host"))
 		if e != nil {
 			return e
 		}
 		everSeen = seen != nil
-		sessions, e = tx.Objects(ctx, query("openSessions", 0), tenant, p.Get("username"))
+		sessions, e = tx.Objects(ctx, query("openSessions", 0), tenant, p.Get("username"), dev.Get("nas_host"))
 		return e
 	})
 	fail := func(e error) error {
@@ -313,13 +343,16 @@ func (x *Executor) execute(ctx context.Context, tenant, agent string, d jsonx.Ob
 			message = message[:300]
 		}
 		step("execução", "falha", message)
-		_ = finish("FAILED", nil, message)
-		return nil
+		outcome := "FAILED"
+		if uncertain {
+			outcome = "UNCERTAIN"
+		}
+		return finish(outcome, nil, message)
 	}
 	if e != nil {
 		return fail(e)
 	}
-	if e = x.scope(ctx, tenant, func(tx *db.Tx) error { _, e := network.Progress(ctx, tx, agent, attempt, "EXECUTING", steps); return e }); e != nil {
+	if e = x.scope(ctx, tenant, func(tx *db.Tx) error { return persistDisconnectSteps(ctx, tx, agent, attempt, steps) }); e != nil {
 		return fail(e)
 	}
 	targets := []jsonx.Object{}
@@ -331,72 +364,110 @@ func (x *Executor) execute(ctx context.Context, tenant, agent string, d jsonx.Ob
 			}
 		}
 	}
+	uncertain = false // Rebuild external uncertainty from the durable target history.
 	pending := 0
-	gone := func(r DisconnectResult) bool {
-		return r.Outcome == "nak" && r.Cause != nil && (*r.Cause == 503 || (dev.Get("vendor") == "mikrotik" && *r.Cause == 406))
+	// Recover every frozen target, including a target no longer in the open list.
+	for _, marker := range history {
+		if marker.Outcome == "invalid" || marker.Outcome == "unavailable" || marker.Outcome == "nak" {
+			continue
+		}
+		var closed bool
+		if e = x.scope(ctx, tenant, func(tx *db.Tx) error {
+			var e error
+			closed, e = disconnectedByAccounting(ctx, tx, tenant, jsonx.String(p.Get("username")), marker)
+			return e
+		}); e != nil {
+			return fail(e)
+		}
+		if closed {
+			marker.Outcome = "observed"
+			steps = append(steps, markerStep(marker))
+		} else {
+			pending++
+			uncertain = true
+			step("consulta da sessão", "incerto", "o accounting ainda não confirmou o encerramento da sessão identificada; comando não repetido")
+		}
 	}
-	drop := func(session jsonx.Object) DisconnectResult {
+	for _, session := range targets {
+		marker := markerFor(session)
+		if prior, exists := history[marker.AccountingID]; exists && prior.Outcome != "invalid" && prior.Outcome != "unavailable" && prior.Outcome != "nak" {
+			continue
+		}
+		if d.Get("recover") == true {
+			pending++
+			prior, known := history[marker.AccountingID]
+			if !known || (prior.Outcome != "invalid" && prior.Outcome != "unavailable" && prior.Outcome != "nak") {
+				uncertain = true
+			}
+			step("desconexão da sessão", "incerto", "recuperação sem prova de envio individual: somente leitura")
+			continue
+		}
+		if os.Getenv("NEXO_RADIUS_DISCONNECT_WRITE") != "1" {
+			pending++
+			step("desconexão da sessão", "pendente", "envio de Disconnect desabilitado; autorização vale para a próxima conexão")
+			continue
+		}
 		host := dev.Get("coa_host")
 		if !jsonx.Truthy(host) {
 			host = dev.Get("nas_host")
 		}
-		sid, ip := "", ""
-		if session != nil {
-			sid = fmt.Sprint(session.Get("session_id"))
-			if session.Get("framed_ip") != nil {
-				ip = fmt.Sprint(session.Get("framed_ip"))
-			}
+		ip := ""
+		if session.Get("framed_ip") != nil {
+			ip = jsonx.String(session.Get("framed_ip"))
 		}
-		return SendDisconnect(ctx, fmt.Sprint(host), int(number(dev.Get("coa_port"))), fmt.Sprint(dev.Get("secret")), fmt.Sprint(p.Get("username")), sid, ip)
-	}
-	for _, session := range targets {
-		r := drop(session)
-		detail := map[string]any{"sessao": session.Get("session_id")}
-		if r.Outcome == "ack" {
-			detail["resposta"] = "aceita pelo concentrador"
-			step("desconexão da sessão", "ok", detail)
-		} else if gone(r) {
-			if e = x.scope(ctx, tenant, func(tx *db.Tx) error { return tx.Exec(ctx, query("executeOne", 3), session.Get("id")) }); e != nil {
+		wasUncertain := uncertain
+		markerIndex := len(steps)
+		steps = append(steps, markerStep(marker))
+		uncertain = true
+		if e = x.scope(ctx, tenant, func(tx *db.Tx) error { return persistDisconnectSteps(ctx, tx, agent, attempt, steps) }); e != nil {
+			return fail(e)
+		}
+		reply := SendDisconnect(ctx, jsonx.String(host), int(number(dev.Get("coa_port"))), jsonx.String(dev.Get("secret")), jsonx.String(p.Get("username")), marker.SessionID, ip)
+		marker.Outcome = reply.Outcome
+		steps[markerIndex] = markerStep(marker)
+		if reply.Outcome == "ack" || (reply.Outcome == "nak" && reply.Cause != nil && *reply.Cause == 503) {
+			reason := "Disconnect-ACK"
+			if reply.Outcome == "nak" {
+				reason = "Session-Context-Not-Found"
+			}
+			if e = x.scope(ctx, tenant, func(tx *db.Tx) error {
+				if e := closeDisconnected(ctx, tx, tenant, jsonx.String(p.Get("username")), marker, reason); e != nil {
+					return e
+				}
+				return persistDisconnectSteps(ctx, tx, agent, attempt, steps)
+			}); e != nil {
 				return fail(e)
 			}
-			detail["resposta"] = "o concentrador não tem mais essa sessão"
-			step("desconexão da sessão", "ok", detail)
+			uncertain = wasUncertain
+			step("desconexão da sessão", "ok", "encerramento confirmado por resposta autenticada do concentrador")
 		} else {
 			pending++
-			detail["resposta"] = "sem resposta do concentrador"
-			if r.Outcome == "nak" {
-				cause := "?"
-				if r.Cause != nil {
-					cause = fmt.Sprint(*r.Cause)
-				}
-				detail["resposta"] = "recusada (causa " + cause + ")"
+			if reply.Outcome != "timeout" {
+				uncertain = wasUncertain
 			}
-			step("desconexão da sessão", "incerto", detail)
+			detail := map[string]any{"resultado": reply.Outcome}
+			if reply.Cause != nil {
+				detail["causa"] = *reply.Cause
+			}
+			step("desconexão da sessão", "pendente", detail)
+			if e = x.scope(ctx, tenant, func(tx *db.Tx) error { return persistDisconnectSteps(ctx, tx, agent, attempt, steps) }); e != nil {
+				return fail(e)
+			}
 		}
 	}
 	wants := p.Get("reconnect") == true || (p.Get("policy") == "suspended" && object(p.Get("suspension")).Get("session") == "disconnect")
 	if ipoe {
-		step("desconexão da sessão", "ok", fmt.Sprintf("IPoE: vale na próxima renovação da concessão (até %g s)", leaseSeconds()))
+		step("desconexão da sessão", "ok", fmt.Sprintf("IPoE: autorização vale na próxima renovação (até %g s)", leaseSeconds()))
 	} else if len(targets) == 0 && wants && !fresh && !everSeen {
-		r := drop(nil)
-		if r.Outcome == "ack" {
-			step("desconexão da sessão", "ok", map[string]any{"resposta": "aceita pelo concentrador (sessão sem registro de accounting)"})
-		} else if gone(r) {
-			step("desconexão da sessão", "ok", "o concentrador não tem sessão desta conta")
-		} else {
-			pending++
-			reply := "sem resposta do concentrador"
-			if r.Outcome == "nak" {
-				cause := "?"
-				if r.Cause != nil {
-					cause = fmt.Sprint(*r.Cause)
-				}
-				reply = "recusada (causa " + cause + ")"
-			}
-			step("desconexão da sessão", "incerto", map[string]any{"resposta": reply})
-		}
-	} else if len(targets) == 0 {
-		step("desconexão da sessão", "ok", "nenhuma sessão a tratar")
+		pending++
+		uncertain = true
+		step("desconexão da sessão", "incerto", "sem identidade de accounting: nenhum Disconnect genérico por usuário foi enviado")
+	} else if d.Get("recover") == true && wants && len(history) == 0 {
+		pending++
+		uncertain = true
+		step("consulta da sessão", "incerto", "tentativa anterior sem journal de desconexão; não presumir efeito nem repetir")
+	} else if len(targets) == 0 && pending == 0 {
+		step("desconexão da sessão", "ok", "nenhuma sessão identificada exige desconexão")
 	}
 	e = x.scope(ctx, tenant, func(tx *db.Tx) error {
 		if _, e := network.Progress(ctx, tx, agent, attempt, "VERIFYING", steps); e != nil {
@@ -407,7 +478,7 @@ func (x *Executor) execute(ctx context.Context, tenant, agent string, d jsonx.Ob
 		if e != nil {
 			return e
 		}
-		sessions, e = tx.Objects(ctx, query("openSessions", 0), tenant, p.Get("username"))
+		sessions, e = tx.Objects(ctx, query("openSessions", 0), tenant, p.Get("username"), dev.Get("nas_host"))
 		return e
 	})
 	if e != nil {
@@ -426,6 +497,9 @@ func (x *Executor) execute(ctx context.Context, tenant, agent string, d jsonx.Ob
 	ok := number(acc.Get("applied_version")) == number(env.Get("desired_version")) && acc.Get("policy") == p.Get("policy") && pending == 0
 	status := "falha"
 	outcome := "FAILED"
+	if pending > 0 && uncertain {
+		outcome = "UNCERTAIN"
+	}
 	var message any = "o concentrador não confirmou a desconexão da sessão"
 	if ok {
 		status, outcome, message = "ok", "SUCCEEDED", nil

@@ -1,1 +1,1 @@
-select id, session_id, framed_ip, started_at, calling_station from radius_acct where tenant_id = $1 and username = $2 and stopped_at is null order by started_at
+select id::text as id, session_id, framed_ip, started_at, calling_station, host(nas_ip) as nas_ip from radius_acct where tenant_id = $1 and username = $2 and nas_ip=$3::inet and stopped_at is null order by started_at
