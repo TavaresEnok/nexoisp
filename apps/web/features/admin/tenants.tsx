@@ -79,7 +79,9 @@ export function TenantDirectory() {
   const { reload } = useSession();
   const navigate = useNavigate();
   const [editor, setEditor] = useState<
-    "create" | { kind: "modules" | "support" | "name"; tenant: Tenant } | null
+    | "create"
+    | { kind: "modules" | "support" | "name" | "acs"; tenant: Tenant }
+    | null
   >(null);
   useCreateRequest("provedor", () => setEditor("create"));
   return (
@@ -145,6 +147,13 @@ export function TenantDirectory() {
                   onClick={() => setEditor({ kind: "support", tenant: item })}
                 >
                   Acesso de suporte
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditor({ kind: "acs", tenant: item })}
+                >
+                  Atribuir CPE
                 </Button>
                 <ActionButton
                   danger={item.status === "active"}
@@ -260,6 +269,41 @@ export function TenantDirectory() {
           onDone={async () => {
             setEditor(null);
             await result.mutate();
+          }}
+        />
+      )}
+      {editor && editor !== "create" && editor.kind === "acs" && (
+        <RecordEditor
+          title={`Atribuir CPE a ${editor.tenant.name}`}
+          description="Atribui propriedade no inventário ACS, conferindo serial e leitura. Não transfere CPE de outro provedor nem vincula automaticamente um contrato."
+          initial={{ acs_device_id: "", serial: "", reason: "" }}
+          fields={[
+            {
+              key: "acs_device_id",
+              label: "Identificador no ACS",
+              required: true,
+              maxLength: 200,
+            },
+            {
+              key: "serial",
+              label: "Serial conferido",
+              required: true,
+              maxLength: 64,
+            },
+            {
+              key: "reason",
+              label: "Justificativa (10 a 500 caracteres)",
+              required: true,
+              maxLength: 500,
+            },
+          ]}
+          submit="Atribuir e conferir"
+          onClose={() => setEditor(null)}
+          onSubmit={async (values) => {
+            await api("/acs/ownership/assign", {
+              body: { ...values, tenant_id: editor.tenant.id },
+            });
+            setEditor(null);
           }}
         />
       )}

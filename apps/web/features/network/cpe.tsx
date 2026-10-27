@@ -18,7 +18,7 @@ import { can } from "@/features/session/model";
 import { api } from "@/platform/erp-client";
 import { stamp } from "./models";
 import { duration } from "./telemetry";
-import { notifyAcs } from "./acs-notice";
+import { CpeTasks, useCpeCommands } from "./cpe-tasks";
 export const cpeDeviceSchema = z.object({
   id: z.string(),
   manufacturer: z.string().nullable(),
@@ -75,18 +75,15 @@ export function ContractCpe({ id }: { id: string }) {
     acsStatusSchema.parse(await api("/acs/status")),
   );
   const d = result.data?.device;
-  const action = async (kind: string) => {
-    const response = await api<{ note?: string; result?: string }>(
-      `${path}/${kind}`,
-      { method: "POST" },
-    );
-    notifyAcs(response);
+  const commands = useCpeCommands(id, false, Boolean(result.data?.linked));
+  const action = async (kind: "refresh" | "reboot") => {
+    await commands.send(kind);
     await result.mutate();
   };
   return (
     <ProfileSection
       title="Roteador do assinante · TR-069"
-      caption="Gerência pelo servidor ACS configurado nesta instalação."
+      caption="Somente roteadores atribuídos a este provedor. Aceite de tarefa é separado da alteração observada."
     >
       <QueryBoundary
         loading={result.isLoading}
@@ -103,8 +100,9 @@ export function ContractCpe({ id }: { id: string }) {
               {!result.data.linked && (
                 <>
                   <p className="profile-footnote">
-                    Nenhum roteador vinculado. Procure pela conta PPPoE do
-                    contrato ou pelo número de série da etiqueta.
+                    Nenhum roteador vinculado. O operador da plataforma deve
+                    atribuir o CPE ao provedor antes da pesquisa; número de
+                    série não prova propriedade.
                   </p>
                   {acs.data?.public_url && (
                     <ProfileFacts
@@ -243,6 +241,7 @@ export function ContractCpe({ id }: { id: string }) {
                             <Button
                               variant="outline"
                               size="sm"
+                              disabled={commands.blocked}
                               onClick={() =>
                                 setWifi({ index: w.index, ssid: w.ssid ?? "" })
                               }
@@ -256,17 +255,22 @@ export function ContractCpe({ id }: { id: string }) {
                   )}
                   {operate && (
                     <div className="erp-inline-actions">
-                      <ActionButton onClick={() => action("refresh")}>
+                      <ActionButton
+                        disabled={commands.blocked}
+                        onClick={() => action("refresh")}
+                      >
                         Reler roteador
                       </ActionButton>
                       <ActionButton
-                        confirm="Reiniciar o roteador do assinante? A conexão poderá cair por alguns minutos."
+                        disabled={commands.blocked}
+                        confirm="Registrar reinício do roteador? Será processado quando o CPE contatar o ACS. A conexão poderá cair por alguns minutos."
                         onClick={() => action("reboot")}
                       >
                         Reiniciar roteador
                       </ActionButton>
                       <ActionButton
                         danger
+                        disabled={commands.blocked}
                         confirm="Desvincular este roteador do contrato?"
                         onClick={async () => {
                           await api(`${path}/link`, { method: "DELETE" });
@@ -284,10 +288,13 @@ export function ContractCpe({ id }: { id: string }) {
           )
         )}
       </QueryBoundary>
+      {result.data?.linked && (
+        <CpeTasks commands={commands} writable={operate} />
+      )}
       {wifi && (
         <RecordEditor
           title="Alterar Wi-Fi do assinante"
-          description="Aparelhos conectados precisarão da nova senha. Em branco, a senha atual será mantida. O servidor informa se a alteração foi aplicada ou ficou na fila."
+          description="Aparelhos conectados precisarão da nova senha. Em branco, a senha atual será mantida. A tarefa fica registrada e somente uma leitura confirma a alteração."
           initial={{ ssid: wifi.ssid, password: "" }}
           fields={[
             { key: "ssid", label: "Nome da rede Wi-Fi", maxLength: 32 },
@@ -304,17 +311,11 @@ export function ContractCpe({ id }: { id: string }) {
           onSubmit={async (values) => {
             if (values.password && values.password.length < 8)
               throw new Error("A senha deve ter pelo menos oito caracteres.");
-            const response = await api<{ note?: string; result?: string }>(
-              `${path}/wifi`,
-              {
-                body: {
-                  index: wifi.index,
-                  ...(values.ssid ? { ssid: values.ssid } : {}),
-                  ...(values.password ? { password: values.password } : {}),
-                },
-              },
-            );
-            notifyAcs(response);
+            await commands.send("wifi", {
+              index: wifi!.index,
+              ...(values.ssid ? { ssid: values.ssid } : {}),
+              ...(values.password ? { password: values.password } : {}),
+            });
             setWifi(null);
             await result.mutate();
           }}

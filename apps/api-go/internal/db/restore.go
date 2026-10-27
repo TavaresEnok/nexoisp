@@ -18,7 +18,17 @@ func verifyRestore(ctx context.Context, c *sql.DB, out io.Writer) error {
 	}
 	defer tx.Rollback()
 	count := 0
-	for _, field := range [][2]string{{"service_resources", "secret_enc"}, {"users", "mfa_secret_enc"}, {"webhook_endpoints", "secret_enc"}, {"notice_channels", "headers_enc"}, {"financial_connections", "webhook_secret_enc"}, {"financial_credential_versions", "secret_enc"}} {
+	for _, field := range [][2]string{{"service_resources", "secret_enc"}, {"users", "mfa_secret_enc"}, {"webhook_endpoints", "secret_enc"}, {"notice_channels", "headers_enc"}, {"financial_connections", "webhook_secret_enc"}, {"financial_credential_versions", "secret_enc"}, {"acs_task_intents", "payload_enc"}} {
+		if field[0] == "acs_task_intents" {
+			var exists bool
+			if e := tx.QueryRowContext(ctx, "select to_regclass('public.acs_task_intents') is not null").Scan(&exists); e != nil {
+				return e
+			}
+			if !exists {
+				continue
+			}
+		}
+
 		rows, err := tx.QueryContext(ctx, "select "+field[1]+" from "+field[0]+" where "+field[1]+" is not null")
 		if err != nil {
 			return err

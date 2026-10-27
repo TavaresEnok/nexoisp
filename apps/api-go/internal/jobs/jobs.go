@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"nexoisp/api-go/internal/acs"
 	"nexoisp/api-go/internal/db"
 	"nexoisp/api-go/internal/finance"
 	"nexoisp/api-go/internal/jobargs"
@@ -60,7 +61,7 @@ func (w *operationWorker) Work(ctx context.Context, j *river.Job[jobargs.Operati
 
 func tenantTask(task string) bool {
 	switch task {
-	case "PSP_OPERATIONS", "PSP_RECEIPTS", "PSP_ISSUANCE", "PAYMENT_EFFECTS", "BILLING", "RECONCILE", "NOTICES", "SCHEDULED", "SLA", "PURGE", "TRUST", "SUSPEND", "NOTIFICATIONS", "WEBHOOKS":
+	case "ACS_TASKS", "PSP_OPERATIONS", "PSP_RECEIPTS", "PSP_ISSUANCE", "PAYMENT_EFFECTS", "BILLING", "RECONCILE", "NOTICES", "SCHEDULED", "SLA", "PURGE", "TRUST", "SUSPEND", "NOTIFICATIONS", "WEBHOOKS":
 		return true
 	}
 	return false
@@ -152,6 +153,8 @@ func (w *worker) runTenant(ctx context.Context, task, tenant string) (err error)
 		return err
 	}
 	switch task {
+	case "ACS_TASKS":
+		return acs.ProcessTasks(ctx, w.db, tenant)
 	case "PSP_OPERATIONS":
 		return finance.ProcessProviderOperations(ctx, w.db, tenant)
 	case "PSP_RECEIPTS":
@@ -274,7 +277,7 @@ func Start(ctx context.Context, database *db.DB, registerers ...prometheus.Regis
 	river.AddWorker(workers, w)
 	river.AddWorker(workers, &operationWorker{radius: w.radius})
 	periodic := []*river.PeriodicJob{}
-	for _, task := range []string{"PSP_OPERATIONS", "PSP_RECEIPTS", "PSP_ISSUANCE", "PAYMENT_EFFECTS", "BILLING", "RECONCILE", "NOTICES", "SCHEDULED", "SLA", "PURGE", "TRUST", "SUSPEND", "NOTIFICATIONS", "WEBHOOKS", "ALERTS", "CLEANUP", "RADIUS", "RADIUS_SYNC"} {
+	for _, task := range []string{"ACS_TASKS", "PSP_OPERATIONS", "PSP_RECEIPTS", "PSP_ISSUANCE", "PAYMENT_EFFECTS", "BILLING", "RECONCILE", "NOTICES", "SCHEDULED", "SLA", "PURGE", "TRUST", "SUSPEND", "NOTIFICATIONS", "WEBHOOKS", "ALERTS", "CLEANUP", "RADIUS", "RADIUS_SYNC"} {
 		if os.Getenv("NEXO_GO_JOB_"+task) != "1" {
 			continue
 		}

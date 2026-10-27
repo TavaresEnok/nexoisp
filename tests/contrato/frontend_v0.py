@@ -49,13 +49,14 @@ def main():
         acs_server = start(acs_port)
         env["NEXO_ACS_URL"] = f"http://127.0.0.1:{acs_port}"
         env["NEXO_ACS_PUBLIC_URL"] = "https://acs.exemplo.invalid:7547"
+        env.update(NEXO_ACS_INSTANCE_ID="synthetic-v0-validation",NEXO_ACS_OWNERSHIP_ENABLED="1",NEXO_ACS_TASKS_ENABLED="1",NEXO_ACS_TASK_WRITE="1",NEXO_GO_JOBS="1",NEXO_GO_JOB_ACS_TASKS="1")
     else:
         env.pop("NEXO_ACS_URL", None)
         env.pop("NEXO_ACS_PUBLIC_URL", None)
     process = None
     log = open(LOCAL / ('frontend-v0-api.log' if api_port == 18881 else f'frontend-v0-api-{api_port}.log'), 'w')
     try:
-        subprocess.run(['docker', 'run', '--rm', '-d', '--name', name, '--label', 'nexo.validation=v0', '--network', 'host', '-e', 'POSTGRES_USER=nexo_owner', '-e', f'POSTGRES_PASSWORD={owner}', '-e', 'POSTGRES_DB=nexo_v0_validation', 'postgres:16-alpine', 'postgres', '-p', str(port)], check=True, stdout=subprocess.DEVNULL)
+        subprocess.run(['docker', 'run', '--rm', '-d', '--name', name, '--label', 'nexo.validation=v0', '--network', 'host', '-e', 'POSTGRES_USER=nexo_owner', '-e', f'POSTGRES_PASSWORD={owner}', '-e', 'POSTGRES_DB=nexo_v0_validation', 'postgres:16-alpine', 'postgres', '-p', str(port), '-c', 'listen_addresses=127.0.0.1'], check=True, stdout=subprocess.DEVNULL)
         for _ in range(100):
             result = subprocess.run(['docker', 'exec', name, 'pg_isready', '-p', str(port), '-U', 'nexo_owner'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             if result.returncode == 0:
@@ -72,6 +73,22 @@ def main():
         process = subprocess.Popen([str(ROOT/'apps/api-go/bin/api')], cwd=ROOT, env=env, stdout=log, stderr=log)
         from lib import wait
         wait(f'http://127.0.0.1:{api_port}', '/api/health', process)
+        if acs_server:
+            # Test setup uses the real operator endpoint. Serial knowledge alone
+            # does not create tenant ownership, even in the synthetic fixture.
+            from lib import request
+            operator_password="synthetic-v0-acs-operator-password"
+            subprocess.run([str(ROOT/'apps/api-go/bin/nexo-db'),'create-operator','acs-operator@v0.invalid','Synthetic ACS operator'],cwd=ROOT,env=dict(env,NEXO_NEW_PASSWORD=operator_password),check=True,stdout=log,stderr=log)
+            base=f"http://127.0.0.1:{api_port}"
+            def acs_call(path,body=None,token=None):
+                response=request(base,'/api'+path,token=token,method='POST' if body is not None else 'GET',headers={'Content-Type':'application/json'},body=json.dumps(body).encode() if body is not None else None)
+                if response['status']!=200:raise RuntimeError((path,response['status'],response['json']))
+                return response['json']
+            op=acs_call('/auth/login',{'email':'acs-operator@v0.invalid','password':operator_password,'bearer':True})['token']
+            admin=acs_call('/auth/login',{'email':'admin@alfa.demo','password':'demo1234','bearer':True})['token']
+            tenant=acs_call('/me',token=admin)['tenant']['id']
+            for serial in ['V0ACS098','V0ACS181']:
+                acs_call('/acs/ownership/assign',{'tenant_id':tenant,'acs_device_id':serial,'serial':serial,'reason':'Synthetic validation inventory assignment'},op)
         print(json.dumps({'ready': True, 'api': f'http://127.0.0.1:{api_port}', 'isolated': True}), flush=True)
         if '--serve' in sys.argv:
             while process.poll() is None:

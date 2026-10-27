@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { RecordEditor } from "@/features/shared/record-editor";
 import { QueryBoundary } from "@/features/shared/feedback";
 import { api } from "@/platform/erp-client";
-import { notifyAcs } from "@/features/network/acs-notice";
+import { CpeTasks, useCpeCommands } from "@/features/network/cpe-tasks";
 const wifi = z.object({ index: z.string(), ssid: z.string().nullable() });
 const cpe = z.object({
   contract_id: z.string(),
@@ -22,6 +22,11 @@ export function PortalWifi({ standalone }: { standalone?: boolean } = {}) {
     index: string;
     ssid: string;
   } | null>(null);
+  const commands = useCpeCommands(
+    editing?.contract ?? "",
+    true,
+    Boolean(editing),
+  );
   return (
     <QueryBoundary
       loading={result.isLoading}
@@ -32,7 +37,7 @@ export function PortalWifi({ standalone }: { standalone?: boolean } = {}) {
         Boolean(result.data?.some((item) => item.wifi.length))) && (
         <Panel
           title="Meu Wi-Fi"
-          description="Alterações podem ser aplicadas imediatamente ou ficar na fila até o roteador contatar o servidor."
+          description="A solicitação fica registrada. Aceite pelo servidor e alteração observada no roteador aparecem separadamente."
         >
           {!result.data?.some((item) => item.wifi.length) && (
             <p>
@@ -66,6 +71,12 @@ export function PortalWifi({ standalone }: { standalone?: boolean } = {}) {
               )),
             )}
           </div>
+          {result.data?.map((item) => (
+            <PortalTaskHistory
+              key={item.contract_id}
+              contract={item.contract_id}
+            />
+          ))}
         </Panel>
       )}
       {editing && (
@@ -84,7 +95,7 @@ export function PortalWifi({ standalone }: { standalone?: boolean } = {}) {
             },
           ]}
           onClose={() => setEditing(null)}
-          submit="Salvar no roteador"
+          submit="Registrar alteração"
           onSubmit={async (values) => {
             if (values.password && values.password.length < 8)
               throw new Error(
@@ -92,17 +103,11 @@ export function PortalWifi({ standalone }: { standalone?: boolean } = {}) {
               );
             if (!values.ssid && !values.password)
               throw new Error("Informe um nome ou uma nova senha.");
-            const response = await api<{ note?: string; result?: string }>(
-              `/portal/cpe/${editing.contract}/wifi`,
-              {
-                body: {
-                  index: editing.index,
-                  ...(values.ssid ? { ssid: values.ssid } : {}),
-                  ...(values.password ? { password: values.password } : {}),
-                },
-              },
-            );
-            notifyAcs(response);
+            await commands.send("wifi", {
+              index: editing.index,
+              ...(values.ssid ? { ssid: values.ssid } : {}),
+              ...(values.password ? { password: values.password } : {}),
+            });
             setEditing(null);
             await result.mutate();
           }}
@@ -110,4 +115,9 @@ export function PortalWifi({ standalone }: { standalone?: boolean } = {}) {
       )}
     </QueryBoundary>
   );
+}
+
+function PortalTaskHistory({ contract }: { contract: string }) {
+  const commands = useCpeCommands(contract, true, true);
+  return <CpeTasks commands={commands} writable />;
 }

@@ -1552,6 +1552,26 @@
     {
       "method": "POST",
       "path": "/api/financial-connections/:id/callback"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/cpe/tasks"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/cpe/tasks/:taskId/retry-lookup"
+    },
+    {
+      "method": "GET",
+      "path": "/api/portal/cpe/:id/tasks"
+    },
+    {
+      "method": "POST",
+      "path": "/api/portal/cpe/:id/tasks/:taskId/retry-lookup"
+    },
+    {
+      "method": "POST",
+      "path": "/api/acs/ownership/assign"
     }
   ]
 }

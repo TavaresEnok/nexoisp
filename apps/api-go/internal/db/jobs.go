@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"nexoisp/api-go/internal/jobargs"
 	"time"
 
@@ -23,12 +24,16 @@ func (t *Tx) EnqueuePeriodic(ctx context.Context, task, tenant string) error {
 	if client == nil {
 		return fmt.Errorf("fila periódica indisponível")
 	}
-	_, err := client.InsertTx(ctx, t.raw, jobargs.Periodic{Task: task, TenantID: tenant}, &river.InsertOpts{
+	args := jobargs.Periodic{Task: task, TenantID: tenant}
+	// A lookup requested after acceptance must survive the previous worker's
+	// final running interval. A distinct wake-up is still serialized by the
+	// tenant lock and the intention's prepared-to-uncertain transition.
+	if task == "ACS_TASKS" {
+		args.WakeID = uuid.NewString()
+	}
+	_, err := client.InsertTx(ctx, t.raw, args, &river.InsertOpts{
 		Queue: "tenant", MaxAttempts: 3,
-		UniqueOpts: river.UniqueOpts{ByArgs: true, ByState: []rivertype.JobState{
-			rivertype.JobStateAvailable, rivertype.JobStatePending, rivertype.JobStateRunning,
-			rivertype.JobStateRetryable, rivertype.JobStateScheduled,
-		}},
+		UniqueOpts: river.UniqueOpts{ByArgs: true, ByState: []rivertype.JobState{rivertype.JobStateAvailable, rivertype.JobStatePending, rivertype.JobStateRunning, rivertype.JobStateRetryable, rivertype.JobStateScheduled}},
 	})
 	return err
 }

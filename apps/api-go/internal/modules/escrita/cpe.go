@@ -4,13 +4,12 @@ import (
 	"context"
 	"nexoisp/api-go/internal/acs"
 	"nexoisp/api-go/internal/apierr"
-	"nexoisp/api-go/internal/audit"
 	"nexoisp/api-go/internal/auth"
 	"nexoisp/api-go/internal/db"
 	"nexoisp/api-go/internal/httpx"
 	"nexoisp/api-go/internal/jsonx"
-	"nexoisp/api-go/internal/tenancy"
 	"nexoisp/api-go/internal/validate"
+	"os"
 	"slices"
 	"strings"
 )
@@ -20,17 +19,13 @@ func (s Service) cpeOperations(ops map[string]operation) {
 	for _, key := range []string{"GET /api/contracts/:id/cpe", "GET /api/contracts/:id/cpe/candidates", "DELETE /api/contracts/:id/cpe/link", "POST /api/contracts/:id/cpe/reboot", "POST /api/contracts/:id/cpe/refresh", "GET /api/portal/cpe"} {
 		ops[key] = operation{nil, nil}
 	}
+	for _, key := range []string{"POST /api/contracts/:id/cpe/reboot", "POST /api/contracts/:id/cpe/refresh"} {
+		ops[key] = operation{nil, obj(o(f("intent_id", str().UUID())))}
+	}
 	ops["POST /api/contracts/:id/cpe/link"] = operation{nil, obj(o(f("acs_device_id", str().Trimmed().Min(3).Max(200).Pattern(`^[A-Za-z0-9%._-]+$`, "identificador de roteador inválido")), f("serial", text(64).Opt())))}
-	wifi := o(f("index", str().Pattern(`^\d{1,2}$`, "")), f("ssid", str().Trimmed().Min(1).Max(32).Pattern(`^[\x20-\x7E]+$`, "nome da rede: até 32 caracteres comuns (sem acento)").Opt()), f("password", str().Min(8, "senha do Wi-Fi: de 8 a 63 caracteres").Max(63).Pattern(`^[\x20-\x7E]+$`, "senha do Wi-Fi: caracteres comuns (sem acento)").Opt()))
+	wifi := o(f("intent_id", str().UUID()), f("index", str().Pattern(`^\d{1,2}$`, "")), f("ssid", str().Trimmed().Min(1).Max(32).Pattern(`^[\x20-\x7E]+$`, "nome da rede: até 32 caracteres comuns (sem acento)").Opt()), f("password", str().Min(8, "senha do Wi-Fi: de 8 a 63 caracteres").Max(63).Pattern(`^[\x20-\x7E]+$`, "senha do Wi-Fi: caracteres comuns (sem acento)").Opt()))
 	ops["POST /api/contracts/:id/cpe/wifi"] = operation{nil, obj(wifi)}
 	ops["POST /api/portal/cpe/:contractId/wifi"] = operation{nil, obj(wifi)}
-}
-func acsOutcome(result string) map[string]any {
-	note := "o roteador não atendeu agora: a mudança fica na fila e vale quando ele contatar o servidor"
-	if result == "applied" {
-		note = "aplicado no roteador agora"
-	}
-	return map[string]any{"result": result, "note": note}
 }
 func (s Service) cpe(ctx context.Context, key, id string, b map[string]any) (any, error) {
 	c := auth.From(ctx)
@@ -63,7 +58,7 @@ func (s Service) cpe(ctx context.Context, key, id string, b map[string]any) (any
 		if link == nil {
 			return map[string]any{"enabled": acs.Configured(), "linked": false}, nil
 		}
-		device, err := acs.Get(ctx, link.Get("acs_device_id").(string), "")
+		device, err := acs.GetOwned(ctx, c.TenantID, link.Get("acs_device_id").(string), "")
 		if err != nil {
 			return nil, err
 		}
@@ -102,7 +97,7 @@ func (s Service) cpe(ctx context.Context, key, id string, b map[string]any) (any
 		if len(or) == 0 {
 			return out, nil
 		}
-		devices, err := acs.Find(ctx, map[string]any{"$or": or}, "_id,_lastInform,_deviceId,InternetGatewayDevice.WANDevice,Device.PPP")
+		devices, err := acs.FindOwned(ctx, c.TenantID, map[string]any{"$or": or}, "_id,_lastInform,_deviceId,InternetGatewayDevice.WANDevice,Device.PPP")
 		if err != nil {
 			return nil, err
 		}
@@ -130,7 +125,7 @@ func (s Service) cpe(ctx context.Context, key, id string, b map[string]any) (any
 		return out, nil
 	}
 	if key == "POST /api/contracts/:id/cpe/link" {
-		device, err := acs.Get(ctx, b["acs_device_id"].(string), "_id,_deviceId,InternetGatewayDevice.WANDevice,Device.PPP")
+		device, err := acs.GetOwned(ctx, c.TenantID, b["acs_device_id"].(string), "_id,_deviceId,InternetGatewayDevice.WANDevice,Device.PPP")
 		if err != nil {
 			return nil, err
 		}
@@ -139,6 +134,9 @@ func (s Service) cpe(ctx context.Context, key, id string, b map[string]any) (any
 		}
 		summary := acs.Summary(device)
 		err = scoped(func(tx *db.Tx) error {
+			if e := guardCPEBinding(ctx, tx, id); e != nil {
+				return e
+			}
 			users, err := rows(ctx, tx, key, 0, id)
 			if err != nil {
 				return err
@@ -170,17 +168,13 @@ func (s Service) cpe(ctx context.Context, key, id string, b map[string]any) (any
 		if err != nil {
 			return nil, err
 		}
-		go func() {
-			object := "InternetGatewayDevice"
-			if summary["model"] == "tr181" {
-				object = "Device"
-			}
-			_, _ = acs.Task(context.Background(), b["acs_device_id"].(string), map[string]any{"name": "refreshObject", "objectName": object})
-		}()
 		return map[string]any{"linked": true, "device": summary}, nil
 	}
 	if key == "DELETE /api/contracts/:id/cpe/link" {
 		err := scoped(func(tx *db.Tx) error {
+			if e := guardCPEBinding(ctx, tx, id); e != nil {
+				return e
+			}
 			row, err := mustRow(ctx, tx, key, 0, "nenhum roteador vinculado", id)
 			if err != nil {
 				return err
@@ -201,7 +195,7 @@ func (s Service) cpe(ctx context.Context, key, id string, b map[string]any) (any
 		}
 		out := []map[string]any{}
 		for _, link := range links {
-			device, err := acs.Get(ctx, link.Get("acs_device_id").(string), "")
+			device, err := acs.GetOwned(ctx, c.TenantID, link.Get("acs_device_id").(string), "")
 			if err != nil || device == nil {
 				continue
 			}
@@ -243,7 +237,7 @@ func (s Service) cpe(ctx context.Context, key, id string, b map[string]any) (any
 		if b["ssid"] == nil && b["password"] == nil {
 			return nil, apierr.New(400, "dados: informe o nome da rede, a senha ou os dois")
 		}
-		device, err := acs.Get(ctx, dev, "")
+		device, err := acs.GetOwned(ctx, c.TenantID, dev, "")
 		if err != nil {
 			return nil, err
 		}
@@ -263,7 +257,7 @@ func (s Service) cpe(ctx context.Context, key, id string, b map[string]any) (any
 		payload = map[string]any{"name": "reboot"}
 		action = "cpe.reboot"
 	} else {
-		device, err := acs.Get(ctx, dev, "_id,InternetGatewayDevice.DeviceInfo,Device.DeviceInfo")
+		device, err := acs.GetOwned(ctx, c.TenantID, dev, "_id,InternetGatewayDevice.DeviceInfo,Device.DeviceInfo")
 		if err != nil {
 			return nil, err
 		}
@@ -274,15 +268,61 @@ func (s Service) cpe(ctx context.Context, key, id string, b map[string]any) (any
 		payload = map[string]any{"name": "refreshObject", "objectName": object}
 		action = "cpe.refresh"
 	}
-	result, err := acs.Task(ctx, dev, payload)
+	intent, _ := b["intent_id"].(string)
+	request := acs.TaskRequest{IntentID: intent, Kind: strings.TrimPrefix(action, "cpe.")}
+	if value, ok := b["index"].(string); ok {
+		request.Index = value
+	}
+	if value, ok := b["ssid"].(string); ok {
+		request.SSID = &value
+	}
+	if value, ok := b["password"].(string); ok {
+		request.Password = &value
+	}
+	device, err := acs.GetOwned(ctx, c.TenantID, dev, "")
 	if err != nil {
 		return nil, err
 	}
-	detail["result"] = result
-	if portal {
-		err = s.DB.WithScope(ctx, tenancy.Scope{TenantID: c.TenantID}, func(tx *db.Tx) error { return record(ctx, tx, action, "contract", id, detail) })
-	} else {
-		err = (audit.Writer{DB: s.DB}).Write(ctx, c, action, "contract", id, detail, "ok")
+	if device == nil {
+		return nil, apierr.New(404, "CPE sem propriedade confirmada neste provedor")
 	}
-	return acsOutcome(result), err
+	var task jsonx.Object
+	err = scoped(func(tx *db.Tx) error {
+		var created bool
+		var e error
+		task, created, e = acs.PrepareTask(ctx, tx, c.TenantID, id, c.UserID, dev, request, payload.(map[string]any), acs.Summary(device))
+		if e != nil {
+			return e
+		}
+		if !created {
+			return nil
+		}
+		if os.Getenv("NEXO_GO_JOBS") == "1" && os.Getenv("NEXO_GO_JOB_ACS_TASKS") == "1" {
+			if e := tx.EnqueuePeriodic(ctx, "ACS_TASKS", c.TenantID); e != nil {
+				return e
+			}
+		}
+		detail["task_intent_id"] = task.Get("id")
+		detail["applied"] = false
+		return record(ctx, tx, action+".prepared", "contract", id, detail)
+	})
+	if err != nil {
+		return nil, err
+	}
+	return map[string]any{"result": task.Get("state"), "task_id": task.Get("id"), "note": "intenção registrada; aceite ACS e aplicação no CPE serão consultados separadamente"}, nil
+}
+
+func guardCPEBinding(ctx context.Context, tx *db.Tx, contract string) error {
+	var exists string
+	if e := tx.QueryRow(ctx, `select id from contracts where id=$1 for update`, contract).Scan(&exists); e != nil {
+		return apierr.New(404, "contrato não encontrado")
+	}
+	var pending bool
+	if e := tx.QueryRow(ctx, `select exists(select 1 from acs_task_intents where contract_id=$1 and state in ('prepared','uncertain','queued','review'))`, contract).Scan(&pending); e != nil {
+		return e
+	}
+	if pending {
+		return apierr.New(409, "CPE possui tarefa pendente; preserve vínculo e resultado antes de alterar")
+	}
+	return nil
 }

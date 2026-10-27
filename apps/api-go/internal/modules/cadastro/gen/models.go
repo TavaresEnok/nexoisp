@@ -31,6 +31,26 @@ type Acceptance struct {
 	CanceledAt        pgtype.Timestamptz `json:"canceled_at"`
 }
 
+type AcsTaskIntent struct {
+	ID            jsonx.UUID         `json:"id"`
+	TenantID      jsonx.UUID         `json:"tenant_id"`
+	ContractID    jsonx.UUID         `json:"contract_id"`
+	IntentID      jsonx.UUID         `json:"intent_id"`
+	DeviceID      string             `json:"device_id"`
+	ServerHash    string             `json:"server_hash"`
+	Kind          string             `json:"kind"`
+	RequestHash   string             `json:"request_hash"`
+	PayloadEnc    string             `json:"payload_enc"`
+	State         string             `json:"state"`
+	RemoteTaskID  pgtype.Text        `json:"remote_task_id"`
+	Attempts      int32              `json:"attempts"`
+	NextAttemptAt pgtype.Timestamptz `json:"next_attempt_at"`
+	LastError     pgtype.Text        `json:"last_error"`
+	CreatedBy     pgtype.UUID        `json:"created_by"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
+}
+
 type AddonProduct struct {
 	ID         jsonx.UUID         `json:"id"`
 	TenantID   jsonx.UUID         `json:"tenant_id"`
