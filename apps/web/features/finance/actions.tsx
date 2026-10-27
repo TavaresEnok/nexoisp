@@ -55,7 +55,7 @@ export function InvoiceActions({
         {(["open", "reconciling"].includes(invoice.status) || pending) && (
           <Button onClick={() => setAction("pay")}>Baixa manual</Button>
         )}
-        {invoice.status === "open" && (
+        {invoice.status === "open" && !invoice.provider_issuance_id && (
           <Button variant="destructive" onClick={() => setAction("cancel")}>
             Cancelar fatura
           </Button>

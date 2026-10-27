@@ -18,6 +18,7 @@ import (
 )
 
 func registerProviderIssuance(api huma.API, registry *endpoint.Registry, s Service) {
+	registerInvoiceProviderBilling(api, registry, s)
 	registry.Handle(api, http.MethodPost, "/api/financial-connections/{id}/issuance/{issuanceId}/retry-lookup", "finance:write", func(ctx context.Context, r *http.Request) (endpoint.Result, error) {
 		actor := auth.From(ctx)
 		if actor.SubscriberID != "" || len(actor.PopIDs) > 0 {

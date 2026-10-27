@@ -1536,6 +1536,10 @@
     {
       "method": "POST",
       "path": "/api/financial-connections/:id/issuance/:issuanceId/operations/:operationId/retry-lookup"
+    },
+    {
+      "method": "GET",
+      "path": "/api/invoices/:id/provider-billing"
     }
   ]
 }

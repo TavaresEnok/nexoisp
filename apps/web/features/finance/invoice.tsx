@@ -30,6 +30,7 @@ import {
   type Due,
 } from "./models";
 import { InvoiceActions } from "./actions";
+import { ProviderBilling } from "./provider-billing";
 export function OperationalInvoice({
   id,
   onClose,
@@ -63,6 +64,7 @@ export function OperationalInvoice({
             "erp-invoices",
             "erp-contract-finance",
             "erp-finance-summary",
+            "erp-provider-billing",
           ].includes(key[0]),
     );
   };
@@ -239,6 +241,7 @@ export function OperationalInvoice({
               </Table>
             </ProfileSection>
           )}
+          <ProviderBilling key={invoice.id} invoice={invoice} refresh={refresh} />
           {writable && due.data && (
             <InvoiceActions
               invoice={invoice}

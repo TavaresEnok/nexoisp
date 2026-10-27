@@ -63,6 +63,7 @@ export type GatewayEvent = {
   invoice_id?: string | null;
 };
 export type InvoiceDetail = ErpInvoice & {
+  provider_issuance_id?: string | null;
   paid_at: string | null;
   status_note: string | null;
   payment_methods: Record<string, unknown> | null;
