@@ -25,7 +25,12 @@ try {
  await editor.getByLabel('CPF/CNPJ').fill(''); await editor.getByLabel('E-mail', { exact: true }).fill('titular-v0@example.invalid'); await editor.getByLabel('Telefone', { exact: true }).fill('85999990000'); await editor.getByLabel('Cidade', { exact: true }).fill('Fortaleza'); await editor.getByRole('button', { name: 'Salvar', exact: true }).click();
  await visible(page.getByRole('heading', { name: unique, exact: true })); const id = new URL(page.url()).searchParams.get('ficha'); assert.match(id, /^[a-f0-9-]{36}$/);
  checks.push('Cadastro valida CPF no Go e abre a ficha pelo UUID real');
- await page.getByRole('button', { name: 'Novo contrato', exact: true }).click(); const contractDialog = page.getByRole('dialog', { name: 'Novo contrato', exact: true }); await contractDialog.getByLabel('Plano', { exact: true }).selectOption({ label: 'Fibra 200 · R$ 79,90 · 200 Mbps' }); await contractDialog.getByLabel('Dia de vencimento', { exact: true }).fill('12'); await contractDialog.getByRole('button', { name: 'Criar contrato', exact: true }).click(); await page.getByRole('button', { name: 'Abrir contrato', exact: true }).waitFor();
+ await page.getByRole('button', { name: 'Novo contrato', exact: true }).click();
+ const contractDialog = page.getByRole('dialog', { name: 'Novo contrato', exact: true });
+ await contractDialog.getByLabel('Plano', { exact: true }).selectOption({ label: 'Fibra 200 · R$ 79,90 · 200 Mbps' });
+ await contractDialog.getByLabel('Dia de vencimento', { exact: true }).fill('12');
+ await contractDialog.getByRole('button', { name: 'Criar contrato', exact: true }).click();
+ await page.getByRole('button', { name: 'Abrir contrato', exact: true }).waitFor();
  const detail = await (await context.request.get(`${base}/api/subscribers/${id}`)).json(); const contractId = detail.contracts[0].id; assert.equal(detail.contracts[0].due_day, 12);
  await page.getByRole('tab', { name: 'Histórico', exact: true }).click(); await visible(page.getByText('Contrato criado', { exact: true })); checks.push('Contrato criado pela ficha com versão do plano e evento na linha do tempo');
  await page.getByRole('button', { name: 'Editar cadastro', exact: true }).click(); editor = page.getByRole('dialog', { name: 'Editar assinante', exact: true }); await editor.getByLabel('Telefone', { exact: true }).fill('85988887777'); await editor.getByLabel('Situação do cadastro', { exact: true }).selectOption('inactive'); await editor.getByRole('button', { name: 'Salvar', exact: true }).click();
@@ -52,5 +57,5 @@ try {
  const demoContext = await browser.newContext(); const demo = await demoContext.newPage(); const requests = []; demo.on('request', request => { if (new URL(request.url()).pathname.startsWith('/api/')) requests.push(request.url()); }); await demo.goto(`${base}/demonstracao/assinantes`); await visible(demo.getByRole('heading', { name: 'Assinantes', exact: true })); await demo.getByRole('button', { name: /Abrir ficha de/ }).first().click(); await visible(demo.getByRole('dialog')); await demo.getByRole('tab', { name: 'Cadastro', exact: true }).click(); await demo.reload(); await visible(demo.getByRole('dialog')); assert.equal(new URL(demo.url()).pathname, '/demonstracao/assinantes'); assert.deepEqual(requests, []); await demoContext.close(); checks.push('Demonstração e ficha preservadas sob /demonstracao sem qualquer chamada operacional');
  assert.deepEqual(errors, []);
  await writeFile(new URL('integracao-assinantes.json', report), JSON.stringify({ ok: true, backend: 'Go isolado, dados sintéticos', checks }, null, 2) + '\n'); console.log(JSON.stringify({ ok: true, checks }));
-} catch (error) { await page.screenshot({ path: '/tmp/nexo-v0-failure.png', fullPage: true }).catch(() => {}); console.error('Verificações concluídas:', checks); throw error; }
+} catch (error) { await page.screenshot({ path: new URL('frontend-v0-failure.png', report).pathname, fullPage: true }).catch(() => {}); console.error('Verificações concluídas:', checks); throw error; }
 finally { await context.close(); await browser.close(); }
