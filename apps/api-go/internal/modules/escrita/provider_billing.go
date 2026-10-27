@@ -48,7 +48,7 @@ func registerInvoiceProviderBilling(api huma.API, registry *endpoint.Registry, s
 				return err
 			}
 			out["accounts"] = accounts
-			issuances, err := tx.Objects(ctx, `select j.id,j.financial_connection_id,j.request->>'intent_key' as intent_id,j.state,j.product,j.charge_id,j.attempts,j.last_error,j.receipt_checked_at,j.receipt_review,j.receipt_last_error,j.created_at,j.updated_at,c.name as account_name,c.status as account_status from provider_issuance j join financial_connections c on c.id=j.financial_connection_id where j.invoice_id=$1 order by j.created_at,j.id`, id)
+			issuances, err := tx.Objects(ctx, `select j.id,j.predecessor_id,j.financial_connection_id,j.request->>'intent_key' as intent_id,j.state,j.product,j.charge_id,j.attempts,j.last_error,j.receipt_checked_at,j.receipt_review,j.receipt_last_error,j.created_at,j.updated_at,c.name as account_name,c.status as account_status from provider_issuance j join financial_connections c on c.id=j.financial_connection_id where j.invoice_id=$1 order by (j.id=(select provider_issuance_id from invoices where id=$1)) desc,j.created_at desc,j.id`, id)
 			if err != nil {
 				return err
 			}
@@ -58,11 +58,16 @@ func registerInvoiceProviderBilling(api huma.API, registry *endpoint.Registry, s
 				return err
 			}
 			out["operations"] = operations
-			payments, err := tx.Objects(ctx, `select p.id,p.amount_cents,p.paid_at,
+			resolutions, e := tx.Objects(ctx, `select e.id,e.issuance_id,e.intent_id,e.kind,e.status,e.reason,e.created_at,e.snapshot_hash,(select j.id from provider_issuance j where j.resolution_id=e.id) as successor_id from provider_resolution_evidence e join provider_issuance j on j.id=e.issuance_id where j.invoice_id=$1 order by e.created_at desc,e.id`, id)
+			if e != nil {
+				return e
+			}
+			out["resolutions"] = resolutions
+			payments, err := tx.Objects(ctx, `select distinct p.id,j.id as issuance_id,p.amount_cents,p.paid_at,
 			 p.amount_cents-coalesce((select sum(r.amount_cents) from payments r where r.reversal_of=p.id),0)
 			 -coalesce((select sum(o.amount_cents) from provider_operations o where o.payment_id=p.id and o.state in ('prepared','uncertain','review')),0) as refundable_cents
 			 from payments p join provider_issuance j on j.invoice_id=p.invoice_id and j.financial_connection_id=p.financial_connection_id
-			 where p.invoice_id=$1 and p.kind='payment' and p.source<>'manual' and p.method='pix' and j.state='issued' and j.product in ('pix_cob','pix_cobv') order by p.paid_at,p.id`, id)
+			 where p.invoice_id=$1 and p.kind='payment' and p.source<>'manual' and p.method='pix' and j.state='issued' and j.product in ('pix_cob','pix_cobv') and (not exists(select 1 from provider_issuance other where other.invoice_id=j.invoice_id and other.id<>j.id) or exists(select 1 from audit_events ae where ae.action='finance.provider.receipt' and ae.entity_id=p.invoice_id::text and ae.detail->>'provider_issuance_id'=j.id::text and ae.detail->>'payment_id'=p.gateway_payment_id)) order by p.paid_at,p.id`, id)
 			out["refund_payments"] = payments
 			return err
 		})

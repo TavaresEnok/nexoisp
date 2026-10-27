@@ -14,7 +14,7 @@ func ApplyProviderRefund(ctx context.Context, tx *db.Tx, invoice, connection str
 		return false, apierr.New(409, "devolução confirmada sem identidade, valor ou data válidos")
 	}
 	var locked, tenant string
-	if err := tx.QueryRow(ctx, `select id,tenant_id from invoices where id=$1 and financial_connection_id=$2 for update`, invoice, connection).Scan(&locked, &tenant); err != nil {
+	if err := tx.QueryRow(ctx, `select id,tenant_id from invoices where id=$1 and (financial_connection_id=$2 or exists(select 1 from provider_issuance j where j.invoice_id=invoices.id and j.state='issued' and j.financial_connection_id=$2)) for update`, invoice, connection).Scan(&locked, &tenant); err != nil {
 		return false, err
 	}
 	count, err := tx.Affected(ctx, `insert into payments(tenant_id,invoice_id,amount_cents,paid_at,method,source,note,kind,reversal_of,financial_connection_id,gateway,provider_refund_id,provider_return_id)
@@ -34,7 +34,7 @@ func ApplyProviderRefund(ctx context.Context, tx *db.Tx, invoice, connection str
 		}
 		return true, nil
 	}
-	if err = tx.Exec(ctx, `update invoices set status='reconciling',status_note='devolução confirmada; revisar obrigação e saldo residual' where id=$1`, invoice); err != nil {
+	if err = tx.Exec(ctx, `update invoices set status='reconciling',payment_methods=null,status_note='devolução confirmada; revisar obrigação e saldo residual' where id=$1`, invoice); err != nil {
 		return false, err
 	}
 	return false, SysAudit(ctx, tx, tenant, "finance.provider.refund", "invoice", invoice, map[string]any{"refund_id": refund.ID, "return_id": refund.ReturnID, "amount_cents": refund.AmountCents}, "ok")

@@ -64,3 +64,19 @@ test("partial refunds respect server reservation projection; rejected or confirm
   data.operations[0].state = "rejected";
   assert.equal(providerIntentTerminal(refund, data), true);
 });
+
+test("resolution and replacement persist their own intentions after lost ACK without reusing initial issuance", async () => {
+  for (const kind of ["resolve", "reissue"] as const) {
+    const s = storage();
+    const intent = { ...candidate, kind, issuance_id: journal, body: { reason: "Authenticated synthetic review" } };
+    const sent: unknown[] = [];
+    await assert.rejects(sendProviderIntent(s, "key", intent, async (path, body) => { sent.push({path,body}); throw Error("lost ACK"); }));
+    await sendProviderIntent(s,"key",{...intent,intent_id:invoice,body:{reason:"Changed"}},async(path,body)=>{sent.push({path,body});});
+    assert.deepEqual(sent[0], sent[1]);
+    assert.equal((sent[0] as {path:string}).path, `/financial-connections/${connection}/issuance/${journal}/${kind}`);
+    const data = {issuances:[],operations:[],resolutions:[{intent_id:intention,issuance_id:journal,kind,status:"removed"}]} as unknown as ProviderBillingData;
+    assert.equal(providerIntentTerminal(intent,data),kind === "resolve");
+    data.issuances = [{intent_id:intention, financial_connection_id:connection,state:"prepared"}] as ProviderBillingData["issuances"];
+    if (kind === "reissue") { assert.equal(providerIntentTerminal(intent,data),false); data.issuances[0].state="issued";assert.equal(providerIntentTerminal(intent,data),true); }
+  }
+});

@@ -22,11 +22,27 @@ func paymentWithReview(ctx context.Context, tx *db.Tx, id, gateway, connection s
 	if e != nil {
 		return false, "", e
 	}
-	if inv == nil || connection == "" || inv.Get("financial_connection_id") != connection || inv.Get("gateway") != gateway {
+	if inv == nil || connection == "" {
 		return false, "", apierr.New(409, "pagamento sem vínculo com a conexão da fatura")
 	}
+	if inv.Get("financial_connection_id") != connection || inv.Get("gateway") != gateway {
+		var historical bool
+		if e = tx.QueryRow(ctx, `select exists(select 1 from provider_issuance where invoice_id=$1 and state='issued' and financial_connection_id=$2 and request#>>'{scope,provider}'=$3)`, id, connection, gateway).Scan(&historical); e != nil {
+			return false, "", e
+		}
+		if !historical {
+			return false, "", apierr.New(409, "pagamento sem vínculo com a conexão da fatura")
+		}
+		forceReview = true
+	}
 	// Cancellation never proves a later payment impossible (notably Bolix).
-	forceReview = forceReview || inv.Get("status") == "canceled" || inv.Get("provider_canceled_at") != nil
+	var currentCanceled bool
+	if inv.Get("provider_canceled_at") != nil {
+		if e = tx.QueryRow(ctx, `select i.provider_issuance_id is null or exists(select 1 from provider_operations o where o.issuance_id=i.provider_issuance_id and o.kind='cancel' and o.state='confirmed') from invoices i where i.id=$1`, id).Scan(&currentCanceled); e != nil {
+			return false, "", e
+		}
+	}
+	forceReview = forceReview || inv.Get("status") == "canceled" || currentCanceled
 	count, e := tx.Affected(ctx, query("applyGatewayPayment", 1), inv.Get("tenant_id"), id, p.Get("amount_cents"), p.Get("paid_at"), p.Get("method"), source, gateway, p.Get("id"), connection)
 	if e != nil {
 		return false, "", e
@@ -48,7 +64,7 @@ func paymentWithReview(ctx context.Context, tx *db.Tx, id, gateway, connection s
 		return false, "", e
 	}
 	if disputed || forceReview {
-		e = tx.Exec(ctx, `update invoices set status='reconciling',status_note='estorno/contestação informado; confirmação posterior exige decisão manual' where id=$1`, id)
+		e = tx.Exec(ctx, `update invoices set status='reconciling',payment_methods=null,status_note='estorno/contestação informado; confirmação posterior exige decisão manual' where id=$1`, id)
 		return false, "reconciling", e
 	}
 	status, e := settle(ctx, tx, inv, false)

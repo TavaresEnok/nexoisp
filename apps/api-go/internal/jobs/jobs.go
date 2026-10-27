@@ -211,6 +211,9 @@ func (w *worker) runTenant(ctx context.Context, task, tenant string) (err error)
 		case "SLA":
 			return outbound.SLA(ctx, tx, tenant)
 		case "PURGE":
+			if err := finance.RetainProviderNotices(ctx, tx); err != nil {
+				return err
+			}
 			return radius.Purge(ctx, tx, tenant)
 		}
 		return nil

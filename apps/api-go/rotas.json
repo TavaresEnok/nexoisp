@@ -1103,6 +1103,14 @@
     },
     {
       "method": "POST",
+      "path": "/api/financial-connections/:id/issuance/:issuanceId/reissue"
+    },
+    {
+      "method": "POST",
+      "path": "/api/financial-connections/:id/issuance/:issuanceId/resolve"
+    },
+    {
+      "method": "POST",
       "path": "/api/financial-connections/:id/issuance/:issuanceId/retry-lookup"
     },
     {

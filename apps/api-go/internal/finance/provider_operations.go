@@ -242,7 +242,7 @@ func RunProviderOperation(ctx context.Context, database *db.DB, scope tenancy.Sc
 			if e := tx.Exec(ctx, `update invoices set provider_canceled_at=coalesce(provider_canceled_at,now()),status='reconciling',status_note='cobrança removida no fornecedor; obrigação preservada para revisão' where id=$1`, invoice); e != nil {
 				return e
 			}
-			if e := tx.Exec(ctx, `update provider_issuance set receipt_review=false,receipt_next_at=now() where invoice_id=$1`, invoice); e != nil {
+			if e := tx.Exec(ctx, `update provider_issuance set receipt_next_at=now() where invoice_id=$1`, invoice); e != nil {
 				return e
 			}
 		}

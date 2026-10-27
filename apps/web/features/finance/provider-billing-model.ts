@@ -19,6 +19,7 @@ const issuanceSchema = z.object({
   id: z.string().uuid(),
   financial_connection_id: z.string().uuid(),
   intent_id: z.string().uuid(),
+  predecessor_id: z.string().uuid().nullable().optional(),
   product: z.enum(["pix_cob", "pix_cobv", "bolix"]),
   state: z.enum(["prepared", "uncertain", "review", "issued"]),
   account_name: z.string(),
@@ -55,11 +56,27 @@ export const providerBillingSchema = z.object({
   ),
   issuances: z.array(issuanceSchema),
   operations: z.array(operationSchema),
+  resolutions: z
+    .array(
+      z.object({
+        id: z.string().uuid(),
+        issuance_id: z.string().uuid(),
+        intent_id: z.string().uuid(),
+        kind: z.enum(["resolve", "reissue"]),
+        status: z.string(),
+        reason: z.string(),
+        snapshot_hash: z.string(),
+        created_at: z.string(),
+        successor_id: z.string().uuid().nullable(),
+      }),
+    )
+    .default([]),
   refund_payments: z.array(
     z.object({
       id: z.string().uuid(),
       amount_cents: cents(),
       refundable_cents: cents(),
+      issuance_id: z.string().uuid().optional(),
       paid_at: z.string(),
     }),
   ),
@@ -73,7 +90,7 @@ const intentSchema = z.object({
   invoice_id: z.string().uuid(),
   connection_id: z.string().uuid(),
   issuance_id: z.string().uuid().optional(),
-  kind: z.enum(["issue", "cancel", "refund"]),
+  kind: z.enum(["issue", "cancel", "refund", "resolve", "reissue"]),
   body: z.record(z.string(), z.unknown()),
 });
 export type ProviderIntent = z.infer<typeof intentSchema>;
@@ -105,9 +122,10 @@ export function readProviderIntent(
 }
 export function providerIntentPath(intent: ProviderIntent) {
   const base = `/financial-connections/${intent.connection_id}/issuance`;
-  return intent.kind === "issue"
-    ? base
-    : `${base}/${intent.issuance_id}/operations`;
+  if (intent.kind === "issue") return base;
+  if (intent.kind === "resolve" || intent.kind === "reissue")
+    return `${base}/${intent.issuance_id}/${intent.kind}`;
+  return `${base}/${intent.issuance_id}/operations`;
 }
 /** Call inside navigator.locks; freeze the payload before the first request.
  * Acceptance is preparation, not bank settlement. Keep intent until the journal
@@ -140,7 +158,14 @@ export function providerIntentTerminal(
   intent: ProviderIntent,
   data: ProviderBillingData,
 ) {
-  return intent.kind === "issue"
+  if (intent.kind === "resolve")
+    return data.resolutions.some(
+      (row) =>
+        row.intent_id === intent.intent_id &&
+        row.issuance_id === intent.issuance_id &&
+        row.kind === "resolve",
+    );
+  return intent.kind === "issue" || intent.kind === "reissue"
     ? data.issuances.some(
         (row) =>
           row.intent_id === intent.intent_id &&

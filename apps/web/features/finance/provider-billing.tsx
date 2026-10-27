@@ -112,9 +112,9 @@ export function ProviderBilling({
   );
   const issue = useBillingIntent(issueKey, invoice.id, data);
   const operation = useBillingIntent(operationKey, invoice.id, data);
-  const [action, setAction] = useState<"issue" | "cancel" | "refund" | null>(
-    null,
-  );
+  const [action, setAction] = useState<
+    "issue" | "cancel" | "refund" | "resolve" | "reissue" | null
+  >(null);
   const [retry, setRetry] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const writable = can(me, "finance:write");
@@ -127,7 +127,9 @@ export function ProviderBilling({
       throw new Error(
         "Use um navegador atualizado para proteger a intenção entre abas.",
       );
-    const key = candidate.kind === "issue" ? issueKey : operationKey;
+    const key = ["issue", "reissue"].includes(candidate.kind)
+      ? issueKey
+      : operationKey;
     try {
       await navigator.locks.request(key, () =>
         sendProviderIntent(localStorage, key, candidate, (path, body) =>
@@ -159,11 +161,20 @@ export function ProviderBilling({
         action === "issue"
           ? values.choice.split(":")[0]
           : issuance!.financial_connection_id,
-      ...(action === "issue" ? {} : { issuance_id: issuance!.id }),
+      ...(action === "issue"
+        ? {}
+        : {
+            issuance_id: refund
+              ? (data.refund_payments.find((p) => p.id === values.payment)
+                  ?.issuance_id ?? issuance!.id)
+              : issuance!.id,
+          }),
       body:
         action === "issue"
           ? issuanceBody(invoice.id, values, data)
-          : operationBody(values, refund, data),
+          : action === "resolve" || action === "reissue"
+            ? { reason: values.reason.trim() }
+            : operationBody(values, refund, data),
     });
   };
   const storageError = issue.error ?? operation.error;
@@ -261,12 +272,17 @@ export function ProviderBilling({
             {[issue.pending, operation.pending]
               .filter((p): p is ProviderIntent => Boolean(p))
               .map((pending) => {
-                const known =
-                  pending.kind === "issue"
-                    ? data.issuances.some(
-                        (j) =>
-                          j.intent_id === pending.intent_id &&
-                          j.financial_connection_id === pending.connection_id,
+                const known = ["issue", "reissue"].includes(pending.kind)
+                  ? data.issuances.some(
+                      (j) =>
+                        j.intent_id === pending.intent_id &&
+                        j.financial_connection_id === pending.connection_id,
+                    )
+                  : pending.kind === "resolve"
+                    ? data.resolutions.some(
+                        (e) =>
+                          e.intent_id === pending.intent_id &&
+                          e.issuance_id === pending.issuance_id,
                       )
                     : data.operations.some(
                         (o) =>
@@ -283,9 +299,13 @@ export function ProviderBilling({
                       Intenção preservada:{" "}
                       {pending.kind === "issue"
                         ? "emissão"
-                        : pending.kind === "refund"
-                          ? "devolução"
-                          : "cancelamento"}{" "}
+                        : pending.kind === "reissue"
+                          ? "reemissão"
+                          : pending.kind === "resolve"
+                            ? "resolução por consulta"
+                            : pending.kind === "refund"
+                              ? "devolução"
+                              : "cancelamento"}{" "}
                       · {pending.intent_id}.{" "}
                       {known
                         ? "Preparação registrada. Acompanhe o resultado abaixo."
@@ -299,6 +319,22 @@ export function ProviderBilling({
                   </div>
                 );
               })}
+            {data.resolutions.map((e) => (
+              <p key={e.id} className="profile-footnote">
+                {e.kind === "reissue"
+                  ? "Reemissão preparada"
+                  : "Resultado consultado"}{" "}
+                · {e.status} · {date(e.created_at)} · {e.reason} · Evidência{" "}
+                {e.snapshot_hash.slice(0, 12)}
+              </p>
+            ))}
+            {data.issuances.length > 1 && (
+              <p className="profile-footnote">
+                {data.issuances.length} gerações preservadas para esta mesma
+                fatura. Exibindo a geração atual; recebimentos tardios continuam
+                sujeitos à conciliação.
+              </p>
+            )}
             {data.operations.map((op) => (
               <div key={op.id} className="erp-stack">
                 <ProfileFacts
@@ -361,10 +397,34 @@ export function ProviderBilling({
                       desta fatura. Solicite o cadastro ao administrador.
                     </p>
                   ))}
+                {issuance &&
+                  issuance.state !== "prepared" &&
+                  !operation.pending && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setAction("resolve")}
+                    >
+                      Resolver com consulta autenticada
+                    </Button>
+                  )}
+                {issuance?.state === "issued" &&
+                  !invoice.payments.length &&
+                  !issue.pending &&
+                  !operation.pending && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setAction("reissue")}
+                    >
+                      Preparar reemissão segura
+                    </Button>
+                  )}
                 {issuance?.state === "issued" && !operation.pending && (
                   <>
                     {!invoice.payments.length &&
-                      !data.operations.some((o) => o.kind === "cancel") && (
+                      !data.operations.some(
+                        (o) =>
+                          o.kind === "cancel" && o.issuance_id === issuance.id,
+                      ) && (
                         <Button
                           variant="outline"
                           onClick={() => setAction("cancel")}
@@ -394,14 +454,22 @@ export function ProviderBilling({
                     ? "Preparar emissão Efí"
                     : action === "refund"
                       ? "Preparar devolução Pix"
-                      : "Remover cobrança no provedor"
+                      : action === "resolve"
+                        ? "Resolver resultado financeiro"
+                        : action === "reissue"
+                          ? "Preparar reemissão segura"
+                          : "Remover cobrança no provedor"
                 }
                 description={
                   action === "issue"
                     ? "Valor nominal e vencimento vêm da fatura. Os dados ficam vinculados à intenção. Envio bancário depende dos consumidores habilitados no servidor."
                     : action === "refund"
                       ? "O limite desconta devoluções confirmadas e intenções reservadas. A devolução só altera o caixa após confirmação bancária."
-                      : "Esta ação remove a cobrança no PSP; não quita nem cancela automaticamente a obrigação no ERP. Uma liquidação tardia continuará sendo recebida em revisão."
+                      : action === "resolve"
+                        ? "Consulta a intenção original com a credencial autenticada. Divergências ou operações pendentes mantêm a reserva. Não envia cobrança."
+                        : action === "reissue"
+                          ? "O servidor deve comprovar remoção sem recebimentos e sem operações pendentes. Mantém a fatura, valor e vencimento; prepara uma nova intenção, sem enviar agora. A cobrança antiga permanece no histórico."
+                          : "Esta ação remove a cobrança no PSP; não quita nem cancela automaticamente a obrigação no ERP. Uma liquidação tardia continuará sendo recebida em revisão."
                 }
                 initial={
                   action === "issue"

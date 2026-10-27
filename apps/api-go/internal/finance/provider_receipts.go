@@ -83,32 +83,7 @@ func ReconcileProviderReceipts(ctx context.Context, database *db.DB, scope tenan
 				if !eligible {
 					return nil
 				}
-				if e := storeProviderArtifacts(opctx, tx, id, snapshot.Charge, snapshot.Status == "active"); e != nil {
-					return e
-				}
-				forceReview := snapshot.ReviewRequired || len(snapshot.Refunds) > 0 || snapshot.Status == "removed"
-				for _, payment := range snapshot.Payments {
-					duplicate, status, e := paymentWithReview(opctx, tx, request.InvoiceID, request.Scope.Provider, request.Scope.ConnectionID, paymentObject(payment), "reconciliation", forceReview)
-					if e != nil {
-						return e
-					}
-					if !duplicate {
-						if e = SysAudit(opctx, tx, scope.TenantID, "finance.provider.receipt", "invoice", request.InvoiceID, map[string]any{"provider_issuance_id": id, "payment_id": payment.ID, "amount_cents": payment.AmountCents, "status": status}, "ok"); e != nil {
-							return e
-						}
-					}
-				}
-				for _, refund := range snapshot.Refunds {
-					if _, e := ApplyProviderRefund(opctx, tx, request.InvoiceID, request.Scope.ConnectionID, refund); e != nil {
-						return e
-					}
-				}
-				if forceReview {
-					if e := tx.Exec(opctx, `update invoices set status='reconciling',status_note='fornecedor informa remoção ou devolução; revisar obrigação e saldo' where id=$1 and status<>'canceled'`, request.InvoiceID); e != nil {
-						return e
-					}
-				}
-				return tx.Exec(opctx, `update provider_notices set status='processed',processed_at=now() where financial_connection_id=$1 and charge_id=$2 and status='pending'`, request.Scope.ConnectionID, charge)
+				return applyProviderSnapshot(opctx, tx, scope.TenantID, id, request, snapshot)
 			})
 		}
 		cancel()
@@ -150,7 +125,7 @@ func ReconcileProviderReceipts(ctx context.Context, database *db.DB, scope tenan
 				if e := tx.Exec(ctx, `update provider_notices set status='review',processed_at=now() where financial_connection_id=$1 and charge_id=$2 and status='pending'`, request.Scope.ConnectionID, charge); e != nil {
 					return e
 				}
-				if e := tx.Exec(ctx, `update invoices set status='reconciling',status_note='consulta do fornecedor exige revisão financeira' where id=$1 and status<>'canceled'`, request.InvoiceID); e != nil {
+				if e := tx.Exec(ctx, `update invoices set status='reconciling',payment_methods=null,status_note='consulta do fornecedor exige revisão financeira' where id=$1 and status<>'canceled'`, request.InvoiceID); e != nil {
 					return e
 				}
 			}
@@ -160,4 +135,38 @@ func ReconcileProviderReceipts(ctx context.Context, database *db.DB, scope tenan
 		}
 	}
 	return nil
+}
+
+// Caller holds the invoice before the issuance lock and validates the complete snapshot.
+func applyProviderSnapshot(ctx context.Context, tx *db.Tx, tenant, id string, request providers.Create, snapshot providers.Snapshot) error {
+	var superseded bool
+	if e := tx.QueryRow(ctx, `select provider_issuance_id is distinct from $2::uuid from invoices where id=$1`, request.InvoiceID, id).Scan(&superseded); e != nil {
+		return e
+	}
+	forceReview := superseded || snapshot.ReviewRequired || len(snapshot.Refunds) > 0 || snapshot.Status == "removed"
+	for _, payment := range snapshot.Payments {
+		duplicate, status, e := paymentWithReview(ctx, tx, request.InvoiceID, request.Scope.Provider, request.Scope.ConnectionID, paymentObject(payment), "reconciliation", forceReview)
+		if e != nil {
+			return e
+		}
+		if !duplicate {
+			if e = SysAudit(ctx, tx, tenant, "finance.provider.receipt", "invoice", request.InvoiceID, map[string]any{"provider_issuance_id": id, "payment_id": payment.ID, "amount_cents": payment.AmountCents, "status": status}, "ok"); e != nil {
+				return e
+			}
+		}
+	}
+	for _, refund := range snapshot.Refunds {
+		if _, e := ApplyProviderRefund(ctx, tx, request.InvoiceID, request.Scope.ConnectionID, refund); e != nil {
+			return e
+		}
+	}
+	if forceReview {
+		if e := tx.Exec(ctx, `update invoices set status='reconciling',payment_methods=null,status_note='fornecedor informa remoção ou devolução; revisar obrigação e saldo' where id=$1 and provider_issuance_id=$2 and status<>'canceled'`, request.InvoiceID, id); e != nil {
+			return e
+		}
+	}
+	if e := storeProviderArtifacts(ctx, tx, id, snapshot.Charge, snapshot.Status == "active"); e != nil {
+		return e
+	}
+	return tx.Exec(ctx, `update provider_notices set status='processed',processed_at=now() where financial_connection_id=$1 and charge_id=$2 and status='pending'`, request.Scope.ConnectionID, snapshot.Charge.ID)
 }

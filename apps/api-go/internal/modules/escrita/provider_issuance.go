@@ -19,6 +19,7 @@ import (
 
 func registerProviderIssuance(api huma.API, registry *endpoint.Registry, s Service) {
 	registerInvoiceProviderBilling(api, registry, s)
+	registerProviderResolution(api, registry, s)
 	registerChargesCallback(api, registry, s)
 	registerCallbackConfig(api, registry, s)
 	registry.Handle(api, http.MethodPost, "/api/financial-connections/{id}/issuance/{issuanceId}/retry-lookup", "finance:write", func(ctx context.Context, r *http.Request) (endpoint.Result, error) {
@@ -94,7 +95,7 @@ func registerProviderIssuance(api huma.API, registry *endpoint.Registry, s Servi
 			if err := tx.QueryRow(ctx, `select c.id,c.tenant_id,c.provider,c.environment,c.account_ref,i.amount_cents,i.due_date::text,c.credential_version_id from financial_connections c join invoices i on i.tenant_id=c.tenant_id where c.id=$1 and i.id=$2`, connection, body.InvoiceID).Scan(&request.Scope.ConnectionID, &request.Scope.TenantID, &request.Scope.Provider, &request.Scope.Environment, &request.Scope.AccountRef, &request.Money.Cents, &request.DueDate, &credential); err != nil {
 				return err
 			}
-			rows, err := tx.Objects(ctx, `select financial_connection_id,credential_version_id,product_options from provider_issuance where invoice_id=$1`, body.InvoiceID)
+			rows, err := tx.Objects(ctx, `select financial_connection_id,credential_version_id,product_options from provider_issuance where invoice_id=$1 and intent_key=$2`, body.InvoiceID, body.IntentID)
 			if err != nil {
 				return err
 			}

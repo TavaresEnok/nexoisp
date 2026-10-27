@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"github.com/jackc/pgx/v5"
 
 	"nexoisp/api-go/internal/apierr"
 	"nexoisp/api-go/internal/db"
@@ -86,7 +87,10 @@ func (s SandboxIssuance) prepareOptions(ctx context.Context, scope tenancy.Scope
 			return err
 		}
 		var stored []byte
-		if err := tx.QueryRow(ctx, `select id,state,coalesce(charge_id,''),request,config_hash,coalesce(credential_version_id::text,'') from provider_issuance where invoice_id=$1`, r.InvoiceID).Scan(&out.ID, &out.State, &out.ChargeID, &stored, &out.ConfigHash, &out.CredentialID); err != nil {
+		if err := tx.QueryRow(ctx, `select id,state,coalesce(charge_id,''),request,config_hash,coalesce(credential_version_id::text,'') from provider_issuance where invoice_id=$1 and intent_key=$2 and financial_connection_id=$3`, r.InvoiceID, r.IntentKey, r.Scope.ConnectionID).Scan(&out.ID, &out.State, &out.ChargeID, &stored, &out.ConfigHash, &out.CredentialID); err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return apierr.New(409, "fatura já possui outra intenção de emissão")
+			}
 			return err
 		}
 		if err := json.Unmarshal(stored, &out.Request); err != nil {
@@ -128,7 +132,7 @@ func (s SandboxIssuance) Run(ctx context.Context, scope tenancy.Scope, id string
 		}
 		if item.State == "prepared" {
 			var valid bool
-			if err := tx.QueryRow(ctx, `select exists(select 1 from invoices i join financial_connections c on c.id=$2 and c.tenant_id=i.tenant_id and c.company_id is not distinct from i.company_id where i.id=$1 and i.provider_issuance_id=$6 and i.status='open' and i.gateway_charge_id is null and i.financial_connection_id is null and i.amount_cents=$3 and i.due_date=$4::date and i.fee_cents=0 and i.discount_cents=0 and c.status<>'disabled' and c.account_ref=$5 and not exists(select 1 from payments p where p.invoice_id=i.id))`, item.Request.InvoiceID, item.Request.Scope.ConnectionID, item.Request.Money.Cents, item.Request.DueDate, item.Request.Scope.AccountRef, id).Scan(&valid); err != nil {
+			if err := tx.QueryRow(ctx, `select exists(select 1 from invoices i join financial_connections c on c.id=$2 and c.tenant_id=i.tenant_id and c.company_id is not distinct from i.company_id where i.id=$1 and i.provider_issuance_id=$6 and i.status='open' and i.gateway_charge_id is null and i.financial_connection_id is null and i.amount_cents=$3 and i.due_date=$4::date and i.fee_cents=0 and i.discount_cents=0 and c.status<>'disabled' and c.account_ref=$5 and not exists(select 1 from payments p where p.invoice_id=i.id) and not exists(select 1 from provider_issuance old where old.invoice_id=i.id and old.id<>$6 and (old.receipt_review or old.receipt_last_error is not null)))`, item.Request.InvoiceID, item.Request.Scope.ConnectionID, item.Request.Money.Cents, item.Request.DueDate, item.Request.Scope.AccountRef, id).Scan(&valid); err != nil {
 				return err
 			}
 			if !valid {
