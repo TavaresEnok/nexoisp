@@ -110,6 +110,26 @@ func ResolveProviderResult(ctx context.Context, database *db.DB, scope tenancy.S
 	if kind == "reissue" && (snapshot.Status != "removed" || len(snapshot.Payments) > 0) {
 		return nil, apierr.New(409, "reemissão exige remoção comprovada sem recebimentos")
 	}
+	// A replacement has its own server-owned recovery window. Bolix searches by
+	// creation date after an uncertain POST; copying an old generation's date
+	// would hide a successfully created replacement from lookup-only recovery.
+	successor := r
+	successor.IntentKey = b.IntentID
+	successorOptions := options
+	successorHash := hash
+	if kind == "reissue" && options.Product == "bolix" {
+		zone, e := time.LoadLocation("America/Sao_Paulo")
+		if e != nil {
+			return nil, e
+		}
+		successorOptions.IssuedOn = time.Now().In(zone).Format("2006-01-02")
+		next, cleanup, e := factory(ctx, successor, version, successorOptions)
+		if e != nil {
+			return nil, apierr.New(409, "configuração da reemissão indisponível; reserva preservada")
+		}
+		successorHash = next.ConfigurationHash()
+		cleanup()
+	}
 	raw, err := json.Marshal(snapshot)
 	if err != nil {
 		return nil, err
@@ -192,11 +212,9 @@ func ResolveProviderResult(ctx context.Context, database *db.DB, scope tenancy.S
 			return e
 		}
 		if kind == "reissue" {
-			successor := r
-			successor.IntentKey = b.IntentID
 			requestJSON, _ := json.Marshal(successor)
-			optsJSON, _ := json.Marshal(options)
-			rows, e := tx.Objects(ctx, `insert into provider_issuance(tenant_id,invoice_id,financial_connection_id,intent_key,request,config_hash,credential_version_id,product,product_options,predecessor_id,resolution_id) values(app_tenant(),$1,$2,$3,$4::jsonb,$5,$6,$7,$8::jsonb,$9,$10) returning id`, r.InvoiceID, connection, b.IntentID, string(requestJSON), hash, version, options.Product, string(optsJSON), id, out.Get("id"))
+			optsJSON, _ := json.Marshal(successorOptions)
+			rows, e := tx.Objects(ctx, `insert into provider_issuance(tenant_id,invoice_id,financial_connection_id,intent_key,request,config_hash,credential_version_id,product,product_options,predecessor_id,resolution_id) values(app_tenant(),$1,$2,$3,$4::jsonb,$5,$6,$7,$8::jsonb,$9,$10) returning id`, r.InvoiceID, connection, b.IntentID, string(requestJSON), successorHash, version, options.Product, string(optsJSON), id, out.Get("id"))
 			if e != nil {
 				return e
 			}

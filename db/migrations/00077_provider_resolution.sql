@@ -75,8 +75,11 @@ begin
    or proof.observed_at<clock_timestamp()-interval '2 minutes' or proof.charge_id<>parent.charge_id
    or proof.credential_version_id is distinct from parent.credential_version_id or proof.config_hash<>parent.config_hash
    or new.intent_key<>proof.intent_id::text or new.intent_key=parent.intent_key
-   or row(new.financial_connection_id,new.config_hash,new.credential_version_id,new.product,new.product_options)
-     is distinct from row(parent.financial_connection_id,parent.config_hash,parent.credential_version_id,parent.product,parent.product_options)
+   or row(new.financial_connection_id,new.credential_version_id,new.product)
+     is distinct from row(parent.financial_connection_id,parent.credential_version_id,parent.product)
+   or (new.product<>'bolix' and row(new.config_hash,new.product_options) is distinct from row(parent.config_hash,parent.product_options))
+   or (new.product='bolix' and ((new.product_options-'issued_on') is distinct from (parent.product_options-'issued_on')
+    or new.product_options->>'issued_on' is distinct from (clock_timestamp() at time zone 'America/Sao_Paulo')::date::text))
    or exists(select 1 from provider_operations where invoice_id=new.invoice_id and state in ('prepared','uncertain','review')) then
    raise exception using errcode='N6901',message='fresh authenticated removal without receipts and unresolved operations required';
   end if;

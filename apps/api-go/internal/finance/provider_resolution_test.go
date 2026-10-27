@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"nexoisp/api-go/internal/db"
 	"nexoisp/api-go/internal/finance/providers"
+	"nexoisp/api-go/internal/finance/providers/efi"
 	"nexoisp/api-go/internal/tenancy"
 )
 
@@ -389,5 +390,77 @@ func TestProviderResolutionPartialAndUnresolvedReservation(t *testing.T) {
 		return tx.QueryRow(ctx, `select provider_issuance_id=$2::uuid and (select count(*) from provider_issuance where invoice_id=i.id)=1 from invoices i where id=$1`, r2.InvoiceID, i2.ID).Scan(&good)
 	}); e != nil || !good {
 		t.Fatal("pending operation lost reservation", e)
+	}
+}
+
+func TestBolixReplacementFreezesNewRecoveryWindow(t *testing.T) {
+	d, scope := issuanceDatabase(t)
+	r := issuanceFixture(t, d, scope)
+	ctx := context.Background()
+	var user string
+	var version CredentialMetadata
+	if e := d.WithScope(ctx, scope, func(tx *db.Tx) error {
+		if e := tx.QueryRow(ctx, `select id from users order by id limit 1`).Scan(&user); e != nil {
+			return e
+		}
+		var e error
+		version, e = SaveFinancialCredentials(ctx, tx, r.Scope.ConnectionID, user, PixCredentials{Kind: "efi_charges", ClientID: "synthetic-charges-client", ClientSecret: "synthetic-charges-secret"})
+		return e
+	}); e != nil {
+		t.Fatal(e)
+	}
+	customer := efi.BilletCustomer{Name: "Synthetic payer", CPF: "12345678909", Email: "synthetic@example.invalid"}
+	customer.Address.Street = "Synthetic street"
+	customer.Address.Number = "1"
+	customer.Address.Neighborhood = "Synthetic"
+	customer.Address.City = "Fortaleza"
+	customer.Address.State = "CE"
+	customer.Address.Zip = "60000000"
+	options := IssuanceOptions{Product: "bolix", IssuedOn: "2026-09-01", Customer: customer}
+	stored := StoredAdapterFactory(d, scope)
+	original, closeOriginal, e := stored(ctx, r, version.ID, options)
+	if e != nil {
+		t.Fatal(e)
+	}
+	hash := original.ConfigurationHash()
+	closeOriginal()
+	item, e := (SandboxIssuance{DB: d}).prepareOptions(ctx, scope, r, hash, version.ID, options)
+	if e != nil {
+		t.Fatal(e)
+	}
+	fake := &resolutionAdapter{issuanceFake: issuanceFake{request: r, lost: true, config: hash}}
+	fake.snapshot = providers.Snapshot{Charge: fake.charge(), Status: "removed"}
+	fake.snapshot.Charge.ID = "987654321"
+	if _, e = (SandboxIssuance{DB: d}).Run(ctx, scope, item.ID, fake); e == nil {
+		t.Fatal("expected uncertain original")
+	}
+	if _, e = ResolveProviderResult(ctx, d, scope, r.Scope.ConnectionID, item.ID, user, "resolve", ResolutionInput{uuid.NewString(), "Confirmar remoção Bolix com prova vinculada"}, resolutionFactory(fake)); e != nil {
+		t.Fatal(e)
+	}
+	b := ResolutionInput{uuid.NewString(), "Reemitir Bolix em nova data de recuperação"}
+	factory := func(ctx context.Context, request providers.Create, version string, o IssuanceOptions) (ConfiguredAdapter, func(), error) {
+		if request.IntentKey == r.IntentKey {
+			return fake, func() {}, nil
+		}
+		if request.IntentKey != b.IntentID || request.DueDate != r.DueDate || request.Money != r.Money || o.Customer != options.Customer || o.IssuedOn == options.IssuedOn {
+			return nil, func() {}, errors.New("replacement changed debt/customer or retained stale recovery window")
+		}
+		// Real adapter construction/hash, with synthetic credentials; no HTTP call.
+		return stored(ctx, request, version, o)
+	}
+	out, e := ResolveProviderResult(ctx, d, scope, r.Scope.ConnectionID, item.ID, user, "reissue", b, factory)
+	if e != nil {
+		t.Fatal(e)
+	}
+	var good bool
+	if e = d.WithScope(ctx, scope, func(tx *db.Tx) error {
+		return tx.QueryRow(ctx, `select child.state='prepared' and child.config_hash<>parent.config_hash and child.product_options->>'issued_on'=(now() at time zone 'America/Sao_Paulo')::date::text and parent.product_options->>'issued_on'='2026-09-01' and child.request->>'due_date'=parent.request->>'due_date' and child.credential_version_id=parent.credential_version_id from provider_issuance child join provider_issuance parent on parent.id=child.predecessor_id where child.id=$1`, out.Get("successor_id")).Scan(&good)
+	}); e != nil || !good {
+		t.Fatal("new Bolix recovery window not frozen", e)
+	}
+	r2 := r
+	r2.IntentKey = b.IntentID
+	if efi.TxID(r2) == efi.TxID(r) || fake.writes.Load() != 1 {
+		t.Fatal("replacement reuses provider identity or sends again during preparation")
 	}
 }
