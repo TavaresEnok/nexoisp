@@ -27,6 +27,36 @@ def onu_delivery(action="onu.authorize", version=1, op=None, recover=False, vlan
 
 
 class Onu(unittest.TestCase):
+    def test_resultado_olt_interrompido_nao_libera_nova_escrita_por_leitura_negativa(self):
+        delivery = onu_delivery()
+        env = Envelope.model_validate(json.loads(delivery["envelope"]))
+        self.store.record_attempt(delivery["attempt_id"], env, delivery["envelope"])
+        self.store.set_status(delivery["attempt_id"], "EXECUTING", [])
+        self.ex.recover_interrupted()
+        self.assertEqual(self.cloud.results, [])
+        self.assertEqual(len(self.store.interrupted()), 1)
+        self.ex.handle(onu_delivery(op=env.operation_id, recover=True))
+        self.assertEqual(self.olt.write_count(SERIAL, "authorize"), 0)
+        self.assertEqual(self.cloud.results, [])
+        self.ex.handle(onu_delivery(version=2))
+        self.assertEqual(self.cloud.results[-1][1]["outcome"], "FAILED")
+        self.assertIn("anterior", self.cloud.results[-1][1]["error"])
+        self.assertEqual(self.olt.write_count(SERIAL, "authorize"), 0)
+        self.cloud.results.clear()
+        # A late effect can still be confirmed, without another mutation.
+        self.olt.authorize(SERIAL, pon_port="0/1/1", line_profile="residencial", service_vlan=100, description=f"nexo:{ONU[:8]}:v1")
+        self.ex.recover_interrupted()
+        self.assertTrue(all(r[1]["outcome"] == "SUCCEEDED" for r in self.cloud.results))
+        self.assertEqual(self.olt.write_count(SERIAL, "authorize"), 1)
+
+    def test_onu_de_outro_recurso_nao_e_adotada_ou_removida(self):
+        self.olt.authorize(SERIAL, pon_port="0/1/1", line_profile="residencial", service_vlan=100, description="nexo:ffffffff:v1")
+        self.ex.handle(onu_delivery())
+        self.assertEqual(self.cloud.results[-1][1]["outcome"], "FAILED")
+        self.assertEqual(self.olt.read_onu(SERIAL).description, "nexo:ffffffff:v1")
+        self.assertEqual(self.olt.write_count(SERIAL, "authorize"), 1)
+        self.assertEqual(self.olt.write_count(SERIAL, "deauthorize"), 0)
+
     def setUp(self):
         self.dir = tempfile.mkdtemp()
         self.cloud = FakeCloud()

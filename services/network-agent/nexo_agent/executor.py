@@ -152,7 +152,7 @@ def onu_applied(st: OnuState, env: Envelope) -> bool:
     p = env.parameters
     if p.state == "removed":
         return not st.authorized
-    return (st.authorized and st.applied_version == env.desired_version and st.pon_port == p.pon_port
+    return (st.authorized and st.description == p.description and st.applied_version == env.desired_version and st.pon_port == p.pon_port
             and st.line_profile == p.line_profile and st.service_vlan == p.service_vlan
             and (p.service_profile is None or st.service_profile == p.service_profile))
 
@@ -175,6 +175,9 @@ class OnuFamily:
     def execute(driver, env: Envelope, go: dict, step, checkpoint) -> bool:
         p = env.parameters
         st = driver.read_onu(p.serial)
+        if st.authorized and (not st.description or st.description.rsplit(":v", 1)[0] != p.description.rsplit(":v", 1)[0]):
+            raise ValueError("ONU existente não pertence a este recurso; adoção/remoção automática recusada")
+        uncertain = False
         if onu_applied(st, env):
             step("configuração na OLT", "ok", "já aplicada nesta versão")
         else:
@@ -187,10 +190,13 @@ class OnuFamily:
                 else:
                     step("desautorização da ONU", "ok", driver.deauthorize(p.serial))
             except AckLost as e:
+                uncertain = True
                 step("configuração na OLT", "incerto", f"{e}; será verificado por consulta")
         checkpoint("VERIFYING")
         st = driver.read_onu(p.serial)
         ok = onu_applied(st, env)
+        if uncertain and not ok:
+            raise AckLost("readback ainda não confirma o resultado; manter intenção desconhecida sem reenviar")
         step("verificação", "ok" if ok else "falha", {"authorized": st.authorized, "pon_port": st.pon_port, "line_profile": st.line_profile,
                                                        "service_vlan": st.service_vlan, "applied_version": st.applied_version, "online": st.online})
         return ok
@@ -230,11 +236,19 @@ class Executor:
                 continue
             fam = family_of(env)
             steps = json.loads(row["steps"]) + [{"name": "recuperação após reinício", "status": "info", "at": _now()}]
-            st = fam.read(driver, env)
+            try:
+                st = fam.read(driver, env)
+            except Exception:
+                self.store.set_status(row["attempt_id"], "EXECUTING", steps)
+                continue
             if fam.applied(st, env):
                 steps.append({"name": "consulta do estado aplicado", "status": "ok", "at": _now(), "detail": "efeito confirmado sem repetir o comando"})
                 self._finish(row["attempt_id"], {"outcome": "SUCCEEDED", "recovered": True, fam.result_key: fam.payload(st)}, steps)
             else:
+                if fam is OnuFamily:
+                    steps.append({"name": "consulta sem confirmação", "status": "incerto", "at": _now(), "detail": "ausência momentânea não autoriza repetir comando OLT"})
+                    self.store.set_status(row["attempt_id"], "EXECUTING", steps)
+                    continue
                 steps.append({"name": "consulta do estado aplicado", "status": "ok", "at": _now(), "detail": "efeito não encontrado ou incompleto"})
                 self._finish(row["attempt_id"], {"outcome": "NOT_APPLIED", "recovered": True, fam.result_key: fam.payload(st)}, steps)
         self.store.abandon_received()
@@ -263,7 +277,11 @@ class Executor:
             return
 
         had_effect = delivery.get("recover") or self.store.may_have_effect(env.operation_id)
+        uncertain_onu = fam is OnuFamily and (delivery.get("recover") or self.store.unresolved_effect(env.operation_id))
         self.store.record_attempt(attempt_id, env, delivery["envelope"])  # se falhar aqui, nada é escrito no equipamento
+        if fam is OnuFamily and self.store.unresolved_resource(env.resource_id, env.operation_id):
+            self._finish(attempt_id, {"outcome": "FAILED", "error": "recurso OLT possui operação anterior com resultado desconhecido; resolver antes de nova mutação"}, [])
+            return
         fam.remember(self.store, env)
         steps: list = []
 
@@ -285,6 +303,10 @@ class Executor:
                 self._finish(attempt_id, {"outcome": "SUCCEEDED", "recovered": True, fam.result_key: fam.payload(st)}, steps)
                 return
             step("consulta antes de repetir", "ok", "efeito ausente ou incompleto; revalidando intenção")
+            if uncertain_onu:
+                step("resultado OLT desconhecido", "incerto", "manter consulta; não reenviar mutação nem remover efeito parcial")
+                self.store.set_status(attempt_id, "EXECUTING", steps)
+                return
 
         go = self.client.begin(attempt_id)  # revalida intenção atual, prazo e precondições na nuvem
         if not go.get("go"):
@@ -300,6 +322,9 @@ class Executor:
                 self._finish(attempt_id, {"outcome": "SUCCEEDED", fam.result_key: fam.payload(st)}, steps)
             else:
                 self._finish(attempt_id, {"outcome": "FAILED", "error": "leitura do estado aplicado não confirmou a mudança", fam.result_key: fam.payload(st)}, steps)
+        except AckLost:
+            step("resultado desconhecido", "incerto", "comando pode ter sido aplicado; aguardar readback sem reenviar")
+            self.store.set_status(attempt_id, "EXECUTING", steps)
         except Exception as e:  # falha definida (ex.: sem conexão com o equipamento)
             log.exception("falha executando %s", env.operation_id)
             step("erro", "falha", str(e)[:300])

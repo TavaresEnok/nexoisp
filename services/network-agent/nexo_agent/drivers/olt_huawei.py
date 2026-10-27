@@ -14,6 +14,7 @@ import re
 from typing import Optional, Protocol
 
 from .olt_base import OnuState
+from .base import AckLost
 
 
 class OltCommandError(Exception):
@@ -43,7 +44,7 @@ def _field(text: str, label: str) -> Optional[str]:
 
 
 def check_failure(output: str):
-    m = re.search(r"^\s*(Failure\s*:.*|%\s*\S.*)$", output, re.M)
+    m = re.search(r"^\s*(Failure\s*:.*|Error\s*:.*|%\s*\S.*)$", output, re.M | re.I)
     if m:
         raise OltCommandError(m.group(1).strip())
 
@@ -95,6 +96,16 @@ def parse_optical(output: str) -> tuple[Optional[float], Optional[float]]:
     return num("Rx optical power(dBm)"), num("Tx optical power(dBm)")
 
 
+def _scoped_service_ports(output: str, ont_id: int) -> list[dict]:
+    if re.search(r"Failure\s*:\s*No service virtual port can be operated", output, re.I):
+        return []
+    check_failure(output)
+    rows = parse_service_ports(output)
+    if not rows or any(row["ont_id"] != ont_id for row in rows):
+        raise OltCommandError("service-port não reconhecido ou de outra ONT; estado desconhecido")
+    return rows
+
+
 def parse_ont_add(output: str) -> int:
     m = re.search(r"ONTID\s*:\s*(\d+)", output)
     if not m:
@@ -128,17 +139,31 @@ class NetmikoCli:
 
     _END = r"(?:[>#]|\}\s*:|More[^\n]*----)\s*$"
 
-    def __init__(self, host: str, port: int, username: str, password: str):
+    def __init__(self, host: str, port: int, username: str, password: str, known_hosts_file: str):
         from netmiko import ConnectHandler
+        from ..ssh_trust import ssh_parameters
+        security = ssh_parameters(host, port, known_hosts_file)
         self._c = ConnectHandler(device_type="huawei_smartax", host=host, port=port, username=username, password=password,
-                                 conn_timeout=15, auth_timeout=15, banner_timeout=15, fast_cli=True, global_delay_factor=0.1)
-        for cmd in ("enable", "undo smart", "undo interactive", "scroll 512", "config"):
-            self._send(cmd)
+                                 conn_timeout=15, auth_timeout=15, banner_timeout=15, fast_cli=True, global_delay_factor=0.1, **security)
+        try:
+            for cmd in ("enable", "undo smart", "undo interactive", "scroll 512", "config"):
+                check_failure(self._send(cmd))
+        except Exception:
+            self.close()
+            raise
 
     def _send(self, command: str) -> str:
         return self._c.send_command(command, expect_string=self._END, strip_prompt=False, strip_command=True, read_timeout=30, cmd_verify=False)
 
     def run(self, command: str) -> str:
+        try:
+            return self._run_command(command)
+        except Exception:
+            if re.match(r"^(ont (add|delete)\b|service-port\b|undo service-port\b)", command):
+                raise AckLost("confirmação SSH ausente após comando mutante; consultar estado") from None
+            raise
+
+    def _run_command(self, command: str) -> str:
         out = self._send(command)
         for _ in range(50):
             tail = out.rstrip().splitlines()[-1] if out.strip() else ""
@@ -148,8 +173,10 @@ class NetmikoCli:
                 out += "\n" + self._send(" ")
             else:
                 break
+        else:
+            raise OltCommandError("resposta CLI incompleta após limite de paginação")
         lines = out.splitlines()
-        if lines and re.search(r"[>#]\s*$", lines[-1]):  # remove o prompt final
+        if lines and re.search(r"[>#]\s*$", lines[-1]):
             lines = lines[:-1]
         return "\n".join(lines)
 
@@ -165,8 +192,9 @@ class NetmikoCli:
 class HuaweiOltDriver:
     simulated = False
 
-    def __init__(self, connect, gemport: int = 1):
+    def __init__(self, connect, gemport: int = 1, *, allow_writes=True, expected_product=None, expected_firmware=None):
         self._connect, self.gemport = connect, gemport
+        self.allow_writes, self.expected_product, self.expected_firmware = allow_writes, expected_product, expected_firmware
         self._check_cache = None
         self._cli, self._cli_used = None, 0.0
 
@@ -178,7 +206,10 @@ class HuaweiOltDriver:
         if not dev.get("host"):
             raise RuntimeError("OLT sem endereço configurado")
         host, port = dev["host"], int(dev.get("api_port") or 22)
-        return cls(lambda: NetmikoCli(host, port, cred["username"], cred["password"]), int(cred.get("gemport", 1)))
+        if cred.get("allow_writes") is True and (not cred.get("expected_product") or not cred.get("expected_firmware")):
+            raise ValueError("escrita OLT exige modelo e firmware esperados explícitos na configuração local")
+        return cls(lambda: NetmikoCli(host, port, cred["username"], cred["password"], cred.get("known_hosts_file", "")), int(cred.get("gemport", 1)),
+                   allow_writes=cred.get("allow_writes") is True, expected_product=cred.get("expected_product"), expected_firmware=cred.get("expected_firmware"))
 
     def _session(self):
         """Reaproveita a sessão SSH entre chamadas próximas (abrir uma sessão custa segundos). Qualquer erro descarta a sessão,
@@ -210,12 +241,30 @@ class HuaweiOltDriver:
     def _check(self) -> dict:
         with self._session() as s:
             out = s.run("display version")
-        return {"ok": True, "detail": (" ".join(filter(None, [_field(out, "PRODUCT"), _field(out, "VERSION")])) or "Huawei SmartAX")
+        product, firmware = _field(out, "PRODUCT"), _field(out, "VERSION")
+        if not product or not firmware:
+            raise OltCommandError("modelo/firmware não reconhecido; capacidade não confirmada")
+        return {"ok": True, "product": product, "firmware": firmware, "homologated": False, "detail": f"{product} {firmware}"
                 + " — driver não homologado em equipamento real"}
+
+    def _require_write_capability(self):
+        if not self.allow_writes:
+            raise OltCommandError("escrita OLT desabilitada na configuração local")
+        if self.expected_product is not None or self.expected_firmware is not None:
+            actual = self._check()
+            if not self.expected_product or not self.expected_firmware or actual["product"] != self.expected_product or actual["firmware"] != self.expected_firmware:
+                raise OltCommandError("modelo/firmware não coincide com a capacidade aprovada localmente")
 
     def discover(self) -> list[dict]:
         with self._session() as s:
-            return parse_autofind(s.run("display ont autofind all", tolerate=True))
+            output = s.run("display ont autofind all", tolerate=True)
+            if re.search(r"Failure\s*:\s*The automatically found ONTs do not exist", output, re.I):
+                return []
+            check_failure(output)
+            found = parse_autofind(output)
+            if not found and not re.search(r"number of GPON autofind ONT is\s+0\b", output, re.I):
+                raise OltCommandError("descoberta incompleta/não reconhecida; não reportar lista vazia")
+            return found
 
     session_idle_s = 45
     poll_interval_s = 60   # leitura periódica: uma sessão SSH por ciclo para descoberta + todas as ONUs
@@ -232,11 +281,21 @@ class HuaweiOltDriver:
     def _read(self, s, serial: str) -> OnuState:
         sn = normalize_serial(serial)
         if True:
-            info = parse_ont_info(s.run(f"display ont info by-sn {sn}", tolerate=True))
-            if not info:
+            raw = s.run(f"display ont info by-sn {sn}", tolerate=True)
+            if re.search(r"Failure\s*:\s*The required ONT does not exist", raw, re.I):
                 return OnuState(authorized=False)
-            ports = [p for p in parse_service_ports(s.run(f"display service-port port {info['pon_port']} ont {info['ont_id']}", tolerate=True))
-                     if p["ont_id"] == info["ont_id"]]
+            check_failure(raw)
+            info = parse_ont_info(raw)
+            if not info:
+                raise OltCommandError("resposta ONT incompleta; estado desconhecido")
+            if _field(raw, "SN") != sn:
+                raise OltCommandError("serial do readback não corresponde à ONU consultada")
+            split_port(info["pon_port"])
+            raw_ports = s.run(f"display service-port port {info['pon_port']} ont {info['ont_id']}", tolerate=True)
+            empty_ports = re.search(r"Failure\s*:\s*No service virtual port can be operated", raw_ports, re.I)
+            if not empty_ports:
+                check_failure(raw_ports)
+            ports = _scoped_service_ports(raw_ports, info["ont_id"])
             online = info["run_state"] == "online"
             rx = tx = None
             if online:
@@ -254,6 +313,10 @@ class HuaweiOltDriver:
         if not service_profile:
             raise ValueError("OLT Huawei exige o perfil de serviço (ont-srvprofile-name)")
         vlan = int(service_vlan)
+        if not 1 <= vlan <= 4094 or not 1 <= self.gemport <= 4095:
+            raise ValueError("VLAN ou GEM port fora da capacidade suportada")
+        _safe(line_profile, "perfil de linha"); _safe(service_profile, "perfil de serviço"); _safe(description, "descrição")
+        self._require_write_capability()
         with self._session() as s:
             s.run(f"interface gpon {fs}")
             ont_id = parse_ont_add(s.run(
@@ -265,12 +328,19 @@ class HuaweiOltDriver:
 
     def deauthorize(self, serial: str) -> dict:
         sn = normalize_serial(serial)
+        self._require_write_capability()
         with self._session() as s:
-            info = parse_ont_info(s.run(f"display ont info by-sn {sn}", tolerate=True))
-            if not info:
+            raw = s.run(f"display ont info by-sn {sn}", tolerate=True)
+            if re.search(r"Failure\s*:\s*The required ONT does not exist", raw, re.I):
                 return {"removed": 0}
-            ports = [x for x in parse_service_ports(s.run(f"display service-port port {info['pon_port']} ont {info['ont_id']}", tolerate=True))
-                     if x["ont_id"] == info["ont_id"]]
+            check_failure(raw); info = parse_ont_info(raw)
+            if not info or _field(raw, "SN") != sn:
+                raise OltCommandError("identidade/estado ONT desconhecido; remoção recusada")
+            split_port(info["pon_port"])
+            raw_ports = s.run(f"display service-port port {info['pon_port']} ont {info['ont_id']}", tolerate=True)
+            if not re.search(r"Failure\s*:\s*No service virtual port can be operated", raw_ports, re.I):
+                check_failure(raw_ports)
+            ports = _scoped_service_ports(raw_ports, info["ont_id"])
             for sp in ports:
                 s.run(f"undo service-port {sp['index']}")
             fs, p = split_port(info["pon_port"])

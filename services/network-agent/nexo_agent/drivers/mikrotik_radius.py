@@ -6,12 +6,14 @@ Falta repetir no equipamento físico/versão do piloto (ADR-012). FreeRADIUS seg
 A autenticação é respondida pelo FreeRADIUS com os dados locais: continua funcionando com a nuvem ou o agente parados.
 Atributos (manual MikroTik, RADIUS): Mikrotik-Group = nome do perfil PPP do usuário."""
 import re
+import ipaddress
+import os
 import sqlite3
 import ssl
 import time
 from typing import Optional
 
-from .base import AccountState
+from .base import AccountState, AckLost
 
 SCHEMA = """
 create table if not exists nexo_accounts (
@@ -198,6 +200,13 @@ class MikrotikSessions:
     def __init__(self, host: str, port: Optional[int], cred: dict):
         self.host, self.cred = host, cred
         self.plaintext = bool(cred.get("insecure_plaintext"))  # somente laboratório
+        if self.plaintext or cred.get("insecure_skip_verify"):
+            try:
+                loopback = ipaddress.ip_address(host).is_loopback
+            except ValueError:
+                loopback = False
+            if os.environ.get("NEXO_AGENT_ALLOW_INSECURE_LAB") != "1" or not loopback:
+                raise ValueError("transporte NAS inseguro exige laboratório explícito e IP de loopback")
         self.port = port or (8728 if self.plaintext else 8729)
 
     def _connect(self):
@@ -205,6 +214,7 @@ class MikrotikSessions:
         kw = {}
         if not self.plaintext:
             ctx = ssl.create_default_context(cafile=self.cred.get("ca_file"))
+            ctx.minimum_version = ssl.TLSVersion.TLSv1_2
             if self.cred.get("insecure_skip_verify"):  # somente laboratório; nunca padrão
                 ctx.check_hostname, ctx.verify_mode = False, ssl.CERT_NONE
             kw["ssl_wrapper"] = lambda sock: ctx.wrap_socket(sock, server_hostname=self.host)
@@ -241,7 +251,10 @@ class MikrotikSessions:
             path = api.path("ppp", "active")
             ids = [r[".id"] for r in path.select(Key(".id"), Key("name")).where(Key("name") == username)]
             if ids:
-                path.remove(*ids)
+                try:
+                    path.remove(*ids)
+                except Exception:
+                    raise AckLost("resposta NAS ausente após remoção; consultar sessões sem presumir falha") from None
             return len(ids)
         finally:
             api.close()

@@ -117,6 +117,8 @@ def verify_envelope(raw: str, signature_b64: str, public_key_b64: str, *, agent_
     if is_onu != isinstance(env.parameters, OnuParameters):
         raise EnvelopeError("parâmetros incompatíveis com a ação")
     if is_onu:
+        if env.parameters.description != f"nexo:{env.resource_id[:8]}:v{env.desired_version}":
+            raise EnvelopeError("marcador ONU não corresponde ao recurso/versão assinados")
         if env.parameters.state != {"onu.authorize": "authorized", "onu.deauthorize": "removed"}[env.action]:
             raise EnvelopeError("estado incompatível com a ação")
     else:

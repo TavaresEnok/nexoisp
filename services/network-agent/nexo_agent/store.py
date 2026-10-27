@@ -131,6 +131,12 @@ class Store:
         """Alguma tentativa anterior desta operação chegou a iniciar escrita?"""
         return self._x("select 1 from attempts where operation_id = ? and (status in ('EXECUTING','VERIFYING') or outcome is not null)", (operation_id,)).fetchone() is not None
 
+    def unresolved_effect(self, operation_id: str) -> bool:
+        return self._x("select 1 from attempts where operation_id = ? and status in ('EXECUTING','VERIFYING')", (operation_id,)).fetchone() is not None
+
+    def unresolved_resource(self, resource_id: str, operation_id: str) -> bool:
+        return self._x("select 1 from attempts where resource_id = ? and operation_id <> ? and status in ('EXECUTING','VERIFYING')", (resource_id, operation_id)).fetchone() is not None
+
     def interrupted(self) -> list[sqlite3.Row]:
         return self._x("select * from attempts where status in ('EXECUTING','VERIFYING') order by created_at").fetchall()
 
