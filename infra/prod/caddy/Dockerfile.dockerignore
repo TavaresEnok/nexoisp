@@ -1,6 +1,7 @@
 **
 !package.json
 !package-lock.json
+!.npmrc
 !apps/
 !apps/web/
 !apps/web/**
@@ -12,3 +13,8 @@
 apps/web/dist/
 
 **/*.tsbuildinfo
+
+# Keep environment files and private keys out of the restricted web context.
+**/.env
+**/.env.*
+**/*.key
