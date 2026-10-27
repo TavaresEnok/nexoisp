@@ -29,8 +29,15 @@ try {
  const contractDialog = page.getByRole('dialog', { name: 'Novo contrato', exact: true });
  await contractDialog.getByLabel('Plano', { exact: true }).selectOption({ label: 'Fibra 200 · R$ 79,90 · 200 Mbps' });
  await contractDialog.getByLabel('Dia de vencimento', { exact: true }).fill('12');
+ // Assert the actual mutation and its destination, not a global button that
+ // also exists in the overview panel while tabs are changing.
+ const creation = page.waitForResponse(response => new URL(response.url()).pathname === '/api/contracts' && response.request().method() === 'POST');
  await contractDialog.getByRole('button', { name: 'Criar contrato', exact: true }).click();
- await page.getByRole('button', { name: 'Abrir contrato', exact: true }).waitFor();
+ assert.equal((await creation).ok(), true, 'contract mutation must succeed');
+ await contractDialog.waitFor({ state: 'hidden' });
+ await page.waitForURL(url => url.searchParams.get('abaFicha') === 'contrato');
+ assert.equal(await page.getByRole('tab', { name: 'Contratos', exact: true }).getAttribute('aria-selected'), 'true');
+ await page.getByRole('tabpanel', { name: 'Contratos', exact: true }).getByRole('button', { name: 'Abrir contrato', exact: true }).waitFor();
  const detail = await (await context.request.get(`${base}/api/subscribers/${id}`)).json(); const contractId = detail.contracts[0].id; assert.equal(detail.contracts[0].due_day, 12);
  await page.getByRole('tab', { name: 'Histórico', exact: true }).click(); await visible(page.getByText('Contrato criado', { exact: true })); checks.push('Contrato criado pela ficha com versão do plano e evento na linha do tempo');
  await page.getByRole('button', { name: 'Editar cadastro', exact: true }).click(); editor = page.getByRole('dialog', { name: 'Editar assinante', exact: true }); await editor.getByLabel('Telefone', { exact: true }).fill('85988887777'); await editor.getByLabel('Situação do cadastro', { exact: true }).selectOption('inactive'); await editor.getByRole('button', { name: 'Salvar', exact: true }).click();
