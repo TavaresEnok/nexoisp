@@ -6,6 +6,8 @@ import shutil
 import subprocess
 import tempfile
 import time
+import sys
+import traceback
 import urllib.error
 import urllib.request
 
@@ -14,6 +16,20 @@ LOCAL = Path(__file__).resolve().parent / 'local'
 DB_CONTAINER = os.getenv('NEXO_CONTRATO_DB_CONTAINER', 'nexo-fase1-db')
 DB_PORT = int(os.getenv('NEXO_CONTRATO_DB_PORT', '15439'))
 DB_NAME = 'nexo_contrato_lab'
+
+
+# Child contracts run as separate Python processes. Surface their exact failing
+# source location to hosted checks without publishing exception/response values.
+if os.getenv('GITHUB_ACTIONS') == 'true':
+    def _annotate_contract_failure(exc_type, value, tb):
+        for frame in traceback.extract_tb(tb):
+            path = Path(frame.filename).resolve()
+            if path.is_relative_to(ROOT):
+                message = (exc_type.__name__ + ': ' + (frame.line or frame.name))
+                message = message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+                print(f'::error file={path.relative_to(ROOT)},line={frame.lineno},title=Contrato isolado::{message}', flush=True)
+        sys.__excepthook__(exc_type, value, tb)
+    sys.excepthook = _annotate_contract_failure
 
 
 def command(args, **kwargs):
