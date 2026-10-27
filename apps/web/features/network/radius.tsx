@@ -1,3 +1,4 @@
+import { RadiusAccountingHistory } from "./radius-history";
 import { RadiusAccountingReview } from "./radius-accounting";
 import { useState } from "react";
 import useSWR from "swr";
@@ -202,7 +203,10 @@ export function RadiusOverview() {
         )}
       </QueryBoundary>
       {result.data?.capabilities.accounting_review_allowed && (
-        <RadiusAccountingReview />
+        <>
+          <RadiusAccountingReview />
+          <RadiusAccountingHistory />
+        </>
       )}
       {creating && (
         <RadiusEditor

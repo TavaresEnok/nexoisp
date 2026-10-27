@@ -1,0 +1,44 @@
+import { chromium } from 'playwright';
+import assert from 'node:assert/strict';
+import { writeFile } from 'node:fs/promises';
+const base = process.env.BASE;
+assert.ok(base?.startsWith('http://127.0.0.1:'));
+const browser = await chromium.launch({ args: ['--no-sandbox'] });
+const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, acceptDownloads: true });
+const page = await context.newPage();
+page.setDefaultTimeout(15000);
+const errors = [];
+page.on('pageerror', e => errors.push(e.message));
+try {
+  const login = await context.request.post(`${base}/api/auth/login`, { data: { email: 'admin@alfa.demo', password: 'demo1234' } });
+  assert.equal(login.status(), 200);
+  await page.goto(`${base}/rede`);
+  const section = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Histórico de sessões RADIUS', exact: true }) });
+  await section.getByLabel('Usuário RADIUS exato').fill('history-browser-synthetic');
+  await section.getByRole('button', { name: 'Consultar histórico', exact: true }).click();
+  await section.getByText('9223372036854775807', { exact: true }).waitFor();
+  await section.getByText('2001:db8:200::/56', { exact: true }).waitFor();
+  const downloading = page.waitForEvent('download');
+  await section.getByRole('button', { name: 'Exportar esta página CSV', exact: true }).click();
+  const downloaded = await downloading;
+  assert.equal(downloaded.suggestedFilename(), 'radius-accounting-page.csv');
+  await downloaded.saveAs('/evidence/history-browser.csv');
+  await section.getByLabel('Situação no accounting').selectOption('closed');
+  await section.getByRole('button', { name: 'Consultar histórico', exact: true }).click();
+  await section.getByText('Nenhuma sessão para os filtros informados.', { exact: true }).waitFor();
+  // A failed API query must remain visible, never become an empty seeded success.
+  await section.getByLabel('Identificador do NAS').fill('invalid');
+  await section.getByRole('button', { name: 'Consultar histórico', exact: true }).click();
+  await section.getByRole('button', { name: 'Tentar novamente', exact: true }).waitFor();
+  assert.equal(await section.getByRole('button', { name: 'Exportar esta página CSV', exact: true }).isDisabled(), true);
+  await section.getByLabel('Identificador do NAS').fill('');
+  await section.getByLabel('Situação no accounting').selectOption('');
+  await section.getByRole('button', { name: 'Consultar histórico', exact: true }).click();
+  await section.getByText('9223372036854775807', { exact: true }).waitFor();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await section.scrollIntoViewIfNeeded();
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+  await section.screenshot({ path: '/evidence/radius-history-mobile.png' });
+  assert.deepEqual(errors, []);
+  await writeFile('/evidence/browser-history.json', JSON.stringify({ ok: true, checks: ['real cookie session', 'exact bigint and delegated prefix', 'CSV download', 'closed filter', 'API error and export disabled', '390px without overflow'], hardware_homologation: false }, null, 2));
+} finally { await context.close(); await browser.close(); }

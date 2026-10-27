@@ -111,6 +111,9 @@ def run():
         import re
         actual={(method.upper(),re.sub(r'\{([^}]+)\}',r':\1',path)) for path,item in schema['paths'].items() for method in item if method.upper() in ['GET','POST','PUT','PATCH','DELETE']}
         assert manifest==actual,(manifest-actual,actual-manifest);checks.append('operações reais iguais ao inventário')
+        from radius_history_contract import verify as verify_radius_history
+        verify_radius_history(api,call,sql)
+        checks.append('B11: histórico, paginação, IPv6 CSV exato, auditoria e isolamento')
         command([sys.executable,str(ROOT/'tests/contrato/payment_intents.py')],env=dict(env,NEXO_PAYMENT_LAB='1',NEXO_PAYMENT_LAB_URL=bases[0],NEXO_PAYMENT_LAB_URL_2=bases[1]))
         checks.append('intenção persistente: replay concorrente, conflito, estorno e resumos residuais')
         command([sys.executable,str(ROOT/'tests/contrato/financial_connections.py')],env=dict(env,NEXO_PAYMENT_LAB='1',NEXO_PAYMENT_LAB_URL=bases[0],NEXO_PAYMENT_LAB_URL_2=bases[1]))

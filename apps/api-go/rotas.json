@@ -567,6 +567,10 @@
     },
     {
       "method": "GET",
+      "path": "/api/radius/accounting/sessions"
+    },
+    {
+      "method": "GET",
       "path": "/api/radius/allowed-sources"
     },
     {

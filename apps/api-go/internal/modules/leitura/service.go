@@ -75,6 +75,7 @@ func Register(api huma.API, r *endpoint.Registry, s Service) {
 	registerAuxiliares(api, r, s)
 	registerDinamicas(api, r, s)
 	registerRadiusAccounting(api, r, s)
+	registerRadiusHistory(api, r, s)
 	r.PublicGet(api, "/aviso/{slug}", s.notice)
 	r.Get(api, "/api/me", "", true, s.me)
 	r.Get(api, "/api/plans", "plans:read", false, s.simple(gen.Plans0, "many", false, false))
