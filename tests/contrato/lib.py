@@ -16,6 +16,9 @@ LOCAL = Path(__file__).resolve().parent / 'local'
 DB_CONTAINER = os.getenv('NEXO_CONTRATO_DB_CONTAINER', 'nexo-fase1-db')
 DB_PORT = int(os.getenv('NEXO_CONTRATO_DB_PORT', '15439'))
 DB_NAME = 'nexo_contrato_lab'
+# A clean checkout has no ignored output directory. Child contracts must be able
+# to write evidence before the parent finishes its own report.
+(ROOT / 'tests/contrato/relatorios').mkdir(parents=True, exist_ok=True)
 
 
 # Child contracts run as separate Python processes. Surface their exact failing
