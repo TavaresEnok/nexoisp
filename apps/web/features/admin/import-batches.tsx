@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import useSWR from "swr";
 import { z } from "zod";
 import { OperationalCatalog } from "@/components/operational-catalog";
+import { Panel } from "@/components/workspace-ui";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,8 +12,17 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { QueryBoundary } from "@/features/shared/feedback";
 import { ActionButton } from "@/features/shared/action";
+import { money } from "@/lib/format";
 import { api } from "@/platform/erp-client";
 import {
   batch,
@@ -21,6 +31,7 @@ import {
   totals,
   type ImportRow,
   type ImportBatch,
+  type ImportKind,
 } from "./import-models";
 const importBatch = batch.extend({
   totals: totals.extend({ conflicts: z.coerce.number().optional() }),
@@ -172,7 +183,241 @@ function ImportBatchDetail({
         >
           <ImportResults rows={result.data ?? []} />
         </QueryBoundary>
+        <ImportBatchReconciliation batchId={batch.id} kind={batch.kind} />
       </DialogContent>
     </Dialog>
+  );
+}
+const centsText = z.string().regex(/^-?\d+$/, "Centavos inválidos");
+const batchReconciliation = z.object({
+  invoices: z
+    .object({
+      count: z.number().int().nonnegative(),
+      by_status: z.object({
+        open: z.number().int().nonnegative(),
+        paid: z.number().int().nonnegative(),
+        reconciling: z.number().int().nonnegative(),
+        canceled: z.number().int().nonnegative(),
+      }),
+      missing: z.number().int().nonnegative(),
+      amount_cents: centsText,
+      received_cents: centsText,
+      received_after_import_cents: centsText,
+      open_residual_cents: centsText,
+      canceled_after_import: z.number().int().nonnegative(),
+      legacy_issuance_violations: z.number().int().nonnegative(),
+      by_contract: z.array(
+        z.object({
+          contract_id: z.string(),
+          invoices: z.number().int().nonnegative(),
+          open_residual_cents: centsText,
+        }),
+      ),
+    })
+    .nullable(),
+  contracts: z
+    .object({
+      entities_created: z.number().int().nonnegative(),
+      contracts_by_status: z.record(z.string(), z.number().int().nonnegative()),
+      resources_pending_provision: z.number().int().nonnegative(),
+    })
+    .nullable(),
+  evidence: z.object({
+    snapshot: z.boolean(),
+    note: z.string(),
+  }),
+});
+type BatchReconciliation = z.infer<typeof batchReconciliation>;
+const invoiceStatusLabel = {
+  open: "Em aberto",
+  paid: "Paga",
+  reconciling: "Em conciliação",
+  canceled: "Cancelada",
+} as const;
+const contractStatusLabel: Record<string, string> = {
+  active: "Vigente",
+  ended: "Encerrado",
+};
+function centsLabel(cents: string) {
+  return money(Number(cents) / 100);
+}
+function Fact({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div>
+      <dt>{label}</dt>
+      <dd>{value}</dd>
+    </div>
+  );
+}
+function ImportBatchReconciliation({
+  batchId,
+  kind,
+}: {
+  batchId: string;
+  kind: ImportKind;
+}) {
+  const result = useSWR(
+    ["erp-import-batch-reconciliation", batchId],
+    async () =>
+      batchReconciliation.parse(
+        await api(`/import/batches/${batchId}/reconciliation`),
+      ),
+  );
+  const data = result.data;
+  return (
+    <Panel
+      className="min-w-0"
+      title="Reconciliação"
+      description="Estado atual do Nexo; não comprova o saldo na instituição de origem."
+    >
+      <QueryBoundary
+        loading={result.isLoading}
+        error={result.error}
+        retry={() => result.mutate()}
+      >
+        {data?.invoices && <InvoiceReconciliation invoices={data.invoices} />}
+        {data?.contracts && (
+          <ContractReconciliation contracts={data.contracts} />
+        )}
+        {data && !data.invoices && !data.contracts && (
+          <p>
+            {kind === "invoices"
+              ? "O servidor não devolveu o saldo deste lote de títulos."
+              : kind === "subscribers" || kind === "contracts"
+                ? "O servidor não devolveu a situação dos contratos deste lote."
+                : "Este tipo de lote não tem saldo de títulos nem situação de contratos."}
+          </p>
+        )}
+      </QueryBoundary>
+    </Panel>
+  );
+}
+function InvoiceReconciliation({
+  invoices,
+}: {
+  invoices: NonNullable<BatchReconciliation["invoices"]>;
+}) {
+  const contracts = invoices.by_contract.slice(0, 500);
+  return (
+    <div className="flex min-w-0 flex-col gap-4">
+      {(invoices.legacy_issuance_violations > 0 || invoices.missing > 0) && (
+        <div className="erp-inline-actions">
+          {invoices.legacy_issuance_violations > 0 && (
+            <Badge variant="warning">
+              títulos legados com nova cobrança — investigar
+            </Badge>
+          )}
+          {invoices.missing > 0 && (
+            <Badge variant="warning">faturas ausentes</Badge>
+          )}
+        </div>
+      )}
+      <dl className="erp-columns">
+        <Fact label="Títulos localizados" value={invoices.count} />
+        {(["open", "paid", "reconciling", "canceled"] as const).map(
+          (status) => (
+            <Fact
+              key={status}
+              label={invoiceStatusLabel[status]}
+              value={invoices.by_status[status]}
+            />
+          ),
+        )}
+        <Fact
+          label="Valor importado"
+          value={centsLabel(invoices.amount_cents)}
+        />
+        <Fact label="Recebido" value={centsLabel(invoices.received_cents)} />
+        <Fact
+          label="Recebido após a importação"
+          value={centsLabel(invoices.received_after_import_cents)}
+        />
+        <Fact
+          label="Saldo em aberto"
+          value={centsLabel(invoices.open_residual_cents)}
+        />
+        <Fact
+          label="Cancelados após a importação"
+          value={invoices.canceled_after_import}
+        />
+        <Fact label="Faturas ausentes" value={invoices.missing} />
+        <Fact
+          label="Títulos legados com nova cobrança"
+          value={invoices.legacy_issuance_violations}
+        />
+      </dl>
+      <div className="flex min-w-0 flex-col gap-2">
+        <p>
+          <strong>Contratos com maior saldo</strong>
+        </p>
+        <p className="profile-footnote">
+          Até 500 contratos, na ordem enviada pelo servidor.
+        </p>
+        {contracts.length === 0 ? (
+          <p>Nenhum contrato com título localizado.</p>
+        ) : (
+          <div className="min-w-0 overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Contrato</TableHead>
+                  <TableHead>Títulos</TableHead>
+                  <TableHead>Saldo em aberto</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {contracts.map((row) => (
+                  <TableRow key={row.contract_id}>
+                    <TableCell className="mono whitespace-nowrap">
+                      {row.contract_id}
+                    </TableCell>
+                    <TableCell>{row.invoices}</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      {centsLabel(row.open_residual_cents)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+function ContractReconciliation({
+  contracts,
+}: {
+  contracts: NonNullable<BatchReconciliation["contracts"]>;
+}) {
+  const statuses = Object.entries(contracts.contracts_by_status);
+  return (
+    <div className="flex flex-col gap-4">
+      <dl className="erp-columns">
+        <Fact label="Entidades criadas" value={contracts.entities_created} />
+        <Fact
+          label="Contas pendentes de provisionamento"
+          value={contracts.resources_pending_provision}
+        />
+      </dl>
+      <div className="flex flex-col gap-2">
+        <p>
+          <strong>Contratos por situação</strong>
+        </p>
+        {statuses.length === 0 ? (
+          <p>Nenhum contrato vinculado às entidades criadas.</p>
+        ) : (
+          <dl className="erp-columns">
+            {statuses.map(([status, count]) => (
+              <Fact
+                key={status}
+                label={contractStatusLabel[status] ?? status}
+                value={count}
+              />
+            ))}
+          </dl>
+        )}
+      </div>
+    </div>
   );
 }
