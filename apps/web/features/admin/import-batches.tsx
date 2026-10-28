@@ -26,6 +26,7 @@ import { money } from "@/lib/format";
 import { api } from "@/platform/erp-client";
 import {
   batch,
+  importKind,
   importRow,
   kindLabels,
   totals,
@@ -184,6 +185,7 @@ function ImportBatchDetail({
           <ImportResults rows={result.data ?? []} />
         </QueryBoundary>
         <ImportBatchReconciliation batchId={batch.id} kind={batch.kind} />
+        <ImportBatchRevertEligibility batchId={batch.id} />
       </DialogContent>
     </Dialog>
   );
@@ -247,6 +249,77 @@ function Fact({ label, value }: { label: string; value: ReactNode }) {
       <dt>{label}</dt>
       <dd>{value}</dd>
     </div>
+  );
+}
+const revertBlocker = z.object({
+  kind: z.string(),
+  count: z.number().int().nonnegative(),
+  sample_ids: z.array(z.string()),
+  description: z.string(),
+});
+const revertEligibility = z
+  .object({
+    batch: z.object({
+      id: z.string(),
+      kind: importKind,
+      source: z.string(),
+      created_at: z.string(),
+    }),
+    eligible: z.boolean(),
+    blockers: z.array(revertBlocker),
+    checked_at: z.string(),
+    evidence: z.object({
+      reverted: z.literal(false),
+      note: z.string(),
+    }),
+  })
+  .refine((value) => value.eligible === (value.blockers.length === 0), {
+    message: "Elegibilidade inconsistente com os bloqueios.",
+  });
+function ImportBatchRevertEligibility({ batchId }: { batchId: string }) {
+  const result = useSWR(
+    ["erp-import-batch-revert-eligibility", batchId],
+    async () =>
+      revertEligibility.parse(
+        await api(`/import/batches/${batchId}/revert-eligibility`),
+      ),
+  );
+  const data = result.data;
+  return (
+    <Panel
+      className="min-w-0"
+      title="Reversão"
+      description="Esta verificação não altera dados. A reversão do lote ainda não está disponível e, quando existir, compensará registros financeiros em vez de apagá-los."
+    >
+      <QueryBoundary
+        loading={result.isLoading}
+        error={result.error}
+        retry={() => result.mutate()}
+      >
+        {data &&
+          (data.eligible ? (
+            <Badge variant="success">Sem efeitos posteriores</Badge>
+          ) : (
+            <div className="flex min-w-0 flex-col gap-3">
+              <Badge variant="warning">Efeitos posteriores</Badge>
+              <ul className="flex min-w-0 flex-col gap-3">
+                {data.blockers.map((blocker) => (
+                  <li key={blocker.kind} className="min-w-0">
+                    <p>
+                      {blocker.description} <strong>{blocker.count}</strong>
+                    </p>
+                    {blocker.sample_ids.length > 0 && (
+                      <p className="mono text-xs break-all">
+                        {blocker.sample_ids.join(" ")}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+      </QueryBoundary>
+    </Panel>
   );
 }
 function ImportBatchReconciliation({
