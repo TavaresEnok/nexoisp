@@ -375,6 +375,10 @@
     },
     {
       "method": "GET",
+      "path": "/api/import/batches/:id/reconciliation"
+    },
+    {
+      "method": "GET",
       "path": "/api/install-kits"
     },
     {
