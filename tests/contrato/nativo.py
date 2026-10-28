@@ -123,6 +123,9 @@ def run():
         from import_batch_reconciliation_contract import verify as verify_import_batch_reconciliation
         verify_import_batch_reconciliation(api,call,sql)
         checks.append('B13: reconciliação por lote com estado atual, saldo por contrato e invariante de legado')
+        from import_revert_eligibility_contract import verify as verify_import_revert_eligibility
+        verify_import_revert_eligibility(api,call,sql)
+        checks.append('B13: elegibilidade de reversão lista efeitos posteriores sem alterar dados')
         command([sys.executable,str(ROOT/'tests/contrato/payment_intents.py')],env=dict(env,NEXO_PAYMENT_LAB='1',NEXO_PAYMENT_LAB_URL=bases[0],NEXO_PAYMENT_LAB_URL_2=bases[1]))
         checks.append('intenção persistente: replay concorrente, conflito, estorno e resumos residuais')
         command([sys.executable,str(ROOT/'tests/contrato/financial_connections.py')],env=dict(env,NEXO_PAYMENT_LAB='1',NEXO_PAYMENT_LAB_URL=bases[0],NEXO_PAYMENT_LAB_URL_2=bases[1]))

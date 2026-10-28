@@ -379,6 +379,10 @@
     },
     {
       "method": "GET",
+      "path": "/api/import/batches/:id/revert-eligibility"
+    },
+    {
+      "method": "GET",
       "path": "/api/install-kits"
     },
     {
