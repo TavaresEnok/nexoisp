@@ -523,6 +523,11 @@ func (x *Executor) Sync(ctx context.Context, tenant string) error {
 	since := x.watermark[tenant]
 	var next any
 	e := x.scope(ctx, tenant, func(tx *db.Tx) error {
+		// The mutex covers one process. Hold this tenant lock until commit so a
+		// concurrent replica reads the stored service_sessions and adds a zero delta.
+		if e := tx.Exec(ctx, `select pg_advisory_xact_lock(hashtextextended($1,77))`, "nexo-radius-usage:"+tenant); e != nil {
+			return e
+		}
 		r, e := one(ctx, tx, "syncAccounting", 0)
 		if e != nil {
 			return e

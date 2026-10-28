@@ -12,6 +12,7 @@ import (
 	"net"
 	"os"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 
@@ -285,6 +286,43 @@ func TestRadiusDisconnectJournalRecoversWithoutResendAndScopesNAS(t *testing.T) 
 	}
 	if err := owner.QueryRowContext(ctx, `select coalesce(sum(bytes_in),0) from usage_daily where tenant_id=$1`, tenant).Scan(&usageAfter); err != nil || usageBefore < 123456 || usageAfter != usageBefore {
 		t.Fatal("restart double count", usageBefore, usageAfter, err)
+	}
+	// Eight executors must apply one counter delta. A replay with no further
+	// accounting change leaves the tenant total in place.
+	if _, err := owner.ExecContext(ctx, `update radius_acct set bytes_in=223456 where tenant_id=$1 and username=$2 and nas_ip='127.0.0.1'`, tenant, accepted.User); err != nil {
+		t.Fatal(err)
+	}
+	var ready, finished sync.WaitGroup
+	start := make(chan struct{})
+	syncErrs := make([]error, 8)
+	for i := range syncErrs {
+		ready.Add(1)
+		finished.Add(1)
+		go func(i int) {
+			defer finished.Done()
+			ready.Done()
+			<-start
+			syncErrs[i] = (&radius.Executor{DB: database}).Sync(ctx, tenant)
+		}(i)
+	}
+	ready.Wait()
+	close(start)
+	finished.Wait()
+	for _, err := range syncErrs {
+		if err != nil {
+			t.Fatal("concurrent accounting sync", err)
+		}
+	}
+	var usageConcurrent int64
+	if err := owner.QueryRowContext(ctx, `select coalesce(sum(bytes_in),0) from usage_daily where tenant_id=$1`, tenant).Scan(&usageConcurrent); err != nil || usageConcurrent != usageAfter+100000 {
+		t.Fatal("concurrent double count", usageAfter, usageConcurrent, err)
+	}
+	if err := (&radius.Executor{DB: database}).Sync(ctx, tenant); err != nil {
+		t.Fatal("replay sync", err)
+	}
+	var usageReplay int64
+	if err := owner.QueryRowContext(ctx, `select coalesce(sum(bytes_in),0) from usage_daily where tenant_id=$1`, tenant).Scan(&usageReplay); err != nil || usageReplay != usageConcurrent {
+		t.Fatal("replay changed usage", usageConcurrent, usageReplay, err)
 	}
 	if err := owner.QueryRowContext(ctx, `select observed_session is null from service_resources where id=$1`, accepted.ID).Scan(&closed); err != nil || !closed {
 		t.Fatal("foreign NAS became live observation", err)
