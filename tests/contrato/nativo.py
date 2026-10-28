@@ -114,6 +114,9 @@ def run():
         from radius_history_contract import verify as verify_radius_history
         verify_radius_history(api,call,sql)
         checks.append('B11: histórico, paginação, IPv6 CSV exato, auditoria e isolamento')
+        from radius_telemetry_contract import verify as verify_radius_telemetry
+        verify_radius_telemetry(api,call,sql)
+        checks.append('B11: telemetria de recência/atraso por NAS sem prova de sessão online')
         command([sys.executable,str(ROOT/'tests/contrato/payment_intents.py')],env=dict(env,NEXO_PAYMENT_LAB='1',NEXO_PAYMENT_LAB_URL=bases[0],NEXO_PAYMENT_LAB_URL_2=bases[1]))
         checks.append('intenção persistente: replay concorrente, conflito, estorno e resumos residuais')
         command([sys.executable,str(ROOT/'tests/contrato/financial_connections.py')],env=dict(env,NEXO_PAYMENT_LAB='1',NEXO_PAYMENT_LAB_URL=bases[0],NEXO_PAYMENT_LAB_URL_2=bases[1]))

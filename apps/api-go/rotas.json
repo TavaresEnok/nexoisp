@@ -571,6 +571,10 @@
     },
     {
       "method": "GET",
+      "path": "/api/radius/accounting/telemetry"
+    },
+    {
+      "method": "GET",
       "path": "/api/radius/allowed-sources"
     },
     {
