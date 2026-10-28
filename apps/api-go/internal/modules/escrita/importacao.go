@@ -775,9 +775,18 @@ func importInvoice(ctx context.Context, tx *db.Tx, b map[string]any, r map[strin
 		return nil, e
 	}
 	if ex != nil {
-		msgs := []string{}
-		if num(ex.Get("amount_cents")) != amount || ex.Get("due_date") != due {
-			msgs = append(msgs, "título já importado com valor/vencimento diferentes; não foi alterado")
+		var paidAt any
+		paid := float64(0)
+		if sit == "pago" {
+			var pe error
+			paidAt, paid, pe = invoicePaid(r, amount)
+			if pe != nil {
+				return nil, pe
+			}
+		}
+		msgs := invoiceDivergence(ex, sit, amount, due, paid, paidAt)
+		if len(msgs) > 0 {
+			inc(t, "conflicts", 1)
 		}
 		return importResult(ext, "unchanged", ex.Get("id"), msgs), nil
 	}
@@ -793,23 +802,10 @@ func importInvoice(ctx context.Context, tx *db.Tx, b map[string]any, r map[strin
 	var paidAt any
 	paid := float64(0)
 	if sit == "pago" {
-		paidAt = importDate(r["pago_em"])
-		if paidAt == nil {
-			return fail(fmt.Sprintf("pago_em inválido ou ausente: \"%s\" (obrigatório para título pago)", r["pago_em"]))
-		}
-		paid = amount
-		if r["valor_pago"] != "" {
-			var ok bool
-			paid, ok = cents(r["valor_pago"])
-			if !ok {
-				paid = -1
-			}
-		}
-		if paid <= 0 {
-			return fail(fmt.Sprintf("valor_pago inválido: \"%s\"", r["valor_pago"]))
-		}
-		if paid > amount*2 {
-			return fail(fmt.Sprintf("valor_pago (%s) muito acima do valor do título; confira o arquivo", r["valor_pago"]))
+		var pe error
+		paidAt, paid, pe = invoicePaid(r, amount)
+		if pe != nil {
+			return nil, pe
 		}
 	}
 	full := sit == "pago" && paid >= amount
@@ -858,6 +854,128 @@ func importInvoice(ctx context.Context, tx *db.Tx, b map[string]any, r map[strin
 		inc(t, "amount_cents_total", amount-paid)
 	}
 	return importResult(ext, "created", i.Get("id"), msgs), nil
+}
+func invoicePaid(r map[string]string, amount float64) (any, float64, error) {
+	paidAt := importDate(r["pago_em"])
+	if paidAt == nil {
+		return nil, 0, rowError(fmt.Sprintf("pago_em inválido ou ausente: \"%s\" (obrigatório para título pago)", r["pago_em"]))
+	}
+	paid := amount
+	if r["valor_pago"] != "" {
+		var ok bool
+		paid, ok = cents(r["valor_pago"])
+		if !ok {
+			paid = -1
+		}
+	}
+	if paid <= 0 {
+		return nil, 0, rowError(fmt.Sprintf("valor_pago inválido: \"%s\"", r["valor_pago"]))
+	}
+	if paid > amount*2 {
+		return nil, 0, rowError(fmt.Sprintf("valor_pago (%s) muito acima do valor do título; confira o arquivo", r["valor_pago"]))
+	}
+	return paidAt, paid, nil
+}
+func asDate(v any) string {
+	switch x := v.(type) {
+	case string:
+		if len(x) >= 10 && x[4] == '-' && x[7] == '-' {
+			return x[:10]
+		}
+		return x
+	case time.Time:
+		return x.Format("2006-01-02")
+	case jsonx.Time:
+		return x.Format("2006-01-02")
+	default:
+		return fmt.Sprint(v)
+	}
+}
+func brMoney(cents float64) string {
+	sign := ""
+	rounded := math.Round(cents)
+	if rounded < 0 {
+		sign = "-"
+		rounded = -rounded
+	}
+	whole := int64(rounded) / 100
+	frac := int64(rounded) % 100
+	digits := strconv.FormatInt(whole, 10)
+	grouped := make([]byte, 0, len(digits)+len(digits)/3)
+	for i := 0; i < len(digits); i++ {
+		if i > 0 && (len(digits)-i)%3 == 0 {
+			grouped = append(grouped, '.')
+		}
+		grouped = append(grouped, digits[i])
+	}
+	return sign + "R$ " + string(grouped) + "," + fmt.Sprintf("%02d", frac)
+}
+func invoiceKeep(origin, current string) string {
+	return fmt.Sprintf("origem: %s; Nexo: %s — título não alterado, conciliar manualmente", origin, current)
+}
+func importOriginState(sit string, paid, amount float64, paidAt any) (string, string) {
+	switch sit {
+	case "cancelado":
+		return "cancelado", "cancelado"
+	case "pago":
+		when := ""
+		if paidAt != nil {
+			when = " em " + asDate(paidAt)
+		}
+		if paid < amount {
+			return "parcial", "pago parcial" + when + " " + brMoney(paid)
+		}
+		return "pago", "pago" + when + " " + brMoney(paid)
+	default:
+		return "aberto", "em aberto"
+	}
+}
+func importCurrentState(status string, received, amount float64) (string, string) {
+	switch status {
+	case "canceled":
+		return "cancelado", "cancelado"
+	case "paid":
+		if received > 0 && received < amount {
+			return "parcial", "pago parcial " + brMoney(received)
+		}
+		return "pago", "pago " + brMoney(received)
+	default:
+		if received > 0 && received < amount {
+			label := "pago parcial " + brMoney(received)
+			if status == "reconciling" {
+				label += " (em conciliação)"
+			}
+			return "parcial", label
+		}
+		if received >= amount && received > 0 {
+			return "pago", "pago " + brMoney(received)
+		}
+		if status == "reconciling" {
+			return "reconciling", "em conciliação"
+		}
+		return "aberto", "em aberto"
+	}
+}
+func invoiceDivergence(ex jsonx.Object, sit string, amount float64, due any, paid float64, paidAt any) []string {
+	received := num(ex.Get("received_cents"))
+	currentAmount := num(ex.Get("amount_cents"))
+	status, _ := ex.Get("status").(string)
+	originKind, originLabel := importOriginState(sit, paid, amount, paidAt)
+	currentKind, currentLabel := importCurrentState(status, received, currentAmount)
+	msgs := []string{}
+	if originKind != currentKind {
+		msgs = append(msgs, invoiceKeep(originLabel, currentLabel))
+	} else if (originKind == "pago" || originKind == "parcial") && math.Round(paid) != math.Round(received) {
+		msgs = append(msgs, invoiceKeep("valor pago "+brMoney(paid), "valor pago "+brMoney(received)))
+	}
+	if math.Round(currentAmount) != math.Round(amount) {
+		msgs = append(msgs, invoiceKeep("valor "+brMoney(amount), "valor "+brMoney(currentAmount)))
+	}
+	originDue, currentDue := asDate(due), asDate(ex.Get("due_date"))
+	if originDue != currentDue {
+		msgs = append(msgs, invoiceKeep("vencimento "+originDue, "vencimento "+currentDue))
+	}
+	return msgs
 }
 func unaccent(s string) string {
 	out := strings.Builder{}
