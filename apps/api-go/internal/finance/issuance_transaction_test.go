@@ -15,6 +15,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/prometheus/client_golang/prometheus"
+	"nexoisp/api-go/internal/apierr"
 	"nexoisp/api-go/internal/db"
 	"nexoisp/api-go/internal/finance/providers"
 	"nexoisp/api-go/internal/tenancy"
@@ -345,5 +346,47 @@ func TestConcurrentIssuancePreparationKeepsOneReservation(t *testing.T) {
 		return tx.QueryRow(context.Background(), `select count(*) from provider_issuance where invoice_id=$1`, r.InvoiceID).Scan(&n)
 	}); err != nil || n != 1 {
 		t.Fatalf("reservation count=%d %v", n, err)
+	}
+}
+
+func TestImportedLegacyInvoiceIsNeverIssued(t *testing.T) {
+	d, scope := issuanceDatabase(t)
+	ctx := context.Background()
+	account := uuid.NewString()
+	var legacy, native, connection string
+	const refusal = "título importado de outra origem: a cobrança permanece na instituição original; nova cobrança não é emitida"
+	if err := d.WithScope(ctx, scope, func(tx *db.Tx) error {
+		if err := tx.QueryRow(ctx, `insert into invoices(tenant_id,contract_id,subscriber_id,kind,due_date,amount_cents,external_source,external_id) select tenant_id,id,subscriber_id,'manual','2026-11-15',12345,'erp-anterior',$1 from contracts order by id limit 1 returning id`, uuid.NewString()).Scan(&legacy); err != nil {
+			return err
+		}
+		if err := tx.QueryRow(ctx, `insert into invoices(tenant_id,contract_id,subscriber_id,kind,due_date,amount_cents) select tenant_id,contract_id,subscriber_id,kind,due_date,amount_cents from invoices where id=$1 returning id`, legacy).Scan(&native); err != nil {
+			return err
+		}
+		return tx.QueryRow(ctx, `insert into financial_connections(tenant_id,company_id,provider,environment,account_ref,name) select tenant_id,company_id,'efi','sandbox',$2,'B13 legacy issuance guard' from invoices where id=$1 returning id`, legacy, account).Scan(&connection)
+	}); err != nil {
+		t.Fatal(err)
+	}
+	service := SandboxIssuance{DB: d}
+	hash := strings.Repeat("a", 64)
+	request := func(invoice string) providers.Create {
+		return providers.Create{Scope: providers.Scope{TenantID: scope.TenantID, ConnectionID: connection, Provider: "efi", Environment: "sandbox", AccountRef: account}, IntentKey: uuid.NewString(), InvoiceID: invoice, Money: providers.Money{Cents: 12345, Currency: "BRL"}, DueDate: "2026-11-15"}
+	}
+	_, err := service.Prepare(ctx, scope, request(legacy), hash)
+	if v, ok := err.(*apierr.Error); !ok || v.Status != 409 || v.Message != refusal {
+		t.Fatalf("expected imported title 409, got %v", err)
+	}
+	var count int
+	var intact bool
+	if err = d.WithScope(ctx, scope, func(tx *db.Tx) error {
+		if err := tx.QueryRow(ctx, `select count(*) from provider_issuance where invoice_id=$1`, legacy).Scan(&count); err != nil {
+			return err
+		}
+		return tx.QueryRow(ctx, `select status='open' and gateway_charge_id is null and provider_issuance_id is null from invoices where id=$1`, legacy).Scan(&intact)
+	}); err != nil || count != 0 || !intact {
+		t.Fatalf("legacy invoice changed count=%d intact=%v err=%v", count, intact, err)
+	}
+	item, err := service.Prepare(ctx, scope, request(native), hash)
+	if err != nil || item.ID == "" || item.State != "prepared" {
+		t.Fatalf("native invoice not prepared: %v %+v", err, item)
 	}
 }

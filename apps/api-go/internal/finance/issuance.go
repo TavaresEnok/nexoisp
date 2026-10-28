@@ -71,8 +71,13 @@ func (s SandboxIssuance) prepareOptions(ctx context.Context, scope tenancy.Scope
 	}
 	err = s.DB.WithScope(ctx, scope, func(tx *db.Tx) error {
 		var invoice string
-		if err := tx.QueryRow(ctx, `select id from invoices where id=$1 for update`, r.InvoiceID).Scan(&invoice); err != nil {
+		var externalSource *string
+		if err := tx.QueryRow(ctx, `select id, external_source from invoices where id=$1 for update`, r.InvoiceID).Scan(&invoice, &externalSource); err != nil {
 			return err
+		}
+		// Imported titles stay charged at the original institution. A new issuance would bill the subscriber twice.
+		if externalSource != nil {
+			return apierr.New(409, "título importado de outra origem: a cobrança permanece na instituição original; nova cobrança não é emitida")
 		}
 		// Scope and account cannot be selected from provider response/payload.
 		var valid bool
