@@ -147,7 +147,7 @@ def verify(api, call, sql):
             "delete from contract_history where contract_id in (select id from contracts where external_source=" + quote(marker) + ");"
             "delete from contracts where external_source=" + quote(marker) + ";"
             "delete from subscribers where external_source=" + quote(marker) + ";"
-            "delete from audit_events where entity_type='import_batch' and entity_id in (select id from import_batches where source=" + quote(marker) + ");"
+            "delete from audit_events where entity_type='import_batch' and entity_id in (select id::text from import_batches where source=" + quote(marker) + ");"
             "delete from import_rows where batch_id in (select id from import_batches where source=" + quote(marker) + ");"
             "delete from import_batches where source=" + quote(marker) + ";"
             "commit;",
