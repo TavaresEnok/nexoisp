@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { z } from "zod";
 import { PageHeading, Panel } from "@/components/workspace-ui";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/features/shared/form";
@@ -11,12 +12,16 @@ import { api } from "@/platform/erp-client";
 import { money } from "@/lib/format";
 import {
   preview,
+  totals,
   fieldLabels,
   kindLabels,
   type ImportKind,
 } from "./import-models";
 import { ImportResults, ImportBatches } from "./import-batches";
 import { cents } from "@/features/shared/schema";
+const importPreview = preview.extend({
+  totals: totals.extend({ conflicts: z.coerce.number().optional() }),
+});
 const device = z.object({
   id: z.string(),
   name: z.string(),
@@ -42,7 +47,9 @@ export function DataImport() {
   const [deviceId, setDeviceId] = useState("");
   const [mapping, setMapping] = useState<Record<string, string> | undefined>();
   const [planMap, setPlanMap] = useState<Record<string, string>>({});
-  const [result, setResult] = useState<z.infer<typeof preview> | null>(null);
+  const [result, setResult] = useState<z.infer<typeof importPreview> | null>(
+    null,
+  );
   const [signature, setSignature] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -79,7 +86,7 @@ export function DataImport() {
     setBusy(true);
     setError(null);
     try {
-      const response = preview.parse(
+      const response = importPreview.parse(
         await api(`/import/${apply ? "apply" : "preview"}`, { body }),
       );
       const normalized = Object.fromEntries(
@@ -338,7 +345,21 @@ export function DataImport() {
                 {result.totals.rows} linhas · {result.totals.created} novos ·{" "}
                 {result.totals.updated} atualizados · {result.totals.unchanged}{" "}
                 sem alteração · {result.totals.error} com erro
+                {(result.totals.conflicts ?? 0) > 0 && (
+                  <>
+                    {" · "}
+                    <Badge variant="warning">
+                      {result.totals.conflicts ?? 0} divergentes da origem (não
+                      alterados)
+                    </Badge>
+                  </>
+                )}
               </p>
+              {(result.totals.conflicts ?? 0) > 0 && (
+                <p className="profile-footnote">
+                  Divergências não sobrescrevem o Nexo; concilie pelo título.
+                </p>
+              )}
               {kind === "subscribers" ? (
                 <p>
                   {result.totals.contracts_created} contratos ·{" "}

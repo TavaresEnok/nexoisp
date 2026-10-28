@@ -2,6 +2,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import { z } from "zod";
 import { OperationalCatalog } from "@/components/operational-catalog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,9 +18,13 @@ import {
   batch,
   importRow,
   kindLabels,
+  totals,
   type ImportRow,
   type ImportBatch,
 } from "./import-models";
+const importBatch = batch.extend({
+  totals: totals.extend({ conflicts: z.coerce.number().optional() }),
+});
 export function ImportResults({
   rows,
   title = "Linhas com erro ou aviso",
@@ -54,7 +59,7 @@ export function ImportResults({
 }
 export function ImportBatches() {
   const result = useSWR("erp-import-batches", async () =>
-    z.array(batch).parse(await api("/import/batches")),
+    z.array(importBatch).parse(await api("/import/batches")),
   );
   const [detail, setDetail] = useState<ImportBatch | null>(null);
   const [message, setMessage] = useState("");
@@ -85,7 +90,18 @@ export function ImportBatches() {
               <small className="table-subline">{item.source}</small>
             </>,
             kindLabels[item.kind],
-            `${item.totals.created} novos · ${item.totals.updated} atualizados · ${item.totals.unchanged} iguais · ${item.totals.error} erros`,
+            <>
+              {`${item.totals.created} novos · ${item.totals.updated} atualizados · ${item.totals.unchanged} iguais · ${item.totals.error} erros`}
+              {(item.totals.conflicts ?? 0) > 0 && (
+                <>
+                  {" · "}
+                  <Badge variant="warning">
+                    {item.totals.conflicts} divergentes da origem (não
+                    alterados)
+                  </Badge>
+                </>
+              )}
+            </>,
             item.created_by_name ?? "Não informado",
             item.accounts_to_provision,
           ],
