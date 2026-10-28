@@ -1,5 +1,6 @@
 import { RadiusAccountingHistory } from "./radius-history";
 import { RadiusAccountingReview } from "./radius-accounting";
+import { RadiusAccountingTelemetry } from "./radius-telemetry";
 import { useState } from "react";
 import useSWR from "swr";
 import { z } from "zod";
@@ -117,6 +118,7 @@ export function RadiusOverview() {
     <Panel
       title="Autenticação integrada"
       description="Concentradores que autenticam diretamente no NexoISP."
+      contentClassName="min-w-0"
       action={
         can(me, "network:write") && (
           <Button
@@ -204,6 +206,7 @@ export function RadiusOverview() {
       </QueryBoundary>
       {result.data?.capabilities.accounting_review_allowed && (
         <>
+          <RadiusAccountingTelemetry />
           <RadiusAccountingReview />
           <RadiusAccountingHistory />
         </>
