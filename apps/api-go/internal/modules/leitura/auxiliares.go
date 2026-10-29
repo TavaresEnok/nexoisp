@@ -2,12 +2,10 @@ package leitura
 
 import (
 	"context"
-	"math"
 	"net/http"
 	"os"
 	"strings"
 
-	"nexoisp/api-go/internal/apierr"
 	"nexoisp/api-go/internal/auth"
 	"nexoisp/api-go/internal/db"
 	"nexoisp/api-go/internal/endpoint"
@@ -54,7 +52,7 @@ func registerAuxiliares(api huma.API, r *endpoint.Registry, s Service) {
 					return err
 				case "/api/invoices/{id}/due":
 					var err error
-					result, err = DueBreakdown(ctx, tx, id)
+					result, err = DueHTTP(ctx, tx, id)
 					return err
 				case "/api/contracts/{id}/trust-release":
 					var err error
@@ -97,18 +95,5 @@ func GetSettings(ctx context.Context, tx *db.Tx, tenant string) (jsonx.Object, e
 }
 func DueBreakdown(ctx context.Context, tx *db.Tx, id string) (map[string]any, error) {
 	rows, err := tx.Objects(ctx, gen.Due, id)
-	if err != nil {
-		return nil, err
-	}
-	if len(rows) == 0 {
-		return nil, apierr.New(404, "fatura não encontrada")
-	}
-	r := rows[0]
-	amount, fee, discount, paid, days := num(r.Get("amount_cents")), num(r.Get("fee_cents")), num(r.Get("discount_cents")), num(r.Get("paid_cents")), num(r.Get("days_late"))
-	fine, interest := float64(0), float64(0)
-	if days > 0 {
-		fine = math.Floor(amount*num(r.Get("fine_pct"))/100 + 0.5)
-		interest = math.Floor(amount*num(r.Get("int_pct"))/100*days/30 + 0.5)
-	}
-	return map[string]any{"status": r.Get("status"), "due_date": r.Get("due_date"), "amount_cents": amount, "fee_cents": fee, "discount_cents": discount, "paid_cents": paid, "remaining_cents": math.Max(0, amount+fee-discount-paid), "days_late": days, "fine_cents": fine, "interest_cents": interest, "fee_if_applied_cents": math.Max(fee, fine+interest)}, nil
+	return dueBreakdownFromQuery(rows, err)
 }
