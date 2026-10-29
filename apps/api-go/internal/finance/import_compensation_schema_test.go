@@ -56,51 +56,40 @@ func TestImportCompensationMigrationFile(t *testing.T) {
 }
 
 func TestImportBatchCompensationSchema(t *testing.T) {
-	dsn := os.Getenv("NEXO_GO_TEST_DATABASE_URL")
+	runtimeDSN := os.Getenv("NEXO_GO_TEST_DATABASE_URL")
+	appDSN := os.Getenv("DATABASE_URL_APP")
 	ownerDSN := os.Getenv("NEXO_GO_TEST_DATABASE_OWNER_URL")
-	if dsn == "" || ownerDSN == "" {
+	if runtimeDSN == "" || ownerDSN == "" {
 		t.Skip("NEXO_GO_TEST_DATABASE_URL ou NEXO_GO_TEST_DATABASE_OWNER_URL ausente; este skip não é teste de banco aprovado. A gerência precisa executar tests/contrato/nativo.py e tests/contrato/go_integration.py num PostgreSQL descartável antes de publicar")
 	}
+	if appDSN == "" {
+		t.Fatal("DATABASE_URL_APP ausente; a conexão nexo_app vem do harness e o teste não deriva credencial")
+	}
+	if runtimeDSN == appDSN || runtimeDSN == ownerDSN || appDSN == ownerDSN {
+		t.Fatal("runtime Go, app e owner precisam de conexões distintas")
+	}
 	ctx := context.Background()
-	app, err := sql.Open("pgx", dsn)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = app.Close() })
-	owner, err := sql.Open("pgx", ownerDSN)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = owner.Close() })
+	runtime := openCompensationDB(t, runtimeDSN)
+	app := openCompensationDB(t, appDSN)
+	owner := openCompensationDB(t, ownerDSN)
+	assertCompensationRole(t, runtime, "nexo_go")
+	assertCompensationRole(t, app, "nexo_app")
+	assertCompensationOwner(t, owner)
 
-	var appDB, appUser string
-	var privileged bool
-	if err = app.QueryRowContext(ctx, `select current_database(), current_user, rolsuper or rolbypassrls from pg_roles where rolname = current_user`).Scan(&appDB, &appUser, &privileged); err != nil {
-		t.Fatal(err)
-	}
-	if appDB != "nexo_test" || appUser != "nexo_app" || privileged {
-		t.Fatalf("papel efetivo inválido: db=%s user=%s privileged=%v", appDB, appUser, privileged)
-	}
-	var ownerDB string
-	if err = owner.QueryRowContext(ctx, `select current_database()`).Scan(&ownerDB); err != nil || ownerDB != "nexo_test" {
-		t.Fatal("somente o banco descartável nexo_test é permitido", ownerDB, err)
-	}
 	var version int
 	var tableName sql.NullString
-	if err = owner.QueryRowContext(ctx, `select coalesce(max(version_id), 0), to_regclass('public.import_batch_compensations')::text from goose_db_version`).Scan(&version, &tableName); err != nil {
+	if err := owner.QueryRowContext(ctx, `select coalesce(max(version_id), 0), to_regclass('public.import_batch_compensations')::text from goose_db_version`).Scan(&version, &tableName); err != nil {
 		t.Fatal(err)
 	}
 	if version < 78 || !tableName.Valid {
 		t.Fatalf("migração 00078 não aplicada no laboratório descartável: goose=%d tabela=%v", version, tableName.String)
 	}
-	var selectOK, insertOK, updateOK, deleteOK, rls bool
-	if err = app.QueryRowContext(ctx, `select has_table_privilege(current_user, 'import_batch_compensations', 'SELECT'), has_table_privilege(current_user, 'import_batch_compensations', 'INSERT'), has_table_privilege(current_user, 'import_batch_compensations', 'UPDATE'), has_table_privilege(current_user, 'import_batch_compensations', 'DELETE'), (select relrowsecurity from pg_class where oid = 'import_batch_compensations'::regclass)`).Scan(&selectOK, &insertOK, &updateOK, &deleteOK, &rls); err != nil {
-		t.Fatal(err)
-	}
-	if !selectOK || !insertOK || updateOK || deleteOK || !rls {
-		t.Fatalf("grants ou RLS divergentes: select=%v insert=%v update=%v delete=%v rls=%v", selectOK, insertOK, updateOK, deleteOK, rls)
-	}
+	assertCompensationPrivileges(t, app, true)
+	assertCompensationPrivileges(t, runtime, false)
+	assertCompensationRLSPolicies(t, app)
 	assertCompensationCatalog(t, owner)
+	assertCompensationMutationDenied(t, app)
+	assertCompensationMutationDenied(t, runtime)
 
 	conn, err := owner.Conn(ctx)
 	if err != nil {
@@ -217,13 +206,7 @@ func assertCompensationCatalog(t *testing.T, owner *sql.DB) {
 			t.Fatalf("restrição ausente %s em %s", want, joined)
 		}
 	}
-	var policies int
-	if err = owner.QueryRowContext(context.Background(), `select count(*) from pg_policy where polrelid = 'import_batch_compensations'::regclass and ((polname = 't_import_batch_compensations' and polpermissive and pg_get_expr(polqual, polrelid) like '%app_tenant()%') or (polname = 'portal_import_batch_compensations' and not polpermissive and pg_get_expr(polqual, polrelid) like '%app_subscriber()%') or (polname = 'pop_import_batch_compensations' and not polpermissive and pg_get_expr(polqual, polrelid) like '%app_pops()%'))`).Scan(&policies); err != nil {
-		t.Fatal(err)
-	}
-	if policies != 3 {
-		t.Fatalf("políticas de tenant, portal e POP: %d", policies)
-	}
+	assertCompensationRLSPolicies(t, owner)
 	var trigger string
 	if err = owner.QueryRowContext(context.Background(), `select pg_get_triggerdef(oid) from pg_trigger where tgrelid = 'import_batch_compensations'::regclass and not tgisinternal and tgname = 'immutable_import_batch_compensations'`).Scan(&trigger); err != nil {
 		t.Fatal(err)
@@ -231,6 +214,102 @@ func assertCompensationCatalog(t *testing.T, owner *sql.DB) {
 	if !strings.Contains(strings.ToLower(trigger), "financial_append_only()") || !strings.Contains(strings.ToLower(trigger), "update") || !strings.Contains(strings.ToLower(trigger), "delete") {
 		t.Fatal(trigger)
 	}
+}
+
+func openCompensationDB(t *testing.T, dsn string) *sql.DB {
+	t.Helper()
+	db, err := sql.Open("pgx", dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+	return db
+}
+
+func assertCompensationRole(t *testing.T, db *sql.DB, role string) {
+	t.Helper()
+	var database, sessionUser, currentUser string
+	var superuser, bypass bool
+	if err := db.QueryRowContext(context.Background(), `select current_database(), session_user::text, current_user::text, rolsuper, rolbypassrls from pg_roles where rolname = session_user`).Scan(&database, &sessionUser, &currentUser, &superuser, &bypass); err != nil {
+		t.Fatal(err)
+	}
+	if database != "nexo_test" || sessionUser != role || currentUser != role || superuser || bypass {
+		t.Fatalf("papel efetivo inválido: db=%s session=%s current=%s esperado=%s super=%v bypassrls=%v", database, sessionUser, currentUser, role, superuser, bypass)
+	}
+}
+
+func assertCompensationOwner(t *testing.T, db *sql.DB) {
+	t.Helper()
+	var database, sessionUser, currentUser string
+	if err := db.QueryRowContext(context.Background(), `select current_database(), session_user::text, current_user::text`).Scan(&database, &sessionUser, &currentUser); err != nil {
+		t.Fatal(err)
+	}
+	if database != "nexo_test" || sessionUser != "nexo_owner" || currentUser != "nexo_owner" {
+		t.Fatalf("owner de fixture inválido: db=%s session=%s current=%s", database, sessionUser, currentUser)
+	}
+}
+
+func assertCompensationPrivileges(t *testing.T, db *sql.DB, directGrant bool) {
+	t.Helper()
+	ctx := context.Background()
+	var selectOK, insertOK, updateOK, deleteOK, rls, subject bool
+	var role string
+	if err := db.QueryRowContext(ctx, `select current_user::text, has_table_privilege(current_user, 'import_batch_compensations', 'SELECT'), has_table_privilege(current_user, 'import_batch_compensations', 'INSERT'), has_table_privilege(current_user, 'import_batch_compensations', 'UPDATE'), has_table_privilege(current_user, 'import_batch_compensations', 'DELETE'), c.relrowsecurity, pg_get_userbyid(c.relowner) <> current_user and not pg_has_role(current_user, pg_get_userbyid(c.relowner), 'member') from pg_class c where c.oid = 'import_batch_compensations'::regclass`).Scan(&role, &selectOK, &insertOK, &updateOK, &deleteOK, &rls, &subject); err != nil {
+		t.Fatal(err)
+	}
+	if !selectOK || !insertOK || updateOK || deleteOK || !rls || !subject {
+		t.Fatalf("grants ou RLS divergentes para %s: select=%v insert=%v update=%v delete=%v rls=%v sujeito=%v", role, selectOK, insertOK, updateOK, deleteOK, rls, subject)
+	}
+	var visible int
+	if err := db.QueryRowContext(ctx, `select count(*) from import_batch_compensations`).Scan(&visible); err != nil {
+		t.Fatalf("%s não leu sob RLS: %v", role, err)
+	}
+	var directSelect, directInsert, directUpdate, directDelete, directGo bool
+	if err := db.QueryRowContext(ctx, `select coalesce(bool_or(rolname = 'nexo_app' and privilege_type = 'SELECT'), false), coalesce(bool_or(rolname = 'nexo_app' and privilege_type = 'INSERT'), false), coalesce(bool_or(rolname = 'nexo_app' and privilege_type = 'UPDATE'), false), coalesce(bool_or(rolname = 'nexo_app' and privilege_type = 'DELETE'), false), coalesce(bool_or(rolname = 'nexo_go'), false) from (select r.rolname, x.privilege_type from pg_class c cross join lateral aclexplode(c.relacl) x join pg_roles r on r.oid = x.grantee where c.oid = 'import_batch_compensations'::regclass) acl`).Scan(&directSelect, &directInsert, &directUpdate, &directDelete, &directGo); err != nil {
+		t.Fatal(err)
+	}
+	if directGo || directUpdate || directDelete || !directSelect || !directInsert {
+		t.Fatalf("ACL direta divergente do contrato: nexo_app select=%v insert=%v update=%v delete=%v nexo_go=%v", directSelect, directInsert, directUpdate, directDelete, directGo)
+	}
+	if directGrant {
+		var memberOfGo bool
+		if err := db.QueryRowContext(ctx, `select pg_has_role(current_user, 'nexo_go', 'member')`).Scan(&memberOfGo); err != nil {
+			t.Fatal(err)
+		}
+		if role != "nexo_app" || memberOfGo {
+			t.Fatalf("conexão app não é o papel nexo_app isolado: role=%s membro_de_nexo_go=%v", role, memberOfGo)
+		}
+		return
+	}
+	var inheritsApp bool
+	if err := db.QueryRowContext(ctx, `select current_user = 'nexo_go' and pg_has_role(current_user, 'nexo_app', 'member')`).Scan(&inheritsApp); err != nil {
+		t.Fatal(err)
+	}
+	if role != "nexo_go" || !inheritsApp {
+		t.Fatalf("runtime nexo_go precisa herdar nexo_app sem ser esse papel: role=%s herda=%v", role, inheritsApp)
+	}
+}
+
+func assertCompensationRLSPolicies(t *testing.T, db *sql.DB) {
+	t.Helper()
+	var policies int
+	if err := db.QueryRowContext(context.Background(), `select count(*) from pg_policy where polrelid = 'import_batch_compensations'::regclass and ((polname = 't_import_batch_compensations' and polpermissive and pg_get_expr(polqual, polrelid) like '%app_tenant()%') or (polname = 'portal_import_batch_compensations' and not polpermissive and pg_get_expr(polqual, polrelid) like '%app_subscriber()%') or (polname = 'pop_import_batch_compensations' and not polpermissive and pg_get_expr(polqual, polrelid) like '%app_pops()%'))`).Scan(&policies); err != nil {
+		t.Fatal(err)
+	}
+	if policies != 3 {
+		t.Fatalf("políticas de tenant, portal e POP: %d", policies)
+	}
+}
+
+func assertCompensationMutationDenied(t *testing.T, db *sql.DB) {
+	t.Helper()
+	tx, err := db.BeginTx(context.Background(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tx.Rollback()
+	expectState(t, tx, `update import_batch_compensations set reason = 'motivo alterado indevidamente no marcador' where false`, "42501")
+	expectState(t, tx, `delete from import_batch_compensations where false`, "42501")
 }
 
 func migrationSQL(t *testing.T) string {
