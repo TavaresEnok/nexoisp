@@ -12,19 +12,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-// balanceVariantsAtInit guarda o registro feito pelo init de variants_dinamicas.go.
-// O mapa vivo volta a ficar vazio em seguida: o teste congelado da L1 distingue
-// mutação de teste de um mapa que começou vazio.
-var balanceVariantsAtInit map[string]string
-
-func TestMain(m *testing.M) {
-	balanceVariantsAtInit = maps.Clone(balanceVariants)
-	if got := balanceVariantsAtInit[balanceReaderInvoiceList]; got == invoiceListVariantSQL && len(balanceVariantsAtInit) == 1 {
-		delete(balanceVariants, balanceReaderInvoiceList)
-	}
-	os.Exit(m.Run())
-}
-
 func TestBalanceReadInvoiceListRegisteredOutsideLegacy(t *testing.T) {
 	legacy, err := os.ReadFile("dinamicas/4a483e96_1.sql")
 	if err != nil {
@@ -42,11 +29,8 @@ func TestBalanceReadInvoiceListRegisteredOutsideLegacy(t *testing.T) {
 	if invoiceListVariantSQL != variantSQL {
 		t.Fatal("o embed da lista não é shadow/4a483e96_1.sql")
 	}
-	if got := balanceVariantsAtInit[balanceReaderInvoiceList]; got != variantSQL || len(balanceVariantsAtInit) != 1 {
+	if balanceVariants[balanceReaderInvoiceList] != variantSQL || strings.TrimSpace(variantSQL) == "" {
 		t.Fatal("init não registrou invoice-list com o embed próprio")
-	}
-	if _, ok := balanceVariants[balanceReaderInvoiceList]; ok {
-		t.Fatal("mapa vivo do teste ainda contém invoice-list")
 	}
 
 	meta, err := os.ReadFile("dinamicas.json")
@@ -83,11 +67,22 @@ func TestBalanceReadInvoiceListRegisteredOutsideLegacy(t *testing.T) {
 		t.Fatal(err)
 	}
 	fn := functionSource(t, string(handler), "func (s Service) invoices(")
-	if !strings.Contains(fn, `dynamicSQL("/api/invoices", 1,`) || !strings.Contains(fn, "tx.Objects(ctx, query, args...)") {
-		t.Fatal("a lista em produção deixou de executar o índice 1")
+	if !strings.Contains(fn, `dynamicSQL("/api/invoices", 1,`) || !strings.Contains(fn, `balanceRowsInTx(ctx, tx, balanceReaderInvoiceList, query, args...)`) {
+		t.Fatal("a lista deixou de passar o SQL legado do índice 1 por balanceRowsInTx")
 	}
-	if strings.Contains(fn, "Pick(") || strings.Contains(fn, "balanceRows") || strings.Contains(fn, "invoiceListVariantSQL") {
+	if strings.Contains(fn, "invoiceListVariantSQL") {
 		t.Fatal("a lista em produção passou a executar a variante")
+	}
+	if len(productionShadowAllowlist()) != 0 || len(productionCutAllowlist()) != 0 {
+		t.Fatal("allowlist de produção da lista foi preenchida")
+	}
+	legacyQuery := dynamicSQL("/api/invoices", 1, map[string]string{"limit": "25", "offset": "50"})
+	if strings.Contains(legacyQuery, "cmp_") || strings.Contains(legacyQuery, "{{") || !strings.Contains(legacyQuery, "limit 25 offset 50") {
+		t.Fatalf("índice 1 não é a sentença legada: %s", legacyQuery)
+	}
+	selected, err := Pick(balanceReaderInvoiceList, legacyQuery)
+	if err != nil || selected.Shadow || selected.SQL != legacyQuery || selected.Reader != balanceReaderInvoiceList {
+		t.Fatalf("allowlists vazias não devolveram o índice 1: err=%v sel=%#v", err, selected)
 	}
 
 	sqlc, err := os.ReadFile("../../../sqlc.yaml")

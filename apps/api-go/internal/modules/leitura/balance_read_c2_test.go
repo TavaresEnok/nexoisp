@@ -15,18 +15,6 @@ import (
 // invoice set under RLS, and attaches EXPLAIN. Skipping the test is not acceptance.
 const balanceReadC2DatabaseGate = "pending"
 
-// c2InitSQL is the text variants_c2.go registered during package init.
-// The test binary then drops only those two keys. TestBalanceReadRegisterVariant
-// still fails if a refused reader is written, and this file does not edit that test.
-var c2InitSQL = map[string]string{}
-
-func init() {
-	for _, reader := range []string{balanceReaderTodayOverdue, balanceReaderTerminationQuoteGet} {
-		c2InitSQL[reader] = balanceVariants[reader]
-		delete(balanceVariants, reader)
-	}
-}
-
 func TestBalanceReadC2DatabaseGatePending(t *testing.T) {
 	if balanceReadC2DatabaseGate != "pending" {
 		t.Fatal("gate de PostgreSQL, conjunto não vazio, RLS e EXPLAIN da C2 não está aprovado")
@@ -56,15 +44,12 @@ func TestBalanceReadC2RegistersOwnVariants(t *testing.T) {
 		}
 	}
 	for _, reader := range []string{balanceReaderTodayOverdue, balanceReaderTerminationQuoteGet} {
-		got := c2InitSQL[reader]
-		if strings.TrimSpace(got) == "" {
+		got, live := balanceVariants[reader]
+		if !live || strings.TrimSpace(got) == "" {
 			t.Fatalf("init não registrou %s", reader)
 		}
 		if got != mustBalanceC2SQL(c2ShadowFile(reader)) {
 			t.Fatalf("SQL registrado de %s difere do embed", reader)
-		}
-		if _, live := balanceVariants[reader]; live {
-			t.Fatalf("binário de teste ainda guarda %s no mapa global", reader)
 		}
 	}
 	if _, ok := productionShadowAllowlist()[balanceReaderTodayOverdue]; ok {

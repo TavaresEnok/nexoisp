@@ -3,7 +3,7 @@ package leitura
 import (
 	"context"
 	"errors"
-	"fmt"
+	"maps"
 	"os"
 	"reflect"
 	"strings"
@@ -18,20 +18,6 @@ func dueCompareCount(reader, result string) float64 {
 	// Inc(1) lands in valInt of the prometheus counter. The field stays unexported.
 	counter := balanceReadCompare.WithLabelValues(reader, result)
 	return float64(reflect.ValueOf(counter).Elem().FieldByName("valInt").Uint())
-}
-
-func TestMain(m *testing.M) {
-	if !dueVariantInitRegistered || strings.TrimSpace(dueShadowSQL) == "" || balanceVariants[balanceReaderInvoiceDue] != dueShadowSQL {
-		fmt.Fprintln(os.Stderr, "init não registrou shadow/due.sql em invoice-due")
-		os.Exit(1)
-	}
-	// TestBalanceReadRegisterVariant exige o mapa global vazio para provar que
-	// um registerBalanceVariant rejeitado não grava leitor. A chave registrada
-	// no init volta ao fim da suíte. O binário de produção não executa TestMain.
-	delete(balanceVariants, balanceReaderInvoiceDue)
-	code := m.Run()
-	balanceVariants[balanceReaderInvoiceDue] = dueShadowSQL
-	os.Exit(code)
 }
 
 func dueLocalPolicy(mode string, shadowAllow, cutAllow, withVariant bool, variant string) balanceReadPolicy {
@@ -64,8 +50,9 @@ func TestBalanceReadDueVariantRegisteredAndAllowlistsEmpty(t *testing.T) {
 	if string(disk) != dueShadowSQL {
 		t.Fatal("embed divergiu de shadow/due.sql")
 	}
-	if _, ok := balanceVariants[balanceReaderInvoiceDue]; ok {
-		t.Fatal("teste mutou o mapa global")
+	before := maps.Clone(balanceVariants)
+	if before[balanceReaderInvoiceDue] != dueShadowSQL || strings.TrimSpace(dueShadowSQL) == "" {
+		t.Fatal("init não deixou invoice-due com a sentença shadow no mapa vivo")
 	}
 	local := map[string]string{}
 	if err := addBalanceVariant(local, balanceReaderInvoiceDue, dueShadowSQL); err != nil {
@@ -74,7 +61,7 @@ func TestBalanceReadDueVariantRegisteredAndAllowlistsEmpty(t *testing.T) {
 	if local[balanceReaderInvoiceDue] != dueShadowSQL {
 		t.Fatal("registro local não guardou a sentença")
 	}
-	if len(balanceVariants) != 0 {
+	if !maps.Equal(balanceVariants, before) {
 		t.Fatal("registro local escreveu no mapa global")
 	}
 	if len(productionShadowAllowlist()) != 0 || len(productionCutAllowlist()) != 0 {

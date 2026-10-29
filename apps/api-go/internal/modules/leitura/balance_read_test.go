@@ -1,6 +1,7 @@
 package leitura
 
 import (
+	"maps"
 	"os"
 	"strings"
 	"testing"
@@ -106,8 +107,12 @@ func TestBalanceReadEnvironmentStaysOnAllowlist(t *testing.T) {
 }
 
 func TestBalanceReadRegisterVariant(t *testing.T) {
+	before := maps.Clone(balanceVariants)
 	if err := addBalanceVariant(map[string]string{}, "livre", "select 1"); err != errBalanceReaderClosed {
 		t.Fatal(err)
+	}
+	if !maps.Equal(balanceVariants, before) {
+		t.Fatal("leitor fechado alterou o registro de produto")
 	}
 	dst := map[string]string{}
 	if err := addBalanceVariant(dst, balanceReaderInvoiceList, "  "); err != errBalanceVariantInvalid {
@@ -116,10 +121,16 @@ func TestBalanceReadRegisterVariant(t *testing.T) {
 	if err := addBalanceVariant(dst, balanceReaderInvoiceList, "select 1"); err != nil {
 		t.Fatal(err)
 	}
+	if dst[balanceReaderInvoiceList] != "select 1" {
+		t.Fatal("registro local não guardou a sentença")
+	}
 	if err := addBalanceVariant(dst, balanceReaderInvoiceList, "select 2"); err != errBalanceVariantInvalid {
 		t.Fatal(err)
 	}
-	if _, ok := balanceVariants[balanceReaderInvoiceList]; ok {
+	if dst[balanceReaderInvoiceList] != "select 1" {
+		t.Fatal("rejeição local substituiu a sentença")
+	}
+	if !maps.Equal(balanceVariants, before) {
 		t.Fatal("registro de teste mutou o mapa global")
 	}
 	func() {
@@ -130,7 +141,7 @@ func TestBalanceReadRegisterVariant(t *testing.T) {
 		}()
 		registerBalanceVariant("livre", "select 1")
 	}()
-	if len(balanceVariants) != 0 {
+	if !maps.Equal(balanceVariants, before) {
 		t.Fatal("panic de registro gravou variante global")
 	}
 }
