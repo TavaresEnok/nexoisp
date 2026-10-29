@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -15,6 +14,7 @@ import (
 	"unicode/utf16"
 
 	"nexoisp/api-go/internal/db"
+	"nexoisp/api-go/internal/db/labtest"
 	"nexoisp/api-go/internal/finance"
 	"nexoisp/api-go/internal/tenancy"
 
@@ -811,21 +811,7 @@ func cjJournalInsertExclusiveTenant(ctx context.Context) (string, string, error)
 		return "", "", err
 	}
 	slug := "cj" + tail
-	err := cjJournalWithOwner(ctx, func(tx pgx.Tx) error {
-		if _, err := tx.Exec(ctx, `insert into tenants (id, name, slug) values ($1::uuid, 'cjJournal escopo', $2)`, id, slug); err != nil {
-			return err
-		}
-		var cells, queued int
-		if err := tx.QueryRow(ctx, `select
-			(select count(*) from tenant_cells where tenant_id = $1::uuid),
-			(select count(*) from notice_log where tenant_id = $1::uuid and status = 'queued')`, id).Scan(&cells, &queued); err != nil {
-			return err
-		}
-		if cells != 1 || queued != 0 {
-			return fmt.Errorf("escopo exclusivo inconsistente: cells=%d queued=%d", cells, queued)
-		}
-		return nil
-	})
+	err := labtest.InsertExclusiveJournalTenant(ctx, cjJournalOwnerURL(), os.Getenv("NEXO_GO_TEST_DATABASE_URL"), id, slug)
 	return id, slug, err
 }
 
@@ -845,20 +831,7 @@ func cjJournalSeedBaseContract(ctx context.Context, tx *db.Tx) error {
 }
 
 func cjJournalDetachExclusiveTenant(ctx context.Context, id, slug string) error {
-	if _, err := uuid.Parse(id); err != nil || !strings.HasPrefix(slug, "cj") || len(slug) != 14 {
-		return errors.New("escopo exclusivo inválido")
-	}
-	return cjJournalWithOwner(ctx, func(tx pgx.Tx) error {
-		tag, err := tx.Exec(ctx, `delete from tenant_cells tc using tenants t
-			where tc.tenant_id = t.id and t.id = $1::uuid and t.slug = $2 and t.name = 'cjJournal escopo'`, id, slug)
-		if err != nil {
-			return err
-		}
-		if tag.RowsAffected() != 1 {
-			return fmt.Errorf("limpeza removeu %d tenant_cells", tag.RowsAffected())
-		}
-		return nil
-	})
+	return labtest.DetachExclusiveJournalTenant(ctx, cjJournalOwnerURL(), os.Getenv("NEXO_GO_TEST_DATABASE_URL"), id, slug)
 }
 
 func cjJournalSeed(t *testing.T, opened *db.DB, scope tenancy.Scope, opt cjJournalSeedOpt) cjJournalFx {
@@ -1058,105 +1031,15 @@ func cjJournalCleanup(t *testing.T, opened *db.DB, scope tenancy.Scope, fx cjJou
 }
 
 func cjJournalDeleteMaintenance(ctx context.Context, tenant, maintenance string) error {
-	if _, err := uuid.Parse(tenant); err != nil {
-		return errors.New("tenant da limpeza inválido")
-	}
-	if _, err := uuid.Parse(maintenance); err != nil {
-		return errors.New("manutenção da limpeza inválida")
-	}
-	return cjJournalWithOwner(ctx, func(tx pgx.Tx) error {
-		var ignored string
-		if err := tx.QueryRow(ctx, `select set_config('app.tenant_id', $1, true)`, tenant).Scan(&ignored); err != nil {
-			return err
-		}
-		tag, err := tx.Exec(ctx, `delete from maintenance_notices
-			where id = $1::uuid and tenant_id = $2::uuid
-			  and title = 'cjJournal janela' and message = 'aviso interno de manutencao'`, maintenance, tenant)
-		if err != nil {
-			return err
-		}
-		if tag.RowsAffected() != 1 {
-			return fmt.Errorf("limpeza removeu %d maintenance_notices", tag.RowsAffected())
-		}
-		return nil
-	})
+	return labtest.DeleteOwnCloudFixture(ctx, cjJournalOwnerURL(), os.Getenv("NEXO_GO_TEST_DATABASE_URL"), labtest.FamilyCloudJournal, tenant, "", maintenance)
 }
 
 func cjJournalDeleteAccount(ctx context.Context, tenant, account string) error {
-	if _, err := uuid.Parse(tenant); err != nil {
-		return errors.New("tenant da limpeza inválido")
-	}
-	if _, err := uuid.Parse(account); err != nil {
-		return errors.New("conta da limpeza inválida")
-	}
-	return cjJournalWithOwner(ctx, func(tx pgx.Tx) error {
-		var ignored string
-		if err := tx.QueryRow(ctx, `select set_config('app.tenant_id', $1, true)`, tenant).Scan(&ignored); err != nil {
-			return err
-		}
-		tag, err := tx.Exec(ctx, `delete from cloud_accounts where id = $1::uuid and tenant_id = $2::uuid and name like 'cjJournal %'`, account, tenant)
-		if err != nil {
-			return err
-		}
-		if tag.RowsAffected() != 1 {
-			return fmt.Errorf("limpeza removeu %d cloud_accounts", tag.RowsAffected())
-		}
-		return nil
-	})
+	return labtest.DeleteOwnCloudFixture(ctx, cjJournalOwnerURL(), os.Getenv("NEXO_GO_TEST_DATABASE_URL"), labtest.FamilyCloudJournal, tenant, account, "")
 }
 
-func cjJournalWithOwner(ctx context.Context, fn func(pgx.Tx) error) error {
-	raw := strings.TrimSpace(os.Getenv("NEXO_GO_TEST_DATABASE_OWNER_URL"))
-	if raw == "" {
-		return errors.New("NEXO_GO_TEST_DATABASE_OWNER_URL ausente; a preparação do journal não aprova PostgreSQL e não concede DELETE de cloud_accounts a nexo_app")
-	}
-	if raw == os.Getenv("NEXO_GO_TEST_DATABASE_URL") {
-		return errors.New("URL de preparação coincide com a sessão de produto")
-	}
-	cfg, err := pgx.ParseConfig(raw)
-	if err != nil {
-		return errors.New("URL de preparação inválida")
-	}
-	if cfg.User != "nexo_owner" || cfg.Database != "nexo_test" || !cjJournalLocalHost(cfg.Host) {
-		return errors.New("URL de preparação recusada; exige host local, banco nexo_test e papel nexo_owner")
-	}
-	if cfg.ConnectTimeout <= 0 {
-		cfg.ConnectTimeout = 15 * time.Second
-	}
-	conn, err := pgx.ConnectConfig(ctx, cfg)
-	if err != nil {
-		return fmt.Errorf("conexão de preparação recusada: %w", err)
-	}
-	defer conn.Close(ctx)
-	var database, sessionUser, currentUser string
-	if err = conn.QueryRow(ctx, `select current_database(), session_user::text, current_user::text`).Scan(&database, &sessionUser, &currentUser); err != nil {
-		return fmt.Errorf("identidade de preparação: %w", err)
-	}
-	if database != "nexo_test" || sessionUser != "nexo_owner" || currentUser != "nexo_owner" {
-		return fmt.Errorf("papel de preparação recusado: database=%s session_user=%s current_user=%s", database, sessionUser, currentUser)
-	}
-	tx, err := conn.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-	if err = fn(tx); err != nil {
-		return err
-	}
-	return tx.Commit(ctx)
-}
-
-func cjJournalLocalHost(host string) bool {
-	host = strings.Trim(strings.ToLower(strings.TrimSpace(host)), "[]")
-	switch host {
-	case "", "localhost", "127.0.0.1", "::1":
-		return true
-	}
-	if strings.HasPrefix(host, "/") {
-		return true
-	}
-	ip := net.ParseIP(host)
-	return ip != nil && ip.IsLoopback()
+func cjJournalOwnerURL() string {
+	return strings.TrimSpace(os.Getenv("NEXO_GO_TEST_DATABASE_OWNER_URL"))
 }
 
 func cjJournalClaim(ctx context.Context, tx *db.Tx, tenant string) (int64, error) {
