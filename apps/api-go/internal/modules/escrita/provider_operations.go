@@ -51,19 +51,8 @@ func registerProviderOperations(api huma.API, registry *endpoint.Registry, s Ser
 					if validate.UUID(id) != nil || len(strings.TrimSpace(body.Reason)) < 10 || len(body.Reason) > 500 {
 						return apierr.New(400, "operação ou motivo inválidos")
 					}
-					rows, e := tx.Objects(ctx, `select i.id from invoices i join provider_operations o on o.invoice_id=i.id where o.id=$1 and o.issuance_id=$2 for update of i`, id, issuance)
-					if e != nil {
+					if e := finance.RequeueProviderOperationLookup(ctx, tx, actorTenant(ctx), issuance, id); e != nil {
 						return e
-					}
-					if len(rows) == 0 {
-						return apierr.New(404, "operação não encontrada")
-					}
-					n, e := tx.Affected(ctx, `update provider_operations set state='uncertain',next_attempt_at=now(),last_error=null where id=$1 and state in ('review','uncertain')`, id)
-					if e != nil {
-						return e
-					}
-					if n == 0 {
-						return apierr.New(409, "somente operação incerta ou em revisão pode retomar consulta")
 					}
 					out = map[string]any{"queued": true, "lookup_only": true}
 					return record(ctx, tx, "finance.provider.retry_lookup", "provider_operation", id, map[string]any{"reason": body.Reason})

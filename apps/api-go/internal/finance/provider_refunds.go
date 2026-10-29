@@ -13,6 +13,10 @@ func ApplyProviderRefund(ctx context.Context, tx *db.Tx, invoice, connection str
 	if refund.Validate() != nil {
 		return false, apierr.New(409, "devolução confirmada sem identidade, valor ou data válidos")
 	}
+	// Advisory and the invoice row before the reversal insert. validate_payment_reversal locks the invoice again.
+	if err := LockInvoices(ctx, tx, "", invoice); err != nil {
+		return false, err
+	}
 	var locked, tenant string
 	if err := tx.QueryRow(ctx, `select id,tenant_id from invoices where id=$1 and (financial_connection_id=$2 or exists(select 1 from provider_issuance j where j.invoice_id=invoices.id and j.state='issued' and j.financial_connection_id=$2)) for update`, invoice, connection).Scan(&locked, &tenant); err != nil {
 		return false, err
