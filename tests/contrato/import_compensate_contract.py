@@ -332,10 +332,27 @@ def verify(api, call, sql):
         "insert into invoice_movements (tenant_id, invoice_id, origin, nominal_delta, fee_delta, discount_delta, status_after)"
         " select tenant_id, id, 'adjustment', 0, 0, 0, status from invoices where id=" + quote(title) + "::uuid"
     ), 'provenance_movement')
+    # Efeito de cobrança sem chamada ao PSP: conexão pendente do mesmo tenant/empresa,
+    # provedor efi e gateway alinhados, para o financial_binding_guard aceitar o vínculo.
     issuance_invoice = refuse_blocker(marker + '-psp', lambda title, owned: run_sql(
-        "update invoices set gateway_charge_id=" + quote('cob-' + marker) + " where id=" + quote(title) + "::uuid"
+        "insert into financial_connections(tenant_id,company_id,provider,environment,account_ref,name,status)"
+        " select tenant_id, company_id, 'efi', 'sandbox', " + quote('b13-efi-' + marker) + ", "
+        + quote('Conexao sintetica ' + marker) + ", 'pending' from invoices where id=" + quote(title) + "::uuid;"
+        " update invoices i set financial_connection_id=c.id, gateway=c.provider, gateway_charge_id=" + quote('cob-' + marker)
+        + " from financial_connections c where i.id=" + quote(title) + "::uuid and c.tenant_id=i.tenant_id"
+        + " and c.company_id is not distinct from i.company_id and c.provider='efi' and c.environment='sandbox'"
+        + " and c.account_ref=" + quote('b13-efi-' + marker)
     ), 'provider_issuance')
     assert records("select gateway_charge_id from invoices where id=" + quote(issuance_invoice) + "::uuid")[0]['gateway_charge_id'] == 'cob-' + marker
+    bound = records(
+        "select i.gateway, c.provider, (c.tenant_id=i.tenant_id) as same_tenant,"
+        " (c.company_id is not distinct from i.company_id) as same_company,"
+        " (select count(*)::int from provider_issuance j where j.invoice_id=i.id) as issuances"
+        " from invoices i join financial_connections c on c.id=i.financial_connection_id"
+        " where i.id=" + quote(issuance_invoice) + "::uuid"
+    )[0]
+    assert bound['gateway'] == 'efi' and bound['provider'] == 'efi' and bound['same_tenant'] is True and bound['same_company'] is True
+    assert bound['issuances'] == 0 and cash(issuance_invoice)['movements'] == 1 and cash(issuance_invoice)['operations'] == 0
 
     # B13-17 misto: created, unchanged e error; updated bloqueia o lote
     first_batch, first_invoice = fresh(marker + '-keep', '15,00', 'pago', '2020-05-01', '15,00')
