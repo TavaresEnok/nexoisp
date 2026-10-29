@@ -4,10 +4,22 @@ payments_after_import.sample_ids traz payments.id (não o id da fatura).
 dependent_batches.sample_ids traz import_batches.id dos outros lotes.
 Uma reimportação do mesmo assinante com nome alterado grava status updated
 e também entra em dependent_batches do lote que criou a entidade.
+C25-v1: compensation absent ou committed. O POST /compensate é o fluxo HTTP
+registrado. eligible não autoriza mutação. A chave e o hash não saem na leitura.
 """
+import inspect
 import json
+import time
 import uuid
-from lib import quote
+from lib import quote, request as http_request
+
+READ_NOTE = 'avaliação do estado atual; nenhuma reversão foi executada. Reversão futura deve compensar, não apagar, registros financeiros'
+WRITE_NOTE = 'compensação append-only; nenhuma linha financeira, lote ou auditoria foi apagada'
+SCOPE_ERROR = 'a reconciliação do lote exige escopo integral do provedor, fora do suporte'
+COUNT_NAMES = (
+    'created_rows', 'reversed_payments', 'canceled_invoices',
+    'left_canceled', 'skipped_unchanged', 'skipped_error',
+)
 
 
 def verify(api, call, sql):
@@ -30,7 +42,8 @@ def verify(api, call, sql):
     marker = 'b13v-' + uuid.uuid4().hex
     open_ext = marker + '-open'
     sub_name = 'Assinante ' + marker
-    restricted, pop = str(uuid.uuid4()), str(uuid.uuid4())
+    restricted, pop, portal = str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4())
+    support_token = None
     tenants = {row['email']: row for row in records("select tenant_id::text as tenant_id, email from users where email in ('admin@alfa.demo','admin@beta.demo')")}
     alfa = tenants['admin@alfa.demo']['tenant_id']
 
@@ -41,11 +54,22 @@ def verify(api, call, sql):
         assert body['applied'] is True and body['totals']['error'] == 0, body
         return body
 
-    def eligibility(batch_id, query=''):
+    def peek(batch_id, query=''):
         before = counts()
         page = api('/api/import/batches/' + batch_id + '/revert-eligibility' + query)
         after = counts()
         assert before == after, (before, after, page['json'])
+        if page['status'] == 200:
+            assert page['headers']['cache-control'] == 'no-store'
+            assert page['json']['evidence']['reverted'] is False
+            blob = json.dumps(page['json'])
+            assert 'idempotency_key' not in blob and 'request_hash' not in blob
+        return page
+
+    def eligibility(batch_id, query=''):
+        page = peek(batch_id, query)
+        if page['status'] == 200:
+            assert page['json']['compensation'] == {'state': 'absent'}, page['json']
         return page
 
     try:
@@ -244,16 +268,213 @@ def verify(api, call, sql):
         sql(
             "insert into pops(id,tenant_id,name) values(" + quote(pop) + "," + quote(alfa) + "," + quote('POP ' + marker[:20]) + ");"
             "insert into users(id,tenant_id,email,name,password_hash,role) select " + quote(restricted) + ",tenant_id," + quote(marker + '@synthetic.invalid') + ",'Revert POP fixture',password_hash,'noc' from users where email='admin@alfa.demo';"
+            "insert into users(id,tenant_id,email,name,password_hash,role,subscriber_id) select " + quote(portal) + ",tenant_id," + quote(marker + '@portal.invalid') + ",'Revert portal fixture',password_hash,'subscriber'," + quote(plain_id) + "::uuid from users where email='admin@alfa.demo';"
             "insert into user_pops(tenant_id,user_id,pop_id) values(" + quote(alfa) + "," + quote(restricted) + "," + quote(pop) + ")",
             'nexo_test')
         pop_login = call('/api/auth/login', {'email': marker + '@synthetic.invalid', 'password': 'demo1234', 'bearer': True})
         assert pop_login['status'] == 200, pop_login['json']
         denied = call('/api/import/batches/' + batch_id + '/revert-eligibility', token=pop_login['json']['token'])
         assert denied['status'] == 403, denied['json']
-        return {'ok': True, 'checks': ['lote de assinantes limpo é elegível', 'lote de títulos limpo é elegível', 'fatura posterior do mesmo contrato não bloqueia o lote de títulos', 'baixa posterior bloqueia com payments.id', 'lote dependente bloqueia o lote de assinantes', 'lote de contratos ignora irmãos e a fatura deles', 'fatura do contrato novo bloqueia o lote de contratos', 'reimportação com atualização bloqueia o lote original', 'outro tenant 404', 'POP 403', 'consulta não altera contagens']}
+
+        # call() do nativo não envia cabeçalho. O POST registrado lê Idempotency-Key do HTTP.
+        defaults = api.__defaults__ or ()
+        names = api.__code__.co_varnames[:api.__code__.co_argcount]
+        bound = dict(zip(names[-len(defaults):], defaults)) if defaults else {}
+        closed = inspect.getclosurevars(api).nonlocals
+        base = bound.get('base') or closed.get('base')
+        alfa_token = closed.get('token') or bound.get('token')
+        assert isinstance(base, str) and base.startswith('http'), base
+        assert isinstance(alfa_token, str) and alfa_token, alfa_token
+
+        def markers(batch):
+            return records(
+                "select id::text as id, idempotency_key, request_hash, reason, result"
+                " from import_batch_compensations where batch_id=" + quote(batch) + "::uuid"
+            )
+
+        def invoice_status(invoice_id):
+            return records("select status from invoices where id=" + quote(invoice_id) + "::uuid")[0]['status']
+
+        def movement_count(invoice_id):
+            return records("select count(*)::int as n from invoice_movements where invoice_id=" + quote(invoice_id) + "::uuid")[0]['n']
+
+        def post_compensate(batch, key, reason, token=None, query='', cookie=False):
+            headers = {'Content-Type': 'application/json'}
+            if key is not None:
+                headers['Idempotency-Key'] = key
+            return http_request(
+                base,
+                '/api/import/batches/' + batch + '/compensate' + query,
+                token=alfa_token if token is None else token,
+                cookie=cookie,
+                method='POST',
+                headers=headers,
+                body=json.dumps({'reason': reason}).encode(),
+            )
+
+        def hides(page, secret):
+            blob = json.dumps(page['json'])
+            assert secret not in blob and 'idempotency_key' not in blob and 'request_hash' not in blob, page['json']
+
+        refused = post_compensate(subscriber_batch, 'c25-kind-' + uuid.uuid4().hex[:12], 'Lote de assinante nao compensa')
+        assert refused['status'] == 409 and refused['json']['error'] == 'kind_not_compensatable', refused['json']
+        assert markers(subscriber_batch) == []
+        still_people = eligibility(subscriber_batch)
+        assert still_people['json']['eligible'] is False
+        assert any(item['kind'] == 'dependent_batches' for item in still_people['json']['blockers'])
+
+        cmp_ext = marker + '-cmp'
+        opened = apply('invoices', '\n'.join([
+            'id_externo;id_externo_assinante;vencimento;valor;situacao;pago_em;valor_pago',
+            ';'.join([cell(cmp_ext), cell(marker), '2026-10-25', '30,00', 'aberto', '', '']),
+        ]) + '\n')
+        assert opened['totals']['created'] == 1, opened['totals']
+        cmp_batch = opened['batch_id']
+        cmp_invoice = next(row['entity_id'] for row in opened['sample'] if row['external_id'] == cmp_ext)
+        moves = movement_count(cmp_invoice)
+        assert invoice_status(cmp_invoice) == 'open' and markers(cmp_batch) == []
+        absent = eligibility(cmp_batch)
+        assert absent['json']['eligible'] is True and absent['json']['blockers'] == []
+        assert absent['json']['evidence'] == {'reverted': False, 'note': READ_NOTE}
+        assert absent['json']['compensation'] == {'state': 'absent'}
+
+        beta_token = beta_login['json']['token']
+        pop_token = pop_login['json']['token']
+        portal_login = call('/api/auth/login', {'email': marker + '@portal.invalid', 'password': 'demo1234', 'bearer': True})
+        assert portal_login['status'] == 200, portal_login['json']
+        portal_token = portal_login['json']['token']
+        operator = call('/api/auth/login', {'email': 'operador@nexoisp.demo', 'password': 'demo1234', 'bearer': True})
+        assert operator['status'] == 200, operator['json']
+        entered = call('/api/support/enter', {'tenant_id': alfa, 'reason': 'ensaio de escopo'}, token=operator['json']['token'])
+        assert entered['status'] == 200, entered['json']
+        support_token = operator['json']['token']
+        cookie_login = call('/api/auth/login', {'email': 'admin@alfa.demo', 'password': 'demo1234'})
+        assert cookie_login['status'] == 200, cookie_login['json']
+        set_cookie = cookie_login['headers'].get('set-cookie', '')
+        assert set_cookie.startswith('nexo_session='), set_cookie
+        session = set_cookie.split(';', 1)[0].split('=', 1)[1]
+
+        def gate(token, status, error=None):
+            seen = call('/api/import/batches/' + cmp_batch + '/revert-eligibility', token=token)
+            assert seen['status'] == status, seen['json']
+            if error is not None:
+                assert seen['json']['error'] == error, seen['json']
+            posted = post_compensate(cmp_batch, 'c25-gate-' + uuid.uuid4().hex[:12], 'Escopo nao compensa o lote', token=token)
+            assert posted['status'] == status, posted['json']
+            if error is not None:
+                assert posted['json']['error'] == error, posted['json']
+            assert markers(cmp_batch) == [] and invoice_status(cmp_invoice) == 'open'
+
+        me = None
+        for _ in range(40):
+            me = call('/api/me', token=support_token)
+            if me['status'] == 200 and me['json'].get('support') is True:
+                break
+            time.sleep(0.05)
+        assert me['status'] == 200 and me['json'].get('support') is True, me['json']
+        gate(beta_token, 404)
+        gate(pop_token, 403)
+        gate(portal_token, 403)
+        gate(support_token, 403, SCOPE_ERROR)
+        cookie_get = http_request(base, '/api/import/batches/' + cmp_batch + '/revert-eligibility', token=session, cookie=True)
+        assert cookie_get['status'] == 200 and cookie_get['json']['compensation'] == {'state': 'absent'}, cookie_get['json']
+        assert cookie_get['json']['evidence']['reverted'] is False
+        csrf_denied = post_compensate(cmp_batch, 'c25-csrf-' + uuid.uuid4().hex[:12], 'Sem CSRF de sessao cookie', token=session, cookie=True)
+        assert csrf_denied['status'] == 403 and csrf_denied['json']['error'] == 'requisição sem proteção CSRF', csrf_denied['json']
+        assert markers(cmp_batch) == [] and invoice_status(cmp_invoice) == 'open' and movement_count(cmp_invoice) == moves
+
+        missing_key = post_compensate(cmp_batch, None, 'Motivo valido do lote')
+        assert missing_key['status'] == 400, missing_key['json']
+        short = post_compensate(cmp_batch, 'c25-short-' + uuid.uuid4().hex[:8], 'curto')
+        assert short['status'] == 400, short['json']
+        unknown = post_compensate(cmp_batch, 'c25-query-' + uuid.uuid4().hex[:8], 'Motivo valido do lote', query='?tenant=other')
+        assert unknown['status'] == 400 and unknown['json']['error'] == 'filtro desconhecido', unknown['json']
+        repeated = post_compensate(cmp_batch, 'c25-repeat-' + uuid.uuid4().hex[:8], 'Motivo valido do lote', query='?x=1&x=2')
+        assert repeated['status'] == 400 and repeated['json']['error'] == 'filtro repetido', repeated['json']
+        assert markers(cmp_batch) == [] and invoice_status(cmp_invoice) == 'open'
+
+        reason = '  Compensar lote de laboratório  '
+        trimmed = reason.strip()
+        key = 'c25-' + uuid.uuid4().hex
+        assert 8 <= len(key) <= 200 and 10 <= len(trimmed) <= 200
+        created = post_compensate(cmp_batch, key, reason)
+        assert created['status'] == 200, created['json']
+        body = created['json']
+        compensation_id = str(uuid.UUID(body['compensation_id']))
+        assert body['batch_id'] == cmp_batch and body['compensation_id'] == compensation_id
+        assert body['idempotent_replay'] is False
+        assert [body[name] for name in COUNT_NAMES] == [1, 0, 1, 0, 0, 0]
+        for name in COUNT_NAMES:
+            assert isinstance(body[name], int) and not isinstance(body[name], bool)
+        assert body['evidence'] == {'reverted': False, 'note': WRITE_NOTE}
+        hides(created, key)
+        assert invoice_status(cmp_invoice) == 'canceled'
+        assert movement_count(cmp_invoice) == moves + 1
+        stored = markers(cmp_batch)
+        assert len(stored) == 1, stored
+        assert stored[0]['id'] == compensation_id
+        assert stored[0]['idempotency_key'] == key and stored[0]['request_hash']
+        assert stored[0]['reason'] == trimmed
+        assert stored[0]['result'] == body
+
+        committed = peek(cmp_batch)
+        assert committed['status'] == 200, committed['json']
+        view = committed['json']
+        comp = view['compensation']
+        assert view['evidence'] == {'reverted': False, 'note': READ_NOTE}
+        assert set(comp) == {'state', 'compensation_id', 'created_at', 'reason', 'result'}
+        assert comp['state'] == 'committed' and comp['compensation_id'] == compensation_id
+        assert isinstance(comp['created_at'], str) and comp['created_at'].endswith('Z') and 'T' in comp['created_at']
+        assert comp['reason'] == trimmed and comp['result'] == body
+        assert view['eligible'] is False
+        assert 'invoice_movements_after_import' in {item['kind'] for item in view['blockers']}
+        hides(committed, key)
+        assert movement_count(cmp_invoice) == moves + 1 and len(markers(cmp_batch)) == 1
+
+        replay = post_compensate(cmp_batch, key, reason)
+        assert replay['status'] == 200, replay['json']
+        again = replay['json']
+        assert again['idempotent_replay'] is True and again['compensation_id'] == compensation_id
+        assert again['batch_id'] == cmp_batch and again['evidence'] == body['evidence']
+        assert [again[name] for name in COUNT_NAMES] == [body[name] for name in COUNT_NAMES]
+        hides(replay, key)
+        assert len(markers(cmp_batch)) == 1 and movement_count(cmp_invoice) == moves + 1
+        reread = peek(cmp_batch)
+        assert reread['json']['evidence']['reverted'] is False
+        assert reread['json']['compensation']['result'] == body
+        assert reread['json']['compensation']['result']['idempotent_replay'] is False
+        assert movement_count(cmp_invoice) == moves + 1
+
+        other = post_compensate(cmp_batch, 'c25-other-' + uuid.uuid4().hex, trimmed)
+        assert other['status'] == 409 and other['json']['error'] == 'already_compensated', other['json']
+        clash = post_compensate(cmp_batch, key, trimmed + ' diferente')
+        assert clash['status'] == 409 and clash['json']['error'] == 'idempotency_conflict', clash['json']
+        assert len(markers(cmp_batch)) == 1 and movement_count(cmp_invoice) == moves + 1
+
+        leaked = call('/api/import/batches/' + cmp_batch + '/revert-eligibility', token=beta_token)
+        assert leaked['status'] == 404, leaked['json']
+        assert compensation_id not in json.dumps(leaked['json'])
+        for token in (pop_token, portal_token, support_token):
+            hidden_get = call('/api/import/batches/' + cmp_batch + '/revert-eligibility', token=token)
+            hidden_post = post_compensate(cmp_batch, 'c25-late-' + uuid.uuid4().hex[:12], 'Escopo nao compensa o lote', token=token)
+            assert hidden_get['status'] == 403 and hidden_post['status'] == 403, (hidden_get['json'], hidden_post['json'])
+            assert compensation_id not in json.dumps(hidden_get['json']) and compensation_id not in json.dumps(hidden_post['json'])
+        assert len(markers(cmp_batch)) == 1 and movement_count(cmp_invoice) == moves + 1
+        left = call('/api/support/exit', {}, token=support_token)
+        assert left['status'] == 200, left['json']
+        support_token = None
+        return {'ok': True, 'checks': ['lote de assinantes limpo é elegível', 'lote de títulos limpo é elegível', 'fatura posterior do mesmo contrato não bloqueia o lote de títulos', 'baixa posterior bloqueia com payments.id', 'lote dependente bloqueia o lote de assinantes', 'lote de contratos ignora irmãos e a fatura deles', 'fatura do contrato novo bloqueia o lote de contratos', 'reimportação com atualização bloqueia o lote original', 'outro tenant 404', 'POP 403', 'portal 403', 'suporte 403', 'consulta não altera contagens', 'compensação ausente antes do POST', 'POST committed com contagens do result', 'replay sem efeito novo e reverted false']}
     finally:
+        if support_token:
+            try:
+                call('/api/support/exit', {}, token=support_token)
+            except Exception:
+                pass
         sql(
             "begin;"
+            "alter table import_batch_compensations disable trigger immutable_import_batch_compensations;"
+            "delete from import_batch_compensations where batch_id in (select id from import_batches where source=" + quote(marker) + ");"
+            "alter table import_batch_compensations enable trigger immutable_import_batch_compensations;"
             "alter table payments disable trigger immutable_payments;"
             "alter table invoice_movements disable trigger immutable_invoice_movements;"
             "delete from manual_payment_intents where invoice_id in (select id from invoices where external_source=" + quote(marker) + ");"
@@ -262,6 +483,7 @@ def verify(api, call, sql):
             "delete from invoice_movements where invoice_id in (select id from invoices where external_source=" + quote(marker) + ");"
             "delete from payment_effects where invoice_id in (select id from invoices where external_source=" + quote(marker) + ");"
             "delete from agreement_sources where invoice_id in (select id from invoices where external_source=" + quote(marker) + ");"
+            "delete from audit_events where entity_type='invoice' and entity_id in (select id::text from invoices where external_source=" + quote(marker) + ");"
             "delete from invoices where external_source=" + quote(marker) + ";"
             "alter table payments enable trigger immutable_payments;"
             "alter table invoice_movements enable trigger immutable_invoice_movements;"
@@ -272,8 +494,8 @@ def verify(api, call, sql):
             "delete from import_rows where batch_id in (select id from import_batches where source=" + quote(marker) + ");"
             "delete from import_batches where source=" + quote(marker) + ";"
             "delete from user_pops where user_id=" + quote(restricted) + "::uuid;"
-            "delete from sessions where user_id=" + quote(restricted) + "::uuid;"
-            "delete from users where id=" + quote(restricted) + "::uuid;"
+            "delete from sessions where user_id=" + quote(restricted) + "::uuid or user_id=" + quote(portal) + "::uuid;"
+            "delete from users where id=" + quote(restricted) + "::uuid or id=" + quote(portal) + "::uuid;"
             "delete from pops where id=" + quote(pop) + "::uuid;"
             "commit;",
             'nexo_test')
