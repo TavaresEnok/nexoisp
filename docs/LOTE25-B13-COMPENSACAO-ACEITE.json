@@ -8,9 +8,9 @@
   "matriz_historica": "docs/LOTE24-B13-ACEITACAO.json",
   "matriz_historica_intocada": true,
   "implementado": true,
-  "implementado_em": "branch de desenvolvimento, HEAD 8c10c1a, base de desenho 82c4251",
+  "implementado_em": "código desde 8c10c1a; fixture PSP corrigido em b67d2f3 no HEAD e2f3b18; prova de execução na base cc542a1",
   "executado": false,
-  "validado_no_runner": "somente o relato de quatro unitários sem banco; esta documentação não os reexecutou",
+  "validado_no_runner": "go_integration.py exit 0 em cc542a1, 241 ações pass, 58 de compensação; browser dirigido exit 0; nativo.py exit 1 sem concluir",
   "homologacao": false,
   "publicado": false,
   "projeto_concluido": false,
@@ -19,35 +19,92 @@
   "skip_por_ausencia_de_postgresql_nao_aprova": true,
   "analise_de_codigo_nao_e_homologacao": true,
   "codigo_de_teste_nao_e_execucao": true,
-  "nota": "Os 22 casos têm teste com invariantes. Isso não é execução. compensate() sem token explícito usa api() de nativo.py e envia o bearer do login admin; token explícito e cookie CSRF continuam em call(). Neste runner não havia NEXO_GO_TEST_DATABASE_URL: os testes de banco fizeram skip e esse skip não aprova concorrência, RLS, rollback nem o contrato HTTP. A gerência precisa rodar python3 tests/contrato/nativo.py e python3 tests/contrato/go_integration.py, sem -I, na raiz do repositório, num PostgreSQL descartável, com container, porta e prefixo exclusivos, antes de publicar. Essa é a invocação de .github/workflows/native.yml. python3 -I nos mesmos scripts termina em ModuleNotFoundError: No module named 'lib' (nativo.py:13 e go_integration.py:11) antes do laboratório; essa falha de bootstrap não é skip por ausência de banco e não aprova o gate. Os testes não foram alterados. O runner offline só compilou e rodou unitários sem banco. O comando executável de nativo.py não foi executado.",
+  "nota": "Os 22 casos conservam invariantes e executado false no conjunto porque o HTTP não concluiu. B13-03, B13-21 e B13-22 só têm teste Go e essa ação passou em cc542a1. Implementação, revisão e skip não contam como execução. Contrato MVP: só invoices, até 200 created, sem PSP, sem franquia, IDs e histórico preservados, evidence.reverted false. Não há percentual, homologação, push ou deploy.",
   "ambiente": "Laboratório sintético de tests/contrato/nativo.py (PostgreSQL 16, papéis nexo_owner/nexo_go/nexo_app, sem .env do produto) e o mesmo banco descartável de tests/contrato/go_integration.py via NEXO_GO_TEST_DATABASE_URL e NEXO_GO_TEST_DATABASE_OWNER_URL. Cada corrida concorrente usa container, porta e prefixo próprios.",
   "comandos_de_gate": [
-    ["python3", "tests/contrato/nativo.py"],
-    ["python3", "tests/contrato/go_integration.py"]
+    [
+      "python3",
+      "tests/contrato/nativo.py"
+    ],
+    [
+      "python3",
+      "tests/contrato/go_integration.py"
+    ]
   ],
   "comandos_lab": [
-    ["python3", "tests/contrato/nativo.py"],
-    ["python3", "tests/contrato/go_integration.py"],
-    ["go", "test", "-count=1", "-run", "TestImportCompensate", "./internal/modules/escrita/"],
-    ["go", "test", "-count=1", "-race", "-p", "1", "./internal/finance/", "./internal/outbound/", "./internal/modules/escrita/", "./internal/modules/leitura/"]
+    [
+      "python3",
+      "tests/contrato/nativo.py"
+    ],
+    [
+      "python3",
+      "tests/contrato/go_integration.py"
+    ],
+    [
+      "go",
+      "test",
+      "-count=1",
+      "-run",
+      "TestImportCompensate",
+      "./internal/modules/escrita/"
+    ],
+    [
+      "go",
+      "test",
+      "-count=1",
+      "-race",
+      "-p",
+      "1",
+      "./internal/finance/",
+      "./internal/outbound/",
+      "./internal/modules/escrita/",
+      "./internal/modules/leitura/"
+    ]
   ],
   "comandos_lab_nota": "Os dois primeiros são a invocação do workflow native.yml, sem -I, na raiz do repositório, e sobem PostgreSQL descartável. python3 -I nos mesmos caminhos falha no import de lib antes do laboratório e não é gate. Os go test rodam em apps/api-go e só aprovam com NEXO_GO_TEST_DATABASE_URL e NEXO_GO_TEST_DATABASE_OWNER_URL desse laboratório. Sem URL, o skip não aprova.",
   "comandos_ci": [
-    ["go", "test", "-race", "./..."],
-    ["python3", "tests/contrato/nativo.py"],
-    ["python3", "tests/contrato/go_integration.py"],
-    ["python3", "tests/contrato/e2e.py"]
+    [
+      "go",
+      "test",
+      "-race",
+      "./..."
+    ],
+    [
+      "python3",
+      "tests/contrato/nativo.py"
+    ],
+    [
+      "python3",
+      "tests/contrato/go_integration.py"
+    ],
+    [
+      "python3",
+      "tests/contrato/e2e.py"
+    ]
   ],
-  "comandos_ci_nota": "Workflow .github/workflows/native.yml, job verificar, no commit candidato a publicação. go test -race ./... sem URL de banco deixa TestImportCompensate em skip e não publica. e2e.py inclui frontend-v0-import.mjs por e2e/smoke.mjs. Nenhum desses comandos foi executado para o HEAD 8c10c1a nesta documentação.",
-  "comando_browser": ["env", "NEXO_E2E_ONLY=frontend-v0-import.mjs", "python3", "tests/contrato/e2e.py"],
-  "comando_browser_nota": "Harness real com Go, Caddy e Playwright. npm -w apps/web run test:import só alcança um BASE já no ar e não substitui este comando. O script não foi executado. Não há PNG import-compensacao em docs/integracao-v0/evidencias.",
+  "comandos_ci_nota": "Workflow .github/workflows/native.yml, job verificar, no commit candidato a publicação. O go_integration.py e o browser dirigido rodaram localmente em cc542a1. O nativo.py não concluiu. Nenhum run hospedado foi conferido para cc542a1 ou e2f3b18. CI e193266 e a base 6f4bf38 não validam esta base.",
+  "comando_browser": [
+    "env",
+    "NEXO_E2E_ONLY=frontend-v0-import.mjs",
+    "python3",
+    "tests/contrato/e2e.py"
+  ],
+  "comando_browser_nota": "Em cc542a1 o harness dirigido terminou exit 0: desktop, viewport 390, replay e POST commitado com resposta perdida recuperada pela UI sem segundo estorno. Capturas em browser-real-cc542a1, fora deste commit. A jornada não marca os 22 HTTP.",
   "falha_de_bootstrap": {
     "distinta_de_skip_por_ausencia_de_banco": true,
     "testes_alterados": false,
     "reproduzida_em": "2026-10-29",
     "comandos": [
-      ["python3", "-I", "tests/contrato/nativo.py"],
-      ["python3", "-I", "tests/contrato/go_integration.py"]
+      [
+        "python3",
+        "-I",
+        "tests/contrato/nativo.py"
+      ],
+      [
+        "python3",
+        "-I",
+        "tests/contrato/go_integration.py"
+      ]
     ],
     "resultado": "exit 1 nos dois. ModuleNotFoundError: No module named 'lib' em nativo.py:13 e go_integration.py:11. -I implica -P e -E: o diretório do script sai de sys.path e PYTHONPATH é ignorado. Não chega a Docker nem a PostgreSQL.",
     "nao_e_gate": true,
@@ -64,26 +121,94 @@
       "TestImportCompensate_B13_15",
       "TestImportCompensate_B13_19",
       "TestImportCompensateHashOmitsKey"
-    ]
+    ],
+    "nota": "Bloco histórico do runner que escreveu a matriz. A prova posterior está em observado_na_base_cc542a1."
   },
   "cobertura_coletiva": {
-    "escopo_original": ["t3", "t4", "t5", "t6", "t8"],
+    "escopo_original": [
+      "t3",
+      "t4",
+      "t5",
+      "t6",
+      "t8"
+    ],
     "criterio_descartado": false,
     "cinco_ramos_de_escritores_antes_do_registro": [
-      {"commit": "2da4e0c", "tarefa": "t2-locks-financeiros", "efeito": "LockInvoices em Manual, Reverse, cancelamento, baixa manual, resolve, acordo, gateway e issuance"},
-      {"commit": "35413a8", "tarefa": "t3-consumidor-efeitos", "efeito": "planPaidEffect antes de payment_effects"},
-      {"commit": "573b8d9", "tarefa": "t4-locks-reimport-avisos", "efeito": "reimportação invoices trava faturas reconhecíveis antes dos savepoints"},
-      {"commit": "5337074", "tarefa": "t3-operacoes-devolucoes", "efeito": "PrepareProviderOperation e ApplyProviderRefund antes do insert"},
-      {"commit": "13ac6dd", "tarefa": "t4-enfileiramento-avisos", "efeito": "avisos travam as faturas candidatas antes de notice_log"}
+      {
+        "commit": "2da4e0c",
+        "tarefa": "t2-locks-financeiros",
+        "efeito": "LockInvoices em Manual, Reverse, cancelamento, baixa manual, resolve, acordo, gateway e issuance"
+      },
+      {
+        "commit": "35413a8",
+        "tarefa": "t3-consumidor-efeitos",
+        "efeito": "planPaidEffect antes de payment_effects"
+      },
+      {
+        "commit": "573b8d9",
+        "tarefa": "t4-locks-reimport-avisos",
+        "efeito": "reimportação invoices trava faturas reconhecíveis antes dos savepoints"
+      },
+      {
+        "commit": "5337074",
+        "tarefa": "t3-operacoes-devolucoes",
+        "efeito": "PrepareProviderOperation e ApplyProviderRefund antes do insert"
+      },
+      {
+        "commit": "13ac6dd",
+        "tarefa": "t4-enfileiramento-avisos",
+        "efeito": "avisos travam as faturas candidatas antes de notice_log"
+      }
     ],
-    "prova_de_emissao_sem_novo_escritor": {"commit": "f676a04", "tarefa": "t3-locks-psp-efeitos", "efeito": "só invoice_locks_issuance_test.go; o lock de issuance.go entrou em 2da4e0c"},
-    "nucleo": {"commit": "0c04ded", "tarefa": "t5-post-compensacao", "arquivo": "apps/api-go/internal/modules/escrita/import_compensate.go"},
-    "registro_seguro": {"commit": "e8fe763", "tarefa": "t5-registrar-rota", "arquivos": ["apps/api-go/internal/modules/escrita/importacao.go", "apps/api-go/internal/modules/escrita/rotas.json"], "nota": "registra o POST depois dos cinco ramos e do núcleo; não abre transação própria"},
-    "inventario_openapi": {"commit": "a5709b4", "tarefa": "t5-inventario-compensacao", "arquivo": "apps/api-go/rotas.json", "rota": "POST /api/import/batches/:id/compensate", "publicado": false, "nota": "lista estática. Fechar o lote depende desta entrada existir. Existir no JSON não prova /openapi.json servido nem publicação."},
-    "leitura_get": {"commit": "ee80de1", "arquivo": "apps/api-go/internal/modules/leitura/import_revert_eligibility.go"},
-    "contrato_get_before_after_replay": {"commit": "82589b1", "arquivo": "tests/contrato/import_revert_eligibility_contract.py", "executado": false, "comando": ["python3", "tests/contrato/nativo.py"]},
-    "contratos_22": {"commit": "6de0e98", "executado": false},
-    "interface": {"commit": "8f06bae", "arquivo": "apps/web/features/admin/import-batches.tsx"},
+    "prova_de_emissao_sem_novo_escritor": {
+      "commit": "f676a04",
+      "tarefa": "t3-locks-psp-efeitos",
+      "efeito": "só invoice_locks_issuance_test.go; o lock de issuance.go entrou em 2da4e0c"
+    },
+    "nucleo": {
+      "commit": "0c04ded",
+      "tarefa": "t5-post-compensacao",
+      "arquivo": "apps/api-go/internal/modules/escrita/import_compensate.go"
+    },
+    "registro_seguro": {
+      "commit": "e8fe763",
+      "tarefa": "t5-registrar-rota",
+      "arquivos": [
+        "apps/api-go/internal/modules/escrita/importacao.go",
+        "apps/api-go/internal/modules/escrita/rotas.json"
+      ],
+      "nota": "registra o POST depois dos cinco ramos e do núcleo; não abre transação própria"
+    },
+    "inventario_openapi": {
+      "commit": "a5709b4",
+      "tarefa": "t5-inventario-compensacao",
+      "arquivo": "apps/api-go/rotas.json",
+      "rota": "POST /api/import/batches/:id/compensate",
+      "publicado": false,
+      "nota": "lista estática. Fechar o lote depende desta entrada existir. Existir no JSON não prova /openapi.json servido nem publicação."
+    },
+    "leitura_get": {
+      "commit": "ee80de1",
+      "arquivo": "apps/api-go/internal/modules/leitura/import_revert_eligibility.go"
+    },
+    "contrato_get_before_after_replay": {
+      "commit": "82589b1",
+      "arquivo": "tests/contrato/import_revert_eligibility_contract.py",
+      "executado": false,
+      "comando": [
+        "python3",
+        "tests/contrato/nativo.py"
+      ]
+    },
+    "contratos_22": {
+      "commit": "6de0e98",
+      "executado": false,
+      "http_cc542a1": "comando não concluído"
+    },
+    "interface": {
+      "commit": "8f06bae",
+      "arquivo": "apps/web/features/admin/import-batches.tsx"
+    },
     "browser": {
       "commit": "1ec8569",
       "arquivo": "e2e/frontend-v0-import.mjs",
@@ -98,135 +223,523 @@
         "409 mostra a frase do POST e a contagem em nós separados; o GET permanece absent e a baixa posterior fica intacta",
         "no viewport 390, Escape pode fechar a ficha; o script reabre o lote e cancelar a confirmação não envia POST"
       ],
-      "commit_com_resposta_perdida": "O script aborta a resposta depois do upstream 200. A ficha relê o GET, mostra a compensação registrada, não oferece novo botão e outra chave recebe 409 already_compensated. Isso não foi executado."
+      "commit_com_resposta_perdida": "Em cc542a1 a UI recuperou um POST já commitado com resposta perdida, sem segundo estorno. Isso não passa os 22 HTTP.",
+      "executado_cc542a1": true,
+      "screenshots_no_commit": false,
+      "screenshots_arquivo": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/browser-real-cc542a1/"
     }
   },
   "continuacao": {
     "pedir_nova_ordem": false,
     "projeto_100": false,
-    "instrucao": "A gerência executa os testes reais, corrige e revisa falhas, integra a branch de desenvolvimento e escolhe o próximo recorte interno aberto do mapa. Candidato interno seguinte: SBOM de B01. Restore de host vazio permanece em B12. Não fechar item externo por ausência de recurso. Não transformar default em homologação."
+    "instrucao": "Não reimplementar os lotes 25 e 26. Repetir python3 tests/contrato/nativo.py sem -I no HEAD com b67d2f3. Executar python3 tests/contrato/restore_clean_host.py quando houver Docker. Conferir o CI hospedado deste HEAD, inclusive o artefato sbom-cyclonedx. Não fechar host físico, cópia externa, cofre, RPO/RTO, piloto nem os testes do Backup-center por inferência."
   },
   "casos": [
     {
       "id": "B13-01",
       "implementado": true,
       "executado": false,
-      "skip": true,
-      "status": "escrito_nao_executado",
-      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_01"],
-      "argv": [["python3", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_01", "./internal/modules/escrita/"]],
+      "skip": false,
+      "status": "go_pass_em_cc542a1_http_nao_concluido",
+      "testes": [
+        "tests/contrato/import_compensate_contract.py",
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_01"
+      ],
+      "argv": [
+        [
+          "python3",
+          "tests/contrato/nativo.py"
+        ],
+        [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestImportCompensate_B13_01",
+          "./internal/modules/escrita/"
+        ]
+      ],
       "ambiente": "nativo.py no laboratório descartável; o teste Go exige NEXO_GO_TEST_DATABASE_URL no mesmo laboratório, não um skip local",
-      "invariantes": ["um único compensation_id", "idempotent_replay na segunda resposta", "uma reversão e a baixa original preservada", "import_rows created permanece"]
+      "invariantes": [
+        "um único compensation_id",
+        "idempotent_replay na segunda resposta",
+        "uma reversão e a baixa original preservada",
+        "import_rows created permanece"
+      ],
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": true,
+        "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+        "estado": "pass",
+        "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-go-integration-cc542a1-summary.json",
+        "testes_nomeados_no_aceite": [
+          "TestImportCompensate_B13_01"
+        ],
+        "limite": "Ação Go passada dentro das 58. Não declara o HTTP do mesmo caso."
+      }
     },
     {
       "id": "B13-02",
       "implementado": true,
       "executado": false,
-      "skip": true,
-      "status": "escrito_nao_executado",
-      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_02"],
-      "argv": [["python3", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_02", "./internal/modules/escrita/"]],
+      "skip": false,
+      "status": "go_pass_em_cc542a1_http_nao_concluido",
+      "testes": [
+        "tests/contrato/import_compensate_contract.py",
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_02"
+      ],
+      "argv": [
+        [
+          "python3",
+          "tests/contrato/nativo.py"
+        ],
+        [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestImportCompensate_B13_02",
+          "./internal/modules/escrita/"
+        ]
+      ],
       "ambiente": "duas requisições concorrentes no laboratório; go_integration.py cobre o pacote com -race",
-      "invariantes": ["uma resposta 200 e uma 409 already_compensated", "um marcador", "uma reversão"]
+      "invariantes": [
+        "uma resposta 200 e uma 409 already_compensated",
+        "um marcador",
+        "uma reversão"
+      ],
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": true,
+        "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+        "estado": "pass",
+        "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-go-integration-cc542a1-summary.json",
+        "testes_nomeados_no_aceite": [
+          "TestImportCompensate_B13_02"
+        ],
+        "limite": "Ação Go passada dentro das 58. Não declara o HTTP do mesmo caso."
+      }
     },
     {
       "id": "B13-03",
       "implementado": true,
-      "executado": false,
-      "skip": true,
-      "status": "escrito_nao_executado",
-      "testes": ["apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_03"],
-      "argv": [["go", "test", "-count=1", "-run", "TestImportCompensate_B13_03", "./internal/modules/escrita/"]],
+      "executado": true,
+      "skip": false,
+      "status": "go_pass_em_cc542a1",
+      "testes": [
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_03"
+      ],
+      "argv": [
+        [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestImportCompensate_B13_03",
+          "./internal/modules/escrita/"
+        ]
+      ],
       "ambiente": "PostgreSQL descartável. O subteste do marcador usa falha real de chave estrangeira do ator. O subteste de auditoria ainda arma o gancho importCompensateBeforeCommit, que não foi usado nos testes novos de barreira.",
-      "invariantes": ["rollback de pagamento, status, paid_at, marcador e movimento"]
+      "invariantes": [
+        "rollback de pagamento, status, paid_at, marcador e movimento"
+      ],
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": true,
+        "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+        "estado": "pass",
+        "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-go-integration-cc542a1-summary.json",
+        "testes_nomeados_no_aceite": [
+          "TestImportCompensate_B13_03"
+        ],
+        "limite": "O caso só lista teste Go. Essa ação passou com banco em cc542a1. Não é HTTP, CI hospedado nem homologação."
+      }
     },
     {
       "id": "B13-04",
       "implementado": true,
       "executado": false,
-      "skip": true,
-      "status": "escrito_nao_executado",
-      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_04"],
-      "argv": [["python3", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_04", "./internal/modules/escrita/"]],
+      "skip": false,
+      "status": "go_pass_em_cc542a1_http_nao_concluido",
+      "testes": [
+        "tests/contrato/import_compensate_contract.py",
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_04"
+      ],
+      "argv": [
+        [
+          "python3",
+          "tests/contrato/nativo.py"
+        ],
+        [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestImportCompensate_B13_04",
+          "./internal/modules/escrita/"
+        ]
+      ],
       "ambiente": "CSV situacao=pago integral no nativo.py",
-      "invariantes": ["reversal manual do valor integral", "nota com o lote", "sem PSP", "signed_cents 0", "external_id preservado", "evidence.reverted false"]
+      "invariantes": [
+        "reversal manual do valor integral",
+        "nota com o lote",
+        "sem PSP",
+        "signed_cents 0",
+        "external_id preservado",
+        "evidence.reverted false"
+      ],
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": true,
+        "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+        "estado": "pass",
+        "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-go-integration-cc542a1-summary.json",
+        "testes_nomeados_no_aceite": [
+          "TestImportCompensate_B13_04"
+        ],
+        "limite": "Ação Go passada dentro das 58. Não declara o HTTP do mesmo caso."
+      }
     },
     {
       "id": "B13-05",
       "implementado": true,
       "executado": false,
-      "skip": true,
-      "status": "escrito_nao_executado",
-      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_05"],
-      "argv": [["python3", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_05", "./internal/modules/escrita/"]],
+      "skip": false,
+      "status": "go_pass_em_cc542a1_http_nao_concluido",
+      "testes": [
+        "tests/contrato/import_compensate_contract.py",
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_05"
+      ],
+      "argv": [
+        [
+          "python3",
+          "tests/contrato/nativo.py"
+        ],
+        [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestImportCompensate_B13_05",
+          "./internal/modules/escrita/"
+        ]
+      ],
       "ambiente": "CSV com valor_pago menor que o valor",
-      "invariantes": ["estorno do valor pago, não do nominal", "fatura canceled", "nominal preservado"]
+      "invariantes": [
+        "estorno do valor pago, não do nominal",
+        "fatura canceled",
+        "nominal preservado"
+      ],
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": true,
+        "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+        "estado": "pass",
+        "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-go-integration-cc542a1-summary.json",
+        "testes_nomeados_no_aceite": [
+          "TestImportCompensate_B13_05"
+        ],
+        "limite": "Ação Go passada dentro das 58. Não declara o HTTP do mesmo caso."
+      }
     },
     {
       "id": "B13-06",
       "implementado": true,
       "executado": false,
-      "skip": true,
-      "status": "escrito_nao_executado",
-      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_06"],
-      "argv": [["python3", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_06", "./internal/modules/escrita/"]],
+      "skip": false,
+      "status": "go_pass_em_cc542a1_http_nao_concluido",
+      "testes": [
+        "tests/contrato/import_compensate_contract.py",
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_06"
+      ],
+      "argv": [
+        [
+          "python3",
+          "tests/contrato/nativo.py"
+        ],
+        [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestImportCompensate_B13_06",
+          "./internal/modules/escrita/"
+        ]
+      ],
       "ambiente": "CSV com valor_pago maior que o valor e até o dobro",
-      "invariantes": ["estorno do pagamento excedente inteiro", "excess_cents 0", "nenhum acordo", "alocação não sai da fatura"]
+      "invariantes": [
+        "estorno do pagamento excedente inteiro",
+        "excess_cents 0",
+        "nenhum acordo",
+        "alocação não sai da fatura"
+      ],
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": true,
+        "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+        "estado": "pass",
+        "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-go-integration-cc542a1-summary.json",
+        "testes_nomeados_no_aceite": [
+          "TestImportCompensate_B13_06"
+        ],
+        "limite": "Ação Go passada dentro das 58. Não declara o HTTP do mesmo caso."
+      }
     },
     {
       "id": "B13-07",
       "implementado": true,
       "executado": false,
-      "skip": true,
-      "status": "escrito_nao_executado",
-      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_07"],
-      "argv": [["python3", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_07", "./internal/modules/escrita/"]],
+      "skip": false,
+      "status": "go_pass_em_cc542a1_http_nao_concluido",
+      "testes": [
+        "tests/contrato/import_compensate_contract.py",
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_07"
+      ],
+      "argv": [
+        [
+          "python3",
+          "tests/contrato/nativo.py"
+        ],
+        [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestImportCompensate_B13_07",
+          "./internal/modules/escrita/"
+        ]
+      ],
       "ambiente": "CSV situacao=cancelado e reimportação do mesmo id_externo",
-      "invariantes": ["left_canceled 1", "sem pagamento novo", "mesmo invoice id na reimportação unchanged"]
+      "invariantes": [
+        "left_canceled 1",
+        "sem pagamento novo",
+        "mesmo invoice id na reimportação unchanged"
+      ],
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": true,
+        "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+        "estado": "pass",
+        "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-go-integration-cc542a1-summary.json",
+        "testes_nomeados_no_aceite": [
+          "TestImportCompensate_B13_07"
+        ],
+        "limite": "Ação Go passada dentro das 58. Não declara o HTTP do mesmo caso."
+      }
     },
     {
       "id": "B13-08",
       "implementado": true,
       "executado": false,
-      "skip": true,
-      "status": "escrito_nao_executado",
-      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_08"],
-      "argv": [["python3", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_08", "./internal/modules/escrita/"]],
+      "skip": false,
+      "status": "go_pass_em_cc542a1_http_nao_concluido",
+      "testes": [
+        "tests/contrato/import_compensate_contract.py",
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_08"
+      ],
+      "argv": [
+        [
+          "python3",
+          "tests/contrato/nativo.py"
+        ],
+        [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestImportCompensate_B13_08",
+          "./internal/modules/escrita/"
+        ]
+      ],
       "ambiente": "CSV situacao=aberto",
-      "invariantes": ["cancelamento sem reversal", "amount_cents e external_id intactos", "external_source continua preenchido"]
+      "invariantes": [
+        "cancelamento sem reversal",
+        "amount_cents e external_id intactos",
+        "external_source continua preenchido"
+      ],
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": true,
+        "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+        "estado": "pass",
+        "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-go-integration-cc542a1-summary.json",
+        "testes_nomeados_no_aceite": [
+          "TestImportCompensate_B13_08"
+        ],
+        "limite": "Ação Go passada dentro das 58. Não declara o HTTP do mesmo caso."
+      }
     },
     {
       "id": "B13-09",
       "implementado": true,
       "executado": false,
-      "skip": true,
-      "status": "escrito_nao_executado",
-      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_09"],
-      "argv": [["python3", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_09", "./internal/modules/escrita/"]],
+      "skip": false,
+      "status": "go_pass_em_cc542a1_http_nao_concluido",
+      "testes": [
+        "tests/contrato/import_compensate_contract.py",
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_09"
+      ],
+      "argv": [
+        [
+          "python3",
+          "tests/contrato/nativo.py"
+        ],
+        [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestImportCompensate_B13_09",
+          "./internal/modules/escrita/"
+        ]
+      ],
       "ambiente": "POST /api/invoices/{id}/manual-payment existente, depois GET e POST de compensação",
-      "invariantes": ["GET eligible false com payments_after_import", "POST 409 provenance_payment", "baixa posterior permanece", "sem marcador e sem PSP"]
+      "invariantes": [
+        "GET eligible false com payments_after_import",
+        "POST 409 provenance_payment",
+        "baixa posterior permanece",
+        "sem marcador e sem PSP"
+      ],
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": true,
+        "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+        "estado": "pass",
+        "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-go-integration-cc542a1-summary.json",
+        "testes_nomeados_no_aceite": [
+          "TestImportCompensate_B13_09"
+        ],
+        "limite": "Ação Go passada dentro das 58. Não declara o HTTP do mesmo caso."
+      }
     },
     {
       "id": "B13-10",
       "implementado": true,
       "executado": false,
-      "skip": true,
-      "status": "escrito_nao_executado",
-      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_10"],
-      "argv": [["python3", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_10", "./internal/modules/escrita/"]],
+      "skip": false,
+      "status": "go_pass_em_cc542a1_http_nao_concluido",
+      "testes": [
+        "tests/contrato/import_compensate_contract.py",
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_10"
+      ],
+      "argv": [
+        [
+          "python3",
+          "tests/contrato/nativo.py"
+        ],
+        [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestImportCompensate_B13_10",
+          "./internal/modules/escrita/"
+        ]
+      ],
       "ambiente": "fixtures SQL do laboratório: notice_log, fee_cents, invoice_movements extra e gateway_charge_id. O teste Go cobre aviso, encargo e lote dependente.",
-      "invariantes": ["409 com blockers", "contagens financeiras intactas", "provider_operations não ganha cancel nem refund"]
+      "invariantes": [
+        "409 com blockers",
+        "contagens financeiras intactas",
+        "provider_operations não ganha cancel nem refund"
+      ],
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": true,
+        "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+        "estado": "pass",
+        "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-go-integration-cc542a1-summary.json",
+        "testes_nomeados_no_aceite": [
+          "TestImportCompensate_B13_10"
+        ],
+        "limite": "O Go passou aviso, encargo e lote dependente. O fixture provider_issuance do HTTP é o ponto em que nativo.py morreu e não está nesses subtestes."
+      }
     },
     {
       "id": "B13-11",
       "implementado": true,
       "executado": false,
-      "skip": true,
-      "status": "escrito_nao_executado",
-      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_11", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_11_Barreira"],
-      "argv": [["python3", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_11", "./internal/modules/escrita/"]],
+      "skip": false,
+      "status": "go_pass_em_cc542a1_http_nao_concluido",
+      "testes": [
+        "tests/contrato/import_compensate_contract.py",
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_11",
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_11_Barreira"
+      ],
+      "argv": [
+        [
+          "python3",
+          "tests/contrato/nativo.py"
+        ],
+        [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestImportCompensate_B13_11",
+          "./internal/modules/escrita/"
+        ]
+      ],
       "ambiente": "HTTP cobre as duas ordens já commitadas. A barreira Go segura LockInvoices, observa a espera em pg_locks e só então solta. Duas faturas usam a ordem canônica dos ids. Sem sleep que esconda deadlock.",
-      "invariantes": ["não coexistem marcador e pagamento posterior", "a fatura de id menor fica travada antes da espera na maior"]
+      "invariantes": [
+        "não coexistem marcador e pagamento posterior",
+        "a fatura de id menor fica travada antes da espera na maior"
+      ],
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": true,
+        "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+        "estado": "pass",
+        "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-go-integration-cc542a1-summary.json",
+        "testes_nomeados_no_aceite": [
+          "TestImportCompensate_B13_11",
+          "TestImportCompensate_B13_11_Barreira"
+        ],
+        "limite": "Ação Go passada dentro das 58. Não declara o HTTP do mesmo caso."
+      }
     },
     {
       "id": "B13-12",
@@ -234,89 +747,359 @@
       "executado": false,
       "skip": true,
       "status": "escrito_nao_executado",
-      "testes": ["tests/contrato/import_compensate_contract.py"],
-      "argv": [["python3", "tests/contrato/nativo.py"]],
+      "testes": [
+        "tests/contrato/import_compensate_contract.py"
+      ],
+      "argv": [
+        [
+          "python3",
+          "tests/contrato/nativo.py"
+        ]
+      ],
       "ambiente": "GET eligible=true, baixa manual, POST sem novo GET",
-      "invariantes": ["POST 409 provenance_payment", "sem marcador", "evidence.reverted continua false"]
+      "invariantes": [
+        "POST 409 provenance_payment",
+        "sem marcador",
+        "evidence.reverted continua false"
+      ],
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": false,
+        "motivo": "não há TestImportCompensate deste caso na lista das 58 ações"
+      }
     },
     {
       "id": "B13-13",
       "implementado": true,
       "executado": false,
-      "skip": true,
-      "status": "escrito_nao_executado",
-      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_13"],
-      "argv": [["python3", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_13", "./internal/modules/escrita/"]],
+      "skip": false,
+      "status": "go_pass_em_cc542a1_http_nao_concluido",
+      "testes": [
+        "tests/contrato/import_compensate_contract.py",
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_13"
+      ],
+      "argv": [
+        [
+          "python3",
+          "tests/contrato/nativo.py"
+        ],
+        [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestImportCompensate_B13_13",
+          "./internal/modules/escrita/"
+        ]
+      ],
       "ambiente": "pagamento manual com created_at igual ao lote, created_by preenchido e nota diferente. O teste Go também cobre created_at anterior.",
-      "invariantes": ["GET não lista payments_after_import", "POST 409 provenance_payment", "o pagamento alheio não é estornado"]
+      "invariantes": [
+        "GET não lista payments_after_import",
+        "POST 409 provenance_payment",
+        "o pagamento alheio não é estornado"
+      ],
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": true,
+        "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+        "estado": "pass",
+        "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-go-integration-cc542a1-summary.json",
+        "testes_nomeados_no_aceite": [
+          "TestImportCompensate_B13_13"
+        ],
+        "limite": "Ação Go passada dentro das 58. Não declara o HTTP do mesmo caso."
+      }
     },
     {
       "id": "B13-14",
       "implementado": true,
       "executado": false,
-      "skip": true,
-      "status": "escrito_nao_executado",
-      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_14"],
-      "argv": [["python3", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_14", "./internal/modules/escrita/"]],
+      "skip": false,
+      "status": "go_pass_em_cc542a1_http_nao_concluido",
+      "testes": [
+        "tests/contrato/import_compensate_contract.py",
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_14"
+      ],
+      "argv": [
+        [
+          "python3",
+          "tests/contrato/nativo.py"
+        ],
+        [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestImportCompensate_B13_14",
+          "./internal/modules/escrita/"
+        ]
+      ],
       "ambiente": "admin@beta.demo contra lote do alfa. O corpo envia tenant e é ignorado.",
-      "invariantes": ["GET e POST 404", "nenhuma linha do alfa é gravada pela sessão beta"]
+      "invariantes": [
+        "GET e POST 404",
+        "nenhuma linha do alfa é gravada pela sessão beta"
+      ],
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": true,
+        "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+        "estado": "pass",
+        "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-go-integration-cc542a1-summary.json",
+        "testes_nomeados_no_aceite": [
+          "TestImportCompensate_B13_14"
+        ],
+        "limite": "Ação Go passada dentro das 58. Não declara o HTTP do mesmo caso."
+      }
     },
     {
       "id": "B13-15",
       "implementado": true,
       "executado": false,
-      "skip": true,
-      "status": "escrito_nao_executado",
-      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_15"],
-      "argv": [["python3", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_15", "./internal/modules/escrita/"]],
+      "skip": false,
+      "status": "go_pass_em_cc542a1_http_nao_concluido",
+      "testes": [
+        "tests/contrato/import_compensate_contract.py",
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_15"
+      ],
+      "argv": [
+        [
+          "python3",
+          "tests/contrato/nativo.py"
+        ],
+        [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestImportCompensate_B13_15",
+          "./internal/modules/escrita/"
+        ]
+      ],
       "ambiente": "O unitário sem banco passou neste runner e só cobre o núcleo sem HTTP. CSRF, cookie e sessões de POP, portal, suporte e financeiro continuam no nativo.py, ainda não executado.",
       "unitario_sem_banco": "pass",
-      "invariantes": ["403 em POP, portal, suporte, financeiro e POST cookie sem CSRF", "CSRF válido grava um marcador", "as recusas não gravam marcador"]
+      "invariantes": [
+        "403 em POP, portal, suporte, financeiro e POST cookie sem CSRF",
+        "CSRF válido grava um marcador",
+        "as recusas não gravam marcador"
+      ],
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": true,
+        "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+        "estado": "pass",
+        "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-go-integration-cc542a1-summary.json",
+        "testes_nomeados_no_aceite": [
+          "TestImportCompensate_B13_15"
+        ],
+        "limite": "Os subtestes Go passaram no núcleo, sem banco, CSRF, cookie ou HTTP."
+      }
     },
     {
       "id": "B13-16",
       "implementado": true,
       "executado": false,
-      "skip": true,
-      "status": "escrito_nao_executado",
-      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_16"],
-      "argv": [["python3", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_16", "./internal/modules/escrita/"]],
+      "skip": false,
+      "status": "go_pass_em_cc542a1_http_nao_concluido",
+      "testes": [
+        "tests/contrato/import_compensate_contract.py",
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_16"
+      ],
+      "argv": [
+        [
+          "python3",
+          "tests/contrato/nativo.py"
+        ],
+        [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestImportCompensate_B13_16",
+          "./internal/modules/escrita/"
+        ]
+      ],
       "ambiente": "apply real de assinante updated e de contrato; lotes history, network, documents e users inseridos nas tabelas de importação",
-      "invariantes": ["409 kind_not_compensatable", "nome updated não é restaurado", "contrato permanece", "sem marcador"]
+      "invariantes": [
+        "409 kind_not_compensatable",
+        "nome updated não é restaurado",
+        "contrato permanece",
+        "sem marcador"
+      ],
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": true,
+        "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+        "estado": "pass",
+        "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-go-integration-cc542a1-summary.json",
+        "testes_nomeados_no_aceite": [
+          "TestImportCompensate_B13_16"
+        ],
+        "limite": "Ação Go passada dentro das 58. Não declara o HTTP do mesmo caso."
+      }
     },
     {
       "id": "B13-17",
       "implementado": true,
       "executado": false,
-      "skip": true,
-      "status": "escrito_nao_executado",
-      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_17"],
-      "argv": [["python3", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_17", "./internal/modules/escrita/"]],
+      "skip": false,
+      "status": "go_pass_em_cc542a1_http_nao_concluido",
+      "testes": [
+        "tests/contrato/import_compensate_contract.py",
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_17"
+      ],
+      "argv": [
+        [
+          "python3",
+          "tests/contrato/nativo.py"
+        ],
+        [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestImportCompensate_B13_17",
+          "./internal/modules/escrita/"
+        ]
+      ],
       "ambiente": "um CSV com created, unchanged e error; uma linha updated no lote de títulos",
-      "invariantes": ["só a fatura created é cancelada", "skipped_unchanged 1 e skipped_error 1", "linha updated responde 409 e faz rollback"]
+      "invariantes": [
+        "só a fatura created é cancelada",
+        "skipped_unchanged 1 e skipped_error 1",
+        "linha updated responde 409 e faz rollback"
+      ],
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": true,
+        "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+        "estado": "pass",
+        "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-go-integration-cc542a1-summary.json",
+        "testes_nomeados_no_aceite": [
+          "TestImportCompensate_B13_17"
+        ],
+        "limite": "Ação Go passada dentro das 58. Não declara o HTTP do mesmo caso."
+      }
     },
     {
       "id": "B13-18",
       "implementado": true,
       "executado": false,
-      "skip": true,
-      "status": "escrito_nao_executado",
-      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_18"],
-      "argv": [["python3", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_18", "./internal/modules/escrita/"]],
+      "skip": false,
+      "status": "go_pass_em_cc542a1_http_nao_concluido",
+      "testes": [
+        "tests/contrato/import_compensate_contract.py",
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_18"
+      ],
+      "argv": [
+        [
+          "python3",
+          "tests/contrato/nativo.py"
+        ],
+        [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestImportCompensate_B13_18",
+          "./internal/modules/escrita/"
+        ]
+      ],
       "ambiente": "reapply HTTP do mesmo CSV. A barreira Go commita um lote unchanged sob o lock e só então a compensação relê.",
-      "invariantes": ["segunda carga unchanged com o mesmo invoice id", "uma linha em invoices_ext_uq", "chave nova 409 already_compensated", "GET lista o lote novo em dependent_batches e conserva o marcador", "compensação que espera o lock vê o dependente commitado e não grava marcador"]
+      "invariantes": [
+        "segunda carga unchanged com o mesmo invoice id",
+        "uma linha em invoices_ext_uq",
+        "chave nova 409 already_compensated",
+        "GET lista o lote novo em dependent_batches e conserva o marcador",
+        "compensação que espera o lock vê o dependente commitado e não grava marcador"
+      ],
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": true,
+        "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+        "estado": "pass",
+        "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-go-integration-cc542a1-summary.json",
+        "testes_nomeados_no_aceite": [
+          "TestImportCompensate_B13_18"
+        ],
+        "limite": "Ação Go passada dentro das 58. Não declara o HTTP do mesmo caso."
+      }
     },
     {
       "id": "B13-19",
       "implementado": true,
       "executado": false,
-      "skip": true,
-      "status": "escrito_nao_executado",
-      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_19", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_IdempotencyConflictAndCap"],
-      "argv": [["python3", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_19|TestImportCompensate_IdempotencyConflictAndCap", "./internal/modules/escrita/"]],
+      "skip": false,
+      "status": "go_pass_em_cc542a1_http_nao_concluido",
+      "testes": [
+        "tests/contrato/import_compensate_contract.py",
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_19",
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_IdempotencyConflictAndCap"
+      ],
+      "argv": [
+        [
+          "python3",
+          "tests/contrato/nativo.py"
+        ],
+        [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestImportCompensate_B13_19|TestImportCompensate_IdempotencyConflictAndCap",
+          "./internal/modules/escrita/"
+        ]
+      ],
       "ambiente": "A validação de chave, motivo, query e uuid passou sem banco. nothing_created, row_cap, conflito de idempotência e a corrida da mesma chave em dois lotes dependem do PostgreSQL e não rodaram.",
       "unitario_sem_banco": "pass_somente_validacao_de_entrada",
-      "invariantes": ["400 sem marcador", "409 idempotency_conflict", "409 nothing_created", "409 row_cap acima de 200 created"]
+      "invariantes": [
+        "400 sem marcador",
+        "409 idempotency_conflict",
+        "409 nothing_created",
+        "409 row_cap acima de 200 created"
+      ],
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": true,
+        "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+        "estado": "pass",
+        "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-go-integration-cc542a1-summary.json",
+        "testes_nomeados_no_aceite": [
+          "TestImportCompensate_B13_19",
+          "TestImportCompensate_IdempotencyConflictAndCap"
+        ],
+        "limite": "Os subtestes de entrada passaram sem banco. TestImportCompensate_IdempotencyConflictAndCap passou com banco e cobre conflito, nothing_created e row_cap. O HTTP não concluiu."
+      }
     },
     {
       "id": "B13-20",
@@ -324,33 +1107,148 @@
       "executado": false,
       "skip": true,
       "status": "escrito_nao_executado",
-      "testes": ["tests/contrato/import_compensate_contract.py"],
-      "argv": [["python3", "tests/contrato/nativo.py"]],
+      "testes": [
+        "tests/contrato/import_compensate_contract.py"
+      ],
+      "argv": [
+        [
+          "python3",
+          "tests/contrato/nativo.py"
+        ]
+      ],
       "ambiente": "rotas existentes de estorno e de baixa manual depois da compensação",
-      "invariantes": ["a linha kind=reversal é recusada", "não nasce segunda reversão", "baixa manual na fatura canceled é recusada", "marcador e auditoria do compensate permanecem", "provider_refund_id continua nulo"],
-      "divergencia_conhecida": "O desenho do lote 24 pede 409 payments_one_reversal_uq na segunda reversão da baixa original. finance.Reverse, fora dos arquivos desta tarefa, recusa antes com 400 fatura cancelada. O teste verifica essa recusa e a unicidade. Não altera o código de caixa."
+      "invariantes": [
+        "a linha kind=reversal é recusada",
+        "não nasce segunda reversão",
+        "baixa manual na fatura canceled é recusada",
+        "marcador e auditoria do compensate permanecem",
+        "provider_refund_id continua nulo"
+      ],
+      "divergencia_conhecida": "O desenho do lote 24 pede 409 payments_one_reversal_uq na segunda reversão da baixa original. finance.Reverse, fora dos arquivos desta tarefa, recusa antes com 400 fatura cancelada. O teste verifica essa recusa e a unicidade. Não altera o código de caixa.",
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": false,
+        "motivo": "não há TestImportCompensate deste caso na lista das 58 ações"
+      }
     },
     {
       "id": "B13-21",
       "implementado": true,
-      "executado": false,
-      "skip": true,
-      "status": "escrito_nao_executado",
-      "testes": ["apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_21"],
-      "argv": [["go", "test", "-count=1", "-run", "TestImportCompensate_B13_21", "./internal/modules/escrita/"]],
+      "executado": true,
+      "skip": false,
+      "status": "go_pass_em_cc542a1",
+      "testes": [
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_21"
+      ],
+      "argv": [
+        [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestImportCompensate_B13_21",
+          "./internal/modules/escrita/"
+        ]
+      ],
       "ambiente": "SandboxIssuance.Prepare e compensação no PostgreSQL descartável, com barreira em pg_locks. Sem PSP real.",
-      "invariantes": ["prepare de título com external_source responde 409 e não insere provider_issuance", "não coexistem marcador e emissão nascida na corrida", "provider_operations permanece vazio"]
+      "invariantes": [
+        "prepare de título com external_source responde 409 e não insere provider_issuance",
+        "não coexistem marcador e emissão nascida na corrida",
+        "provider_operations permanece vazio"
+      ],
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": true,
+        "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+        "estado": "pass",
+        "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-go-integration-cc542a1-summary.json",
+        "testes_nomeados_no_aceite": [
+          "TestImportCompensate_B13_21"
+        ],
+        "limite": "O caso só lista teste Go. Essa ação passou com banco em cc542a1. Não é HTTP, CI hospedado nem homologação."
+      }
     },
     {
       "id": "B13-22",
       "implementado": true,
-      "executado": false,
-      "skip": true,
-      "status": "escrito_nao_executado",
-      "testes": ["apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_22"],
-      "argv": [["go", "test", "-count=1", "-run", "TestImportCompensate_B13_22", "./internal/modules/escrita/"]],
+      "executado": true,
+      "skip": false,
+      "status": "go_pass_em_cc542a1",
+      "testes": [
+        "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_22"
+      ],
+      "argv": [
+        [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestImportCompensate_B13_22",
+          "./internal/modules/escrita/"
+        ]
+      ],
       "ambiente": "duas transações reais. A ordem invertida espera deadlock 40P01, com deadlock_timeout de 200ms e statement_timeout de 5s como limite, sem retry. A ordem consultivo 7411005 e depois FOR UPDATE conclui como o B13-11.",
-      "invariantes": ["a inversão observa 40P01", "nenhum marcador depois do rollback", "a ordem do protocolo cancela a fatura aberta"]
+      "invariantes": [
+        "a inversão observa 40P01",
+        "nenhum marcador depois do rollback",
+        "a ordem do protocolo cancela a fatura aberta"
+      ],
+      "http_cc542a1": {
+        "executado": false,
+        "comando_concluiu": false,
+        "nota": "python3 tests/contrato/nativo.py na base cc542a1 terminou exit 1 em import_compensate_contract.py:335. O comando não concluiu. Não há resultado por caso. Os 22 HTTP não estão passados. A correção b67d2f3 não rodou em PostgreSQL."
+      },
+      "go_cc542a1": {
+        "executado": true,
+        "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+        "estado": "pass",
+        "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-go-integration-cc542a1-summary.json",
+        "testes_nomeados_no_aceite": [
+          "TestImportCompensate_B13_22"
+        ],
+        "limite": "O caso só lista teste Go. Essa ação passou com banco em cc542a1. Não é HTTP, CI hospedado nem homologação."
+      }
     }
-  ]
+  ],
+  "http_22_concluidos": false,
+  "observado_na_base_cc542a1": {
+    "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+    "nativo_py": {
+      "exit_code": 1,
+      "concluiu": false,
+      "local": "import_compensate_contract.py:335",
+      "http_22_passados": false
+    },
+    "go_integration_py": {
+      "exit_code": 0,
+      "acoes_pass_incluindo_subtestes": 241,
+      "acoes_de_compensacao_pass": 58,
+      "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-go-integration-cc542a1-summary.json"
+    },
+    "browser_dirigido": {
+      "exit_code": 0,
+      "declara_22_http": false
+    },
+    "sbom_local": {
+      "exit_code": 0,
+      "go_components": 52,
+      "npm_components": 1075,
+      "run": "local-l26-cc542a1",
+      "hosted_ci_verified": false
+    },
+    "fixture_b67d2f3": "compilado; nova chamada de nativo.py exit 1 por FileNotFoundError docker, antes do PostgreSQL",
+    "restore_b12": {
+      "harness_commit": "56b2187",
+      "ensaios_executado": false,
+      "testes_estaticos": "13 OK; não aprovam B12"
+    }
+  }
 }

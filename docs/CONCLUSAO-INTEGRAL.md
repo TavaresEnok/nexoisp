@@ -15,7 +15,7 @@ Cada critério separa quatro estados:
 | Homologado | Há prova no serviço, banco, equipamento ou ambiente do responsável. Sandbox sintético e laboratório local não contam. |
 | Publicado | Distingue commit no clone, relato de publicação no GitHub e deploy de produção. |
 
-Não há percentual. Critério sem prova fica aberto, com causa, dependência, evidência faltante e comando de validação. Skip de `tests/contrato/nativo.py` ou `tests/contrato/go_integration.py` por falta de PostgreSQL não é teste de banco aprovado. A invocação executável é `python3 tests/contrato/nativo.py` e `python3 tests/contrato/go_integration.py`, na raiz do repositório, sem `-I`, como em `.github/workflows/native.yml`. Esta reconciliação não executou esses dois comandos. `python3 -I` nos mesmos scripts falha com `ModuleNotFoundError: No module named 'lib'` antes do laboratório; essa falha de bootstrap não é skip de banco e não aprova o gate. A gerência precisa rodar a invocação sem `-I` em laboratório PostgreSQL descartável antes de publicar qualquer lote que toque banco, isolamento ou dinheiro.
+Não há percentual. Critério sem prova fica aberto, com causa, dependência, evidência faltante e comando de validação. Skip de `tests/contrato/nativo.py` ou `tests/contrato/go_integration.py` por falta de PostgreSQL não é teste de banco aprovado. A invocação executável é `python3 tests/contrato/nativo.py` e `python3 tests/contrato/go_integration.py`, na raiz do repositório, sem `-I`, como em `.github/workflows/native.yml`. A redação original destes dois arquivos, na base `82c4251`, não executou esses dois comandos. `python3 -I` nos mesmos scripts falha com `ModuleNotFoundError: No module named 'lib'` antes do laboratório; essa falha de bootstrap não é skip de banco e não aprova o gate. A gerência, depois, executou os dois sem `-I` na base `cc542a1`. O resultado está em B01, B12 e B13 e em `docs/LOTE26-VALIDACAO-B13-SBOM.md`. Exit 1 ou comando interrompido não passa o gate. Publicar ainda exige a invocação sem `-I` no commit candidato.
 
 ## Autorização, custo e franquia
 
@@ -29,7 +29,7 @@ Não há percentual. Critério sem prova fica aberto, com causa, dependência, e
 
 HEAD do clone: `82c4251`, merge de `9fe63f0` (lote 24, só documentação do B13) sobre `e193266` (lote 23, elegibilidade de reversão somente leitura). O relatório histórico `00_STATUS.md` de 29/10/2026 registra o lote 24 como documental, sem push nem deploy, e o último código funcional publicado como lote 23 / `e193266`, com CI hospedado citado nas duas branches. Esta reconciliação não consultou de novo o GitHub Actions. Os identificadores de run abaixo são relato daquele arquivo, não observação nova.
 
-A reconciliação de 29/10 que gravou estes dois arquivos, na base `82c4251`, executou somente os três testes documentais daquele pedido. Não abriu conta, certificado, equipamento, backup de produção nem banco de laboratório. A branch de desenvolvimento avançou depois disso até `8c10c1a`, com o código do lote 25. Esse avanço está registrado em B13 e na continuação. Os demais itens B01–B18 abaixo continuam a leitura da base, salvo o ponteiro que ainda mandava implementar B13 de novo.
+A reconciliação de 29/10 que gravou estes dois arquivos, na base `82c4251`, executou somente os três testes documentais daquele pedido. Não abriu conta, certificado, equipamento, backup de produção nem banco de laboratório. A branch de desenvolvimento avançou depois disso até `8c10c1a`, com o código do lote 25, e em seguida até `cc542a1` (lote 26) e `e2f3b18` (lote 27, fixture PSP `b67d2f3` e harness de restore `56b2187`). B01, B12 e B13 abaixo usam essa leitura. Os demais itens B01–B18 conservam a leitura da base `82c4251`. Não se reabre lote já concluído para implementá-lo de novo.
 
 Documentos de lote no clone: `docs/LOTE01` a `LOTE16`, `LOTE18`, `LOTE19` e `LOTE24`. Os recortes 17 e 20–23 estão nos relatórios externos 30–36 e nos commits do clone; a ausência de `docs/LOTE17.md` não apaga a entrega. Relatórios lidos em `/home/enok/Documentos/projetos/resultados-analise-nexoisp`: `00_STATUS.md`, `08_BACKLOG_EXECUTAVEL.md`, `11_COMPLEMENTO_REVISAO.md`, `31` a `37`. O complemento de 25/10 descreve o mundo anterior a B02–B13; onde o código posterior existe, o complemento fica histórico.
 
@@ -70,23 +70,25 @@ A matriz SGP em `docs/SGP_COMPARATIVO_NEXOISP/matriz_capacidades.csv` (45 fluxos
 ## Interface oficial, isolamento, segurança, acessibilidade e operação
 
 - UI oficial é `apps/web`, referência em `docs/novo-design-nexoISP`, legado só em `apps/web-legacy`. `AGENTS.md` proíbe trocar a interface v0 pela antiga. Páginas em `/demonstracao/` usam dados fictícios. Falha de API operacional não pode cair em seed.
-- Isolamento tenant, POP, portal e suporte está desenhado nas rotas financeiras, de importação e de RADIUS dos lotes 10, 16, 18, 19 e 23. A compensação do lote 25 usa o mesmo recorte no POST e no GET, no código da branch `8c10c1a`. A prova automatizada mora em `tests/contrato/nativo.py` e `tests/contrato/go_integration.py`, mais `go test -race` no workflow `.github/workflows/native.yml`. Sem execução neste laboratório, essa prova não existe para `8c10c1a`. O CI relatado de `e193266` não cobre este HEAD. Skip sem PostgreSQL não aprova.
+- Isolamento tenant, POP, portal e suporte está desenhado nas rotas financeiras, de importação e de RADIUS dos lotes 10, 16, 18, 19 e 23. A compensação do lote 25 usa o mesmo recorte no POST e no GET. Em `cc542a1`, `python3 tests/contrato/go_integration.py` terminou exit 0, com 241 ações pass. O contrato HTTP `nativo.py` morreu antes de concluir. O CI relatado de `e193266` não cobre `cc542a1` nem `e2f3b18`. Skip sem PostgreSQL não aprova.
 - Segurança de sessão: cookie HttpOnly, CSRF e MFA existem no código e na matriz AC-01/AC-08/BE-20. Revisão independente de segurança e sessão com leitor de tela continuam na lista de `docs/pendencias.md`, sem prova nova.
 - Acessibilidade: `apps/web/tests/audit-remediation.json` registra `completion: partial` no checkpoint de 18/10/2026. Não há suíte axe como gate do workflow. T-UI-01 do backlog (teclado até erro e ação, 503 sem amostra) não tem corrida registrada nesta reconciliação.
 - Operação: `infra/monitoring/alerts.yml` e `prometheus.yml` definem alertas de API, fila e jobs. `docs/PILOTO.md` e `docs/pendencias.md` ainda exigem monitor externo no host do provedor, preflight `./nexo prod db preflight` e canal do responsável. Artefato no repositório não é monitoramento publicado.
-- Runtime pinado no clone: Node `>=22.23.4 <23` (`.nvmrc` `22.23.4`), npm `>=10.9.9 <11`, Go `1.27.3` em `apps/api-go/go.mod`. Não há arquivo SBOM no clone.
+- Runtime pinado no clone: Node `>=22.23.4 <23` (`.nvmrc` `22.23.4`), npm `>=10.9.9 <11`, Go `1.27.3` em `apps/api-go/go.mod`. O SBOM CycloneDX não é arquivo versionado. A geração local de `cc542a1` está em B01.
 
 ## B01–B18
 
 Prioridade herdada do backlog executável. “Entregue” significa implementação presente e teste local ou de CI relatado no escopo daquele lote. Homologação externa e produção permanecem abertas em todos os itens que dependem de banco, PSP, fisco, equipamento ou piloto.
 
-### B01 — build, dependências e SBOM — P0 — parcial
+### B01 — build, dependências e SBOM — P0 — geração local feita, CI hospedado aberto
 
-Implementado no clone: engines em `package.json`, Go 1.27.3, workflow `native.yml` com build, vet, `go test -race`, golangci-lint 2.14.0, npm ci, typecheck, testes web e build. Commit de Backup-center `e5c39eb` trava dependências Python à parte.
+Implementado no clone: engines em `package.json`, Go 1.27.3, workflow `native.yml` com build, vet, `go test -race`, golangci-lint 2.14.0, npm ci, typecheck, testes web e build. Commit de Backup-center `e5c39eb` trava dependências Python à parte. O lote 26 acrescenta `scripts/generate-sbom.sh`, `scripts/validate-sbom.py`, `docs/SBOM.md` e o passo que grava o artefato `sbom-cyclonedx` no job `verificar`. Commit `e1b17d8`, presente em `cc542a1`. Os JSON em `sbom/` não entram no código versionado.
 
-Aberto: não há SBOM (CycloneDX ou equivalente) versionado nem passo de SBOM no workflow. Triagem de advisories npm/Go não foi refeita em 29/10. O complemento de 25/10 ainda registra divergência antiga de toolchain; o `go.mod` atual diz 1.27.3, alinhado ao relato do lote 21, sem SBOM que prove a imagem publicada.
+Gerado de verdade na base `cc542a1b502b9b78bdd0673140bbba0f15a89716`, exit 0, run `local-l26-cc542a1`. Go: 52 componentes, SHA-256 `f8090a025b2555058213d0fc4684a5000d9795afb81cfa1d904b6a2c63cc84ac`. npm: 1075 componentes, incluindo aninhados, 754 no topo, SHA-256 `003f12bca69988957ac9fb068d5f4ef41f890bced7f9a07501b788dc39d3e9bd`. Os dois arquivos guardam esse commit e esse run. Cópia em `/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/sbom-cc542a1/`. O aviso de peers WASM opcionais no `npm ls` está no log e não esvazia o lockfile. Não houve `audit fix`.
 
-Causa: identidade de build reproduzível no CI relatado não inclui lista de componentes assinada. Dependência: nenhuma conta externa. Próximo passo: gerar SBOM de `apps/api-go` e do workspace npm no mesmo runner do `native.yml`, guardar o artefato e não aplicar `audit fix` cego. Validação: checkout limpo, `go version` igual a `go 1.27.3`, `node -v` igual a `v22.23.4`, presença do artefato SBOM no run. Gate de publicação: o mesmo workflow com PostgreSQL descartável; skip de banco não aprova o job.
+Aberto: o gate do CI hospedado e o artefato `sbom-cyclonedx` de um run desta base. `hosted_ci_verified` no resumo é falso. O CI de `e193266` e qualquer geração da base `6f4bf38` não validam `cc542a1`. Triagem de advisories npm/Go não foi refeita. Este SBOM não prova imagem publicada nem deploy.
+
+Causa do que falta: o arquivo do workflow não substitui o run. Dependência: nenhuma conta externa. Próximo passo: no commit candidato, conferir o job `verificar` e o artefato hospedado, sem `audit fix` cego. Validação: checkout limpo, `go version` igual a `go 1.27.3`, `node -v` igual a `v22.23.4`, commit e run dentro dos dois CycloneDX. Gate de publicação: o mesmo workflow com PostgreSQL descartável; skip de banco não aprova o job.
 
 ### B02 — idempotência da baixa manual — P0 — entregue no código
 
@@ -175,15 +177,24 @@ Aberto:
 
 Validação interna antes de publicar mudança RADIUS: `go test` dos pacotes radius no lab e o cenário `e2e/frontend-v0-radius-*.mjs`. Skip sem PostgreSQL não aprova.
 
-### B12 — backup, restore e Backup-center — P0 — integridade local reivindicada, restore de host sem prova
+### B12 — backup, restore e Backup-center — P0 — harness sintético entregue, ensaio e critérios externos abertos
 
-No NexoISP existem `scripts/backup.sh`, `scripts/backup-manifest.py`, `scripts/restore-verify-prod.sh`, `scripts/restore-isolation.sql` e `apps/api-go/internal/db/restore.go`. No irmão `/home/enok/Documentos/projetos/Backup-center`, HEAD `2e410d2` (26/10/2026). O commit `118df92` altera diagnóstico, limites de ZIP e testes de integridade. Esses dois SHAs e os testes `tests/test_backup_integrity_isolated.py` e `tests/test_backup_executor_integrity_lab.py` pertencem ao repositório Backup-center. `git cat-file` neste clone não os resolve. `CONSOLIDACAO_LOTE01.md` desse repositório relata 258 testes Linux e fluxo sintético SQLAlchemy/PostgreSQL/Redis/Celery, e afirma que integridade de arquivo não comprova restauração completa. Nenhum push ou produção. Esta reconciliação não reexecutou essa suíte.
+No NexoISP existem `scripts/backup.sh`, `scripts/backup-manifest.py`, `scripts/restore-verify-prod.sh`, `scripts/restore-isolation.sql` e `apps/api-go/internal/db/restore.go`. No irmão `/home/enok/Documentos/projetos/Backup-center`, HEAD `2e410d2` (26/10/2026). O commit `118df92` altera diagnóstico, limites de ZIP e testes de integridade. Esses dois SHAs e os testes `tests/test_backup_integrity_isolated.py` e `tests/test_backup_executor_integrity_lab.py` pertencem ao repositório Backup-center. `git cat-file` neste clone não os resolve. `CONSOLIDACAO_LOTE01.md` desse repositório relata 258 testes Linux e fluxo sintético SQLAlchemy/PostgreSQL/Redis/Celery, e afirma que integridade de arquivo não comprova restauração completa. Nenhum push ou produção. Esta reconciliação não reexecutou essa suíte e não a encerra por inferência.
 
 O complemento de 25/10 dizia que duas falhas de integridade continuavam abertas. O commit posterior `118df92` é a evidência de correção reivindicada; sem reexecução aqui, o mapa marca “teste histórico no relatório de consolidação”, não “reprovado” nem “homologado”.
 
-Aberto: ensaio de restore em host novo (dump, documentos, chaves, grants, RLS, filas) e cópia externa do piloto. Causa: falta bancada descartável autorizada e operador. Proibido apontar restore para configuração herdada de produção. Próximo passo: a gerência sobe um lab vazio e executa o roteiro de `docs/pendencias.md` (cópia e `restore-check`) mais os testes `tests/test_backup_integrity_isolated.py` e `tests/test_backup_executor_integrity_lab.py` do Backup-center. Validação de banco do Nexo, no mesmo lab: `python3 tests/contrato/go_integration.py`, sem `-I`. A forma com `-I` falha no import de `lib` antes do PostgreSQL e não conta como esse ensaio. Comparar só contagens não fecha o critério.
+Entregue no lote 27, commit `56b2187`, HEAD `e2f3b18`: `tests/contrato/restore_clean_host.py`, `tests/operacao/test_restore_clean_host.py`, o passo `python3 tests/contrato/restore_clean_host.py` em `.github/workflows/native.yml` e o roteiro `docs/RESTORE-LAB-HOST-LIMPO.md`. O unittest estático dessa entrega rodou 13 testes e terminou OK. Ele só recusa identidade herdada e artefato manipulado. Não abre Docker e não aprova B12. No mesmo worker, `docker` estava ausente. Não há `tests/contrato/relatorios/restore-clean-host.json` de uma corrida concluída. O ensaio 27 em destino vazio permanece pendente. O passo novo do workflow também não teve run hospedado.
 
-### B13 — importação e reversão — P0 — código na branch, testes de banco e publicação abertos
+Aberto, separados de propósito:
+
+- Ensaio sintético deste clone: `python3 tests/contrato/restore_clean_host.py`, com Docker, dois clusters exclusivos, dump, bytes e SHA-256 de documento, download HTTP, grants, RLS, filas com jobs desligados e replay de uma compensação já committed. Sem esse exit 0, o critério interno continua aberto.
+- Destino real e host físico do piloto. O cluster vazio de laboratório não o substitui.
+- Cópia externa, cofre, RPO/RTO produtivo e piloto. Continuam sem prova.
+- Testes do Backup-center citados acima. Não foram executados e não moram neste clone.
+
+Proibido apontar restore para configuração herdada de produção. Comparar só contagens não fecha o critério. `python3 -I tests/contrato/go_integration.py` falha no import de `lib` e não é este ensaio.
+
+### B13 — importação e reversão — P0 — Go e browser executados em cc542a1, HTTP nativo interrompido
 
 Entregue antes deste lote, lotes 21–23, commits `845212b`, `000e0f1`, `37abd06`, `eb11a58`, `c676c5b`, `db41585`, `e193266`:
 
@@ -194,32 +205,28 @@ Entregue antes deste lote, lotes 21–23, commits `845212b`, `000e0f1`, `37abd06
 
 Lote 24, base `82c4251`: desenho e 22 casos `planned/not_run` em `docs/LOTE24-B13-ACEITACAO.json`. Esses dois arquivos continuam históricos. Análise documental (Sonnet 5.5 alto, relato 37) não é homologação.
 
-Implementado na branch de desenvolvimento, HEAD `8c10c1a`, sem publicação: marcador append-only da migração 78, `finance.LockInvoices` com sal `7411005` antes do `FOR UPDATE` ordenado por id, `POST /api/import/batches/{id}/compensate` idempotente que revalida, leitura `compensation` `absent` ou `committed`, ficha oficial sem apagar histórico, inventário estático em `apps/api-go/rotas.json`, contratos dos 22 casos e jornada de browser escrita. Alcance só `invoices`. Sem devolução PSP e sem liberar `external_id`. O procedimento operacional está em `docs/importacao-csv.md`. O relatório do lote é `docs/LOTE25-B13-COMPENSACAO.md`.
+Implementado na branch de desenvolvimento desde `8c10c1a`, ainda sem publicação: marcador append-only da migração 78, `finance.LockInvoices` com sal `7411005` antes do `FOR UPDATE` ordenado por id, `POST /api/import/batches/{id}/compensate` idempotente que revalida, leitura `compensation` `absent` ou `committed`, ficha oficial sem apagar histórico, inventário estático em `apps/api-go/rotas.json`, contratos dos 22 casos e jornada de browser escrita. Alcance só `invoices`, no máximo 200 `created`. Sem devolução PSP e sem liberar `external_id`. `evidence.reverted` permanece falso. O procedimento operacional está em `docs/importacao-csv.md`. O relatório do lote é `docs/LOTE25-B13-COMPENSACAO.md`. A validação do lote 26 está em `docs/LOTE26-VALIDACAO-B13-SBOM.md`.
 
-Quatro estados, separados de propósito:
+O lote 27, commit `b67d2f3`, altera só o setup HTTP do efeito de cobrança: conexão financeira sintética EFI sandbox do mesmo tenant e empresa, para o `financial_binding_guard` aceitar `gateway_charge_id`. O POST continua 409 `provider_issuance`. Essa alteração está em `e2f3b18` e não foi executada até o fim.
 
-| Estado | B13 nesta branch |
+Quatro estados, separados de propósito, na base de prova `cc542a1`:
+
+| Estado | B13 |
 |---|---|
-| Implementado | Sim, no clone de desenvolvimento `8c10c1a`. Não é tag nem deploy. |
-| Testado | 22 casos e o GET before/after/replay estão escritos e `executado: false`. O relato do runner cita quatro unitários sem banco. Skip por falta de PostgreSQL não aprova. A forma `python3 -I` falha no import de `lib` e também não aprova. Browser não executado. |
+| Implementado | Sim, desde `8c10c1a`. O fixture PSP corrigido está em `b67d2f3`. Não é tag nem deploy. |
+| Executado | `python3 tests/contrato/go_integration.py` exit 0: 241 ações pass, incluindo subtestes. Dentro delas, 58 ações de `TestImportCompensate*` passaram. O browser dirigido exit 0 cobre desktop, viewport 390, replay e um POST commitado cuja resposta perdida a UI recupera sem segundo estorno. `python3 tests/contrato/nativo.py` exit 1 em `import_compensate_contract.py:335`. Os 22 HTTP não estão passados. Código de teste, revisão e skip não contam como essa execução. |
 | Homologado | Sem prova. Exportação real de provedor continua em B18. |
-| Publicado | Não. CI de `e193266` não foi reconsultado e não cobre este HEAD. |
+| Publicado | Não. CI de `e193266` não foi reconsultado e não cobre `cc542a1` nem `e2f3b18`. |
 
-A última revisão da jornada de browser usou Sol 6.1 medium porque a cota de Sonnet 5.5 high estava comprovadamente esgotada. A revisão principal não está ativa para essa fatia. O script cobre três defeitos de jornada (reimportação identificável, bloqueio 409 sem usar o GET antigo, ficha estreita que não dispara POST ao cancelar) e o commit com resposta perdida. O código do teste não é a execução. Não há screenshot `import-compensacao` nas evidências.
+A última revisão da jornada de browser, no lote 25, usou Sol 6.1 medium porque a cota de Sonnet 5.5 high estava comprovadamente esgotada. A revisão principal não ficou ativa para essa fatia de código. O script cobre três defeitos de jornada (reimportação identificável, bloqueio 409 sem usar o GET antigo, ficha estreita que não dispara POST ao cancelar) e o commit com resposta perdida. Na base `cc542a1` o harness dirigido executou esses caminhos e terminou exit 0. As capturas estão em `/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/browser-real-cc542a1/`. Não estão neste commit. A corrida não nomeia os 22 casos e não os declara passados.
 
-Aberto: executar de verdade, em laboratório PostgreSQL descartável, com container, porta e prefixo exclusivos:
+O Go da mesma base cobre, com banco, os testes `TestImportCompensate_B13_01` a `B13_11`, `B13_13`, `B13_14`, `B13_16` a `B13_18`, `B13_21`, `B13_22`, a barreira de B13-11 e `TestImportCompensate_IdempotencyConflictAndCap`. B13-15 passou só no núcleo sem HTTP. B13-12 e B13-20 não têm ação nessa lista. O detalhe por caso está no aceite do lote 25. B13-03, B13-21 e B13-22 só possuem teste Go; essa execução os cobre. Os demais continuam com `executado: false` enquanto o HTTP não concluir.
 
-- `python3 tests/contrato/nativo.py`
-- `python3 tests/contrato/go_integration.py`
+Aberto: repetir `python3 tests/contrato/nativo.py`, sem `-I`, no HEAD que contém `b67d2f3`, em PostgreSQL descartável com container e porta exclusivos. A retentativa do lote 27 morreu com `FileNotFoundError: docker` em `nativo.py:19`, exit 1, antes do banco. Compilação não substitui esse comando. `python3 -I` continua falha de bootstrap no import de `lib` e não é o gate. Os scripts de contrato não foram alterados para esconder a falha de `cc542a1`.
 
-Sem `-I`, na raiz do repositório. `python3 -I tests/contrato/nativo.py` e `python3 -I tests/contrato/go_integration.py` foram reproduzidos nesta worktree com exit 1 e `ModuleNotFoundError: No module named 'lib'` em `nativo.py:13` e `go_integration.py:11`, antes do laboratório. Essa falha de bootstrap fica registrada à parte do skip por ausência de PostgreSQL. Não é teste de banco aprovado e não substitui os dois comandos acima. Os scripts de contrato não foram alterados.
-- em `apps/api-go`, com as URLs desse laboratório, `go test -count=1 -run TestImportCompensate ./internal/modules/escrita/`
-- no mesmo ambiente, `go test -count=1 -race -p 1 ./internal/finance/ ./internal/outbound/ ./internal/modules/escrita/ ./internal/modules/leitura/`
-- browser pelo harness `NEXO_E2E_ONLY=frontend-v0-import.mjs python3 tests/contrato/e2e.py`
+`go test -race ./...` do workflow, sem URL de banco, não substitui o `go_integration.py` já executado nem o `nativo.py` ainda aberto. Publicação exige o job `verificar` de `.github/workflows/native.yml` verde no commit candidato, com os contratos que sobem PostgreSQL, mais revisão independente. Homologação com dado real é B18.
 
-`go test -race ./...` do workflow, sem URL de banco, não substitui esses comandos. Publicação exige o job `verificar` de `.github/workflows/native.yml` verde nesse commit, com os contratos que sobem PostgreSQL, mais revisão independente. Homologação com dado real é B18.
-
-Dependências internas já presentes: B03, B04 e a elegibilidade do lote 23. B12 de restore de host não bloqueia o teste sintético; bloqueia o piloto com dado real. O detalhe dos cinco ramos de escritores, do registro da rota e do inventário está no relatório do lote 25. Nenhum critério desse escopo foi descartado.
+Dependências internas já presentes: B03, B04 e a elegibilidade do lote 23. O ensaio B12 de destino vazio não bloqueia o HTTP sintético; host físico e dado real continuam bloqueando o piloto. O detalhe dos cinco ramos de escritores, do registro da rota e do inventário está no relatório do lote 25. Nenhum critério desse escopo foi descartado. Não reimplementar o lote 25 nem o lote 26.
 
 ### B14 — fiscal e NFCom — P0 somente se o fiscal estiver ativo — escopo não ativado
 
@@ -253,15 +260,15 @@ Causa do que falta: especificação de projeto físico além do mapa operacional
 
 O workflow `native.yml` é o gate de release de código. O relato de 28/10 em `00_STATUS.md` atribui CI aprovado nas duas branches ao commit `e193266` (runs 40717836379 e 40717831261). Esta reconciliação não reconsultou esses runs. O merge documental `82c4251` não tem, no mesmo relato, push nem CI. Não houve deploy.
 
-Aberto: piloto com responsável, janela e grupo reversível; restore ensaiado; reconciliação de saldos; H separado de C/T nas notas de release. Causa: sem operador e sem ambiente definitivo. O código de compensação B13 está na branch e ainda depende do lab. Seguem abertos o SBOM e o lab de restore. Validação de código antes de tag: o workflow nativo inteiro em runner com PostgreSQL, mais `git diff --check`. Skip de banco reprova a publicação. Homologação e piloto são os checklists de `PILOTO.md`, com evidência sem segredo. Ausência de provedor não fecha o piloto.
+Aberto: piloto com responsável, janela e grupo reversível; restore ensaiado em destino que não seja só o harness sintético; reconciliação de saldos; H separado de C/T nas notas de release. Causa: sem operador e sem ambiente definitivo. O HTTP de B13 ainda não concluiu. O SBOM local de `cc542a1` não é o artefato hospedado. O ensaio B12 de cluster vazio não rodou. Validação de código antes de tag: o workflow nativo inteiro em runner com PostgreSQL, mais `git diff --check`. Skip de banco reprova a publicação. Homologação e piloto são os checklists de `PILOTO.md`, com evidência sem segredo. Ausência de provedor não fecha o piloto.
 
-## Continuação depois do lote 25
+## Continuação depois dos lotes 25, 26 e 27
 
-O lote 25 não encerra o projeto e não está publicado. A gerência continua por eventos, sem pedir nova ordem e sem duplicar plano ou tarefa já concluídos.
+Os lotes 25 e 26 estão entregues e não se reimplementam. O lote 27 entregou o fixture e o harness; os dois ensaios reais continuam pendentes. Nada disso encerra o projeto, publica ou homologa. A gerência continua por eventos, sem pedir nova ordem e sem duplicar plano ou tarefa já concluídos.
 
-1. Executar os testes reais do B13 no laboratório descartável nomeado em `docs/LOTE25-B13-COMPENSACAO.md`. Corrigir falha de código ou de ambiente. Não alterar teste para esconder falha. Revisão independente na fila. Integrar a branch de desenvolvimento só depois disso. `go test` que faz skip por falta de PostgreSQL não conta como aprovado.
-2. Escolher o próximo recorte interno ainda aberto. O candidato já listado é o SBOM de B01, no gate de build, sem `audit fix` cego. Não reimplementar a compensação.
-3. Ensaio de restore em host vazio (B12), conduzido pela gerência, quando esse for o recorte escolhido.
+1. Repetir `python3 tests/contrato/nativo.py`, sem `-I`, no HEAD `e2f3b18`, em PostgreSQL descartável. A base `cc542a1` parou no fixture PSP. A correção `b67d2f3` só foi compilada. Exit diferente de 0 não passa os 22 HTTP.
+2. Executar `python3 tests/contrato/restore_clean_host.py` onde Docker, Go, OpenSSL e `postgres:16-alpine` existirem. Os 13 testes estáticos OK não aprovam B12. Host físico, cópia externa, cofre, RPO/RTO, piloto e a suíte do Backup-center permanecem fora desse comando.
+3. Conferir um run hospedado de `.github/workflows/native.yml` neste HEAD, com o artefato `sbom-cyclonedx` e o passo de restore. Não reutilizar o CI de `e193266` nem a geração de `6f4bf38`.
 4. Homologações Efí, OLT, NAS, fiscal e piloto permanecem sem tarefa de produção enquanto o recurso externo não existir. Inter e NFCom não ganham código até demanda e escopo reais. Não fechar esses itens só porque o recurso falta. Default, sandbox e gate desligado não são homologação.
 
-Gates que continuam obrigatórios para qualquer publicação: `python3 tests/contrato/nativo.py` e `python3 tests/contrato/go_integration.py`, sem `-I`, em PostgreSQL descartável. Falha por ausência de banco fica registrada como não executada, nunca como aprovada. Falha de `python3 -I` no import de `lib` é bootstrap, também não executada como laboratório, e não aprova o gate. O mapa integral preserva B01–B18. Não há percentual. O projeto permanece aberto enquanto existir critério aberto. O lote 25 não está publicado.
+Gates que continuam obrigatórios para qualquer publicação: `python3 tests/contrato/nativo.py` e `python3 tests/contrato/go_integration.py`, sem `-I`, em PostgreSQL descartável, no commit candidato. O exit 0 de `go_integration.py` em `cc542a1` vale para essa base. Não é publicado e não cobre o fixture posterior. Falha por ausência de banco fica registrada como não executada, nunca como aprovada. Falha de `python3 -I` no import de `lib` é bootstrap e não aprova o gate. O mapa integral preserva B01–B18. Não há percentual. O projeto permanece aberto enquanto existir critério aberto. Os lotes 25 e 26 não estão publicados.

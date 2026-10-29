@@ -2,13 +2,27 @@
 
 A compensação está implementada na branch de desenvolvimento `task/556b3d63d7fc/t9-documentacao-operacional`, HEAD `8c10c1a`, sobre a base aprovada `82c4251`. Não está publicada, não está homologada e não fecha o NexoISP. Não há percentual de conclusão. `docs/LOTE24-B13-DESENHO-COMPENSACAO.md` e `docs/LOTE24-B13-ACEITACAO.json` permanecem históricos: a matriz do lote 24 continua `planned/not_run`.
 
-A matriz executável é [docs/LOTE25-B13-COMPENSACAO-ACEITE.json](LOTE25-B13-COMPENSACAO-ACEITE.json). Os 22 casos têm teste escrito e `executado: false`. Código de teste não é execução. Skip por falta de `NEXO_GO_TEST_DATABASE_URL` não é teste de banco aprovado.
+A matriz executável é [docs/LOTE25-B13-COMPENSACAO-ACEITE.json](LOTE25-B13-COMPENSACAO-ACEITE.json). Os 22 casos continuam com `executado: false` no conjunto: o HTTP de `nativo.py` não concluiu. Código de teste, revisão e skip não são execução. Três casos que só têm teste Go (B13-03, B13-21 e B13-22) têm a ação Go passada na base `cc542a1`; isso não passa os 22 HTTP.
 
-## O que esta documentação verificou
+## Leitura vigente depois dos lotes 26 e 27
 
-Esta tarefa leu o desenho, a matriz do lote 24, `AGENTS.md` e o código já integrado na branch. Não alterou controlador, modelos, testes nem dados. Não acessou credencial real e não chamou PSP. Não executou `nativo.py`, `go_integration.py`, `go test` com PostgreSQL, Playwright nem o workflow. Não há PNG `import-compensacao-*.png` em `docs/integracao-v0/evidencias/`.
+A seção seguinte registra o que a redação do lote 25 fez. A prova posterior está em [docs/LOTE26-VALIDACAO-B13-SBOM.md](LOTE26-VALIDACAO-B13-SBOM.md) e em `/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-summary-cc542a1.json`.
 
-Os quatro unitários sem banco citados no aceite (`TestImportCompensateSourceGuards`, `TestImportCompensate_B13_15`, `TestImportCompensate_B13_19`, `TestImportCompensateHashOmitsKey`) são relato do runner que escreveu a matriz. Esta documentação não os reexecutou. Eles não cobrem concorrência, RLS, rollback nem HTTP.
+Na base `cc542a1b502b9b78bdd0673140bbba0f15a89716`:
+
+- `python3 tests/contrato/go_integration.py` exit 0. 241 ações pass, incluindo subtestes. 58 delas são `TestImportCompensate*`, todas pass. Pacotes sem teste aparecem como skip de pacote, não como skip desses casos.
+- O browser dirigido de `frontend-v0-import.mjs` exit 0. Desktop e viewport 390. Um POST já commitado com resposta perdida foi recuperado pela ficha, sem segundo estorno. As capturas ficam no arquivo externo `browser-real-cc542a1/`. Essa jornada não declara os 22 HTTP passados.
+- `python3 tests/contrato/nativo.py` exit 1 em `import_compensate_contract.py:335`, no `UPDATE` de `gateway_charge_id` sem `financial_connection_id`. A limpeza de elegibilidade anterior passou. O comando não concluiu.
+
+No HEAD `e2f3b18`, o commit `b67d2f3` corrige esse setup com conexão EFI sandbox sintética e mantém o 409 `provider_issuance`. `py_compile` passou. A nova chamada de `nativo.py` morreu com `FileNotFoundError: docker` antes do PostgreSQL. O ensaio do fixture corrigido permanece pendente. Não reimplementar o lote 25.
+
+O contrato MVP não muda: só `invoices`, até 200 `created`, sem PSP, sem franquia, IDs e histórico preservados, `evidence.reverted` falso. Sem homologação, push ou deploy.
+
+## O que a redação do lote 25 verificou
+
+Esta tarefa leu o desenho, a matriz do lote 24, `AGENTS.md` e o código já integrado na branch. Não alterou controlador, modelos, testes nem dados. Não acessou credencial real e não chamou PSP. Naquele momento não executou `nativo.py`, `go_integration.py`, `go test` com PostgreSQL, Playwright nem o workflow. Não havia PNG `import-compensacao-*.png` no clone. A execução nomeada acima é posterior e não reescreve esse fato.
+
+Os quatro unitários sem banco citados no aceite (`TestImportCompensateSourceGuards`, `TestImportCompensate_B13_15`, `TestImportCompensate_B13_19`, `TestImportCompensateHashOmitsKey`) eram, na redação, relato do runner que escreveu a matriz. Esta redação não os reexecutou. Eles não cobrem concorrência, RLS, rollback nem HTTP. Depois, os quatro passaram dentro do `go_integration.py` de `cc542a1` e continuam sem cobrir o HTTP.
 
 ## Arquivos da implementação
 
@@ -66,7 +80,7 @@ Chamada aninhada repete o par. Ela é reentrante na mesma transação porque a o
 
 O GET, para o lote do tenant visível, devolve `compensation.state=absent` ou `committed` com `compensation_id`, `created_at`, `reason` e o `result` persistido. O `result` guardado conserva `idempotent_replay=false`; o replay do POST é que responde `true`. Segredo de idempotência não entra no payload.
 
-O contrato `import_revert_eligibility_contract.py`, chamado por `nativo.py`, descreve o before, o after e o replay: ausente e fatura `open` antes; committed, cancelada e um movimento a mais depois; segundo POST sem movimento novo; `evidence.reverted` falso nas três leituras; outro tenant 404; POP, portal, suporte e cookie sem CSRF não gravam. O arquivo existe. `nativo.py` não foi executado aqui.
+O contrato `import_revert_eligibility_contract.py`, chamado por `nativo.py`, descreve o before, o after e o replay: ausente e fatura `open` antes; committed, cancelada e um movimento a mais depois; segundo POST sem movimento novo; `evidence.reverted` falso nas três leituras; outro tenant 404; POP, portal, suporte e cookie sem CSRF não gravam. O arquivo existe. Na redação do lote 25, `nativo.py` não foi executado. Na base `cc542a1` o comando inteiro morreu antes de concluir, então o before/after/replay também não fica passado.
 
 A ficha oficial não é página nova. O badge "Sem efeitos posteriores" continua leitura. Outros kinds mantêm o texto de que a reversão daquele tipo não está disponível.
 
@@ -82,21 +96,23 @@ Três defeitos que o script passa a cobrir, para a jornada não mentir sobre a U
 
 O cenário real de commit com resposta perdida está no mesmo script e não é um desses três. O servidor responde 200, o teste aborta a resposta no navegador, a ficha relê o GET e mostra "A resposta da tentativa não chegou íntegra. A leitura do lote mostra a compensação registrada." Há um estorno, o botão some, e outra chave recebe 409 `already_compensated`. A frase de resposta inconclusiva, usada no 503, não aparece nesse caminho. O 503 coberto ao lado conserva a mesma chave e só grava na segunda confirmação.
 
-Nenhum desses caminhos foi executado nesta documentação. Não há evidência Playwright neste HEAD. O passo de CI `python3 tests/contrato/e2e.py` inclui `frontend-v0-import.mjs` via `e2e/smoke.mjs`, e também não foi consultado para este HEAD.
+Nenhum desses caminhos foi executado na redação do lote 25. Não havia evidência Playwright naquele HEAD. Em `cc542a1` o harness dirigido executou a jornada e terminou exit 0; as capturas não entraram no commit. O passo de CI `python3 tests/contrato/e2e.py` inclui `frontend-v0-import.mjs` via `e2e/smoke.mjs` e não foi consultado como run hospedado.
 
 ## Testes: o que é real, o que é skip, o que falta
 
-| Verificação | Estado neste registro |
-|---|---|
-| Quatro unitários Go sem banco | Relato do runner da matriz, não reexecutado aqui. Não aprovam banco. |
-| `TestImportCompensate_B13_*` que abre PostgreSQL | Escritos. Skip sem `NEXO_GO_TEST_DATABASE_URL` não aprova. |
-| `python3 tests/contrato/nativo.py` | Não executado. É o gate HTTP dos 22 casos que o contrato cobre e do GET before/after/replay. É o passo do workflow `.github/workflows/native.yml`, sem `-I`. |
-| `python3 tests/contrato/go_integration.py` | Não executado. Sobe PostgreSQL descartável com container e porta próprios e roda `go test -count=1 -race -p 1 ./...` com as duas URLs de banco. É o passo seguinte do mesmo workflow, sem `-I`. |
+A tabela mistura o registro original e a prova de `cc542a1`. Onde as duas divergem, vale a coluna da base `cc542a1`.
+
+| Verificação | Registro original do lote 25 | Base cc542a1 |
+|---|---|---|
+| Quatro unitários Go sem banco | Relato do runner da matriz, não reexecutado na redação. Não aprovam banco. | `TestImportCompensateSourceGuards`, `TestImportCompensate_B13_15`, `TestImportCompensate_B13_19` e `TestImportCompensateHashOmitsKey` passaram dentro das 58 ações. B13-15 continua sem CSRF, cookie e HTTP. |
+| `TestImportCompensate_B13_*` que abre PostgreSQL | Escritos. Skip sem `NEXO_GO_TEST_DATABASE_URL` não aprova. | Passaram no `go_integration.py`, exit 0, com URL de banco. Não são skip. Não substituem o HTTP. |
+| `python3 tests/contrato/nativo.py` | Não executado na redação. É o gate HTTP dos 22 casos e do GET before/after/replay. | Exit 1 em `cc542a1`, comando não concluído. Os 22 HTTP não estão passados. O fixture corrigido em `b67d2f3` ainda não rodou até o fim. |
+| `python3 tests/contrato/go_integration.py` | Não executado na redação. Sobe PostgreSQL descartável e roda `go test -count=1 -race -p 1 ./...`. | Exit 0 em `cc542a1`: 241 ações pass. Vale para essa base, não para o CI hospedado e não para o fixture posterior. |
 | `python3 -I tests/contrato/nativo.py` e `python3 -I tests/contrato/go_integration.py` | Falha de bootstrap, reproduzida nesta worktree em 2026-10-29, exit 1, antes de Docker e de PostgreSQL. `ModuleNotFoundError: No module named 'lib'` em `nativo.py:13` e em `go_integration.py:11`. `-I` implica `-P` e `-E`: o diretório do script sai de `sys.path` e `PYTHONPATH` é ignorado. Isto não é skip por ausência de banco, não aprova o laboratório e não é o gate. Os testes não foram alterados. |
 | `go test -race ./...` do workflow, sem URL de banco | Compila e deixa os testes de banco em skip. Esse skip não publica o lote. |
-| Browser `frontend-v0-import.mjs` | Script presente, execução ausente, screenshots ausentes. |
+| Browser `frontend-v0-import.mjs` | Na redação, script presente e execução ausente. Em `cc542a1`, o harness dirigido terminou exit 0, com capturas só no arquivo externo. Não marca os 22 HTTP. |
 | Homologação com exportação real de provedor | Aberta em B18. Fora deste lote. |
-| Publicação e deploy | Não ocorreram. CI de `e193266` citado em `00_STATUS.md` não foi reconsultado e não cobre `8c10c1a`. |
+| Publicação e deploy | Não ocorreram. CI de `e193266` não cobre `cc542a1` nem `e2f3b18`. |
 
 Comandos que a gerência executa num laboratório descartável, antes de publicar. Container, porta e prefixo exclusivos. Não apontar para banco de produção.
 
@@ -148,16 +164,22 @@ A autoridade depois de uma tentativa é o GET do lote, não a memória do navega
 
 ## Riscos que continuam abertos
 
-- Nenhum dos 22 casos rodou em PostgreSQL nesta branch. Concorrência, RLS e rollback seguem sem prova fresca. A falha de bootstrap com `python3 -I` é anterior a esse laboratório e não o substitui.
+- Os 22 HTTP não concluíram. Em `cc542a1` o `nativo.py` morreu no fixture PSP de B13-10. A correção `b67d2f3` não teve PostgreSQL. Concorrência e rollback do contrato Python seguem sem essa prova. O Go com banco, na mesma base, cobre os testes listados na seção vigente, inclusive B13-02, a barreira de B13-11 e o `40P01` de B13-22. Isso não é o comando HTTP. A falha de bootstrap com `python3 -I` não substitui nenhum dos dois.
 - A ordem de lock depende de todos os escritores citados. Um call site novo que trave a fatura antes do consultivo `7411005` reabre deadlock.
 - O teto de 200 linhas `created` recusa o lote inteiro. Operação maior precisa de recorte, não de apagar o teto em silêncio.
 - Kinds que não são títulos continuam sem compensação. O procedimento de corte RADIUS permanece o caminho operacional desses lotes.
 - B13-20 não devolve o 409 do índice único enquanto `finance.Reverse` recusar fatura cancelada com 400. A unicidade continua no índice e no marcador.
 - O gancho de teste `importCompensateBeforeCommit` precisa permanecer nil fora do teste.
-- A jornada de browser não tem execução nem revisão principal Sonnet. Sol 6.1 medium cobriu a última revisão dessa fatia por cota esgotada.
+- A jornada de browser rodou em `cc542a1` e as capturas não estão no commit. A revisão principal Sonnet dessa fatia de código, no lote 25, não ficou ativa. Sol 6.1 medium cobriu a última revisão daquele script por cota esgotada. Execução não reescreve essa revisão.
 - O inventário OpenAPI estático não prova o listener interno.
 - Sem franquia nova, sem PSP real e sem produção. Defaults de gate desligado não homologam Efí, Asaas, Inter, OLT, NAS, fiscal nem piloto.
 
 ## Continuação
 
-A gerência continua depois deste lote sem pedir nova ordem. Executa os testes reais nomeados, corrige e revisa o que falhar, integra a branch de desenvolvimento e escolhe o próximo recorte interno aberto do mapa. O candidato interno seguinte já listado é o SBOM de B01. O ensaio de restore em host vazio continua com a gerência, em B12. Itens externos não fecham por ausência de recurso. Default, sandbox e skip não viram homologação. O projeto global permanece aberto enquanto existir critério aberto em `docs/CONCLUSAO-INTEGRAL.md`.
+A gerência continua sem pedir nova ordem e sem reimplementar os lotes 25 e 26. O que falta de execução, com procedimento em `docs/LOTE26-VALIDACAO-B13-SBOM.md`:
+
+1. `python3 tests/contrato/nativo.py`, sem `-I`, no HEAD que contém `b67d2f3`.
+2. `python3 tests/contrato/restore_clean_host.py` quando o Docker existir. O unittest estático não aprova B12. Host físico, cópia externa, cofre, RPO/RTO, piloto e os testes do Backup-center continuam abertos.
+3. Run hospedado do `native.yml` neste HEAD, com o artefato `sbom-cyclonedx`. A geração local de `cc542a1` não é esse run. O CI de `e193266` e a base `6f4bf38` também não.
+
+Itens externos não fecham por ausência de recurso. Default, sandbox e skip não viram homologação. O projeto global permanece aberto enquanto existir critério aberto em `docs/CONCLUSAO-INTEGRAL.md`. Não há percentual.
