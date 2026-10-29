@@ -157,5 +157,74 @@
     "ci-jobs-6963214.json": "e8a897eebec66dce57cfc998cc6083493c225c55e9b024802625cdc9b927063f",
     "ci-candidate-6963214.json": "eba024380593e538bec091d7ca050b386004c93cd81f1c5f0aeacfe789fb7dad",
     "push-candidate-6963214.log": "c1fd87b1164f59b2a22f691f107b65a56bac296477f707eb7d7f81e174eccaf2"
+  },
+  "auditoria_snapshots": {
+    "documento_portatil": "docs/evidencias/B04-GATES-6963214-AUDIT.json",
+    "fonte": "implementacao-codex/lote32-b04-aceite-b15-desenho-2026-10-29/evidencias/evidence-hash-audit-6963214.json",
+    "fonte_recorded_at": "2026-10-29T13:41:19.556729+00:00",
+    "comparados": 14,
+    "integras": 12,
+    "divergencias": 2,
+    "bytes_reportados_recuperados": false,
+    "preserva_objeto_ci_in_progress": true,
+    "preserva_mapa_sha256": true,
+    "nao_altera_criterios_executados": true,
+    "nao_altera_criterios_abertos": true,
+    "nao_altera_flags": true,
+    "nao_fecha_criterio_funcional": true,
+    "nao_promove_criterios_abertos": true,
+    "hashes_historicos": {
+      "ci-run-6963214.json": {
+        "sha256": "54850a68c24abfe8c68862106a8b4f00fca39e0f3f726f8040880f29cfaba02f",
+        "estado": "reported_not_recovered",
+        "motivo": "Snapshot mutável reescrito pelo gerente depois da coleta deste espelho. Os bytes desse hash não foram recuperados e não são fabricados."
+      },
+      "ci-jobs-6963214.json": {
+        "sha256": "e8a897eebec66dce57cfc998cc6083493c225c55e9b024802625cdc9b927063f",
+        "estado": "reported_not_recovered",
+        "motivo": "Snapshot mutável reescrito pelo gerente depois da coleta deste espelho. Os bytes desse hash não foram recuperados e não são fabricados."
+      }
+    },
+    "referencias_atuais_content_addressed": {
+      "diretorio": "implementacao-codex/lote32-b04-aceite-b15-desenho-2026-10-29/evidencias/immutable-snapshots",
+      "ci-run-6963214.json": {
+        "sha256": "c1d68fe19e6e3b079be859ba58bc8166b0f570ccd5fcedc8c2485ec002282971",
+        "nome": "c1d68fe19e6e3b079be859ba58bc8166b0f570ccd5fcedc8c2485ec002282971-ci-run-6963214.json"
+      },
+      "ci-jobs-6963214.json": {
+        "sha256": "b11f864cab6ddfa306c77369209ba97b336068ffcbd3ad546f33f6aadf521335",
+        "nome": "b11f864cab6ddfa306c77369209ba97b336068ffcbd3ad546f33f6aadf521335-ci-jobs-6963214.json"
+      }
+    },
+    "ci_candidata_posterior": {
+      "separada_deste_snapshot": true,
+      "run": "40877414874",
+      "status": "completed",
+      "conclusion": "success",
+      "updated_at": "2026-10-29T13:11:42Z",
+      "job_agente": "success",
+      "job_verificar": "success",
+      "migracao_65_para_66": "success",
+      "nao_substitui_o_objeto_ci": true,
+      "nao_fecha_criterio": true
+    },
+    "publicacao_posterior": {
+      "separada_deste_snapshot": true,
+      "arquivo": "implementacao-codex/lote32-b04-aceite-b15-desenho-2026-10-29/evidencias/publication-applied-6963214.json",
+      "sha256": "01748e5872fce8df0dc9fce965709cd9d1f1eff7e0207e7b780cea24ca1b2a09",
+      "status": "published_main_and_development",
+      "remote_main": "6963214927aa45ae1963c58d4c14ba540d78c2f0",
+      "remote_development": "6963214927aa45ae1963c58d4c14ba540d78c2f0",
+      "development_ref": "refs/heads/dev/lote01-consolidado-2026-10-26",
+      "can_fast_forward": true,
+      "official_head": "6963214927aa45ae1963c58d4c14ba540d78c2f0",
+      "official_branch": "dev/lote01-consolidado-2026-10-26",
+      "recovery_tag": "base/pre-b13-b04-2026-10-29-e193266",
+      "deployment": false,
+      "recorded_at": "2026-10-29T13:48:01.855434+00:00",
+      "nao_altera_publicado_em_main": true,
+      "nao_e_deploy": true,
+      "nao_fecha_criterio": true
+    }
   }
 }
