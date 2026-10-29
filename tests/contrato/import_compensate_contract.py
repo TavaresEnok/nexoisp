@@ -365,8 +365,10 @@ def verify(api, call, sql):
     created = invoice_of(mixed, marker + '-new')
     untouched = invoice_of(mixed, marker + '-keep')
     bad = invoice_of(mixed, marker + '-bad')
-    assert created['status'] == 'created' and untouched['status'] == 'unchanged' and untouched['entity_id'] == first_invoice
-    assert bad['status'] == 'error' and not bad['entity_id']
+    # importResult omite entity_id quando id é nil; nulo também não vincula. Id presente e não nulo é indevido.
+    assert created['status'] == 'created' and uuid_text(created['entity_id']), created
+    assert untouched['status'] == 'unchanged' and untouched['entity_id'] == first_invoice and uuid_text(untouched['entity_id']), untouched
+    assert bad['status'] == 'error' and ('entity_id' not in bad or bad['entity_id'] is None), bad
     mixed_reply = compensate(mixed['batch_id'], 'b13-17-' + marker)
     assert mixed_reply['status'] == 200, mixed_reply['json']
     assert mixed_reply['json']['canceled_invoices'] == 1 and mixed_reply['json']['skipped_unchanged'] == 1 and mixed_reply['json']['skipped_error'] == 1
