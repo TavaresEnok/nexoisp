@@ -2,6 +2,7 @@ package escrita
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
@@ -22,6 +23,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -443,7 +445,7 @@ func TestImportCompensate_B13_16(t *testing.T) {
 		}
 	}
 	seed := seedImported(t, database, tenant, user, "open")
-	execTenant(t, database, tenant, `update import_rows set status = 'updated' where batch_id = $1::uuid`, seed.batch)
+	execImportRowOwner(t, tenant, `update import_rows set status = 'updated' where batch_id = $1::uuid`, seed.batch)
 	_, err := postCompensate(database, actor, seed.batch, "updated-"+uuid.NewString(), "motivo sem preimagem", "")
 	if statusCode(err) != 409 || err.Error() != "provenance_movement" {
 		t.Fatal(err)
@@ -571,29 +573,40 @@ func TestImportCompensate_B13_11_Barreira(t *testing.T) {
 	t.Run("duas faturas na ordem canonica", func(t *testing.T) {
 		batch, ids := seedOpenPair(t, database, tenant, user)
 		sorted := sortedUUIDs(t, ids)
-		release, held, done := holdInvoices(t, database, scope, []string{sorted[1]}, false, nil)
-		defer finishHold(t, release, done)
-		waitHeld(t, held)
+		releaseHigh, heldHigh, doneHigh := holdInvoices(t, database, scope, []string{sorted[1]}, false, nil)
+		defer finishHold(t, releaseHigh, doneHigh)
+		waitHeld(t, heldHigh)
 		errCh := make(chan error, 1)
 		go func() {
 			_, err := postCompensate(database, actor, batch, "pair-"+uuid.NewString(), "motivo das duas faturas", "")
 			errCh <- err
 		}()
-		waitAdvisory(t, database, scope, invoiceAdvisoryKey(tenant, sorted[1]))
-		if invoiceRowFree(t, database, scope, sorted[0]) {
-			t.Fatal("a fatura menor não estava travada quando a maior entrou em espera")
+		lowKey := invoiceAdvisoryKey(tenant, sorted[0])
+		highKey := invoiceAdvisoryKey(tenant, sorted[1])
+		waitAdvisory(t, database, scope, highKey)
+		if !invoiceRowFree(t, database, scope, sorted[0]) {
+			t.Fatal("a fatura menor foi travada enquanto o advisory maior ainda espera")
 		}
-		release()
+		waitAdvisoryBeforeRows(t, database, scope, lowKey, highKey)
+		releaseLow, heldLow, doneLow := holdInvoiceRow(t, database, scope, sorted[0])
+		defer finishHold(t, releaseLow, doneLow)
+		waitHeld(t, heldLow)
+		waitAdvisoryBeforeRows(t, database, scope, lowKey, highKey)
+		releaseHigh()
+		waitRowsAfterAdvisories(t, database, scope, lowKey, highKey, batch)
+		releaseLow()
 		if err := waitErr(t, errCh); err != nil {
 			t.Fatal(err)
 		}
 		for _, id := range ids {
 			var status string
-			var markers int
-			scanTenant(t, database, tenant, `select i.status, (select count(*)::int from import_batch_compensations c where c.batch_id=$2::uuid)
-				from invoices i where i.id=$1::uuid`, []any{&status, &markers}, id, batch)
-			if status != "canceled" || markers != 1 {
-				t.Fatalf("status=%s markers=%d", status, markers)
+			var markers, payments int
+			scanTenant(t, database, tenant, `select i.status,
+				(select count(*)::int from import_batch_compensations c where c.batch_id=$2::uuid),
+				(select count(*)::int from payments p where p.invoice_id=i.id)
+				from invoices i where i.id=$1::uuid`, []any{&status, &markers, &payments}, id, batch)
+			if status != "canceled" || markers != 1 || payments != 0 {
+				t.Fatalf("status=%s markers=%d payments=%d", status, markers, payments)
 			}
 		}
 	})
@@ -679,9 +692,6 @@ func TestImportCompensate_B13_22(t *testing.T) {
 		go func() {
 			errA <- database.WithScope(context.Background(), scope, func(tx *db.Tx) error {
 				ctx := context.Background()
-				if err := tx.Exec(ctx, `select set_config('deadlock_timeout','200ms',true)`); err != nil {
-					return err
-				}
 				if err := tx.Exec(ctx, `select set_config('statement_timeout','5s',true)`); err != nil {
 					return err
 				}
@@ -696,9 +706,6 @@ func TestImportCompensate_B13_22(t *testing.T) {
 		go func() {
 			errB <- database.WithScope(context.Background(), scope, func(tx *db.Tx) error {
 				ctx := context.Background()
-				if err := tx.Exec(ctx, `select set_config('deadlock_timeout','200ms',true)`); err != nil {
-					return err
-				}
 				if err := tx.Exec(ctx, `select set_config('statement_timeout','5s',true)`); err != nil {
 					return err
 				}
@@ -1063,7 +1070,7 @@ func assertCash(t *testing.T, database *db.DB, tenant string, seed importedSeed,
 		(select count(*)::int from payments p where p.invoice_id = i.id and p.kind = 'reversal'),
 		coalesce((select sum(p.signed_cents)::int from payments p where p.invoice_id = i.id), 0),
 		(select count(*)::int from import_batch_compensations c where c.batch_id = $2::uuid),
-		(select count(*)::int from audit_events a where a.action = 'import.compensate_batch' and a.entity_id = $2),
+		(select count(*)::int from audit_events a where a.action = 'import.compensate_batch' and a.entity_id = $2::text),
 		(select count(*)::int from invoice_movements m where m.invoice_id = i.id),
 		i.paid_at,
 		coalesce((select collectible_cents::int from financial_balance_shadow s where s.invoice_id = i.id), 0),
@@ -1144,6 +1151,144 @@ func assertNoPSP(t *testing.T, database *db.DB, tenant, invoice string) {
 	scanTenant(t, database, tenant, `select count(*)::int from provider_operations where invoice_id = $1::uuid`, []any{&ops}, invoice)
 	if ops != 0 {
 		t.Fatal(ops)
+	}
+}
+
+func execImportRowOwner(t *testing.T, tenant, query string, args ...any) {
+	t.Helper()
+	dsn := os.Getenv("NEXO_GO_TEST_DATABASE_OWNER_URL")
+	if dsn == "" {
+		t.Fatal("NEXO_GO_TEST_DATABASE_OWNER_URL ausente; o estado sintético de import_rows exige o owner do laboratório nexo_test")
+	}
+	owner, err := sql.Open("pgx", dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer owner.Close()
+	ctx := context.Background()
+	var name, user string
+	if err = owner.QueryRowContext(ctx, `select current_database(), current_user`).Scan(&name, &user); err != nil {
+		t.Fatal(err)
+	}
+	if name != "nexo_test" || user == "nexo_go" || user == "nexo_app" {
+		t.Fatalf("owner exclusivo de nexo_test exigido, db=%s user=%s", name, user)
+	}
+	tx, err := owner.BeginTx(ctx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tx.Rollback()
+	if _, err = tx.ExecContext(ctx, `select set_config('app.tenant_id', $1, true)`, tenant); err != nil {
+		t.Fatal(err)
+	}
+	res, err := tx.ExecContext(ctx, query, args...)
+	if err != nil {
+		t.Fatal(err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n != 1 {
+		t.Fatalf("import_rows sintético alterou %d linhas", n)
+	}
+	if err = tx.Commit(); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func holdInvoiceRow(t *testing.T, d *db.DB, scope tenancy.Scope, id string) (func(), <-chan struct{}, <-chan error) {
+	t.Helper()
+	releaseCh := make(chan struct{})
+	held := make(chan struct{})
+	done := make(chan error, 1)
+	var once sync.Once
+	release := func() { once.Do(func() { close(releaseCh) }) }
+	go func() {
+		done <- d.WithScope(context.Background(), scope, func(tx *db.Tx) error {
+			ctx := context.Background()
+			rows, err := tx.Objects(ctx, `select id::text as id from invoices where id = $1::uuid for update`, id)
+			if err != nil {
+				return err
+			}
+			if len(rows) != 1 {
+				return fmt.Errorf("fatura %s ausente para a barreira de linha", id)
+			}
+			close(held)
+			<-releaseCh
+			return errImportLockRollback
+		})
+	}()
+	return release, held, done
+}
+
+func waitAdvisoryBeforeRows(t *testing.T, d *db.DB, scope tenancy.Scope, lowKey, highKey string) {
+	t.Helper()
+	deadline := time.Now().Add(8 * time.Second)
+	for {
+		if time.Now().After(deadline) {
+			t.Fatal("o advisory menor não estava concedido antes dos row locks")
+		}
+		var waiters, lowGranted, tuples int
+		err := d.WithScope(context.Background(), scope, func(tx *db.Tx) error {
+			return tx.QueryRow(context.Background(), `with waiter as (
+  select pid from pg_locks
+  where locktype = 'advisory' and not granted and objsubid = 1
+    and database = (select oid from pg_database where datname = current_database())
+    and ((classid::bigint << 32) | objid::bigint) = hashtextextended($1, $3)
+)
+select
+  (select count(*) from waiter),
+  (select count(*) from pg_locks l join waiter w on w.pid = l.pid
+    where l.locktype = 'advisory' and l.granted and l.objsubid = 1
+      and l.database = (select oid from pg_database where datname = current_database())
+      and ((l.classid::bigint << 32) | l.objid::bigint) = hashtextextended($2, $3)),
+  (select count(*) from pg_locks l join waiter w on w.pid = l.pid
+    where l.locktype = 'tuple' and l.granted)`, highKey, lowKey, importAdvisorySalt).Scan(&waiters, &lowGranted, &tuples)
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if waiters > 0 && lowGranted > 0 && tuples == 0 {
+			return
+		}
+		time.Sleep(2 * time.Millisecond)
+	}
+}
+
+func waitRowsAfterAdvisories(t *testing.T, d *db.DB, scope tenancy.Scope, lowKey, highKey, batch string) {
+	t.Helper()
+	deadline := time.Now().Add(8 * time.Second)
+	for {
+		if time.Now().After(deadline) {
+			t.Fatal("os row locks não ocorreram somente depois dos dois advisories")
+		}
+		var advisories, waiting, markers int
+		err := d.WithScope(context.Background(), scope, func(tx *db.Tx) error {
+			return tx.QueryRow(context.Background(), `with holder as (
+  select l.pid
+  from pg_locks l
+  where l.locktype = 'advisory' and l.granted and l.objsubid = 1
+    and l.database = (select oid from pg_database where datname = current_database())
+    and ((l.classid::bigint << 32) | l.objid::bigint) in (hashtextextended($1, $3), hashtextextended($2, $3))
+  group by l.pid
+  having count(distinct ((l.classid::bigint << 32) | l.objid::bigint)) = 2
+)
+select
+  coalesce((select count(*) from holder), 0),
+  coalesce((select count(*) from pg_locks l join holder h on h.pid = l.pid where not l.granted), 0),
+  (select count(*)::int from import_batch_compensations c where c.batch_id = $4::uuid)`, lowKey, highKey, importAdvisorySalt, batch).Scan(&advisories, &waiting, &markers)
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if markers > 0 {
+			t.Fatal("marcador gravado antes da observação do row lock")
+		}
+		if advisories >= 1 && waiting > 0 {
+			return
+		}
+		time.Sleep(2 * time.Millisecond)
 	}
 }
 
