@@ -1,0 +1,135 @@
+{
+  "kind": "b04-gates-hash-audit",
+  "subject": "docs/evidencias/B04-GATES-6963214.json",
+  "commit": "6963214927aa45ae1963c58d4c14ba540d78c2f0",
+  "fonte": "implementacao-codex/lote32-b04-aceite-b15-desenho-2026-10-29/evidencias/evidence-hash-audit-6963214.json",
+  "fonte_recorded_at": "2026-10-29T13:41:19.556729+00:00",
+  "diretorio_content_addressed": "implementacao-codex/lote32-b04-aceite-b15-desenho-2026-10-29/evidencias/immutable-snapshots",
+  "bytes_fora_do_clone": true,
+  "hashes_validados_contra_o_nome": true,
+  "counts": {"compared": 14, "matches": 12, "divergences": 2},
+  "bytes_reportados_recuperados": false,
+  "fecha_criterio_funcional": false,
+  "promove_criterios_abertos": false,
+  "altera_treze_executados": false,
+  "altera_flags": false,
+  "criterios_executados_inalterados": [
+    "estado-open",
+    "estado-paid",
+    "estado-reconciling",
+    "estado-canceled",
+    "acordo-comprovado",
+    "refund-psp",
+    "compensacao",
+    "rollback",
+    "rls-tenant-portal-pop",
+    "drift-injetado",
+    "explain-indices",
+    "variante-shadow-isolada",
+    "flag-fechada"
+  ],
+  "criterios_abertos_inalterados": [
+    "acordo-nao-comprovado",
+    "estorno",
+    "excesso",
+    "importacao",
+    "matches-falso-bloqueia-corte",
+    "sem-fallback-silencioso"
+  ],
+  "integras": [
+    {"name": "gate-go-integration-6963214.log", "sha256": "2e8c0eecd2aaf9ba17f58d22b82b9cb150d2928740f1329ca4cb68711b6d52db", "content_addressed": "2e8c0eecd2aaf9ba17f58d22b82b9cb150d2928740f1329ca4cb68711b6d52db-gate-go-integration-6963214.log"},
+    {"name": "gate-nativo-6963214.log", "sha256": "6338c4c4d54b99c7a4a2591106cd383e5e707df1f603178f5d6d611b69b2544c", "content_addressed": "6338c4c4d54b99c7a4a2591106cd383e5e707df1f603178f5d6d611b69b2544c-gate-nativo-6963214.log"},
+    {"name": "gate-go-summary-6963214.json", "sha256": "4ab19ecd487edc9ed63a5cb734d7c0afd4e11f67d2fa26815de24fba5b45cd24", "content_addressed": "4ab19ecd487edc9ed63a5cb734d7c0afd4e11f67d2fa26815de24fba5b45cd24-gate-go-summary-6963214.json"},
+    {"name": "gate-summary-6963214.json", "sha256": "543606ec24dade1c1ef0eac7b8139fffff07b012c6f9bd699c04fdb366e5fd48", "content_addressed": "543606ec24dade1c1ef0eac7b8139fffff07b012c6f9bd699c04fdb366e5fd48-gate-summary-6963214.json"},
+    {"name": "explain-paid-6963214.json", "sha256": "0b8bf954939b270a3afa72ca3a901960e5caed3125746ad6d8b7f8d636686179", "content_addressed": "0b8bf954939b270a3afa72ca3a901960e5caed3125746ad6d8b7f8d636686179-explain-paid-6963214.json"},
+    {"name": "explain-pagina-6963214.json", "sha256": "4f24e6bf519d3013319e2c12d19e1242787665754363cfd215c07710e80940d0", "content_addressed": "4f24e6bf519d3013319e2c12d19e1242787665754363cfd215c07710e80940d0-explain-pagina-6963214.json"},
+    {"name": "nativo-6963214.json", "sha256": "9edb1df466368e20b59d745ab2dc83124976f850e18da65ce02ec120c0aa7a2f", "content_addressed": "9edb1df466368e20b59d745ab2dc83124976f850e18da65ce02ec120c0aa7a2f-nativo-6963214.json"},
+    {"name": "financial-movements-6963214.json", "sha256": "36d6a25315646d01f22ed936c7f9fda18b1168a0079bc868b20d16f2bbb8ac00", "content_addressed": "36d6a25315646d01f22ed936c7f9fda18b1168a0079bc868b20d16f2bbb8ac00-financial-movements-6963214.json"},
+    {"name": "TestBalanceReadPGExplain-6963214.txt", "sha256": "fb14d5b08f38dc2fd10ea1a8b382d85e8a0eea00ebf009dc7f82b1bdc28abf9d", "content_addressed": "fb14d5b08f38dc2fd10ea1a8b382d85e8a0eea00ebf009dc7f82b1bdc28abf9d-TestBalanceReadPGExplain-6963214.txt"},
+    {"name": "TestBalanceReadPGVariantsApp-6963214.txt", "sha256": "3fdde3795f20e4ac911008c84cc3c94e51da9d67d6f791321653a01808eed649", "content_addressed": "3fdde3795f20e4ac911008c84cc3c94e51da9d67d6f791321653a01808eed649-TestBalanceReadPGVariantsApp-6963214.txt"},
+    {"name": "ci-candidate-6963214.json", "sha256": "eba024380593e538bec091d7ca050b386004c93cd81f1c5f0aeacfe789fb7dad", "content_addressed": "eba024380593e538bec091d7ca050b386004c93cd81f1c5f0aeacfe789fb7dad-ci-candidate-6963214.json"},
+    {"name": "push-candidate-6963214.log", "sha256": "c1fd87b1164f59b2a22f691f107b65a56bac296477f707eb7d7f81e174eccaf2", "content_addressed": "c1fd87b1164f59b2a22f691f107b65a56bac296477f707eb7d7f81e174eccaf2-push-candidate-6963214.log"}
+  ],
+  "divergencias": [
+    {
+      "name": "ci-run-6963214.json",
+      "mutavel": true,
+      "reported_sha256": "54850a68c24abfe8c68862106a8b4f00fca39e0f3f726f8040880f29cfaba02f",
+      "estado": "reported_not_recovered",
+      "motivo": "O gerente atualizou o arquivo depois da coleta. O hash reportado fica histórico. Os bytes antigos não foram recuperados.",
+      "atual_sha256": "c1d68fe19e6e3b079be859ba58bc8166b0f570ccd5fcedc8c2485ec002282971",
+      "content_addressed": "c1d68fe19e6e3b079be859ba58bc8166b0f570ccd5fcedc8c2485ec002282971-ci-run-6963214.json",
+      "atual": {"run": "40877414874", "status": "completed", "conclusion": "success", "updated_at": "2026-10-29T13:11:42Z"}
+    },
+    {
+      "name": "ci-jobs-6963214.json",
+      "mutavel": true,
+      "reported_sha256": "e8a897eebec66dce57cfc998cc6083493c225c55e9b024802625cdc9b927063f",
+      "estado": "reported_not_recovered",
+      "motivo": "O gerente atualizou o arquivo depois da coleta. O hash reportado fica histórico. Os bytes antigos não foram recuperados.",
+      "atual_sha256": "b11f864cab6ddfa306c77369209ba97b336068ffcbd3ad546f33f6aadf521335",
+      "content_addressed": "b11f864cab6ddfa306c77369209ba97b336068ffcbd3ad546f33f6aadf521335-ci-jobs-6963214.json",
+      "atual": {
+        "jobs": [
+          {"name": "verificar", "status": "completed", "conclusion": "success", "migracao_65_para_66": "success"},
+          {"name": "agente", "status": "completed", "conclusion": "success"}
+        ]
+      }
+    }
+  ],
+  "snapshot_historico": {
+    "documento": "docs/evidencias/B04-GATES-6963214.json",
+    "ci_status": "in_progress",
+    "ci_conclusion": null,
+    "job_agente": "success",
+    "job_verificar": "in_progress",
+    "migracao_65_para_66": "pending",
+    "publicado_em_main": false,
+    "corte_autorizado": false,
+    "homologacao": false,
+    "balance_read_database_gate": "pending",
+    "substituido": false
+  },
+  "ci_candidata_posterior": {
+    "separada_do_snapshot_historico": true,
+    "run": "40877414874",
+    "workflow": "backend Go e painel",
+    "branch": "dev/lote31-b04-pg-validado-6963214",
+    "head_sha": "6963214927aa45ae1963c58d4c14ba540d78c2f0",
+    "status": "completed",
+    "conclusion": "success",
+    "ambos_jobs": "success",
+    "updated_at": "2026-10-29T13:11:42Z",
+    "fontes": [
+      "c1d68fe19e6e3b079be859ba58bc8166b0f570ccd5fcedc8c2485ec002282971-ci-run-6963214.json",
+      "b11f864cab6ddfa306c77369209ba97b336068ffcbd3ad546f33f6aadf521335-ci-jobs-6963214.json"
+    ],
+    "reconfirmacao": {
+      "arquivo": "implementacao-codex/lote32-b04-aceite-b15-desenho-2026-10-29/evidencias/ci-published-6963214-76e699238249bdf5e2ff53eedd00e47c0bec25dd857b3978db6e5a719f7e8646.json",
+      "sha256": "76e699238249bdf5e2ff53eedd00e47c0bec25dd857b3978db6e5a719f7e8646",
+      "observed_at": "2026-10-29T13:57:08.284578+00:00",
+      "run_40877414874": "completed/success",
+      "outras_corridas_no_mesmo_arquivo_fora_desta_auditoria": ["40884919385", "40884920062", "40884330928"]
+    },
+    "e_deploy": false,
+    "e_homologacao": false,
+    "fecha_criterio": false
+  },
+  "publicacao_posterior": {
+    "separada_do_snapshot_historico": true,
+    "arquivo": "implementacao-codex/lote32-b04-aceite-b15-desenho-2026-10-29/evidencias/publication-applied-6963214.json",
+    "sha256": "01748e5872fce8df0dc9fce965709cd9d1f1eff7e0207e7b780cea24ca1b2a09",
+    "status": "published_main_and_development",
+    "remote_main": "6963214927aa45ae1963c58d4c14ba540d78c2f0",
+    "remote_development": "6963214927aa45ae1963c58d4c14ba540d78c2f0",
+    "development_ref": "refs/heads/dev/lote01-consolidado-2026-10-26",
+    "can_fast_forward": true,
+    "official_head": "6963214927aa45ae1963c58d4c14ba540d78c2f0",
+    "official_branch": "dev/lote01-consolidado-2026-10-26",
+    "recovery_tag": "base/pre-b13-b04-2026-10-29-e193266",
+    "deployment": false,
+    "recorded_at": "2026-10-29T13:48:01.855434+00:00",
+    "fecha_criterio": false,
+    "altera_flag_publicado_em_main": false
+  }
+}
