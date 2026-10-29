@@ -124,3 +124,21 @@ Allowlists continuam vazias mesmo com esse exit 0. `docs/B04-ACEITE-CORTE-LEITOR
 | Corte | inalterado | fechado | fechado | fechado | vazia |
 
 O projeto permanece aberto. Lotes 25 a 31 não estão publicados.
+
+## Adendo da corrida 6963214
+
+A tabela acima registra o gate de composição, quando a execução nova ainda estava pendente. A gerência depois rodou o comando já escrito neste documento, no commit `6963214927aa45ae1963c58d4c14ba540d78c2f0`:
+
+```sh
+NEXO_BALANCE_READ_PG_REQUIRED=1 python3 tests/contrato/go_integration.py
+```
+
+Resultado gravado em `gate-summary-6963214.json` às 2026-10-29T12:55:58Z: exit 0, `REQUIRED=1`, 370 ações `pass`, nenhuma falha, `new_pg_skips` 0. As 19 ações PostgreSQL `pass` incluem casos em memória e subtestes. Os sete testes SQL que passaram são `TestBalanceReadPGDue`, `TestBalanceReadPGFixturesOracleAndRLS`, `TestBalanceReadPGExplain`, `TestBalanceReadPGVariants`, `TestBalanceReadPGVariantsEmpty`, `TestBalanceReadPGVariantsRLS` e `TestBalanceReadPGVariantsApp`. `TestBalanceReadPGDedicatedSQLNotView` passou em checagem estática. `TestBalanceReadPGExplainVerifier`, com dez subtestes e o caso pai, passou em memória. O subteste `tenant_chave_so_no_filtro` não substitui o `EXPLAIN` real.
+
+`python3 tests/contrato/nativo.py` terminou exit 0, com 25 grupos, inclusive o grupo B13 de 22 casos, o ledger, o estorno parcial, o acordo, o rollback, o drift e o HTTP dos leitores sem `cmp_`.
+
+Os planos naturais, com `enable_seqscan=on` e `plan_cache_mode=force_custom_plan`, usaram `invoice_movements_invoice` e `payments_tenant_invoice_identity_uq`. Os dois scans têm `Index Cond ((tenant_id = i.tenant_id) AND (invoice_id = i.id))`. No caso paid há 1 linha e 1 loop. Na página de 7 ids há 1 linha e 7 loops. Volumes lidos no log do teste: `invoice_movements` 4287 linhas e 62 páginas `ctid`; `payments` 4156 linhas e 69 páginas `ctid`. O mínimo do teste continua 4096 linhas e 16 páginas. Não há `Seq Scan` nesses dois JSON. O teste que passou consultou `pg_index`, `pg_class`, `pg_attribute` e `pg_get_indexdef`.
+
+A corrida `7cde1e6` continua falha histórica. O texto antigo de `explain-indices` foi preservado. `balanceReadDatabaseGate` continua `pending`. Allowlists de shadow e de cut continuam vazias. Nenhum id entrou em corte. Os planos 29 e 30 permanecem DONE. O plano 31 permanece DONE neste commit. A matriz em `docs/B04-ACEITE-CORTE-LEITOR.json` marca `executado` só no critério cuja asserção desta corrida cobre a prova mínima. Seis critérios seguem abertos: acordo anterior à migração, estorno completo, excesso em outro contrato, importação com abertura, bloqueio de corte por `not matches`, e fallback com log. O campo global `executado` da matriz continua falso.
+
+A branch candidata `dev/lote31-b04-pg-validado-6963214` foi enviada. O CI `40877414874` está `in_progress`, com `conclusion` nula, no snapshot `ci-run-6963214.json`. O job `agente` figura `success`. O job `verificar` ainda não terminou, e o passo da migração 65 para 66 está `pending`. Publicação dessa candidata não é `main`, deploy nem homologação. O artefato sanitizado, com hashes e sem os logs, é `docs/evidencias/B04-GATES-6963214.json`.
