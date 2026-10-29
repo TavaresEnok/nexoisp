@@ -148,3 +148,13 @@ Ids que continuam fora da allowlist de corte, pelo desenho já integrado no lote
 ## Fora deste gate
 
 Não houve alteração de `docs/B04-ACEITE-CORTE-LEITOR.json`, `docs/CONCLUSAO-INTEGRAL.md`, `docs/LOTE29-B04-BASE-SHADOW.md`, `main`, workflow ou publicação. O projeto permanece aberto. Lotes 25 a 29 e estas provas de PostgreSQL não estão publicados.
+
+## Adendo posterior — alcance do lote 31
+
+As seções acima permanecem o registro do gate de composição do lote 30, no HEAD `9bb9e8d`, com URL ausente e os seis skips nomeados. Essa execução local não é reescrita.
+
+Depois desse texto, a gerência executou `python3 tests/contrato/go_integration.py` com `NEXO_BALANCE_READ_PG_REQUIRED=1` na base `7cde1e623462ec49c9fe75ca588e25c75a62dd5b`. O runner terminou exit 1. O resumo `gate-summary-7cde1e6.json` conta 356 ações `pass`, falha de `TestBalanceReadPGExplain`, falha do pacote `nexoisp/api-go/internal/modules/leitura` e zero `skip` nos testes PostgreSQL novos. `TestBalanceReadPGDue`, `TestBalanceReadPGDedicatedSQLNotView`, `TestBalanceReadPGFixturesOracleAndRLS`, `TestBalanceReadPGVariants`, `TestBalanceReadPGVariantsEmpty` e `TestBalanceReadPGVariantsRLS` passaram. O EXPLAIN rejeitou o nome antigo `payments_invoice`. O plano natural usou `invoice_movements_invoice` e `payments_tenant_invoice_identity_uq`, os dois com `Index Cond ((tenant_id = i.tenant_id) AND (invoice_id = i.id))`, `enable_seqscan=on`, uma linha por loop, um loop na fatura `paid` e sete na página. Essa corrida permanece reprovada. O plano `8b78eab07512` fica DONE 4/4 e o plano 29 fica DONE 13/13 na base `5ca3036`. Nenhum dos dois recomeça.
+
+Log, resumo e os dois planos naturais estão em `/home/enok/Documentos/projetos/implementacao-codex/lote30-b04-provas-postgres-2026-10-29/evidencias` (`gate-go-integration-7cde1e6.log`, `gate-summary-7cde1e6.json`, `explain-failure-7cde1e6.txt`, `explain-paid-7cde1e6.json`, `explain-pagina-7cde1e6.json`).
+
+O lote 31, em `docs/LOTE31-B04-GATES-EXPLAIN-RLS.md`, registra a correção da prova: equivalência estrutural do índice e papel efetivo `nexo_app` nas oito variantes, com os controles `nexo_go` conservados. Produção, SQL, schema, índices, grants e allowlists ficam fora desse lote. A prova nova continua com a gerência, no HEAD integrado, pelo `go_integration.py` existente e `NEXO_BALANCE_READ_PG_REQUIRED=1`.
