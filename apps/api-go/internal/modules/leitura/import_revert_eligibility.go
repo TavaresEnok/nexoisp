@@ -52,6 +52,12 @@ func parseImportRevertEligibilityRequest(id string, q url.Values) error {
 // batch created (their invoices). Sibling contracts of the same subscriber,
 // and invoices of those siblings, do not block a contract batch. Kind
 // invoices matches entity_id only. Blockers with count 0 are omitted.
+//
+// C25-v1 read: compensation is the schema-78 marker for this tenant and
+// batch, or {state:absent}. A committed marker exposes id, created_at,
+// reason and the persisted result object. idempotency_key and request_hash
+// stay out of the payload. evidence.reverted stays false. eligible does not
+// authorize a write; this statement only selects.
 const importRevertEligibilitySQL = `
 with b as (
   select id, kind, source, created_at, tenant_id
@@ -271,9 +277,22 @@ select json_build_object(
   'evidence', json_build_object(
     'reverted', false,
     'note', 'avaliação do estado atual; nenhuma reversão foi executada. Reversão futura deve compensar, não apagar, registros financeiros'
-  )
+  ),
+  'compensation', case
+    when marker.id is null then json_build_object('state', 'absent')
+    else json_build_object(
+      'state', 'committed',
+      'compensation_id', marker.id,
+      'created_at', to_char(marker.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),
+      'reason', marker.reason,
+      'result', marker.result::json
+    )
+  end
 ) as payload
 from b
+left join import_batch_compensations marker
+  on marker.tenant_id = b.tenant_id
+ and marker.batch_id = b.id
 cross join lateral (
   select coalesce(json_agg(json_build_object(
            'kind', g.kind,
@@ -341,6 +360,9 @@ cross join lateral (
   where g.n > 0
 ) found`
 
+// registerImportRevertEligibility keeps the read-only GET. Compensation is
+// projected by importRevertEligibilitySQL; this handler does not insert,
+// update or lock invoices.
 func registerImportRevertEligibility(api huma.API, r *endpoint.Registry, s Service) {
 	r.Get(api, "/api/import/batches/{id}/revert-eligibility", "import:run", false, func(ctx context.Context, req *http.Request) (endpoint.Result, error) {
 		if err := importRevertEligibilityScope(ctx); err != nil {
