@@ -59,6 +59,9 @@ func run() error {
 		_ = shutdownTelemetry(shutdown)
 	}()
 	reg := prometheus.NewRegistry()
+	if err := leitura.RegisterBalanceReadMetrics(reg); err != nil {
+		return err
+	}
 	database, err := db.Open(ctx, cfg.URL, cfg.Plan, cfg.Pool, reg)
 	if err != nil {
 		return err
