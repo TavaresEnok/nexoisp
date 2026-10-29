@@ -1,0 +1,641 @@
+{
+  "lote": "B04",
+  "contrato": "B04-corte-leitura-v1",
+  "titulo": "Matriz de aceite do corte de leitura dos saldos reconstruídos",
+  "desenho": "docs/B04-DESENHO-CORTE-LEITOR.md",
+  "base_lote03": "docs/LOTE03-B04-MOVIMENTOS.md",
+  "migracao": "db/migrations/00066_financial_movements.sql",
+  "migracao_66_intocada": true,
+  "lote03_intocado": true,
+  "lotes_24_a_27_intocados": true,
+  "implementado": false,
+  "executado": false,
+  "corte_autorizado": false,
+  "homologacao": false,
+  "publicado": false,
+  "revisao_independente": false,
+  "revisao_independente_exigida": true,
+  "produto_alterado": false,
+  "schema_alterado": false,
+  "grant_novo": false,
+  "escritor_novo": false,
+  "flag_default": "off",
+  "allowlist_shadow": [],
+  "allowlist_cut": [],
+  "decisao": {
+    "oraculo": "financial_balance_shadow e financial_agreement_shadow, security_invoker, papel nexo_app",
+    "caminho_quente": "consulta dedicada futura por invoice_id, formula identica a da view, filtro antes do agregado",
+    "resposta_servida": "expressao legada de cada leitor ate o id entrar na allowlist de corte",
+    "variavel": "NEXO_BALANCE_READ",
+    "valores": ["off", "shadow", "cut"],
+    "ausencia_equivale_a": "off",
+    "cut_com_allowlist_vazia": "devolve o corpo legado e executa so a sentenca legada",
+    "sentenca_off": "somente o SQL que o leitor executa hoje",
+    "sentenca_shadow": "arquivo novo em apps/api-go/internal/modules/leitura/shadow, uma sentenca, somente com o leitor na allowlist de shadow; Strip remove chaves cmp_ antes do corpo",
+    "sql_legado_da_coorte_nao_recebe_lateral": true,
+    "variante_fora_do_sqlc": "apps/api-go/sqlc.yaml le queries em internal/modules/leitura/queries; shadow/ nao entra nesse diretorio e nao gera artefato",
+    "grupos_generated_nao_editar": "apps/api-go/internal/modules/leitura/grupos_generated.go",
+    "consultas_generated_nao_editar": "apps/api-go/internal/modules/leitura/consultas_generated.go",
+    "gen_nao_editar_a_mao": true,
+    "due_fonte_viva": "apps/api-go/internal/modules/leitura/queries/due.sql",
+    "due_artefato": "apps/api-go/internal/modules/leitura/gen/due.sql.go",
+    "due_execucao": "leitura.DueBreakdown em auxiliares.go chama tx.Objects(ctx, gen.Due, id)",
+    "due_copia_inerte": "apps/api-go/internal/finance/sql/c59c1801_0.sql, citada somente por finance/financeiro.json em helper:dueBreakdown; query dueBreakdown nao e chamada",
+    "discrepancia": "corpo legado inteiro, sem mistura de campos e sem reler a view como substituto",
+    "escritores": "colunas da fatura e sum(signed_cents) sob LockInvoices; a sombra nao decide baixa, estorno, acordo, importacao nem refund"
+  },
+  "fonte_de_dinheiro": "payments.signed_cents",
+  "recebido_da_sombra_usa_a_mesma_fonte": true,
+  "prova_de_extrato_psp": false,
+  "prova_de_partidas_dobradas": false,
+  "indices_existentes": [
+    "invoice_movements_invoice (tenant_id, invoice_id, id) em db/migrations/00066_financial_movements.sql",
+    "payments_invoice (invoice_id) include (signed_cents) em db/migrations/00039_indices_de_escala.sql"
+  ],
+  "indice_novo_autorizado": false,
+  "rls": {
+    "tenant": ["t_inv", "t_pay", "db/migrations/00003_financeiro.sql"],
+    "portal": ["portal_inv", "portal_pay", "db/migrations/00004_portal_importacao.sql"],
+    "pop": ["pop_invoices", "db/migrations/00034_escopo_pop_aviso_documentos.sql"],
+    "movimentos": ["movements_visible", "db/migrations/00066_financial_movements.sql"],
+    "payments_nao_tem_politica_pop": true,
+    "consulta_dedicada_soma_pagamentos_so_da_fatura_visivel": true
+  },
+  "gates_existentes": [
+    {
+      "id": "nativo",
+      "comando": ["python3", "tests/contrato/nativo.py"],
+      "ambiente": "NEXO_PAYMENT_LAB=1",
+      "inclui": "tests/contrato/financial_movements.py",
+      "reimplementar": false,
+      "executado_neste_recorte": false
+    },
+    {
+      "id": "migracao-66",
+      "comando": ["python3", "tests/contrato/financial_movements_migration.py"],
+      "ambiente": "NEXO_PAYMENT_LAB=1",
+      "reimplementar": false,
+      "executado_neste_recorte": false
+    }
+  ],
+  "prova_sintetica_0086558": {
+    "commit": "0086558",
+    "papel": "nexo_go nao privilegiado",
+    "relato_da_gerencia": {
+      "tenant_alfa_faturas": 23,
+      "tenant_alfa_shadow": 23,
+      "drift": 0,
+      "beta": 0,
+      "acordos": 0
+    },
+    "artefato": "implementacao-codex/lote27-b13-http-restore-2026-10-29/evidencias/b04-comparacao-sintetica-0086558.json",
+    "artefato_nesta_worktree": false,
+    "reexecutado_aqui": false,
+    "fecha_matriz": false,
+    "autoriza_corte": false,
+    "motivo": "23 faturas sem acordo nao cobrem acordo comprovado, source_unproven, estorno, excesso, refund, importacao, compensacao, rollback, RLS de portal e POP nem drift injetado"
+  },
+  "restore_lote27": {
+    "homologa_ledger_externo": false,
+    "autoriza_corte": false,
+    "relatorios_go_e_browser_26_homologam_ledger_externo": false
+  },
+  "leitores": [
+    {
+      "id": "invoice-detail",
+      "rota": "GET /api/invoices/{id}",
+      "permissao": "finance:read",
+      "funcao": "grupos.go grupo, ramo que inclui /api/invoices/{id}, somente query(0, id); rows[0] e o corpo",
+      "fonte_editavel": "apps/api-go/internal/modules/leitura/queries/group91a4cc44_0.sql",
+      "artefato_gerado": "apps/api-go/internal/modules/leitura/gen/group91a4cc44_0.sql.go",
+      "metadado_gerado": "apps/api-go/internal/modules/leitura/grupos_generated.go gen.Group91a4cc440",
+      "variante_shadow": "apps/api-go/internal/modules/leitura/shadow/group91a4cc44_0.sql",
+      "registro": "apps/api-go/internal/modules/leitura/variants_sqlc.go",
+      "expressao": "paid_cents = sum(signed_cents)::int",
+      "coorte": "C1-sqlc",
+      "cut_permitido": false,
+      "motivo_cut_fechado": "cast ::int e allowlist vazia"
+    },
+    {
+      "id": "contract-finance-list",
+      "rota": "GET /api/contracts/{id}/finance",
+      "permissao": "finance:read",
+      "funcao": "grupos.go grupo, ramo /api/contracts/{id}/finance, query(0, id)",
+      "fonte_editavel": "apps/api-go/internal/modules/leitura/queries/groupc47037ac_0.sql",
+      "artefato_gerado": "apps/api-go/internal/modules/leitura/gen/groupc47037ac_0.sql.go",
+      "metadado_gerado": "apps/api-go/internal/modules/leitura/grupos_generated.go gen.Groupc47037ac0",
+      "variante_shadow": "apps/api-go/internal/modules/leitura/shadow/groupc47037ac_0.sql",
+      "registro": "apps/api-go/internal/modules/leitura/variants_sqlc.go",
+      "expressao": "paid_cents = sum(signed_cents)::int",
+      "coorte": "C1-sqlc",
+      "cut_permitido": false,
+      "motivo_cut_fechado": "cast ::int e allowlist vazia"
+    },
+    {
+      "id": "contract-finance-totals",
+      "rota": "GET /api/contracts/{id}/finance",
+      "permissao": "finance:read",
+      "funcao": "grupos.go ramo /api/contracts/{id}/finance, tx.Objects da string de totais; a L1 move a string para contract_finance_totals.go",
+      "fonte_editavel": "apps/api-go/internal/modules/leitura/grupos.go",
+      "fonte_depois_da_L1": "apps/api-go/internal/modules/leitura/contract_finance_totals.go",
+      "artefato_gerado": null,
+      "variante_shadow": "apps/api-go/internal/modules/leitura/shadow/contract_finance_totals.sql",
+      "registro": "apps/api-go/internal/modules/leitura/variants_inline.go",
+      "expressao": "open_cents e overdue_cents em bigint apenas para status open",
+      "coorte": "C1-inline",
+      "cut_permitido": false,
+      "motivo_cut_fechado": "equivalencia exige o mesmo filtro open; cobravel de reconciling fica de fora; allowlist vazia"
+    },
+    {
+      "id": "reconciliation-invoices",
+      "rota": "GET /api/finance/reconciliation",
+      "permissao": "finance:read",
+      "funcao": "grupos.go grupo, ramo /api/finance/reconciliation, somente indice 0 chave invoices",
+      "fonte_editavel": "apps/api-go/internal/modules/leitura/queries/group152f5ccd_0.sql",
+      "artefato_gerado": "apps/api-go/internal/modules/leitura/gen/group152f5ccd_0.sql.go",
+      "metadado_gerado": "apps/api-go/internal/modules/leitura/grupos_generated.go gen.Group152f5ccd0",
+      "variante_shadow": "apps/api-go/internal/modules/leitura/shadow/group152f5ccd_0.sql",
+      "registro": "apps/api-go/internal/modules/leitura/variants_sqlc.go",
+      "expressao": "paid_cents ::int das faturas reconciling",
+      "coorte": "C1-sqlc",
+      "cut_permitido": false,
+      "motivo_cut_fechado": "cast ::int; group152f5ccd_1.sql e gateway_events e fica fora"
+    },
+    {
+      "id": "finance-summary",
+      "rota": "GET /api/finance/summary",
+      "permissao": "finance:read",
+      "funcao": "consultas.go s.rows somente quando spec.Path e /api/finance/summary; first(rows) e o corpo",
+      "fonte_editavel": "apps/api-go/internal/modules/leitura/queries/readf038858e.sql",
+      "artefato_gerado": "apps/api-go/internal/modules/leitura/gen/readf038858e.sql.go",
+      "metadado_gerado": "apps/api-go/internal/modules/leitura/consultas_generated.go gen.Readf038858e",
+      "variante_shadow": "apps/api-go/internal/modules/leitura/shadow/readf038858e.sql",
+      "registro": "apps/api-go/internal/modules/leitura/variants_sqlc.go",
+      "expressao": "open_cents e overdue_cents bigint para open; received_month_cents e caixa ::int",
+      "coorte": "C1-sqlc",
+      "cut_permitido": false,
+      "motivo_cut_fechado": "received_month_cents nao e saldo de fatura; allowlist vazia"
+    },
+    {
+      "id": "invoice-list",
+      "rota": "GET /api/invoices",
+      "permissao": "finance:read",
+      "funcao": "dinamicas.go invoices, somente dynamicSQL(/api/invoices, 1)",
+      "fonte_editavel": "apps/api-go/internal/modules/leitura/dinamicas/4a483e96_1.sql",
+      "artefato_gerado": null,
+      "variante_shadow": "apps/api-go/internal/modules/leitura/shadow/4a483e96_1.sql",
+      "registro": "apps/api-go/internal/modules/leitura/variants_dinamicas.go",
+      "expressao": "paid_cents ::int",
+      "coorte": "C1-dinamicas",
+      "cut_permitido": false,
+      "motivo_cut_fechado": "cast ::int e allowlist vazia"
+    },
+    {
+      "id": "today-overdue",
+      "rota": "GET /api/today",
+      "permissao": "subscribers:read",
+      "funcao": "today.go one(3) no bloco finance:read",
+      "fonte_editavel": "apps/api-go/internal/modules/leitura/dinamicas/8d9dae54_3.sql",
+      "artefato_gerado": null,
+      "variante_shadow": "apps/api-go/internal/modules/leitura/shadow/8d9dae54_3.sql",
+      "registro": "apps/api-go/internal/modules/leitura/variants_c2.go",
+      "expressao": "overdue_cents ::int de open vencidas",
+      "coorte": "C2",
+      "cut_permitido": false,
+      "motivo_cut_fechado": "cast ::int"
+    },
+    {
+      "id": "termination-quote-get",
+      "rota": "GET /api/contracts/{id}/termination-quote",
+      "permissao": "contracts:read",
+      "funcao": "dinamicas.go terminationQuote, complexRows de helper:terminationQuote indice 0",
+      "fonte_editavel": "apps/api-go/internal/modules/leitura/dinamicas/4facfb98_0.sql",
+      "artefato_gerado": null,
+      "variante_shadow": "apps/api-go/internal/modules/leitura/shadow/4facfb98_0.sql",
+      "registro": "apps/api-go/internal/modules/leitura/variants_c2.go",
+      "expressao": "open_cents ::int com nominal, encargos, desconto e recebido",
+      "coorte": "C2",
+      "cut_permitido": false,
+      "motivo_cut_fechado": "cast ::int; total_cents soma multa de fidelidade"
+    },
+    {
+      "id": "invoice-due",
+      "rota": "GET /api/invoices/{id}/due",
+      "permissao": "finance:read",
+      "funcao": "leitura.DueBreakdown em auxiliares.go; o GET esta no ramo /api/invoices/{id}/due",
+      "fonte_editavel": "apps/api-go/internal/modules/leitura/queries/due.sql",
+      "artefato_gerado": "apps/api-go/internal/modules/leitura/gen/due.sql.go",
+      "execucao": "tx.Objects(ctx, gen.Due, id)",
+      "copia_inerte": "apps/api-go/internal/finance/sql/c59c1801_0.sql",
+      "variante_shadow": "apps/api-go/internal/modules/leitura/shadow/due.sql",
+      "registro": "apps/api-go/internal/modules/leitura/variants_due.go",
+      "ponto_de_chamada_http": "apps/api-go/internal/modules/leitura/due_http.go DueHTTP",
+      "expressao": "paid_cents ::int mais previa fine_cents, interest_cents e fee_if_applied_cents",
+      "coorte": "C3b depois de C3a",
+      "cut_permitido": false,
+      "motivo_cut_fechado": "funcao compartilhada com Agreement e Manual; previa de juros nao e fee_cents"
+    }
+  ],
+  "fora_da_coorte": [
+    {
+      "id": "settle",
+      "fonte_editavel": "apps/api-go/internal/finance/sql/c810a196_1.sql",
+      "funcao": "finance.settle em core.go",
+      "papel": "escritor"
+    },
+    {
+      "id": "reverse",
+      "fonte_editavel": "apps/api-go/internal/finance/sql/48002566_3.sql",
+      "funcao": "finance.Reverse em core.go",
+      "papel": "escritor"
+    },
+    {
+      "id": "agreement",
+      "fonte_editavel": "apps/api-go/internal/finance/advanced.go",
+      "sql": "apps/api-go/internal/modules/leitura/queries/due.sql via leitura.DueBreakdown e gen.Due",
+      "funcao": "finance.Agreement",
+      "papel": "escritor"
+    },
+    {
+      "id": "import-invoice-row",
+      "fonte_editavel": "apps/api-go/internal/modules/escrita/sql/56aea313_1.sql",
+      "funcao": "helper:importInvoiceRow",
+      "papel": "escritor"
+    },
+    {
+      "id": "termination-quote-write",
+      "fonte_editavel": "apps/api-go/internal/modules/escrita/sql/4facfb98_0.sql",
+      "funcao": "escrita/contratos.go helper:terminationQuote",
+      "papel": "consulta no encerramento; soma so amount_cents; Go nao consome open_cents na multa"
+    },
+    {
+      "id": "finance-monthly",
+      "rota": "GET /api/finance/monthly",
+      "fonte_editavel": "apps/api-go/internal/modules/leitura/queries/group3a79e37d_0.sql",
+      "papel": "caixa por paid_at"
+    },
+    {
+      "id": "dashboard-panels",
+      "rota": "GET /api/dashboard/panels",
+      "fonte_editavel": "apps/api-go/internal/modules/leitura/dinamicas/9603e721_4.sql",
+      "papel": "caixa do dia em float"
+    },
+    {
+      "id": "receipts-report",
+      "rota": "GET /api/finance/reports/receipts",
+      "fonte_editavel": "apps/api-go/internal/modules/escrita/sql/b92a2082_1.sql",
+      "papel": "caixa agrupado em float"
+    },
+    {
+      "id": "aging",
+      "rota": "GET /api/finance/reports/aging",
+      "fonte_editavel": "apps/api-go/internal/modules/escrita/sql/d634dac7_1.sql",
+      "papel": "due_cents pode ser negativo e vai para float"
+    },
+    {
+      "id": "to-cancel",
+      "rota": "GET /api/finance/reports/to-cancel",
+      "fonte_editavel": "apps/api-go/internal/modules/escrita/sql/dafcc056_1.sql",
+      "papel": "nao subtrai recebimento"
+    },
+    {
+      "id": "finance-export",
+      "rota": "GET /api/finance/export",
+      "fonte_editavel": [
+        "apps/api-go/internal/modules/escrita/sql/c5014101_0.sql",
+        "apps/api-go/internal/modules/escrita/sql/c5014101_1.sql"
+      ],
+      "papel": "CSV com documento; pagamentos em linha assinada; titulos com valor_pago ::int"
+    },
+    {
+      "id": "portal-overview",
+      "rota": "GET /api/portal/overview",
+      "fonte_editavel": "apps/api-go/internal/modules/leitura/queries/overview_2.sql",
+      "papel": "expoe amount_cents e status, nao residual"
+    },
+    {
+      "id": "notices",
+      "fonte_editavel": "apps/api-go/internal/outbound/sql/69b06ce3_3.sql",
+      "funcao": "outbound/notices.go",
+      "papel": "texto ao assinante; due_cents pode ser negativo"
+    },
+    {
+      "id": "import-reconciliation",
+      "rota": "GET /api/import/batches/{id}/reconciliation",
+      "fonte_editavel": "apps/api-go/internal/modules/leitura/import_reconciliation.go",
+      "papel": "residual sem encargos nem desconto; dono B13"
+    },
+    {
+      "id": "payment-lines",
+      "rota": "GET /api/invoices/{id}",
+      "fonte_editavel": "apps/api-go/internal/modules/leitura/queries/group91a4cc44_2.sql",
+      "papel": "razao de caixa da fatura, nao sombra"
+    }
+  ],
+  "dag": [
+    {
+      "id": "L1",
+      "titulo": "Consulta dedicada e wrapper com allowlists vazias",
+      "arquivos": [
+        "apps/api-go/internal/modules/leitura/queries/balance_shadow_compare.sql",
+        "apps/api-go/internal/modules/leitura/balance_read.go",
+        "apps/api-go/internal/modules/leitura/contract_finance_totals.go",
+        "apps/api-go/internal/modules/leitura/grupos.go",
+        "apps/api-go/internal/modules/leitura/consultas.go",
+        "apps/api-go/internal/modules/leitura/dinamicas.go",
+        "apps/api-go/internal/modules/leitura/today.go"
+      ],
+      "ganchos": {
+        "grupos.go": "Pick so no indice 0 de /api/invoices/{id}, /api/contracts/{id}/finance e /api/finance/reconciliation; totais chamam contract_finance_totals.go",
+        "consultas.go": "Pick so quando spec.Path e /api/finance/summary",
+        "dinamicas.go": "Pick so em invoices indice 1 e em terminationQuote indice 0",
+        "today.go": "Pick so em one(3)"
+      },
+      "artefato_sqlc": "apps/api-go/internal/modules/leitura/gen/balance_shadow_compare.sql.go",
+      "nao_edita": [
+        "apps/api-go/internal/modules/leitura/grupos_generated.go",
+        "apps/api-go/internal/modules/leitura/consultas_generated.go",
+        "apps/api-go/internal/modules/leitura/queries/due.sql",
+        "apps/api-go/internal/modules/leitura/gen/due.sql.go",
+        "apps/api-go/internal/modules/leitura/gen/balance_shadow_compare.sql.go"
+      ],
+      "depende_de": [],
+      "aceite_proprio": "lateral igual a financial_balance_shadow nas fixtures nao vazias; EXPLAIN usa invoice_movements_invoice e payments_invoice; com allowlist vazia Pick devolve a sentenca legada, o arquivo shadow nao e executado e o corpo nao tem chave cmp_",
+      "aprovado_por_consumidores": false,
+      "executado": false
+    },
+    {
+      "id": "C1-sqlc",
+      "titulo": "Comparacao desligada nos SQLC de fatura, contrato, reconciliacao e resumo",
+      "arquivos": [
+        "apps/api-go/internal/modules/leitura/shadow/group91a4cc44_0.sql",
+        "apps/api-go/internal/modules/leitura/shadow/groupc47037ac_0.sql",
+        "apps/api-go/internal/modules/leitura/shadow/group152f5ccd_0.sql",
+        "apps/api-go/internal/modules/leitura/shadow/readf038858e.sql",
+        "apps/api-go/internal/modules/leitura/variants_sqlc.go"
+      ],
+      "nao_edita": [
+        "apps/api-go/internal/modules/leitura/grupos.go",
+        "apps/api-go/internal/modules/leitura/consultas.go",
+        "apps/api-go/internal/modules/leitura/grupos_generated.go",
+        "apps/api-go/internal/modules/leitura/consultas_generated.go",
+        "apps/api-go/internal/modules/leitura/queries/group91a4cc44_0.sql",
+        "apps/api-go/internal/modules/leitura/queries/groupc47037ac_0.sql",
+        "apps/api-go/internal/modules/leitura/queries/group152f5ccd_0.sql",
+        "apps/api-go/internal/modules/leitura/queries/readf038858e.sql"
+      ],
+      "depende_de": ["L1"],
+      "aceite_proprio": "diff vazio nos SQL legados; com a variavel desligada Pick devolve gen.Group91a4cc440, gen.Groupc47037ac0, gen.Group152f5ccd0 e gen.Readf038858e; corpo sem chave cmp_",
+      "executado": false
+    },
+    {
+      "id": "C1-dinamicas",
+      "titulo": "Comparacao desligada na lista de faturas",
+      "arquivos": [
+        "apps/api-go/internal/modules/leitura/shadow/4a483e96_1.sql",
+        "apps/api-go/internal/modules/leitura/variants_dinamicas.go"
+      ],
+      "nao_edita": [
+        "apps/api-go/internal/modules/leitura/dinamicas.go",
+        "apps/api-go/internal/modules/leitura/dinamicas.json",
+        "apps/api-go/internal/modules/leitura/dinamicas/4a483e96_1.sql"
+      ],
+      "depende_de": ["L1"],
+      "aceite_proprio": "com a variavel desligada Pick devolve dynamicSQL(/api/invoices, 1); o indice 1 de dinamicas.json permanece 4a483e96_1.sql; corpo sem chave cmp_",
+      "executado": false
+    },
+    {
+      "id": "C1-inline",
+      "titulo": "Comparacao desligada nos totais do financeiro do contrato",
+      "arquivos": [
+        "apps/api-go/internal/modules/leitura/shadow/contract_finance_totals.sql",
+        "apps/api-go/internal/modules/leitura/variants_inline.go"
+      ],
+      "nao_edita": [
+        "apps/api-go/internal/modules/leitura/grupos.go",
+        "apps/api-go/internal/modules/leitura/contract_finance_totals.go"
+      ],
+      "depende_de": ["L1"],
+      "aceite_proprio": "a string legada permanece em contract_finance_totals.go; a variante repete essa string e so acrescenta colunas cmp_; modo desligado executa a string legada",
+      "executado": false
+    },
+    {
+      "id": "C2",
+      "titulo": "Agregados today e termination-quote, sem allowlist de corte",
+      "arquivos": [
+        "apps/api-go/internal/modules/leitura/shadow/8d9dae54_3.sql",
+        "apps/api-go/internal/modules/leitura/shadow/4facfb98_0.sql",
+        "apps/api-go/internal/modules/leitura/variants_c2.go"
+      ],
+      "nao_edita": [
+        "apps/api-go/internal/modules/leitura/today.go",
+        "apps/api-go/internal/modules/leitura/dinamicas.go",
+        "apps/api-go/internal/modules/leitura/dinamicas/8d9dae54_3.sql",
+        "apps/api-go/internal/modules/leitura/dinamicas/4facfb98_0.sql"
+      ],
+      "depende_de": ["L1"],
+      "aceite_proprio": "modo desligado executa os embeds atuais; ids permanecem fora da allowlist de corte enquanto houver ::int",
+      "executado": false
+    },
+    {
+      "id": "C3a",
+      "titulo": "Separar o GET due de DueBreakdown",
+      "arquivos": [
+        "apps/api-go/internal/modules/leitura/due_http.go",
+        "apps/api-go/internal/modules/leitura/auxiliares.go"
+      ],
+      "vigiar": [
+        "apps/api-go/internal/modules/leitura/queries/due.sql",
+        "apps/api-go/internal/modules/leitura/gen/due.sql.go",
+        "apps/api-go/internal/finance/core.go",
+        "apps/api-go/internal/finance/advanced.go"
+      ],
+      "proibido": [
+        "apps/api-go/internal/finance/sql/c59c1801_0.sql",
+        "apps/api-go/internal/finance/financeiro.json"
+      ],
+      "depende_de": [],
+      "aceite_proprio": "DueHTTP delega a DueBreakdown. Agreement em advanced.go e Manual em core.go continuam chamando DueBreakdown, que executa gen.Due. queries/due.sql sem diff. gen/due.sql.go sem edicao manual. query dueBreakdown continua sem chamada. c59c1801_0.sql permanece inerte",
+      "aprovado_por_c3b": false,
+      "executado": false
+    },
+    {
+      "id": "C3b",
+      "titulo": "Comparacao so no GET due",
+      "arquivos": [
+        "apps/api-go/internal/modules/leitura/due_http.go",
+        "apps/api-go/internal/modules/leitura/shadow/due.sql",
+        "apps/api-go/internal/modules/leitura/variants_due.go"
+      ],
+      "nao_edita": [
+        "apps/api-go/internal/modules/leitura/queries/due.sql",
+        "apps/api-go/internal/modules/leitura/gen/due.sql.go",
+        "apps/api-go/internal/finance/sql/c59c1801_0.sql",
+        "apps/api-go/internal/finance/core.go",
+        "apps/api-go/internal/finance/advanced.go"
+      ],
+      "depende_de": ["L1", "C3a"],
+      "aceite_proprio": "DueBreakdown e gen.Due permanecem a sentenca de Agreement e Manual. A variante so e escolhida dentro de DueHTTP. A previa de multa e juros e o mapa devolvido aos escritores ficam intactos",
+      "executado": false
+    },
+    {
+      "id": "G",
+      "titulo": "Gate conjunto de conversao",
+      "arquivos": [
+        "docs/B04-DESENHO-CORTE-LEITOR.md",
+        "docs/B04-ACEITE-CORTE-LEITOR.json"
+      ],
+      "depende_de": ["L1", "C1-sqlc", "C1-dinamicas", "C1-inline", "C2", "C3a", "C3b"],
+      "aceite_proprio": "so documenta allowlist depois da matriz nao vazia e da revisao independente; nao aprova L1 nem C3a",
+      "executado": false
+    }
+  ],
+  "frentes_ausentes_de_proposito": [
+    "mensal, paineis, recibos, aging, a cancelar, exportacao",
+    "portal overview e avisos",
+    "reconciliacao de importacao e escritores",
+    "tela ou leitura de acordo",
+    "indice, grant, view nova, edicao da migracao 66",
+    "editar grupos_generated.go, consultas_generated.go ou gen a mao",
+    "passar a executar finance/sql/c59c1801_0.sql"
+  ],
+  "criterios": [
+    {
+      "id": "estado-open",
+      "prova_minima": "uma fatura open com nominal, encargos, desconto e recebido parcial; residual e cobravel iguais a nominal+encargos-desconto-recebido; contagem > 0",
+      "gate": "nativo",
+      "executado": false,
+      "prova": null
+    },
+    {
+      "id": "estado-paid",
+      "prova_minima": "uma fatura paid com recebido igual a nominal+encargos-desconto; residual 0; cobravel 0; contagem > 0",
+      "gate": "nativo",
+      "executado": false,
+      "prova": null
+    },
+    {
+      "id": "estado-reconciling",
+      "prova_minima": "uma fatura reconciling; cobravel igual ao residual e diferente do open_cents dos leitores que filtram status open; contagem > 0",
+      "gate": "nativo",
+      "executado": false,
+      "prova": null
+    },
+    {
+      "id": "estado-canceled",
+      "prova_minima": "uma fatura canceled com nominal preservado, cobravel 0 e residual podendo permanecer; contagem > 0",
+      "gate": "nativo",
+      "executado": false,
+      "prova": null
+    },
+    {
+      "id": "acordo-comprovado",
+      "prova_minima": "agreement_sources com transferred_cents igual ao residual; parcelas somam total_cents; recebimentos originais nao copiados; financial_agreement_shadow.matches verdadeiro; cobravel da fatura original 0",
+      "gate": "nativo",
+      "executado": false,
+      "prova": null
+    },
+    {
+      "id": "acordo-nao-comprovado",
+      "prova_minima": "acordo anterior a migracao sem agreement_sources; source_unproven verdadeiro; matches falso; vinculo nao inferido por nota",
+      "gate": "migracao-66",
+      "executado": false,
+      "prova": null
+    },
+    {
+      "id": "estorno",
+      "prova_minima": "linha kind reversal com signed_cents negativo; residual restaurado; segunda reversao do mesmo recebimento recusada",
+      "gate": "nativo",
+      "executado": false,
+      "prova": null
+    },
+    {
+      "id": "excesso",
+      "prova_minima": "recebido acima de nominal+encargos-desconto; excess_cents > 0; residual 0; excesso nao vira credito de outro contrato",
+      "gate": "nativo",
+      "executado": false,
+      "prova": null
+    },
+    {
+      "id": "refund-psp",
+      "prova_minima": "devolucao confirmada grava reversal com provider_refund_id e provider_return_id; status reconciling; recebido cai pelo signed_cents; contagem > 0",
+      "gate": "teste ja existente em apps/api-go/internal/finance/provider_refunds_test.go, sem runner novo",
+      "executado": false,
+      "prova": null
+    },
+    {
+      "id": "importacao",
+      "prova_minima": "titulo importado com abertura de movimento e recebido assinado conferido contra a sombra; contagem > 0",
+      "gate": "nativo ou financial_movements_migration.py, sem runner novo",
+      "executado": false,
+      "prova": null
+    },
+    {
+      "id": "compensacao",
+      "prova_minima": "estorno de baixa importada zera o signed_cents daquele recebimento; collectible e excess da sombra conferidos; historico preservado",
+      "gate": "testes ja existentes de compensacao B13, sem runner novo",
+      "executado": false,
+      "prova": null
+    },
+    {
+      "id": "rollback",
+      "prova_minima": "update de fatura com rollback restaura colunas e nao deixa movement novo",
+      "gate": "nativo",
+      "executado": false,
+      "prova": null
+    },
+    {
+      "id": "rls-tenant-portal-pop",
+      "prova_minima": "papel nexo_app; a fatura conta 1 no tenant dono e 0 com subscriber_id alheio, com pop_ids alheio e com outro tenant",
+      "gate": "nativo",
+      "executado": false,
+      "prova": null
+    },
+    {
+      "id": "drift-injetado",
+      "prova_minima": "trigger desligada, coluna alterada, matches falso, rollback, matches verdadeiro de novo e leitura oficial preservada",
+      "gate": "nativo e migracao-66",
+      "executado": false,
+      "prova": null
+    },
+    {
+      "id": "matches-falso-bloqueia-corte",
+      "prova_minima": "uma linha not matches no escopo impede entrada daquele leitor na allowlist de corte",
+      "gate": "G",
+      "executado": false,
+      "prova": null
+    },
+    {
+      "id": "sem-fallback-silencioso",
+      "prova_minima": "divergencia de um campo devolve o corpo legado inteiro; log sem nota, documento, gateway, segredo nem centavos",
+      "gate": "L1",
+      "executado": false,
+      "prova": null
+    },
+    {
+      "id": "explain-indices",
+      "prova_minima": "EXPLAIN de um invoice_id e de uma pagina usa invoice_movements_invoice e payments_invoice",
+      "gate": "L1",
+      "executado": false,
+      "prova": null
+    },
+    {
+      "id": "variante-shadow-isolada",
+      "prova_minima": "com shadow e o leitor na allowlist, uma sentenca nova em leitura/shadow substitui a legada no mesmo snapshot e projeta cmp_; Strip remove cmp_ antes do JSON; os SQL legados da coorte, grupos_generated.go, consultas_generated.go e gen/due.sql.go permanecem sem a lateral",
+      "gate": "L1 prova Pick e Strip com variante de teste; cada frente C prova o proprio arquivo em shadow/ e o diff vazio do SQL legado",
+      "executado": false,
+      "prova": null
+    },
+    {
+      "id": "flag-fechada",
+      "prova_minima": "allowlists vazias; off, shadow e cut executam a sentenca legada, nao enviam arquivo de shadow/ e devolvem o corpo sem chave cmp_",
+      "gate": "L1",
+      "executado": false,
+      "prova": null
+    }
+  ],
+  "amostra_vazia_nao_fecha_criterio": true,
+  "comparacao_23_faturas_0_acordos_nao_fecha_matriz": true,
+  "codigo_de_teste_nao_e_execucao": true,
+  "analise_deste_documento_nao_e_homologacao": true
+}
