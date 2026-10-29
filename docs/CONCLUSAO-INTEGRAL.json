@@ -429,15 +429,23 @@
     },
     {
       "path": "docs/B15-DESENHO-CLOUD-API.md",
-      "papel": "b15_desenho_offline_default_off"
+      "papel": "b15_desenho_lote32_com_adendo_lote33"
     },
     {
       "path": "docs/B15-ACEITE-CLOUD-API.json",
-      "papel": "b15_matriz_planned_not_run"
+      "papel": "b15_matriz_r1_exit_0_r2_g_h_pendentes"
     },
     {
       "path": "docs/LOTE32-B04-ACEITE-B15-DESENHO.md",
       "papel": "lote32_mapa_aceite_b04_e_desenho_b15"
+    },
+    {
+      "path": "docs/LOTE33-B15-OFFLINE.md",
+      "papel": "lote33_mvp_offline_ci_e_pg_pendentes"
+    },
+    {
+      "path": "docs/evidencias/B04-GATES-6963214-AUDIT.json",
+      "papel": "auditoria_t9_snapshots_nao_editada"
     },
     {
       "path": "/home/enok/Documentos/projetos/implementacao-codex/lote30-b04-provas-postgres-2026-10-29/evidencias/gate-summary-7cde1e6.json",
@@ -1954,27 +1962,40 @@
       "prioridade": "P1",
       "fechado": false,
       "implementado": "parcial",
-      "testado": "canal_generico_historico_cloud_api_planned_not_run",
+      "testado": "r1_sender_falso_exit_0_r2_g_postgresql_nao_executado",
       "homologado": "sem_recurso_externo",
-      "publicado": "desenho_na_branch_de_desenvolvimento",
+      "publicado": "branch_de_desenvolvimento_nao_publicada",
       "cloud_api": {
-        "estado": "desenho_revisado",
-        "implementado": false,
+        "estado": "mvp_interno_offline_default_off",
+        "implementado": true,
         "enviado": false,
         "homologado": false,
         "offline": true,
         "default_off": true,
-        "commit": "6ca6d21731d5706b72cbccdc6939de213dbb9070",
-        "base_lida": "6963214927aa45ae1963c58d4c14ba540d78c2f0",
+        "desenho_lote32": "6ca6d21731d5706b72cbccdc6939de213dbb9070",
+        "base_ci_verde": "6963214927aa45ae1963c58d4c14ba540d78c2f0",
+        "base_documental_lote32": "f42256b558288590f8e804b558982f15651981fb",
+        "objeto_33f42256b_neste_clone": false,
+        "ci_lote33": "pendente",
+        "postgresql_r2_g": "pendente",
         "desenho": "docs/B15-DESENHO-CLOUD-API.md",
         "matriz": "docs/B15-ACEITE-CLOUD-API.json",
-        "casos": "B15-C01 a B15-C27 e B15-H01",
-        "execucao": "planned/not_run",
-        "nexo_cloud_api": "ausente no código; o desenho só liga com o valor on",
+        "lote": "docs/LOTE33-B15-OFFLINE.md",
+        "casos": "doze R1 executados no pacote cloudapi; R2, G e B15-H01 não executados",
+        "execucao": "r1_pacote_cloudapi_exit_0_r2_g_h_pendentes",
+        "r1_argv": ["go", "-C", "apps/api-go", "test", "-count=1", "-v", "./internal/outbound/cloudapi/"],
+        "r1_exit": 0,
+        "r1_data": "2026-10-29",
+        "r1_rede": false,
+        "r1_postgresql": false,
+        "nexo_cloud_api": "só o valor on liga a trava; ausente neste ciclo",
         "proven_graph_versions": [],
         "active_default": false,
         "chamada_meta": false,
-        "waba": false
+        "waba": false,
+        "protocolo_meta": "nao_verificado",
+        "versao_graph": "nao_homologada",
+        "api_real": false
       },
       "evidencia": [
         {
@@ -1988,25 +2009,34 @@
         {
           "path": "docs/B15-DESENHO-CLOUD-API.md",
           "commit": "6ca6d21",
-          "nota": "desenho revisado; implementação futura offline e desligada"
+          "nota": "desenho do lote 32 preservado; adendo do lote 33 decide linearização, FOR SHARE, orçamento 3, decoder injetado e retenção"
         },
         {
           "path": "docs/B15-ACEITE-CLOUD-API.json",
           "commit": "6ca6d21",
-          "nota": "matriz planned/not_run; H aberto"
+          "nota": "doze casos R1 com exit 0 do pacote cloudapi em 2026-10-29; R2, G e H01 não executados"
+        },
+        {
+          "path": "docs/LOTE33-B15-OFFLINE.md",
+          "nota": "separa implementado, teste falso, PostgreSQL, CI e publicação"
+        },
+        {
+          "path": "docs/evidencias/B04-GATES-6963214-AUDIT.json",
+          "nota": "auditoria t9 de snapshots; este lote não a edita"
         }
       ],
       "entregue": [
         "avisos e canal HTTP genérico com Authorization",
-        "desenho do adapter Cloud API e matriz, sem código e sem envio"
+        "MVP interno Cloud API offline e desligado, sem envio e sem conta",
+        "R1 com sender falso e exit 0; R2 e G ainda sem PostgreSQL"
       ],
       "criterios_abertos": [
         {
           "id": "B15-cloud-api",
-          "causa": "O desenho e a matriz existem. O pacote, a migração 79 e a conta não existem. WABA, template e versão Graph de produção continuam sem recurso.",
+          "causa": "O código interno existe e permanece desligado. R2 e G não tiveram PostgreSQL. WABA, template, versão Graph e API real continuam sem recurso. O CI 40877414874 não cobre este lote.",
           "dependencias": [],
-          "evidencia_faltante": "Implementação offline de R1 e de R2, cada uma com o go test do desenho. G depois das duas. H permanece aberto.",
-          "proximo_passo": "Implementar R1 e R2 como frentes independentes, default off, sem chamada à Meta. G não bloqueia o aceite de R1 nem de R2.",
+          "evidencia_faltante": "NEXO_CLOUD_PG_REQUIRED=1 em python3 tests/contrato/go_integration.py, sem runner novo, e o CI do SHA deste lote. H permanece aberto.",
+          "proximo_passo": "A gerência executa o runner já existente com NEXO_CLOUD_PG_REQUIRED=1. Não chamar a Meta. Não tratar o exit 0 de R1 como homologação.",
           "frentes": [
             {
               "id": "R1",
@@ -2182,10 +2212,10 @@
     }
   ],
   "proximo_evento": {
-    "id": "implementar-b15-offline-r1-r2",
-    "id_anterior": "reexecutar-ci-apos-depguard-e-manter-corte-fechado",
+    "id": "provar-b15-postgresql-e-ci-do-lote33",
+    "id_anterior": "implementar-b15-offline-r1-r2",
     "prioridade": "P1",
-    "motivo": "A corrida 6963214 tem Go exit 0 com 370 ações pass e zero falha, novos PG com zero skip, e nativo exit 0 com 25 grupos. Treze critérios B04 ficam executados. Seis critérios, as allowlists vazias e o gate de inclusão permanecem abertos. O run 40877414874 da candidata concluiu success em 2026-10-29T13:11:42Z, leitura pública sem token em 2026-10-29T13:21:13Z. O snapshot imutável das 2026-10-29T12:56:16Z continua in_progress. A falha 7cde1e6 e o run 40840682617 permanecem históricos. B15 passou de lacuna sem desenho para desenho revisado. A próxima implementação é offline, default off, nas frentes R1 e R2. G espera as duas e não as bloqueia. H, WABA, fiscal, extrato, host físico, cópia externa e main permanecem abertos.",
+    "motivo": "A corrida 6963214 tem Go exit 0 com 370 ações pass e zero falha, novos PG com zero skip, e nativo exit 0 com 25 grupos. Treze critérios B04 ficam executados. Seis critérios, as allowlists vazias e o gate de inclusão permanecem abertos. O run 40877414874 da candidata concluiu success em 2026-10-29T13:11:42Z e não cobre o lote 33. O pacote cloudapi teve exit 0 em 2026-10-29, sem rede. R2, G, H01, WABA, fiscal, extrato, host físico, cópia externa e main permanecem abertos.",
     "nao_reabrir": [
       "lote01",
       "b07-resolucao",
@@ -2208,7 +2238,7 @@
       "desenho-b15-6ca6d21",
       "aceite-b04-d37603f"
     ],
-    "candidato_interno_seguinte": "implementação offline de R1 em apps/api-go/internal/outbound/cloudapi e de R2 em cloudjournal mais db/migrations/00079_cloud_notice_journal.sql; contratos go test -count=1 de cada pacote; G em notices_cloud.go, 69b06ce3_3.sql e b2808f33_1.sql só depois; allowlists B04 vazias; sem Meta, sem main e sem agente fora do controlador",
+    "candidato_interno_seguinte": "NEXO_CLOUD_PG_REQUIRED=1 python3 tests/contrato/go_integration.py no runner já existente, e o CI do SHA do lote 33; allowlists B04 vazias; sem Meta, sem main e sem agente fora do controlador",
     "frentes": [
       {
         "id": "R1",
@@ -2263,7 +2293,11 @@
       "verificador em memória e skip não fecham o EXPLAIN",
       "lote 31 não altera produção nem allowlists",
       "CI success da candidata não é main nem homologação",
-      "B15 desenhado não está implementado nem enviado"
+      "CI 40877414874 não cobre o lote 33",
+      "R1 com sender falso não fecha R2, G, H01 nem WABA",
+      "presença de Test no arquivo não é execução",
+      "skip de PostgreSQL não aprova B15",
+      "B15 implementado offline não foi enviado nem publicado"
     ],
     "validacao": [
       [
@@ -2277,7 +2311,7 @@
     "pedir_nova_ordem": false,
     "projeto_concluido": false,
     "percentual": null,
-    "instrucao": "Os lotes 25 e 26 não se reimplementam. O fixture b67d2f3, o harness 56b2187, a corrida sintética 0086558, a expectativa 9c764d7, o desenho B04 728f2ff e a base de sombra do lote 29 também não se refazem. O plano 29 permanece DONE 13/13, o plano 30 8b78eab07512 permanece DONE 4/4 e o plano 31 permanece DONE em 6963214927aa45ae1963c58d4c14ba540d78c2f0. A corrida real 7cde1e6 permanece exit 1 e não é reclassificada. A corrida 6963214 tem go_integration.py exit 0 com 370 pass e zero falha, new_pg_skips 0, e nativo.py exit 0 com 25 grupos. Treze critérios B04 estão executados. Seis critérios, allowlists vazias e o gate de inclusão permanecem abertos. O run 40840682617 permanece falha. O run 40877414874 concluiu success em 2026-10-29T13:11:42Z na candidata e não é main. O desenho B15 está revisado e a implementação offline ainda não existe. Go, browser e SBOM local continuam datados em cc542a1. Não fechar H, P, extrato, fiscal, host físico, cópia externa, WABA nem o projeto. Não transformar default, sandbox, skip, geração local, teste estático, correção entregue, desenho ou allowlist vazia em homologação. O projeto permanece aberto enquanto existir critério aberto."
+    "instrucao": "Os lotes 25 e 26 não se reimplementam. O fixture b67d2f3, o harness 56b2187, a corrida sintética 0086558, a expectativa 9c764d7, o desenho B04 728f2ff e a base de sombra do lote 29 também não se refazem. O plano 29 permanece DONE 13/13, o plano 30 8b78eab07512 permanece DONE 4/4 e o plano 31 permanece DONE em 6963214927aa45ae1963c58d4c14ba540d78c2f0. A corrida real 7cde1e6 permanece exit 1 e não é reclassificada. A corrida 6963214 tem go_integration.py exit 0 com 370 pass e zero falha, new_pg_skips 0, e nativo.py exit 0 com 25 grupos. Treze critérios B04 estão executados. Seis critérios, allowlists vazias e o gate de inclusão permanecem abertos. O run 40840682617 permanece falha. O run 40877414874 concluiu success em 2026-10-29T13:11:42Z na candidata e não é main nem cobre o lote 33. O lote 33 implementa o MVP B15 offline. R1 teve exit 0 no pacote cloudapi com sender falso em 2026-10-29. R2, G e H01 não foram executados. Go, browser e SBOM local continuam datados em cc542a1. Não fechar H, P, extrato, fiscal, host físico, cópia externa, WABA nem o projeto. Não transformar default, sandbox, skip, geração local, teste falso, correção entregue, desenho ou allowlist vazia em homologação. O projeto permanece aberto enquanto existir critério aberto."
   },
   "publicacao": {
     "producao": false,
@@ -2315,7 +2349,11 @@
     },
     "lote32_publicado": false,
     "head_documental_2b80d7e": "merge de d37603f e 6ca6d21; este mapa não publica esse HEAD",
-    "b15_implementado": false,
+    "base_documental_f42256b": "f42256b558288590f8e804b558982f15651981fb; ancestral conferido; o objeto 33f42256b não está neste clone",
+    "lote33_publicado": false,
+    "lote33_ci": "pendente",
+    "lote33_postgresql": "pendente",
+    "b15_implementado": "mvp interno offline no clone; não é envio nem homologação",
     "b15_enviado": false,
     "waba": false,
     "host_fisico": false,
