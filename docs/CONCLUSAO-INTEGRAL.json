@@ -84,7 +84,35 @@
       "comando": "NEXO_BALANCE_READ_PG_REQUIRED=1 python3 tests/contrato/go_integration.py",
       "sem_traco_I": true,
       "runner_editado_no_lote31": false,
-      "executada_neste_gate_documental": false
+      "executada_neste_gate_documental": false,
+      "estado_posterior": "executada na base 6963214; o pedido deste campo é o do gate do lote 31"
+    },
+    "corrida_6963214": {
+      "head": "6963214927aa45ae1963c58d4c14ba540d78c2f0",
+      "go_integration": {
+        "comando": ["python3", "tests/contrato/go_integration.py"],
+        "variavel": "NEXO_BALANCE_READ_PG_REQUIRED=1",
+        "exit": 0,
+        "required": 1,
+        "acoes_pass": 370,
+        "falhas": 0,
+        "new_pg_actions_pass": 19,
+        "new_pg_skips": 0,
+        "recorded_at_comando": "2026-10-29T12:55:58.487575+00:00",
+        "recorded_at_gate_go_summary": "2026-10-29T12:52:51.344675+00:00"
+      },
+      "nativo": {
+        "comando": ["python3", "tests/contrato/nativo.py"],
+        "exit": 0,
+        "grupos": 25,
+        "b13_casos": 22,
+        "ok": true
+      },
+      "fonte_imutavel": "/home/enok/Documentos/projetos/implementacao-codex/lote31-b04-gates-explain-rls-2026-10-29/evidencias",
+      "espelho": "docs/evidencias/B04-GATES-6963214.json",
+      "reclassifica_7cde1e6": false,
+      "fecha_matriz_inteira": false,
+      "fecha_corte": false
     },
     "executados_na_base_cc542a1": {
       "nativo_py": {
@@ -378,6 +406,38 @@
     {
       "path": "docs/LOTE31-B04-GATES-EXPLAIN-RLS.md",
       "papel": "lote31_correcao_de_prova_sem_producao"
+    },
+    {
+      "path": "docs/B04-ACEITE-CORTE-LEITOR.json",
+      "papel": "b04_aceite_por_criterio_6963214"
+    },
+    {
+      "path": "docs/evidencias/B04-GATES-6963214.json",
+      "papel": "espelho_sanitizado_da_corrida_6963214"
+    },
+    {
+      "path": "/home/enok/Documentos/projetos/implementacao-codex/lote31-b04-gates-explain-rls-2026-10-29/evidencias/gate-go-summary-6963214.json",
+      "papel": "go_370_pass_0_falha_new_pg_skips_0"
+    },
+    {
+      "path": "/home/enok/Documentos/projetos/implementacao-codex/lote31-b04-gates-explain-rls-2026-10-29/evidencias/nativo-6963214.json",
+      "papel": "nativo_25_grupos_ok"
+    },
+    {
+      "path": "/home/enok/Documentos/projetos/implementacao-codex/lote31-b04-gates-explain-rls-2026-10-29/evidencias/ci-run-6963214.json",
+      "papel": "snapshot_ci_40877414874_in_progress_2026-10-29T12:56:16Z"
+    },
+    {
+      "path": "docs/B15-DESENHO-CLOUD-API.md",
+      "papel": "b15_desenho_offline_default_off"
+    },
+    {
+      "path": "docs/B15-ACEITE-CLOUD-API.json",
+      "papel": "b15_matriz_planned_not_run"
+    },
+    {
+      "path": "docs/LOTE32-B04-ACEITE-B15-DESENHO.md",
+      "papel": "lote32_mapa_aceite_b04_e_desenho_b15"
     },
     {
       "path": "/home/enok/Documentos/projetos/implementacao-codex/lote30-b04-provas-postgres-2026-10-29/evidencias/gate-summary-7cde1e6.json",
@@ -804,10 +864,13 @@
       "prioridade": "P0",
       "fechado": false,
       "implementado": "parcial",
-      "testado": "suite_local_sem_banco_e_relatos_anteriores",
+      "testado": "execucao_parcial_com_prova",
       "homologado": "nao_aplicavel",
-      "publicado": "branch_de_desenvolvimento_nao_publicada",
+      "publicado": "candidata_dev_lote31_b04_pg_validado_6963214_nao_e_main",
       "corte_autorizado": false,
+      "allowlist_shadow": [],
+      "allowlist_cut": [],
+      "balance_read_database_gate": "pending",
       "desenho_lote28": {
         "commit": "728f2ff5712cb4b133fe7b07953db80836b72045",
         "implementado": false,
@@ -887,8 +950,80 @@
           "TestBalanceReadPGVariantsEmpty",
           "TestBalanceReadPGVariantsRLS"
         ],
-        "aceite_e_desenho": "ajustados na raiz e62ce32; executado permanece false; este gate documental não os edita",
+        "aceite_e_desenho": "ajustados na raiz e62ce32 com executado false naquele gate; o registro posterior t1 d37603f marca critérios da corrida 6963214 em registro_6963214",
         "documento": "docs/LOTE31-B04-GATES-EXPLAIN-RLS.md"
+      },
+      "registro_6963214": {
+        "commit": "6963214927aa45ae1963c58d4c14ba540d78c2f0",
+        "aceite": "d37603f9d0d3fd91e0e96248bd61847f9cc7fe43",
+        "espelho": "docs/evidencias/B04-GATES-6963214.json",
+        "go_pass_actions": 370,
+        "go_fail_actions": 0,
+        "new_pg_skips": 0,
+        "nativo_grupos": 25,
+        "criterios_executados": [
+          "estado-open",
+          "estado-paid",
+          "estado-reconciling",
+          "estado-canceled",
+          "acordo-comprovado",
+          "refund-psp",
+          "compensacao",
+          "rollback",
+          "rls-tenant-portal-pop",
+          "drift-injetado",
+          "explain-indices",
+          "variante-shadow-isolada",
+          "flag-fechada"
+        ],
+        "criterios_abertos": [
+          "acordo-nao-comprovado",
+          "estorno",
+          "excesso",
+          "importacao",
+          "matches-falso-bloqueia-corte",
+          "sem-fallback-silencioso"
+        ],
+        "gate_inclusao": "matches-falso-bloqueia-corte",
+        "flag_fechada_nao_e_gate_de_inclusao": true,
+        "lista_nao_promove_criterio": true,
+        "allowlist_shadow": [],
+        "allowlist_cut": [],
+        "balance_read_database_gate": "pending",
+        "corte_autorizado": false
+      },
+      "ci_candidata_6963214": {
+        "run": "40877414874",
+        "workflow": "backend Go e painel",
+        "branch": "dev/lote31-b04-pg-validado-6963214",
+        "head_sha": "6963214927aa45ae1963c58d4c14ba540d78c2f0",
+        "evento": "push",
+        "run_number": 64,
+        "snapshot_imutavel": {
+          "fonte": "/home/enok/Documentos/projetos/implementacao-codex/lote31-b04-gates-explain-rls-2026-10-29/evidencias/ci-run-6963214.json",
+          "status": "in_progress",
+          "conclusion": null,
+          "updated_at": "2026-10-29T12:56:16Z",
+          "job_agente": {"id": 123459688220, "status": "completed", "conclusion": "success", "completed_at": "2026-10-29T12:56:29Z"},
+          "job_verificar": {"id": 123459687659, "status": "in_progress", "conclusion": null}
+        },
+        "leitura_publica_sem_token": {
+          "consultada_em": "2026-10-29T13:21:13Z",
+          "url": "https://api.github.com/repos/TavaresEnok/nexoisp/actions/runs/40877414874",
+          "status": "completed",
+          "conclusion": "success",
+          "updated_at": "2026-10-29T13:11:42Z",
+          "jobs_url": "https://api.github.com/repos/TavaresEnok/nexoisp/actions/runs/40877414874/jobs",
+          "job_verificar": {"id": 123459687659, "status": "completed", "conclusion": "success", "completed_at": "2026-10-29T13:11:42Z"},
+          "job_agente": {"id": 123459688220, "status": "completed", "conclusion": "success", "completed_at": "2026-10-29T12:56:29Z"},
+          "passo_migracao_65_para_66": "success"
+        },
+        "cobre_commits_posteriores": false,
+        "e_main": false,
+        "e_deploy": false,
+        "e_homologacao": false,
+        "promove_criterios_abertos": false,
+        "apaga_run_40840682617": false
       },
       "compilacao_gate_documental_lote31": {
         "worktree": "/home/enok/srv_projetos/worktrees/08mu8zaz/task-1c9516f806d0-t3-b04-consolidar-gates",
@@ -959,7 +1094,22 @@
         {
           "path": "docs/LOTE31-B04-GATES-EXPLAIN-RLS.md",
           "commit": "996d28f",
-          "nota": "decisão e duas correções de prova; EXPLAIN e matriz continuam abertos até a corrida nova"
+          "nota": "decisão e duas correções de prova; o estado daquele gate esperava a corrida nova"
+        },
+        {
+          "path": "docs/B04-ACEITE-CORTE-LEITOR.json",
+          "commit": "d37603f",
+          "nota": "aceite por critério da corrida 6963214; flags vazias; gate de inclusão aberto"
+        },
+        {
+          "path": "docs/evidencias/B04-GATES-6963214.json",
+          "commit": "d37603f",
+          "nota": "espelho sem logs; Go 370 pass; nativo 25 grupos; CI snapshot in_progress"
+        },
+        {
+          "path": "docs/LOTE32-B04-ACEITE-B15-DESENHO.md",
+          "commit": "working tree sobre 2b80d7e",
+          "nota": "mapa deste lote; a leitura pública do CI está datada em 2026-10-29T13:21:13Z"
         }
       ],
       "entregue": [
@@ -969,17 +1119,19 @@
         "desenho e matriz planejada do corte, sem ativação",
         "base de sombra do lote 29 com NEXO_BALANCE_READ e allowlists compiladas vazias",
         "provas PostgreSQL do lote 30, com a corrida 7cde1e6 reprovada no EXPLAIN",
-        "correção de prova do lote 31, equivalência estrutural e papel nexo_app, sem mudança de produção"
+        "correção de prova do lote 31, equivalência estrutural e papel nexo_app, sem mudança de produção",
+        "corrida 6963214 com Go 370 pass, novos PG sem skip e nativo de 25 grupos",
+        "treze critérios executados no aceite d37603f, com allowlists vazias"
       ],
       "criterios_abertos": [
         {
           "id": "B04-corte",
-          "causa": "A sombra existe e o leitor antigo não foi promovido. NEXO_BALANCE_READ existe e as allowlists compiladas estão vazias. O desenho 728f2ff, a suíte local de leitura e a comparação 0086558 de 23 faturas e 0 acordos não autorizam a troca. A corrida 7cde1e6 executou PostgreSQL e terminou exit 1 no EXPLAIN por nome de índice. A correção de prova do lote 31 ainda não tem corrida real.",
+          "causa": "Treze critérios da matriz têm prova na corrida 6963214. As allowlists compiladas continuam vazias e balanceReadDatabaseGate continua pending. flag-fechada mostra off, shadow e cut na sentença legada. O gate de inclusão matches-falso-bloqueia-corte continua aberto e separado. Seis critérios seguem sem a prova mínima inteira: acordo-nao-comprovado, estorno, excesso, importacao, matches-falso-bloqueia-corte e sem-fallback-silencioso. A corrida 7cde1e6 permanece exit 1. A comparação 0086558 de 23 faturas e 0 acordos não autoriza a troca.",
           "dependencias": [
             "B03"
           ],
-          "evidencia_faltante": "Corrida nova de python3 tests/contrato/go_integration.py com NEXO_BALANCE_READ_PG_REQUIRED=1 no HEAD integrado, com TestBalanceReadPGExplain e TestBalanceReadPGVariantsApp em pass e sem skip, mais revisão independente antes de qualquer allowlist. A corrida 7cde1e6 permanece falha histórica. O verificador em memória e os skips deste gate documental não preenchem explain-indices. A prova de 23 faturas não cobre acordo, source_unproven, estorno, excesso, refund, importação, compensação, rollback, RLS de portal e POP nem drift injetado. O CI 40840682617 falhou e ainda não foi repetido depois de 92535ed.",
-          "proximo_passo": "Manter o corte fechado e as allowlists vazias. A gerência executa NEXO_BALANCE_READ_PG_REQUIRED=1 python3 tests/contrato/go_integration.py, sem -I, no HEAD integrado. Repetir o workflow hospedado depois de 92535ed. Não reclassificar 7cde1e6. Não reimplementar a migração 66 nem tratar a comparação sintética, a suíte local, o verificador em memória ou o desenho como aceite da matriz.",
+          "evidencia_faltante": "Prova mínima dos seis critérios abertos e revisão independente antes de qualquer nome na allowlist de corte. O CI 40877414874 success cobre o SHA 6963214 na candidata e não promove allowlist. O run 40840682617 permanece falha histórica.",
+          "proximo_passo": "Manter o corte fechado e as allowlists vazias. A inclusão de um leitor espera o gate G e revisão independente. Não reclassificar 7cde1e6. Não reimplementar a migração 66.",
           "prova_limitada_0086558": {
             "alfa_faturas": 23,
             "alfa_sombra": 23,
@@ -1538,9 +1690,10 @@
       "fechado": false,
       "implementado": "sim",
       "implementado_onde": "código desde 8c10c1a; fixture PSP em b67d2f3; expectativa do campo opcional em 9c764d7; HEAD documental 027e461",
-      "testado": "relato_gerencia_55e0d29_exit_0_mais_historico_exit_1",
+      "testado": "nativo_6963214_exit_0_25_grupos_historico_exit_1_preservado",
+      "testado_anterior": "relato_gerencia_55e0d29_exit_0_mais_historico_exit_1",
       "homologado": "sem_prova",
-      "publicado": "branch_de_desenvolvimento_nao_publicada",
+      "publicado": "candidata_6963214_ci_success_nao_e_main",
       "evidence_reverted": false,
       "alcance": "somente kind invoices",
       "psp": false,
@@ -1657,14 +1810,14 @@
       "criterios_abertos": [
         {
           "id": "B13-compensacao",
-          "causa": "O Go de cc542a1 passou 58 ações de compensação dentro de 241. O browser dirigido passou. Em 0086558 o nativo.py passou do fixture PSP e terminou exit 1 no entity_id opcional da linha error. A gerência relata exit 0 com 24 checks em 55e0d29. O CI 40840682617 falhou no depguard e não foi repetido depois de 92535ed. O lote não foi publicado nem homologado.",
+          "causa": "O Go de cc542a1 passou 58 ações de compensação dentro de 241. O browser dirigido passou. Em 0086558 o nativo.py passou do fixture PSP e terminou exit 1 no entity_id opcional da linha error. O relato de 24 checks em 55e0d29 fica histórico. Em 6963214 o nativo.py terminou exit 0 com 25 grupos, incluindo 22 casos de compensação, e o Go terminou exit 0 com 370 ações pass. O CI 40840682617 permanece falha. O run 40877414874 da candidata concluiu success em 2026-10-29T13:11:42Z. Homologação e main continuam abertos.",
           "dependencias": [
             "desenho do lote 24 já aprovado",
             "lab PostgreSQL descartável",
-            "revisão independente antes de integrar a publicação"
+            "revisão independente antes de integrar a publicação em main"
           ],
-          "evidencia_faltante": "Job verificar hospedado no commit candidato depois de 92535ed. O relato de nativo.py exit 0 em 55e0d29 não foi reexecutado neste gate e não homologa.",
-          "proximo_passo": "Reexecutar o workflow nativo depois da corretiva de depguard. Preservar o exit 1 de 0086558 como histórico. Não reimplementar o lote 25, o fixture b67d2f3 nem a expectativa já corrigida. Kinds diferentes de invoices permanecem recusados. Sem PSP e sem apagar histórico.",
+          "evidencia_faltante": "Homologação com dado real e tag em main. O job verificar da candidata 6963214 já concluiu success e não substitui host físico, cópia externa nem piloto.",
+          "proximo_passo": "Preservar o exit 1 de 0086558 e a falha 40840682617. Não reimplementar o lote 25, o fixture b67d2f3 nem a expectativa já corrigida. Kinds diferentes de invoices permanecem recusados. Sem PSP e sem apagar histórico.",
           "validacao": [
             [
               "python3",
@@ -1728,7 +1881,33 @@
           "run": "40840682617",
           "resultado": "falha depguard em database/sql e pgx/stdlib nos testes financeiros",
           "corretiva": "92535ed",
-          "reexecutado_apos_corretiva": false
+          "reexecutado_apos_corretiva": false,
+          "nota": "falha histórica; o run posterior da candidata está em provas_6963214"
+        }
+      },
+      "provas_6963214": {
+        "base": "6963214927aa45ae1963c58d4c14ba540d78c2f0",
+        "nativo_py": {
+          "exit_code": 0,
+          "grupos": 25,
+          "b13_casos": 22,
+          "fonte": "/home/enok/Documentos/projetos/implementacao-codex/lote31-b04-gates-explain-rls-2026-10-29/evidencias/nativo-6963214.json",
+          "homologa": false,
+          "publica_main": false
+        },
+        "go_integration": {
+          "exit_code": 0,
+          "acoes_pass": 370,
+          "falhas": 0,
+          "variavel": "NEXO_BALANCE_READ_PG_REQUIRED=1"
+        },
+        "ci_candidata": {
+          "run": "40877414874",
+          "branch": "dev/lote31-b04-pg-validado-6963214",
+          "conclusion": "success",
+          "updated_at": "2026-10-29T13:11:42Z",
+          "leitura": "2026-10-29T13:21:13Z",
+          "e_main": false
         }
       }
     },
@@ -1775,9 +1954,28 @@
       "prioridade": "P1",
       "fechado": false,
       "implementado": "parcial",
-      "testado": "relato_historico_local",
+      "testado": "canal_generico_historico_cloud_api_planned_not_run",
       "homologado": "sem_recurso_externo",
-      "publicado": "github_relatado_nao_reconsultado",
+      "publicado": "desenho_na_branch_de_desenvolvimento",
+      "cloud_api": {
+        "estado": "desenho_revisado",
+        "implementado": false,
+        "enviado": false,
+        "homologado": false,
+        "offline": true,
+        "default_off": true,
+        "commit": "6ca6d21731d5706b72cbccdc6939de213dbb9070",
+        "base_lida": "6963214927aa45ae1963c58d4c14ba540d78c2f0",
+        "desenho": "docs/B15-DESENHO-CLOUD-API.md",
+        "matriz": "docs/B15-ACEITE-CLOUD-API.json",
+        "casos": "B15-C01 a B15-C27 e B15-H01",
+        "execucao": "planned/not_run",
+        "nexo_cloud_api": "ausente no código; o desenho só liga com o valor on",
+        "proven_graph_versions": [],
+        "active_default": false,
+        "chamada_meta": false,
+        "waba": false
+      },
       "evidencia": [
         {
           "path": "apps/web/features/admin/message-channels.tsx",
@@ -1786,26 +1984,69 @@
         {
           "path": "apps/api-go/internal/modules/escrita/avisos.go",
           "commit": "82c4251"
+        },
+        {
+          "path": "docs/B15-DESENHO-CLOUD-API.md",
+          "commit": "6ca6d21",
+          "nota": "desenho revisado; implementação futura offline e desligada"
+        },
+        {
+          "path": "docs/B15-ACEITE-CLOUD-API.json",
+          "commit": "6ca6d21",
+          "nota": "matriz planned/not_run; H aberto"
         }
       ],
       "entregue": [
-        "avisos e canal HTTP genérico com Authorization"
+        "avisos e canal HTTP genérico com Authorization",
+        "desenho do adapter Cloud API e matriz, sem código e sem envio"
       ],
       "criterios_abertos": [
         {
           "id": "B15-cloud-api",
-          "causa": "Não há adapter Cloud API, WABA, template aprovado nem dedupe de delivery de WhatsApp.",
-          "dependencias": [
-            "B05",
-            "conta WABA do operador"
-          ],
-          "evidencia_faltante": "Um emissor idempotente, opt-out e cancelamento da régua quando o pagamento ocorre antes do envio.",
-          "proximo_passo": "Recorte interno só quando B13 estiver implementado ou quando o operador pedir o canal: adapter desligado por padrão e HTTP falso nos testes.",
-          "validacao": [
-            "go",
-            "test",
-            "-count=1",
-            "./internal/modules/escrita/"
+          "causa": "O desenho e a matriz existem. O pacote, a migração 79 e a conta não existem. WABA, template e versão Graph de produção continuam sem recurso.",
+          "dependencias": [],
+          "evidencia_faltante": "Implementação offline de R1 e de R2, cada uma com o go test do desenho. G depois das duas. H permanece aberto.",
+          "proximo_passo": "Implementar R1 e R2 como frentes independentes, default off, sem chamada à Meta. G não bloqueia o aceite de R1 nem de R2.",
+          "frentes": [
+            {
+              "id": "R1",
+              "arquivos": [
+                "apps/api-go/internal/outbound/cloudapi/client.go",
+                "apps/api-go/internal/outbound/cloudapi/redact.go",
+                "apps/api-go/internal/outbound/cloudapi/client_test.go"
+              ],
+              "contrato": ["go", "test", "-count=1", "./internal/outbound/cloudapi/"],
+              "depende_de": []
+            },
+            {
+              "id": "R2",
+              "arquivos": [
+                "db/migrations/00079_cloud_notice_journal.sql",
+                "apps/api-go/internal/outbound/cloudjournal/journal.go",
+                "apps/api-go/internal/outbound/cloudjournal/journal_test.go"
+              ],
+              "contrato": ["go", "test", "-count=1", "./internal/outbound/cloudjournal/"],
+              "banco": "PostgreSQL de teste; skip não aprova",
+              "depende_de": []
+            },
+            {
+              "id": "G",
+              "arquivos": [
+                "apps/api-go/internal/outbound/notices_cloud.go",
+                "apps/api-go/internal/outbound/sql/69b06ce3_3.sql",
+                "apps/api-go/internal/radius/sql/b2808f33_1.sql",
+                "apps/api-go/internal/outbound/notices_cloud_test.go"
+              ],
+              "rota": "POST /api/webhooks/cloud-api/{account}",
+              "contrato": ["go", "test", "-count=1", "-run", "TestCloudNoticeGate", "./internal/outbound/"],
+              "depende_de": ["R1", "R2"],
+              "nao_bloqueia": ["R1", "R2"]
+            },
+            {
+              "id": "H",
+              "itens": ["conta WABA", "template aprovado", "versão Graph citada em fonte primária atual", "envio real deliberado"],
+              "fecha_mvp_offline": false
+            }
           ]
         }
       ]
@@ -1917,15 +2158,15 @@
       "criterios_abertos": [
         {
           "id": "B18-piloto",
-          "causa": "Não há provedor, janela, grupo reversível, restore de host físico, monitor externo nem deploy. O ensaio sintético 0086558, o SBOM local e o Go de cc542a1 não fecham o piloto.",
+          "causa": "Não há provedor, janela, grupo reversível, restore de host físico, monitor externo nem deploy. O ensaio sintético 0086558, o SBOM local, o Go de cc542a1, o nativo de 6963214 e o CI success da candidata 40877414874 não fecham o piloto.",
           "dependencias": [
             "B12 host físico, cópia externa, cofre, RPO/RTO, Backup-center e exactly-once externo; o ensaio sintético de 0086558 já ocorreu",
-            "B13 HTTP ainda sem exit 0 antes de corte com dado importado",
-            "artefato SBOM hospedado no commit candidato",
+            "homologação com dado real; o nativo 6963214 já tem exit 0 no laboratório e não substitui esse dado",
+            "artefato SBOM hospedado conferido; este mapa não inventariou artefatos do run 40877414874",
             "recursos externos de banco, acesso e, se ativos, fisco"
           ],
-          "evidencia_faltante": "Itens de docs/PILOTO.md com responsável, data e versão, sem segredo.",
-          "proximo_passo": "Reexecutar o workflow hospedado depois de 92535ed. Preservar o restore sintético de 0086558, o relato de nativo.py em 55e0d29 e a base B04 com allowlists vazias. Não reimplementar os lotes 25 e 26. Não declarar piloto. Publicação de código exige o workflow nativo com PostgreSQL real no runner do commit candidato. Ausência de provedor não fecha o item.",
+          "evidencia_faltante": "Itens de docs/PILOTO.md com responsável, data e versão, sem segredo. main e deploy continuam sem prova.",
+          "proximo_passo": "Preservar o restore sintético de 0086558, a falha 40840682617, a corrida 6963214 e as allowlists B04 vazias. Não reimplementar os lotes 25 e 26. Não declarar piloto. Tag em main exige o workflow nativo com PostgreSQL real no SHA tagueado. Ausência de provedor não fecha o item.",
           "validacao": [
             [
               "python3",
@@ -1941,10 +2182,10 @@
     }
   ],
   "proximo_evento": {
-    "id": "reexecutar-ci-apos-depguard-e-manter-corte-fechado",
-    "id_anterior": "repetir-http-b13-apos-campo-opcional",
-    "prioridade": "P0",
-    "motivo": "O Go, o browser e o SBOM local de cc542a1 permanecem válidos. Em 0086558 o HTTP passou do fixture PSP e parou no entity_id opcional. A gerência relata nativo.py exit 0 em 55e0d29, 24 checks, incluindo B13 e financeiro. O CI 40840682617 falhou no depguard e a corretiva 92535ed ainda não tem run hospedado. O restore sintético de 0086558 terminou exit 0 em 17 fases. A base B04 do lote 29 está no clone com allowlists vazias. O corte permanece fechado. A corrida real 7cde1e6 de go_integration.py terminou exit 1, com 356 ações pass e TestBalanceReadPGExplain em falha; Due, oráculo/RLS e as oito variantes em nexo_go passaram sem skip. O lote 31 corrige a prova do índice e acrescenta TestBalanceReadPGVariantsApp. A compilação deste gate documental, sem banco, não executa EXPLAIN nem encerra a matriz. A próxima prova é NEXO_BALANCE_READ_PG_REQUIRED=1 python3 tests/contrato/go_integration.py no HEAD integrado.",
+    "id": "implementar-b15-offline-r1-r2",
+    "id_anterior": "reexecutar-ci-apos-depguard-e-manter-corte-fechado",
+    "prioridade": "P1",
+    "motivo": "A corrida 6963214 tem Go exit 0 com 370 ações pass e zero falha, novos PG com zero skip, e nativo exit 0 com 25 grupos. Treze critérios B04 ficam executados. Seis critérios, as allowlists vazias e o gate de inclusão permanecem abertos. O run 40877414874 da candidata concluiu success em 2026-10-29T13:11:42Z, leitura pública sem token em 2026-10-29T13:21:13Z. O snapshot imutável das 2026-10-29T12:56:16Z continua in_progress. A falha 7cde1e6 e o run 40840682617 permanecem históricos. B15 passou de lacuna sem desenho para desenho revisado. A próxima implementação é offline, default off, nas frentes R1 e R2. G espera as duas e não as bloqueia. H, WABA, fiscal, extrato, host físico, cópia externa e main permanecem abertos.",
     "nao_reabrir": [
       "lote01",
       "b07-resolucao",
@@ -1961,26 +2202,68 @@
       "t0-depguard-92535ed",
       "plano29-5ca3036-done-13",
       "plano30-8b78eab07512-done-4",
-      "corrida-real-7cde1e6"
+      "plano31-6963214-done",
+      "corrida-real-7cde1e6",
+      "run-40840682617",
+      "desenho-b15-6ca6d21",
+      "aceite-b04-d37603f"
     ],
-    "candidato_interno_seguinte": "a gerência executa NEXO_BALANCE_READ_PG_REQUIRED=1 python3 tests/contrato/go_integration.py, sem -I, no HEAD integrado; manter allowlists B04 vazias até essa corrida, o EXPLAIN sem skip e a revisão da inclusão; reexecutar o workflow native.yml depois de 92535ed",
+    "candidato_interno_seguinte": "implementação offline de R1 em apps/api-go/internal/outbound/cloudapi e de R2 em cloudjournal mais db/migrations/00079_cloud_notice_journal.sql; contratos go test -count=1 de cada pacote; G em notices_cloud.go, 69b06ce3_3.sql e b2808f33_1.sql só depois; allowlists B04 vazias; sem Meta, sem main e sem agente fora do controlador",
+    "frentes": [
+      {
+        "id": "R1",
+        "arquivos": [
+          "apps/api-go/internal/outbound/cloudapi/client.go",
+          "apps/api-go/internal/outbound/cloudapi/redact.go",
+          "apps/api-go/internal/outbound/cloudapi/client_test.go"
+        ],
+        "contrato": ["go", "test", "-count=1", "./internal/outbound/cloudapi/"],
+        "depende_de": []
+      },
+      {
+        "id": "R2",
+        "arquivos": [
+          "db/migrations/00079_cloud_notice_journal.sql",
+          "apps/api-go/internal/outbound/cloudjournal/journal.go",
+          "apps/api-go/internal/outbound/cloudjournal/journal_test.go"
+        ],
+        "contrato": ["go", "test", "-count=1", "./internal/outbound/cloudjournal/"],
+        "depende_de": []
+      },
+      {
+        "id": "G",
+        "arquivos": [
+          "apps/api-go/internal/outbound/notices_cloud.go",
+          "apps/api-go/internal/outbound/sql/69b06ce3_3.sql",
+          "apps/api-go/internal/radius/sql/b2808f33_1.sql",
+          "apps/api-go/internal/outbound/notices_cloud_test.go"
+        ],
+        "contrato": ["go", "test", "-count=1", "-run", "TestCloudNoticeGate", "./internal/outbound/"],
+        "depende_de": ["R1", "R2"],
+        "nao_bloqueia": ["R1", "R2"]
+      }
+    ],
     "limites": [
       "sem franquia",
       "sem PSP real",
       "sem produção",
       "custo adicional zero",
       "executor Grok 4.7 medium",
-      "revisão independente na fila",
+      "revisão independente Sonnet alto, Sol médio só sem cota",
+      "até 10 workers deste chat, sem agente fora do controlador",
+      "este executor não cria plano, agente nem submissão",
       "não fechar item externo por ausência de recurso",
       "default não é homologação",
       "projeto não está em 100%",
       "correção entregue não é gate repetido",
       "comparação de 23 faturas e desenho B04 não ativam o corte",
       "suíte local de leitura não fecha a matriz",
-      "relato de nativo em 55e0d29 não é execução fresca do lote 29",
+      "relato de nativo em 55e0d29 permanece histórico",
       "corrida 7cde1e6 permanece exit 1",
       "verificador em memória e skip não fecham o EXPLAIN",
-      "lote 31 não altera produção nem allowlists"
+      "lote 31 não altera produção nem allowlists",
+      "CI success da candidata não é main nem homologação",
+      "B15 desenhado não está implementado nem enviado"
     ],
     "validacao": [
       [
@@ -1994,7 +2277,7 @@
     "pedir_nova_ordem": false,
     "projeto_concluido": false,
     "percentual": null,
-    "instrucao": "Os lotes 25 e 26 não se reimplementam. O fixture b67d2f3, o harness 56b2187, a corrida sintética 0086558, a expectativa 9c764d7, o desenho B04 728f2ff e a base de sombra do lote 29 também não se refazem. O plano 29 permanece DONE 13/13 e o plano 30 8b78eab07512 permanece DONE 4/4. A corrida real 7cde1e6 permanece exit 1 e não é reclassificada. A gerência relata nativo.py exit 0 em 55e0d29. O CI hospedado 40840682617 falhou e pede run novo depois de 92535ed. A matriz B04 e o EXPLAIN continuam pendentes até NEXO_BALANCE_READ_PG_REQUIRED=1 python3 tests/contrato/go_integration.py no HEAD integrado, incluindo TestBalanceReadPGExplain e TestBalanceReadPGVariantsApp sem skip. Go, browser e SBOM local continuam datados em cc542a1. Não fechar item externo por ausência de recurso. Não transformar default, sandbox, skip, geração local, teste estático, correção entregue, desenho ou allowlist vazia em homologação. O projeto permanece aberto enquanto existir critério aberto."
+    "instrucao": "Os lotes 25 e 26 não se reimplementam. O fixture b67d2f3, o harness 56b2187, a corrida sintética 0086558, a expectativa 9c764d7, o desenho B04 728f2ff e a base de sombra do lote 29 também não se refazem. O plano 29 permanece DONE 13/13, o plano 30 8b78eab07512 permanece DONE 4/4 e o plano 31 permanece DONE em 6963214927aa45ae1963c58d4c14ba540d78c2f0. A corrida real 7cde1e6 permanece exit 1 e não é reclassificada. A corrida 6963214 tem go_integration.py exit 0 com 370 pass e zero falha, new_pg_skips 0, e nativo.py exit 0 com 25 grupos. Treze critérios B04 estão executados. Seis critérios, allowlists vazias e o gate de inclusão permanecem abertos. O run 40840682617 permanece falha. O run 40877414874 concluiu success em 2026-10-29T13:11:42Z na candidata e não é main. O desenho B15 está revisado e a implementação offline ainda não existe. Go, browser e SBOM local continuam datados em cc542a1. Não fechar H, P, extrato, fiscal, host físico, cópia externa, WABA nem o projeto. Não transformar default, sandbox, skip, geração local, teste estático, correção entregue, desenho ou allowlist vazia em homologação. O projeto permanece aberto enquanto existir critério aberto."
   },
   "publicacao": {
     "producao": false,
@@ -2010,13 +2293,34 @@
     "lote28_publicado": false,
     "head_documental_027e461": "inclui 9c764d7 e 728f2ff; o desenho B04 não ativa o corte; esta documentação não publica esse HEAD",
     "relato_nativo_55e0d29": "exit 0, 24 checks, incluindo B13 e financeiro; não reexecutado neste gate; não publica",
-    "ci_40840682617": "falha depguard em 55e0d29; corretiva 92535ed ainda sem run hospedado",
+    "ci_40840682617": "falha depguard em 55e0d29; permanece histórica. O run posterior 40877414874 está em candidata e não reclassifica esta falha",
     "lote29_publicado": false,
     "head_worktree_ab6166a": "base de sombra e gate documental na branch de desenvolvimento; allowlists vazias; esta documentação não publica esse HEAD; não é main nem deploy",
     "lote30_publicado": false,
     "plano30_8b78eab07512": "DONE 4/4; a corrida real posterior 7cde1e6 terminou exit 1",
     "head_7cde1e6": "go_integration.py com REQUIRED=1, exit 1, 356 pass, TestBalanceReadPGExplain fail, novos PG sem skip; falha histórica preservada",
     "lote31_publicado": false,
-    "head_codigo_996d28f": "merge de e62ce32 e be70bd2, correção de prova sem produção; a documentação deste gate não publica esse HEAD; não é main nem deploy"
+    "head_codigo_996d28f": "merge de e62ce32 e be70bd2, correção de prova sem produção; a documentação deste gate não publica esse HEAD; não é main nem deploy",
+    "base31_6963214": "DONE; prova local Go 370 pass e nativo 25 grupos; não é main nem deploy",
+    "candidata": {
+      "branch": "dev/lote31-b04-pg-validado-6963214",
+      "sha": "6963214927aa45ae1963c58d4c14ba540d78c2f0",
+      "run": "40877414874",
+      "snapshot_12_56_16Z": "in_progress",
+      "leitura_13_21_13Z": "completed success",
+      "updated_at": "2026-10-29T13:11:42Z",
+      "e_main": false,
+      "e_deploy": false,
+      "e_homologacao": false
+    },
+    "lote32_publicado": false,
+    "head_documental_2b80d7e": "merge de d37603f e 6ca6d21; este mapa não publica esse HEAD",
+    "b15_implementado": false,
+    "b15_enviado": false,
+    "waba": false,
+    "host_fisico": false,
+    "copia_externa": false,
+    "fiscal": false,
+    "projeto_100": false
   }
 }
