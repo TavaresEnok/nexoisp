@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -43,9 +44,11 @@ type pgQueryCase struct {
 
 // pgQueryExplainVolume é o mínimo de faturas, movimentos e pagamentos extras
 // na mesma transação do EXPLAIN. Numa tabela de uma página o custo do Seq Scan
-// fica perto de 1 e o do Index Scan perto de 8; o planner então ignora
-// invoice_movements_invoice e payments_invoice. O volume torna essa escolha
-// natural, sem enable_seqscan=off nem outro forçamento.
+// fica perto de 1 e o do Index Scan perto de 8; o planner então pode deixar de
+// lado o acesso indexado. O volume torna essa escolha natural, sem
+// enable_seqscan=off nem outro forçamento. O nome payments_invoice não é a
+// prova: a unicidade da migração 74 pode aparecer como
+// payments_tenant_invoice_identity_uq quando o catálogo confirma a estrutura.
 const pgQueryExplainVolume = 4096
 
 type pgQueryFixture struct {
@@ -521,10 +524,18 @@ func pgQueryExplain(t *testing.T, ctx context.Context, tx *db.Tx, fx pgQueryFixt
 	}
 	t.Logf("pgQuery EXPLAIN caso=paid invoice_id=%s movimentos_fatura=%d pagamentos_fatura=%d enable_seqscan=%s plan_cache_mode=%s %s %s plano=%s", paid, movements, payments, seqscan, planCache, pgQueryStatLog(moveStat, payStat), pgQueryPlanStats(onePlan), string(onePlan))
 	t.Logf("pgQuery EXPLAIN caso=pagina ids=%s movimentos_pagina=%d pagamentos_pagina=%d enable_seqscan=%s plan_cache_mode=%s %s %s plano=%s", strings.Join(page, ","), pageMovements, pagePayments, seqscan, planCache, pgQueryStatLog(moveStat, payStat), pgQueryPlanStats(pagePlan), string(pagePlan))
-	if err := pgQueryProvePlan(onePlan, "fatura", []string{paid}); err != nil {
+	names, err := pgQueryPlanIndexNames(onePlan, pagePlan)
+	if err != nil {
+		return fmt.Errorf("nomes de índice do plano: %w", err)
+	}
+	catalog, err := pgQueryIndexCatalog(ctx, tx, names)
+	if err != nil {
+		return fmt.Errorf("catálogo dos índices do plano: %w", err)
+	}
+	if err := pgQueryProvePlan(onePlan, "fatura", []string{paid}, catalog); err != nil {
 		return fmt.Errorf("%w; %s", err, pgQueryStatLog(moveStat, payStat))
 	}
-	if err := pgQueryProvePlan(pagePlan, "pagina", page); err != nil {
+	if err := pgQueryProvePlan(pagePlan, "pagina", page, catalog); err != nil {
 		return fmt.Errorf("%w; %s", err, pgQueryStatLog(moveStat, payStat))
 	}
 	return nil
@@ -561,61 +572,347 @@ func pgQueryRunExplain(ctx context.Context, tx *db.Tx, ids []string) ([]byte, er
 	return plan, nil
 }
 
-func pgQueryProvePlan(raw []byte, label string, ids []string) error {
-	moveCond, payCond, err := pgQueryIndexConds(raw)
+type pgQueryIndexFact struct {
+	Name      string
+	Relation  string
+	Valid     bool
+	Ready     bool
+	Keys      []string
+	Include   []string
+	Predicate string
+	IndexDef  string
+}
+
+func pgQueryPlanIndexNames(raws ...[]byte) ([]string, error) {
+	seen := map[string]struct{}{}
+	var names []string
+	for _, raw := range raws {
+		var docs any
+		if err := json.Unmarshal(raw, &docs); err != nil {
+			return nil, err
+		}
+		pgQueryWalkPlans(docs, func(node map[string]any) {
+			name, _ := node["Index Name"].(string)
+			if name == "" {
+				return
+			}
+			if _, ok := seen[name]; ok {
+				return
+			}
+			seen[name] = struct{}{}
+			names = append(names, name)
+		})
+	}
+	return names, nil
+}
+
+const pgQueryIndexCatalogSQL = `select
+  ic.relname as name,
+  tc.relname as relation,
+  ix.indisvalid as valid,
+  ix.indisready as ready,
+  pg_get_indexdef(ix.indexrelid) as indexdef,
+  coalesce(pg_get_expr(ix.indpred, ix.indrelid), '') as predicate,
+  coalesce((
+    select string_agg(coalesce(a.attname, 'expression'), ',' order by k.ord)
+    from unnest(ix.indkey::smallint[]) with ordinality as k(attnum, ord)
+    left join pg_attribute a on a.attrelid = tc.oid and a.attnum = k.attnum and k.attnum > 0
+    where k.ord <= ix.indnkeyatts::bigint
+  ), '') as keys,
+  coalesce((
+    select string_agg(coalesce(a.attname, 'expression'), ',' order by k.ord)
+    from unnest(ix.indkey::smallint[]) with ordinality as k(attnum, ord)
+    left join pg_attribute a on a.attrelid = tc.oid and a.attnum = k.attnum and k.attnum > 0
+    where k.ord > ix.indnkeyatts::bigint
+  ), '') as include_cols
+from pg_index ix
+join pg_class ic on ic.oid = ix.indexrelid
+join pg_class tc on tc.oid = ix.indrelid
+join pg_namespace ns on ns.oid = tc.relnamespace
+where ns.nspname = 'public' and ic.relname = any($1::text[])`
+
+func pgQueryIndexCatalog(ctx context.Context, tx *db.Tx, names []string) (map[string]pgQueryIndexFact, error) {
+	if names == nil {
+		names = []string{}
+	}
+	rows, err := tx.Objects(ctx, pgQueryIndexCatalogSQL, names)
 	if err != nil {
-		return fmt.Errorf("plano %s ilegível: %w; ids=%s plano=%s", label, err, strings.Join(ids, ","), string(raw))
+		return nil, err
 	}
-	var missing []string
-	if !pgQueryCondHas(moveCond, "invoice_id") || !pgQueryCondHas(moveCond, "tenant_id") {
-		missing = append(missing, "invoice_movements_invoice com filtro correlacionado")
+	out := make(map[string]pgQueryIndexFact, len(rows))
+	for _, row := range rows {
+		name, err := pgQueryText(row.Get("name"), "name")
+		if err != nil {
+			return nil, err
+		}
+		relation, err := pgQueryText(row.Get("relation"), "relation")
+		if err != nil {
+			return nil, err
+		}
+		valid, err := pgQueryBool(row.Get("valid"), "valid")
+		if err != nil {
+			return nil, err
+		}
+		ready, err := pgQueryBool(row.Get("ready"), "ready")
+		if err != nil {
+			return nil, err
+		}
+		indexdef, err := pgQueryText(row.Get("indexdef"), "indexdef")
+		if err != nil {
+			return nil, err
+		}
+		predicate, _ := row.Get("predicate").(string)
+		if _, exists := out[name]; exists {
+			return nil, fmt.Errorf("índice %s repetido no catálogo public", name)
+		}
+		out[name] = pgQueryIndexFact{
+			Name: name, Relation: relation, Valid: valid, Ready: ready,
+			Keys: pgQueryCSV(row.Get("keys")), Include: pgQueryCSV(row.Get("include_cols")),
+			Predicate: predicate, IndexDef: indexdef,
+		}
 	}
-	if !pgQueryCondHas(payCond, "invoice_id") || !pgQueryCondHas(payCond, "tenant_id") {
-		missing = append(missing, "payments_invoice com filtro correlacionado")
+	return out, nil
+}
+
+func pgQueryProvePlan(raw []byte, label string, ids []string, catalog map[string]pgQueryIndexFact) error {
+	var docs any
+	if err := json.Unmarshal(raw, &docs); err != nil {
+		return fmt.Errorf("plano %s ilegível: %w; ids=%s", label, err, strings.Join(ids, ","))
 	}
-	if len(missing) > 0 {
-		return fmt.Errorf("plano natural de %s ids=%s não provou %s; gate de EXPLAIN permanece pendente; enable_seqscan não foi alterado; plano=%s", label, strings.Join(ids, ","), strings.Join(missing, "; "), string(raw))
+	targets := []struct {
+		relation string
+		alias    string
+	}{
+		{"invoice_movements", "mv"},
+		{"payments", "py"},
+	}
+	var problems []string
+	for _, target := range targets {
+		scans := pgQueryIndexScans(docs, target.relation, target.alias)
+		if len(scans) == 0 {
+			problems = append(problems, fmt.Sprintf("%s alias %s sem Index Scan da relação", target.relation, target.alias))
+			continue
+		}
+		var reasons []string
+		proved := false
+		for _, scan := range scans {
+			if err := pgQueryProveScan(scan, target.relation, target.alias, catalog); err != nil {
+				reasons = append(reasons, err.Error())
+				continue
+			}
+			proved = true
+			break
+		}
+		if !proved {
+			problems = append(problems, fmt.Sprintf("%s: %s", target.relation, strings.Join(reasons, " | ")))
+		}
+	}
+	if len(problems) > 0 {
+		return fmt.Errorf("plano natural de %s ids=%s não provou acesso indexado correlacionado: %s; gate de EXPLAIN permanece pendente; enable_seqscan não foi alterado", label, strings.Join(ids, ","), strings.Join(problems, "; "))
 	}
 	return nil
 }
 
-func pgQueryIndexConds(raw []byte) (movements, payments string, err error) {
-	var docs []any
-	if err = json.Unmarshal(raw, &docs); err != nil {
-		return "", "", err
+func pgQueryProveScan(node map[string]any, relation, alias string, catalog map[string]pgQueryIndexFact) error {
+	name, _ := node["Index Name"].(string)
+	indexText := pgQueryOwnConds(node, "Index Cond", "Recheck Cond")
+	nodeText := pgQueryOwnConds(node, "Index Cond", "Filter", "Recheck Cond")
+	if !pgQueryCorrelatesInvoice(indexText) || !pgQueryCorrelatesTenant(nodeText) {
+		return fmt.Errorf("scan %q em %s alias %s sem invoice_id=i.id no Index Cond e tenant_id=i.tenant_id no mesmo nó; cond=%q", name, relation, alias, nodeText)
 	}
-	var walk func(any)
-	walk = func(node any) {
-		switch value := node.(type) {
-		case map[string]any:
-			if name, _ := value["Index Name"].(string); name == "invoice_movements_invoice" || name == "payments_invoice" {
-				cond := strings.Join([]string{pgQueryPlanString(value["Index Cond"]), pgQueryPlanString(value["Filter"]), pgQueryPlanString(value["Recheck Cond"])}, " ")
-				if name == "invoice_movements_invoice" {
-					movements = strings.TrimSpace(movements + " " + cond)
-				} else {
-					payments = strings.TrimSpace(payments + " " + cond)
-				}
-			}
-			for _, child := range value {
-				walk(child)
-			}
-		case []any:
-			for _, child := range value {
-				walk(child)
-			}
+	fact, ok := catalog[name]
+	if !ok || name == "" {
+		return fmt.Errorf("índice %q sem inspeção de catálogo; nome isolado não aceita; cond=%q", name, nodeText)
+	}
+	if err := pgQueryIndexServes(fact, relation); err != nil {
+		return fmt.Errorf("índice %s: %w; cond=%q", name, err, nodeText)
+	}
+	if pgQueryTenantLeadsInvoice(fact.Keys) && !pgQueryCorrelatesTenant(indexText) {
+		return fmt.Errorf("índice %s: tenant_id é chave anterior a invoice_id e não restringe o Index Cond do mesmo scan; cond=%q", name, indexText)
+	}
+	return nil
+}
+
+func pgQueryIndexServes(fact pgQueryIndexFact, relation string) error {
+	if err := pgQueryIndexDefAgrees(fact); err != nil {
+		return err
+	}
+	if fact.Relation != relation {
+		return fmt.Errorf("índice de outra relação: catálogo %s, scan %s", fact.Relation, relation)
+	}
+	if !fact.Valid {
+		return fmt.Errorf("índice inválido (indisvalid=false)")
+	}
+	if !fact.Ready {
+		return fmt.Errorf("índice sem prontidão (indisready=false)")
+	}
+	if !pgQueryKeysSeekInvoice(fact.Keys) {
+		return fmt.Errorf("chaves inadequadas %v; invoice_id precisa ser buscável com prefixo só de tenant_id", fact.Keys)
+	}
+	return pgQueryPredicateSatisfied(fact.Predicate)
+}
+
+func pgQueryIndexDefAgrees(fact pgQueryIndexFact) error {
+	if fact.IndexDef == "" {
+		return fmt.Errorf("pg_get_indexdef ausente para %s", fact.Name)
+	}
+	def := strings.ToLower(fact.IndexDef)
+	if !pgQueryHasWord(def, fact.Name) {
+		return fmt.Errorf("pg_get_indexdef não cita o índice %s", fact.Name)
+	}
+	if !pgQueryHasWord(def, fact.Relation) {
+		return fmt.Errorf("pg_get_indexdef não cita a relação %s", fact.Relation)
+	}
+	for _, key := range fact.Keys {
+		if key == "expression" || !pgQueryHasWord(def, key) {
+			return fmt.Errorf("pg_get_indexdef não cita a chave %s", key)
 		}
 	}
-	walk(docs)
-	return movements, payments, nil
+	hasInclude := strings.Contains(def, " include ")
+	if len(fact.Include) > 0 && !hasInclude {
+		return fmt.Errorf("pg_get_indexdef sem include declarado")
+	}
+	if len(fact.Include) == 0 && hasInclude {
+		return fmt.Errorf("pg_get_indexdef tem include ausente do catálogo")
+	}
+	for _, column := range fact.Include {
+		if !pgQueryHasWord(def, column) {
+			return fmt.Errorf("pg_get_indexdef não cita include %s", column)
+		}
+	}
+	hasWhere := strings.Contains(def, " where ")
+	if strings.TrimSpace(fact.Predicate) == "" && hasWhere {
+		return fmt.Errorf("predicado do catálogo diverge de pg_get_indexdef")
+	}
+	if strings.TrimSpace(fact.Predicate) != "" && !hasWhere {
+		return fmt.Errorf("pg_get_indexdef sem predicado declarado")
+	}
+	return nil
 }
 
-func pgQueryPlanString(value any) string {
+func pgQueryPredicateSatisfied(predicate string) error {
+	body := strings.ToLower(strings.TrimSpace(predicate))
+	if body == "" {
+		return nil
+	}
+	body = strings.NewReplacer("(", " ", ")", " ").Replace(body)
+	body = pgQuerySpace.ReplaceAllString(body, " ")
+	body = strings.TrimSpace(body)
+	if pgQueryAllowedPred.MatchString(body) {
+		return nil
+	}
+	return fmt.Errorf("predicado insuficiente: %s", predicate)
+}
+
+func pgQueryKeysSeekInvoice(keys []string) bool {
+	invoiceAt := -1
+	for i, key := range keys {
+		if key == "invoice_id" {
+			invoiceAt = i
+			break
+		}
+	}
+	if invoiceAt < 0 {
+		return false
+	}
+	for _, key := range keys[:invoiceAt] {
+		if key != "tenant_id" {
+			return false
+		}
+	}
+	return true
+}
+
+func pgQueryTenantLeadsInvoice(keys []string) bool {
+	invoiceAt := -1
+	tenantAt := -1
+	for i, key := range keys {
+		if key == "invoice_id" && invoiceAt < 0 {
+			invoiceAt = i
+		}
+		if key == "tenant_id" && tenantAt < 0 {
+			tenantAt = i
+		}
+	}
+	return invoiceAt >= 0 && tenantAt >= 0 && tenantAt < invoiceAt
+}
+
+func pgQueryIndexScans(root any, relation, alias string) []map[string]any {
+	var out []map[string]any
+	pgQueryWalkPlans(root, func(node map[string]any) {
+		kind, _ := node["Node Type"].(string)
+		if kind != "Index Scan" && kind != "Index Only Scan" {
+			return
+		}
+		if node["Relation Name"] == relation && node["Alias"] == alias {
+			out = append(out, node)
+		}
+	})
+	return out
+}
+
+func pgQueryWalkPlans(node any, visit func(map[string]any)) {
+	switch value := node.(type) {
+	case map[string]any:
+		visit(value)
+		for _, child := range value {
+			pgQueryWalkPlans(child, visit)
+		}
+	case []any:
+		for _, child := range value {
+			pgQueryWalkPlans(child, visit)
+		}
+	}
+}
+
+func pgQueryOwnConds(node map[string]any, fields ...string) string {
+	parts := make([]string, 0, len(fields))
+	for _, field := range fields {
+		text, _ := node[field].(string)
+		if text != "" {
+			parts = append(parts, text)
+		}
+	}
+	return strings.Join(parts, " ")
+}
+
+var (
+	pgQueryInvoiceCorr = regexp.MustCompile(`(?i)(?:\b(?:mv|py)\.)?\binvoice_id\b\s*=\s*\bi\.id\b|\bi\.id\b\s*=\s*(?:\b(?:mv|py)\.)?\binvoice_id\b`)
+	pgQueryTenantCorr  = regexp.MustCompile(`(?i)(?:\b(?:mv|py)\.)?\btenant_id\b\s*=\s*\bi\.tenant_id\b|\bi\.tenant_id\b\s*=\s*(?:\b(?:mv|py)\.)?\btenant_id\b`)
+	pgQueryAllowedPred = regexp.MustCompile(`^(?:invoice_id is not null|tenant_id is not null)(?: and (?:invoice_id is not null|tenant_id is not null))*$`)
+	pgQuerySpace       = regexp.MustCompile(`\s+`)
+)
+
+func pgQueryCorrelatesInvoice(text string) bool {
+	return pgQueryInvoiceCorr.MatchString(text)
+}
+
+func pgQueryCorrelatesTenant(text string) bool {
+	return pgQueryTenantCorr.MatchString(text)
+}
+
+func pgQueryHasWord(text, word string) bool {
+	if word == "" {
+		return false
+	}
+	return regexp.MustCompile(`(?i)\b` + regexp.QuoteMeta(word) + `\b`).MatchString(text)
+}
+
+func pgQueryCSV(value any) []string {
 	text, _ := value.(string)
-	return text
-}
-
-func pgQueryCondHas(cond, piece string) bool {
-	return strings.Contains(strings.ToLower(cond), piece)
+	text = strings.TrimSpace(text)
+	if text == "" {
+		return nil
+	}
+	parts := strings.Split(text, ",")
+	out := make([]string, 0, len(parts))
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part != "" {
+			out = append(out, part)
+		}
+	}
+	return out
 }
 
 func pgQueryPlanStats(raw []byte) string {
@@ -856,3 +1153,1121 @@ var pgQueryCompareFields = []string{
 	"legacy_nominal_cents", "legacy_fee_cents", "legacy_discount_cents", "legacy_received_cents",
 	"residual_cents", "excess_cents", "collectible_cents", "matches",
 }
+
+func TestBalanceReadPGExplainVerifier(t *testing.T) {
+	catalog := pgQueryCatalog74()
+	paid := []byte(pgQueryPlanPaid7cde)
+	page := []byte(pgQueryPlanPagina7cde)
+	if err := pgQueryProvePlan(paid, "fatura", []string{"278a1e56-338f-4263-bae9-8ee2cdea7b22"}, catalog); err != nil {
+		t.Fatalf("plano real da fatura 7cde1e6: %v", err)
+	}
+	if err := pgQueryProvePlan(page, "pagina", []string{"pagina"}, catalog); err != nil {
+		t.Fatalf("plano real da pagina 7cde1e6: %v", err)
+	}
+	pgQueryRequireObservedScan(t, paid, 1)
+	pgQueryRequireObservedScan(t, page, 7)
+	if err := pgQueryProvePlan(paid, "fatura", []string{"278a1e56-338f-4263-bae9-8ee2cdea7b22"}, nil); err == nil {
+		t.Fatal("nome isolado foi aceito sem catálogo")
+	}
+	movements := pgQueryScanJSON("invoice_movements", "mv", "invoice_movements_invoice", "((tenant_id = i.tenant_id) AND (invoice_id = i.id))", "", "")
+	paymentsInvoice := pgQueryScanJSON("payments", "py", "payments_invoice", "(invoice_id = i.id)", "(tenant_id = i.tenant_id)", pgQueryScanJSON("contracts", "k", "contracts_list", "(tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid)", "(invoice_id = i.id)", ""))
+	if err := pgQueryProvePlan(pgQueryWrapPlans(movements, paymentsInvoice), "fatura", []string{"paid"}, catalog); err != nil {
+		t.Fatalf("caminho payments_invoice: %v", err)
+	}
+	payments := pgQueryScanJSON("payments", "py", "payments_tenant_invoice_identity_uq", "((tenant_id = i.tenant_id) AND (invoice_id = i.id))", "", "")
+	rls := pgQueryScanJSON("payments", "py", "payments_tenant_invoice_identity_uq", "(tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid)", "(SubPlan 11)", pgQueryScanJSON("invoices", "i_1", "invoices_tenant_id_id_key", "((tenant_id = py.tenant_id) AND (id = py.invoice_id))", "(invoice_id = i.id)", ""))
+	splitLeft := pgQueryScanJSON("invoice_movements", "mv", "invoice_movements_invoice", "(invoice_id = i.id)", "", "")
+	splitRight := pgQueryScanJSON("invoice_movements", "mv", "invoice_movements_invoice", "(tenant_id = i.tenant_id)", "", "")
+	cases := []struct {
+		name     string
+		plan     []byte
+		catalog  map[string]pgQueryIndexFact
+		fragment string
+	}{
+		{name: "nome isolado", plan: paid, catalog: nil, fragment: "nome isolado"},
+		{name: "nome sem chaves", plan: paid, catalog: pgQueryCatalogNameOnly(), fragment: "chaves inadequadas"},
+		{name: "indice de outra relacao", plan: paid, catalog: pgQueryCatalogMutate("payments_tenant_invoice_identity_uq", func(fact *pgQueryIndexFact) {
+			fact.Relation = "invoices"
+			fact.IndexDef = "CREATE UNIQUE INDEX payments_tenant_invoice_identity_uq ON public.invoices USING btree (tenant_id, invoice_id, id)"
+		}), fragment: "outra relação"},
+		{name: "so tenant RLS", plan: pgQueryWrapPlans(movements, rls), catalog: catalog, fragment: "no mesmo nó"},
+		{name: "invoice sem tenant", plan: pgQueryWrapPlans(movements, pgQueryScanJSON("payments", "py", "payments_invoice", "(invoice_id = i.id)", "", "")), catalog: catalog, fragment: "no mesmo nó"},
+		{name: "predicado insuficiente", plan: pgQueryWrapPlans(movements, paymentsInvoice), catalog: pgQueryCatalogMutate("payments_invoice", func(fact *pgQueryIndexFact) {
+			fact.Predicate = "(status = 'open'::text)"
+			fact.IndexDef = "CREATE INDEX payments_invoice ON public.payments USING btree (invoice_id) INCLUDE (signed_cents) WHERE (status = 'open'::text)"
+		}), fragment: "predicado insuficiente"},
+		{name: "indice invalido", plan: paid, catalog: pgQueryCatalogMutate("payments_tenant_invoice_identity_uq", func(fact *pgQueryIndexFact) {
+			fact.Valid = false
+		}), fragment: "índice inválido"},
+		{name: "indice sem prontidao", plan: paid, catalog: pgQueryCatalogMutate("invoice_movements_invoice", func(fact *pgQueryIndexFact) {
+			fact.Ready = false
+		}), fragment: "sem prontidão"},
+		{name: "condicoes divididas", plan: pgQueryWrapPlans(splitLeft, splitRight, payments), catalog: catalog, fragment: "no mesmo nó"},
+		{name: "tenant chave so no filtro", plan: pgQueryWrapPlans(movements, pgQueryScanJSON("payments", "py", "payments_tenant_invoice_identity_uq", "(invoice_id = i.id)", "(tenant_id = i.tenant_id)", "")), catalog: catalog, fragment: "chave anterior"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := pgQueryProvePlan(tc.plan, tc.name, []string{"caso"}, tc.catalog)
+			if err == nil {
+				t.Fatal("plano reprovável foi aceito")
+			}
+			if !strings.Contains(err.Error(), tc.fragment) {
+				t.Fatalf("evidência %q ausente em %v", tc.fragment, err)
+			}
+		})
+	}
+}
+
+func pgQueryRequireObservedScan(t *testing.T, raw []byte, loops float64) {
+	t.Helper()
+	var docs any
+	if err := json.Unmarshal(raw, &docs); err != nil {
+		t.Fatal(err)
+	}
+	for _, target := range []struct {
+		relation string
+		alias    string
+		index    string
+	}{
+		{"invoice_movements", "mv", "invoice_movements_invoice"},
+		{"payments", "py", "payments_tenant_invoice_identity_uq"},
+	} {
+		scans := pgQueryIndexScans(docs, target.relation, target.alias)
+		if len(scans) != 1 {
+			t.Fatalf("%s scans=%d", target.relation, len(scans))
+		}
+		if scans[0]["Index Name"] != target.index {
+			t.Fatalf("índice %v", scans[0]["Index Name"])
+		}
+		if scans[0]["Index Cond"] != "((tenant_id = i.tenant_id) AND (invoice_id = i.id))" {
+			t.Fatalf("cond %v", scans[0]["Index Cond"])
+		}
+		if scans[0]["Actual Loops"] != loops || scans[0]["Actual Rows"] != float64(1) {
+			t.Fatalf("loops=%v rows=%v", scans[0]["Actual Loops"], scans[0]["Actual Rows"])
+		}
+	}
+}
+
+func pgQueryCatalog74() map[string]pgQueryIndexFact {
+	return map[string]pgQueryIndexFact{
+		"invoice_movements_invoice": {
+			Name: "invoice_movements_invoice", Relation: "invoice_movements", Valid: true, Ready: true,
+			Keys:     []string{"tenant_id", "invoice_id", "id"},
+			IndexDef: "CREATE INDEX invoice_movements_invoice ON public.invoice_movements USING btree (tenant_id, invoice_id, id)",
+		},
+		"payments_tenant_invoice_identity_uq": {
+			Name: "payments_tenant_invoice_identity_uq", Relation: "payments", Valid: true, Ready: true,
+			Keys:     []string{"tenant_id", "invoice_id", "id"},
+			IndexDef: "CREATE UNIQUE INDEX payments_tenant_invoice_identity_uq ON public.payments USING btree (tenant_id, invoice_id, id)",
+		},
+		"payments_invoice": {
+			Name: "payments_invoice", Relation: "payments", Valid: true, Ready: true,
+			Keys:     []string{"invoice_id"},
+			Include:  []string{"signed_cents"},
+			IndexDef: "CREATE INDEX payments_invoice ON public.payments USING btree (invoice_id) INCLUDE (signed_cents)",
+		},
+	}
+}
+
+func pgQueryCatalogNameOnly() map[string]pgQueryIndexFact {
+	return map[string]pgQueryIndexFact{
+		"invoice_movements_invoice": pgQueryCatalog74()["invoice_movements_invoice"],
+		"payments_tenant_invoice_identity_uq": {
+			Name: "payments_tenant_invoice_identity_uq", Relation: "payments", Valid: true, Ready: true,
+			IndexDef: "payments_tenant_invoice_identity_uq ON payments",
+		},
+	}
+}
+
+func pgQueryCatalogMutate(name string, edit func(*pgQueryIndexFact)) map[string]pgQueryIndexFact {
+	out := pgQueryCatalog74()
+	fact := out[name]
+	edit(&fact)
+	out[name] = fact
+	return out
+}
+
+func pgQueryScanJSON(relation, alias, index, indexCond, filter, child string) string {
+	extra := ""
+	if filter != "" {
+		extra += `,"Filter":` + strconv.Quote(filter)
+	}
+	if child != "" {
+		extra += `,"Plans":[` + child + `]`
+	}
+	return `{"Node Type":"Index Scan","Index Name":` + strconv.Quote(index) + `,"Relation Name":` + strconv.Quote(relation) + `,"Alias":` + strconv.Quote(alias) + `,"Index Cond":` + strconv.Quote(indexCond) + extra + `}`
+}
+
+func pgQueryWrapPlans(plans ...string) []byte {
+	return []byte(`[{"Plan":{"Node Type":"Nested Loop","Plans":[` + strings.Join(plans, ",") + `]}}]`)
+}
+
+const pgQueryPlanPaid7cde = `
+[
+  {
+    "Plan": {
+      "Node Type": "Nested Loop",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Join Type": "Left",
+      "Startup Cost": 50.37,
+      "Total Cost": 66.94,
+      "Plan Rows": 1,
+      "Plan Width": 191,
+      "Actual Startup Time": 0.09,
+      "Actual Total Time": 0.093,
+      "Actual Rows": 1,
+      "Actual Loops": 1,
+      "Inner Unique": false,
+      "Shared Hit Blocks": 13,
+      "Shared Read Blocks": 0,
+      "Shared Dirtied Blocks": 0,
+      "Shared Written Blocks": 0,
+      "Local Hit Blocks": 0,
+      "Local Read Blocks": 0,
+      "Local Dirtied Blocks": 0,
+      "Local Written Blocks": 0,
+      "Temp Read Blocks": 0,
+      "Temp Written Blocks": 0,
+      "Plans": [
+        {
+          "Node Type": "Nested Loop",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Join Type": "Left",
+          "Startup Cost": 25.33,
+          "Total Cost": 41.82,
+          "Plan Rows": 1,
+          "Plan Width": 138,
+          "Actual Startup Time": 0.071,
+          "Actual Total Time": 0.073,
+          "Actual Rows": 1,
+          "Actual Loops": 1,
+          "Inner Unique": false,
+          "Shared Hit Blocks": 10,
+          "Shared Read Blocks": 0,
+          "Shared Dirtied Blocks": 0,
+          "Shared Written Blocks": 0,
+          "Local Hit Blocks": 0,
+          "Local Read Blocks": 0,
+          "Local Dirtied Blocks": 0,
+          "Local Written Blocks": 0,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 0,
+          "Plans": [
+            {
+              "Node Type": "Index Scan",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Scan Direction": "Forward",
+              "Index Name": "invoices_pkey",
+              "Relation Name": "invoices",
+              "Alias": "i",
+              "Startup Cost": 0.28,
+              "Total Cost": 16.73,
+              "Plan Rows": 1,
+              "Plan Width": 82,
+              "Actual Startup Time": 0.02,
+              "Actual Total Time": 0.021,
+              "Actual Rows": 1,
+              "Actual Loops": 1,
+              "Index Cond": "(id = ANY ('{278a1e56-338f-4263-bae9-8ee2cdea7b22}'::uuid[]))",
+              "Rows Removed by Index Recheck": 0,
+              "Filter": "((tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid) AND (((NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid IS NULL) OR (subscriber_id = (NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid)) AND (((NULLIF(string_to_array(NULLIF(current_setting('app.pop_ids'::text, true), ''::text), ','::text), '{}'::text[]))::uuid[] IS NULL) OR (hashed SubPlan 2)))",
+              "Rows Removed by Filter": 0,
+              "Shared Hit Blocks": 3,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Plans": [
+                {
+                  "Node Type": "Index Scan",
+                  "Parent Relationship": "SubPlan",
+                  "Subplan Name": "SubPlan 2",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Scan Direction": "Forward",
+                  "Index Name": "contracts_list",
+                  "Relation Name": "contracts",
+                  "Alias": "k",
+                  "Startup Cost": 0.15,
+                  "Total Cost": 8.34,
+                  "Plan Rows": 1,
+                  "Plan Width": 16,
+                  "Actual Startup Time": 0.0,
+                  "Actual Total Time": 0.0,
+                  "Actual Rows": 0,
+                  "Actual Loops": 0,
+                  "Index Cond": "(tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid)",
+                  "Rows Removed by Index Recheck": 0,
+                  "Filter": "((((NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid IS NULL) OR (subscriber_id = (NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid)) AND (((NULLIF(string_to_array(NULLIF(current_setting('app.pop_ids'::text, true), ''::text), ','::text), '{}'::text[]))::uuid[] IS NULL) OR (pop_id IS NULL) OR (pop_id = ANY ((NULLIF(string_to_array(NULLIF(current_setting('app.pop_ids'::text, true), ''::text), ','::text), '{}'::text[]))::uuid[]))))",
+                  "Rows Removed by Filter": 0,
+                  "Shared Hit Blocks": 0,
+                  "Shared Read Blocks": 0,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 0,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0
+                }
+              ]
+            },
+            {
+              "Node Type": "Aggregate",
+              "Strategy": "Plain",
+              "Partial Mode": "Simple",
+              "Parent Relationship": "Inner",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 25.05,
+              "Total Cost": 25.06,
+              "Plan Rows": 1,
+              "Plan Width": 56,
+              "Actual Startup Time": 0.049,
+              "Actual Total Time": 0.05,
+              "Actual Rows": 1,
+              "Actual Loops": 1,
+              "Shared Hit Blocks": 7,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Plans": [
+                {
+                  "Node Type": "Result",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Startup Cost": 0.28,
+                  "Total Cost": 25.03,
+                  "Plan Rows": 1,
+                  "Plan Width": 37,
+                  "Actual Startup Time": 0.037,
+                  "Actual Total Time": 0.039,
+                  "Actual Rows": 1,
+                  "Actual Loops": 1,
+                  "One-Time Filter": "((NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid = i.tenant_id)",
+                  "Shared Hit Blocks": 7,
+                  "Shared Read Blocks": 0,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 0,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0,
+                  "Plans": [
+                    {
+                      "Node Type": "Index Scan",
+                      "Parent Relationship": "Outer",
+                      "Parallel Aware": false,
+                      "Async Capable": false,
+                      "Scan Direction": "Backward",
+                      "Index Name": "invoice_movements_invoice",
+                      "Relation Name": "invoice_movements",
+                      "Alias": "mv",
+                      "Startup Cost": 0.28,
+                      "Total Cost": 25.03,
+                      "Plan Rows": 1,
+                      "Plan Width": 37,
+                      "Actual Startup Time": 0.035,
+                      "Actual Total Time": 0.036,
+                      "Actual Rows": 1,
+                      "Actual Loops": 1,
+                      "Index Cond": "((tenant_id = i.tenant_id) AND (invoice_id = i.id))",
+                      "Rows Removed by Index Recheck": 0,
+                      "Filter": "(SubPlan 5)",
+                      "Rows Removed by Filter": 0,
+                      "Shared Hit Blocks": 7,
+                      "Shared Read Blocks": 0,
+                      "Shared Dirtied Blocks": 0,
+                      "Shared Written Blocks": 0,
+                      "Local Hit Blocks": 0,
+                      "Local Read Blocks": 0,
+                      "Local Dirtied Blocks": 0,
+                      "Local Written Blocks": 0,
+                      "Temp Read Blocks": 0,
+                      "Temp Written Blocks": 0,
+                      "Plans": [
+                        {
+                          "Node Type": "Result",
+                          "Parent Relationship": "SubPlan",
+                          "Subplan Name": "SubPlan 5",
+                          "Parallel Aware": false,
+                          "Async Capable": false,
+                          "Startup Cost": 0.28,
+                          "Total Cost": 16.73,
+                          "Plan Rows": 1,
+                          "Plan Width": 0,
+                          "Actual Startup Time": 0.024,
+                          "Actual Total Time": 0.024,
+                          "Actual Rows": 1,
+                          "Actual Loops": 1,
+                          "One-Time Filter": "((NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid = mv.tenant_id)",
+                          "Shared Hit Blocks": 3,
+                          "Shared Read Blocks": 0,
+                          "Shared Dirtied Blocks": 0,
+                          "Shared Written Blocks": 0,
+                          "Local Hit Blocks": 0,
+                          "Local Read Blocks": 0,
+                          "Local Dirtied Blocks": 0,
+                          "Local Written Blocks": 0,
+                          "Temp Read Blocks": 0,
+                          "Temp Written Blocks": 0,
+                          "Plans": [
+                            {
+                              "Node Type": "Index Scan",
+                              "Parent Relationship": "Outer",
+                              "Parallel Aware": false,
+                              "Async Capable": false,
+                              "Scan Direction": "Forward",
+                              "Index Name": "invoices_tenant_id_id_key",
+                              "Relation Name": "invoices",
+                              "Alias": "i_1",
+                              "Startup Cost": 0.28,
+                              "Total Cost": 16.73,
+                              "Plan Rows": 1,
+                              "Plan Width": 0,
+                              "Actual Startup Time": 0.022,
+                              "Actual Total Time": 0.022,
+                              "Actual Rows": 1,
+                              "Actual Loops": 1,
+                              "Index Cond": "((tenant_id = mv.tenant_id) AND (id = mv.invoice_id))",
+                              "Rows Removed by Index Recheck": 0,
+                              "Filter": "((((NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid IS NULL) OR (subscriber_id = (NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid)) AND (((NULLIF(string_to_array(NULLIF(current_setting('app.pop_ids'::text, true), ''::text), ','::text), '{}'::text[]))::uuid[] IS NULL) OR (hashed SubPlan 4)))",
+                              "Rows Removed by Filter": 0,
+                              "Shared Hit Blocks": 3,
+                              "Shared Read Blocks": 0,
+                              "Shared Dirtied Blocks": 0,
+                              "Shared Written Blocks": 0,
+                              "Local Hit Blocks": 0,
+                              "Local Read Blocks": 0,
+                              "Local Dirtied Blocks": 0,
+                              "Local Written Blocks": 0,
+                              "Temp Read Blocks": 0,
+                              "Temp Written Blocks": 0,
+                              "Plans": [
+                                {
+                                  "Node Type": "Index Scan",
+                                  "Parent Relationship": "SubPlan",
+                                  "Subplan Name": "SubPlan 4",
+                                  "Parallel Aware": false,
+                                  "Async Capable": false,
+                                  "Scan Direction": "Forward",
+                                  "Index Name": "contracts_list",
+                                  "Relation Name": "contracts",
+                                  "Alias": "k_1",
+                                  "Startup Cost": 0.15,
+                                  "Total Cost": 8.34,
+                                  "Plan Rows": 1,
+                                  "Plan Width": 16,
+                                  "Actual Startup Time": 0.0,
+                                  "Actual Total Time": 0.0,
+                                  "Actual Rows": 0,
+                                  "Actual Loops": 0,
+                                  "Index Cond": "(tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid)",
+                                  "Rows Removed by Index Recheck": 0,
+                                  "Filter": "((((NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid IS NULL) OR (subscriber_id = (NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid)) AND (((NULLIF(string_to_array(NULLIF(current_setting('app.pop_ids'::text, true), ''::text), ','::text), '{}'::text[]))::uuid[] IS NULL) OR (pop_id IS NULL) OR (pop_id = ANY ((NULLIF(string_to_array(NULLIF(current_setting('app.pop_ids'::text, true), ''::text), ','::text), '{}'::text[]))::uuid[]))))",
+                                  "Rows Removed by Filter": 0,
+                                  "Shared Hit Blocks": 0,
+                                  "Shared Read Blocks": 0,
+                                  "Shared Dirtied Blocks": 0,
+                                  "Shared Written Blocks": 0,
+                                  "Local Hit Blocks": 0,
+                                  "Local Read Blocks": 0,
+                                  "Local Dirtied Blocks": 0,
+                                  "Local Written Blocks": 0,
+                                  "Temp Read Blocks": 0,
+                                  "Temp Written Blocks": 0
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Node Type": "Aggregate",
+          "Strategy": "Plain",
+          "Partial Mode": "Simple",
+          "Parent Relationship": "Inner",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Startup Cost": 25.05,
+          "Total Cost": 25.06,
+          "Plan Rows": 1,
+          "Plan Width": 8,
+          "Actual Startup Time": 0.014,
+          "Actual Total Time": 0.014,
+          "Actual Rows": 1,
+          "Actual Loops": 1,
+          "Shared Hit Blocks": 3,
+          "Shared Read Blocks": 0,
+          "Shared Dirtied Blocks": 0,
+          "Shared Written Blocks": 0,
+          "Local Hit Blocks": 0,
+          "Local Read Blocks": 0,
+          "Local Dirtied Blocks": 0,
+          "Local Written Blocks": 0,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 0,
+          "Plans": [
+            {
+              "Node Type": "Result",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 0.28,
+              "Total Cost": 25.04,
+              "Plan Rows": 1,
+              "Plan Width": 4,
+              "Actual Startup Time": 0.012,
+              "Actual Total Time": 0.013,
+              "Actual Rows": 1,
+              "Actual Loops": 1,
+              "One-Time Filter": "((NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid = i.tenant_id)",
+              "Shared Hit Blocks": 3,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Plans": [
+                {
+                  "Node Type": "Index Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Scan Direction": "Forward",
+                  "Index Name": "payments_tenant_invoice_identity_uq",
+                  "Relation Name": "payments",
+                  "Alias": "py",
+                  "Startup Cost": 0.28,
+                  "Total Cost": 25.04,
+                  "Plan Rows": 1,
+                  "Plan Width": 4,
+                  "Actual Startup Time": 0.01,
+                  "Actual Total Time": 0.011,
+                  "Actual Rows": 1,
+                  "Actual Loops": 1,
+                  "Index Cond": "((tenant_id = i.tenant_id) AND (invoice_id = i.id))",
+                  "Rows Removed by Index Recheck": 0,
+                  "Filter": "(((NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid IS NULL) OR (SubPlan 11))",
+                  "Rows Removed by Filter": 0,
+                  "Shared Hit Blocks": 3,
+                  "Shared Read Blocks": 0,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 0,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0,
+                  "Plans": [
+                    {
+                      "Node Type": "Index Scan",
+                      "Parent Relationship": "SubPlan",
+                      "Subplan Name": "SubPlan 11",
+                      "Parallel Aware": false,
+                      "Async Capable": false,
+                      "Scan Direction": "Forward",
+                      "Index Name": "invoices_pkey",
+                      "Relation Name": "invoices",
+                      "Alias": "i_2",
+                      "Startup Cost": 0.28,
+                      "Total Cost": 16.73,
+                      "Plan Rows": 1,
+                      "Plan Width": 0,
+                      "Actual Startup Time": 0.0,
+                      "Actual Total Time": 0.0,
+                      "Actual Rows": 0,
+                      "Actual Loops": 0,
+                      "Index Cond": "(id = py.invoice_id)",
+                      "Rows Removed by Index Recheck": 0,
+                      "Filter": "((tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid) AND (((NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid IS NULL) OR (subscriber_id = (NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid)) AND (((NULLIF(string_to_array(NULLIF(current_setting('app.pop_ids'::text, true), ''::text), ','::text), '{}'::text[]))::uuid[] IS NULL) OR (hashed SubPlan 10)))",
+                      "Rows Removed by Filter": 0,
+                      "Shared Hit Blocks": 0,
+                      "Shared Read Blocks": 0,
+                      "Shared Dirtied Blocks": 0,
+                      "Shared Written Blocks": 0,
+                      "Local Hit Blocks": 0,
+                      "Local Read Blocks": 0,
+                      "Local Dirtied Blocks": 0,
+                      "Local Written Blocks": 0,
+                      "Temp Read Blocks": 0,
+                      "Temp Written Blocks": 0,
+                      "Plans": [
+                        {
+                          "Node Type": "Index Scan",
+                          "Parent Relationship": "SubPlan",
+                          "Subplan Name": "SubPlan 10",
+                          "Parallel Aware": false,
+                          "Async Capable": false,
+                          "Scan Direction": "Forward",
+                          "Index Name": "contracts_list",
+                          "Relation Name": "contracts",
+                          "Alias": "k_2",
+                          "Startup Cost": 0.15,
+                          "Total Cost": 8.34,
+                          "Plan Rows": 1,
+                          "Plan Width": 16,
+                          "Actual Startup Time": 0.0,
+                          "Actual Total Time": 0.0,
+                          "Actual Rows": 0,
+                          "Actual Loops": 0,
+                          "Index Cond": "(tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid)",
+                          "Rows Removed by Index Recheck": 0,
+                          "Filter": "((((NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid IS NULL) OR (subscriber_id = (NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid)) AND (((NULLIF(string_to_array(NULLIF(current_setting('app.pop_ids'::text, true), ''::text), ','::text), '{}'::text[]))::uuid[] IS NULL) OR (pop_id IS NULL) OR (pop_id = ANY ((NULLIF(string_to_array(NULLIF(current_setting('app.pop_ids'::text, true), ''::text), ','::text), '{}'::text[]))::uuid[]))))",
+                          "Rows Removed by Filter": 0,
+                          "Shared Hit Blocks": 0,
+                          "Shared Read Blocks": 0,
+                          "Shared Dirtied Blocks": 0,
+                          "Shared Written Blocks": 0,
+                          "Local Hit Blocks": 0,
+                          "Local Read Blocks": 0,
+                          "Local Dirtied Blocks": 0,
+                          "Local Written Blocks": 0,
+                          "Temp Read Blocks": 0,
+                          "Temp Written Blocks": 0
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Planning": {
+      "Shared Hit Blocks": 76,
+      "Shared Read Blocks": 0,
+      "Shared Dirtied Blocks": 0,
+      "Shared Written Blocks": 0,
+      "Local Hit Blocks": 0,
+      "Local Read Blocks": 0,
+      "Local Dirtied Blocks": 0,
+      "Local Written Blocks": 0,
+      "Temp Read Blocks": 0,
+      "Temp Written Blocks": 0
+    },
+    "Planning Time": 4.312,
+    "Triggers": [],
+    "Execution Time": 0.471
+  }
+]
+`
+
+const pgQueryPlanPagina7cde = `
+[
+  {
+    "Plan": {
+      "Node Type": "Nested Loop",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Join Type": "Left",
+      "Startup Cost": 50.38,
+      "Total Cost": 154.24,
+      "Plan Rows": 1,
+      "Plan Width": 191,
+      "Actual Startup Time": 0.09,
+      "Actual Total Time": 0.184,
+      "Actual Rows": 7,
+      "Actual Loops": 1,
+      "Inner Unique": false,
+      "Shared Hit Blocks": 84,
+      "Shared Read Blocks": 0,
+      "Shared Dirtied Blocks": 0,
+      "Shared Written Blocks": 0,
+      "Local Hit Blocks": 0,
+      "Local Read Blocks": 0,
+      "Local Dirtied Blocks": 0,
+      "Local Written Blocks": 0,
+      "Temp Read Blocks": 0,
+      "Temp Written Blocks": 0,
+      "Plans": [
+        {
+          "Node Type": "Nested Loop",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Join Type": "Left",
+          "Startup Cost": 25.34,
+          "Total Cost": 129.11,
+          "Plan Rows": 1,
+          "Plan Width": 138,
+          "Actual Startup Time": 0.06,
+          "Actual Total Time": 0.124,
+          "Actual Rows": 7,
+          "Actual Loops": 1,
+          "Inner Unique": false,
+          "Shared Hit Blocks": 64,
+          "Shared Read Blocks": 0,
+          "Shared Dirtied Blocks": 0,
+          "Shared Written Blocks": 0,
+          "Local Hit Blocks": 0,
+          "Local Read Blocks": 0,
+          "Local Dirtied Blocks": 0,
+          "Local Written Blocks": 0,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 0,
+          "Plans": [
+            {
+              "Node Type": "Index Scan",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Scan Direction": "Forward",
+              "Index Name": "invoices_tenant_id_id_key",
+              "Relation Name": "invoices",
+              "Alias": "i",
+              "Startup Cost": 0.29,
+              "Total Cost": 104.03,
+              "Plan Rows": 1,
+              "Plan Width": 82,
+              "Actual Startup Time": 0.023,
+              "Actual Total Time": 0.038,
+              "Actual Rows": 7,
+              "Actual Loops": 1,
+              "Index Cond": "((tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid) AND (id = ANY ('{fb0dd183-0102-44b8-89ae-b0f69fcaf63a,278a1e56-338f-4263-bae9-8ee2cdea7b22,011c3ae4-a1c7-483b-96bd-562d3e5415fa,48c1bb0c-48b6-49f0-895f-a751a1b6caab,47c49264-8dca-4e94-a361-8b945e8f23c5,43ef1b5f-f45b-49a3-92c3-7752e58cd317,cb7baded-532f-43d2-bcbc-479a58377d0e}'::uuid[])))",
+              "Rows Removed by Index Recheck": 0,
+              "Filter": "((((NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid IS NULL) OR (subscriber_id = (NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid)) AND (((NULLIF(string_to_array(NULLIF(current_setting('app.pop_ids'::text, true), ''::text), ','::text), '{}'::text[]))::uuid[] IS NULL) OR (hashed SubPlan 2)))",
+              "Rows Removed by Filter": 0,
+              "Shared Hit Blocks": 15,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Plans": [
+                {
+                  "Node Type": "Index Scan",
+                  "Parent Relationship": "SubPlan",
+                  "Subplan Name": "SubPlan 2",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Scan Direction": "Forward",
+                  "Index Name": "contracts_list",
+                  "Relation Name": "contracts",
+                  "Alias": "k",
+                  "Startup Cost": 0.15,
+                  "Total Cost": 8.34,
+                  "Plan Rows": 1,
+                  "Plan Width": 16,
+                  "Actual Startup Time": 0.0,
+                  "Actual Total Time": 0.0,
+                  "Actual Rows": 0,
+                  "Actual Loops": 0,
+                  "Index Cond": "(tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid)",
+                  "Rows Removed by Index Recheck": 0,
+                  "Filter": "((((NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid IS NULL) OR (subscriber_id = (NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid)) AND (((NULLIF(string_to_array(NULLIF(current_setting('app.pop_ids'::text, true), ''::text), ','::text), '{}'::text[]))::uuid[] IS NULL) OR (pop_id IS NULL) OR (pop_id = ANY ((NULLIF(string_to_array(NULLIF(current_setting('app.pop_ids'::text, true), ''::text), ','::text), '{}'::text[]))::uuid[]))))",
+                  "Rows Removed by Filter": 0,
+                  "Shared Hit Blocks": 0,
+                  "Shared Read Blocks": 0,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 0,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0
+                }
+              ]
+            },
+            {
+              "Node Type": "Aggregate",
+              "Strategy": "Plain",
+              "Partial Mode": "Simple",
+              "Parent Relationship": "Inner",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 25.05,
+              "Total Cost": 25.06,
+              "Plan Rows": 1,
+              "Plan Width": 56,
+              "Actual Startup Time": 0.011,
+              "Actual Total Time": 0.012,
+              "Actual Rows": 1,
+              "Actual Loops": 7,
+              "Shared Hit Blocks": 49,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Plans": [
+                {
+                  "Node Type": "Result",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Startup Cost": 0.28,
+                  "Total Cost": 25.03,
+                  "Plan Rows": 1,
+                  "Plan Width": 37,
+                  "Actual Startup Time": 0.008,
+                  "Actual Total Time": 0.009,
+                  "Actual Rows": 1,
+                  "Actual Loops": 7,
+                  "One-Time Filter": "((NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid = i.tenant_id)",
+                  "Shared Hit Blocks": 49,
+                  "Shared Read Blocks": 0,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 0,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0,
+                  "Plans": [
+                    {
+                      "Node Type": "Index Scan",
+                      "Parent Relationship": "Outer",
+                      "Parallel Aware": false,
+                      "Async Capable": false,
+                      "Scan Direction": "Backward",
+                      "Index Name": "invoice_movements_invoice",
+                      "Relation Name": "invoice_movements",
+                      "Alias": "mv",
+                      "Startup Cost": 0.28,
+                      "Total Cost": 25.03,
+                      "Plan Rows": 1,
+                      "Plan Width": 37,
+                      "Actual Startup Time": 0.007,
+                      "Actual Total Time": 0.008,
+                      "Actual Rows": 1,
+                      "Actual Loops": 7,
+                      "Index Cond": "((tenant_id = i.tenant_id) AND (invoice_id = i.id))",
+                      "Rows Removed by Index Recheck": 0,
+                      "Filter": "(SubPlan 5)",
+                      "Rows Removed by Filter": 0,
+                      "Shared Hit Blocks": 49,
+                      "Shared Read Blocks": 0,
+                      "Shared Dirtied Blocks": 0,
+                      "Shared Written Blocks": 0,
+                      "Local Hit Blocks": 0,
+                      "Local Read Blocks": 0,
+                      "Local Dirtied Blocks": 0,
+                      "Local Written Blocks": 0,
+                      "Temp Read Blocks": 0,
+                      "Temp Written Blocks": 0,
+                      "Plans": [
+                        {
+                          "Node Type": "Result",
+                          "Parent Relationship": "SubPlan",
+                          "Subplan Name": "SubPlan 5",
+                          "Parallel Aware": false,
+                          "Async Capable": false,
+                          "Startup Cost": 0.28,
+                          "Total Cost": 16.73,
+                          "Plan Rows": 1,
+                          "Plan Width": 0,
+                          "Actual Startup Time": 0.004,
+                          "Actual Total Time": 0.004,
+                          "Actual Rows": 1,
+                          "Actual Loops": 7,
+                          "One-Time Filter": "((NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid = mv.tenant_id)",
+                          "Shared Hit Blocks": 21,
+                          "Shared Read Blocks": 0,
+                          "Shared Dirtied Blocks": 0,
+                          "Shared Written Blocks": 0,
+                          "Local Hit Blocks": 0,
+                          "Local Read Blocks": 0,
+                          "Local Dirtied Blocks": 0,
+                          "Local Written Blocks": 0,
+                          "Temp Read Blocks": 0,
+                          "Temp Written Blocks": 0,
+                          "Plans": [
+                            {
+                              "Node Type": "Index Scan",
+                              "Parent Relationship": "Outer",
+                              "Parallel Aware": false,
+                              "Async Capable": false,
+                              "Scan Direction": "Forward",
+                              "Index Name": "invoices_tenant_id_id_key",
+                              "Relation Name": "invoices",
+                              "Alias": "i_1",
+                              "Startup Cost": 0.28,
+                              "Total Cost": 16.73,
+                              "Plan Rows": 1,
+                              "Plan Width": 0,
+                              "Actual Startup Time": 0.003,
+                              "Actual Total Time": 0.003,
+                              "Actual Rows": 1,
+                              "Actual Loops": 7,
+                              "Index Cond": "((tenant_id = mv.tenant_id) AND (id = mv.invoice_id))",
+                              "Rows Removed by Index Recheck": 0,
+                              "Filter": "((((NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid IS NULL) OR (subscriber_id = (NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid)) AND (((NULLIF(string_to_array(NULLIF(current_setting('app.pop_ids'::text, true), ''::text), ','::text), '{}'::text[]))::uuid[] IS NULL) OR (hashed SubPlan 4)))",
+                              "Rows Removed by Filter": 0,
+                              "Shared Hit Blocks": 21,
+                              "Shared Read Blocks": 0,
+                              "Shared Dirtied Blocks": 0,
+                              "Shared Written Blocks": 0,
+                              "Local Hit Blocks": 0,
+                              "Local Read Blocks": 0,
+                              "Local Dirtied Blocks": 0,
+                              "Local Written Blocks": 0,
+                              "Temp Read Blocks": 0,
+                              "Temp Written Blocks": 0,
+                              "Plans": [
+                                {
+                                  "Node Type": "Index Scan",
+                                  "Parent Relationship": "SubPlan",
+                                  "Subplan Name": "SubPlan 4",
+                                  "Parallel Aware": false,
+                                  "Async Capable": false,
+                                  "Scan Direction": "Forward",
+                                  "Index Name": "contracts_list",
+                                  "Relation Name": "contracts",
+                                  "Alias": "k_1",
+                                  "Startup Cost": 0.15,
+                                  "Total Cost": 8.34,
+                                  "Plan Rows": 1,
+                                  "Plan Width": 16,
+                                  "Actual Startup Time": 0.0,
+                                  "Actual Total Time": 0.0,
+                                  "Actual Rows": 0,
+                                  "Actual Loops": 0,
+                                  "Index Cond": "(tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid)",
+                                  "Rows Removed by Index Recheck": 0,
+                                  "Filter": "((((NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid IS NULL) OR (subscriber_id = (NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid)) AND (((NULLIF(string_to_array(NULLIF(current_setting('app.pop_ids'::text, true), ''::text), ','::text), '{}'::text[]))::uuid[] IS NULL) OR (pop_id IS NULL) OR (pop_id = ANY ((NULLIF(string_to_array(NULLIF(current_setting('app.pop_ids'::text, true), ''::text), ','::text), '{}'::text[]))::uuid[]))))",
+                                  "Rows Removed by Filter": 0,
+                                  "Shared Hit Blocks": 0,
+                                  "Shared Read Blocks": 0,
+                                  "Shared Dirtied Blocks": 0,
+                                  "Shared Written Blocks": 0,
+                                  "Local Hit Blocks": 0,
+                                  "Local Read Blocks": 0,
+                                  "Local Dirtied Blocks": 0,
+                                  "Local Written Blocks": 0,
+                                  "Temp Read Blocks": 0,
+                                  "Temp Written Blocks": 0
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Node Type": "Aggregate",
+          "Strategy": "Plain",
+          "Partial Mode": "Simple",
+          "Parent Relationship": "Inner",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Startup Cost": 25.05,
+          "Total Cost": 25.06,
+          "Plan Rows": 1,
+          "Plan Width": 8,
+          "Actual Startup Time": 0.007,
+          "Actual Total Time": 0.007,
+          "Actual Rows": 1,
+          "Actual Loops": 7,
+          "Shared Hit Blocks": 20,
+          "Shared Read Blocks": 0,
+          "Shared Dirtied Blocks": 0,
+          "Shared Written Blocks": 0,
+          "Local Hit Blocks": 0,
+          "Local Read Blocks": 0,
+          "Local Dirtied Blocks": 0,
+          "Local Written Blocks": 0,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 0,
+          "Plans": [
+            {
+              "Node Type": "Result",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 0.28,
+              "Total Cost": 25.04,
+              "Plan Rows": 1,
+              "Plan Width": 4,
+              "Actual Startup Time": 0.006,
+              "Actual Total Time": 0.007,
+              "Actual Rows": 1,
+              "Actual Loops": 7,
+              "One-Time Filter": "((NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid = i.tenant_id)",
+              "Shared Hit Blocks": 20,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Plans": [
+                {
+                  "Node Type": "Index Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Scan Direction": "Forward",
+                  "Index Name": "payments_tenant_invoice_identity_uq",
+                  "Relation Name": "payments",
+                  "Alias": "py",
+                  "Startup Cost": 0.28,
+                  "Total Cost": 25.04,
+                  "Plan Rows": 1,
+                  "Plan Width": 4,
+                  "Actual Startup Time": 0.005,
+                  "Actual Total Time": 0.005,
+                  "Actual Rows": 1,
+                  "Actual Loops": 7,
+                  "Index Cond": "((tenant_id = i.tenant_id) AND (invoice_id = i.id))",
+                  "Rows Removed by Index Recheck": 0,
+                  "Filter": "(((NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid IS NULL) OR (SubPlan 11))",
+                  "Rows Removed by Filter": 0,
+                  "Shared Hit Blocks": 20,
+                  "Shared Read Blocks": 0,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 0,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0,
+                  "Plans": [
+                    {
+                      "Node Type": "Index Scan",
+                      "Parent Relationship": "SubPlan",
+                      "Subplan Name": "SubPlan 11",
+                      "Parallel Aware": false,
+                      "Async Capable": false,
+                      "Scan Direction": "Forward",
+                      "Index Name": "invoices_pkey",
+                      "Relation Name": "invoices",
+                      "Alias": "i_2",
+                      "Startup Cost": 0.28,
+                      "Total Cost": 16.73,
+                      "Plan Rows": 1,
+                      "Plan Width": 0,
+                      "Actual Startup Time": 0.0,
+                      "Actual Total Time": 0.0,
+                      "Actual Rows": 0,
+                      "Actual Loops": 0,
+                      "Index Cond": "(id = py.invoice_id)",
+                      "Rows Removed by Index Recheck": 0,
+                      "Filter": "((tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid) AND (((NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid IS NULL) OR (subscriber_id = (NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid)) AND (((NULLIF(string_to_array(NULLIF(current_setting('app.pop_ids'::text, true), ''::text), ','::text), '{}'::text[]))::uuid[] IS NULL) OR (hashed SubPlan 10)))",
+                      "Rows Removed by Filter": 0,
+                      "Shared Hit Blocks": 0,
+                      "Shared Read Blocks": 0,
+                      "Shared Dirtied Blocks": 0,
+                      "Shared Written Blocks": 0,
+                      "Local Hit Blocks": 0,
+                      "Local Read Blocks": 0,
+                      "Local Dirtied Blocks": 0,
+                      "Local Written Blocks": 0,
+                      "Temp Read Blocks": 0,
+                      "Temp Written Blocks": 0,
+                      "Plans": [
+                        {
+                          "Node Type": "Index Scan",
+                          "Parent Relationship": "SubPlan",
+                          "Subplan Name": "SubPlan 10",
+                          "Parallel Aware": false,
+                          "Async Capable": false,
+                          "Scan Direction": "Forward",
+                          "Index Name": "contracts_list",
+                          "Relation Name": "contracts",
+                          "Alias": "k_2",
+                          "Startup Cost": 0.15,
+                          "Total Cost": 8.34,
+                          "Plan Rows": 1,
+                          "Plan Width": 16,
+                          "Actual Startup Time": 0.0,
+                          "Actual Total Time": 0.0,
+                          "Actual Rows": 0,
+                          "Actual Loops": 0,
+                          "Index Cond": "(tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid)",
+                          "Rows Removed by Index Recheck": 0,
+                          "Filter": "((((NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid IS NULL) OR (subscriber_id = (NULLIF(current_setting('app.subscriber_id'::text, true), ''::text))::uuid)) AND (((NULLIF(string_to_array(NULLIF(current_setting('app.pop_ids'::text, true), ''::text), ','::text), '{}'::text[]))::uuid[] IS NULL) OR (pop_id IS NULL) OR (pop_id = ANY ((NULLIF(string_to_array(NULLIF(current_setting('app.pop_ids'::text, true), ''::text), ','::text), '{}'::text[]))::uuid[]))))",
+                          "Rows Removed by Filter": 0,
+                          "Shared Hit Blocks": 0,
+                          "Shared Read Blocks": 0,
+                          "Shared Dirtied Blocks": 0,
+                          "Shared Written Blocks": 0,
+                          "Local Hit Blocks": 0,
+                          "Local Read Blocks": 0,
+                          "Local Dirtied Blocks": 0,
+                          "Local Written Blocks": 0,
+                          "Temp Read Blocks": 0,
+                          "Temp Written Blocks": 0
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Planning": {
+      "Shared Hit Blocks": 41,
+      "Shared Read Blocks": 0,
+      "Shared Dirtied Blocks": 0,
+      "Shared Written Blocks": 0,
+      "Local Hit Blocks": 0,
+      "Local Read Blocks": 0,
+      "Local Dirtied Blocks": 0,
+      "Local Written Blocks": 0,
+      "Temp Read Blocks": 0,
+      "Temp Written Blocks": 0
+    },
+    "Planning Time": 3.108,
+    "Triggers": [],
+    "Execution Time": 0.528
+  }
+]
+`
