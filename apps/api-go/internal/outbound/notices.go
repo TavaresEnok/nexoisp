@@ -4,7 +4,6 @@ import (
 	"context"
 	"embed"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"nexoisp/api-go/internal/db"
 	"nexoisp/api-go/internal/finance"
@@ -58,7 +57,6 @@ func Notices(ctx context.Context, database *db.DB, tenant string, force bool) (m
 	out := map[string]any{"sent": 0, "failed": 0, "skipped": 0}
 	scope := tenancy.Scope{TenantID: tenant}
 	enabled := false
-	sql := func(i int) string { return RoutineSQL("runNotices", i) }
 	err := database.WithScope(ctx, scope, func(tx *db.Tx) error {
 		var e error
 		enabled, e = enqueueNotices(ctx, tx, tenant, force, out)
@@ -67,45 +65,7 @@ func Notices(ctx context.Context, database *db.DB, tenant string, force bool) (m
 	if err != nil || !enabled {
 		return out, err
 	}
-	for n := 0; n < 500; n++ {
-		var job jsonx.Object
-		err = database.WithScope(ctx, scope, func(tx *db.Tx) error {
-			rs, e := tx.Objects(ctx, sql(6), tenant)
-			if len(rs) > 0 {
-				job = rs[0]
-			}
-			return e
-		})
-		if err != nil {
-			return out, err
-		}
-		if job == nil {
-			break
-		}
-		channel, _ := job.Get("channel").(jsonx.Object)
-		var sendErr error
-		if channel == nil {
-			sendErr = errors.New("canal de envio removido ou desativado")
-		} else {
-			sendErr = Message(ctx, channel, fmt.Sprint(job.Get("contact_value")), fmt.Sprint(job.Get("message")))
-		}
-		status := "sent"
-		var message any
-		if sendErr != nil {
-			status = "failed"
-			message = utf16cut(sendErr.Error(), 300)
-		}
-		err = database.WithScope(ctx, scope, func(tx *db.Tx) error { return tx.Exec(ctx, sql(7), job.Get("id"), status, message) })
-		if err != nil {
-			return out, err
-		}
-		counter := "sent"
-		if sendErr != nil {
-			counter = "failed"
-		}
-		out[counter] = out[counter].(int) + 1
-	}
-	return out, nil
+	return out, deliverQueuedNotices(ctx, database, scope, tenant, productionNoticeRuntime(), out)
 }
 
 // enqueueNotices writes notice_log rows. Message delivery stays in Notices, after commit.
@@ -125,7 +85,7 @@ func enqueueNotices(ctx context.Context, tx *db.Tx, tenant string, force bool, o
 	if t.Get("enabled") != true && !force {
 		return false, nil
 	}
-	if err = tx.Exec(ctx, sql(1), tenant, 10); err != nil {
+	if err = sweepNotices(ctx, tx, tenant); err != nil {
 		return false, err
 	}
 	rules, err := tx.Objects(ctx, sql(2))
