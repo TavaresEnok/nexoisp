@@ -85,10 +85,11 @@ func (s Service) today(ctx context.Context, tx *db.Tx, _ *http.Request, _ map[st
 		add(r.Get("unassigned"), "info", "ordem de serviço sem responsável", "ordens de serviço sem responsável", "/ordens-servico", nil)
 	}
 	if has("finance:read", "") {
-		r, err := one(3)
+		rows, err := balanceRowsInTx(ctx, tx, balanceReaderTodayOverdue, dynamicSQL(path, 3, nil))
 		if err != nil {
 			return endpoint.Result{}, err
 		}
+		r := object(rows)
 		add(r.Get("reconciling"), "warning", "fatura em conciliação", "faturas em conciliação", "/conciliacao", str("Pagamento divergente aguardando decisão."))
 		add(r.Get("overdue"), "info", "fatura vencida", "faturas vencidas", "/faturas", str("Total de "+currencyBRL(num(r.Get("overdue_cents")))+"."))
 	}
