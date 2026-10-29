@@ -58,6 +58,8 @@ jobs:
         run: python3 tests/contrato/go_integration.py
       - name: Falha por provedor, filas, limites compartilhados e recuperação
         run: python3 tests/contrato/resilience.py
+      - name: Restore sintético em cluster vazio exclusivo
+        run: python3 tests/contrato/restore_clean_host.py
       - name: Ferramentas de operação e conferência de migração
         run: python3 -m unittest discover -s tests/operacao
       - name: Integridade de cadastro, campos personalizados, equipe e estoque
@@ -82,7 +84,10 @@ jobs:
         with: {name: verificacao-go, path: tests/contrato/relatorios/}
       - name: Limpeza do laboratório
         if: always()
-        run: docker rm -f nexo-fase1-db nexo-resilience-db || true
+        run: |
+          docker rm -f nexo-fase1-db nexo-resilience-db || true
+          docker ps -aq --filter label=nexo.lab=b12-clean-host | xargs -r docker rm -f || true
+          docker volume ls -q --filter label=nexo.lab=b12-clean-host | xargs -r docker volume rm || true
   agente:
     runs-on: ubuntu-24.04
     steps:
