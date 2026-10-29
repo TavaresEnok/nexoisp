@@ -8,6 +8,8 @@ Evidência consolidada: `/home/enok/Documentos/projetos/implementacao-codex/lote
 
 `docs/LOTE24-B13-DESENHO-COMPENSACAO.md` e `docs/LOTE24-B13-ACEITACAO.json` permanecem históricos, `planned/not_run`. O contrato MVP continua só `invoices`, no máximo 200 linhas `created`, sem PSP, sem franquia, com IDs e histórico preservados e `evidence.reverted` falso.
 
+Go, browser dirigido e SBOM local descritos abaixo permanecem a prova da base `cc542a1`. A corrida posterior `0086558` não os repetiu. O resumo dessa corrida aponta `previous_unchanged_go_browser_sbom_evidence` para `cc542a1`. O CI hospedado do commit candidato continua sendo o gate real de publicação. O HEAD de desenvolvimento que contém a correção do campo opcional e o desenho B04 é `027e4615691452e35df11522ac373103ed346a1f` (`027e461`): `9c764d7` e `728f2ff`. Essa documentação não publica esse HEAD.
+
 ## Quatro estados
 
 | Estado | Leitura desta base |
@@ -56,7 +58,11 @@ Essa corrida não é a matriz dos 22 HTTP. Não marca caso como passado só porq
 
 O traceback cai dentro de B13-10, no quarto `refuse_blocker` (`provider_issuance`), depois dos asserts anteriores do mesmo `verify()`. Casos que o fonte coloca depois desse ponto não chegaram a rodar. Casos anteriores também não ganham `executado: true`: o processo não concluiu e o log não registra cada um.
 
-O lote 27 alterou esse setup em `b67d2f3`: insere uma `financial_connections` sintética EFI sandbox do mesmo tenant e empresa, grava `gateway` e `gateway_charge_id` juntos e mantém o POST 409 `provider_issuance`. `python3 -m py_compile` desse arquivo terminou 0. A tentativa seguinte de `nativo.py`, com container `nexo-b13-psp-fixture` e porta 25478, morreu em `nativo.py:19` com `FileNotFoundError: docker`, exit 1, antes de PostgreSQL. Compilação não é o gate. O ensaio do fixture corrigido continua pendente. A gerência é quem repete `python3 tests/contrato/nativo.py` sem `-I` e exige exit 0.
+O lote 27 alterou esse setup em `b67d2f3`: insere uma `financial_connections` sintética EFI sandbox do mesmo tenant e empresa, grava `gateway` e `gateway_charge_id` juntos e mantém o POST 409 `provider_issuance`. `python3 -m py_compile` desse arquivo terminou 0. Uma tentativa anterior, com container `nexo-b13-psp-fixture` e porta 25478, morreu em `nativo.py:19` com `FileNotFoundError: docker`, exit 1, antes de PostgreSQL. Essa tentativa ficou para trás.
+
+A corrida seguinte, base `0086558d9296054cfaf89071c9ae1bf0f2f56571`, passou do fixture PSP. O resumo `/home/enok/Documentos/projetos/implementacao-codex/lote27-b13-http-restore-2026-10-29/evidencias/gate-summary-0086558.json` marca `earlier_psp_fixture_passed` verdadeiro e `nativo.exit_code` 1. O log `gate-nativo-0086558.log` para em `tests/contrato/import_compensate_contract.py:369`, com `KeyError: 'entity_id'` na linha `error` do lote misto. `importResult` só serializa `entity_id` quando o id não é nil. A ausência é contrato válido. `http_22_cases_passed` é falso. O comando não concluiu, então os 22 HTTP continuam sem exit 0. Casos anteriores a essa linha não ganham `executado: true` por esta nota.
+
+O commit `9c764d7` ajusta a expectativa: a linha `error` aceita `entity_id` ausente ou nulo e recusa id presente e não nulo. Esse commit está em `027e461`. A correção entregue e qualquer revisão dela não são uma nova execução aprovada. Compilação também não é o gate. A gerência repete `python3 tests/contrato/nativo.py` sem `-I` no HEAD que contém `9c764d7` e exige exit 0.
 
 ## SBOM local
 
@@ -71,15 +77,18 @@ O log do npm repete o aviso de peers WASM opcionais (`@emnapi/*`, `@napi-rs/wasm
 
 ## B12 nesta mesma leitura
 
-O harness `tests/contrato/restore_clean_host.py`, os testes negativos `tests/operacao/test_restore_clean_host.py`, o passo em `native.yml` e `docs/RESTORE-LAB-HOST-LIMPO.md` estão em `56b2187`. O unittest estático da entrega rodou 13 testes, OK, em 0,024 s. Esse estático não aprova B12. No worker, `docker` estava ausente. `python3 tests/contrato/restore_clean_host.py` não produziu `tests/contrato/relatorios/restore-clean-host.json` de uma corrida concluída. O ensaio 27 de destino vazio permanece pendente.
+O harness `tests/contrato/restore_clean_host.py`, os testes negativos `tests/operacao/test_restore_clean_host.py`, o passo em `native.yml` e `docs/RESTORE-LAB-HOST-LIMPO.md` estão em `56b2187`. O unittest estático da entrega rodou 13 testes, OK, em 0,024 s. Esse estático não aprova B12. No worker que escreveu a nota do lote 26, `docker` estava ausente e não houve JSON de corrida. Essa ausência descreve aquele worker. Não descreve a corrida posterior.
 
-Não fechar com esse harness: host físico, cópia externa, cofre, RPO/RTO produtivo, piloto, nem os testes `tests/test_backup_integrity_isolated.py` e `tests/test_backup_executor_integrity_lab.py` do repositório Backup-center. Esses arquivos não estão neste clone.
+Na base `0086558` o mesmo comando terminou exit 0, com 17 fases e `ok` verdadeiro. A evidência rastreável é `restore-clean-host-0086558.json`, `gate-summary-0086558.json` e `gate-restore-clean-host-0086558.log`, no diretório do lote 27 citado acima. Os dois clusters são novos: `nexo-b12-src-30cf94629328` e `nexo-b12-dst-30cf94629328`, com volumes próprios. A corrida comprovou bytes de documento, hash pela verificação do restore, download HTTP, recusa de chave errada, recusa de manifesto e de dump manipulados, grants e isolamento, login, filas com jobs desligados e o replay B13 sem nova reversão. `resources_cleaned_by_harness` é verdadeiro. `static_approval` é falso.
+
+O exit 0 deixa abertos host físico, cópia externa, cofre, RPO/RTO produtivo, piloto, exactly-once externo e os testes `tests/test_backup_integrity_isolated.py` e `tests/test_backup_executor_integrity_lab.py` do repositório Backup-center. Esses arquivos não estão neste clone. O passo do workflow também não teve run hospedado. Não se explica mais o ensaio sintético por falta de autorização ou de bancada: ele já foi executado. Não refazer o harness nem essa corrida só para repetir o registro.
 
 ## Pendências que a prova deixa abertas
 
-1. Repetir `python3 tests/contrato/nativo.py`, sem `-I`, no HEAD que contém `b67d2f3`, em PostgreSQL 16 descartável. Exit diferente de 0 não passa os 22 HTTP.
-2. Executar `python3 tests/contrato/restore_clean_host.py` onde houver Docker, Go, OpenSSL e `postgres:16-alpine`. Sem o JSON de fases da corrida, B12-restore segue pendente.
-3. Conferir um run do `native.yml` neste HEAD, com o artefato `sbom-cyclonedx` e o passo de restore. Não reutilizar `e193266` nem `6f4bf38`.
-4. Homologação, push e deploy continuam fora desta nota.
+1. Repetir `python3 tests/contrato/nativo.py`, sem `-I`, no HEAD que contém `9c764d7`, em PostgreSQL 16 descartável. A base `cc542a1` parou no fixture. A base `0086558` passou desse fixture e parou no `entity_id` opcional da linha `error`, antes de terminar os 22 HTTP. A correção `9c764d7` ainda não teve essa repetição. Exit diferente de 0 não passa os 22 HTTP.
+2. O ensaio sintético `python3 tests/contrato/restore_clean_host.py` na base `0086558` está registrado, exit 0, 17 fases. B12 segue aberto no host físico, na cópia externa, no cofre, no RPO/RTO produtivo, no Backup-center, no piloto e no exactly-once externo. O run hospedado do passo também falta.
+3. Conferir um run do `native.yml` no commit candidato, com o artefato `sbom-cyclonedx` e o passo de restore. Go, browser e SBOM local de `cc542a1` continuam válidos nas partes que `0086558` não reexecutou. Não reutilizar `e193266` nem `6f4bf38`.
+4. O desenho B04 em `728f2ff` (`docs/B04-DESENHO-CORTE-LEITOR.md` e `docs/B04-ACEITE-CORTE-LEITOR.json`) é preparação. A comparação sintética de `0086558` leu 23 faturas e 23 sombras sem drift no tenant alfa, zero no beta e zero acordos. Essa leitura e o desenho não ativam o corte. A matriz do aceite permanece com `executado` falso.
+5. Homologação, push e deploy continuam fora desta nota.
 
-Não reimplementar os lotes 25 e 26. O código deles permanece. O próximo trabalho é execução que ainda não existe, mais a revisão independente de qualquer correção que essa execução mostrar.
+Não reimplementar os lotes 25 e 26, o fixture PSP `b67d2f3`, o harness `56b2187` nem a expectativa já corrigida em `9c764d7`. Não refazer a corrida de restore `0086558` como se ela faltasse. O próximo trabalho de B13 é a repetição do HTTP até exit 0, mais a revisão independente do que essa repetição mostrar. O corte B04 não entra como código neste registro.
