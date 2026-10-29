@@ -147,6 +147,9 @@ def run():
         checks.append('B07: reserva de emissao bloqueia baixas e cancelamentos concorrentes')
         command([sys.executable,str(ROOT/'tests/contrato/financial_credentials.py')],env=dict(env,NEXO_PAYMENT_LAB='1',NEXO_PAYMENT_LAB_URL=bases[0]))
         checks.append('B07: cofre financeiro versionado cifrado e autorizado')
+        from cloud_notices_contract import verify as verify_cloud_notices
+        verify_cloud_notices(api, call, sql)
+        checks.append('B15: migração 79 sem conta, webhook recusado, zero envio e sem efeito financeiro; R2 e G seguem pendentes de PostgreSQL')
     finally:
         for p,log in processes:
             p.terminate()

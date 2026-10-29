@@ -4,7 +4,7 @@
   "titulo": "Aceite futuro do adapter Cloud API de avisos, desligado por padrão",
   "base": "6963214927aa45ae1963c58d4c14ba540d78c2f0",
   "desenho": "docs/B15-DESENHO-CLOUD-API.md",
-  "execucao": "planned/not_run",
+  "execucao": "r1_pacote_cloudapi_exit_0_r2_g_h_pendentes",
   "executado": false,
   "homologacao_waba": false,
   "conta_configurada": false,
@@ -12,37 +12,172 @@
   "publicacao": false,
   "analise_de_codigo_nao_e_homologacao": true,
   "skip_nao_e_execucao": true,
-  "observado": null,
-  "nota": "Nenhum caso foi executado neste lote. resultado é o efeito esperado da implementação futura. comando é um argv futuro. R1 aprova sem journal, sem PostgreSQL e sem R2. R2 aprova com sender falso e sem o pacote cloudapi. O gate G não é pré-requisito de R1 nem de R2. Teste offline não fecha WABA, template, versão Graph nem entrega real.",
+  "observado": {
+    "r1": {
+      "argv": [
+        "go",
+        "-C",
+        "apps/api-go",
+        "test",
+        "-count=1",
+        "-v",
+        "./internal/outbound/cloudapi/"
+      ],
+      "equivale_ao_comando_do_pacote": [
+        "go",
+        "test",
+        "-count=1",
+        "./internal/outbound/cloudapi/"
+      ],
+      "diretorio": "apps/api-go",
+      "exit": 0,
+      "data": "2026-10-29",
+      "pacote": "ok nexoisp/api-go/internal/outbound/cloudapi 0.163s",
+      "funcoes_pass": [
+        "TestCloudAPI_B15_C10",
+        "TestCloudAPI_B15_C11",
+        "TestCloudAPI_B15_C12",
+        "TestCloudAPI_B15_C13",
+        "TestCloudAPI_B15_C14",
+        "TestCloudAPI_B15_C15",
+        "TestCloudAPI_B15_C16",
+        "TestCloudAPI_B15_C17",
+        "TestCloudAPI_B15_C18",
+        "TestCloudAPI_B15_C22",
+        "TestCloudAPI_B15_C23",
+        "TestCloudAPI_B15_C25"
+      ],
+      "rede": false,
+      "postgresql": false,
+      "fecha_waba": false,
+      "fecha_h01": false
+    },
+    "r2_g": "O comando deste caso não rodou em PostgreSQL nesta entrega. Presença da função Test no arquivo não é execução. Skip sem NEXO_GO_TEST_DATABASE_URL não aprova. A gerência executa NEXO_CLOUD_PG_REQUIRED=1 em python3 tests/contrato/go_integration.py, o runner já existente, sem runner novo.",
+    "h01": "aberto; o exit 0 de R1 não homologa WABA, template, número, versão Graph nem API real",
+    "ci_lote33": "pendente",
+    "ci_candidata_6963214": {
+      "run": "40877414874",
+      "conclusion": "success",
+      "updated_at": "2026-10-29T13:11:42Z",
+      "cobre_lote33": false
+    },
+    "base_documental_lote32": "f42256b558288590f8e804b558982f15651981fb",
+    "objeto_33f42256b_neste_clone": false
+  },
+  "nota": "A matriz nasceu no lote 32 como planned/not_run. No lote 33 o pacote cloudapi teve exit 0 com as funções R1 listadas em observado.r1, sender falso, sem rede e sem PostgreSQL. Esse exit não fecha H01, WABA, versão Graph nem API real. R2 e G permanecem não executados até NEXO_CLOUD_PG_REQUIRED=1 no go_integration.py já existente. Skip não é execução. Presença de Test no arquivo não é a fonte do observado.",
   "raizes": [
     {
       "id": "R1",
       "pacote": "apps/api-go/internal/outbound/cloudapi",
       "aceite_independente": true,
       "depende_de": [],
-      "comando": ["go", "test", "-count=1", "./internal/outbound/cloudapi/"]
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "./internal/outbound/cloudapi/"
+      ],
+      "observado": {
+        "argv": [
+          "go",
+          "-C",
+          "apps/api-go",
+          "test",
+          "-count=1",
+          "-v",
+          "./internal/outbound/cloudapi/"
+        ],
+        "equivale_ao_comando_do_pacote": [
+          "go",
+          "test",
+          "-count=1",
+          "./internal/outbound/cloudapi/"
+        ],
+        "diretorio": "apps/api-go",
+        "exit": 0,
+        "data": "2026-10-29",
+        "pacote": "ok nexoisp/api-go/internal/outbound/cloudapi 0.163s",
+        "funcoes_pass": [
+          "TestCloudAPI_B15_C10",
+          "TestCloudAPI_B15_C11",
+          "TestCloudAPI_B15_C12",
+          "TestCloudAPI_B15_C13",
+          "TestCloudAPI_B15_C14",
+          "TestCloudAPI_B15_C15",
+          "TestCloudAPI_B15_C16",
+          "TestCloudAPI_B15_C17",
+          "TestCloudAPI_B15_C18",
+          "TestCloudAPI_B15_C22",
+          "TestCloudAPI_B15_C23",
+          "TestCloudAPI_B15_C25"
+        ],
+        "rede": false,
+        "postgresql": false,
+        "fecha_waba": false,
+        "fecha_h01": false
+      }
     },
     {
       "id": "R2",
       "pacote": "apps/api-go/internal/outbound/cloudjournal",
       "aceite_independente": true,
       "depende_de": [],
-      "comando": ["go", "test", "-count=1", "./internal/outbound/cloudjournal/"],
-      "banco": "PostgreSQL de teste. Ausência de NEXO_GO_TEST_DATABASE_URL que produza skip não aprova."
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "./internal/outbound/cloudjournal/"
+      ],
+      "banco": "PostgreSQL de teste. Ausência de NEXO_GO_TEST_DATABASE_URL que produza skip não aprova.",
+      "observado": {
+        "estado": "pendente",
+        "motivo": "O comando deste caso não rodou em PostgreSQL nesta entrega. Presença da função Test no arquivo não é execução. Skip sem NEXO_GO_TEST_DATABASE_URL não aprova. A gerência executa NEXO_CLOUD_PG_REQUIRED=1 em python3 tests/contrato/go_integration.py, o runner já existente, sem runner novo.",
+        "presenca_de_Test_no_arquivo_nao_e_execucao": true,
+        "fecha_h01": false
+      }
     }
   ],
   "gate": {
     "id": "G",
-    "depende_de": ["R1", "R2"],
-    "nao_bloqueia": ["R1", "R2"],
-    "comando": ["go", "test", "-count=1", "-run", "TestCloudNoticeGate", "./internal/outbound/"],
-    "banco": "PostgreSQL de teste. Skip não aprova."
+    "depende_de": [
+      "R1",
+      "R2"
+    ],
+    "nao_bloqueia": [
+      "R1",
+      "R2"
+    ],
+    "comando": [
+      "go",
+      "test",
+      "-count=1",
+      "-run",
+      "TestCloudNoticeGate",
+      "./internal/outbound/"
+    ],
+    "banco": "PostgreSQL de teste. Skip não aprova.",
+    "observado": {
+      "estado": "pendente",
+      "motivo": "O comando deste caso não rodou em PostgreSQL nesta entrega. Presença da função Test no arquivo não é execução. Skip sem NEXO_GO_TEST_DATABASE_URL não aprova. A gerência executa NEXO_CLOUD_PG_REQUIRED=1 em python3 tests/contrato/go_integration.py, o runner já existente, sem runner novo.",
+      "presenca_de_Test_no_arquivo_nao_e_execucao": true,
+      "fecha_h01": false
+    }
   },
   "homologacao_operador": {
     "id": "H",
     "fecha_mvp_offline": false,
-    "itens_abertos": ["conta WABA", "template aprovado", "versão Graph citada em fonte primária atual", "envio real deliberado"],
-    "comando_meta": null
+    "itens_abertos": [
+      "conta WABA",
+      "template aprovado",
+      "versão Graph citada em fonte primária atual",
+      "envio real deliberado"
+    ],
+    "comando_meta": null,
+    "observado": {
+      "estado": "aberto",
+      "exit_r1_nao_fecha": true,
+      "chamada_meta": false
+    }
   },
   "casos": [
     {
@@ -52,10 +187,27 @@
       "fixture": "Um notice_log queued de adapter cloud_api, dois chamadores no mesmo tenant.",
       "acao": "Os dois executam o claim existente com for update skip locked e só o vencedor chama Revalidate.",
       "resultado": "Uma linha passa a sending. A outra réplica recebe zero linhas. O sender falso do vencedor é a única chamada possível e, neste caso, a decisão de teste é send com um único attempt.",
-      "invariantes": ["Um único cloud_notice_attempts para o notice_log, attempt_no 1.", "A fixture não estoura lock.", "A segunda réplica não grava attempt."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudJournal_B15_C01", "./internal/outbound/cloudjournal/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "Um único cloud_notice_attempts para o notice_log, attempt_no 1.",
+        "A fixture não estoura lock.",
+        "A segunda réplica não grava attempt."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudJournal_B15_C01",
+        "./internal/outbound/cloudjournal/"
+      ],
+      "execucao": "codigo_presente_postgresql_nao_executado",
+      "executado": false,
+      "observado": {
+        "estado": "pendente",
+        "motivo": "O comando deste caso não rodou em PostgreSQL nesta entrega. Presença da função Test no arquivo não é execução. Skip sem NEXO_GO_TEST_DATABASE_URL não aprova. A gerência executa NEXO_CLOUD_PG_REQUIRED=1 em python3 tests/contrato/go_integration.py, o runner já existente, sem runner novo.",
+        "presenca_de_Test_no_arquivo_nao_e_execucao": true,
+        "fecha_h01": false
+      }
     },
     {
       "id": "B15-C02",
@@ -64,10 +216,28 @@
       "fixture": "Attempt submitted com provider_message_id fixo de teste. Authenticator.Proven verdadeiro no falso de teste. Mesmo corpo duas vezes.",
       "acao": "AcceptStatus duas vezes com o mesmo body.",
       "resultado": "A primeira grava uma observação. A segunda devolve Duplicate verdadeiro e não insere outra linha.",
-      "invariantes": ["Um único body_hash na conta.", "MoneyWrites=0.", "Sends=0.", "notice_log não volta a queued."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudJournal_B15_C02", "./internal/outbound/cloudjournal/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "Um único body_hash na conta.",
+        "MoneyWrites=0.",
+        "Sends=0.",
+        "notice_log não volta a queued."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudJournal_B15_C02",
+        "./internal/outbound/cloudjournal/"
+      ],
+      "execucao": "codigo_presente_postgresql_nao_executado",
+      "executado": false,
+      "observado": {
+        "estado": "pendente",
+        "motivo": "O comando deste caso não rodou em PostgreSQL nesta entrega. Presença da função Test no arquivo não é execução. Skip sem NEXO_GO_TEST_DATABASE_URL não aprova. A gerência executa NEXO_CLOUD_PG_REQUIRED=1 em python3 tests/contrato/go_integration.py, o runner já existente, sem runner novo.",
+        "presenca_de_Test_no_arquivo_nao_e_execucao": true,
+        "fecha_h01": false
+      }
     },
     {
       "id": "B15-C03",
@@ -76,10 +246,27 @@
       "fixture": "Dois corpos distintos do mesmo provider_message_id, autenticados pelo falso.",
       "acao": "AcceptStatus do segundo corpo e depois do primeiro.",
       "resultado": "As duas observações existem. Nenhuma cria notice_log nem chama o sender.",
-      "invariantes": ["Sends=0.", "MoneyWrites=0.", "status do log permanece o que o HTTP já tinha gravado."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudJournal_B15_C03", "./internal/outbound/cloudjournal/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "Sends=0.",
+        "MoneyWrites=0.",
+        "status do log permanece o que o HTTP já tinha gravado."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudJournal_B15_C03",
+        "./internal/outbound/cloudjournal/"
+      ],
+      "execucao": "codigo_presente_postgresql_nao_executado",
+      "executado": false,
+      "observado": {
+        "estado": "pendente",
+        "motivo": "O comando deste caso não rodou em PostgreSQL nesta entrega. Presença da função Test no arquivo não é execução. Skip sem NEXO_GO_TEST_DATABASE_URL não aprova. A gerência executa NEXO_CLOUD_PG_REQUIRED=1 em python3 tests/contrato/go_integration.py, o runner já existente, sem runner novo.",
+        "presenca_de_Test_no_arquivo_nao_e_execucao": true,
+        "fecha_h01": false
+      }
     },
     {
       "id": "B15-C04",
@@ -88,10 +275,27 @@
       "fixture": "Attempt da conta no tenant A. Escopo da transação no tenant B.",
       "acao": "AcceptStatus com o id de provedor do tenant A.",
       "resultado": "Nenhuma linha nova no tenant A nem no tenant B. Effect sem Applied.",
-      "invariantes": ["RLS impede a leitura da conta A.", "Sends=0.", "MoneyWrites=0."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudJournal_B15_C04", "./internal/outbound/cloudjournal/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "RLS impede a leitura da conta A.",
+        "Sends=0.",
+        "MoneyWrites=0."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudJournal_B15_C04",
+        "./internal/outbound/cloudjournal/"
+      ],
+      "execucao": "codigo_presente_postgresql_nao_executado",
+      "executado": false,
+      "observado": {
+        "estado": "pendente",
+        "motivo": "O comando deste caso não rodou em PostgreSQL nesta entrega. Presença da função Test no arquivo não é execução. Skip sem NEXO_GO_TEST_DATABASE_URL não aprova. A gerência executa NEXO_CLOUD_PG_REQUIRED=1 em python3 tests/contrato/go_integration.py, o runner já existente, sem runner novo.",
+        "presenca_de_Test_no_arquivo_nao_e_execucao": true,
+        "fecha_h01": false
+      }
     },
     {
       "id": "B15-C05",
@@ -100,10 +304,26 @@
       "fixture": "Duas cloud_accounts do mesmo tenant. O id de provedor pertence à conta A. A chamada usa a conta B com assinatura válida da conta B.",
       "acao": "AcceptStatus da conta B.",
       "resultado": "A conta A não ganha observação. A conta B não cria attempt.",
-      "invariantes": ["Único provider_message_id continua na conta A.", "Sends=0."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudJournal_B15_C05", "./internal/outbound/cloudjournal/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "Único provider_message_id continua na conta A.",
+        "Sends=0."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudJournal_B15_C05",
+        "./internal/outbound/cloudjournal/"
+      ],
+      "execucao": "codigo_presente_postgresql_nao_executado",
+      "executado": false,
+      "observado": {
+        "estado": "pendente",
+        "motivo": "O comando deste caso não rodou em PostgreSQL nesta entrega. Presença da função Test no arquivo não é execução. Skip sem NEXO_GO_TEST_DATABASE_URL não aprova. A gerência executa NEXO_CLOUD_PG_REQUIRED=1 em python3 tests/contrato/go_integration.py, o runner já existente, sem runner novo.",
+        "presenca_de_Test_no_arquivo_nao_e_execucao": true,
+        "fecha_h01": false
+      }
     },
     {
       "id": "B15-C06",
@@ -112,10 +332,26 @@
       "fixture": "Authenticator de teste que recusa o corpo.",
       "acao": "AcceptStatus.",
       "resultado": "Erro, rollback, zero linhas em cloud_notice_status, notice_log inalterado.",
-      "invariantes": ["Sends=0.", "MoneyWrites=0."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudJournal_B15_C06", "./internal/outbound/cloudjournal/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "Sends=0.",
+        "MoneyWrites=0."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudJournal_B15_C06",
+        "./internal/outbound/cloudjournal/"
+      ],
+      "execucao": "codigo_presente_postgresql_nao_executado",
+      "executado": false,
+      "observado": {
+        "estado": "pendente",
+        "motivo": "O comando deste caso não rodou em PostgreSQL nesta entrega. Presença da função Test no arquivo não é execução. Skip sem NEXO_GO_TEST_DATABASE_URL não aprova. A gerência executa NEXO_CLOUD_PG_REQUIRED=1 em python3 tests/contrato/go_integration.py, o runner já existente, sem runner novo.",
+        "presenca_de_Test_no_arquivo_nao_e_execucao": true,
+        "fecha_h01": false
+      }
     },
     {
       "id": "B15-C07",
@@ -124,10 +360,26 @@
       "fixture": "Linha sending. Contato que estava allow_notices na entrada da fila passa a false antes de Revalidate.",
       "acao": "Revalidate e, se a decisão não for send, o teste não chama o sender.",
       "resultado": "DecisionOptOut, notice_log skipped_no_consent, attempt not_sent, zero chamadas ao sender.",
-      "invariantes": ["allow_notices falso permanece.", "Nenhum provider_message_id."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudJournal_B15_C07", "./internal/outbound/cloudjournal/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "allow_notices falso permanece.",
+        "Nenhum provider_message_id."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudJournal_B15_C07",
+        "./internal/outbound/cloudjournal/"
+      ],
+      "execucao": "codigo_presente_postgresql_nao_executado",
+      "executado": false,
+      "observado": {
+        "estado": "pendente",
+        "motivo": "O comando deste caso não rodou em PostgreSQL nesta entrega. Presença da função Test no arquivo não é execução. Skip sem NEXO_GO_TEST_DATABASE_URL não aprova. A gerência executa NEXO_CLOUD_PG_REQUIRED=1 em python3 tests/contrato/go_integration.py, o runner já existente, sem runner novo.",
+        "presenca_de_Test_no_arquivo_nao_e_execucao": true,
+        "fecha_h01": false
+      }
     },
     {
       "id": "B15-C08",
@@ -136,10 +388,27 @@
       "fixture": "Linha sending de fatura que o teste quita com LockInvoices antes de MarkWire. Saldo deixa de ser positivo.",
       "acao": "MarkWire.",
       "resultado": "DecisionSettled, notice_log skipped_settled, sender não chamado.",
-      "invariantes": ["payments da quitação permanece.", "O journal não insere payments.", "Zero HTTP no sender falso."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudJournal_B15_C08", "./internal/outbound/cloudjournal/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "payments da quitação permanece.",
+        "O journal não insere payments.",
+        "Zero HTTP no sender falso."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudJournal_B15_C08",
+        "./internal/outbound/cloudjournal/"
+      ],
+      "execucao": "codigo_presente_postgresql_nao_executado",
+      "executado": false,
+      "observado": {
+        "estado": "pendente",
+        "motivo": "O comando deste caso não rodou em PostgreSQL nesta entrega. Presença da função Test no arquivo não é execução. Skip sem NEXO_GO_TEST_DATABASE_URL não aprova. A gerência executa NEXO_CLOUD_PG_REQUIRED=1 em python3 tests/contrato/go_integration.py, o runner já existente, sem runner novo.",
+        "presenca_de_Test_no_arquivo_nao_e_execucao": true,
+        "fecha_h01": false
+      }
     },
     {
       "id": "B15-C09",
@@ -148,10 +417,26 @@
       "fixture": "Attempt em wire com wire_at preenchido. O processo de teste não chama RecordResult.",
       "acao": "SweepReserved.",
       "resultado": "state uncertain e notice_log uncertain. O sender não é chamado de novo.",
-      "invariantes": ["Um único attempt.", "Sem segundo attempt_no."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudJournal_B15_C09", "./internal/outbound/cloudjournal/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "Um único attempt.",
+        "Sem segundo attempt_no."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudJournal_B15_C09",
+        "./internal/outbound/cloudjournal/"
+      ],
+      "execucao": "codigo_presente_postgresql_nao_executado",
+      "executado": false,
+      "observado": {
+        "estado": "pendente",
+        "motivo": "O comando deste caso não rodou em PostgreSQL nesta entrega. Presença da função Test no arquivo não é execução. Skip sem NEXO_GO_TEST_DATABASE_URL não aprova. A gerência executa NEXO_CLOUD_PG_REQUIRED=1 em python3 tests/contrato/go_integration.py, o runner já existente, sem runner novo.",
+        "presenca_de_Test_no_arquivo_nao_e_execucao": true,
+        "fecha_h01": false
+      }
     },
     {
       "id": "B15-C10",
@@ -160,10 +445,48 @@
       "fixture": "Cliente com Enabled verdadeiro, versão presente em AllowVersions de teste, RoundTripper que bloqueia até o contexto estourar.",
       "acao": "Send uma vez.",
       "resultado": "Result.Uncertain verdadeiro, Submitted falso, uma única ida ao RoundTripper.",
-      "invariantes": ["O transporte de teste conta 1.", "Não há segundo POST dentro de Send."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudAPI_B15_C10", "./internal/outbound/cloudapi/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "O transporte de teste conta 1.",
+        "Não há segundo POST dentro de Send."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudAPI_B15_C10",
+        "./internal/outbound/cloudapi/"
+      ],
+      "execucao": "go_test_pacote_cloudapi_exit_0",
+      "executado": true,
+      "observado": {
+        "argv": [
+          "go",
+          "-C",
+          "apps/api-go",
+          "test",
+          "-count=1",
+          "-v",
+          "./internal/outbound/cloudapi/"
+        ],
+        "argv_prescrito": [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestCloudAPI_B15_C10",
+          "./internal/outbound/cloudapi/"
+        ],
+        "funcao": "TestCloudAPI_B15_C10",
+        "resultado": "PASS",
+        "exit_do_pacote": 0,
+        "data": "2026-10-29",
+        "rede": false,
+        "postgresql": false,
+        "fecha_waba": false,
+        "fecha_h01": false,
+        "presenca_no_arquivo_nao_e_a_fonte": true
+      }
     },
     {
       "id": "B15-C11",
@@ -172,10 +495,47 @@
       "fixture": "RoundTripper devolve 429 e um corpo curto sem messages[].id.",
       "acao": "Send.",
       "resultado": "Refused verdadeiro, Uncertain falso, Submitted falso, ProviderMessageID vazio, uma chamada.",
-      "invariantes": ["Contagem do transporte é 1."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudAPI_B15_C11", "./internal/outbound/cloudapi/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "Contagem do transporte é 1."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudAPI_B15_C11",
+        "./internal/outbound/cloudapi/"
+      ],
+      "execucao": "go_test_pacote_cloudapi_exit_0",
+      "executado": true,
+      "observado": {
+        "argv": [
+          "go",
+          "-C",
+          "apps/api-go",
+          "test",
+          "-count=1",
+          "-v",
+          "./internal/outbound/cloudapi/"
+        ],
+        "argv_prescrito": [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestCloudAPI_B15_C11",
+          "./internal/outbound/cloudapi/"
+        ],
+        "funcao": "TestCloudAPI_B15_C11",
+        "resultado": "PASS",
+        "exit_do_pacote": 0,
+        "data": "2026-10-29",
+        "rede": false,
+        "postgresql": false,
+        "fecha_waba": false,
+        "fecha_h01": false,
+        "presenca_no_arquivo_nao_e_a_fonte": true
+      }
     },
     {
       "id": "B15-C12",
@@ -184,10 +544,48 @@
       "fixture": "RoundTripper devolve 503 sem messages[].id.",
       "acao": "Send.",
       "resultado": "Uncertain verdadeiro, Submitted falso, uma chamada. Send não repete.",
-      "invariantes": ["Contagem do transporte é 1.", "O id de provedor fica vazio."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudAPI_B15_C12", "./internal/outbound/cloudapi/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "Contagem do transporte é 1.",
+        "O id de provedor fica vazio."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudAPI_B15_C12",
+        "./internal/outbound/cloudapi/"
+      ],
+      "execucao": "go_test_pacote_cloudapi_exit_0",
+      "executado": true,
+      "observado": {
+        "argv": [
+          "go",
+          "-C",
+          "apps/api-go",
+          "test",
+          "-count=1",
+          "-v",
+          "./internal/outbound/cloudapi/"
+        ],
+        "argv_prescrito": [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestCloudAPI_B15_C12",
+          "./internal/outbound/cloudapi/"
+        ],
+        "funcao": "TestCloudAPI_B15_C12",
+        "resultado": "PASS",
+        "exit_do_pacote": 0,
+        "data": "2026-10-29",
+        "rede": false,
+        "postgresql": false,
+        "fecha_waba": false,
+        "fecha_h01": false,
+        "presenca_no_arquivo_nao_e_a_fonte": true
+      }
     },
     {
       "id": "B15-C13",
@@ -196,10 +594,48 @@
       "fixture": "RoundTripper devolve 400 com corpo de erro sem messages[].id.",
       "acao": "Send.",
       "resultado": "Refused verdadeiro, Submitted falso, uma chamada.",
-      "invariantes": ["O resultado não é delivered.", "Contagem do transporte é 1."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudAPI_B15_C13", "./internal/outbound/cloudapi/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "O resultado não é delivered.",
+        "Contagem do transporte é 1."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudAPI_B15_C13",
+        "./internal/outbound/cloudapi/"
+      ],
+      "execucao": "go_test_pacote_cloudapi_exit_0",
+      "executado": true,
+      "observado": {
+        "argv": [
+          "go",
+          "-C",
+          "apps/api-go",
+          "test",
+          "-count=1",
+          "-v",
+          "./internal/outbound/cloudapi/"
+        ],
+        "argv_prescrito": [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestCloudAPI_B15_C13",
+          "./internal/outbound/cloudapi/"
+        ],
+        "funcao": "TestCloudAPI_B15_C13",
+        "resultado": "PASS",
+        "exit_do_pacote": 0,
+        "data": "2026-10-29",
+        "rede": false,
+        "postgresql": false,
+        "fecha_waba": false,
+        "fecha_h01": false,
+        "presenca_no_arquivo_nao_e_a_fonte": true
+      }
     },
     {
       "id": "B15-C14",
@@ -208,10 +644,48 @@
       "fixture": "Bearer test-token-not-real e telefone 5500000000001. RoundTripper devolve erro de transporte depois de Do, ou 400 com o token ecoado no corpo.",
       "acao": "Send e ler Error e BodyExcerpt.",
       "resultado": "Nenhum dos dois textos contém o bearer nem o telefone completo.",
-      "invariantes": ["O cipher v1 não é montado pelo cliente.", "O teste não usa token real."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudAPI_B15_C14", "./internal/outbound/cloudapi/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "O cipher v1 não é montado pelo cliente.",
+        "O teste não usa token real."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudAPI_B15_C14",
+        "./internal/outbound/cloudapi/"
+      ],
+      "execucao": "go_test_pacote_cloudapi_exit_0",
+      "executado": true,
+      "observado": {
+        "argv": [
+          "go",
+          "-C",
+          "apps/api-go",
+          "test",
+          "-count=1",
+          "-v",
+          "./internal/outbound/cloudapi/"
+        ],
+        "argv_prescrito": [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestCloudAPI_B15_C14",
+          "./internal/outbound/cloudapi/"
+        ],
+        "funcao": "TestCloudAPI_B15_C14",
+        "resultado": "PASS",
+        "exit_do_pacote": 0,
+        "data": "2026-10-29",
+        "rede": false,
+        "postgresql": false,
+        "fecha_waba": false,
+        "fecha_h01": false,
+        "presenca_no_arquivo_nao_e_a_fonte": true
+      }
     },
     {
       "id": "B15-C15",
@@ -220,10 +694,48 @@
       "fixture": "Enabled falso. AllowVersions pode até conter a versão de teste. RoundTripper que falha o teste se for chamado.",
       "acao": "Send.",
       "resultado": "Erro de desligado. Contagem do transporte é 0.",
-      "invariantes": ["Nenhuma rede.", "O caso não depende de journal."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudAPI_B15_C15", "./internal/outbound/cloudapi/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "Nenhuma rede.",
+        "O caso não depende de journal."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudAPI_B15_C15",
+        "./internal/outbound/cloudapi/"
+      ],
+      "execucao": "go_test_pacote_cloudapi_exit_0",
+      "executado": true,
+      "observado": {
+        "argv": [
+          "go",
+          "-C",
+          "apps/api-go",
+          "test",
+          "-count=1",
+          "-v",
+          "./internal/outbound/cloudapi/"
+        ],
+        "argv_prescrito": [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestCloudAPI_B15_C15",
+          "./internal/outbound/cloudapi/"
+        ],
+        "funcao": "TestCloudAPI_B15_C15",
+        "resultado": "PASS",
+        "exit_do_pacote": 0,
+        "data": "2026-10-29",
+        "rede": false,
+        "postgresql": false,
+        "fecha_waba": false,
+        "fecha_h01": false,
+        "presenca_no_arquivo_nao_e_a_fonte": true
+      }
     },
     {
       "id": "B15-C16",
@@ -232,10 +744,48 @@
       "fixture": "RoundTripper devolve 200 e um JSON com messages[0].id igual a wamid.test.",
       "acao": "Send.",
       "resultado": "Submitted verdadeiro, Uncertain falso, ProviderMessageID wamid.test. O tipo Result não tem campo Delivered.",
-      "invariantes": ["Uma chamada.", "O teste não grava notice_log."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudAPI_B15_C16", "./internal/outbound/cloudapi/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "Uma chamada.",
+        "O teste não grava notice_log."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudAPI_B15_C16",
+        "./internal/outbound/cloudapi/"
+      ],
+      "execucao": "go_test_pacote_cloudapi_exit_0",
+      "executado": true,
+      "observado": {
+        "argv": [
+          "go",
+          "-C",
+          "apps/api-go",
+          "test",
+          "-count=1",
+          "-v",
+          "./internal/outbound/cloudapi/"
+        ],
+        "argv_prescrito": [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestCloudAPI_B15_C16",
+          "./internal/outbound/cloudapi/"
+        ],
+        "funcao": "TestCloudAPI_B15_C16",
+        "resultado": "PASS",
+        "exit_do_pacote": 0,
+        "data": "2026-10-29",
+        "rede": false,
+        "postgresql": false,
+        "fecha_waba": false,
+        "fecha_h01": false,
+        "presenca_no_arquivo_nao_e_a_fonte": true
+      }
     },
     {
       "id": "B15-C17",
@@ -244,10 +794,44 @@
       "fixture": "O pacote cloudapi compilado no teste não referencia cloudjournal nem db.",
       "acao": "go test do pacote inteiro, que inclui C10 a C16, C18, C22, C23 e C25.",
       "resultado": "Exit 0 do pacote sem PostgreSQL e sem o pacote de journal existir.",
-      "invariantes": ["R2 pode estar ausente.", "G pode estar ausente."],
-      "comando": ["go", "test", "-count=1", "./internal/outbound/cloudapi/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "R2 pode estar ausente.",
+        "G pode estar ausente."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "./internal/outbound/cloudapi/"
+      ],
+      "execucao": "go_test_pacote_cloudapi_exit_0",
+      "executado": true,
+      "observado": {
+        "argv": [
+          "go",
+          "-C",
+          "apps/api-go",
+          "test",
+          "-count=1",
+          "-v",
+          "./internal/outbound/cloudapi/"
+        ],
+        "argv_prescrito": [
+          "go",
+          "test",
+          "-count=1",
+          "./internal/outbound/cloudapi/"
+        ],
+        "funcao": "TestCloudAPI_B15_C17",
+        "resultado": "PASS",
+        "exit_do_pacote": 0,
+        "data": "2026-10-29",
+        "rede": false,
+        "postgresql": false,
+        "fecha_waba": false,
+        "fecha_h01": false,
+        "presenca_no_arquivo_nao_e_a_fonte": true
+      }
     },
     {
       "id": "B15-C18",
@@ -256,10 +840,48 @@
       "fixture": "PhoneNumberID e Version de teste. Outra chamada pede host que não é graph.facebook.com.",
       "acao": "Endpoint e Send com URL que o teste tenta forçar para outro host.",
       "resultado": "A URL montada é https://graph.facebook.com/{version}/{id}/messages. Host, usuário, porta, query ou HTTP são recusados com zero RoundTrip. NEXO_DEMO_MODE não altera o resultado.",
-      "invariantes": ["Não usa outbound.Post.", "Redirect do transporte de produção é recusado."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudAPI_B15_C18", "./internal/outbound/cloudapi/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "Não usa outbound.Post.",
+        "Redirect do transporte de produção é recusado."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudAPI_B15_C18",
+        "./internal/outbound/cloudapi/"
+      ],
+      "execucao": "go_test_pacote_cloudapi_exit_0",
+      "executado": true,
+      "observado": {
+        "argv": [
+          "go",
+          "-C",
+          "apps/api-go",
+          "test",
+          "-count=1",
+          "-v",
+          "./internal/outbound/cloudapi/"
+        ],
+        "argv_prescrito": [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestCloudAPI_B15_C18",
+          "./internal/outbound/cloudapi/"
+        ],
+        "funcao": "TestCloudAPI_B15_C18",
+        "resultado": "PASS",
+        "exit_do_pacote": 0,
+        "data": "2026-10-29",
+        "rede": false,
+        "postgresql": false,
+        "fecha_waba": false,
+        "fecha_h01": false,
+        "presenca_no_arquivo_nao_e_a_fonte": true
+      }
     },
     {
       "id": "B15-C19",
@@ -268,10 +890,26 @@
       "fixture": "Dois canais. Um generic_http cuja URL contém graph.facebook.com. Outro cloud_api.",
       "acao": "O laço de Notices entrega os dois logs.",
       "resultado": "O genérico chama Message e não chama cloudapi.Client. O cloud_api chama o cliente só com a flag e a versão allowlisted. Não há inspeção de host para escolher o adapter.",
-      "invariantes": ["headers_enc do canal genérico continua o caminho cryptox já existente.", "A tela message-channels.tsx não é exigida por este caso."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudNoticeGate_B15_C19", "./internal/outbound/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "headers_enc do canal genérico continua o caminho cryptox já existente.",
+        "A tela message-channels.tsx não é exigida por este caso."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudNoticeGate_B15_C19",
+        "./internal/outbound/"
+      ],
+      "execucao": "codigo_presente_postgresql_nao_executado",
+      "executado": false,
+      "observado": {
+        "estado": "pendente",
+        "motivo": "O comando deste caso não rodou em PostgreSQL nesta entrega. Presença da função Test no arquivo não é execução. Skip sem NEXO_GO_TEST_DATABASE_URL não aprova. A gerência executa NEXO_CLOUD_PG_REQUIRED=1 em python3 tests/contrato/go_integration.py, o runner já existente, sem runner novo.",
+        "presenca_de_Test_no_arquivo_nao_e_execucao": true,
+        "fecha_h01": false
+      }
     },
     {
       "id": "B15-C20",
@@ -280,10 +918,26 @@
       "fixture": "Pagamento já gravado na fatura. Webhook autenticado de status.",
       "acao": "AcceptStatus.",
       "resultado": "A soma de payments.signed_cents permanece. Não surge notice_log novo. Sends=0 e MoneyWrites=0.",
-      "invariantes": ["provider_notices não recebe o corpo.", "notifications e webhook_deliveries não recebem o corpo."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudJournal_B15_C20", "./internal/outbound/cloudjournal/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "provider_notices não recebe o corpo.",
+        "notifications e webhook_deliveries não recebem o corpo."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudJournal_B15_C20",
+        "./internal/outbound/cloudjournal/"
+      ],
+      "execucao": "codigo_presente_postgresql_nao_executado",
+      "executado": false,
+      "observado": {
+        "estado": "pendente",
+        "motivo": "O comando deste caso não rodou em PostgreSQL nesta entrega. Presença da função Test no arquivo não é execução. Skip sem NEXO_GO_TEST_DATABASE_URL não aprova. A gerência executa NEXO_CLOUD_PG_REQUIRED=1 em python3 tests/contrato/go_integration.py, o runner já existente, sem runner novo.",
+        "presenca_de_Test_no_arquivo_nao_e_execucao": true,
+        "fecha_h01": false
+      }
     },
     {
       "id": "B15-C21",
@@ -292,10 +946,28 @@
       "fixture": "Uma fatura. Uma sessão segura LockInvoices como escritor de pagamento e só commita depois que a transação A de Revalidate espera o lock. Outra variante commita a quitação só depois do commit wire.",
       "acao": "Primeira variante: quitação visível em B, zero sender. Segunda variante: MarkWire já em wire, sender chamado uma vez, pagamento permanece, sem chamada de cancelamento.",
       "resultado": "O ponto de linearização observado é o commit de MarkWire. Antes dele o HTTP não ocorre. Depois dele o HTTP em voo não é desfeito. No estouro de lock em B, o attempt reserved já commitado termina not_sent e o log volta a queued.",
-      "invariantes": ["A ordem é advisory 7411005 e depois for update, a mesma de finance.LockInvoices.", "Orçamento de lock 2s com savepoint: estouro em A não deixa attempt e devolve o log a queued.", "Estouro em B grava not_sent no attempt_no já reservado. O próximo Revalidate que seguir para envio usa attempt_no 2. O número 1 não volta a reserved.", "Nenhum estouro chama o sender."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudJournal_B15_C21", "./internal/outbound/cloudjournal/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "A ordem é advisory 7411005 e depois for update, a mesma de finance.LockInvoices.",
+        "Orçamento de lock 2s com savepoint: estouro em A não deixa attempt e devolve o log a queued.",
+        "Estouro em B grava not_sent no attempt_no já reservado. O próximo Revalidate que seguir para envio usa attempt_no 2. O número 1 não volta a reserved.",
+        "Nenhum estouro chama o sender."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudJournal_B15_C21",
+        "./internal/outbound/cloudjournal/"
+      ],
+      "execucao": "codigo_presente_postgresql_nao_executado",
+      "executado": false,
+      "observado": {
+        "estado": "pendente",
+        "motivo": "O comando deste caso não rodou em PostgreSQL nesta entrega. Presença da função Test no arquivo não é execução. Skip sem NEXO_GO_TEST_DATABASE_URL não aprova. A gerência executa NEXO_CLOUD_PG_REQUIRED=1 em python3 tests/contrato/go_integration.py, o runner já existente, sem runner novo.",
+        "presenca_de_Test_no_arquivo_nao_e_execucao": true,
+        "fecha_h01": false
+      }
     },
     {
       "id": "B15-C22",
@@ -304,10 +976,48 @@
       "fixture": "Enabled verdadeiro e AllowVersions vazio, que é o default do código futuro.",
       "acao": "Send com qualquer string de versão, inclusive uma versão numérica real de mercado.",
       "resultado": "Erro de versão não allowlisted. Transporte com contagem 0. O teste não grava uma versão como suportada.",
-      "invariantes": ["provenGraphVersions de produção começa vazio.", "Este caso não homologa versão."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudAPI_B15_C22", "./internal/outbound/cloudapi/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "provenGraphVersions de produção começa vazio.",
+        "Este caso não homologa versão."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudAPI_B15_C22",
+        "./internal/outbound/cloudapi/"
+      ],
+      "execucao": "go_test_pacote_cloudapi_exit_0",
+      "executado": true,
+      "observado": {
+        "argv": [
+          "go",
+          "-C",
+          "apps/api-go",
+          "test",
+          "-count=1",
+          "-v",
+          "./internal/outbound/cloudapi/"
+        ],
+        "argv_prescrito": [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestCloudAPI_B15_C22",
+          "./internal/outbound/cloudapi/"
+        ],
+        "funcao": "TestCloudAPI_B15_C22",
+        "resultado": "PASS",
+        "exit_do_pacote": 0,
+        "data": "2026-10-29",
+        "rede": false,
+        "postgresql": false,
+        "fecha_waba": false,
+        "fecha_h01": false,
+        "presenca_no_arquivo_nao_e_a_fonte": true
+      }
     },
     {
       "id": "B15-C23",
@@ -316,10 +1026,48 @@
       "fixture": "RoundTripper captura o request. AttemptKey preenchido.",
       "acao": "Send com 200 e messages[].id.",
       "resultado": "O request não contém cabeçalho de idempotência nem o campo biz_opaque_callback_data. Authorization é bearer. O host é graph.facebook.com.",
-      "invariantes": ["AttemptKey fica fora do fio.", "O corpo de template permanece o que o lote da versão citar; este caso só exige a ausência dos campos não verificados."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudAPI_B15_C23", "./internal/outbound/cloudapi/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "AttemptKey fica fora do fio.",
+        "O corpo de template permanece o que o lote da versão citar; este caso só exige a ausência dos campos não verificados."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudAPI_B15_C23",
+        "./internal/outbound/cloudapi/"
+      ],
+      "execucao": "go_test_pacote_cloudapi_exit_0",
+      "executado": true,
+      "observado": {
+        "argv": [
+          "go",
+          "-C",
+          "apps/api-go",
+          "test",
+          "-count=1",
+          "-v",
+          "./internal/outbound/cloudapi/"
+        ],
+        "argv_prescrito": [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestCloudAPI_B15_C23",
+          "./internal/outbound/cloudapi/"
+        ],
+        "funcao": "TestCloudAPI_B15_C23",
+        "resultado": "PASS",
+        "exit_do_pacote": 0,
+        "data": "2026-10-29",
+        "rede": false,
+        "postgresql": false,
+        "fecha_waba": false,
+        "fecha_h01": false,
+        "presenca_no_arquivo_nao_e_a_fonte": true
+      }
     },
     {
       "id": "B15-C24",
@@ -328,10 +1076,26 @@
       "fixture": "PostgreSQL com a migração 79 aplicada. Nenhuma inserção de cloud_accounts. NEXO_CLOUD_API ausente.",
       "acao": "Contar cloud_accounts e chamar o gate para um log cloud_api.",
       "resultado": "Zero contas. active default falso na coluna. Zero RoundTrip. Nenhum token no banco.",
-      "invariantes": ["A migração não dá insert.", "Este caso não cria credencial."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudNoticeGate_B15_C24", "./internal/outbound/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "A migração não dá insert.",
+        "Este caso não cria credencial."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudNoticeGate_B15_C24",
+        "./internal/outbound/"
+      ],
+      "execucao": "codigo_presente_postgresql_nao_executado",
+      "executado": false,
+      "observado": {
+        "estado": "pendente",
+        "motivo": "O comando deste caso não rodou em PostgreSQL nesta entrega. Presença da função Test no arquivo não é execução. Skip sem NEXO_GO_TEST_DATABASE_URL não aprova. A gerência executa NEXO_CLOUD_PG_REQUIRED=1 em python3 tests/contrato/go_integration.py, o runner já existente, sem runner novo.",
+        "presenca_de_Test_no_arquivo_nao_e_execucao": true,
+        "fecha_h01": false
+      }
     },
     {
       "id": "B15-C25",
@@ -340,10 +1104,47 @@
       "fixture": "RoundTripper devolve 200 com mais de 4096 bytes e o id só depois do corte.",
       "acao": "Send.",
       "resultado": "No máximo 4096 bytes são lidos. Sem id dentro do corte, Uncertain verdadeiro e Submitted falso. Uma chamada.",
-      "invariantes": ["O excerpt de erro tem no máximo 300 unidades UTF-16."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudAPI_B15_C25", "./internal/outbound/cloudapi/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "O excerpt de erro tem no máximo 300 unidades UTF-16."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudAPI_B15_C25",
+        "./internal/outbound/cloudapi/"
+      ],
+      "execucao": "go_test_pacote_cloudapi_exit_0",
+      "executado": true,
+      "observado": {
+        "argv": [
+          "go",
+          "-C",
+          "apps/api-go",
+          "test",
+          "-count=1",
+          "-v",
+          "./internal/outbound/cloudapi/"
+        ],
+        "argv_prescrito": [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestCloudAPI_B15_C25",
+          "./internal/outbound/cloudapi/"
+        ],
+        "funcao": "TestCloudAPI_B15_C25",
+        "resultado": "PASS",
+        "exit_do_pacote": 0,
+        "data": "2026-10-29",
+        "rede": false,
+        "postgresql": false,
+        "fecha_waba": false,
+        "fecha_h01": false,
+        "presenca_no_arquivo_nao_e_a_fonte": true
+      }
     },
     {
       "id": "B15-C26",
@@ -352,10 +1153,27 @@
       "fixture": "notice_log sending com maintenance_notice_id, phase start, invoice_id nulo, contact_value do assinante. Canal adapter cloud_api. Uma variante tem allow_notices verdadeiro e purpose technical. Outra tem o mesmo número com purpose billing. Uma terceira põe allow_notices falso antes de Revalidate. Nenhum caso chama finance.LockInvoices.",
       "acao": "Classify, Revalidate e, só se a decisão for send, MarkWire.",
       "resultado": "Classify devolve maintenance. Purpose technical e purpose billing com allow_notices seguem para DecisionSend, attempt reserved e depois wire, sender falso uma vez. allow_notices falso devolve DecisionOptOut, skipped_no_consent, attempt not_sent, zero sender. DecisionSettled não ocorre. LockInvoices tem contagem zero.",
-      "invariantes": ["ConsentMaintenance não exige purpose technical e não usa o filtro billing/general de 69b06ce3_4.sql.", "O telefone enviado é o contact_value já gravado.", "notifications e o caminho de OS ficam intocados."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudJournal_B15_C26", "./internal/outbound/cloudjournal/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "ConsentMaintenance não exige purpose technical e não usa o filtro billing/general de 69b06ce3_4.sql.",
+        "O telefone enviado é o contact_value já gravado.",
+        "notifications e o caminho de OS ficam intocados."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudJournal_B15_C26",
+        "./internal/outbound/cloudjournal/"
+      ],
+      "execucao": "codigo_presente_postgresql_nao_executado",
+      "executado": false,
+      "observado": {
+        "estado": "pendente",
+        "motivo": "O comando deste caso não rodou em PostgreSQL nesta entrega. Presença da função Test no arquivo não é execução. Skip sem NEXO_GO_TEST_DATABASE_URL não aprova. A gerência executa NEXO_CLOUD_PG_REQUIRED=1 em python3 tests/contrato/go_integration.py, o runner já existente, sem runner novo.",
+        "presenca_de_Test_no_arquivo_nao_e_execucao": true,
+        "fecha_h01": false
+      }
     },
     {
       "id": "B15-C27",
@@ -364,10 +1182,27 @@
       "fixture": "Dois notice_log billing do tenant. Um skipped_settled com created_at anterior ao prazo de radius.Purge. Outro skipped_settled dentro do prazo. Um queued antigo permanece.",
       "acao": "radius.Purge no tenant de teste.",
       "resultado": "A linha vencida some. A linha dentro do prazo permanece. A linha queued permanece. O literal de b2808f33_1.sql contém skipped_settled junto de sent, failed, skipped_no_consent, uncertain e test.",
-      "invariantes": ["69b06ce3_3.sql também lista skipped_settled na exclusão da mesma regra e fatura.", "rotinas.go não é alterado.", "R2 não executa este caso."],
-      "comando": ["go", "test", "-count=1", "-run", "TestCloudNoticeGate_B15_C27", "./internal/outbound/"],
-      "execucao": "planned/not_run",
-      "executado": false
+      "invariantes": [
+        "69b06ce3_3.sql também lista skipped_settled na exclusão da mesma regra e fatura.",
+        "rotinas.go não é alterado.",
+        "R2 não executa este caso."
+      ],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "-run",
+        "TestCloudNoticeGate_B15_C27",
+        "./internal/outbound/"
+      ],
+      "execucao": "codigo_presente_postgresql_nao_executado",
+      "executado": false,
+      "observado": {
+        "estado": "pendente",
+        "motivo": "O comando deste caso não rodou em PostgreSQL nesta entrega. Presença da função Test no arquivo não é execução. Skip sem NEXO_GO_TEST_DATABASE_URL não aprova. A gerência executa NEXO_CLOUD_PG_REQUIRED=1 em python3 tests/contrato/go_integration.py, o runner já existente, sem runner novo.",
+        "presenca_de_Test_no_arquivo_nao_e_execucao": true,
+        "fecha_h01": false
+      }
     },
     {
       "id": "B15-H01",
@@ -376,10 +1211,33 @@
       "fixture": "Nenhuma conta no repositório.",
       "acao": "Nenhuma chamada HTTP à Meta.",
       "resultado": "O exit futuro de R1, R2 ou G não marca homologacao_waba. Template, número e versão Graph continuam pendentes de operador e de fonte primária.",
-      "invariantes": ["comando_meta é null.", "Não há token no Git."],
+      "invariantes": [
+        "comando_meta é null.",
+        "Não há token no Git."
+      ],
       "comando": [],
       "execucao": "planned/not_run",
-      "executado": false
+      "executado": false,
+      "observado": {
+        "estado": "aberto",
+        "motivo": "Nenhuma chamada HTTP à Meta. O exit 0 de R1, e o exit futuro de R2 ou G, não marcam homologacao_waba.",
+        "chamada_meta": false,
+        "template": "pendente",
+        "versao_graph": "pendente",
+        "api_real": false
+      }
     }
-  ]
+  ],
+  "lote_codigo": "33",
+  "presenca_de_Test_no_arquivo_nao_e_execucao": true,
+  "postgresql_pendente": {
+    "variavel": "NEXO_CLOUD_PG_REQUIRED=1",
+    "comando": [
+      "python3",
+      "tests/contrato/go_integration.py"
+    ],
+    "runner_novo": false,
+    "executado_nesta_entrega": false,
+    "skip_aprova": false
+  }
 }

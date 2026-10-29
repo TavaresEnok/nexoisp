@@ -1,5 +1,7 @@
 # B15 — desenho do adapter Cloud API de avisos, desligado por padrão
 
+O adendo do lote 33 está no final deste arquivo e decide os refinamentos de consentimento, de retry e de linearização. Os parágrafos seguintes permanecem o desenho do lote 32 e não são reescritos.
+
 Este recorte é só desenho e matriz. A base lida é `6963214927aa45ae1963c58d4c14ba540d78c2f0`. Não há migração, código, conta, token, ativação, chamada à Meta, chamada a PSP, publicação, `main` nem homologação. A matriz futura está em [docs/B15-ACEITE-CLOUD-API.json](B15-ACEITE-CLOUD-API.json). Cada caso de lá está `planned/not_run`. O comando indicado é o argv da implementação futura. Skip não é execução.
 
 NexoISP continua com avisos de saída. A fronteira está escrita em `db/migrations/00027_avisos_ao_assinante.sql`. O comentário dessa migração nomeia cobrança, manutenção e OS. Na fila que o claim realmente lê, cobrança e manutenção são linhas de `notice_log`. OS segue outro caminho: `domain.QueueNotice` grava `notifications` para o webhook interno do tenant. `notice_log` não tem coluna de ordem de serviço. A migração 51 acrescenta `maintenance_notice_id` e `phase`. O adapter Cloud API envia cobrança e manutenção que já estejam nessa fila. Não lê `notifications`, não cria aviso de OS e não puxa OS para `notice_log`. Webchat, inbox e CRM de conversa pertencem a outro projeto. `provider_notices` (migração 72, `finance.AcceptPixNotices`) é a caixa de aviso de PSP e não recebe evento de WhatsApp. `notifications` e `webhook_deliveries` (`outbound.Notifications`, `outbound.Webhooks`) continuam sendo o webhook genérico do tenant. O adapter não os substitui e não nasce dentro deles.
@@ -319,3 +321,37 @@ Homologação de operador, também futura e separada, sem comando que chame a Me
 - `messages[].id` não é confirmação de entrega ao aparelho.
 - Webhook autenticado não move dinheiro e não dispara outro aviso.
 - Lista vazia de versões e flag diferente de `on` produzem zero HTTP, mesmo com teste que injeta transporte: o cliente devolve antes de chamar o `RoundTripper`.
+
+## Adendo do lote 33 — refinamentos decididos
+
+Este adendo não reabre o histórico do lote 32. A implementação offline que o segue está desligada por padrão. Não há exactly-once externo, não há publicador automático, não há conta, não há chamada à Meta e não há homologação WABA. O CI `40877414874` continua sendo o verde da candidata `6963214`. Não cobre este lote. A base documental ancestral conferida neste clone é `f42256b558288590f8e804b558982f15651981fb`. O objeto `33f42256b` não existe neste clone.
+
+As raízes continuam donas dos próprios arquivos. Nenhuma depende de factory de produção nem de consumidor futuro para o próprio aceite. R1 é o cliente puro. A raiz dos tipos é a única dona de `Classify` e de `MaxLockRequeues = 3`. Consentimento, máquina de envio, status, HTTP e worker permanecem em arquivos disjuntos. Este adendo não os edita.
+
+### Última barreira
+
+`Revalidate` reserva. O commit de `MarkWire` é a transação B e o único ponto de linearização da autorização. A não é essa barreira. Depois do commit de B o código não promete cancelar um HTTP já iniciado nem desfazer um pagamento. Quitação nessa janela convive com um POST que pode terminar em `submitted`. Morte do processo antes desse commit continua sem chamada ao sender.
+
+### Consentimento
+
+`ConsentBilling` e `ConsentMaintenance` relêem o contato com `FOR SHARE`, não com `FOR KEY SHARE`. O lock bloqueia `UPDATE` e `DELETE` do contato autorizado até o commit e fecha o opt-out depois da releitura e antes do commit. `allow_notices` não é coluna de chave, então `FOR KEY SHARE` não segura esse `UPDATE`.
+
+O lock da fatura continua sendo o advisory `7411005` e só depois o `FOR UPDATE` da linha. A linha da fatura não é adquirida antes do advisory. A consulta inicial de `notice_log` pode ser só leitura. A serialização da linha vem na ordem compatível com os escritores já existentes. O orçamento local é 2 segundos, com savepoint, para o estouro não abortar a transação inteira.
+
+### Orçamento de três estouros
+
+`notice_log.cloud_lock_timeouts` nasce em 0 pela migração 79. Não é o contador `attempts` do enqueue. No máximo três requeues por estouro, persistidos nessa coluna. No terceiro timeout o estado é `failed`, terminal, e não há HTTP.
+
+Estouro em A: nenhum attempt. Estouro em B: o attempt `reserved` passa a `not_sent`, o número não é reutilizado e o próximo, se houver, é o máximo já usado mais um.
+
+### Retenção
+
+A retenção apaga `skipped_settled`. A chave de `cloud_notice_attempts` para `notice_log` remove o attempt em cascata, para a linha expirada não ficar presa por essa FK. `cloud_notice_status` permanece append-only para a aplicação: sem `UPDATE` nem `DELETE` direto. A função de retenção autorizada pode remover o grafo de observação expirado, sem attempt vivo. Pagamentos, faturas e movimentos não entram nesse delete. O isolamento é por tenant, com RLS nas tabelas novas.
+
+### Status não verificado
+
+A assinatura `AcceptStatus` permanece. Produção usa `UnprovedAuthenticator`, cujo `Proven` é falso, e não instala decoder. Sem `Authenticator.Proven`, sem `Verify` aceito e sem um `StatusDecoder` da mesma instância com `DecoderProven`, a recusa acontece antes de qualquer escrita. O decoder é interface por instância: `DecodeStatus(body) (providerID, rawStatus, error)`. O falso de teste pode implementá-la. Isso não é parser de corpo, cabeçalho ou algoritmo da Meta. Não há versão Graph homologada. `BodyParams` não vazio continua recusado enquanto o esquema do corpo não estiver verificado. O corpo mínimo já citado na coleção oficial continua sendo `messaging_product=whatsapp`, `to`, `type=template` e `template.name` / `template.language.code`. A versão de fixture `v0.0` não é versão homologada.
+
+### O que este lote não fecha
+
+R1 tem corrida local com sender falso, sem rede. R2 e o gate G só fecham quando a gerência executar `NEXO_CLOUD_PG_REQUIRED=1` em `python3 tests/contrato/go_integration.py`, sem runner novo. Skip por falta de URL não aprova. H01, protocolo Meta, WABA, versão Graph e API real permanecem abertos. O contrato `tests/contrato/cloud_notices_contract.py` entra em `nativo.py` e não substitui esse PostgreSQL.
