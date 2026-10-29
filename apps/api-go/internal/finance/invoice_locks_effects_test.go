@@ -55,7 +55,7 @@ func TestPlanPaidEffectLockProtocol(t *testing.T) {
 		writePlanPaidResume(t, d, scope, true)
 		fx := seedPlanPaidFixture(t, d, scope)
 		before := planPaidRead(t, d, scope, fx)
-		release, held, holderDone := holdPlanPaid(t, d, scope, func(ctx context.Context, tx *db.Tx) error {
+		release, held, holderDone, _ := holdPlanPaid(t, d, scope, func(ctx context.Context, tx *db.Tx) error {
 			return tx.Exec(ctx, `select pg_advisory_xact_lock(hashtextextended($1,$2))`, scope.TenantID+":invoice:"+fx.invoice, invoiceAdvisorySalt)
 		})
 		defer release()
@@ -81,7 +81,7 @@ func TestPlanPaidEffectLockProtocol(t *testing.T) {
 		writePlanPaidResume(t, d, scope, true)
 		fx := seedPlanPaidFixture(t, d, scope)
 		before := planPaidRead(t, d, scope, fx)
-		release, held, holderDone := holdPlanPaid(t, d, scope, func(ctx context.Context, tx *db.Tx) error {
+		release, held, holderDone, holderPID := holdPlanPaid(t, d, scope, func(ctx context.Context, tx *db.Tx) error {
 			_, err := tx.Objects(ctx, `select id::text as id from invoices where id=$1::uuid for update`, fx.invoice)
 			return err
 		})
@@ -93,7 +93,7 @@ func TestPlanPaidEffectLockProtocol(t *testing.T) {
 		go func() {
 			done <- runPlanPaid(runCtx, d, scope, fx.effect, fx.invoice, "2s")
 		}()
-		err := waitPlanPaidInvoiceHeld(t, d, scope, fx, done)
+		err := waitPlanPaidInvoiceHeld(t, d, scope, fx, <-holderPID, done)
 		if !planPaidLockWait(err) {
 			t.Fatalf("consumidor não esperou a fatura: %v", err)
 		}
@@ -108,7 +108,7 @@ func TestPlanPaidEffectLockProtocol(t *testing.T) {
 		writePlanPaidResume(t, d, scope, true)
 		fx := seedPlanPaidFixture(t, d, scope)
 		before := planPaidRead(t, d, scope, fx)
-		release, held, holderDone := holdPlanPaid(t, d, scope, func(ctx context.Context, tx *db.Tx) error {
+		release, held, holderDone, holderPID := holdPlanPaid(t, d, scope, func(ctx context.Context, tx *db.Tx) error {
 			_, err := tx.Objects(ctx, `select id::text as id from service_resources where id=$1::uuid for update`, fx.resource)
 			return err
 		})
@@ -120,7 +120,7 @@ func TestPlanPaidEffectLockProtocol(t *testing.T) {
 		go func() {
 			done <- runPlanPaid(runCtx, d, scope, fx.effect, fx.invoice, "2s")
 		}()
-		err := waitPlanPaidChildrenHeld(t, d, scope, fx, done)
+		err := waitPlanPaidChildrenHeld(t, d, scope, fx, <-holderPID, done)
 		if !planPaidLockWait(err) {
 			t.Fatalf("consumidor não esperou o recurso depois da fatura: %v", err)
 		}
@@ -135,7 +135,7 @@ func TestPlanPaidEffectLockProtocol(t *testing.T) {
 		writePlanPaidResume(t, d, scope, false)
 		fx := seedPlanPaidFixture(t, d, scope)
 		before := planPaidRead(t, d, scope, fx)
-		release, held, holderDone := holdPlanPaid(t, d, scope, func(ctx context.Context, tx *db.Tx) error {
+		release, held, holderDone, _ := holdPlanPaid(t, d, scope, func(ctx context.Context, tx *db.Tx) error {
 			_, err := tx.Objects(ctx, `select id::text as id from payment_effects where id=$1::uuid for update`, fx.effect)
 			return err
 		})
@@ -156,7 +156,7 @@ func TestPlanPaidEffectLockProtocol(t *testing.T) {
 		writePlanPaidResume(t, d, scope, false)
 		fx := seedPlanPaidFixture(t, d, scope)
 		before := planPaidRead(t, d, scope, fx)
-		release, held, holderDone := holdPlanPaid(t, d, scope, func(ctx context.Context, tx *db.Tx) error {
+		release, held, holderDone, _ := holdPlanPaid(t, d, scope, func(ctx context.Context, tx *db.Tx) error {
 			return LockInvoices(ctx, tx, scope.TenantID, fx.invoice)
 		})
 		defer release()
@@ -408,11 +408,12 @@ func writePlanPaidResume(t *testing.T, d *db.DB, scope tenancy.Scope, enabled bo
 	}
 }
 
-func holdPlanPaid(t *testing.T, d *db.DB, scope tenancy.Scope, fn func(context.Context, *db.Tx) error) (func(), <-chan struct{}, <-chan error) {
+func holdPlanPaid(t *testing.T, d *db.DB, scope tenancy.Scope, fn func(context.Context, *db.Tx) error) (func(), <-chan struct{}, <-chan error, <-chan int) {
 	t.Helper()
 	releaseCh := make(chan struct{})
 	held := make(chan struct{})
 	done := make(chan error, 1)
+	pid := make(chan int, 1)
 	var once sync.Once
 	release := func() { once.Do(func() { close(releaseCh) }) }
 	go func() {
@@ -420,12 +421,17 @@ func holdPlanPaid(t *testing.T, d *db.DB, scope tenancy.Scope, fn func(context.C
 			if err := fn(context.Background(), tx); err != nil {
 				return err
 			}
+			var backend int
+			if err := tx.QueryRow(context.Background(), `select pg_backend_pid()`).Scan(&backend); err != nil {
+				return err
+			}
+			pid <- backend
 			close(held)
 			<-releaseCh
 			return errPlanPaidRollback
 		})
 	}()
-	return release, held, done
+	return release, held, done, pid
 }
 
 func waitPlanPaidHeld(t *testing.T, held <-chan struct{}, done <-chan error) {
@@ -463,15 +469,111 @@ func planPaidRowLocked(err error) (bool, error) {
 	return false, err
 }
 
-func planPaidAdvisoryHeld(ctx context.Context, d *db.DB, scope tenancy.Scope, invoice string) (int, error) {
-	var n int
+// planPaidBarrier is one materialized pg_locks scan. It reports whether a
+// backend is waiting on the holder's transaction — the row-lock wait — and how
+// many of the invoice advisories that waiter already holds. Callers bracket a
+// NOWAIT probe with two barriers. A waiting transaction cannot take or drop
+// locks, so equal brackets are one observation, not two snapshots.
+func planPaidBarrier(ctx context.Context, tx *db.Tx, holder int, invoiceKey string) (bool, int, error) {
+	var blocked bool
+	var adv int
+	err := tx.QueryRow(ctx, `with locks as materialized (
+  select pid, locktype, granted, transactionid, classid, objid, objsubid, database
+  from pg_locks
+), waiters as (
+  select w.pid
+  from locks w
+  join locks h
+    on h.pid = $1
+   and h.granted
+   and h.locktype = 'transactionid'
+   and w.pid <> h.pid
+   and not w.granted
+   and w.locktype = 'transactionid'
+   and w.transactionid = h.transactionid
+)
+select exists (select 1 from waiters),
+  coalesce((select count(*)::int from locks l
+    where l.locktype = 'advisory' and l.granted and l.objsubid = 1
+      and l.pid in (select pid from waiters)
+      and l.database = (select oid from pg_database where datname = current_database())
+      and ((l.classid::bigint << 32) | l.objid::bigint) = hashtextextended($2, $3)), 0)`, holder, invoiceKey, invoiceAdvisorySalt).Scan(&blocked, &adv)
+	return blocked, adv, err
+}
+
+func planPaidLockedNowait(ctx context.Context, tx *db.Tx, sql, arg string) (bool, error) {
+	if err := tx.Exec(ctx, `savepoint plan_paid_observe`); err != nil {
+		return false, err
+	}
+	_, err := tx.Objects(ctx, sql, arg)
+	if err != nil {
+		var pg *pgconn.PgError
+		if errors.As(err, &pg) && pg.Code == "55P03" {
+			if rb := tx.Exec(ctx, `rollback to savepoint plan_paid_observe`); rb != nil {
+				return false, rb
+			}
+			if rel := tx.Exec(ctx, `release savepoint plan_paid_observe`); rel != nil {
+				return false, rel
+			}
+			return true, nil
+		}
+		_ = tx.Exec(ctx, `rollback to savepoint plan_paid_observe`)
+		return false, err
+	}
+	if err = tx.Exec(ctx, `rollback to savepoint plan_paid_observe`); err != nil {
+		return false, err
+	}
+	if err = tx.Exec(ctx, `release savepoint plan_paid_observe`); err != nil {
+		return false, err
+	}
+	return false, nil
+}
+
+type planPaidObservation struct {
+	stable         bool
+	adv            int
+	invoiceLocked  bool
+	effectLocked   bool
+	resourceLocked bool
+}
+
+func planPaidObserve(ctx context.Context, d *db.DB, scope tenancy.Scope, fx planPaidFixture, holder int) (planPaidObservation, error) {
+	var view planPaidObservation
+	key := scope.TenantID + ":invoice:" + fx.invoice
 	err := d.WithScope(ctx, scope, func(tx *db.Tx) error {
-		return tx.QueryRow(ctx, `select count(*) from pg_locks
-where locktype='advisory' and granted and objsubid=1
-  and database=(select oid from pg_database where datname=current_database())
-  and ((classid::bigint << 32) | objid::bigint)=hashtextextended($1,$2)`, scope.TenantID+":invoice:"+invoice, invoiceAdvisorySalt).Scan(&n)
+		blocked, adv, err := planPaidBarrier(ctx, tx, holder, key)
+		if err != nil {
+			return err
+		}
+		if !blocked {
+			return errPlanPaidRollback
+		}
+		invoiceLocked, err := planPaidLockedNowait(ctx, tx, `select id::text as id from invoices where id=$1::uuid for update nowait`, fx.invoice)
+		if err != nil {
+			return err
+		}
+		effectLocked, err := planPaidLockedNowait(ctx, tx, `select id::text as id from payment_effects where id=$1::uuid for update nowait`, fx.effect)
+		if err != nil {
+			return err
+		}
+		resourceLocked, err := planPaidLockedNowait(ctx, tx, `select id::text as id from service_resources where id=$1::uuid for update nowait`, fx.resource)
+		if err != nil {
+			return err
+		}
+		blockedAgain, advAgain, err := planPaidBarrier(ctx, tx, holder, key)
+		if err != nil {
+			return err
+		}
+		if !blockedAgain || adv != advAgain {
+			return errPlanPaidRollback
+		}
+		view = planPaidObservation{stable: true, adv: adv, invoiceLocked: invoiceLocked, effectLocked: effectLocked, resourceLocked: resourceLocked}
+		return errPlanPaidRollback
 	})
-	return n, err
+	if errors.Is(err, errPlanPaidRollback) {
+		return view, nil
+	}
+	return view, err
 }
 
 func waitPlanPaidRowsFree(t *testing.T, d *db.DB, scope tenancy.Scope, fx planPaidFixture, done <-chan error) error {
@@ -521,51 +623,43 @@ func planPaidChildrenFree(t *testing.T, d *db.DB, scope tenancy.Scope, fx planPa
 	return nil
 }
 
-func waitPlanPaidInvoiceHeld(t *testing.T, d *db.DB, scope tenancy.Scope, fx planPaidFixture, done <-chan error) error {
+func waitPlanPaidInvoiceHeld(t *testing.T, d *db.DB, scope tenancy.Scope, fx planPaidFixture, holder int, done <-chan error) error {
 	t.Helper()
 	return waitPlanPaidState(t, done, func(ctx context.Context) (bool, error) {
-		adv, err := planPaidAdvisoryHeld(ctx, d, scope, fx.invoice)
-		if err != nil {
+		view, err := planPaidObserve(ctx, d, scope, fx, holder)
+		if err != nil || !view.stable {
 			return false, err
 		}
-		invoiceLocked, err := planPaidRowLocked(planPaidNowait(ctx, d, scope, `select id::text as id from invoices where id=$1::uuid for update nowait`, fx.invoice))
-		if err != nil {
-			return false, err
-		}
-		effectLocked, err := planPaidRowLocked(planPaidNowait(ctx, d, scope, `select id::text as id from payment_effects where id=$1::uuid for update nowait`, fx.effect))
-		if err != nil {
-			return false, err
-		}
-		resourceLocked, err := planPaidRowLocked(planPaidNowait(ctx, d, scope, `select id::text as id from service_resources where id=$1::uuid for update nowait`, fx.resource))
-		if err != nil {
-			return false, err
-		}
-		if effectLocked || resourceLocked {
+		if view.effectLocked || view.resourceLocked {
 			return false, errors.New("efeito ou recurso travado antes da fatura")
 		}
-		return adv >= 1 && invoiceLocked, nil
+		if view.adv < 1 {
+			return false, errors.New("fatura travada antes do advisory")
+		}
+		if !view.invoiceLocked {
+			return false, errors.New("a espera da fatura não segurou a linha")
+		}
+		return true, nil
 	})
 }
 
-func waitPlanPaidChildrenHeld(t *testing.T, d *db.DB, scope tenancy.Scope, fx planPaidFixture, done <-chan error) error {
+func waitPlanPaidChildrenHeld(t *testing.T, d *db.DB, scope tenancy.Scope, fx planPaidFixture, holder int, done <-chan error) error {
 	t.Helper()
 	return waitPlanPaidState(t, done, func(ctx context.Context) (bool, error) {
-		adv, err := planPaidAdvisoryHeld(ctx, d, scope, fx.invoice)
-		if err != nil {
+		view, err := planPaidObserve(ctx, d, scope, fx, holder)
+		if err != nil || !view.stable {
 			return false, err
 		}
-		invoiceLocked, err := planPaidRowLocked(planPaidNowait(ctx, d, scope, `select id::text as id from invoices where id=$1::uuid for update nowait`, fx.invoice))
-		if err != nil {
-			return false, err
-		}
-		effectLocked, err := planPaidRowLocked(planPaidNowait(ctx, d, scope, `select id::text as id from payment_effects where id=$1::uuid for update nowait`, fx.effect))
-		if err != nil {
-			return false, err
-		}
-		if adv < 1 && (invoiceLocked || effectLocked) {
+		if view.adv < 1 && (view.invoiceLocked || view.effectLocked) {
 			return false, errors.New("fatura ou efeito travado antes do advisory")
 		}
-		return adv >= 1 && invoiceLocked && effectLocked, nil
+		if view.adv < 1 {
+			return false, errors.New("recurso esperado antes do advisory")
+		}
+		if !view.invoiceLocked || !view.effectLocked {
+			return false, errors.New("recurso esperado antes da fatura ou do efeito")
+		}
+		return true, nil
 	})
 }
 
