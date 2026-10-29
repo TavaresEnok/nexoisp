@@ -764,16 +764,31 @@
       "prioridade": "P0",
       "fechado": false,
       "implementado": "parcial",
-      "testado": "relato_historico_local",
+      "testado": "suite_local_sem_banco_e_relatos_anteriores",
       "homologado": "nao_aplicavel",
-      "publicado": "github_relatado_nao_reconsultado",
+      "publicado": "branch_de_desenvolvimento_nao_publicada",
       "corte_autorizado": false,
       "desenho_lote28": {
         "commit": "728f2ff5712cb4b133fe7b07953db80836b72045",
         "implementado": false,
         "executado": false,
         "matriz": "planejada",
-        "ativa_corte": false
+        "ativa_corte": false,
+        "revisao_sonnet": "relato da gerência; não carimba teste nem matriz"
+      },
+      "base_lote29": {
+        "head_worktree": "ab6166a93059169155c660376a2de8a93311770b",
+        "documento": "docs/LOTE29-B04-BASE-SHADOW.md",
+        "codigo": "presente",
+        "allowlist_shadow": [],
+        "allowlist_cut": [],
+        "corte_autorizado": false,
+        "compilacao_go_build": 0,
+        "suite_leitura_exit": 0,
+        "db_explain": "nao_executado",
+        "matriz_executada": false,
+        "homologado": false,
+        "publicado": false
       },
       "evidencia": [
         {
@@ -787,12 +802,22 @@
         {
           "path": "docs/B04-DESENHO-CORTE-LEITOR.md",
           "commit": "728f2ff",
-          "nota": "preparação; flag ausente no código; corte fechado"
+          "nota": "desenho revisado por Sonnet segundo a gerência; a revisão não carimba teste"
         },
         {
           "path": "docs/B04-ACEITE-CORTE-LEITOR.json",
           "commit": "728f2ff",
-          "nota": "matriz com executado false; corte_autorizado false"
+          "nota": "matriz com executado false; corte_autorizado false; consolidação do lote 29 no mesmo arquivo"
+        },
+        {
+          "path": "docs/LOTE29-B04-BASE-SHADOW.md",
+          "commit": "ab6166a",
+          "nota": "gate documental; allowlists vazias; compilação e suíte leitura exit 0; DB e EXPLAIN pendentes"
+        },
+        {
+          "path": "docs/B04-CONTRATO-IMPLEMENTACAO.md",
+          "commit": "ddf7e49",
+          "nota": "contrato I1; DueHTTP consome a política do core"
         },
         {
           "path": "/home/enok/Documentos/projetos/implementacao-codex/lote27-b13-http-restore-2026-10-29/evidencias/b04-comparacao-sintetica-0086558.json",
@@ -804,17 +829,18 @@
         "movimentos append-only",
         "sombra de saldo",
         "comparação antes do corte",
-        "desenho e matriz planejada do corte, sem ativação"
+        "desenho e matriz planejada do corte, sem ativação",
+        "base de sombra do lote 29 com NEXO_BALANCE_READ e allowlists compiladas vazias"
       ],
       "criterios_abertos": [
         {
           "id": "B04-corte",
-          "causa": "A sombra existe e o leitor antigo não foi promovido. Não há NEXO_BALANCE_READ no código. O desenho 728f2ff e a comparação 0086558 de 23 faturas e 0 acordos não autorizam a troca.",
+          "causa": "A sombra existe e o leitor antigo não foi promovido. NEXO_BALANCE_READ existe e as allowlists compiladas estão vazias. O desenho 728f2ff, a suíte local de leitura e a comparação 0086558 de 23 faturas e 0 acordos não autorizam a troca.",
           "dependencias": [
             "B03"
           ],
-          "evidencia_faltante": "Execução da matriz planejada em docs/B04-ACEITE-CORTE-LEITOR.json, com revisão independente, antes de qualquer allowlist de corte. A prova de 23 faturas não cobre acordo, source_unproven, estorno, excesso, refund, importação, compensação, rollback, RLS de portal e POP nem drift injetado.",
-          "proximo_passo": "Manter o corte fechado. Não implementar o corte a partir deste desenho. Não reimplementar a migração 66 nem tratar a comparação sintética como aceite.",
+          "evidencia_faltante": "Execução fresca da matriz em docs/B04-ACEITE-CORTE-LEITOR.json, com PostgreSQL, EXPLAIN e revisão independente, antes de qualquer allowlist de corte. A prova de 23 faturas não cobre acordo, source_unproven, estorno, excesso, refund, importação, compensação, rollback, RLS de portal e POP nem drift injetado. O CI 40840682617 falhou e ainda não foi repetido depois de 92535ed.",
+          "proximo_passo": "Manter o corte fechado e as allowlists vazias. Repetir o workflow hospedado depois de 92535ed. Não reimplementar a migração 66 nem tratar a comparação sintética, a suíte local ou o desenho como aceite da matriz.",
           "prova_limitada_0086558": {
             "alfa_faturas": 23,
             "alfa_sombra": 23,
@@ -1373,7 +1399,7 @@
       "fechado": false,
       "implementado": "sim",
       "implementado_onde": "código desde 8c10c1a; fixture PSP em b67d2f3; expectativa do campo opcional em 9c764d7; HEAD documental 027e461",
-      "testado": "execucao_parcial_com_prova",
+      "testado": "relato_gerencia_55e0d29_exit_0_mais_historico_exit_1",
       "homologado": "sem_prova",
       "publicado": "branch_de_desenvolvimento_nao_publicada",
       "evidence_reverted": false,
@@ -1465,7 +1491,12 @@
         {
           "path": "tests/contrato/import_compensate_contract.py",
           "commit": "9c764d7",
-          "nota": "expectativa da linha error aceita entity_id ausente ou nulo; ainda sem nova execução de nativo.py"
+          "nota": "expectativa da linha error aceita entity_id ausente ou nulo; o relato de execução posterior está em 55e0d29"
+        },
+        {
+          "path": "tests/contrato/nativo.py",
+          "commit": "55e0d29",
+          "nota": "relato da gerência: exit 0, 24 checks, incluindo B13 e financeiro; este gate documental não reexecutou"
         },
         {
           "path": "/home/enok/Documentos/projetos/implementacao-codex/lote27-b13-http-restore-2026-10-29/evidencias/gate-summary-0086558.json",
@@ -1481,19 +1512,20 @@
         "desenho aprovado da compensação, preservado",
         "marcador append-only, POST idempotente só de invoices, locks 7411005, interface oficial, inventário estático e testes escritos",
         "fixture PSP exercitado na base 0086558 até o campo opcional",
-        "expectativa do entity_id opcional corrigida em 9c764d7, sem nova execução aprovada"
+        "expectativa do entity_id opcional corrigida em 9c764d7",
+        "relato da gerência de nativo.py exit 0 em 55e0d29, 24 checks, incluindo B13 e financeiro"
       ],
       "criterios_abertos": [
         {
           "id": "B13-compensacao",
-          "causa": "O Go de cc542a1 passou 58 ações de compensação dentro de 241. O browser dirigido passou. Em 0086558 o nativo.py passou do fixture PSP e terminou exit 1 no entity_id opcional da linha error, antes de concluir os 22 HTTP. A correção 9c764d7 não foi repetida. O lote não foi publicado.",
+          "causa": "O Go de cc542a1 passou 58 ações de compensação dentro de 241. O browser dirigido passou. Em 0086558 o nativo.py passou do fixture PSP e terminou exit 1 no entity_id opcional da linha error. A gerência relata exit 0 com 24 checks em 55e0d29. O CI 40840682617 falhou no depguard e não foi repetido depois de 92535ed. O lote não foi publicado nem homologado.",
           "dependencias": [
             "desenho do lote 24 já aprovado",
             "lab PostgreSQL descartável",
             "revisão independente antes de integrar a publicação"
           ],
-          "evidencia_faltante": "python3 tests/contrato/nativo.py exit 0 no HEAD que contém 9c764d7, e o job verificar hospedado no commit candidato. A correção entregue não substitui essa execução.",
-          "proximo_passo": "Repetir o nativo.py sem -I. Não converter 9c764d7 nem revisão em sucesso dos 22 HTTP. Não reimplementar o lote 25, o fixture b67d2f3 nem a expectativa já corrigida. Kinds diferentes de invoices permanecem recusados. Sem PSP e sem apagar histórico.",
+          "evidencia_faltante": "Job verificar hospedado no commit candidato depois de 92535ed. O relato de nativo.py exit 0 em 55e0d29 não foi reexecutado neste gate e não homologa.",
+          "proximo_passo": "Reexecutar o workflow nativo depois da corretiva de depguard. Preservar o exit 1 de 0086558 como histórico. Não reimplementar o lote 25, o fixture b67d2f3 nem a expectativa já corrigida. Kinds diferentes de invoices permanecem recusados. Sem PSP e sem apagar histórico.",
           "validacao": [
             [
               "python3",
@@ -1540,6 +1572,25 @@
           "http_22_cases_passed": false
         },
         "correcao_9c764d7_reexecutada": false
+      },
+      "provas_55e0d29": {
+        "base": "55e0d29",
+        "nativo_py": {
+          "exit_code": 0,
+          "checks": 24,
+          "inclui": ["B13", "financeiro"],
+          "fonte": "relato da gerência neste plano",
+          "reexecutado_no_gate_documental": false,
+          "fecha_matriz_b04": false,
+          "homologa": false,
+          "publica": false
+        },
+        "ci_hospedado": {
+          "run": "40840682617",
+          "resultado": "falha depguard em database/sql e pgx/stdlib nos testes financeiros",
+          "corretiva": "92535ed",
+          "reexecutado_apos_corretiva": false
+        }
       }
     },
     {
@@ -1735,7 +1786,7 @@
             "recursos externos de banco, acesso e, se ativos, fisco"
           ],
           "evidencia_faltante": "Itens de docs/PILOTO.md com responsável, data e versão, sem segredo.",
-          "proximo_passo": "Repetir o HTTP depois de 9c764d7. Preservar o restore sintético de 0086558 e o desenho B04 sem corte. Não reimplementar os lotes 25 e 26. Não declarar piloto. Publicação de código exige o workflow nativo com PostgreSQL real no runner do commit candidato. Ausência de provedor não fecha o item.",
+          "proximo_passo": "Reexecutar o workflow hospedado depois de 92535ed. Preservar o restore sintético de 0086558, o relato de nativo.py em 55e0d29 e a base B04 com allowlists vazias. Não reimplementar os lotes 25 e 26. Não declarar piloto. Publicação de código exige o workflow nativo com PostgreSQL real no runner do commit candidato. Ausência de provedor não fecha o item.",
           "validacao": [
             [
               "python3",
@@ -1751,10 +1802,10 @@
     }
   ],
   "proximo_evento": {
-    "id": "repetir-http-b13-apos-campo-opcional",
-    "id_anterior": "repetir-http-b13-e-executar-restore-sintetico",
+    "id": "reexecutar-ci-apos-depguard-e-manter-corte-fechado",
+    "id_anterior": "repetir-http-b13-apos-campo-opcional",
     "prioridade": "P0",
-    "motivo": "O Go, o browser e o SBOM local de cc542a1 permanecem válidos. Em 0086558 o HTTP passou do fixture PSP e parou no entity_id opcional. A correção 9c764d7 ainda não foi executada. O restore sintético dessa base terminou exit 0 em 17 fases. O desenho B04 não ativa o corte. O CI hospedado do commit candidato continua aberto.",
+    "motivo": "O Go, o browser e o SBOM local de cc542a1 permanecem válidos. Em 0086558 o HTTP passou do fixture PSP e parou no entity_id opcional. A gerência relata nativo.py exit 0 em 55e0d29, 24 checks, incluindo B13 e financeiro. O CI 40840682617 falhou no depguard e a corretiva 92535ed ainda não tem run hospedado. O restore sintético de 0086558 terminou exit 0 em 17 fases. A base B04 do lote 29 está no clone com allowlists vazias. O corte permanece fechado. A matriz de banco e o EXPLAIN não foram executados neste gate.",
     "nao_reabrir": [
       "lote01",
       "b07-resolucao",
@@ -1766,9 +1817,11 @@
       "b12-harness-56b2187",
       "b12-corrida-sintetica-0086558",
       "b13-expectativa-opcional-9c764d7",
-      "b04-desenho-728f2ff"
+      "b04-desenho-728f2ff",
+      "b04-base-sombra-lote29",
+      "t0-depguard-92535ed"
     ],
-    "candidato_interno_seguinte": "repetir nativo.py no HEAD que contém 9c764d7 até exit 0; o restore sintético de 0086558 fica registrado; em seguida conferir o run hospedado do native.yml no commit candidato",
+    "candidato_interno_seguinte": "reexecutar o workflow native.yml no commit candidato depois de 92535ed; manter allowlists B04 vazias até a matriz fresca, o EXPLAIN e a revisão da inclusão",
     "limites": [
       "sem franquia",
       "sem PSP real",
@@ -1780,7 +1833,9 @@
       "default não é homologação",
       "projeto não está em 100%",
       "correção entregue não é gate repetido",
-      "comparação de 23 faturas e desenho B04 não ativam o corte"
+      "comparação de 23 faturas e desenho B04 não ativam o corte",
+      "suíte local de leitura não fecha a matriz",
+      "relato de nativo em 55e0d29 não é execução fresca do lote 29"
     ],
     "validacao": [
       [
@@ -1794,7 +1849,7 @@
     "pedir_nova_ordem": false,
     "projeto_concluido": false,
     "percentual": null,
-    "instrucao": "Os lotes 25 e 26 não se reimplementam. O fixture b67d2f3, o harness 56b2187, a corrida sintética 0086558, a expectativa 9c764d7 e o desenho B04 728f2ff também não se refazem. A gerência repete nativo.py no HEAD que contém 9c764d7 até exit 0 e confere o CI hospedado do commit candidato. Go, browser e SBOM local continuam datados em cc542a1. Não fechar item externo por ausência de recurso. Não transformar default, sandbox, skip, geração local, teste estático, correção entregue ou desenho em homologação. O projeto permanece aberto enquanto existir critério aberto."
+    "instrucao": "Os lotes 25 e 26 não se reimplementam. O fixture b67d2f3, o harness 56b2187, a corrida sintética 0086558, a expectativa 9c764d7, o desenho B04 728f2ff e a base de sombra do lote 29 também não se refazem. A gerência relata nativo.py exit 0 em 55e0d29. O CI hospedado 40840682617 falhou e pede run novo depois de 92535ed. A matriz B04 e o EXPLAIN continuam pendentes. Go, browser e SBOM local continuam datados em cc542a1. Não fechar item externo por ausência de recurso. Não transformar default, sandbox, skip, geração local, teste estático, correção entregue, desenho ou allowlist vazia em homologação. O projeto permanece aberto enquanto existir critério aberto."
   },
   "publicacao": {
     "producao": false,
@@ -1808,6 +1863,10 @@
     "head_desenvolvimento_e2f3b18": "inclui b67d2f3 e 56b2187; esta documentação não publica esse HEAD",
     "base_0086558": "HTTP exit 1 no campo opcional depois do fixture PSP; restore sintético exit 0 em 17 fases; published false",
     "lote28_publicado": false,
-    "head_documental_027e461": "inclui 9c764d7 e 728f2ff; a correção do campo opcional não foi reexecutada; o desenho B04 não ativa o corte; esta documentação não publica esse HEAD"
+    "head_documental_027e461": "inclui 9c764d7 e 728f2ff; o desenho B04 não ativa o corte; esta documentação não publica esse HEAD",
+    "relato_nativo_55e0d29": "exit 0, 24 checks, incluindo B13 e financeiro; não reexecutado neste gate; não publica",
+    "ci_40840682617": "falha depguard em 55e0d29; corretiva 92535ed ainda sem run hospedado",
+    "lote29_publicado": false,
+    "head_worktree_ab6166a": "base de sombra e gate documental na branch de desenvolvimento; allowlists vazias; esta documentação não publica esse HEAD; não é main nem deploy"
   }
 }
