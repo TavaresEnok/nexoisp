@@ -1475,6 +1475,10 @@
     },
     {
       "method": "POST",
+      "path": "/api/webhooks/cloud-api/:account"
+    },
+    {
+      "method": "POST",
       "path": "/api/webhooks/gateway/:gateway"
     },
     {
