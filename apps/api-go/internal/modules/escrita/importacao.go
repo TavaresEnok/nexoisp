@@ -10,6 +10,7 @@ import (
 	"nexoisp/api-go/internal/cryptox"
 	"nexoisp/api-go/internal/db"
 	"nexoisp/api-go/internal/domain"
+	"nexoisp/api-go/internal/finance"
 	"nexoisp/api-go/internal/jsonx"
 	"nexoisp/api-go/internal/validate"
 	"regexp"
@@ -19,6 +20,7 @@ import (
 	"time"
 	"unicode/utf16"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 	"golang.org/x/text/unicode/norm"
 )
@@ -191,6 +193,11 @@ func bodyRecord(b map[string]any, key, name string) string {
 
 var previewRollback = errors.New("prévia de importação concluída")
 
+// beforeImportRows é nil em produção. O teste observa os locks depois dos savepoints e antes de import_rows.
+var beforeImportRows func(context.Context, *db.Tx) error
+
+type invoiceLockKey struct{}
+
 func (s Service) importOperations(ops map[string]operation) {
 	f, o, str := validate.F, validate.Object, validate.String
 	schema := obj(o(f("kind", validate.Enum("subscribers", "contracts", "invoices", "history", "network", "documents", "users")), f("source", str().Pattern(`^[a-z0-9-]{2,40}$`, "origem: minúsculas, números e hífen").Def("csv-intermediario")), f("filename", str().Max(200).Opt()), f("csv", str().Min(1).Max(15*1024*1024)), f("mapping", validate.Record(str()).Opt()), f("plan_map", validate.Record(str().UUID()).Opt()), f("device_id", str().UUID().Nullish())))
@@ -258,6 +265,13 @@ func (s Service) importCSV(ctx context.Context, b map[string]any, apply bool) (a
 				if device == nil {
 					return apierr.New(400, "equipamento não encontrado")
 				}
+			}
+			if kind == "invoices" {
+				held, e := lockReferencedInvoices(ctx, tx, importSource(b), table, headers, mapping)
+				if e != nil {
+					return e
+				}
+				ctx = context.WithValue(ctx, invoiceLockKey{}, held)
 			}
 			seen := map[string]bool{}
 			for n := 1; n < len(table); n++ {
@@ -331,7 +345,17 @@ func (s Service) importCSV(ctx context.Context, b map[string]any, apply bool) (a
 				results = append(results, result)
 			}
 		}
+		if kind == "invoices" && len(missing) == 0 {
+			if e := rereadImportedInvoices(ctx, tx, importSource(b), results); e != nil {
+				return e
+			}
+		}
 		if apply && len(missing) == 0 {
+			if kind == "invoices" && beforeImportRows != nil {
+				if e := beforeImportRows(ctx, tx); e != nil {
+					return e
+				}
+			}
 			encoded, e := jsonx.Encode(totals)
 			if e != nil {
 				return e
@@ -712,6 +736,128 @@ func importExtras(ctx context.Context, tx *db.Tx, b map[string]any, contract any
 	}
 	return changed, nil
 }
+
+func importSource(b map[string]any) string {
+	source, _ := b["source"].(string)
+	return source
+}
+
+func mappedCell(headers, row []string, mapping map[string]any, field string) string {
+	if mapping[field] == nil {
+		return ""
+	}
+	name, ok := mapping[field].(string)
+	if !ok {
+		return ""
+	}
+	index := slices.Index(headers, name)
+	if index < 0 || index >= len(row) {
+		return ""
+	}
+	return validate.Trim(row[index])
+}
+
+func canonicalHeldID(v any) string {
+	parsed, err := uuid.Parse(strings.TrimSpace(fmt.Sprint(v)))
+	if err != nil {
+		return ""
+	}
+	return parsed.String()
+}
+
+func invoiceLockHeld(ctx context.Context, id any) bool {
+	held, _ := ctx.Value(invoiceLockKey{}).(map[string]struct{})
+	if len(held) == 0 {
+		return false
+	}
+	_, ok := held[canonicalHeldID(id)]
+	return ok
+}
+
+// lockReferencedInvoices trava, antes de qualquer savepoint, só as faturas que o CSV já pode reconhecer.
+// A ordem é a do protocolo comum; o rollback da linha não solta esses locks.
+func lockReferencedInvoices(ctx context.Context, tx *db.Tx, source string, table [][]string, headers []string, mapping map[string]any) (map[string]struct{}, error) {
+	external := []string{}
+	seen := map[string]struct{}{}
+	for n := 1; n < len(table); n++ {
+		ext := mappedCell(headers, table[n], mapping, "id_externo")
+		if ext == "" {
+			continue
+		}
+		if _, ok := seen[ext]; ok {
+			continue
+		}
+		seen[ext] = struct{}{}
+		external = append(external, ext)
+	}
+	held := map[string]struct{}{}
+	ids, err := referencedInvoiceIDs(ctx, tx, source, external)
+	if err != nil {
+		return nil, err
+	}
+	if err = finance.LockInvoices(ctx, tx, auth.From(ctx).TenantID, ids...); err != nil {
+		return nil, err
+	}
+	for _, id := range ids {
+		held[id] = struct{}{}
+	}
+	again, err := referencedInvoiceIDs(ctx, tx, source, external)
+	if err != nil {
+		return nil, err
+	}
+	for _, id := range again {
+		if _, ok := held[id]; !ok {
+			return nil, apierr.New(409, "faturas referenciadas mudaram; repita a importação")
+		}
+	}
+	return held, nil
+}
+
+func referencedInvoiceIDs(ctx context.Context, tx *db.Tx, source string, external []string) ([]string, error) {
+	if source == "" || len(external) == 0 {
+		return nil, nil
+	}
+	rows, err := tx.Objects(ctx, `select id::text as id from invoices where external_source = $1 and external_id = any($2::text[])`, source, external)
+	if err != nil {
+		return nil, err
+	}
+	ids := make([]string, 0, len(rows))
+	seen := map[string]struct{}{}
+	for _, row := range rows {
+		id := canonicalHeldID(row.Get("id"))
+		if id == "" {
+			return nil, fmt.Errorf("id de fatura ilegível")
+		}
+		if _, ok := seen[id]; ok {
+			continue
+		}
+		seen[id] = struct{}{}
+		ids = append(ids, id)
+	}
+	return ids, nil
+}
+
+func rereadImportedInvoices(ctx context.Context, tx *db.Tx, source string, results []map[string]any) error {
+	for _, r := range results {
+		status, _ := r["status"].(string)
+		if status != "unchanged" && status != "created" {
+			continue
+		}
+		ext, _ := r["external_id"].(string)
+		if ext == "" {
+			return fmt.Errorf("linha %v sem id externo", r["row"])
+		}
+		ex, err := one(ctx, tx, "helper:importInvoiceRow", 1, source, ext)
+		if err != nil {
+			return err
+		}
+		if ex == nil || canonicalHeldID(ex.Get("id")) == "" || canonicalHeldID(ex.Get("id")) != canonicalHeldID(r["entity_id"]) {
+			return apierr.New(409, "fatura reimportada mudou antes do registro")
+		}
+	}
+	return nil
+}
+
 func importInvoice(ctx context.Context, tx *db.Tx, b map[string]any, r map[string]string, t map[string]any) (map[string]any, error) {
 	const key = "helper:importInvoiceRow"
 	ext := r["id_externo"]
@@ -775,6 +921,9 @@ func importInvoice(ctx context.Context, tx *db.Tx, b map[string]any, r map[strin
 		return nil, e
 	}
 	if ex != nil {
+		if !invoiceLockHeld(ctx, ex.Get("id")) {
+			return nil, apierr.New(409, "fatura reconhecida fora da ordem de locks; repita a importação")
+		}
 		var paidAt any
 		paid := float64(0)
 		if sit == "pago" {
