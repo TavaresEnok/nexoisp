@@ -30,11 +30,16 @@ type Issuance struct {
 	ConfigHash          string
 }
 
-// Every issuance transaction takes the invoice lock before the journal lock,
-// matching ordinary receipts and the reservation/payment guards in PostgreSQL.
+// Every issuance transaction takes the invoice advisory and the invoice row
+// before any invoice or journal FOR UPDATE. The journal read below does not
+// lock a row. Callers lock the journal only after this returns. A later
+// paymentWithReview in the same transaction repeats LockInvoices in this order.
 func lockIssuanceInvoice(ctx context.Context, tx *db.Tx, id string) error {
 	var invoice string
 	if err := tx.QueryRow(ctx, `select invoice_id from provider_issuance where id=$1`, id).Scan(&invoice); err != nil {
+		return err
+	}
+	if err := LockInvoices(ctx, tx, "", invoice); err != nil {
 		return err
 	}
 	return tx.QueryRow(ctx, `select id from invoices where id=$1 for update`, invoice).Scan(&invoice)
@@ -70,6 +75,9 @@ func (s SandboxIssuance) prepareOptions(ctx context.Context, scope tenancy.Scope
 		return out, err
 	}
 	err = s.DB.WithScope(ctx, scope, func(tx *db.Tx) error {
+		if err := LockInvoices(ctx, tx, scope.TenantID, r.InvoiceID); err != nil {
+			return err
+		}
 		var invoice string
 		var externalSource *string
 		if err := tx.QueryRow(ctx, `select id, external_source from invoices where id=$1 for update`, r.InvoiceID).Scan(&invoice, &externalSource); err != nil {

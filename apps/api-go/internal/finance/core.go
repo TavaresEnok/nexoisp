@@ -213,6 +213,9 @@ func Paid(ctx context.Context, tx *db.Tx, inv jsonx.Object) error {
 }
 
 func Manual(ctx context.Context, tx *db.Tx, id, user string, b map[string]any) (string, error) {
+	if e := LockInvoices(ctx, tx, "", id); e != nil {
+		return "", e
+	}
 	inv, e := first(ctx, tx, "manualPayment", 0, "fatura não encontrada", id)
 	if e != nil {
 		return "", e
@@ -262,6 +265,9 @@ func Manual(ctx context.Context, tx *db.Tx, id, user string, b map[string]any) (
 	return settle(ctx, tx, inv, b["partial"] == true)
 }
 func Reverse(ctx context.Context, tx *db.Tx, id, payment, user, reason string) (any, error) {
+	if e := LockInvoices(ctx, tx, "", id); e != nil {
+		return nil, e
+	}
 	inv, e := first(ctx, tx, "reversePayment", 0, "fatura não encontrada", id)
 	if e != nil {
 		return nil, e

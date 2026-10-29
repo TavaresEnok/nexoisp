@@ -111,16 +111,19 @@ func Agreement(ctx context.Context, tx *db.Tx, tenant, user, id string, b map[st
 	if k.Get("status") != "active" {
 		return nil, apierr.New(400, "contrato encerrado")
 	}
-	ids := []string{}
-	seen := map[string]bool{}
-	for _, v := range b["invoice_ids"].([]any) {
-		value := v.(string)
-		if !seen[value] {
-			ids = append(ids, value)
-			seen[value] = true
-		}
+	rawIDs := b["invoice_ids"].([]any)
+	texts := make([]string, len(rawIDs))
+	for i, v := range rawIDs {
+		texts[i] = v.(string)
 	}
-	locked, e := tx.Objects(ctx, query("createAgreement", 1), ids, id)
+	ids, e := canonicalInvoiceIDs(texts)
+	if e != nil {
+		return nil, e
+	}
+	if e = LockInvoices(ctx, tx, tenant, ids...); e != nil {
+		return nil, e
+	}
+	locked, e := tx.Objects(ctx, query("createAgreement", 1), ids, id, tenant)
 	if e != nil {
 		return nil, e
 	}
