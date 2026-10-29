@@ -2,6 +2,7 @@ package escrita
 
 import (
 	"context"
+	"encoding/csv"
 	"errors"
 	"fmt"
 	"os"
@@ -348,7 +349,12 @@ func (f importLockFix) line(idOrExt, valor string) string {
 	if mapped, ok := f.ext[idOrExt]; ok {
 		ext = mapped
 	}
-	return strings.Join([]string{ext, f.sub, f.con, "2026-12-20", valor, "aberto"}, ",")
+	var buf strings.Builder
+	w := csv.NewWriter(&buf)
+	// valor "10,00" precisa de aspas; senão o parser lê situacao "00". "nope" continua uma célula inválida.
+	_ = w.Write([]string{ext, f.sub, f.con, "2026-12-20", valor, "aberto"})
+	w.Flush()
+	return strings.TrimRight(buf.String(), "\r\n")
 }
 
 func runInvoiceImport(ctx context.Context, d *db.DB, scope tenancy.Scope, fix importLockFix, apply bool, lines ...string) (any, error) {
