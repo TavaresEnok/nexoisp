@@ -1,6 +1,6 @@
 # B04 — contrato de implementação do núcleo de leitura
 
-Este documento registra o contrato operacional B04-I1 da frente L1. Ele complementa `docs/B04-DESENHO-CORTE-LEITOR.md` e não substitui a matriz em `docs/B04-ACEITE-CORTE-LEITOR.json`. A entrega implementa o núcleo puro: consulta por ids, seleção, `Strip`, métrica e a prévia pura do GET due. Não instala ganchos nos leitores, não registra variante de produto e não abre allowlist.
+Este documento registra o contrato operacional B04-I1 da frente L1 no estado integrado com C3a. Ele complementa `docs/B04-DESENHO-CORTE-LEITOR.md` e não substitui a matriz em `docs/B04-ACEITE-CORTE-LEITOR.json`. A entrega L1 implementa o núcleo puro: consulta por ids, seleção, `Strip` e métrica. Não registra variante de produto e não abre allowlist. O gancho do GET due e a prévia pura estão em C3a (`due_http.go`, `due_calculation.go` e o ramo de `auxiliares.go`) e já fazem parte desta árvore. Os outros leitores fechados continuam sem gancho. A evolução seguinte do caminho Due pertence à frente t8.
 
 O produto continua na sentença legada. Corte, centavos oficiais, escritores, schema, grants, SQLs legados e UI permanecem como estão. O histórico dos lotes 25 a 28 e o desenho aprovado não são reescritos.
 
@@ -12,12 +12,12 @@ O pacote `leitura` expõe:
 - `Pick(reader, legacy string) (BalanceReadSelection, error)`.
 - `Strip(selection BalanceReadSelection, rows []jsonx.Object) error`, que retira colunas `cmp_` das linhas quando a seleção é de variante.
 - `RegisterBalanceReadMetrics(prometheus.Registerer) error`.
-- `DueHTTP(ctx, tx, id) (map[string]any, error)`, exclusivo do GET. Nenhum handler chama esta função nesta entrega.
+- `DueHTTP(ctx, tx, id) (map[string]any, error)`, declarado uma vez em `due_http.go`. O GET `/api/invoices/{id}/due` em `auxiliares.go` chama essa função. Com as allowlists compiladas vazias, `DueHTTP` delega a `DueBreakdown`.
 
 Funções internas:
 
 - `registerBalanceVariant(reader, sql string)`, usada só pelo `init` dos futuros `variants_*.go`. Nesta entrega ninguém a chama no produto, e o mapa global permanece vazio.
-- `dueBreakdownFromRow(jsonx.Object) map[string]any`, extração mecânica da mesma expressão que `DueBreakdown` já calcula depois de `gen.Due`. O HTTP em shadow usa essa função sobre a linha já lida. `DueBreakdown` em `auxiliares.go` permanece com a expressão original: esta frente não edita esse arquivo e não troca o ramo GET.
+- `dueBreakdownFromRow(jsonx.Object) map[string]any`, declarado uma vez em `due_calculation.go`. É a expressão de multa, juros e residual que `DueBreakdown` aplica depois de `gen.Due`, por `dueBreakdownFromQuery`. O shadow de `dueServe` usa essa função sobre a linha já lida. `balance_read.go` não declara `DueHTTP`, `dueHTTPWith`, `dueMapFromShadowRows` nem `dueBreakdownFromRow`.
 - `balanceRowsInTx(ctx, tx, reader, legacy, args...)` executa `Pick`, uma `tx.Objects` e `Strip` na mesma transação.
 - `Service.balanceRows` abre o `WithScope` já usado por `Service.rows` e delega a `balanceRowsInTx`. `Service.rows` não muda.
 
@@ -84,9 +84,17 @@ O scanner gerado segue a inferência de nulidade do sqlc 1.31.1: as somas saem c
 
 ## GET due
 
-`DueBreakdown` continua executando `gen.Due` e a expressão original de multa, juros e residual. `finance.Manual` e `finance.Agreement` continuam chamando `DueBreakdown`. `queries/due.sql`, `gen/due.sql.go` e `auxiliares.go` não foram editados. O ramo GET continua em `DueBreakdown`; esta frente não o troca por `DueHTTP`. `dueBreakdownFromRow` repete essa expressão para o shadow calcular a prévia na linha da variante, sem segunda sentença e sem passar por `auxiliares.go`.
+O caminho integrado, depois de C3a, fica assim:
 
-Em `off`, `DueHTTP` delega a `DueBreakdown`. Em `shadow` de teste, com política local que permite `invoice-due` e traz uma variante, há uma única `tx.Objects`, depois `Strip` e o mesmo cálculo puro. A prévia de multa e juros não entra na sombra e não é relida em outra sentença.
+- `registerAuxiliares` atende `GET /api/invoices/{id}/due` com permissão `finance:read` e chama `DueHTTP(ctx, tx, id)`.
+- `DueHTTP` em `due_http.go` usa a política compilada `off` e allowlists vazias. Nesse modo executa `DueBreakdown` e a sentença é `gen.Due`. O corpo de `DueHTTP` tem uma chamada `tx.Objects` e uma chamada `DueBreakdown`.
+- `DueBreakdown` em `auxiliares.go` executa uma `tx.Objects(ctx, gen.Due, id)` e devolve `dueBreakdownFromQuery`. A assinatura permanece `(ctx, tx, id) (map[string]any, error)`.
+- `dueBreakdownFromRow` em `due_calculation.go` calcula multa com `math.Floor(amount*num(r.Get("fine_pct"))/100 + 0.5)`, juros com `math.Floor(amount*num(r.Get("int_pct"))/100*days/30 + 0.5)`, residual e `fee_if_applied_cents`. `finance.Manual` e `finance.Agreement` continuam chamando `DueBreakdown`, portanto `gen.Due`.
+- `queries/due.sql` e `gen/due.sql.go` permanecem a sentença legada, sem coluna `cmp_`. C3a editou o ramo GET de `auxiliares.go`; esta correção de integração não edita esse arquivo.
+
+`balance_read.go` conserva `Pick`, `Strip`, o registro de variantes, a seleção pura, `balanceRows`, a métrica e a consulta dedicada. As allowlists compiladas de shadow e de cut continuam vazias. Uma leitura due em `off` executa uma sentença. A resposta servida não contém `cmp_`.
+
+Em `shadow` de teste de C3a, com política local que permite `invoice-due` e traz uma variante, `dueServe` faz uma única consulta, `stripDueCompare` e o mesmo `dueBreakdownFromRow`. A prévia de multa e juros não entra na sombra e não é relida em outra sentença. A próxima frente t8 é a dona da evolução desse caminho.
 
 ## Gates pendentes
 
