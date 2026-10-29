@@ -1147,6 +1147,10 @@
     },
     {
       "method": "POST",
+      "path": "/api/import/batches/:id/compensate"
+    },
+    {
+      "method": "POST",
       "path": "/api/import/batches/:id/provision"
     },
     {
