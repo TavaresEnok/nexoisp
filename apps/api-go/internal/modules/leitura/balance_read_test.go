@@ -227,10 +227,14 @@ func TestBalanceReadDueShadowUsesLegacyPreview(t *testing.T) {
 		{Name: "cmp_amount_cents", Value: int32(1)},
 	}
 	rows := []jsonx.Object{row}
-	got, err := dueMapFromShadowRows(BalanceReadSelection{SQL: "variant", Reader: balanceReaderInvoiceDue, Shadow: true}, rows)
-	if err != nil {
+	if err := stripDueCompare(true, rows, func(result string) {
+		if result != "mismatch" {
+			t.Fatalf("comparação da prévia: %s", result)
+		}
+	}); err != nil {
 		t.Fatal(err)
 	}
+	got := dueBreakdownFromRow(rows[0])
 	if got["amount_cents"] != float64(10000) || got["paid_cents"] != float64(1000) || got["fine_cents"] != float64(200) || got["interest_cents"] != float64(50) {
 		t.Fatalf("prévia: %#v", got)
 	}
@@ -272,28 +276,45 @@ func TestBalanceReadDueHTTPOffDoesNotSelectVariant(t *testing.T) {
 		t.Fatal(err)
 	}
 	source := string(body)
-	start := strings.Index(source, "func dueHTTPWith(")
-	end := strings.Index(source, "func dueMapFromShadowRows(")
-	if start < 0 || end < start {
-		t.Fatal("dueHTTPWith ausente")
+	for _, decl := range []string{"func DueHTTP(", "func dueHTTPWith(", "func dueMapFromShadowRows(", "func dueBreakdownFromRow("} {
+		if strings.Contains(source, decl) {
+			t.Fatalf("núcleo reabriu %s", decl)
+		}
 	}
-	fn := source[start:end]
+	dueHTTP, err := os.ReadFile("due_http.go")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dueSrc := string(dueHTTP)
+	start := strings.Index(dueSrc, "func DueHTTP(")
+	if start < 0 || strings.Count(dueSrc, "func DueHTTP(") != 1 {
+		t.Fatal("DueHTTP canônico ausente ou duplicado")
+	}
+	fn := dueSrc[start:]
 	if strings.Count(fn, "tx.Objects(") != 1 || strings.Count(fn, "DueBreakdown(") != 1 {
 		t.Fatalf("due HTTP precisa de um ramo legado e uma sentença: %s", fn)
+	}
+	calc, err := os.ReadFile("due_calculation.go")
+	if err != nil {
+		t.Fatal(err)
+	}
+	calcSrc := string(calc)
+	if strings.Count(calcSrc, "func dueBreakdownFromRow(") != 1 || !strings.Contains(calcSrc, "math.Floor(amount*num(r.Get(\"fine_pct\"))/100 + 0.5)") || !strings.Contains(calcSrc, "math.Floor(amount*num(r.Get(\"int_pct\"))/100*days/30 + 0.5)") {
+		t.Fatal("a prévia pura do GET shadow não replica o cálculo de DueBreakdown")
 	}
 	aux, err := os.ReadFile("auxiliares.go")
 	if err != nil {
 		t.Fatal(err)
 	}
 	auxSource := string(aux)
-	if !strings.Contains(auxSource, "func DueBreakdown(") || !strings.Contains(auxSource, "tx.Objects(ctx, gen.Due, id)") || !strings.Contains(auxSource, "math.Floor(amount*num(r.Get(\"fine_pct\"))/100 + 0.5)") {
-		t.Fatal("DueBreakdown deixou de executar gen.Due ou a prévia original")
+	if !strings.Contains(auxSource, "func DueBreakdown(") || !strings.Contains(auxSource, "tx.Objects(ctx, gen.Due, id)") || !strings.Contains(auxSource, "return dueBreakdownFromQuery(rows, err)") {
+		t.Fatal("DueBreakdown deixou de executar gen.Due ou a prévia canônica")
 	}
-	if strings.Contains(auxSource, "DueHTTP(") || strings.Contains(auxSource, "dueBreakdownFromRow(") {
-		t.Fatal("esta frente não edita auxiliares.go nem troca o gancho GET")
+	if !strings.Contains(auxSource, "result, err = DueHTTP(ctx, tx, id)") || strings.Contains(auxSource, "result, err = DueBreakdown(ctx, tx, id)") {
+		t.Fatal("o GET due deixou de chamar DueHTTP")
 	}
-	if !strings.Contains(source, "func dueBreakdownFromRow(") || !strings.Contains(source, "math.Floor(amount*num(r.Get(\"fine_pct\"))/100 + 0.5)") {
-		t.Fatal("a prévia pura do GET shadow não replica o cálculo de DueBreakdown")
+	if strings.Contains(auxSource, "math.Floor(amount*num(r.Get(\"fine_pct\"))/100 + 0.5)") {
+		t.Fatal("a expressão de multa voltou para auxiliares.go")
 	}
 	for _, path := range []string{"../../finance/core.go", "../../finance/advanced.go"} {
 		writer, err := os.ReadFile(path)

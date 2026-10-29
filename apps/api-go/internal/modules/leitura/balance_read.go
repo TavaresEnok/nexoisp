@@ -3,15 +3,12 @@ package leitura
 import (
 	"context"
 	"errors"
-	"math"
 	"os"
 	"strings"
 
-	"nexoisp/api-go/internal/apierr"
 	"nexoisp/api-go/internal/auth"
 	"nexoisp/api-go/internal/db"
 	"nexoisp/api-go/internal/jsonx"
-	gen "nexoisp/api-go/internal/modules/leitura/gen"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -259,45 +256,4 @@ func (s Service) balanceRows(ctx context.Context, reader, legacy string, args ..
 		return err
 	})
 	return rows, err
-}
-
-// DueHTTP is the GET-only entry. Off delegates to DueBreakdown. Shadow runs one
-// statement, strips cmp_ and reuses the pure preview.
-func DueHTTP(ctx context.Context, tx *db.Tx, id string) (map[string]any, error) {
-	return dueHTTPWith(ctx, tx, id, productionBalancePolicy())
-}
-
-func dueHTTPWith(ctx context.Context, tx *db.Tx, id string, policy balanceReadPolicy) (map[string]any, error) {
-	selection, err := policy.pick(balanceReaderInvoiceDue, gen.Due)
-	if err != nil {
-		return nil, err
-	}
-	if !selection.Shadow {
-		return DueBreakdown(ctx, tx, id)
-	}
-	rows, err := tx.Objects(ctx, selection.SQL, id)
-	if err != nil {
-		return nil, err
-	}
-	return dueMapFromShadowRows(selection, rows)
-}
-
-func dueMapFromShadowRows(selection BalanceReadSelection, rows []jsonx.Object) (map[string]any, error) {
-	if err := Strip(selection, rows); err != nil {
-		return nil, err
-	}
-	if len(rows) == 0 {
-		return nil, apierr.New(404, "fatura não encontrada")
-	}
-	return dueBreakdownFromRow(rows[0]), nil
-}
-
-func dueBreakdownFromRow(r jsonx.Object) map[string]any {
-	amount, fee, discount, paid, days := num(r.Get("amount_cents")), num(r.Get("fee_cents")), num(r.Get("discount_cents")), num(r.Get("paid_cents")), num(r.Get("days_late"))
-	fine, interest := float64(0), float64(0)
-	if days > 0 {
-		fine = math.Floor(amount*num(r.Get("fine_pct"))/100 + 0.5)
-		interest = math.Floor(amount*num(r.Get("int_pct"))/100*days/30 + 0.5)
-	}
-	return map[string]any{"status": r.Get("status"), "due_date": r.Get("due_date"), "amount_cents": amount, "fee_cents": fee, "discount_cents": discount, "paid_cents": paid, "remaining_cents": math.Max(0, amount+fee-discount-paid), "days_late": days, "fine_cents": fine, "interest_cents": interest, "fee_if_applied_cents": math.Max(fee, fine+interest)}
 }
