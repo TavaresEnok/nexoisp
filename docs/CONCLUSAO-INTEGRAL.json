@@ -61,7 +61,7 @@
       "testes_alterados": false,
       "nao_e_o_gate": true
     },
-    "exigencia": "Publicar ainda exige python3 tests/contrato/nativo.py e python3 tests/contrato/go_integration.py, sem -I, no commit candidato. Em cc542a1 o Go terminou 0 e o HTTP terminou 1 sem concluir. A forma com -I é falha de bootstrap e não substitui esses dois comandos. Skip por falta de banco não aprova.",
+    "exigencia": "Publicar ainda exige python3 tests/contrato/nativo.py e python3 tests/contrato/go_integration.py, sem -I, no commit candidato. Em cc542a1 o Go terminou 0 e o HTTP terminou 1 no fixture. Em 0086558 o HTTP passou do fixture e terminou 1 no entity_id opcional, antes dos 22 casos. A correção 9c764d7 não foi reexecutada. A forma com -I é falha de bootstrap e não substitui esses dois comandos. Skip por falta de banco não aprova.",
     "executados_na_base_cc542a1": {
       "nativo_py": {
         "exit": 1,
@@ -78,7 +78,33 @@
         "CI e193266",
         "geracao ou gates de 6f4bf38"
       ],
-      "fixture_posterior_b67d2f3": "compilado; nova chamada morreu em FileNotFoundError docker antes do PostgreSQL"
+      "tentativa_seguinte_antes_de_0086558": "uma chamada do fixture b67d2f3 morreu em FileNotFoundError docker antes do PostgreSQL; a corrida 0086558 é posterior e passou do fixture"
+    },
+    "executados_na_base_0086558": {
+      "base": "0086558d9296054cfaf89071c9ae1bf0f2f56571",
+      "resumo": "/home/enok/Documentos/projetos/implementacao-codex/lote27-b13-http-restore-2026-10-29/evidencias/gate-summary-0086558.json",
+      "nativo_py": {
+        "exit": 1,
+        "concluiu": false,
+        "local": "tests/contrato/import_compensate_contract.py:369",
+        "causa": "KeyError entity_id na linha error do lote misto; importResult só serializa entity_id quando id != nil; ausência é contrato válido",
+        "earlier_psp_fixture_passed": true,
+        "http_22_cases_passed": false,
+        "log": "/home/enok/Documentos/projetos/implementacao-codex/lote27-b13-http-restore-2026-10-29/evidencias/gate-nativo-0086558.log"
+      },
+      "restore_clean_host": {
+        "exit": 0,
+        "ok": true,
+        "fases": 17,
+        "evidencia": "/home/enok/Documentos/projetos/implementacao-codex/lote27-b13-http-restore-2026-10-29/evidencias/restore-clean-host-0086558.json"
+      },
+      "go_browser_sbom": "inalterados; a prova continua cc542a1",
+      "published": false,
+      "correcao_posterior_expectativa_opcional": {
+        "commit": "9c764d79e235efc4461fc37323077a2e98acac03",
+        "reexecutado": false,
+        "nao_e_gate_aprovado": true
+      }
     }
   },
   "estados": {
@@ -97,7 +123,8 @@
       "codigo_na_branch_banco_nao_executado",
       "execucao_parcial_com_prova",
       "gerado_localmente_ci_nao_conferido",
-      "harness_entregue_ensaio_nao_executado"
+      "harness_entregue_ensaio_nao_executado",
+      "ensaio_sintetico_exit_0_externos_abertos"
     ],
     "homologado": [
       "sem_prova",
@@ -290,11 +317,31 @@
     },
     {
       "path": "docs/RESTORE-LAB-HOST-LIMPO.md",
-      "papel": "b12_harness_sintetico_nao_executado"
+      "papel": "b12_harness_e_corrida_0086558"
+    },
+    {
+      "path": "docs/B04-DESENHO-CORTE-LEITOR.md",
+      "papel": "b04_desenho_sem_corte"
+    },
+    {
+      "path": "docs/B04-ACEITE-CORTE-LEITOR.json",
+      "papel": "b04_matriz_planejada_nao_executada"
     },
     {
       "path": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-summary-cc542a1.json",
       "papel": "resumo_dos_gates_na_base_cc542a1"
+    },
+    {
+      "path": "/home/enok/Documentos/projetos/implementacao-codex/lote27-b13-http-restore-2026-10-29/evidencias/gate-summary-0086558.json",
+      "papel": "resumo_http_e_restore_na_base_0086558"
+    },
+    {
+      "path": "/home/enok/Documentos/projetos/implementacao-codex/lote27-b13-http-restore-2026-10-29/evidencias/restore-clean-host-0086558.json",
+      "papel": "b12_dezessete_fases_exit_0"
+    },
+    {
+      "path": "/home/enok/Documentos/projetos/implementacao-codex/lote27-b13-http-restore-2026-10-29/evidencias/b04-comparacao-sintetica-0086558.json",
+      "papel": "b04_comparacao_limitada_sem_corte"
     }
   ],
   "matriz_funcional": {
@@ -720,6 +767,14 @@
       "testado": "relato_historico_local",
       "homologado": "nao_aplicavel",
       "publicado": "github_relatado_nao_reconsultado",
+      "corte_autorizado": false,
+      "desenho_lote28": {
+        "commit": "728f2ff5712cb4b133fe7b07953db80836b72045",
+        "implementado": false,
+        "executado": false,
+        "matriz": "planejada",
+        "ativa_corte": false
+      },
       "evidencia": [
         {
           "path": "db/migrations/00066_financial_movements.sql",
@@ -728,22 +783,47 @@
         {
           "path": "docs/LOTE03-B04-MOVIMENTOS.md",
           "commit": "82c4251"
+        },
+        {
+          "path": "docs/B04-DESENHO-CORTE-LEITOR.md",
+          "commit": "728f2ff",
+          "nota": "preparação; flag ausente no código; corte fechado"
+        },
+        {
+          "path": "docs/B04-ACEITE-CORTE-LEITOR.json",
+          "commit": "728f2ff",
+          "nota": "matriz com executado false; corte_autorizado false"
+        },
+        {
+          "path": "/home/enok/Documentos/projetos/implementacao-codex/lote27-b13-http-restore-2026-10-29/evidencias/b04-comparacao-sintetica-0086558.json",
+          "commit": "0086558d9296054cfaf89071c9ae1bf0f2f56571",
+          "nota": "alfa 23 faturas e 23 sombras sem drift; beta 0; acordos 0; não autoriza corte"
         }
       ],
       "entregue": [
         "movimentos append-only",
         "sombra de saldo",
-        "comparação antes do corte"
+        "comparação antes do corte",
+        "desenho e matriz planejada do corte, sem ativação"
       ],
       "criterios_abertos": [
         {
           "id": "B04-corte",
-          "causa": "A sombra existe e o leitor antigo não foi promovido. Não há flag de corte no código. O corte fica fechado enquanto a comparação não autorizar a troca.",
+          "causa": "A sombra existe e o leitor antigo não foi promovido. Não há NEXO_BALANCE_READ no código. O desenho 728f2ff e a comparação 0086558 de 23 faturas e 0 acordos não autorizam a troca.",
           "dependencias": [
             "B03"
           ],
-          "evidencia_faltante": "Consulta de discrepância zerada ou justificada no lab, registrada como decisão de corte.",
-          "proximo_passo": "Não cortar neste ciclo. Repetir a migração 65 para 66 e a leitura comparativa do lote 03 no lab.",
+          "evidencia_faltante": "Execução da matriz planejada em docs/B04-ACEITE-CORTE-LEITOR.json, com revisão independente, antes de qualquer allowlist de corte. A prova de 23 faturas não cobre acordo, source_unproven, estorno, excesso, refund, importação, compensação, rollback, RLS de portal e POP nem drift injetado.",
+          "proximo_passo": "Manter o corte fechado. Não implementar o corte a partir deste desenho. Não reimplementar a migração 66 nem tratar a comparação sintética como aceite.",
+          "prova_limitada_0086558": {
+            "alfa_faturas": 23,
+            "alfa_sombra": 23,
+            "drift": 0,
+            "beta_faturas": 0,
+            "acordos": 0,
+            "papel": "nexo_go nao privilegiado",
+            "cutover_authorized_by_this_evidence": false
+          },
           "validacao": [
             "python3",
             "tests/contrato/financial_movements_migration.py"
@@ -1138,7 +1218,7 @@
       "prioridade": "P0",
       "fechado": false,
       "implementado": "parcial",
-      "testado": "harness_entregue_ensaio_nao_executado",
+      "testado": "ensaio_sintetico_exit_0_externos_abertos",
       "homologado": "sem_prova",
       "publicado": "producao_nao",
       "evidencia": [
@@ -1166,7 +1246,7 @@
         {
           "path": "tests/contrato/restore_clean_host.py",
           "commit": "56b2187",
-          "nota": "harness entregue; ensaio real não executado porque docker estava ausente"
+          "nota": "harness entregue; a corrida sintética exit 0 está na base 0086558, não neste arquivo versionado"
         },
         {
           "path": "tests/operacao/test_restore_clean_host.py",
@@ -1175,29 +1255,41 @@
         },
         {
           "path": "docs/RESTORE-LAB-HOST-LIMPO.md",
-          "commit": "56b2187"
+          "commit": "56b2187",
+          "nota": "roteiro; a corrida 0086558 foi acrescentada na leitura do lote 28"
         },
         {
           "path": ".github/workflows/native.yml",
           "commit": "56b2187",
           "nota": "passo do ensaio no arquivo; run hospedado não conferido"
+        },
+        {
+          "path": "/home/enok/Documentos/projetos/implementacao-codex/lote27-b13-http-restore-2026-10-29/evidencias/restore-clean-host-0086558.json",
+          "commit": "0086558d9296054cfaf89071c9ae1bf0f2f56571",
+          "nota": "ok true; 17 fases; static_approval false; dois clusters sintéticos novos"
+        },
+        {
+          "path": "/home/enok/Documentos/projetos/implementacao-codex/lote27-b13-http-restore-2026-10-29/evidencias/gate-summary-0086558.json",
+          "commit": "0086558d9296054cfaf89071c9ae1bf0f2f56571",
+          "nota": "restore_clean_host.exit_code 0; published false"
         }
       ],
       "entregue": [
         "scripts de backup no Nexo",
         "validação de integridade reivindicada no Backup-center em 26/10, não reexecutada",
-        "harness de restore sintético em cluster vazio, commit 56b2187, ensaio não executado"
+        "harness de restore sintético em cluster vazio, commit 56b2187",
+        "ensaio sintético exit 0 na base 0086558, 17 fases, evidência externa rastreável"
       ],
       "criterios_abertos": [
         {
           "id": "B12-restore-host-novo",
-          "causa": "O harness sintético está no clone e não foi executado. O Backup-center continua dizendo que integridade de arquivo não comprova restauração completa. Host físico, cópia externa, cofre, RPO/RTO e piloto não foram ensaiados.",
+          "causa": "O ensaio sintético de 0086558 terminou exit 0 em dois clusters novos. O critério segue aberto no host físico, na cópia externa, no cofre, no RPO/RTO produtivo, no Backup-center, no piloto e no exactly-once externo. Integridade de arquivo no Backup-center não comprova restauração completa. A causa do que falta não é falta de autorização nem de bancada para o ensaio sintético já executado.",
           "dependencias": [
-            "Docker, Go, OpenSSL e postgres:16-alpine para o ensaio sintético",
-            "lab vazio e operador para o destino real"
+            "operador e destino físico para o que o cluster simulado não cobre",
+            "repositório Backup-center para a suíte que não mora neste clone"
           ],
-          "evidencia_faltante": "JSON de tests/contrato/relatorios/restore-clean-host.json de uma corrida concluída; restore em host físico; cópia externa; e a suíte do repositório Backup-center.",
-          "proximo_passo": "Executar python3 tests/contrato/restore_clean_host.py. Não reimplementar o harness. Não encerrar host físico, cofre, RPO/RTO, piloto nem os testes do Backup-center por esse ensaio.",
+          "evidencia_faltante": "Restore em host físico; cópia externa e cofre; medida de RPO/RTO produtivo; exactly-once externo; piloto; e a suíte do repositório Backup-center. A corrida sintética já tem JSON arquivado.",
+          "proximo_passo": "Preservar a prova 0086558. Não reimplementar o harness e não repetir essa corrida só para obter de novo o exit 0. Não encerrar host físico, cópia externa, cofre, RPO/RTO, piloto, exactly-once externo nem os testes do Backup-center por esse ensaio.",
           "nota": "O argv pytest roda no repositório Backup-center. tests/test_backup_integrity_isolated.py e tests/test_backup_executor_integrity_lab.py não estão neste clone, e git cat-file aqui não resolve 2e410d2.",
           "validacao": [
             [
@@ -1210,15 +1302,65 @@
               "tests/test_backup_executor_integrity_lab.py"
             ]
           ],
+          "prova_0086558": {
+            "base": "0086558d9296054cfaf89071c9ae1bf0f2f56571",
+            "exit_code": 0,
+            "ok": true,
+            "fases": [
+              "identidade",
+              "origem sintética",
+              "backup manifesto e soma",
+              "bootstrap do destino",
+              "manipulação recusada",
+              "restore no cluster vazio",
+              "manifesto conferido",
+              "isolamento e grants",
+              "documentos por bytes",
+              "verify-restore",
+              "chave errada recusada",
+              "fila persistida sem execução",
+              "login e sessão",
+              "download HTTP e recusa entre tenants",
+              "portal e POP",
+              "retomada com jobs desligados",
+              "replay da compensação B13"
+            ],
+            "recusas": [
+              "checksum-manifesto",
+              "dump-manipulado"
+            ],
+            "clusters": {
+              "origem": "nexo-b12-src-30cf94629328",
+              "destino": "nexo-b12-dst-30cf94629328",
+              "volume_origem": "nexo-b12-src-vol-30cf94629328",
+              "volume_destino": "nexo-b12-dst-vol-30cf94629328",
+              "imagem": "postgres:16-alpine",
+              "execucao": "30cf94629328"
+            },
+            "comprovado": [
+              "dois clusters sintéticos novos",
+              "documentos por bytes, verify-restore e download HTTP",
+              "chave errada e manipulação recusadas",
+              "isolamento e grants",
+              "login e sessão",
+              "fila sem execução e retomada com jobs desligados",
+              "replay B13 sem nova reversão"
+            ],
+            "recursos_limpos_pelo_harness": true,
+            "static_approval": false
+          },
           "limites": {
             "harness_entregue": true,
-            "harness_executado": false,
+            "harness_executado": true,
+            "ensaio_sintetico_exit_0": true,
             "testes_estaticos": "13 OK; não aprovam B12",
+            "run_hospedado": false,
             "host_fisico": false,
             "copia_externa": false,
             "cofre": false,
-            "rpo_rto": false,
+            "rpo_rto_produtivo": false,
             "piloto": false,
+            "exactly_once_externo": false,
             "backup_center_reexecutado": false
           }
         }
@@ -1230,7 +1372,7 @@
       "prioridade": "P0",
       "fechado": false,
       "implementado": "sim",
-      "implementado_onde": "código desde 8c10c1a; fixture PSP corrigido em b67d2f3; HEAD de integração e2f3b18",
+      "implementado_onde": "código desde 8c10c1a; fixture PSP em b67d2f3; expectativa do campo opcional em 9c764d7; HEAD documental 027e461",
       "testado": "execucao_parcial_com_prova",
       "homologado": "sem_prova",
       "publicado": "branch_de_desenvolvimento_nao_publicada",
@@ -1318,7 +1460,17 @@
         {
           "path": "tests/contrato/import_compensate_contract.py",
           "commit": "b67d2f3",
-          "nota": "fixture PSP corrigido; nativo.py desse commit não concluiu"
+          "nota": "fixture PSP; a corrida 0086558 passou deste setup e parou no entity_id opcional"
+        },
+        {
+          "path": "tests/contrato/import_compensate_contract.py",
+          "commit": "9c764d7",
+          "nota": "expectativa da linha error aceita entity_id ausente ou nulo; ainda sem nova execução de nativo.py"
+        },
+        {
+          "path": "/home/enok/Documentos/projetos/implementacao-codex/lote27-b13-http-restore-2026-10-29/evidencias/gate-summary-0086558.json",
+          "commit": "0086558d9296054cfaf89071c9ae1bf0f2f56571",
+          "nota": "nativo exit 1; earlier_psp_fixture_passed true; http_22_cases_passed false"
         }
       ],
       "entregue": [
@@ -1327,19 +1479,21 @@
         "reconciliação por lote somente leitura",
         "GET de elegibilidade com marcador absent ou committed e evidence.reverted falso",
         "desenho aprovado da compensação, preservado",
-        "marcador append-only, POST idempotente só de invoices, locks 7411005, interface oficial, inventário estático e testes escritos"
+        "marcador append-only, POST idempotente só de invoices, locks 7411005, interface oficial, inventário estático e testes escritos",
+        "fixture PSP exercitado na base 0086558 até o campo opcional",
+        "expectativa do entity_id opcional corrigida em 9c764d7, sem nova execução aprovada"
       ],
       "criterios_abertos": [
         {
           "id": "B13-compensacao",
-          "causa": "O Go de cc542a1 passou 58 ações de compensação dentro de 241. O browser dirigido passou. O nativo.py exit 1 não concluiu os 22 HTTP. O fixture b67d2f3 ainda não rodou em PostgreSQL. O lote não foi publicado.",
+          "causa": "O Go de cc542a1 passou 58 ações de compensação dentro de 241. O browser dirigido passou. Em 0086558 o nativo.py passou do fixture PSP e terminou exit 1 no entity_id opcional da linha error, antes de concluir os 22 HTTP. A correção 9c764d7 não foi repetida. O lote não foi publicado.",
           "dependencias": [
             "desenho do lote 24 já aprovado",
             "lab PostgreSQL descartável",
             "revisão independente antes de integrar a publicação"
           ],
-          "evidencia_faltante": "python3 tests/contrato/nativo.py exit 0 no HEAD que contém b67d2f3, e o job verificar hospedado nesse commit.",
-          "proximo_passo": "Repetir o nativo.py sem -I. Não redeclarar os 22 HTTP. Não reimplementar o lote 25. Kinds diferentes de invoices permanecem recusados. Sem PSP e sem apagar histórico.",
+          "evidencia_faltante": "python3 tests/contrato/nativo.py exit 0 no HEAD que contém 9c764d7, e o job verificar hospedado no commit candidato. A correção entregue não substitui essa execução.",
+          "proximo_passo": "Repetir o nativo.py sem -I. Não converter 9c764d7 nem revisão em sucesso dos 22 HTTP. Não reimplementar o lote 25, o fixture b67d2f3 nem a expectativa já corrigida. Kinds diferentes de invoices permanecem recusados. Sem PSP e sem apagar histórico.",
           "validacao": [
             [
               "python3",
@@ -1373,6 +1527,19 @@
           "local": "import_compensate_contract.py:335",
           "http_22_passados": false
         }
+      },
+      "provas_0086558": {
+        "base": "0086558d9296054cfaf89071c9ae1bf0f2f56571",
+        "go_browser_sbom_permanecem": "cc542a1",
+        "nativo_py": {
+          "exit_code": 1,
+          "concluiu": false,
+          "local": "tests/contrato/import_compensate_contract.py:369",
+          "causa": "KeyError entity_id na linha error; ausência é contrato válido",
+          "earlier_psp_fixture_passed": true,
+          "http_22_cases_passed": false
+        },
+        "correcao_9c764d7_reexecutada": false
       }
     },
     {
@@ -1560,15 +1727,15 @@
       "criterios_abertos": [
         {
           "id": "B18-piloto",
-          "causa": "Não há provedor, janela, grupo reversível, restore de destino real, monitor externo nem deploy. O SBOM local e o Go de cc542a1 não fecham o piloto.",
+          "causa": "Não há provedor, janela, grupo reversível, restore de host físico, monitor externo nem deploy. O ensaio sintético 0086558, o SBOM local e o Go de cc542a1 não fecham o piloto.",
           "dependencias": [
-            "B12 ensaio sintético ainda não executado e, à parte, restore de host real",
-            "B13 HTTP ainda não concluído antes de corte com dado importado",
-            "artefato SBOM hospedado",
+            "B12 host físico, cópia externa, cofre, RPO/RTO, Backup-center e exactly-once externo; o ensaio sintético de 0086558 já ocorreu",
+            "B13 HTTP ainda sem exit 0 antes de corte com dado importado",
+            "artefato SBOM hospedado no commit candidato",
             "recursos externos de banco, acesso e, se ativos, fisco"
           ],
           "evidencia_faltante": "Itens de docs/PILOTO.md com responsável, data e versão, sem segredo.",
-          "proximo_passo": "Continuar as execuções pendentes. Não reimplementar os lotes 25 e 26. Não declarar piloto. Publicação de código exige o workflow nativo com PostgreSQL real no runner deste HEAD. Ausência de provedor não fecha o item.",
+          "proximo_passo": "Repetir o HTTP depois de 9c764d7. Preservar o restore sintético de 0086558 e o desenho B04 sem corte. Não reimplementar os lotes 25 e 26. Não declarar piloto. Publicação de código exige o workflow nativo com PostgreSQL real no runner do commit candidato. Ausência de provedor não fecha o item.",
           "validacao": [
             [
               "python3",
@@ -1584,18 +1751,24 @@
     }
   ],
   "proximo_evento": {
-    "id": "repetir-http-b13-e-executar-restore-sintetico",
+    "id": "repetir-http-b13-apos-campo-opcional",
+    "id_anterior": "repetir-http-b13-e-executar-restore-sintetico",
     "prioridade": "P0",
-    "motivo": "O Go e o browser de cc542a1 passaram. O HTTP morreu no fixture, corrigido em b67d2f3 e ainda sem PostgreSQL. O harness B12 está entregue e o ensaio não rodou. O SBOM local não tem CI hospedado.",
+    "motivo": "O Go, o browser e o SBOM local de cc542a1 permanecem válidos. Em 0086558 o HTTP passou do fixture PSP e parou no entity_id opcional. A correção 9c764d7 ainda não foi executada. O restore sintético dessa base terminou exit 0 em 17 fases. O desenho B04 não ativa o corte. O CI hospedado do commit candidato continua aberto.",
     "nao_reabrir": [
       "lote01",
       "b07-resolucao",
       "b11-telemetria",
       "b13-elegibilidade-leitura",
       "b13-implementacao-lote25",
-      "lote26-correcoes-e-sbom"
+      "lote26-correcoes-e-sbom",
+      "b13-fixture-psp-b67d2f3",
+      "b12-harness-56b2187",
+      "b12-corrida-sintetica-0086558",
+      "b13-expectativa-opcional-9c764d7",
+      "b04-desenho-728f2ff"
     ],
-    "candidato_interno_seguinte": "repetir nativo.py no HEAD e2f3b18 e executar restore_clean_host.py; em seguida conferir o run hospedado do native.yml",
+    "candidato_interno_seguinte": "repetir nativo.py no HEAD que contém 9c764d7 até exit 0; o restore sintético de 0086558 fica registrado; em seguida conferir o run hospedado do native.yml no commit candidato",
     "limites": [
       "sem franquia",
       "sem PSP real",
@@ -1606,16 +1779,13 @@
       "não fechar item externo por ausência de recurso",
       "default não é homologação",
       "projeto não está em 100%",
-      "ensaio 27 não executado permanece pendente"
+      "correção entregue não é gate repetido",
+      "comparação de 23 faturas e desenho B04 não ativam o corte"
     ],
     "validacao": [
       [
         "python3",
         "tests/contrato/nativo.py"
-      ],
-      [
-        "python3",
-        "tests/contrato/restore_clean_host.py"
       ]
     ]
   },
@@ -1624,17 +1794,20 @@
     "pedir_nova_ordem": false,
     "projeto_concluido": false,
     "percentual": null,
-    "instrucao": "Os lotes 25 e 26 não se reimplementam. A gerência repete nativo.py no HEAD com b67d2f3, executa o harness de restore quando houver Docker e confere o CI hospedado deste HEAD. Não fechar item externo por ausência de recurso. Não transformar default, sandbox, skip, geração local ou teste estático em homologação. O projeto permanece aberto enquanto existir critério aberto."
+    "instrucao": "Os lotes 25 e 26 não se reimplementam. O fixture b67d2f3, o harness 56b2187, a corrida sintética 0086558, a expectativa 9c764d7 e o desenho B04 728f2ff também não se refazem. A gerência repete nativo.py no HEAD que contém 9c764d7 até exit 0 e confere o CI hospedado do commit candidato. Go, browser e SBOM local continuam datados em cc542a1. Não fechar item externo por ausência de recurso. Não transformar default, sandbox, skip, geração local, teste estático, correção entregue ou desenho em homologação. O projeto permanece aberto enquanto existir critério aberto."
   },
   "publicacao": {
     "producao": false,
     "lote25_publicado": false,
-    "github_e193266": "relato histórico de 00_STATUS.md; não valida cc542a1 nem e2f3b18",
+    "github_e193266": "relato histórico de 00_STATUS.md; não valida cc542a1, 0086558 nem 027e461",
     "head_82c4251": "base documental do desenho B13; o mesmo relato diz que o lote 24 não teve push nem deploy",
     "head_desenvolvimento_8c10c1a": "código do lote 25 integrado na branch de desenvolvimento; esta documentação não publica esse HEAD",
     "lote26_publicado": false,
     "lote27_publicado": false,
-    "head_cc542a1": "base dos gates Go, browser, SBOM local e da falha HTTP; não é publicação",
-    "head_desenvolvimento_e2f3b18": "inclui b67d2f3 e 56b2187; os ensaios desses commits não concluíram; esta documentação não publica esse HEAD"
+    "head_cc542a1": "base dos gates Go, browser, SBOM local e da falha HTTP no fixture; não é publicação; 0086558 não substitui essas três provas",
+    "head_desenvolvimento_e2f3b18": "inclui b67d2f3 e 56b2187; esta documentação não publica esse HEAD",
+    "base_0086558": "HTTP exit 1 no campo opcional depois do fixture PSP; restore sintético exit 0 em 17 fases; published false",
+    "lote28_publicado": false,
+    "head_documental_027e461": "inclui 9c764d7 e 728f2ff; a correção do campo opcional não foi reexecutada; o desenho B04 não ativa o corte; esta documentação não publica esse HEAD"
   }
 }

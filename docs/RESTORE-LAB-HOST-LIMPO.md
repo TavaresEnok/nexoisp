@@ -20,6 +20,30 @@ O processo termina com erro se Docker, Go, OpenSSL ou a imagem `postgres:16-alpi
 
 A saída JSON impressa no stdout e o arquivo `tests/contrato/relatorios/restore-clean-host.json` incluem `base` (o `git rev-parse HEAD`), as fases verificadas e os limites. Não incluem senha, chave, documento nem segredo.
 
+## Corrida registrada em 0086558
+
+Em 2026-10-29 a gerência executou `python3 tests/contrato/restore_clean_host.py` na base `0086558d9296054cfaf89071c9ae1bf0f2f56571`. O processo terminou exit 0. A cópia arquivada desta corrida está fora do clone:
+
+- `/home/enok/Documentos/projetos/implementacao-codex/lote27-b13-http-restore-2026-10-29/evidencias/restore-clean-host-0086558.json`
+- `/home/enok/Documentos/projetos/implementacao-codex/lote27-b13-http-restore-2026-10-29/evidencias/gate-summary-0086558.json`
+- `gate-restore-clean-host-0086558.log`, no mesmo diretório
+
+`ok` é verdadeiro. `criterion` é B12. `static_approval` é falso. `published` no resumo do gate é falso. Os 13 testes de `tests/operacao/test_restore_clean_host.py` continuam sendo só a recusa estática. O run hospedado do passo em `.github/workflows/native.yml` não foi conferido.
+
+O log lista 17 fases, nesta ordem: identidade; origem sintética; backup manifesto e soma; bootstrap do destino; manipulação recusada; restore no cluster vazio; manifesto conferido; isolamento e grants; documentos por bytes; verify-restore; chave errada recusada; fila persistida sem execução; login e sessão; download HTTP e recusa entre tenants; portal e POP; retomada com jobs desligados; replay da compensação B13.
+
+O que essa corrida comprovou:
+
+- Dois clusters sintéticos novos, com recursos próprios da execução `30cf94629328`. Origem: container `nexo-b12-src-30cf94629328`, volume `nexo-b12-src-vol-30cf94629328`, porta 33639. Destino: container `nexo-b12-dst-30cf94629328`, volume `nexo-b12-dst-vol-30cf94629328`, porta 37163. Imagem `postgres:16-alpine`. Rótulo `nexo.lab=b12-clean-host`. O harness registrou a limpeza desses recursos.
+- Recusa de manipulação: `checksum-manifesto` e `dump-manipulado`. A fase seguinte recusou chave errada.
+- Documentos conferidos por bytes, pela verificação do restore e pelo download HTTP, com recusa entre tenants.
+- Isolamento e grants, inclusive o papel não privilegiado do ensaio, e as fases de portal e POP.
+- Login e sessão.
+- Fila persistida sem execução e retomada com jobs desligados.
+- Replay da compensação B13 na fase final, sem nova reversão. Segredos ficaram omitidos.
+
+O que permanece aberto depois do exit 0: host físico, cópia externa e `NEXO_BACKUP_COPY`, cofre, RPO e RTO produtivo, a suíte do repositório Backup-center, o piloto e exactly-once externo. O destino vazio simulado não substitui cluster físico nem cofre. A causa desta corrida não é falta de autorização nem de bancada: o ensaio sintético já foi executado. Repeti-lo só para obter de novo o mesmo exit 0 não é o próximo trabalho. Host físico, cópia externa, cofre, medida produtiva, Backup-center, piloto e exactly-once externo continuam cada um com a própria prova.
+
 ## Recursos e limpeza
 
 A limpeza do próprio processo só remove container e volume cujo rótulo `nexo.lab.run` é o desta execução. O diretório temporário do dump usa o mesmo identificador e é apagado ao final.
