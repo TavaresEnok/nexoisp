@@ -6,15 +6,17 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"os"
+	"strings"
+	"time"
+
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"nexoisp/api-go/internal/apierr"
 	"nexoisp/api-go/internal/db"
 	"nexoisp/api-go/internal/finance/providers"
 	"nexoisp/api-go/internal/jsonx"
 	"nexoisp/api-go/internal/tenancy"
-	"os"
-	"strings"
-	"time"
 )
 
 type ProviderOperationInput struct {
@@ -37,6 +39,18 @@ func PrepareProviderOperation(ctx context.Context, tx *db.Tx, issuance, connecti
 	if b.PaymentID != "" {
 		b.PaymentID = uuid.MustParse(b.PaymentID).String()
 	}
+	var invoice string
+	err = tx.QueryRow(ctx, `select i.id::text from invoices i join provider_issuance j on j.invoice_id=i.id and j.tenant_id=i.tenant_id where j.id=$1 and j.financial_connection_id=$2`, issuance, connection).Scan(&invoice)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, false, apierr.New(404, "emissão não encontrada")
+	}
+	if err != nil {
+		return nil, false, err
+	}
+	// Advisory and the invoice row before the operation insert. The guard trigger locks the invoice again.
+	if err = LockInvoices(ctx, tx, "", invoice); err != nil {
+		return nil, false, err
+	}
 	rows, err := tx.Objects(ctx, `select i.id from invoices i join provider_issuance j on j.invoice_id=i.id and j.tenant_id=i.tenant_id where j.id=$1 and j.financial_connection_id=$2 for update of i`, issuance, connection)
 	if err != nil {
 		return nil, false, err
@@ -44,7 +58,7 @@ func PrepareProviderOperation(ctx context.Context, tx *db.Tx, issuance, connecti
 	if len(rows) == 0 {
 		return nil, false, apierr.New(404, "emissão não encontrada")
 	}
-	invoice := rows[0].Get("id").(string)
+	invoice = rows[0].Get("id").(string)
 	prior, err := tx.Objects(ctx, `select id,state,kind,coalesce(payment_id::text,'') as payment_id,coalesce(amount_cents,0) as amount_cents,reason from provider_operations where issuance_id=$1 and intent_id=$2`, issuance, b.IntentID)
 	if err != nil {
 		return nil, false, err
@@ -143,7 +157,10 @@ func RunProviderOperation(ctx context.Context, database *db.DB, scope tenancy.Sc
 	var op providers.OperationRequest
 	var send, eligible bool
 	err := database.WithScope(ctx, scope, func(tx *db.Tx) error {
-		if e := tx.QueryRow(ctx, `select invoice_id from provider_operations where id=$1`, id).Scan(&invoice); e != nil {
+		if e := tx.QueryRow(ctx, `select invoice_id::text from provider_operations where id=$1`, id).Scan(&invoice); e != nil {
+			return e
+		}
+		if e := LockInvoices(ctx, tx, scope.TenantID, invoice); e != nil {
 			return e
 		}
 		var locked string
@@ -219,6 +236,9 @@ func RunProviderOperation(ctx context.Context, database *db.DB, scope tenancy.Sc
 		}
 	}
 	return database.WithScope(ctx, scope, func(tx *db.Tx) error {
+		if e := LockInvoices(ctx, tx, scope.TenantID, invoice); e != nil {
+			return e
+		}
 		var locked string
 		if e := tx.QueryRow(ctx, `select id from invoices where id=$1 for update`, invoice).Scan(&locked); e != nil {
 			return e
@@ -248,4 +268,35 @@ func RunProviderOperation(ctx context.Context, database *db.DB, scope tenancy.Sc
 		}
 		return SysAudit(ctx, tx, scope.TenantID, "finance.provider.operation_result", "provider_operation", id, map[string]any{"state": result.State, "kind": op.Kind}, "ok")
 	})
+}
+
+// RequeueProviderOperationLookup is the database step of POST .../retry-lookup.
+// It discovers the invoice without a row lock, then takes the advisory and the invoice before the operation update.
+func RequeueProviderOperationLookup(ctx context.Context, tx *db.Tx, tenant, issuance, operation string) error {
+	var invoice string
+	err := tx.QueryRow(ctx, `select i.id::text from invoices i join provider_operations o on o.invoice_id=i.id where o.id=$1 and o.issuance_id=$2`, operation, issuance).Scan(&invoice)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return apierr.New(404, "operação não encontrada")
+	}
+	if err != nil {
+		return err
+	}
+	if err = LockInvoices(ctx, tx, tenant, invoice); err != nil {
+		return err
+	}
+	rows, err := tx.Objects(ctx, `select i.id from invoices i join provider_operations o on o.invoice_id=i.id where o.id=$1 and o.issuance_id=$2 for update of i`, operation, issuance)
+	if err != nil {
+		return err
+	}
+	if len(rows) == 0 {
+		return apierr.New(404, "operação não encontrada")
+	}
+	n, err := tx.Affected(ctx, `update provider_operations set state='uncertain',next_attempt_at=now(),last_error=null where id=$1 and state in ('review','uncertain')`, operation)
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		return apierr.New(409, "somente operação incerta ou em revisão pode retomar consulta")
+	}
+	return nil
 }
