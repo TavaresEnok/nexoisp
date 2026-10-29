@@ -1339,6 +1339,13 @@
     "sha256": "61230d59f2d8d07496f7cd25f2a160cf6c1197ba41e375719040a79a2a638ce8"
   },
   {
+    "path": "POST /api/import/batches/:id/compensate",
+    "permission": "import:run",
+    "file": "import.ts",
+    "queries": [],
+    "sha256": "f9b92d628cc800987f8bb3995fd892f3d79d4df8b41086d185765e7b5f3d3c43"
+  },
+  {
     "path": "POST /api/api-tokens",
     "permission": "settings:manage",
     "file": "integracoes.ts",
