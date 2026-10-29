@@ -89,7 +89,16 @@ func (s Service) invoiceCreate(ctx context.Context, tx *db.Tx, _ string, b map[s
 	}
 	return i, record(ctx, tx, "invoice.create", "invoice", i.Get("id"), map[string]any{"amount_cents": b["amount_cents"]})
 }
+func actorTenant(ctx context.Context) string {
+	if c := auth.From(ctx); c != nil {
+		return c.TenantID
+	}
+	return ""
+}
 func (s Service) invoiceCancel(ctx context.Context, tx *db.Tx, id string, b map[string]any) (any, error) {
+	if err := finance.LockInvoices(ctx, tx, actorTenant(ctx), id); err != nil {
+		return nil, err
+	}
 	r, err := one(ctx, tx, "POST /api/invoices/:id/cancel", 0, id, b["reason"])
 	if err != nil {
 		return nil, err
@@ -100,7 +109,10 @@ func (s Service) invoiceCancel(ctx context.Context, tx *db.Tx, id string, b map[
 	return map[string]any{"ok": true}, record(ctx, tx, "invoice.cancel", "invoice", id, b)
 }
 func (s Service) invoicePayment(ctx context.Context, tx *db.Tx, id string, b map[string]any) (any, error) {
-	// Lock a visible invoice even on replay: authorization/RLS must still apply.
+	// Advisory and invoice row lock before manual_payment_intents. Replay still re-reads the invoice under RLS.
+	if err := finance.LockInvoices(ctx, tx, actorTenant(ctx), id); err != nil {
+		return nil, err
+	}
 	var visible string
 	if err := tx.QueryRow(ctx, "select id from invoices where id=$1 for update", id).Scan(&visible); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -175,6 +187,9 @@ func (s Service) trustGrant(ctx context.Context, tx *db.Tx, id string, b map[str
 }
 func (s Service) invoiceResolve(ctx context.Context, tx *db.Tx, id string, b map[string]any) (any, error) {
 	const key = "POST /api/invoices/:id/resolve"
+	if err := finance.LockInvoices(ctx, tx, actorTenant(ctx), id); err != nil {
+		return nil, err
+	}
 	inv, err := one(ctx, tx, key, 0, id)
 	if err != nil {
 		return nil, err

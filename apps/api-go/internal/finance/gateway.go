@@ -18,6 +18,13 @@ func Payment(ctx context.Context, tx *db.Tx, id, gateway, connection string, p j
 	return paymentWithReview(ctx, tx, id, gateway, connection, p, source, false)
 }
 func paymentWithReview(ctx context.Context, tx *db.Tx, id, gateway, connection string, p jsonx.Object, source string, forceReview bool) (bool, string, error) {
+	// Advisory and invoice row before applyGatewayPayment's FOR UPDATE.
+	// lockIssuanceInvoice may already have taken this pair. Repeating it is safe
+	// only because this transaction already holds advisory then invoice; this
+	// call does not look for an existing row lock.
+	if e := LockInvoices(ctx, tx, "", id); e != nil {
+		return false, "", e
+	}
 	inv, e := one(ctx, tx, "applyGatewayPayment", 0, id)
 	if e != nil {
 		return false, "", e
@@ -102,6 +109,12 @@ func chargePayments(ctx context.Context, tx *db.Tx, gateway, charge, connection 
 func Reconcile(ctx context.Context, tx *db.Tx, tenant string) (map[string]any, error) {
 	invs, e := tx.Objects(ctx, query("reconcile", 0))
 	if e != nil {
+		return nil, e
+	}
+	// The whole set is locked once, in canonical order, before any invoice row
+	// lock. Payment repeats that order. chargePayments Lookup already runs in
+	// this transaction; it stays here and this path adds no provider call.
+	if e = LockInvoices(ctx, tx, tenant, invoiceIDs(invs)...); e != nil {
 		return nil, e
 	}
 	out := map[string]any{"checked": 0, "recovered": 0, "divergent": 0, "unavailable": 0}
@@ -193,6 +206,12 @@ func Event(ctx context.Context, database *db.DB, connection jsonx.Object, ev jso
 			out["status"] = "unmatched"
 			return tx.Exec(ctx, `update gateway_events set status='unmatched',note='cobrança não encontrada nesta conexão' where id=$1`, eventRow)
 		}
+		// gateway_events above is not an invoice row. Every matched invoice is
+		// locked advisory-then-row, in one ordered set, before Payment or the
+		// refund UPDATE. No provider I/O is added on this path.
+		if err = LockInvoices(ctx, tx, tenant, invoiceIDs(rows)...); err != nil {
+			return err
+		}
 		status = "ignored"
 		var note any = "tipo de evento sem tratamento: " + kind
 		if kind == "payment.confirmed" {
@@ -234,15 +253,27 @@ func AutoSuspend(ctx context.Context, tx *db.Tx, tenant string, contract any) (i
 	if e != nil {
 		return 0, e
 	}
+	// One ordered batch before autoSuspend query 1 (FOR UPDATE). A later Payment
+	// repeats LockInvoices for an id this transaction already holds. The charge
+	// lookup inside the loop was already in this transaction and stays there.
+	pending := make([]string, 0, len(rs))
+	for _, k := range rs {
+		if autoSuspendTarget(k) == "" {
+			continue
+		}
+		id := strings.TrimSpace(jsonx.String(k.Get("invoice_id")))
+		if id == "" || id == "null" {
+			continue
+		}
+		pending = append(pending, id)
+	}
+	if e = LockInvoices(ctx, tx, tenant, pending...); e != nil {
+		return 0, e
+	}
 	count := 0
 	for _, k := range rs {
-		target := ""
-		if num(k.Get("days_late")) > num(k.Get("block_days")) {
-			target = "blocked"
-		} else if k.Get("reduce_after_days") != nil && num(k.Get("days_late")) > num(k.Get("reduce_after_days")) {
-			target = "reduced"
-		}
-		if target == "" || (target == "reduced" && k.Get("desired_policy") == "suspended") {
+		target := autoSuspendTarget(k)
+		if target == "" {
 			continue
 		}
 		inv, e := one(ctx, tx, "autoSuspend", 1, k.Get("invoice_id"))
@@ -303,4 +334,29 @@ func AutoSuspend(ctx context.Context, tx *db.Tx, tenant string, contract any) (i
 		}
 	}
 	return count, nil
+}
+
+func invoiceIDs(rows []jsonx.Object) []string {
+	ids := make([]string, 0, len(rows))
+	for _, row := range rows {
+		id := strings.TrimSpace(jsonx.String(row.Get("id")))
+		if id == "" || id == "null" {
+			continue
+		}
+		ids = append(ids, id)
+	}
+	return ids
+}
+
+func autoSuspendTarget(k jsonx.Object) string {
+	target := ""
+	if num(k.Get("days_late")) > num(k.Get("block_days")) {
+		target = "blocked"
+	} else if k.Get("reduce_after_days") != nil && num(k.Get("days_late")) > num(k.Get("reduce_after_days")) {
+		target = "reduced"
+	}
+	if target == "" || (target == "reduced" && k.Get("desired_policy") == "suspended") {
+		return ""
+	}
+	return target
 }
