@@ -49,10 +49,13 @@ def run():
             p=subprocess.Popen([str(ROOT/'apps/api-go/bin/api')],cwd=ROOT,env=process_env,stdout=log,stderr=subprocess.STDOUT);processes.append((p,log))
             wait('http://127.0.0.1:'+str(19881+i),'/healthz',p)
         bases=['http://127.0.0.1:18881','http://127.0.0.1:18882']
-        def call(path,body=None,base=bases[0],method=None,token=None):
-            return request(base,path,token=token,method=method or ('POST' if body is not None else 'GET'),headers={'Content-Type':'application/json'} if body is not None else {},body=json.dumps(body).encode() if body is not None else None)
+        def call(path,body=None,base=bases[0],method=None,token=None,headers=None,cookie=False):
+            h={}
+            if body is not None:h['Content-Type']='application/json'
+            if headers:h.update(headers)
+            return request(base,path,token=token,method=method or ('POST' if body is not None else 'GET'),headers=h,body=json.dumps(body).encode() if body is not None else None,cookie=cookie)
         login=call('/api/auth/login',{'email':'admin@alfa.demo','password':'demo1234','bearer':True});assert login['status']==200,login['json'];token=login['json']['token']
-        def api(path,body=None,base=bases[0],method=None):return call(path,body,base,method,token)
+        def api(path,body=None,base=bases[0],method=None,headers=None):return call(path,body,base,method,token,headers)
         plan=api('/api/plans',{'name':'Plano nativo','price_cents':3500,'down_kbps':1000,'up_kbps':1000,'profile_name':'native'})['json']
         sub=api('/api/subscribers',{'name':'Assinante nativo'})['json']
         contract=api('/api/contracts',{'subscriber_id':sub['id'],'plan_id':plan['id'],'due_day':15})['json']
@@ -126,6 +129,9 @@ def run():
         from import_revert_eligibility_contract import verify as verify_import_revert_eligibility
         verify_import_revert_eligibility(api,call,sql)
         checks.append('B13: elegibilidade de reversão lista efeitos posteriores sem alterar dados')
+        from import_compensate_contract import verify as verify_import_compensate
+        verify_import_compensate(api,call,sql)
+        checks.append('B13: compensação append-only, 22 casos de contrato no laboratório')
         command([sys.executable,str(ROOT/'tests/contrato/payment_intents.py')],env=dict(env,NEXO_PAYMENT_LAB='1',NEXO_PAYMENT_LAB_URL=bases[0],NEXO_PAYMENT_LAB_URL_2=bases[1]))
         checks.append('intenção persistente: replay concorrente, conflito, estorno e resumos residuais')
         command([sys.executable,str(ROOT/'tests/contrato/financial_connections.py')],env=dict(env,NEXO_PAYMENT_LAB='1',NEXO_PAYMENT_LAB_URL=bases[0],NEXO_PAYMENT_LAB_URL_2=bases[1]))

@@ -1,0 +1,279 @@
+{
+  "lote": "25",
+  "item": "B13",
+  "contrato": "C25-v1",
+  "titulo": "Matriz executável da compensação de lote importado",
+  "base_desenho": "82c4251",
+  "desenho": "docs/LOTE24-B13-DESENHO-COMPENSACAO.md",
+  "matriz_historica": "docs/LOTE24-B13-ACEITACAO.json",
+  "matriz_historica_intocada": true,
+  "implementado": true,
+  "executado": false,
+  "homologacao": false,
+  "skip_por_ausencia_de_postgresql_nao_aprova": true,
+  "analise_de_codigo_nao_e_homologacao": true,
+  "nota": "Os 22 casos têm teste com invariantes. Isso não é execução. compensate() sem token explícito usa api() de nativo.py e envia o bearer do login admin; token explícito e cookie CSRF continuam em call(). Neste runner não havia NEXO_GO_TEST_DATABASE_URL: os testes de banco fizeram skip e esse skip não aprova concorrência, RLS, rollback nem o contrato HTTP. A gerência precisa rodar python3 -I tests/contrato/nativo.py e python3 -I tests/contrato/go_integration.py num PostgreSQL descartável, com container, porta e prefixo exclusivos, antes de publicar. O runner offline só compilou e rodou unitários sem banco. nativo.py não foi executado.",
+  "ambiente": "Laboratório sintético de tests/contrato/nativo.py (PostgreSQL 16, papéis nexo_owner/nexo_go/nexo_app, sem .env do produto) e o mesmo banco descartável de tests/contrato/go_integration.py via NEXO_GO_TEST_DATABASE_URL e NEXO_GO_TEST_DATABASE_OWNER_URL. Cada corrida concorrente usa container, porta e prefixo próprios.",
+  "comandos_de_gate": [
+    ["python3", "-I", "tests/contrato/nativo.py"],
+    ["python3", "-I", "tests/contrato/go_integration.py"]
+  ],
+  "observado_neste_runner": {
+    "nativo_py": "nao_executado",
+    "go_integration_py": "nao_executado",
+    "go_test_race_sem_database_url": "os pacotes escrita, finance e outbound compilaram e passaram; TestImportCompensate que abre banco fez SKIP com a frase de que o skip não aprova concorrência, RLS nem rollback",
+    "unitarios_sem_banco_pass": [
+      "TestImportCompensateSourceGuards",
+      "TestImportCompensate_B13_15",
+      "TestImportCompensate_B13_19",
+      "TestImportCompensateHashOmitsKey"
+    ]
+  },
+  "casos": [
+    {
+      "id": "B13-01",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_01"],
+      "argv": [["python3", "-I", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_01", "./internal/modules/escrita/"]],
+      "ambiente": "nativo.py no laboratório descartável; o teste Go exige NEXO_GO_TEST_DATABASE_URL no mesmo laboratório, não um skip local",
+      "invariantes": ["um único compensation_id", "idempotent_replay na segunda resposta", "uma reversão e a baixa original preservada", "import_rows created permanece"]
+    },
+    {
+      "id": "B13-02",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_02"],
+      "argv": [["python3", "-I", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_02", "./internal/modules/escrita/"]],
+      "ambiente": "duas requisições concorrentes no laboratório; go_integration.py cobre o pacote com -race",
+      "invariantes": ["uma resposta 200 e uma 409 already_compensated", "um marcador", "uma reversão"]
+    },
+    {
+      "id": "B13-03",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_03"],
+      "argv": [["go", "test", "-count=1", "-run", "TestImportCompensate_B13_03", "./internal/modules/escrita/"]],
+      "ambiente": "PostgreSQL descartável. O subteste do marcador usa falha real de chave estrangeira do ator. O subteste de auditoria ainda arma o gancho importCompensateBeforeCommit, que não foi usado nos testes novos de barreira.",
+      "invariantes": ["rollback de pagamento, status, paid_at, marcador e movimento"]
+    },
+    {
+      "id": "B13-04",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_04"],
+      "argv": [["python3", "-I", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_04", "./internal/modules/escrita/"]],
+      "ambiente": "CSV situacao=pago integral no nativo.py",
+      "invariantes": ["reversal manual do valor integral", "nota com o lote", "sem PSP", "signed_cents 0", "external_id preservado", "evidence.reverted false"]
+    },
+    {
+      "id": "B13-05",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_05"],
+      "argv": [["python3", "-I", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_05", "./internal/modules/escrita/"]],
+      "ambiente": "CSV com valor_pago menor que o valor",
+      "invariantes": ["estorno do valor pago, não do nominal", "fatura canceled", "nominal preservado"]
+    },
+    {
+      "id": "B13-06",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_06"],
+      "argv": [["python3", "-I", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_06", "./internal/modules/escrita/"]],
+      "ambiente": "CSV com valor_pago maior que o valor e até o dobro",
+      "invariantes": ["estorno do pagamento excedente inteiro", "excess_cents 0", "nenhum acordo", "alocação não sai da fatura"]
+    },
+    {
+      "id": "B13-07",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_07"],
+      "argv": [["python3", "-I", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_07", "./internal/modules/escrita/"]],
+      "ambiente": "CSV situacao=cancelado e reimportação do mesmo id_externo",
+      "invariantes": ["left_canceled 1", "sem pagamento novo", "mesmo invoice id na reimportação unchanged"]
+    },
+    {
+      "id": "B13-08",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_08"],
+      "argv": [["python3", "-I", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_08", "./internal/modules/escrita/"]],
+      "ambiente": "CSV situacao=aberto",
+      "invariantes": ["cancelamento sem reversal", "amount_cents e external_id intactos", "external_source continua preenchido"]
+    },
+    {
+      "id": "B13-09",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_09"],
+      "argv": [["python3", "-I", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_09", "./internal/modules/escrita/"]],
+      "ambiente": "POST /api/invoices/{id}/manual-payment existente, depois GET e POST de compensação",
+      "invariantes": ["GET eligible false com payments_after_import", "POST 409 provenance_payment", "baixa posterior permanece", "sem marcador e sem PSP"]
+    },
+    {
+      "id": "B13-10",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_10"],
+      "argv": [["python3", "-I", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_10", "./internal/modules/escrita/"]],
+      "ambiente": "fixtures SQL do laboratório: notice_log, fee_cents, invoice_movements extra e gateway_charge_id. O teste Go cobre aviso, encargo e lote dependente.",
+      "invariantes": ["409 com blockers", "contagens financeiras intactas", "provider_operations não ganha cancel nem refund"]
+    },
+    {
+      "id": "B13-11",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_11", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_11_Barreira"],
+      "argv": [["python3", "-I", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_11", "./internal/modules/escrita/"]],
+      "ambiente": "HTTP cobre as duas ordens já commitadas. A barreira Go segura LockInvoices, observa a espera em pg_locks e só então solta. Duas faturas usam a ordem canônica dos ids. Sem sleep que esconda deadlock.",
+      "invariantes": ["não coexistem marcador e pagamento posterior", "a fatura de id menor fica travada antes da espera na maior"]
+    },
+    {
+      "id": "B13-12",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["tests/contrato/import_compensate_contract.py"],
+      "argv": [["python3", "-I", "tests/contrato/nativo.py"]],
+      "ambiente": "GET eligible=true, baixa manual, POST sem novo GET",
+      "invariantes": ["POST 409 provenance_payment", "sem marcador", "evidence.reverted continua false"]
+    },
+    {
+      "id": "B13-13",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_13"],
+      "argv": [["python3", "-I", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_13", "./internal/modules/escrita/"]],
+      "ambiente": "pagamento manual com created_at igual ao lote, created_by preenchido e nota diferente. O teste Go também cobre created_at anterior.",
+      "invariantes": ["GET não lista payments_after_import", "POST 409 provenance_payment", "o pagamento alheio não é estornado"]
+    },
+    {
+      "id": "B13-14",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_14"],
+      "argv": [["python3", "-I", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_14", "./internal/modules/escrita/"]],
+      "ambiente": "admin@beta.demo contra lote do alfa. O corpo envia tenant e é ignorado.",
+      "invariantes": ["GET e POST 404", "nenhuma linha do alfa é gravada pela sessão beta"]
+    },
+    {
+      "id": "B13-15",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_15"],
+      "argv": [["python3", "-I", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_15", "./internal/modules/escrita/"]],
+      "ambiente": "O unitário sem banco passou neste runner e só cobre o núcleo sem HTTP. CSRF, cookie e sessões de POP, portal, suporte e financeiro continuam no nativo.py, ainda não executado.",
+      "unitario_sem_banco": "pass",
+      "invariantes": ["403 em POP, portal, suporte, financeiro e POST cookie sem CSRF", "CSRF válido grava um marcador", "as recusas não gravam marcador"]
+    },
+    {
+      "id": "B13-16",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_16"],
+      "argv": [["python3", "-I", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_16", "./internal/modules/escrita/"]],
+      "ambiente": "apply real de assinante updated e de contrato; lotes history, network, documents e users inseridos nas tabelas de importação",
+      "invariantes": ["409 kind_not_compensatable", "nome updated não é restaurado", "contrato permanece", "sem marcador"]
+    },
+    {
+      "id": "B13-17",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_17"],
+      "argv": [["python3", "-I", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_17", "./internal/modules/escrita/"]],
+      "ambiente": "um CSV com created, unchanged e error; uma linha updated no lote de títulos",
+      "invariantes": ["só a fatura created é cancelada", "skipped_unchanged 1 e skipped_error 1", "linha updated responde 409 e faz rollback"]
+    },
+    {
+      "id": "B13-18",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_18"],
+      "argv": [["python3", "-I", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_18", "./internal/modules/escrita/"]],
+      "ambiente": "reapply HTTP do mesmo CSV. A barreira Go commita um lote unchanged sob o lock e só então a compensação relê.",
+      "invariantes": ["segunda carga unchanged com o mesmo invoice id", "uma linha em invoices_ext_uq", "chave nova 409 already_compensated", "GET lista o lote novo em dependent_batches e conserva o marcador", "compensação que espera o lock vê o dependente commitado e não grava marcador"]
+    },
+    {
+      "id": "B13-19",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["tests/contrato/import_compensate_contract.py", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_19", "apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_IdempotencyConflictAndCap"],
+      "argv": [["python3", "-I", "tests/contrato/nativo.py"], ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_19|TestImportCompensate_IdempotencyConflictAndCap", "./internal/modules/escrita/"]],
+      "ambiente": "A validação de chave, motivo, query e uuid passou sem banco. nothing_created, row_cap, conflito de idempotência e a corrida da mesma chave em dois lotes dependem do PostgreSQL e não rodaram.",
+      "unitario_sem_banco": "pass_somente_validacao_de_entrada",
+      "invariantes": ["400 sem marcador", "409 idempotency_conflict", "409 nothing_created", "409 row_cap acima de 200 created"]
+    },
+    {
+      "id": "B13-20",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["tests/contrato/import_compensate_contract.py"],
+      "argv": [["python3", "-I", "tests/contrato/nativo.py"]],
+      "ambiente": "rotas existentes de estorno e de baixa manual depois da compensação",
+      "invariantes": ["a linha kind=reversal é recusada", "não nasce segunda reversão", "baixa manual na fatura canceled é recusada", "marcador e auditoria do compensate permanecem", "provider_refund_id continua nulo"],
+      "divergencia_conhecida": "O desenho do lote 24 pede 409 payments_one_reversal_uq na segunda reversão da baixa original. finance.Reverse, fora dos arquivos desta tarefa, recusa antes com 400 fatura cancelada. O teste verifica essa recusa e a unicidade. Não altera o código de caixa."
+    },
+    {
+      "id": "B13-21",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_21"],
+      "argv": [["go", "test", "-count=1", "-run", "TestImportCompensate_B13_21", "./internal/modules/escrita/"]],
+      "ambiente": "SandboxIssuance.Prepare e compensação no PostgreSQL descartável, com barreira em pg_locks. Sem PSP real.",
+      "invariantes": ["prepare de título com external_source responde 409 e não insere provider_issuance", "não coexistem marcador e emissão nascida na corrida", "provider_operations permanece vazio"]
+    },
+    {
+      "id": "B13-22",
+      "implementado": true,
+      "executado": false,
+      "skip": true,
+      "status": "escrito_nao_executado",
+      "testes": ["apps/api-go/internal/modules/escrita/import_compensate_test.go:TestImportCompensate_B13_22"],
+      "argv": [["go", "test", "-count=1", "-run", "TestImportCompensate_B13_22", "./internal/modules/escrita/"]],
+      "ambiente": "duas transações reais. A ordem invertida espera deadlock 40P01, com deadlock_timeout de 200ms e statement_timeout de 5s como limite, sem retry. A ordem consultivo 7411005 e depois FOR UPDATE conclui como o B13-11.",
+      "invariantes": ["a inversão observa 40P01", "nenhum marcador depois do rollback", "a ordem do protocolo cancela a fatura aberta"]
+    }
+  ]
+}
