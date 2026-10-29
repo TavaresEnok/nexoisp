@@ -178,7 +178,7 @@ O metadado gerado continua apontando para a sentença legada. `grupos_generated.
 
 ## DAG
 
-As frentes abaixo são trabalho futuro. Este recorte não as executa. Cada uma tem aceite próprio. O gate conjunto não devolve aceite para a consulta, e a consulta não espera os endpoints para ser aceita.
+As frentes abaixo eram trabalho futuro quando este desenho foi escrito em `728f2ff`. Este recorte de desenho não as executa. Cada uma tem aceite próprio. O gate conjunto não devolve aceite para a consulta, e a consulta não espera os endpoints para ser aceita. O código que depois entrou na worktree está inventariado em `docs/LOTE29-B04-BASE-SHADOW.md` e não herda aceite deste arquivo.
 
 ```text
 L1 consulta, Pick/Strip, ganchos e allowlists vazias
@@ -210,7 +210,7 @@ Critério para um id entrar um dia na allowlist de corte: SQL editável em `bigi
 
 ## Matriz e gates que já existem
 
-A matriz executável está em `docs/B04-ACEITE-CORTE-LEITOR.json`. Nenhum critério dela fica marcado como executado neste recorte.
+A matriz executável está em `docs/B04-ACEITE-CORTE-LEITOR.json`. Nenhum critério dela fica marcado como executado neste desenho. O registro posterior do lote 29, em `docs/LOTE29-B04-BASE-SHADOW.md`, também mantém `executado` falso.
 
 Os gates já existentes, que continuam sendo a execução e que este desenho não reimplementa:
 
@@ -235,4 +235,8 @@ Essa amostra não exercita acordo comprovado, acordo `source_unproven`, estorno,
 - Não há escritor novo, grant novo, flag ligada, schema novo, dado real, PSP nem rollout.
 - Recebido da sombra e recebido legado compartilham `signed_cents`. A comparação é interna.
 - Não há homologação, publicação, percentual de conclusão nem critério executado sem prova.
-- Revisão independente deste desenho ainda não foi feita. Ela é condição do gate G, não um carimbo deste arquivo.
+- A gerência registra revisão independente Sonnet do texto deste desenho no commit `728f2ff`. Essa revisão não executa teste, não preenche a matriz e não abre allowlist. Revisão do código integrado continua exigida antes de um leitor entrar na allowlist.
+
+## Estado lido no lote 29
+
+O texto acima é o contrato desenhado em `728f2ff`. O código posterior está integrado na worktree de desenvolvimento e inventariado em `docs/LOTE29-B04-BASE-SHADOW.md`. `NEXO_BALANCE_READ` existe. As allowlists compiladas de shadow e de cut estão vazias, então a resposta servida continua a sentença legada. Variantes registradas não são entrada na allowlist. O gate G desta fase só documenta esse alcance. Ele não aprova L1 nem C3a e não altera produto.

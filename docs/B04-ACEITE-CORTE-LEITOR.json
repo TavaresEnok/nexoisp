@@ -11,6 +11,8 @@
   "implementado": false,
   "executado": false,
   "corte_autorizado": false,
+  "base_codigo_lote29": "presente_allowlists_vazias",
+  "gate_documental": "docs/LOTE29-B04-BASE-SHADOW.md",
   "homologacao": false,
   "publicado": false,
   "revisao_independente": false,
@@ -637,5 +639,97 @@
   "amostra_vazia_nao_fecha_criterio": true,
   "comparacao_23_faturas_0_acordos_nao_fecha_matriz": true,
   "codigo_de_teste_nao_e_execucao": true,
-  "analise_deste_documento_nao_e_homologacao": true
+  "analise_deste_documento_nao_e_homologacao": true,
+  "consolidacao_lote29": {
+    "documento": "docs/LOTE29-B04-BASE-SHADOW.md",
+    "head_worktree": "ab6166a93059169155c660376a2de8a93311770b",
+    "papel": "gate G documental",
+    "produto_alterado_neste_gate": false,
+    "aprova_l1": false,
+    "aprova_c3a": false,
+    "allowlist_shadow": [],
+    "allowlist_cut": [],
+    "corte_autorizado": false,
+    "homologado": false,
+    "publicado": false,
+    "percentual": null,
+    "projeto_concluido": false,
+    "db_explain_deste_gate": "nao_executado",
+    "ciclo_de_aceite": false,
+    "revisao_desenho_728f2ff": "Sonnet, relato da gerência; não carimba teste nem matriz",
+    "compilacao": {
+      "diretorio": "apps/api-go",
+      "comando": ["go", "build", "./..."],
+      "exit_code": 0
+    },
+    "suite_local_leitura": {
+      "diretorio": "apps/api-go",
+      "comando": ["go", "test", "-count=1", "./internal/modules/leitura/"],
+      "exit_code": 0,
+      "duracao_s": 0.031,
+      "fecha_matriz": false,
+      "motivo": "sem PostgreSQL e sem EXPLAIN; balanceReadDatabaseGate permanece pending"
+    },
+    "ci_hospedado": {
+      "run_falho": "40840682617",
+      "commit": "55e0d29",
+      "causa": "depguard nos imports database/sql e pgx/stdlib dos testes financeiros",
+      "corretiva": "92535ed4a7b62bc6668b484ae3aaf902a61770ab",
+      "reexecucao_apos_corretiva": false
+    },
+    "contrato_i1": "docs/B04-CONTRATO-IMPLEMENTACAO.md",
+    "c3a_http": {
+      "entrada": "DueHTTP em due_http.go",
+      "politica": "productionBalancePolicy em balance_read.go",
+      "allowlist_vazia": "delega a DueBreakdown e executa gen.Due uma vez",
+      "sombra_de_teste": "dueHTTPWith executa uma sentença, Strip e dueBreakdownFromRow",
+      "escritores": "Agreement e Manual continuam em DueBreakdown",
+      "duePick_nao_e_o_get": true
+    },
+    "donos": {
+      "Pick_Strip_registro_metrica_allowlist": "apps/api-go/internal/modules/leitura/balance_read.go",
+      "DueHTTP": "apps/api-go/internal/modules/leitura/due_http.go",
+      "dueBreakdownFromRow": "apps/api-go/internal/modules/leitura/due_calculation.go",
+      "DueBreakdown": "apps/api-go/internal/modules/leitura/auxiliares.go"
+    },
+    "frentes": [
+      {"id": "L1", "commit": "2e71c2c", "ganchos": "383ac20", "codigo": "presente", "testado_local": "suite leitura exit 0", "ci": "nao", "homologado": "nao", "publicado": "nao", "db_explain": "pendente", "executado_matriz": false},
+      {"id": "C1-sqlc", "commit": "d94a268", "codigo": "presente", "testado_local": "suite leitura exit 0", "ci": "nao", "homologado": "nao", "publicado": "nao", "db_explain": "pendente", "executado_matriz": false},
+      {"id": "C1-dinamicas", "commit": "981c646", "codigo": "presente", "testado_local": "suite leitura exit 0", "ci": "nao", "homologado": "nao", "publicado": "nao", "db_explain": "pendente", "executado_matriz": false},
+      {"id": "C1-inline", "commit": "ebb9d88", "codigo": "presente", "testado_local": "suite leitura exit 0", "ci": "nao", "homologado": "nao", "publicado": "nao", "db_explain": "pendente", "executado_matriz": false},
+      {"id": "C2", "commit": "e025e46", "codigo": "presente", "testado_local": "suite leitura exit 0", "ci": "nao", "homologado": "nao", "publicado": "nao", "db_explain": "pendente", "executado_matriz": false},
+      {"id": "C3a", "commit": "3ba6ea4", "integracao": "ddf7e49", "codigo": "presente", "testado_local": "suite leitura exit 0", "ci": "nao", "homologado": "nao", "publicado": "nao", "db_explain": "pendente", "executado_matriz": false},
+      {"id": "C3b", "commit": "4acbbe3", "codigo": "presente", "testado_local": "suite leitura exit 0", "ci": "nao", "homologado": "nao", "publicado": "nao", "db_explain": "pendente", "executado_matriz": false},
+      {"id": "G", "commit": "ab6166a", "codigo": "documentado", "testado_local": "json.tool e git diff --check", "ci": "nao", "homologado": "nao", "publicado": "nao", "db_explain": "pendente", "executado_matriz": false, "aprova_l1": false, "aprova_c3a": false}
+    ],
+    "criterios_banco_pendentes": [
+      "estado-open",
+      "estado-paid",
+      "estado-reconciling",
+      "estado-canceled",
+      "acordo-comprovado",
+      "acordo-nao-comprovado",
+      "estorno",
+      "excesso",
+      "refund-psp",
+      "importacao",
+      "compensacao",
+      "rollback",
+      "rls-tenant-portal-pop",
+      "drift-injetado",
+      "matches-falso-bloqueia-corte",
+      "sem-fallback-silencioso",
+      "explain-indices",
+      "variante-shadow-isolada",
+      "flag-fechada"
+    ],
+    "provas_anteriores_nao_reexecutadas": [
+      {"commit": "55e0d29", "relato": "nativo.py exit 0, 24 checks, incluindo B13 e financeiro", "fecha_matriz_b04": false},
+      {"commit": "55e0d29", "relato": "CI 40840682617 falhou no depguard", "fecha_matriz_b04": false},
+      {"relato": "financial_movements_migration.py 65 para 66 exit 0", "fecha_matriz_b04": false},
+      {"commit": "cc542a1", "relato": "Go, browser e SBOM local exit 0", "fecha_matriz_b04": false},
+      {"commit": "0086558", "relato": "restore sintético exit 0 em 17 fases", "fecha_matriz_b04": false},
+      {"commit": "0086558", "relato": "23 faturas, 0 acordos, 0 drift", "fecha_matriz_b04": false}
+    ]
+  }
 }
