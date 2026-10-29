@@ -1,0 +1,368 @@
+{
+  "lote": "24",
+  "item": "B13",
+  "titulo": "Aceite futuro da compensação de lote importado",
+  "base": "e193266619df",
+  "desenho": "docs/LOTE24-B13-DESENHO-COMPENSACAO.md",
+  "execucao": "planned/not_run",
+  "executado": false,
+  "homologacao": false,
+  "analise_de_codigo_nao_e_homologacao": true,
+  "observado": null,
+  "nota": "Nenhum caso foi executado neste lote. O campo resultado é o efeito esperado da implementação futura. O campo comando é um argv futuro, não uma corrida já feita. Não há rota de compensação, migração nem teste deste aceite no código atual.",
+  "comandos_de_implementacao_futura": [
+    ["python3", "-I", "tests/contrato/nativo.py"],
+    ["go", "test", "-count=1", "-run", "TestImportCompensate", "./internal/modules/escrita/"],
+    ["go", "test", "-count=1", "-run", "TestImportCompensate", "./internal/finance/"]
+  ],
+  "casos": [
+    {
+      "id": "B13-01",
+      "cenário": "Repetir a compensação com a mesma Idempotency-Key e o mesmo motivo",
+      "fixture": "Lote invoices com um título created, situacao=pago integral, sem bloqueio. Primeiro POST com reason de 10 a 200 caracteres e Idempotency-Key estável.",
+      "ação": "POST /api/import/batches/{id}/compensate duas vezes, mesmo cabeçalho e mesmo corpo.",
+      "resultado": "Primeira resposta 200 com reversed_payments=1, canceled_invoices=1, idempotent_replay=false, evidence.reverted=false. Segunda resposta 200 com o mesmo compensation_id e idempotent_replay=true.",
+      "invariantes": [
+        "Existe uma única linha em payments com reversal_of apontando para a baixa da importação.",
+        "A baixa original permanece, source=manual, kind=payment.",
+        "Existe uma única linha em import_batch_compensations para o lote.",
+        "import_rows.status da linha created permanece created.",
+        "Nenhuma linha de payments, invoice_movements, import_batches, import_rows ou audit_events foi apagada."
+      ],
+      "comando": ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_01", "./internal/modules/escrita/"],
+      "execucao": "planned/not_run",
+      "executado": false
+    },
+    {
+      "id": "B13-02",
+      "cenário": "Duas compensações concorrentes do mesmo lote com chaves diferentes",
+      "fixture": "O mesmo lote pago integral do B13-01, duas sessões import:run de escopo integral.",
+      "ação": "Disparar os dois POST em paralelo, reasons diferentes e Idempotency-Key diferentes.",
+      "resultado": "Uma resposta 200. A outra 409 already_compensated ou, se perder a corrida antes de gravar, 409 sem efeito próprio. Não há duas compensações commitadas.",
+      "invariantes": [
+        "Uma só reversão manual da baixa importada.",
+        "Uma só linha em import_batch_compensations.",
+        "A soma de signed_cents da fatura é 0.",
+        "A fatura fica canceled.",
+        "O perdedor não deixa pagamento, movimento ou auditoria parcial."
+      ],
+      "comando": ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_02", "./internal/finance/"],
+      "execucao": "planned/not_run",
+      "executado": false
+    },
+    {
+      "id": "B13-03",
+      "cenário": "Falha depois do estorno e antes do commit",
+      "fixture": "Título importado pago integral. O teste força erro em record/audit.InTx ou no insert do marcador depois de finance.Reverse ter rodado na mesma db.Tx.",
+      "ação": "POST /api/import/batches/{id}/compensate.",
+      "resultado": "Resposta de erro. A transação WithScope sofre rollback total.",
+      "invariantes": [
+        "A contagem de payments da fatura volta a ser 1, a baixa original, sem kind=reversal.",
+        "O status da fatura volta a paid e paid_at permanece o da importação.",
+        "Não existe linha em import_batch_compensations.",
+        "O movimento created da importação continua sendo o único movimento da fatura.",
+        "Não há savepoint por linha que grave sucesso parcial."
+      ],
+      "comando": ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_03", "./internal/finance/"],
+      "execucao": "planned/not_run",
+      "executado": false
+    },
+    {
+      "id": "B13-04",
+      "cenário": "Pagamento importado integral",
+      "fixture": "CSV de títulos situacao=pago, valor_pago vazio ou igual ao valor, pago_em preenchido. Lote invoices só com essa linha created.",
+      "ação": "POST de compensação com motivo obrigatório.",
+      "resultado": "200. reversed_payments=1, canceled_invoices=1. A nota do estorno cita o lote. evidence.reverted=false.",
+      "invariantes": [
+        "O pagamento novo tem kind=reversal, source=manual, reversal_of da baixa cuja note é Importado de {source} (id {external_id}), created_by nulo na baixa original e amount_cents igual.",
+        "Não há provider_refund_id nem provider_return_id.",
+        "Nenhuma chamada de provider_operations ou transporte PSP.",
+        "signed_cents soma 0. collectible_cents da sombra é 0. nominal do movimento created permanece.",
+        "external_source e external_id da fatura permanecem."
+      ],
+      "comando": ["python3", "-I", "tests/contrato/nativo.py"],
+      "execucao": "planned/not_run",
+      "executado": false
+    },
+    {
+      "id": "B13-05",
+      "cenário": "Pagamento importado parcial",
+      "fixture": "CSV situacao=pago com valor_pago menor que valor. A linha created fica com mensagem de parcial e a fatura permanece open, com um pagamento.",
+      "ação": "POST de compensação.",
+      "resultado": "200. O estorno cobre o valor_pago inteiro, não o nominal. Em seguida a fatura é cancelada. skipped_unchanged=0.",
+      "invariantes": [
+        "Um único reversal, amount_cents igual ao pagamento parcial.",
+        "Não nasce segundo ledger nem crédito.",
+        "Depois do commit o status é canceled e a soma assinada é 0.",
+        "O nominal importado continua em invoice_movements e em invoices.amount_cents."
+      ],
+      "comando": ["python3", "-I", "tests/contrato/nativo.py"],
+      "execucao": "planned/not_run",
+      "executado": false
+    },
+    {
+      "id": "B13-06",
+      "cenário": "Pagamento importado excedente",
+      "fixture": "CSV situacao=pago com valor_pago maior que valor e no máximo o dobro. Um pagamento, status paid, excess_cents positivo na sombra.",
+      "ação": "POST de compensação.",
+      "resultado": "200. Estorno integral desse pagamento e cancelamento. O excedente não é transferido a outro contrato.",
+      "invariantes": [
+        "amount_cents do reversal é o do pagamento excedente, não a diferença.",
+        "Soma de signed_cents é 0 e excess_cents volta a 0.",
+        "financial_payment_allocations não ganha linha fora dessa fatura.",
+        "Nenhum acordo ou crédito é criado."
+      ],
+      "comando": ["python3", "-I", "tests/contrato/nativo.py"],
+      "execucao": "planned/not_run",
+      "executado": false
+    },
+    {
+      "id": "B13-07",
+      "cenário": "Título importado já cancelado na origem",
+      "fixture": "CSV situacao=cancelado. Fatura created com status canceled, sem payments, um movimento origin=created e status_after=canceled.",
+      "ação": "POST de compensação.",
+      "resultado": "200. left_canceled=1, reversed_payments=0, canceled_invoices=0. Marcador gravado.",
+      "invariantes": [
+        "Nenhum pagamento novo.",
+        "A fatura continua canceled e o id externo continua preenchido.",
+        "Não há segundo cancelamento nem DELETE.",
+        "Reimportar o mesmo id_externo devolve unchanged e o mesmo invoice id."
+      ],
+      "comando": ["python3", "-I", "tests/contrato/nativo.py"],
+      "execucao": "planned/not_run",
+      "executado": false
+    },
+    {
+      "id": "B13-08",
+      "cenário": "Título importado em aberto, sem pagamento",
+      "fixture": "CSV situacao=aberto. Fatura open, zero payments, um movimento created.",
+      "ação": "POST de compensação.",
+      "resultado": "200. canceled_invoices=1, reversed_payments=0.",
+      "invariantes": [
+        "Nenhum payments de kind=reversal.",
+        "Status canceled, amount_cents inalterado, external_id inalterado.",
+        "Há um adjustment de status em invoice_movements, na mesma transação.",
+        "O seletor de emissão que exige external_source is null continua sem escolher esta fatura."
+      ],
+      "comando": ["python3", "-I", "tests/contrato/nativo.py"],
+      "execucao": "planned/not_run",
+      "executado": false
+    },
+    {
+      "id": "B13-09",
+      "cenário": "Baixa posterior total, parcial ou excedente bloqueia",
+      "fixture": "Título importado aberto ou pago. Depois, POST /api/invoices/{id}/manual-payment com intent_id, como no contrato de elegibilidade, ou um segundo pagamento que não casa a prova.",
+      "ação": "GET de elegibilidade e, em seguida, POST de compensação.",
+      "resultado": "GET com eligible=false e blocker payments_after_import quando created_at do pagamento novo é maior que o lote. POST 409, sem marcador e sem estorno.",
+      "invariantes": [
+        "A baixa posterior permanece.",
+        "A baixa da importação, se existia, permanece sem reversal_of apontando para ela.",
+        "Status e saldo da fatura iguais aos de antes do POST.",
+        "Nenhuma devolução PSP é criada para a baixa manual posterior."
+      ],
+      "comando": ["python3", "-I", "tests/contrato/nativo.py"],
+      "execucao": "planned/not_run",
+      "executado": false
+    },
+    {
+      "id": "B13-10",
+      "cenário": "Efeito externo bloqueante: emissão, aviso, acordo ou movimento extra",
+      "fixture": "Quatro lotes invoices created, cada um com um dos bloqueios: gateway_charge_id ou provider_issuance, notice_log na fatura, agreement_id, ou invoice_movements além do created da importação. Inclui título que ganhou fee_cents ou discount_cents.",
+      "ação": "POST de compensação em cada lote.",
+      "resultado": "409 em todos. Corpo com blockers. Nenhum cancelamento remoto e nenhum refund.",
+      "invariantes": [
+        "provider_operations não ganha linha kind=cancel nem kind=refund por causa deste POST.",
+        "Contagens de payments e de movimentos iguais às de antes.",
+        "SandboxIssuance.prepare continua recusando external_source não nulo pelo caminho já existente; este caso não depende de o POST chamar o PSP."
+      ],
+      "comando": ["python3", "-I", "tests/contrato/nativo.py"],
+      "execucao": "planned/not_run",
+      "executado": false
+    },
+    {
+      "id": "B13-11",
+      "cenário": "Corrida real com baixa manual durante a compensação",
+      "fixture": "Título importado open sem pagamento. Duas transações: compensate e invoicePayment, ambas passando pelo helper de lock de fatura na ordem do desenho.",
+      "ação": "Intercalar o commit da baixa e o da compensação sob a mesma chave consultiva tenant:invoice:id e FOR UPDATE ordenado.",
+      "resultado": "Se a baixa commita primeiro, a compensação relê e responde 409 sem estornar. Se a compensação commita primeiro, a baixa vê a fatura canceled e não grava payment.",
+      "invariantes": [
+        "Não coexistem marcador de compensação e pagamento criado depois do lote.",
+        "Não há deadlock: as duas transações tomam o consultivo hashtextextended(tenant:invoice:id, 7411005) antes de qualquer FOR UPDATE.",
+        "O helper de invoicePayment roda antes do select id from invoices where id=$1 for update, não só dentro de finance.Manual.",
+        "Um GET eligible=true lido antes da corrida não autoriza o POST."
+      ],
+      "comando": ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_11", "./internal/finance/"],
+      "execucao": "planned/not_run",
+      "executado": false
+    },
+    {
+      "id": "B13-12",
+      "cenário": "GET elegível e pagamento concorrente antes do POST",
+      "fixture": "Lote invoices created em aberto. GET devolve eligible=true e blockers vazio.",
+      "ação": "Gravar baixa manual e só então POST de compensação, sem novo GET.",
+      "resultado": "POST 409 provenance_payment ou payments_after_import. O eligible antigo é ignorado.",
+      "invariantes": [
+        "Nenhum marcador.",
+        "A baixa manual permanece.",
+        "evidence.reverted do GET continua false."
+      ],
+      "comando": ["python3", "-I", "tests/contrato/nativo.py"],
+      "execucao": "planned/not_run",
+      "executado": false
+    },
+    {
+      "id": "B13-13",
+      "cenário": "Falso negativo do predicado created_at maior que o lote",
+      "fixture": "Fatura created pelo lote. Inserir, no papel de teste, um payment manual com created_at igual ao do lote, ou menor, created_by preenchido e note diferente de Importado de {source} (id {external_id}).",
+      "ação": "GET /revert-eligibility e POST /compensate.",
+      "resultado": "O GET pode devolver eligible=true porque o SQL usa created_at > b.created_at. O POST responde 409 provenance_payment.",
+      "invariantes": [
+        "O pagamento alheio não é estornado.",
+        "A igualdade de timestamp não é tratada como prova da baixa importada.",
+        "paid_at antigo do CSV não entra na prova."
+      ],
+      "comando": ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_13", "./internal/finance/"],
+      "execucao": "planned/not_run",
+      "executado": false
+    },
+    {
+      "id": "B13-14",
+      "cenário": "Isolamento de tenant",
+      "fixture": "Lote de invoices no tenant alfa. Sessão admin do tenant beta, ambos com import:run e escopo integral.",
+      "ação": "GET e POST usando o id do lote alfa na sessão beta.",
+      "resultado": "404 lote não encontrado nos dois métodos. Nenhum corpo de bloqueio do outro tenant.",
+      "invariantes": [
+        "Nenhuma linha de alfa é atualizada ou inserida pela sessão beta.",
+        "O tenant do corpo, se alguém o enviar, é ignorado; o escopo vem da sessão WithScope."
+      ],
+      "comando": ["python3", "-I", "tests/contrato/nativo.py"],
+      "execucao": "planned/not_run",
+      "executado": false
+    },
+    {
+      "id": "B13-15",
+      "cenário": "POP, portal e suporte",
+      "fixture": "O mesmo lote invoices eligible. Três sessões: operador com PopIDs não nil, inclusive lista vazia; assinante de portal com SubscriberID; usuário com Support verdadeiro.",
+      "ação": "GET /revert-eligibility e POST /compensate em cada sessão.",
+      "resultado": "403 nas seis chamadas, pelo mesmo importRevertEligibilityScope.",
+      "invariantes": [
+        "Nenhum marcador e nenhum estorno.",
+        "A sessão de POP que hoje pode aplicar CSV de títulos continua sem poder compensar.",
+        "CSRF ausente numa sessão cookie válida de administrador integral também responde 403 e não grava."
+      ],
+      "comando": ["python3", "-I", "tests/contrato/nativo.py"],
+      "execucao": "planned/not_run",
+      "executado": false
+    },
+    {
+      "id": "B13-16",
+      "cenário": "Linha updated sem preimagem e kinds fora do MVP",
+      "fixture": "Um lote subscribers com linha updated que alterou o nome. Um lote contracts created com PPPoE desired_version=0. Um lote history, um network, um documents e um users, cada um com linha created.",
+      "ação": "POST /compensate em cada lote, motivo válido.",
+      "resultado": "409 kind_not_compensatable em todos. Nenhum DELETE e nenhum UPDATE de subscribers, contracts ou service_resources.",
+      "invariantes": [
+        "O nome já gravado pelo updated permanece; não se restaura valor anterior inexistente.",
+        "Contrato, conta PPPoE, contato e extra implícitos da linha de assinante permanecem.",
+        "import_entities e fingerprints permanecem.",
+        "entity_id nulo de linha error não é usado para procurar entidade."
+      ],
+      "comando": ["python3", "-I", "tests/contrato/nativo.py"],
+      "execucao": "planned/not_run",
+      "executado": false
+    },
+    {
+      "id": "B13-17",
+      "cenário": "Lote de títulos misto: created, unchanged e error",
+      "fixture": "Três ids externos no mesmo CSV. O primeiro é novo e aberto. O segundo já existia e volta unchanged, com ou sem mensagem de divergência. O terceiro é erro de valor e fica com entity_id nulo.",
+      "ação": "POST de compensação.",
+      "resultado": "200. Só a fatura created é cancelada. skipped_unchanged=1, skipped_error=1, canceled_invoices=1.",
+      "invariantes": [
+        "A fatura unchanged conserva status, saldo e external_id.",
+        "Não existe fatura criada pelo id externo da linha error.",
+        "import_rows da linha created continua created.",
+        "Uma linha updated no mesmo lote de invoices, se aparecer, faz 409 do lote inteiro e rollback."
+      ],
+      "comando": ["python3", "-I", "tests/contrato/nativo.py"],
+      "execucao": "planned/not_run",
+      "executado": false
+    },
+    {
+      "id": "B13-18",
+      "cenário": "Reimportação depois da compensação e lote dependente",
+      "fixture": "Compensar um lote invoices created. Reaplicar o mesmo CSV na mesma origem. Em paralelo de aceite, um segundo lote que só reconhece a mesma chave (unchanged) depois do commit da compensação.",
+      "ação": "POST /api/import/apply do mesmo arquivo e leitura de revert-eligibility do lote original.",
+      "resultado": "O apply grava outro lote com a linha unchanged e o mesmo entity_id. Não nasce segunda fatura. A compensação já commitada permanece. O GET futuro pode listar o lote novo em dependent_batches; isso não apaga o marcador.",
+      "invariantes": [
+        "invoices_ext_uq continua com uma linha.",
+        "Competência mensal, se havia, continua única.",
+        "Idempotency-Key nova no lote já compensado responde 409 already_compensated.",
+        "A reimportação que ainda não commitou, depois de tomar o lock da fatura, não se enxerga no meio da decisão já protegida pelo FOR UPDATE."
+      ],
+      "comando": ["python3", "-I", "tests/contrato/nativo.py"],
+      "execucao": "planned/not_run",
+      "executado": false
+    },
+    {
+      "id": "B13-19",
+      "cenário": "Validação de motivo, chave e query",
+      "fixture": "Lote invoices eligible. Sessão integral com import:run.",
+      "ação": "POST sem Idempotency-Key; com reason vazio, com 9 caracteres e com 201; com query ?tenant=other; com filtro repetido; com id que não é uuid.",
+      "resultado": "400 em cada chamada. Nenhum marcador.",
+      "invariantes": [
+        "Chave igual e reason diferente, depois de um 200, responde 409 idempotency_conflict.",
+        "Lote sem nenhuma linha created responde 409 nothing_created e também não grava marcador.",
+        "Lote com mais linhas created que o teto vigente responde 409 row_cap."
+      ],
+      "comando": ["python3", "-I", "tests/contrato/nativo.py"],
+      "execucao": "planned/not_run",
+      "executado": false
+    },
+    {
+      "id": "B13-20",
+      "cenário": "Estorno manual da reversão e disputa com a rota de caixa",
+      "fixture": "Lote já compensado pelo B13-04. Pagamento kind=reversal visível na fatura canceled.",
+      "ação": "POST /api/invoices/{id}/payments/{reversalId}/reverse e POST /api/invoices/{id}/payments/{originalId}/reverse de novo. Também POST /api/invoices/{id}/manual-payment.",
+      "resultado": "A rota Reverse recusa a linha que já é estorno. A segunda reversão da baixa original esbarra em payments_one_reversal_uq e volta 409. A baixa manual recusa fatura que não está open nem reconciling.",
+      "invariantes": [
+        "Continua havendo exatamente uma reversão manual da baixa importada.",
+        "Nenhum provider_refund_id é preenchido para desfazer a compensação.",
+        "O marcador do lote permanece.",
+        "Auditoria invoice.payment_reverse nova, se a recusa for auditada pelo caminho já existente, não apaga a auditoria do compensate."
+      ],
+      "comando": ["python3", "-I", "tests/contrato/nativo.py"],
+      "execucao": "planned/not_run",
+      "executado": false
+    },
+    {
+      "id": "B13-21",
+      "cenário": "Corrida com emissão sandbox que reserva a fatura importada",
+      "fixture": "Título importado open, external_source preenchido, provider_issuance_id nulo, sem pagamento. Duas transações: compensate e SandboxIssuance.prepare. As duas tomam o consultivo 7411005 e depois o for update da fatura, prepare no select de external_source em issuance.go, antes do insert into provider_issuance.",
+      "ação": "Intercalar o commit da reserva e o da compensação.",
+      "resultado": "Se prepare pudesse passar do external_source, a compensação relê provider_issuance_id sob o for update e responde 409 sem estornar. No código atual prepare já recusa external_source não nulo com 409 e não insere journal. Se a compensação commitou antes, prepare vê a fatura cancelada ou a origem externa e não grava provider_issuance. Um N6901 de provider_issuance_payment_guard ou de invoice_issuance_guard desfaz a transação inteira.",
+      "invariantes": [
+        "Não coexistem marcador de compensação e linha em provider_issuance criada nessa corrida.",
+        "Nenhum payment kind=reversal nasce se a reserva commitou primeiro.",
+        "provider_operations não ganha cancel nem refund.",
+        "O consultivo não usa o sal 7411003 de importExtended nem a chave inteira 7411003 de rotate em apps/api-go/internal/db/operations.go."
+      ],
+      "comando": ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_21", "./internal/finance/"],
+      "execucao": "planned/not_run",
+      "executado": false
+    },
+    {
+      "id": "B13-22",
+      "cenário": "Consultivo pedido depois do FOR UPDATE da baixa",
+      "fixture": "O mesmo título importado open do B13-11. A baixa manual é instrumentada, só no teste, para travar a fatura e só então pedir hashtextextended com sal 7411005. A compensação pede o consultivo antes do for update.",
+      "ação": "Disparar as duas transações juntas e limitar a espera.",
+      "resultado": "O teste observa espera cruzada ou deadlock do PostgreSQL e falha. A implementação aceita só a ordem consultivo, depois for update. Com essa ordem, vale o resultado do B13-11.",
+      "invariantes": [
+        "Nenhum marcador parcial fica gravado depois do rollback do deadlock.",
+        "A versão que chama LockInvoices dentro de finance.Manual, depois do select de invoicePayment, não é o protocolo deste desenho.",
+        "Comandos deste caso continuam planned/not_run até a implementação futura."
+      ],
+      "comando": ["go", "test", "-count=1", "-run", "TestImportCompensate_B13_22", "./internal/finance/"],
+      "execucao": "planned/not_run",
+      "executado": false
+    }
+  ]
+}

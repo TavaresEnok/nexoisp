@@ -110,4 +110,6 @@ Reversão (preserva o que aconteceu depois da migração)
    (Faturas → pagas no período; Auditoria) e lançá-los no sistema antigo antes de retomar a operação nele.
 8. Registrar o motivo e o que foi relançado.
 
+A compensação contábil de um lote, dentro do NexoISP, está só desenhada em [docs/LOTE24-B13-DESENHO-COMPENSACAO.md](LOTE24-B13-DESENHO-COMPENSACAO.md), com a matriz [docs/LOTE24-B13-ACEITACAO.json](LOTE24-B13-ACEITACAO.json). Ainda não há execução de reversão: nenhuma rota grava compensação, o GET `/api/import/batches/{id}/revert-eligibility` apenas avalia o estado, e `evidence.reverted` permanece falso. Este procedimento operacional continua valendo; ele não autoriza apagar pagamentos, movimentos, lotes ou auditoria.
+
 Nenhuma migração de produção foi executada: este procedimento depende de autorização explícita e do piloto definido.
