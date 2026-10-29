@@ -25,18 +25,35 @@
   },
   "regra_de_banco": {
     "comandos": [
-      ["python3", "-I", "tests/contrato/nativo.py"],
-      ["python3", "-I", "tests/contrato/go_integration.py"]
+      ["python3", "tests/contrato/nativo.py"],
+      ["python3", "tests/contrato/go_integration.py"]
     ],
+    "fonte_da_invocacao": ".github/workflows/native.yml, job verificar, sem -I, na raiz do repositório",
     "executados_nesta_reconciliacao": false,
     "skip_por_falta_de_postgresql_e_aprovacao": false,
-    "exigencia": "A gerência executa os dois comandos em laboratório PostgreSQL descartável antes de publicar lote que toque banco, isolamento ou dinheiro. Ausência de execução e skip por falta de banco ficam como não executados."
+    "falha_de_bootstrap_distinta_de_skip_de_banco": {
+      "comandos": [
+        ["python3", "-I", "tests/contrato/nativo.py"],
+        ["python3", "-I", "tests/contrato/go_integration.py"]
+      ],
+      "reproduzida": true,
+      "data": "2026-10-29",
+      "exit": 1,
+      "sintoma": "ModuleNotFoundError: No module named 'lib' em nativo.py:13 e go_integration.py:11",
+      "causa": "python3 -I implica -E, -s e -P. O diretório do script sai de sys.path e PYTHONPATH é ignorado. O import acontece antes de Docker e de PostgreSQL.",
+      "alcanca_laboratorio": false,
+      "e_skip_por_ausencia_de_banco": false,
+      "e_teste_de_banco_aprovado": false,
+      "testes_alterados": false,
+      "nao_e_o_gate": true
+    },
+    "exigencia": "A gerência executa python3 tests/contrato/nativo.py e python3 tests/contrato/go_integration.py, sem -I, em laboratório PostgreSQL descartável, antes de publicar lote que toque banco, isolamento ou dinheiro. Ausência de execução e skip por falta de banco ficam como não executados. A forma com -I é falha de bootstrap e não substitui esses dois comandos."
   },
   "estados": {
     "implementado": ["sim", "parcial", "nao", "somente_desenho"],
-    "testado": ["nao_executado_nesta_reconciliacao", "relato_historico_local", "relato_historico_ci", "somente_documental", "ausente"],
+    "testado": ["nao_executado_nesta_reconciliacao", "relato_historico_local", "relato_historico_ci", "somente_documental", "ausente", "codigo_na_branch_banco_nao_executado"],
     "homologado": ["sem_prova", "sem_recurso_externo", "nao_aplicavel"],
-    "publicado": ["somente_clone_local", "github_relatado_nao_reconsultado", "producao_nao"]
+    "publicado": ["somente_clone_local", "github_relatado_nao_reconsultado", "producao_nao", "branch_de_desenvolvimento_nao_publicada"]
   },
   "fontes": [
     {"path": "AGENTS.md", "papel": "ui_oficial"},
@@ -60,6 +77,8 @@
     {"path": "docs/LOTE19-B11-HISTORICO.md", "papel": "b11"},
     {"path": "docs/LOTE24-B13-DESENHO-COMPENSACAO.md", "papel": "b13_desenho_aprovado"},
     {"path": "docs/LOTE24-B13-ACEITACAO.json", "papel": "b13_22_casos_planned_not_run"},
+    {"path": "docs/LOTE25-B13-COMPENSACAO.md", "papel": "b13_implementacao_na_branch_nao_publicada"},
+    {"path": "docs/LOTE25-B13-COMPENSACAO-ACEITE.json", "papel": "b13_22_casos_escritos_nao_executados"},
     {"path": "docs/integracao-v0/PLANO.md", "papel": "sete_etapas_de_integracao_ui"},
     {"path": "docs/integracao-v0/MATRIZ_FUNCIONAL.md", "papel": "matriz"},
     {"path": "docs/integracao-v0/matriz-funcional.json", "papel": "matriz_174"},
@@ -150,12 +169,12 @@
       "homologado": "nao_aplicavel",
       "publicado": "github_relatado_nao_reconsultado",
       "fechado": false,
-      "causa": "O desenho e o código ancestral existem. Esta reconciliação não executou nativo.py nem go_integration.py.",
+      "causa": "O desenho, o código ancestral e a compensação da branch 8c10c1a existem. Nem a reconciliação nem o registro do lote 25 executaram a invocação sem -I de nativo.py ou go_integration.py. python3 -I nesses scripts falha no import de lib antes do banco e não conta como execução nem como skip. O CI relatado de e193266 não cobre 8c10c1a.",
       "evidencia_faltante": "Log fresco de laboratório PostgreSQL descartável, sem skip.",
       "proximo_passo": "A gerência executa os dois contratos nativos antes da próxima publicação.",
       "validacao": [
-        ["python3", "-I", "tests/contrato/nativo.py"],
-        ["python3", "-I", "tests/contrato/go_integration.py"]
+        ["python3", "tests/contrato/nativo.py"],
+        ["python3", "tests/contrato/go_integration.py"]
       ]
     },
     "seguranca_sessao": {
@@ -168,7 +187,7 @@
       "fechado": false,
       "causa": "Cookie HttpOnly, CSRF e MFA estão no produto. Revisão independente de segurança e pentest não têm prova neste clone.",
       "proximo_passo": "Manter o gate de CSRF nos contratos. Agendar revisão de segurança fora do piloto com dado real.",
-      "validacao": ["python3", "-I", "tests/contrato/nativo.py"]
+      "validacao": ["python3", "tests/contrato/nativo.py"]
     },
     "acessibilidade": {
       "implementado": "parcial",
@@ -246,7 +265,7 @@
           "dependencias": ["lab PostgreSQL descartável"],
           "evidencia_faltante": "Log desta worktree de nativo.py sem skip.",
           "proximo_passo": "Não implementar de novo. Rodar o contrato quando o próximo lote de dinheiro for publicado.",
-          "validacao": ["python3", "-I", "tests/contrato/nativo.py"]
+          "validacao": ["python3", "tests/contrato/nativo.py"]
         }
       ]
     },
@@ -422,7 +441,7 @@
           "causa": "Não há adapter Asaas. A homologação Efí ainda não existe, e ela é a dependência do backlog.",
           "dependencias": ["B06", "B07 homologado", "credencial sandbox Asaas"],
           "evidencia_faltante": "Pacote do adapter e corpus B06 com inbox antes do HTTP 200.",
-          "proximo_passo": "Não iniciar Asaas neste evento. O próximo recorte de código interno é B13. Asaas só depois da homologação Efí e de conta sandbox.",
+          "proximo_passo": "Não iniciar Asaas neste evento. O código de B13 está na branch de desenvolvimento e o critério continua aberto até o lab. Asaas só depois da homologação Efí e de conta sandbox.",
           "validacao": ["go", "test", "-count=1", "./internal/finance/providers/"]
         },
         {
@@ -527,7 +546,7 @@
           "dependencias": ["equipamento do piloto"],
           "evidencia_faltante": "Roteiro de docs/lab-pppoe.md repetido no NAS do provedor, com mais de uma conta.",
           "proximo_passo": "Manter NEXO_RADIUS_DISCONNECT_WRITE em 0 até essa homologação.",
-          "validacao": ["python3", "-I", "tests/contrato/go_integration.py"]
+          "validacao": ["python3", "tests/contrato/go_integration.py"]
         }
       ]
     },
@@ -557,7 +576,7 @@
           "proximo_passo": "A gerência executa os testes de integridade do Backup-center e um restore em host vazio. Não usar configuração herdada de produção.",
           "nota": "O argv pytest roda no repositório Backup-center. tests/test_backup_integrity_isolated.py e tests/test_backup_executor_integrity_lab.py não estão neste clone, e git cat-file aqui não resolve 2e410d2.",
           "validacao": [
-            ["python3", "-I", "tests/contrato/go_integration.py"],
+            ["python3", "tests/contrato/go_integration.py"],
             ["pytest", "tests/test_backup_integrity_isolated.py", "tests/test_backup_executor_integrity_lab.py"]
           ]
         }
@@ -568,35 +587,56 @@
       "titulo": "Importação e reversão por compensação",
       "prioridade": "P0",
       "fechado": false,
-      "implementado": "parcial",
-      "testado": "somente_documental",
+      "implementado": "sim",
+      "implementado_onde": "branch de desenvolvimento HEAD 8c10c1a; base de desenho 82c4251",
+      "testado": "codigo_na_branch_banco_nao_executado",
       "homologado": "sem_prova",
-      "publicado": "somente_clone_local",
+      "publicado": "branch_de_desenvolvimento_nao_publicada",
+      "evidence_reverted": false,
+      "alcance": "somente kind invoices",
+      "psp": false,
+      "libera_external_id": false,
+      "revisao_browser": {
+        "ultima": "Sol 6.1 medium",
+        "motivo": "cota de Sonnet 5.5 high comprovadamente esgotada",
+        "revisao_principal_ativa": false,
+        "executada": false
+      },
       "evidencia": [
-        {"path": "apps/api-go/internal/modules/leitura/import_revert_eligibility.go", "commit": "db41585"},
-        {"path": "apps/web/features/admin/import-batches.tsx", "commit": "e193266"},
-        {"path": "docs/LOTE24-B13-DESENHO-COMPENSACAO.md", "commit": "9fe63f0"},
-        {"path": "docs/LOTE24-B13-ACEITACAO.json", "commit": "9fe63f0", "nota": "22 casos planned/not_run, executado false"},
-        {"path": "docs/importacao-csv.md", "commit": "9fe63f0"}
+        {"path": "apps/api-go/internal/modules/leitura/import_revert_eligibility.go", "commit": "ee80de1", "nota": "leitura do marcador sobre a elegibilidade de db41585"},
+        {"path": "apps/web/features/admin/import-batches.tsx", "commit": "8f06bae"},
+        {"path": "db/migrations/00078_import_batch_compensations.sql", "commit": "0a67a13"},
+        {"path": "apps/api-go/internal/finance/invoice_locks.go", "commit": "2da4e0c"},
+        {"path": "apps/api-go/internal/modules/escrita/import_compensate.go", "commit": "0c04ded"},
+        {"path": "apps/api-go/internal/modules/escrita/rotas.json", "commit": "e8fe763"},
+        {"path": "apps/api-go/rotas.json", "commit": "a5709b4", "nota": "inventário estático da rota; não é publicação"},
+        {"path": "docs/LOTE24-B13-DESENHO-COMPENSACAO.md", "commit": "9fe63f0", "nota": "histórico intocado"},
+        {"path": "docs/LOTE24-B13-ACEITACAO.json", "commit": "9fe63f0", "nota": "22 casos planned/not_run, executado false, intocado"},
+        {"path": "docs/LOTE25-B13-COMPENSACAO.md", "commit": "working tree sobre 8c10c1a", "nota": "relatório desta documentação; ainda sem commit"},
+        {"path": "docs/LOTE25-B13-COMPENSACAO-ACEITE.json", "commit": "6de0e98", "nota": "22 casos escritos, executado false; a documentação acrescenta a cobertura coletiva no working tree"},
+        {"path": "docs/importacao-csv.md", "commit": "working tree sobre 8c10c1a", "nota": "procedimento alinhado ao código da branch, sem declarar publicação"},
+        {"path": "e2e/frontend-v0-import.mjs", "commit": "1ec8569", "nota": "script presente; execução e screenshots ausentes"}
       ],
       "entregue": [
         "recusa de emissão nova para título importado",
         "reimportação que explica divergência sem sobrescrever",
         "reconciliação por lote somente leitura",
-        "GET de elegibilidade sem ação de reversão",
-        "desenho aprovado da compensação"
+        "GET de elegibilidade com marcador absent ou committed e evidence.reverted falso",
+        "desenho aprovado da compensação, preservado",
+        "marcador append-only, POST idempotente só de invoices, locks 7411005, interface oficial, inventário estático e testes escritos"
       ],
       "criterios_abertos": [
         {
           "id": "B13-compensacao",
-          "causa": "Não há rota POST de compensação, marcador append-only, protocolo de locks novo nem teste TestImportCompensate. O GET não autoriza a escrita. evidence.reverted permanece falso.",
-          "dependencias": ["desenho do lote 24 já aprovado", "lab PostgreSQL descartável"],
-          "evidencia_faltante": "Implementação e execução dos 22 casos da matriz, todos ainda planned/not_run.",
-          "proximo_passo": "Implementar somente o desenho aprovado: marcador append-only, lock consultivo por fatura (sal 7411005) antes do FOR UPDATE ordenado por id, POST idempotente com revalidação, leitura do marcador, interface oficial. Kinds diferentes de invoices permanecem recusados. Sem PSP e sem apagar histórico.",
+          "causa": "O código está na branch. Os 22 casos, o GET before/after/replay e a jornada de browser não foram executados em PostgreSQL nem no Playwright. Skip por falta de banco não aprova. python3 -I em nativo.py e go_integration.py falha no import de lib antes do laboratório e não é o gate. O lote não foi publicado.",
+          "dependencias": ["desenho do lote 24 já aprovado", "lab PostgreSQL descartável", "revisão independente antes de integrar a publicação"],
+          "evidencia_faltante": "Log fresco de nativo.py e go_integration.py sem skip, go test TestImportCompensate com URL de banco, e o harness e2e.py da jornada de importação.",
+          "proximo_passo": "A gerência executa o lab, corrige falha real e só então integra. Não redeclarar a implementação. Kinds diferentes de invoices permanecem recusados. Sem PSP e sem apagar histórico.",
           "validacao": [
-            ["python3", "-I", "tests/contrato/nativo.py"],
+            ["python3", "tests/contrato/nativo.py"],
+            ["python3", "tests/contrato/go_integration.py"],
             ["go", "test", "-count=1", "-run", "TestImportCompensate", "./internal/modules/escrita/"],
-            ["go", "test", "-count=1", "-run", "TestImportCompensate", "./internal/finance/"]
+            ["env", "NEXO_E2E_ONLY=frontend-v0-import.mjs", "python3", "tests/contrato/e2e.py"]
           ]
         }
       ]
@@ -698,7 +738,7 @@
           "dependencias": ["especificação além do mapa operacional"],
           "evidencia_faltante": "Contrato de servidor para porta ocupada, ciclo e tenant cruzado, com teste de lab.",
           "proximo_passo": "Um teste Go da API FTTH já existente, sem canvas novo, quando a fila P0 interna permitir.",
-          "validacao": ["python3", "-I", "tests/contrato/go_integration.py"]
+          "validacao": ["python3", "tests/contrato/go_integration.py"]
         }
       ]
     },
@@ -724,30 +764,41 @@
           "causa": "Não há provedor, janela, grupo reversível, restore ensaiado, monitor externo nem deploy.",
           "dependencias": ["B12 restore em host vazio", "B13 compensação testada antes de corte com dado importado", "recursos externos de banco, acesso e, se ativos, fisco"],
           "evidencia_faltante": "Itens de docs/PILOTO.md com responsável, data e versão, sem segredo.",
-          "proximo_passo": "Continuar tarefas internas. Não declarar piloto. Publicação de código exige o workflow nativo com PostgreSQL real no runner.",
+          "proximo_passo": "Continuar tarefas internas. O código de B13 está na branch e o lab ainda é gate. Não declarar piloto. Publicação de código exige o workflow nativo com PostgreSQL real no runner. Ausência de provedor não fecha o item.",
           "validacao": [
-            ["python3", "-I", "tests/contrato/nativo.py"],
-            ["python3", "-I", "tests/contrato/go_integration.py"]
+            ["python3", "tests/contrato/nativo.py"],
+            ["python3", "tests/contrato/go_integration.py"]
           ]
         }
       ]
     }
   ],
   "proximo_evento": {
-    "id": "implementar-b13-compensacao",
+    "id": "lab-b13-e-proximo-recorte-interno",
     "prioridade": "P0",
-    "motivo": "Desenho e 22 casos já aprovados. É o menor recorte interno que avança migração reversível sem PSP, sem franquia e sem produção.",
-    "nao_reabrir": ["lote01", "b07-resolucao", "b11-telemetria", "b13-elegibilidade-leitura"],
-    "limites": ["sem franquia", "sem PSP real", "sem produção", "custo adicional zero", "executor Grok 4.7 medium", "revisão independente na fila"],
+    "motivo": "O código da compensação está na branch 8c10c1a e não foi executado em PostgreSQL nem publicado. A gerência roda o lab, corrige falha, revisa, integra e escolhe o próximo recorte interno aberto sem pedir nova ordem.",
+    "nao_reabrir": ["lote01", "b07-resolucao", "b11-telemetria", "b13-elegibilidade-leitura", "b13-implementacao-lote25"],
+    "candidato_interno_seguinte": "B01 SBOM",
+    "limites": ["sem franquia", "sem PSP real", "sem produção", "custo adicional zero", "executor Grok 4.7 medium", "revisão independente na fila", "não fechar item externo por ausência de recurso", "default não é homologação", "projeto não está em 100%"],
     "validacao": [
-      ["python3", "-I", "tests/contrato/nativo.py"],
+      ["python3", "tests/contrato/nativo.py"],
+      ["python3", "tests/contrato/go_integration.py"],
       ["go", "test", "-count=1", "-run", "TestImportCompensate", "./internal/modules/escrita/"],
-      ["go", "test", "-count=1", "-run", "TestImportCompensate", "./internal/finance/"]
+      ["env", "NEXO_E2E_ONLY=frontend-v0-import.mjs", "python3", "tests/contrato/e2e.py"]
     ]
+  },
+  "continuacao_apos_lote25": {
+    "autonoma": true,
+    "pedir_nova_ordem": false,
+    "projeto_concluido": false,
+    "percentual": null,
+    "instrucao": "A gerência executa os testes reais, corrige e revisa falhas, integra a branch de desenvolvimento e escolhe o próximo recorte interno aberto do mapa. Não fechar item externo por ausência de recurso. Não transformar default, sandbox ou skip em homologação. O projeto permanece aberto enquanto existir critério aberto."
   },
   "publicacao": {
     "producao": false,
+    "lote25_publicado": false,
     "github_e193266": "relatado em 00_STATUS.md e não reconsultado nesta sessão",
-    "head_82c4251": "merge documental presente neste clone; o mesmo relato diz que o lote 24 não teve push nem deploy"
+    "head_82c4251": "base documental do desenho B13; o mesmo relato diz que o lote 24 não teve push nem deploy",
+    "head_desenvolvimento_8c10c1a": "código do lote 25 integrado na branch de desenvolvimento; esta documentação não publica esse HEAD"
   }
 }
