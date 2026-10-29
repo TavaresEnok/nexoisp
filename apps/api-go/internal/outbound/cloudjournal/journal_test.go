@@ -1032,11 +1032,6 @@ func cjJournalCleanup(t *testing.T, opened *db.DB, scope tenancy.Scope, fx cjJou
 				return err
 			}
 		}
-		if fx.maintenance != "" {
-			if err := tx.Exec(ctx, `delete from maintenance_notices where id = $1::uuid and tenant_id = app_tenant()`, fx.maintenance); err != nil {
-				return err
-			}
-		}
 		if fx.invoice != "" {
 			if err := tx.Exec(ctx, `update invoices set status = 'canceled', canceled_at = now() where id = $1::uuid and tenant_id = app_tenant() and status = 'open'`, fx.invoice); err != nil {
 				return err
@@ -1048,12 +1043,43 @@ func cjJournalCleanup(t *testing.T, opened *db.DB, scope tenancy.Scope, fx cjJou
 		t.Errorf("limpeza cjJournal: %v", cjJournalRedact(err))
 		return
 	}
+	// nexo_app só tem SELECT/INSERT/UPDATE em maintenance_notices. O owner apaga só a janela desta fixture, depois do notice_log.
+	if fx.maintenance != "" {
+		if err := cjJournalDeleteMaintenance(ctx, scope.TenantID, fx.maintenance); err != nil {
+			t.Errorf("limpeza cjJournal: %v", cjJournalRedact(err))
+		}
+	}
 	if fx.account == "" {
 		return
 	}
 	if err := cjJournalDeleteAccount(ctx, scope.TenantID, fx.account); err != nil {
 		t.Errorf("limpeza cjJournal: %v", cjJournalRedact(err))
 	}
+}
+
+func cjJournalDeleteMaintenance(ctx context.Context, tenant, maintenance string) error {
+	if _, err := uuid.Parse(tenant); err != nil {
+		return errors.New("tenant da limpeza inválido")
+	}
+	if _, err := uuid.Parse(maintenance); err != nil {
+		return errors.New("manutenção da limpeza inválida")
+	}
+	return cjJournalWithOwner(ctx, func(tx pgx.Tx) error {
+		var ignored string
+		if err := tx.QueryRow(ctx, `select set_config('app.tenant_id', $1, true)`, tenant).Scan(&ignored); err != nil {
+			return err
+		}
+		tag, err := tx.Exec(ctx, `delete from maintenance_notices
+			where id = $1::uuid and tenant_id = $2::uuid
+			  and title = 'cjJournal janela' and message = 'aviso interno de manutencao'`, maintenance, tenant)
+		if err != nil {
+			return err
+		}
+		if tag.RowsAffected() != 1 {
+			return fmt.Errorf("limpeza removeu %d maintenance_notices", tag.RowsAffected())
+		}
+		return nil
+	})
 }
 
 func cjJournalDeleteAccount(ctx context.Context, tenant, account string) error {
