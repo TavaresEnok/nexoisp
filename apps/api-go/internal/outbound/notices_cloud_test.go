@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -827,23 +828,29 @@ func cgGateSeed(t *testing.T, opened *db.DB, scope tenancy.Scope, opt cgGateSeed
 
 func cgGateCleanup(t *testing.T, opened *db.DB, scope tenancy.Scope, row cgGateRow) {
 	t.Helper()
-	err := opened.WithScope(context.Background(), scope, func(tx *db.Tx) error {
-		ctx := context.Background()
-		if row.logID != 0 {
-			if err := tx.Exec(ctx, `delete from notice_log where id = $1 and tenant_id = app_tenant()`, row.logID); err != nil {
-				return err
-			}
+	ctx := context.Background()
+	// notice_log sai numa transação própria. Falha posterior não devolve aviso queued à fila do tenant.
+	if row.logID != 0 {
+		if err := opened.WithScope(ctx, scope, func(tx *db.Tx) error {
+			return tx.Exec(ctx, `delete from notice_log where id = $1 and tenant_id = app_tenant()`, row.logID)
+		}); err != nil {
+			t.Errorf("limpeza cgGate notice_log: %s", cgGateRedact(err))
 		}
-		if row.channel != "" {
-			if err := tx.Exec(ctx, `delete from notice_channels where id = $1::uuid and tenant_id = app_tenant()`, row.channel); err != nil {
-				return err
-			}
+	}
+	if row.channel != "" {
+		if err := opened.WithScope(ctx, scope, func(tx *db.Tx) error {
+			return tx.Exec(ctx, `delete from notice_channels where id = $1::uuid and tenant_id = app_tenant()`, row.channel)
+		}); err != nil {
+			t.Errorf("limpeza cgGate notice_channels: %s", cgGateRedact(err))
 		}
-		if row.account != "" {
-			if err := tx.Exec(ctx, `delete from cloud_accounts where id = $1::uuid and tenant_id = app_tenant()`, row.account); err != nil {
-				return err
-			}
+	}
+	// nexo_go não tem DELETE em cloud_accounts. Só o owner do laboratório apaga o id criado aqui.
+	if row.account != "" {
+		if err := cgGateDeleteOwnAccount(ctx, scope.TenantID, row.account); err != nil {
+			t.Errorf("limpeza cgGate cloud_accounts: %s", cgGateRedact(err))
 		}
+	}
+	if err := opened.WithScope(ctx, scope, func(tx *db.Tx) error {
 		if row.contactID != "" {
 			if err := tx.Exec(ctx, `delete from subscriber_contacts where id = $1::uuid and tenant_id = app_tenant()`, row.contactID); err != nil {
 				return err
@@ -863,10 +870,92 @@ func cgGateCleanup(t *testing.T, opened *db.DB, scope tenancy.Scope, row cgGateR
 			}
 		}
 		return nil
-	})
-	if err != nil {
+	}); err != nil {
 		t.Errorf("limpeza cgGate: %s", cgGateRedact(err))
 	}
+}
+
+// cgGateDeleteOwnAccount apaga uma conta criada por esta fixture.
+// Recusa URL que não seja nexo_owner em nexo_test no host local e não mexe em notice_log.
+func cgGateDeleteOwnAccount(ctx context.Context, tenantID, accountID string) error {
+	if _, err := uuid.Parse(tenantID); err != nil {
+		return errors.New("tenant da fixture inválido")
+	}
+	if _, err := uuid.Parse(accountID); err != nil {
+		return errors.New("conta da fixture inválida")
+	}
+	raw := os.Getenv("NEXO_GO_TEST_DATABASE_OWNER_URL")
+	if strings.TrimSpace(raw) == "" {
+		return errors.New("NEXO_GO_TEST_DATABASE_OWNER_URL ausente; cloud_accounts da fixture permanece e o papel nexo_go não recebe DELETE")
+	}
+	if raw == os.Getenv("NEXO_GO_TEST_DATABASE_URL") {
+		return errors.New("owner recusado; a URL não pode ser a sessão de runtime")
+	}
+	cfg, err := pgx.ParseConfig(raw)
+	if err != nil {
+		return errors.New("URL de owner do laboratório inválida")
+	}
+	if cfg.User != "nexo_owner" || cfg.Database != "nexo_test" || !cgGateLoopback(cfg.Host) {
+		return errors.New("owner recusado; limpeza de cloud_accounts exige nexo_owner em nexo_test no host local")
+	}
+	if cfg.ConnectTimeout <= 0 {
+		cfg.ConnectTimeout = 15 * time.Second
+	}
+	conn, err := pgx.ConnectConfig(ctx, cfg)
+	if err != nil {
+		return cgGateScrub(err, raw, cfg.Password)
+	}
+	defer conn.Close(ctx)
+	var database, sessionUser, currentUser string
+	if err = conn.QueryRow(ctx, `select current_database(), session_user::text, current_user::text`).Scan(&database, &sessionUser, &currentUser); err != nil {
+		return cgGateScrub(err, raw, cfg.Password)
+	}
+	if database != "nexo_test" || sessionUser != "nexo_owner" || currentUser != "nexo_owner" {
+		return errors.New("destino efetivo recusado; limpeza não usa o papel de runtime")
+	}
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return cgGateScrub(err, raw, cfg.Password)
+	}
+	defer tx.Rollback(ctx)
+	if _, err = tx.Exec(ctx, `select set_config('app.tenant_id', $1, true)`, tenantID); err != nil {
+		return cgGateScrub(err, raw, cfg.Password)
+	}
+	tag, err := tx.Exec(ctx, `delete from cloud_accounts where id = $1::uuid and tenant_id = $2::uuid and name like 'cgGate %'`, accountID, tenantID)
+	if err != nil {
+		return cgGateScrub(err, raw, cfg.Password)
+	}
+	if tag.RowsAffected() != 1 {
+		return errors.New("limpeza de cloud_accounts não removeu exatamente a conta desta fixture")
+	}
+	if err = tx.Commit(ctx); err != nil {
+		return cgGateScrub(err, raw, cfg.Password)
+	}
+	return nil
+}
+
+func cgGateLoopback(host string) bool {
+	if strings.EqualFold(host, "localhost") {
+		return true
+	}
+	ip := net.ParseIP(host)
+	return ip != nil && ip.IsLoopback()
+}
+
+func cgGateScrub(err error, secrets ...string) error {
+	if err == nil {
+		return nil
+	}
+	msg := err.Error()
+	for _, secret := range secrets {
+		if secret != "" && strings.Contains(msg, secret) {
+			return errors.New("conexão de owner do laboratório recusada")
+		}
+	}
+	if strings.Contains(msg, "://") {
+		return errors.New("conexão de owner do laboratório recusada")
+	}
+	return err
 }
 
 func cgGatePay(t *testing.T, opened *db.DB, scope tenancy.Scope, invoice string, amount int) {
@@ -1056,8 +1145,10 @@ func cgGateRedact(err error) string {
 		return ""
 	}
 	text := err.Error()
-	if url := os.Getenv("NEXO_GO_TEST_DATABASE_URL"); url != "" {
-		text = strings.ReplaceAll(text, url, "NEXO_GO_TEST_DATABASE_URL")
+	for _, key := range []string{"NEXO_GO_TEST_DATABASE_URL", "NEXO_GO_TEST_DATABASE_OWNER_URL"} {
+		if url := os.Getenv(key); url != "" {
+			text = strings.ReplaceAll(text, url, key)
+		}
 	}
 	text = strings.ReplaceAll(text, cgGateTokenPlain, "[segredo]")
 	return text
