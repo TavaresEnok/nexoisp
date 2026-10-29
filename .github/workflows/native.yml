@@ -69,6 +69,11 @@ jobs:
           docker build -f apps/api-go/Dockerfile -t nexo-api-go:final .
           docker build -f apps/api-go/Dockerfile.vpn -t nexo-vpn-go:final .
           python3 tests/contrato/vpn_go.py
+      - name: SBOM CycloneDX do módulo Go e do workspace npm
+        run: bash scripts/generate-sbom.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: sbom-cyclonedx, path: sbom/}
       - uses: actions/upload-artifact@v4
         if: always()
         with: {name: frontend-v0-evidencias, path: docs/integracao-v0/evidencias/}
