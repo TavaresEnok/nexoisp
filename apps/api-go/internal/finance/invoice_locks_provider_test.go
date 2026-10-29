@@ -30,25 +30,26 @@ func TestProviderOperationAndRefundLockOrder(t *testing.T) {
 	item, base := providerLockIssue(t, d, scope)
 	user := providerLockUser(t, d, scope)
 	invoice := item.Request.InvoiceID
-	other := providerLockOtherInvoice(t, d, scope, invoice)
 
 	t.Run("prepare waits on advisory before the invoice row", func(t *testing.T) {
+		prepItem, _ := providerLockIssue(t, d, scope)
+		prepInvoice := prepItem.Request.InvoiceID
 		input := ProviderOperationInput{IntentID: uuid.NewString(), Kind: "cancel", Reason: "Preparação espera o consultivo da fatura"}
-		cancelWhenProviderWaiting(t, d, scope, invoice, func(runCtx context.Context) error {
+		cancelWhenProviderWaiting(t, d, scope, prepInvoice, func(runCtx context.Context) error {
 			return d.WithScope(runCtx, scope, func(tx *db.Tx) error {
-				_, _, err := PrepareProviderOperation(runCtx, tx, item.ID, item.Request.Scope.ConnectionID, user, input)
+				_, _, err := PrepareProviderOperation(runCtx, tx, prepItem.ID, prepItem.Request.Scope.ConnectionID, user, input)
 				if err != nil {
 					return err
 				}
 				return errProviderLockRollback
 			})
 		})
-		if n := providerCount(t, d, scope, `select count(*) from provider_operations where issuance_id=$1 and intent_id=$2`, item.ID, input.IntentID); n != 0 {
+		if n := providerCount(t, d, scope, `select count(*) from provider_operations where issuance_id=$1 and intent_id=$2`, prepItem.ID, input.IntentID); n != 0 {
 			t.Fatalf("preparação cancelada gravou %d operações", n)
 		}
 		var first, remote string
 		if err := d.WithScope(ctx, scope, func(tx *db.Tx) error {
-			row, created, err := PrepareProviderOperation(ctx, tx, item.ID, item.Request.Scope.ConnectionID, user, input)
+			row, created, err := PrepareProviderOperation(ctx, tx, prepItem.ID, prepItem.Request.Scope.ConnectionID, user, input)
 			if err != nil || !created {
 				return fmt.Errorf("preparação após a espera: created=%v err=%v", created, err)
 			}
@@ -57,8 +58,14 @@ func TestProviderOperationAndRefundLockOrder(t *testing.T) {
 		}); err != nil {
 			t.Fatal(err)
 		}
+		if len(remote) != 32 {
+			t.Fatalf("identidade remota commitada %q", remote)
+		}
+		if n := providerCount(t, d, scope, `select count(*) from provider_operations where issuance_id=$1 and intent_id=$2`, prepItem.ID, input.IntentID); n != 1 {
+			t.Fatalf("preparação commitada gravou %d operações", n)
+		}
 		if err := d.WithScope(ctx, scope, func(tx *db.Tx) error {
-			row, created, err := PrepareProviderOperation(ctx, tx, item.ID, item.Request.Scope.ConnectionID, user, input)
+			row, created, err := PrepareProviderOperation(ctx, tx, prepItem.ID, prepItem.Request.Scope.ConnectionID, user, input)
 			if err != nil || created || row.Get("id") != first {
 				return fmt.Errorf("replay id=%v created=%v err=%v", row.Get("id"), created, err)
 			}
@@ -73,12 +80,21 @@ func TestProviderOperationAndRefundLockOrder(t *testing.T) {
 		}); !errors.Is(err, errProviderLockRollback) {
 			t.Fatal(err)
 		}
-		if n := providerCount(t, d, scope, `select count(*) from provider_operations where id=$1`, first); n != 0 {
-			t.Fatal("replay da preparação não foi desfeito")
+		if n := providerCount(t, d, scope, `select count(*) from provider_operations where id=$1`, first); n != 1 {
+			t.Fatalf("rollback do replay deixou %d operações commitadas", n)
+		}
+		if n := providerCount(t, d, scope, `select count(*) from provider_operations where issuance_id=$1 and intent_id=$2`, prepItem.ID, input.IntentID); n != 1 {
+			t.Fatalf("efeito único após o replay: %d", n)
+		}
+		if got := providerText(t, d, scope, `select remote_id from provider_operations where id=$1`, first); got != remote {
+			t.Fatalf("identidade remota %s -> %s", remote, got)
 		}
 	})
 
 	t.Run("inverse overlap does not deadlock", func(t *testing.T) {
+		overlapItem, _ := providerLockIssue(t, d, scope)
+		overlapInvoice := overlapItem.Request.InvoiceID
+		overlapOther := providerLockOtherInvoice(t, d, scope, overlapInvoice)
 		input := ProviderOperationInput{IntentID: uuid.NewString(), Kind: "cancel", Reason: "Sobreposição inversa da preparação"}
 		runCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
@@ -90,7 +106,7 @@ func TestProviderOperationAndRefundLockOrder(t *testing.T) {
 				if err := signalProvider(runCtx, ready, start); err != nil {
 					return err
 				}
-				if _, _, err := PrepareProviderOperation(runCtx, tx, item.ID, item.Request.Scope.ConnectionID, user, input); err != nil {
+				if _, _, err := PrepareProviderOperation(runCtx, tx, overlapItem.ID, overlapItem.Request.Scope.ConnectionID, user, input); err != nil {
 					return err
 				}
 				return errProviderLockRollback
@@ -101,7 +117,7 @@ func TestProviderOperationAndRefundLockOrder(t *testing.T) {
 				if err := signalProvider(runCtx, ready, start); err != nil {
 					return err
 				}
-				if err := LockInvoices(runCtx, tx, "", other, invoice); err != nil {
+				if err := LockInvoices(runCtx, tx, "", overlapOther, overlapInvoice); err != nil {
 					return err
 				}
 				return errProviderLockRollback
@@ -121,6 +137,9 @@ func TestProviderOperationAndRefundLockOrder(t *testing.T) {
 			if err := <-errCh; !errors.Is(err, errProviderLockRollback) {
 				t.Fatalf("sobreposição da operação: %v", err)
 			}
+		}
+		if n := providerCount(t, d, scope, `select count(*) from provider_operations where issuance_id=$1 and intent_id=$2`, overlapItem.ID, input.IntentID); n != 0 {
+			t.Fatalf("sobreposição revertida gravou %d operações", n)
 		}
 	})
 
