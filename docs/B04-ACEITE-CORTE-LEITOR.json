@@ -506,134 +506,134 @@
       "id": "estado-open",
       "prova_minima": "uma fatura open com nominal, encargos, desconto e recebido parcial; residual e cobravel iguais a nominal+encargos-desconto-recebido; contagem > 0",
       "gate": "nativo",
-      "executado": false,
-      "prova": null
+      "executado": true,
+      "prova": "Commit 6963214927aa45ae1963c58d4c14ba540d78c2f0. python3 tests/contrato/nativo.py exit 0 na corrida 6963214. financial_movements.py conferiu uma fatura open com nominal 10000, encargos 500, desconto 1000, recebido parcial 4000 e residual 5500, igual a 10000+500-1000-4000. O censo seguinte de balance_read_contract.py, sobre a sombra já gravada, exigiu residual, excesso e cobrável (0 se canceled, senão residual) em toda financial_balance_shadow, com essa contagem igual ao total e partial_n>0. Fontes: financial-movements-6963214.json e gate-nativo-6963214.log. A amostra 0086558 não entra."
     },
     {
       "id": "estado-paid",
       "prova_minima": "uma fatura paid com recebido igual a nominal+encargos-desconto; residual 0; cobravel 0; contagem > 0",
       "gate": "nativo",
-      "executado": false,
-      "prova": null
+      "executado": true,
+      "prova": "Commit 6963214927aa45ae1963c58d4c14ba540d78c2f0. NEXO_BALANCE_READ_PG_REQUIRED=1 python3 tests/contrato/go_integration.py exit 0. TestBalanceReadPGFixturesOracleAndRLS pass, sem skip. O caso paid da fixture tem nominal 20000, encargos 500, recebido 20500, residual 0, cobrável 0 e matches, comparado campo a campo com financial_balance_shadow; a contagem do status paid na consulta é maior que zero. Fonte: gate-go-summary-6963214.json."
     },
     {
       "id": "estado-reconciling",
       "prova_minima": "uma fatura reconciling; cobravel igual ao residual e diferente do open_cents dos leitores que filtram status open; contagem > 0",
       "gate": "nativo",
-      "executado": false,
-      "prova": null
+      "executado": true,
+      "prova": "Commit 6963214927aa45ae1963c58d4c14ba540d78c2f0. NEXO_BALANCE_READ_PG_REQUIRED=1 python3 tests/contrato/go_integration.py exit 0. No mesmo oráculo, o caso reconciling tem nominal 30000, encargos 1000, desconto 200, recebido 5000, residual 25800 e cobrável 25800, com contagem do status maior que zero. TestBalanceReadPGVariants e TestBalanceReadPGVariantsApp, ambos pass, conferem nos leitores que filtram status open os números open=3, open_cents=14500 e reconciling=1. Fonte: gate-go-summary-6963214.json."
     },
     {
       "id": "estado-canceled",
       "prova_minima": "uma fatura canceled com nominal preservado, cobravel 0 e residual podendo permanecer; contagem > 0",
       "gate": "nativo",
-      "executado": false,
-      "prova": null
+      "executado": true,
+      "prova": "Commit 6963214927aa45ae1963c58d4c14ba540d78c2f0. NEXO_BALANCE_READ_PG_REQUIRED=1 python3 tests/contrato/go_integration.py exit 0. O caso canceled do oráculo preserva nominal 40000, deixa residual 39500 e cobra 0, com contagem do status maior que zero, comparado à sombra. TestBalanceReadPGFixturesOracleAndRLS pass. Fonte: gate-go-summary-6963214.json."
     },
     {
       "id": "acordo-comprovado",
       "prova_minima": "agreement_sources com transferred_cents igual ao residual; parcelas somam total_cents; recebimentos originais nao copiados; financial_agreement_shadow.matches verdadeiro; cobravel da fatura original 0",
       "gate": "nativo",
-      "executado": false,
-      "prova": null
+      "executado": true,
+      "prova": "Commit 6963214927aa45ae1963c58d4c14ba540d78c2f0. python3 tests/contrato/nativo.py exit 0. financial_movements.py: financial_agreement_shadow.matches verdadeiro, source_cents 6000 igual ao residual transferido em agreement_sources, installment_cents 5000 e matches exige essa soma igual a total_cents com total=original-desconto; alocações das faturas do acordo contam 0, então o recebimento original não foi copiado; cobrável da fatura original 0. Check autenticado de acordo parcial. Fonte: financial-movements-6963214.json."
     },
     {
       "id": "acordo-nao-comprovado",
       "prova_minima": "acordo anterior a migracao sem agreement_sources; source_unproven verdadeiro; matches falso; vinculo nao inferido por nota",
       "gate": "migracao-66",
       "executado": false,
-      "prova": null
+      "prova": "Aberto. O gate migracao-66, financial_movements_migration.py, não faz parte de nativo.py nem da suíte Go 6963214. Esse script é a prova do acordo anterior à migração, sem agreement_sources, source_unproven, matches falso e sem inferir vínculo pela nota. O insert com rollback dentro de financial_movements.py ocorre numa base já na migração 66. O PASS 65→66 do plano 29, base 5ca3036, permanece histórico e não é corrida deste commit."
     },
     {
       "id": "estorno",
       "prova_minima": "linha kind reversal com signed_cents negativo; residual restaurado; segunda reversao do mesmo recebimento recusada",
       "gate": "nativo",
       "executado": false,
-      "prova": null
+      "prova": "Aberto. Na corrida nativo 6963214, financial_movements.py inseriu kind reversal e o residual passou de 5500 para 9500. A prova mínima também pede signed_cents negativo na linha e a recusa da segunda reversão do mesmo recebimento. Essas duas asserções não rodaram. O índice payments_one_reversal_uq não foi exercido por esse teste."
     },
     {
       "id": "excesso",
       "prova_minima": "recebido acima de nominal+encargos-desconto; excess_cents > 0; residual 0; excesso nao vira credito de outro contrato",
       "gate": "nativo",
       "executado": false,
-      "prova": null
+      "prova": "Aberto. financial_movements.py na corrida nativo 6963214 conferiu excess_cents 2500, residual 0 e a soma de allocated_cents 12000 na mesma fatura, com recebido acima de nominal+encargos-desconto. Não há asserção de que esse excesso não virou crédito de outro contrato. O trecho numérico não fecha a prova mínima inteira."
     },
     {
       "id": "refund-psp",
       "prova_minima": "devolucao confirmada grava reversal com provider_refund_id e provider_return_id; status reconciling; recebido cai pelo signed_cents; contagem > 0",
       "gate": "teste ja existente em apps/api-go/internal/finance/provider_refunds_test.go, sem runner novo",
-      "executado": false,
-      "prova": null
+      "executado": true,
+      "prova": "Commit 6963214927aa45ae1963c58d4c14ba540d78c2f0. NEXO_BALANCE_READ_PG_REQUIRED=1 python3 tests/contrato/go_integration.py exit 0. TestProviderPartialRefundReplayAndCumulativeLimit pass em 1,51 s. Asserções no ledger: duas linhas kind reversal, received_cents 4345 depois do pagamento 12345 e de duas devoluções de 4000, residual 8000, status reconciling. O replay das mesmas chamadas com Refund.ID e ReturnID passa pela consulta que exige provider_refund_id e provider_return_id. Fonte: gate-go-integration-6963214.log, ação pass. Não promove allowlist."
     },
     {
       "id": "importacao",
       "prova_minima": "titulo importado com abertura de movimento e recebido assinado conferido contra a sombra; contagem > 0",
       "gate": "nativo ou financial_movements_migration.py, sem runner novo",
       "executado": false,
-      "prova": null
+      "prova": "Aberto. A prova de título importado com movimento origin=opening e recebido assinado conferido contra a sombra está em financial_movements_migration.py, que não rodou em 6963214. A reconciliação B13 do nativo confere received_cents do lote e a compensação confere signed_cents; nenhuma das duas exige a abertura origin=opening. O PASS antigo do plano 29 não é esta corrida."
     },
     {
       "id": "compensacao",
       "prova_minima": "estorno de baixa importada zera o signed_cents daquele recebimento; collectible e excess da sombra conferidos; historico preservado",
       "gate": "testes ja existentes de compensacao B13, sem runner novo",
-      "executado": false,
-      "prova": null
+      "executado": true,
+      "prova": "Commit 6963214927aa45ae1963c58d4c14ba540d78c2f0. python3 tests/contrato/nativo.py exit 0, 25 grupos, incluindo o check B13 de compensação append-only com 22 casos. import_compensate_contract.py B13-04: signed 0, collectible 0, excess 0, pagamento original preservado e uma reversal acrescentada. B13-06: excesso antes da compensação; depois signed 0, excess 0, collectible 0 e reversal de 15000. O replay mantém um marcador. Fonte: nativo-6963214.json e gate-nativo-6963214.log."
     },
     {
       "id": "rollback",
       "prova_minima": "update de fatura com rollback restaura colunas e nao deixa movement novo",
       "gate": "nativo",
-      "executado": false,
-      "prova": null
+      "executado": true,
+      "prova": "Commit 6963214927aa45ae1963c58d4c14ba540d78c2f0. python3 tests/contrato/nativo.py exit 0. financial_movements.py executa begin, altera amount_cents, faz rollback e confere nominal 10000 com a mesma contagem de invoice_movements. Check: rollback restores invoice and movements together. Fonte: financial-movements-6963214.json."
     },
     {
       "id": "rls-tenant-portal-pop",
       "prova_minima": "papel nexo_app; a fatura conta 1 no tenant dono e 0 com subscriber_id alheio, com pop_ids alheio e com outro tenant",
       "gate": "nativo",
-      "executado": false,
-      "prova": null
+      "executado": true,
+      "prova": "Commit 6963214927aa45ae1963c58d4c14ba540d78c2f0. python3 tests/contrato/nativo.py exit 0 e NEXO_BALANCE_READ_PG_REQUIRED=1 python3 tests/contrato/go_integration.py exit 0. financial_movements.py, papel nexo_app: a sombra conta 1 no tenant dono e 0 com subscriber_id alheio e com pop_ids alheio; invoice_movements conta 0 no outro tenant. balance_read_contract.py repete o desenho na mesma corrida, com titular e POP da casa em 1. TestBalanceReadPGFixturesOracleAndRLS, TestBalanceReadPGVariantsRLS e TestBalanceReadPGVariantsApp passaram sem skip. Fonte: financial-movements-6963214.json e gate-go-summary-6963214.json."
     },
     {
       "id": "drift-injetado",
       "prova_minima": "trigger desligada, coluna alterada, matches falso, rollback, matches verdadeiro de novo e leitura oficial preservada",
       "gate": "nativo e migracao-66",
-      "executado": false,
-      "prova": null
+      "executado": true,
+      "prova": "Commit 6963214927aa45ae1963c58d4c14ba540d78c2f0. python3 tests/contrato/nativo.py exit 0. financial_movements.py desliga o trigger invoice_movement_record, altera a coluna, lê matches falso, faz rollback e lê matches verdadeiro de novo na sombra. Check: shadow detects synthetic drift; rollback preserves original reads and ledger. A migração 65→66 não foi reexecutada; a sequência da prova mínima rodou neste nativo. Fonte: financial-movements-6963214.json."
     },
     {
       "id": "matches-falso-bloqueia-corte",
       "prova_minima": "uma linha not matches no escopo impede entrada daquele leitor na allowlist de corte",
       "gate": "G",
       "executado": false,
-      "prova": null
+      "prova": "Aberto. Nenhuma prova de 6963214 impediu a entrada de um leitor na allowlist de corte por uma linha not matches. O drift mostra matches falso e em seguida o rollback. As allowlists compiladas seguiram vazias e balanceReadDatabaseGate seguiu pending. O Strip de mismatch em memória não é essa trava do gate G."
     },
     {
       "id": "sem-fallback-silencioso",
       "prova_minima": "divergencia de um campo devolve o corpo legado inteiro; log sem nota, documento, gateway, segredo nem centavos",
       "gate": "L1",
       "executado": false,
-      "prova": null
+      "prova": "Aberto. TestBalanceReadGateMoneyFixtures e TestBalanceReadGateDuePreviewOneQuery passaram em memória, dentro das 370 ações, em 0,00 s: o corpo legado permanece e a projeção inválida não cai no legado. A prova mínima pede também log sem nota, documento, gateway, segredo nem centavos. Essa asserção de log não rodou. O subteste em memória tenant_chave_so_no_filtro do verificador de EXPLAIN também não supre plano real. Memória não fecha o critério."
     },
     {
       "id": "explain-indices",
       "prova_minima": "EXPLAIN ANALYZE BUFFERS JSON de um invoice_id e de uma pagina, com enable_seqscan=on, consulta canonica e volume representativo. O mesmo no de Index Scan de invoice_movements (mv) e de payments (py) restringe invoice_id ao i.id externo e tenant_id ao i.tenant_id; tenant pode ser filtro desse scan se nao for chave. Indice equivalente, inclusive payments_tenant_invoice_identity_uq da migracao 74 unique(tenant_id, invoice_id, id) no lugar de payments_invoice da migracao 39, so vale com pg_index, pg_class, pg_attribute e pg_get_indexdef mostrando indice valido, pronto, na relacao certa, chaves capazes de buscar invoice_id e predicado satisfeito. Nome isolado nao aceita. RLS, subplan e condicoes em nos distintos nao contam.",
       "gate": "L1",
-      "executado": false,
-      "prova": "Criterio reescrito para equivalencia estrutural da migracao 74. A corrida 7cde1e6 usou invoice_movements_invoice e payments_tenant_invoice_identity_uq com Index Cond ((tenant_id = i.tenant_id) AND (invoice_id = i.id)), 1 linha por loop, 1 loop na fatura e 7 na pagina, e falhou no verificador que exigia o nome payments_invoice. Essa corrida permanece falha historica e nao e reclassificada. Este texto nao e execucao. explain-indices continua pendente ate uma corrida nova com NEXO_BALANCE_READ_PG_REQUIRED=1."
+      "executado": true,
+      "prova": "Criterio reescrito para equivalencia estrutural da migracao 74. A corrida 7cde1e6 usou invoice_movements_invoice e payments_tenant_invoice_identity_uq com Index Cond ((tenant_id = i.tenant_id) AND (invoice_id = i.id)), 1 linha por loop, 1 loop na fatura e 7 na pagina, e falhou no verificador que exigia o nome payments_invoice. Essa corrida permanece falha historica e nao e reclassificada. Este texto nao e execucao. explain-indices continua pendente ate uma corrida nova com NEXO_BALANCE_READ_PG_REQUIRED=1. Corrida nova 6963214927aa45ae1963c58d4c14ba540d78c2f0, NEXO_BALANCE_READ_PG_REQUIRED=1 python3 tests/contrato/go_integration.py, exit 0, REQUIRED=1, em 2026-10-29T12:55:58Z. TestBalanceReadPGExplain pass, sem skip. Planos naturais com enable_seqscan=on e plan_cache_mode=force_custom_plan: invoice_movements linhas=4287 paginas_ctid=62, payments linhas=4156 paginas_ctid=69, volume mínimo 4096 e 16 páginas. Caso paid: 1 linha e 1 loop em invoice_movements_invoice e em payments_tenant_invoice_identity_uq, Index Cond ((tenant_id = i.tenant_id) AND (invoice_id = i.id)), shared_hit=14, shared_read=0. Página de 7 ids: 1 linha e 7 loops nos mesmos índices e na mesma Index Cond, shared_hit=85, shared_read=0. Nenhum Seq Scan. O teste conferiu o catálogo pg_index, pg_class, pg_attribute e pg_get_indexdef. TestBalanceReadPGExplainVerifier e o subteste tenant_chave_so_no_filtro são memória e não são esta promoção. balanceReadDatabaseGate permanece pending. Fontes: explain-paid-6963214.json, explain-pagina-6963214.json, TestBalanceReadPGExplain-6963214.txt, gate-go-summary-6963214.json."
     },
     {
       "id": "variante-shadow-isolada",
       "prova_minima": "com shadow e o leitor na allowlist, uma sentenca nova em leitura/shadow substitui a legada no mesmo snapshot e projeta cmp_; Strip remove cmp_ antes do JSON; os SQL legados da coorte, grupos_generated.go, consultas_generated.go e gen/due.sql.go permanecem sem a lateral",
       "gate": "L1 prova Pick e Strip com variante de teste; cada frente C prova o proprio arquivo em shadow/ e o diff vazio do SQL legado",
-      "executado": false,
-      "prova": null
+      "executado": true,
+      "prova": "Commit 6963214927aa45ae1963c58d4c14ba540d78c2f0. NEXO_BALANCE_READ_PG_REQUIRED=1 python3 tests/contrato/go_integration.py exit 0, sem skip. TestBalanceReadPGVariants, TestBalanceReadPGVariantsEmpty, TestBalanceReadPGVariantsRLS e TestBalanceReadPGVariantsApp passaram. pgVariantsCompare, no mesmo snapshot, seleciona a sentença de leitura/shadow com o leitor na allowlist local, executa o SQL legado e a variante, exige cmp_matches, Strip remove cmp_ e Pick de produção devolve o legado. VariantsApp usa current_user=nexo_app e session_user=nexo_go. As allowlists compiladas seguem vazias. Fonte: gate-go-summary-6963214.json."
     },
     {
       "id": "flag-fechada",
       "prova_minima": "allowlists vazias; off, shadow e cut executam a sentenca legada, nao enviam arquivo de shadow/ e devolvem o corpo sem chave cmp_",
       "gate": "L1",
-      "executado": false,
-      "prova": null
+      "executado": true,
+      "prova": "Commit 6963214927aa45ae1963c58d4c14ba540d78c2f0. NEXO_BALANCE_READ_PG_REQUIRED=1 python3 tests/contrato/go_integration.py exit 0 e python3 tests/contrato/nativo.py exit 0. TestBalanceReadGateClosedModesStayLegacy pass: com allowlists vazias, off, shadow e cut devolvem a sentença legada e não enviam cmp_. balance_read_contract.py leu os nove leitores no laboratório, rejeitou chave cmp_ e conferiu os mapas compilados vazios no fonte. balanceReadDatabaseGate permaneceu pending. Fonte: gate-go-integration-6963214.log e nativo-6963214.json."
     }
   ],
   "amostra_vazia_nao_fecha_criterio": true,
@@ -731,5 +731,90 @@
       {"commit": "0086558", "relato": "restore sintético exit 0 em 17 fases", "fecha_matriz_b04": false},
       {"commit": "0086558", "relato": "23 faturas, 0 acordos, 0 drift", "fecha_matriz_b04": false}
     ]
+  },
+  "registro_6963214": {
+    "commit": "6963214927aa45ae1963c58d4c14ba540d78c2f0",
+    "papel": "registro documental da corrida; não altera produto, schema, SQL, allowlist nem a constante balanceReadDatabaseGate",
+    "balance_read_database_gate": "pending",
+    "fonte_imutavel": "implementacao-codex/lote31-b04-gates-explain-rls-2026-10-29/evidencias",
+    "comandos": [
+      [
+        "NEXO_BALANCE_READ_PG_REQUIRED=1",
+        "python3",
+        "tests/contrato/go_integration.py"
+      ],
+      [
+        "python3",
+        "tests/contrato/nativo.py"
+      ]
+    ],
+    "go_integration": {
+      "exit_code": 0,
+      "required": 1,
+      "pass_actions": 370,
+      "fail_actions": 0,
+      "new_pg_actions_pass": 19,
+      "new_pg_skips": 0,
+      "testes_sql": [
+        "TestBalanceReadPGDue",
+        "TestBalanceReadPGFixturesOracleAndRLS",
+        "TestBalanceReadPGExplain",
+        "TestBalanceReadPGVariants",
+        "TestBalanceReadPGVariantsEmpty",
+        "TestBalanceReadPGVariantsRLS",
+        "TestBalanceReadPGVariantsApp"
+      ],
+      "dezenove_acoes_pg_nao_sao_dezenove_testes_sql": true,
+      "recorded_at": "2026-10-29T12:55:58.487575+00:00"
+    },
+    "nativo": {
+      "exit_code": 0,
+      "checks": 25,
+      "b13_cases": 22
+    },
+    "falha_historica_7cde1e6": "preservada; TestBalanceReadPGExplain daquela base continua falha e não foi reclassificada",
+    "planos_preservados": [
+      "29 DONE 5ca3036cfbadddd395068671f2ed9a6900850856",
+      "30 DONE 8b78eab07512",
+      "31 DONE 6963214927aa45ae1963c58d4c14ba540d78c2f0"
+    ],
+    "ci_hospedado": {
+      "run": "40877414874",
+      "branch": "dev/lote31-b04-pg-validado-6963214",
+      "status_na_evidencia": "in_progress",
+      "conclusion_na_evidencia": null,
+      "nao_e_main": true,
+      "nao_homologa": true
+    },
+    "executados": [
+      "estado-open",
+      "estado-paid",
+      "estado-reconciling",
+      "estado-canceled",
+      "acordo-comprovado",
+      "refund-psp",
+      "compensacao",
+      "rollback",
+      "rls-tenant-portal-pop",
+      "drift-injetado",
+      "explain-indices",
+      "variante-shadow-isolada",
+      "flag-fechada"
+    ],
+    "abertos": [
+      "acordo-nao-comprovado",
+      "estorno",
+      "excesso",
+      "importacao",
+      "matches-falso-bloqueia-corte",
+      "sem-fallback-silencioso"
+    ],
+    "indice_nao_promove_criterio": true,
+    "artefato": "docs/evidencias/B04-GATES-6963214.json",
+    "corte_autorizado": false,
+    "allowlist_shadow": [],
+    "allowlist_cut": [],
+    "homologacao": false,
+    "publicado": false
   }
 }
