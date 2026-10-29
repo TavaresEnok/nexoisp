@@ -75,7 +75,22 @@ func registerGrupos(api huma.API, registry *endpoint.Registry, s Service) {
 }
 func (s Service) grupo(ctx context.Context, tx *db.Tx, spec grupo, id string) (any, error) {
 	c := auth.From(ctx)
-	query := func(i int, args ...any) ([]jsonx.Object, error) { return tx.Objects(ctx, spec.SQL[i], args...) }
+	query := func(i int, args ...any) ([]jsonx.Object, error) {
+		legacy := spec.SQL[i]
+		if i != 0 {
+			return tx.Objects(ctx, legacy, args...)
+		}
+		switch spec.Path {
+		case "/api/invoices/{id}":
+			return balanceRowsInTx(ctx, tx, balanceReaderInvoiceDetail, legacy, args...)
+		case "/api/contracts/{id}/finance":
+			return balanceRowsInTx(ctx, tx, balanceReaderContractFinanceList, legacy, args...)
+		case "/api/finance/reconciliation":
+			return balanceRowsInTx(ctx, tx, balanceReaderReconciliationInvoices, legacy, args...)
+		default:
+			return tx.Objects(ctx, legacy, args...)
+		}
+	}
 	switch spec.Path {
 	case "/api/leads/{id}", "/api/tickets/{id}", "/api/work-orders/{id}", "/api/ftth/boxes/{id}", "/api/invoices/{id}":
 		rows, err := query(0, id)
@@ -92,7 +107,7 @@ func (s Service) grupo(ctx context.Context, tx *db.Tx, spec grupo, id string) (a
 			if spec.Path == "/api/invoices/{id}" && key == "events" {
 				events := []jsonx.Object{}
 				if result.Get("gateway_charge_id") != nil {
-					events, err = query(i+1, result.Get("gateway"), result.Get("gateway_charge_id"),id)
+					events, err = query(i+1, result.Get("gateway"), result.Get("gateway_charge_id"), id)
 				}
 				if err != nil {
 					return nil, err
@@ -201,17 +216,7 @@ func (s Service) grupo(ctx context.Context, tx *db.Tx, spec grupo, id string) (a
 			return nil, err
 		}
 		// Aggregate all titles, independently from the paginated/latest-24 list.
-		totals, err := tx.Objects(ctx, `select
-          count(*) filter (where status='open') as open,
-          count(*) filter (where status='open' and due_date < (now() at time zone coalesce((select timezone from tenant_settings where tenant_id=app_tenant()),'America/Sao_Paulo'))::date) as overdue,
-          count(*) filter (where status='reconciling') as reconciling,
-          coalesce(sum(amount_cents) filter (where status='open'),0)::bigint as nominal_open_cents,
-          coalesce(sum(paid_cents) filter (where status='open'),0)::bigint as received_open_cents,
-          coalesce(sum(paid_cents),0)::bigint as received_cents,
-          coalesce(sum(greatest(0,amount_cents+fee_cents-discount_cents-paid_cents)) filter (where status='open'),0)::bigint as open_cents,
-          coalesce(sum(greatest(0,amount_cents+fee_cents-discount_cents-paid_cents)) filter (where status='open' and due_date < (now() at time zone coalesce((select timezone from tenant_settings where tenant_id=app_tenant()),'America/Sao_Paulo'))::date),0)::bigint as overdue_cents
-          from (select i.*, (select coalesce(sum(p.signed_cents),0) from payments p where p.invoice_id=i.id) as paid_cents
-                from invoices i where i.contract_id=$1) x`, id)
+		totals, err := contractFinanceTotals(ctx, tx, id)
 		if err != nil {
 			return nil, err
 		}

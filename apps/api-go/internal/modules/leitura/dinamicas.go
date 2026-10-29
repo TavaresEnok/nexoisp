@@ -221,7 +221,7 @@ func (s Service) terminationQuote(ctx context.Context, tx *db.Tx, _ *http.Reques
 		}
 		date = object(rows).Get("d")
 	}
-	rows, err := complexRows(ctx, tx, "helper:terminationQuote", 0, v["id"], date)
+	rows, err := balanceRowsInTx(ctx, tx, balanceReaderTerminationQuoteGet, dynamicSQL("helper:terminationQuote", 0, nil), v["id"], date)
 	if err != nil {
 		return endpoint.Result{}, err
 	}
@@ -256,7 +256,7 @@ func (s Service) invoices(ctx context.Context, tx *db.Tx, _ *http.Request, v map
 		limit = min(p.Limit, cap)
 	}
 	query := dynamicSQL("/api/invoices", 1, map[string]string{"limit": strconv.Itoa(limit), "offset": strconv.FormatFloat(p.Offset, 'f', -1, 64)})
-	rows, err := tx.Objects(ctx, query, args...)
+	rows, err := balanceRowsInTx(ctx, tx, balanceReaderInvoiceList, query, args...)
 	if err != nil {
 		return endpoint.Result{}, err
 	}
