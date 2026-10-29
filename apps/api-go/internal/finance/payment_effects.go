@@ -52,8 +52,14 @@ func ProcessPaidEffects(ctx context.Context, database *db.DB, tenant string) err
 }
 
 func planPaidEffect(ctx context.Context, tx *db.Tx, tenant string, item jsonx.Object) error {
-	// Match payment lock order. Serialization also prevents a reversal from
-	// interleaving between eligibility validation and committing the intention.
+	// Advisory 7411005 and the invoice row come before payment_effects and
+	// service_resources. Skip locked stays after the invoice, so a writer that
+	// already holds the invoice is not overtaken. Settlement, replay and the
+	// separate receipt transaction are unchanged: a technical error rolls back
+	// only this planning transaction.
+	if err := LockInvoices(ctx, tx, tenant, jsonx.String(item.Get("invoice_id"))); err != nil {
+		return err
+	}
 	inv, err := tx.Objects(ctx, `select id,contract_id,status,settlement_version from invoices where id=$1 for update`, item.Get("invoice_id"))
 	if err != nil {
 		return err
