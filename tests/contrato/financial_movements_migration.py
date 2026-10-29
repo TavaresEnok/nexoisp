@@ -33,11 +33,13 @@ with tempfile.TemporaryDirectory(prefix='nexo-b04-migration-') as tmp:
   assert before==sql(snapshot,'nexo_test')
   assert sql("select count(*) from invoice_movements where origin='opening'",'nexo_test')=='1'
   assert sql('select count(*) from financial_balance_shadow where matches and residual_cents=5500','nexo_test')=='1'
+  assert sql("select count(*) from financial_balance_shadow where status='open' and matches",'nexo_test')=='1'
   assert sql('select count(*) from financial_agreement_shadow where source_unproven and not matches','nexo_test')=='1'
   assert sql('select count(*) from agreement_sources','nexo_test')=='0'
   # Owner-only synthetic drift remains visible and no cutover is performed.
   assert sql("begin;alter table invoices disable trigger invoice_movement_record;update invoices set discount_cents=0;select count(*) from financial_balance_shadow where not matches;rollback;",'nexo_test')=='1'
   assert before==sql(snapshot,'nexo_test')
+  assert sql('select count(*) from financial_balance_shadow where not matches','nexo_test')=='0'
   result={'ok':True,'from':65,'to':66,'existing_rows_preserved':True,'opening_snapshot_explicit':True,'repeat_noop':True,'unknown_agreement_source_not_inferred':True,'shadow_detects_drift':True}
   output=repo/'tests/contrato/relatorios/financial-movements-migration.json';output.parent.mkdir(exist_ok=True);output.write_text(json.dumps(result,indent=2));print(result)
  finally:subprocess.run(['docker','rm','-f','-v',DB_CONTAINER],check=True)
