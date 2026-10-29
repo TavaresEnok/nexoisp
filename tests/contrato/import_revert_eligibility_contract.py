@@ -470,6 +470,13 @@ def verify(api, call, sql):
                 call('/api/support/exit', {}, token=support_token)
             except Exception:
                 pass
+        # users_subscriber_fk e filhos diretos do marcador: sessão, user_pops e usuário
+        # do portal saem antes do assinante. Fora deste predicado nada é apagado.
+        fixture_users = (
+            "select id from users where id in (" + quote(restricted) + "::uuid," + quote(portal) + "::uuid)"
+            " or subscriber_id in (select id from subscribers where external_source=" + quote(marker) + ")"
+        )
+        marker_subscribers = "select id from subscribers where external_source=" + quote(marker)
         sql(
             "begin;"
             "alter table import_batch_compensations disable trigger immutable_import_batch_compensations;"
@@ -489,13 +496,14 @@ def verify(api, call, sql):
             "alter table invoice_movements enable trigger immutable_invoice_movements;"
             "delete from contract_history where contract_id in (select id from contracts where external_source=" + quote(marker) + ");"
             "delete from contracts where external_source=" + quote(marker) + ";"
+            "delete from subscriber_contacts where subscriber_id in (" + marker_subscribers + ");"
+            "delete from user_pops where user_id in (" + fixture_users + ");"
+            "delete from sessions where user_id in (" + fixture_users + ");"
+            "delete from users where id in (" + fixture_users + ");"
+            "delete from pops where id=" + quote(pop) + "::uuid;"
             "delete from subscribers where external_source=" + quote(marker) + ";"
             "delete from audit_events where entity_type='import_batch' and entity_id in (select id::text from import_batches where source=" + quote(marker) + ");"
             "delete from import_rows where batch_id in (select id from import_batches where source=" + quote(marker) + ");"
             "delete from import_batches where source=" + quote(marker) + ";"
-            "delete from user_pops where user_id=" + quote(restricted) + "::uuid;"
-            "delete from sessions where user_id=" + quote(restricted) + "::uuid or user_id=" + quote(portal) + "::uuid;"
-            "delete from users where id=" + quote(restricted) + "::uuid or id=" + quote(portal) + "::uuid;"
-            "delete from pops where id=" + quote(pop) + "::uuid;"
             "commit;",
             'nexo_test')
