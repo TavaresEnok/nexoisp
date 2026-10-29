@@ -62,6 +62,30 @@
       "nao_e_o_gate": true
     },
     "exigencia": "Publicar ainda exige python3 tests/contrato/nativo.py e python3 tests/contrato/go_integration.py, sem -I, no commit candidato. Em cc542a1 o Go terminou 0 e o HTTP terminou 1 no fixture. Em 0086558 o HTTP passou do fixture e terminou 1 no entity_id opcional, antes dos 22 casos. A correção 9c764d7 não foi reexecutada. A forma com -I é falha de bootstrap e não substitui esses dois comandos. Skip por falta de banco não aprova.",
+    "corrida_7cde1e6": {
+      "comando": [
+        "python3",
+        "tests/contrato/go_integration.py"
+      ],
+      "variavel": "NEXO_BALANCE_READ_PG_REQUIRED=1",
+      "head": "7cde1e623462ec49c9fe75ca588e25c75a62dd5b",
+      "exit": 1,
+      "acoes_pass": 356,
+      "falhas": [
+        "TestBalanceReadPGExplain",
+        "pacote nexoisp/api-go/internal/modules/leitura"
+      ],
+      "novos_pg_skip": 0,
+      "resumo": "/home/enok/Documentos/projetos/implementacao-codex/lote30-b04-provas-postgres-2026-10-29/evidencias/gate-summary-7cde1e6.json",
+      "reclassificada": false,
+      "fecha_matriz_b04": false
+    },
+    "proxima_corrida_b04": {
+      "comando": "NEXO_BALANCE_READ_PG_REQUIRED=1 python3 tests/contrato/go_integration.py",
+      "sem_traco_I": true,
+      "runner_editado_no_lote31": false,
+      "executada_neste_gate_documental": false
+    },
     "executados_na_base_cc542a1": {
       "nativo_py": {
         "exit": 1,
@@ -342,6 +366,22 @@
     {
       "path": "/home/enok/Documentos/projetos/implementacao-codex/lote27-b13-http-restore-2026-10-29/evidencias/b04-comparacao-sintetica-0086558.json",
       "papel": "b04_comparacao_limitada_sem_corte"
+    },
+    {
+      "path": "docs/LOTE29-B04-BASE-SHADOW.md",
+      "papel": "b04_base_sombra_lote29"
+    },
+    {
+      "path": "docs/LOTE30-B04-PROVAS-POSTGRES.md",
+      "papel": "lote30_historico_com_adendo_da_corrida_7cde1e6"
+    },
+    {
+      "path": "docs/LOTE31-B04-GATES-EXPLAIN-RLS.md",
+      "papel": "lote31_correcao_de_prova_sem_producao"
+    },
+    {
+      "path": "/home/enok/Documentos/projetos/implementacao-codex/lote30-b04-provas-postgres-2026-10-29/evidencias/gate-summary-7cde1e6.json",
+      "papel": "corrida_real_7cde1e6_exit_1"
     }
   ],
   "matriz_funcional": {
@@ -790,6 +830,88 @@
         "homologado": false,
         "publicado": false
       },
+      "corrida_7cde1e6": {
+        "head": "7cde1e623462ec49c9fe75ca588e25c75a62dd5b",
+        "plano30": "8b78eab07512 DONE 4/4",
+        "plano29": "5ca3036 DONE 13/13",
+        "exit": 1,
+        "acoes_pass": 356,
+        "fail_actions": [
+          "TestBalanceReadPGExplain",
+          "pacote leitura"
+        ],
+        "novos_pg_skip": 0,
+        "passaram": [
+          "TestBalanceReadPGDue",
+          "TestBalanceReadPGDedicatedSQLNotView",
+          "TestBalanceReadPGFixturesOracleAndRLS",
+          "TestBalanceReadPGVariants",
+          "TestBalanceReadPGVariantsEmpty",
+          "TestBalanceReadPGVariantsRLS"
+        ],
+        "indice_observado": {
+          "invoice_movements": "invoice_movements_invoice",
+          "payments": "payments_tenant_invoice_identity_uq",
+          "index_cond": "((tenant_id = i.tenant_id) AND (invoice_id = i.id))",
+          "enable_seqscan": "on",
+          "nome_exigido_naquela_base": "payments_invoice"
+        },
+        "reclassificada_como_sucesso": false,
+        "resumo": "/home/enok/Documentos/projetos/implementacao-codex/lote30-b04-provas-postgres-2026-10-29/evidencias/gate-summary-7cde1e6.json"
+      },
+      "lote31_correcao_de_prova": {
+        "producao_alterada": false,
+        "schema_indices_grants_allowlists": "inalterados",
+        "merge_codigo": "996d28f49d2c49753d8f3ca741d4232c5ef2b08a",
+        "raizes": [
+          {
+            "id": "explain-equivalencia",
+            "commit": "e62ce32466124b047491b87f1db75f667259415a",
+            "arquivo": "apps/api-go/internal/modules/leitura/balance_read_pg_query_test.go",
+            "prefixo": "pgQuery"
+          },
+          {
+            "id": "variantes-papel-app",
+            "commit": "be70bd29f06cad6f100411c627aedc7d74c3584b",
+            "arquivo": "apps/api-go/internal/modules/leitura/balance_read_pg_variants_test.go",
+            "prefixo": "pgVariants"
+          }
+        ],
+        "due_inalterado": "apps/api-go/internal/modules/leitura/balance_read_pg_due_test.go",
+        "funcoes_compartilhadas": [],
+        "explain_nome_isolado_aceito": false,
+        "enable_seqscan_forcado_off": false,
+        "papel_efetivo_novo": "TestBalanceReadPGVariantsApp com set local role nexo_app",
+        "controles_nexo_go_conservados": [
+          "TestBalanceReadPGVariants",
+          "TestBalanceReadPGVariantsEmpty",
+          "TestBalanceReadPGVariantsRLS"
+        ],
+        "aceite_e_desenho": "ajustados na raiz e62ce32; executado permanece false; este gate documental não os edita",
+        "documento": "docs/LOTE31-B04-GATES-EXPLAIN-RLS.md"
+      },
+      "compilacao_gate_documental_lote31": {
+        "worktree": "/home/enok/srv_projetos/worktrees/08mu8zaz/task-1c9516f806d0-t3-b04-consolidar-gates",
+        "url": "ausente",
+        "required": "ausente",
+        "go_test_filtro": "go -C apps/api-go test -count=1 -race -run ^TestBalanceRead|^TestDue ./internal/modules/leitura",
+        "exit": 0,
+        "duracao_s": 1.161,
+        "duracao_primeira_passagem_s": 1.169,
+        "skips_pendencia": [
+          "TestBalanceReadPGFixturesOracleAndRLS",
+          "TestBalanceReadPGExplain",
+          "TestBalanceReadPGVariants",
+          "TestBalanceReadPGVariantsEmpty",
+          "TestBalanceReadPGVariantsRLS",
+          "TestBalanceReadPGVariantsApp",
+          "TestBalanceReadPGDue"
+        ],
+        "verifier_em_memoria": "TestBalanceReadPGExplainVerifier pass; não substitui TestBalanceReadPGExplain",
+        "go_build": "go -C apps/api-go build ./... exit 0",
+        "explain_real": "nao_executado",
+        "fecha_matriz": false
+      },
       "evidencia": [
         {
           "path": "db/migrations/00066_financial_movements.sql",
@@ -823,6 +945,21 @@
           "path": "/home/enok/Documentos/projetos/implementacao-codex/lote27-b13-http-restore-2026-10-29/evidencias/b04-comparacao-sintetica-0086558.json",
           "commit": "0086558d9296054cfaf89071c9ae1bf0f2f56571",
           "nota": "alfa 23 faturas e 23 sombras sem drift; beta 0; acordos 0; não autoriza corte"
+        },
+        {
+          "path": "docs/LOTE30-B04-PROVAS-POSTGRES.md",
+          "commit": "7c65ba1",
+          "nota": "composição histórica do lote 30; adendo posterior identifica a corrida 7cde1e6 sem reescrever os skips daquela worktree"
+        },
+        {
+          "path": "/home/enok/Documentos/projetos/implementacao-codex/lote30-b04-provas-postgres-2026-10-29/evidencias/gate-summary-7cde1e6.json",
+          "commit": "7cde1e623462ec49c9fe75ca588e25c75a62dd5b",
+          "nota": "exit 1; 356 pass; TestBalanceReadPGExplain fail; novos PG sem skip; não reclassificada"
+        },
+        {
+          "path": "docs/LOTE31-B04-GATES-EXPLAIN-RLS.md",
+          "commit": "996d28f",
+          "nota": "decisão e duas correções de prova; EXPLAIN e matriz continuam abertos até a corrida nova"
         }
       ],
       "entregue": [
@@ -830,17 +967,19 @@
         "sombra de saldo",
         "comparação antes do corte",
         "desenho e matriz planejada do corte, sem ativação",
-        "base de sombra do lote 29 com NEXO_BALANCE_READ e allowlists compiladas vazias"
+        "base de sombra do lote 29 com NEXO_BALANCE_READ e allowlists compiladas vazias",
+        "provas PostgreSQL do lote 30, com a corrida 7cde1e6 reprovada no EXPLAIN",
+        "correção de prova do lote 31, equivalência estrutural e papel nexo_app, sem mudança de produção"
       ],
       "criterios_abertos": [
         {
           "id": "B04-corte",
-          "causa": "A sombra existe e o leitor antigo não foi promovido. NEXO_BALANCE_READ existe e as allowlists compiladas estão vazias. O desenho 728f2ff, a suíte local de leitura e a comparação 0086558 de 23 faturas e 0 acordos não autorizam a troca.",
+          "causa": "A sombra existe e o leitor antigo não foi promovido. NEXO_BALANCE_READ existe e as allowlists compiladas estão vazias. O desenho 728f2ff, a suíte local de leitura e a comparação 0086558 de 23 faturas e 0 acordos não autorizam a troca. A corrida 7cde1e6 executou PostgreSQL e terminou exit 1 no EXPLAIN por nome de índice. A correção de prova do lote 31 ainda não tem corrida real.",
           "dependencias": [
             "B03"
           ],
-          "evidencia_faltante": "Execução fresca da matriz em docs/B04-ACEITE-CORTE-LEITOR.json, com PostgreSQL, EXPLAIN e revisão independente, antes de qualquer allowlist de corte. A prova de 23 faturas não cobre acordo, source_unproven, estorno, excesso, refund, importação, compensação, rollback, RLS de portal e POP nem drift injetado. O CI 40840682617 falhou e ainda não foi repetido depois de 92535ed.",
-          "proximo_passo": "Manter o corte fechado e as allowlists vazias. Repetir o workflow hospedado depois de 92535ed. Não reimplementar a migração 66 nem tratar a comparação sintética, a suíte local ou o desenho como aceite da matriz.",
+          "evidencia_faltante": "Corrida nova de python3 tests/contrato/go_integration.py com NEXO_BALANCE_READ_PG_REQUIRED=1 no HEAD integrado, com TestBalanceReadPGExplain e TestBalanceReadPGVariantsApp em pass e sem skip, mais revisão independente antes de qualquer allowlist. A corrida 7cde1e6 permanece falha histórica. O verificador em memória e os skips deste gate documental não preenchem explain-indices. A prova de 23 faturas não cobre acordo, source_unproven, estorno, excesso, refund, importação, compensação, rollback, RLS de portal e POP nem drift injetado. O CI 40840682617 falhou e ainda não foi repetido depois de 92535ed.",
+          "proximo_passo": "Manter o corte fechado e as allowlists vazias. A gerência executa NEXO_BALANCE_READ_PG_REQUIRED=1 python3 tests/contrato/go_integration.py, sem -I, no HEAD integrado. Repetir o workflow hospedado depois de 92535ed. Não reclassificar 7cde1e6. Não reimplementar a migração 66 nem tratar a comparação sintética, a suíte local, o verificador em memória ou o desenho como aceite da matriz.",
           "prova_limitada_0086558": {
             "alfa_faturas": 23,
             "alfa_sombra": 23,
@@ -1805,7 +1944,7 @@
     "id": "reexecutar-ci-apos-depguard-e-manter-corte-fechado",
     "id_anterior": "repetir-http-b13-apos-campo-opcional",
     "prioridade": "P0",
-    "motivo": "O Go, o browser e o SBOM local de cc542a1 permanecem válidos. Em 0086558 o HTTP passou do fixture PSP e parou no entity_id opcional. A gerência relata nativo.py exit 0 em 55e0d29, 24 checks, incluindo B13 e financeiro. O CI 40840682617 falhou no depguard e a corretiva 92535ed ainda não tem run hospedado. O restore sintético de 0086558 terminou exit 0 em 17 fases. A base B04 do lote 29 está no clone com allowlists vazias. O corte permanece fechado. A matriz de banco e o EXPLAIN não foram executados neste gate.",
+    "motivo": "O Go, o browser e o SBOM local de cc542a1 permanecem válidos. Em 0086558 o HTTP passou do fixture PSP e parou no entity_id opcional. A gerência relata nativo.py exit 0 em 55e0d29, 24 checks, incluindo B13 e financeiro. O CI 40840682617 falhou no depguard e a corretiva 92535ed ainda não tem run hospedado. O restore sintético de 0086558 terminou exit 0 em 17 fases. A base B04 do lote 29 está no clone com allowlists vazias. O corte permanece fechado. A corrida real 7cde1e6 de go_integration.py terminou exit 1, com 356 ações pass e TestBalanceReadPGExplain em falha; Due, oráculo/RLS e as oito variantes em nexo_go passaram sem skip. O lote 31 corrige a prova do índice e acrescenta TestBalanceReadPGVariantsApp. A compilação deste gate documental, sem banco, não executa EXPLAIN nem encerra a matriz. A próxima prova é NEXO_BALANCE_READ_PG_REQUIRED=1 python3 tests/contrato/go_integration.py no HEAD integrado.",
     "nao_reabrir": [
       "lote01",
       "b07-resolucao",
@@ -1819,9 +1958,12 @@
       "b13-expectativa-opcional-9c764d7",
       "b04-desenho-728f2ff",
       "b04-base-sombra-lote29",
-      "t0-depguard-92535ed"
+      "t0-depguard-92535ed",
+      "plano29-5ca3036-done-13",
+      "plano30-8b78eab07512-done-4",
+      "corrida-real-7cde1e6"
     ],
-    "candidato_interno_seguinte": "reexecutar o workflow native.yml no commit candidato depois de 92535ed; manter allowlists B04 vazias até a matriz fresca, o EXPLAIN e a revisão da inclusão",
+    "candidato_interno_seguinte": "a gerência executa NEXO_BALANCE_READ_PG_REQUIRED=1 python3 tests/contrato/go_integration.py, sem -I, no HEAD integrado; manter allowlists B04 vazias até essa corrida, o EXPLAIN sem skip e a revisão da inclusão; reexecutar o workflow native.yml depois de 92535ed",
     "limites": [
       "sem franquia",
       "sem PSP real",
@@ -1835,7 +1977,10 @@
       "correção entregue não é gate repetido",
       "comparação de 23 faturas e desenho B04 não ativam o corte",
       "suíte local de leitura não fecha a matriz",
-      "relato de nativo em 55e0d29 não é execução fresca do lote 29"
+      "relato de nativo em 55e0d29 não é execução fresca do lote 29",
+      "corrida 7cde1e6 permanece exit 1",
+      "verificador em memória e skip não fecham o EXPLAIN",
+      "lote 31 não altera produção nem allowlists"
     ],
     "validacao": [
       [
@@ -1849,7 +1994,7 @@
     "pedir_nova_ordem": false,
     "projeto_concluido": false,
     "percentual": null,
-    "instrucao": "Os lotes 25 e 26 não se reimplementam. O fixture b67d2f3, o harness 56b2187, a corrida sintética 0086558, a expectativa 9c764d7, o desenho B04 728f2ff e a base de sombra do lote 29 também não se refazem. A gerência relata nativo.py exit 0 em 55e0d29. O CI hospedado 40840682617 falhou e pede run novo depois de 92535ed. A matriz B04 e o EXPLAIN continuam pendentes. Go, browser e SBOM local continuam datados em cc542a1. Não fechar item externo por ausência de recurso. Não transformar default, sandbox, skip, geração local, teste estático, correção entregue, desenho ou allowlist vazia em homologação. O projeto permanece aberto enquanto existir critério aberto."
+    "instrucao": "Os lotes 25 e 26 não se reimplementam. O fixture b67d2f3, o harness 56b2187, a corrida sintética 0086558, a expectativa 9c764d7, o desenho B04 728f2ff e a base de sombra do lote 29 também não se refazem. O plano 29 permanece DONE 13/13 e o plano 30 8b78eab07512 permanece DONE 4/4. A corrida real 7cde1e6 permanece exit 1 e não é reclassificada. A gerência relata nativo.py exit 0 em 55e0d29. O CI hospedado 40840682617 falhou e pede run novo depois de 92535ed. A matriz B04 e o EXPLAIN continuam pendentes até NEXO_BALANCE_READ_PG_REQUIRED=1 python3 tests/contrato/go_integration.py no HEAD integrado, incluindo TestBalanceReadPGExplain e TestBalanceReadPGVariantsApp sem skip. Go, browser e SBOM local continuam datados em cc542a1. Não fechar item externo por ausência de recurso. Não transformar default, sandbox, skip, geração local, teste estático, correção entregue, desenho ou allowlist vazia em homologação. O projeto permanece aberto enquanto existir critério aberto."
   },
   "publicacao": {
     "producao": false,
@@ -1867,6 +2012,11 @@
     "relato_nativo_55e0d29": "exit 0, 24 checks, incluindo B13 e financeiro; não reexecutado neste gate; não publica",
     "ci_40840682617": "falha depguard em 55e0d29; corretiva 92535ed ainda sem run hospedado",
     "lote29_publicado": false,
-    "head_worktree_ab6166a": "base de sombra e gate documental na branch de desenvolvimento; allowlists vazias; esta documentação não publica esse HEAD; não é main nem deploy"
+    "head_worktree_ab6166a": "base de sombra e gate documental na branch de desenvolvimento; allowlists vazias; esta documentação não publica esse HEAD; não é main nem deploy",
+    "lote30_publicado": false,
+    "plano30_8b78eab07512": "DONE 4/4; a corrida real posterior 7cde1e6 terminou exit 1",
+    "head_7cde1e6": "go_integration.py com REQUIRED=1, exit 1, 356 pass, TestBalanceReadPGExplain fail, novos PG sem skip; falha histórica preservada",
+    "lote31_publicado": false,
+    "head_codigo_996d28f": "merge de e62ce32 e be70bd2, correção de prova sem produção; a documentação deste gate não publica esse HEAD; não é main nem deploy"
   }
 }
