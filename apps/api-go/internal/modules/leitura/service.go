@@ -79,6 +79,7 @@ func Register(api huma.API, r *endpoint.Registry, s Service) {
 	registerRadiusTelemetry(api, r, s)
 	registerImportReconciliation(api, r, s)
 	registerImportRevertEligibility(api, r, s)
+	registerCloudNoticeJournal(api, r, s)
 	r.PublicGet(api, "/aviso/{slug}", s.notice)
 	r.Get(api, "/api/me", "", true, s.me)
 	r.Get(api, "/api/plans", "plans:read", false, s.simple(gen.Plans0, "many", false, false))
