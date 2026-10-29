@@ -3,6 +3,7 @@ package escrita
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -14,10 +15,13 @@ import (
 	"nexoisp/api-go/internal/apierr"
 	"nexoisp/api-go/internal/auth"
 	"nexoisp/api-go/internal/db"
+	"nexoisp/api-go/internal/finance"
+	"nexoisp/api-go/internal/finance/providers"
 	"nexoisp/api-go/internal/httpx"
 	"nexoisp/api-go/internal/tenancy"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -534,6 +538,277 @@ func TestImportCompensate_IdempotencyConflictAndCap(t *testing.T) {
 	if statusCode(err) != 409 || err.Error() != "row_cap" {
 		t.Fatal(err)
 	}
+}
+
+func TestImportCompensate_B13_11_Barreira(t *testing.T) {
+	database, tenant, user := compensateLab(t)
+	actor := compensateActor(tenant, user)
+	scope := tenancy.Scope{TenantID: tenant}
+	t.Run("baixa commitada enquanto a compensação espera", func(t *testing.T) {
+		seed := seedImported(t, database, tenant, user, "open")
+		release, held, done := holdInvoices(t, database, scope, []string{seed.invoice}, true, func(ctx context.Context, tx *db.Tx) error {
+			ctx = auth.With(ctx, actor)
+			_, err := (Service{DB: database}).invoicePayment(ctx, tx, seed.invoice, map[string]any{
+				"intent_id": uuid.NewString(), "amount_cents": seed.amount, "paid_at": "2026-10-20", "method": "pix", "note": "baixa sob o lock", "apply_fees": false,
+			})
+			return err
+		})
+		defer finishHold(t, release, done)
+		waitHeld(t, held)
+		errCh := make(chan error, 1)
+		go func() {
+			_, err := postCompensate(database, actor, seed.batch, "hold-pay-"+uuid.NewString(), "motivo apos a barreira", "")
+			errCh <- err
+		}()
+		waitAdvisory(t, database, scope, invoiceAdvisoryKey(tenant, seed.invoice))
+		release()
+		err := waitErr(t, errCh)
+		if statusCode(err) != 409 || err.Error() != "provenance_payment" {
+			t.Fatal(err)
+		}
+		assertCash(t, database, tenant, seed, cashExpect{status: "paid", payments: 1, reversals: 0, signed: seed.amount, markers: 0, external: seed.external})
+	})
+	t.Run("duas faturas na ordem canonica", func(t *testing.T) {
+		batch, ids := seedOpenPair(t, database, tenant, user)
+		sorted := sortedUUIDs(t, ids)
+		release, held, done := holdInvoices(t, database, scope, []string{sorted[1]}, false, nil)
+		defer finishHold(t, release, done)
+		waitHeld(t, held)
+		errCh := make(chan error, 1)
+		go func() {
+			_, err := postCompensate(database, actor, batch, "pair-"+uuid.NewString(), "motivo das duas faturas", "")
+			errCh <- err
+		}()
+		waitAdvisory(t, database, scope, invoiceAdvisoryKey(tenant, sorted[1]))
+		if invoiceRowFree(t, database, scope, sorted[0]) {
+			t.Fatal("a fatura menor não estava travada quando a maior entrou em espera")
+		}
+		release()
+		if err := waitErr(t, errCh); err != nil {
+			t.Fatal(err)
+		}
+		for _, id := range ids {
+			var status string
+			var markers int
+			scanTenant(t, database, tenant, `select i.status, (select count(*)::int from import_batch_compensations c where c.batch_id=$2::uuid)
+				from invoices i where i.id=$1::uuid`, []any{&status, &markers}, id, batch)
+			if status != "canceled" || markers != 1 {
+				t.Fatalf("status=%s markers=%d", status, markers)
+			}
+		}
+	})
+}
+
+func TestImportCompensate_B13_18(t *testing.T) {
+	database, tenant, user := compensateLab(t)
+	actor := compensateActor(tenant, user)
+	scope := tenancy.Scope{TenantID: tenant}
+	seed := seedImported(t, database, tenant, user, "open")
+	release, held, done := holdInvoices(t, database, scope, []string{seed.invoice}, true, func(ctx context.Context, tx *db.Tx) error {
+		var batch string
+		if err := tx.QueryRow(ctx, `insert into import_batches (tenant_id, source, kind, filename, totals, created_by)
+			values ($1::uuid, $2, 'invoices', 'dep.csv', '{}'::jsonb, $3::uuid) returning id::text`, tenant, "dep-"+uuid.NewString(), user).Scan(&batch); err != nil {
+			return err
+		}
+		return tx.Exec(ctx, `insert into import_rows (tenant_id, batch_id, row_number, external_id, status, messages, entity_id)
+			values ($1::uuid, $2::uuid, 1, $3, 'unchanged', '[]'::jsonb, $4::uuid)`, tenant, batch, seed.external, seed.invoice)
+	})
+	defer finishHold(t, release, done)
+	waitHeld(t, held)
+	errCh := make(chan error, 1)
+	go func() {
+		_, err := postCompensate(database, actor, seed.batch, "dep-race-"+uuid.NewString(), "motivo do lote dependente", "")
+		errCh <- err
+	}()
+	waitAdvisory(t, database, scope, invoiceAdvisoryKey(tenant, seed.invoice))
+	release()
+	err := waitErr(t, errCh)
+	if statusCode(err) != 409 || err.Error() != "dependent_batches" {
+		t.Fatal(err)
+	}
+	assertCash(t, database, tenant, seed, cashExpect{status: "open", payments: 0, markers: 0, external: seed.external})
+}
+
+func TestImportCompensate_B13_21(t *testing.T) {
+	database, tenant, user := compensateLab(t)
+	actor := compensateActor(tenant, user)
+	scope := tenancy.Scope{TenantID: tenant}
+	t.Run("emissão espera e recusa a origem", func(t *testing.T) {
+		seed := seedImported(t, database, tenant, user, "open")
+		req := issuanceRequest(t, database, tenant, seed)
+		release, held, done := holdInvoices(t, database, scope, []string{seed.invoice}, false, nil)
+		defer finishHold(t, release, done)
+		waitHeld(t, held)
+		errCh := make(chan error, 1)
+		go func() {
+			_, err := (finance.SandboxIssuance{DB: database}).Prepare(context.Background(), scope, req, strings.Repeat("ab", 32))
+			errCh <- err
+		}()
+		waitAdvisory(t, database, scope, invoiceAdvisoryKey(tenant, seed.invoice))
+		release()
+		err := waitErr(t, errCh)
+		if statusCode(err) != 409 {
+			t.Fatal(err)
+		}
+		assertNoIssuance(t, database, tenant, seed)
+	})
+	t.Run("compensação commitada antes da emissão", func(t *testing.T) {
+		seed := seedImported(t, database, tenant, user, "open")
+		req := issuanceRequest(t, database, tenant, seed)
+		mustCompensate(t, database, actor, seed.batch, "iss-"+uuid.NewString(), "motivo antes da emissao")
+		_, err := (finance.SandboxIssuance{DB: database}).Prepare(context.Background(), scope, req, strings.Repeat("ab", 32))
+		if statusCode(err) != 409 {
+			t.Fatal(err)
+		}
+		assertCash(t, database, tenant, seed, cashExpect{status: "canceled", payments: 0, markers: 1, external: seed.external})
+		assertNoIssuance(t, database, tenant, seed)
+	})
+}
+
+func TestImportCompensate_B13_22(t *testing.T) {
+	database, tenant, user := compensateLab(t)
+	actor := compensateActor(tenant, user)
+	scope := tenancy.Scope{TenantID: tenant}
+	t.Run("ordem invertida produz deadlock", func(t *testing.T) {
+		seed := seedImported(t, database, tenant, user, "open")
+		key := invoiceAdvisoryKey(tenant, seed.invoice)
+		held := make(chan struct{})
+		advisory := make(chan struct{})
+		errA := make(chan error, 1)
+		errB := make(chan error, 1)
+		go func() {
+			errA <- database.WithScope(context.Background(), scope, func(tx *db.Tx) error {
+				ctx := context.Background()
+				if err := tx.Exec(ctx, `select set_config('deadlock_timeout','200ms',true)`); err != nil {
+					return err
+				}
+				if err := tx.Exec(ctx, `select set_config('statement_timeout','5s',true)`); err != nil {
+					return err
+				}
+				if err := tx.Exec(ctx, `select id from invoices where id=$1::uuid for update`, seed.invoice); err != nil {
+					return err
+				}
+				close(held)
+				<-advisory
+				return tx.Exec(ctx, `select pg_advisory_xact_lock(hashtextextended($1,$2))`, key, importAdvisorySalt)
+			})
+		}()
+		go func() {
+			errB <- database.WithScope(context.Background(), scope, func(tx *db.Tx) error {
+				ctx := context.Background()
+				if err := tx.Exec(ctx, `select set_config('deadlock_timeout','200ms',true)`); err != nil {
+					return err
+				}
+				if err := tx.Exec(ctx, `select set_config('statement_timeout','5s',true)`); err != nil {
+					return err
+				}
+				select {
+				case <-held:
+				case <-time.After(8 * time.Second):
+					return errors.New("a baixa invertida não travou a fatura")
+				}
+				if err := tx.Exec(ctx, `select pg_advisory_xact_lock(hashtextextended($1,$2))`, key, importAdvisorySalt); err != nil {
+					return err
+				}
+				close(advisory)
+				return tx.Exec(ctx, `select id from invoices where id=$1::uuid for update`, seed.invoice)
+			})
+		}()
+		a, b := waitErr(t, errA), waitErr(t, errB)
+		if !isDeadlock(a) && !isDeadlock(b) {
+			t.Fatalf("deadlock não observado: %v | %v", a, b)
+		}
+		assertCash(t, database, tenant, seed, cashExpect{status: "open", payments: 0, markers: 0, external: seed.external})
+	})
+	t.Run("ordem do protocolo conclui", func(t *testing.T) {
+		seed := seedImported(t, database, tenant, user, "open")
+		release, held, done := holdInvoices(t, database, scope, []string{seed.invoice}, false, nil)
+		defer finishHold(t, release, done)
+		waitHeld(t, held)
+		errCh := make(chan error, 1)
+		go func() {
+			_, err := postCompensate(database, actor, seed.batch, "order-"+uuid.NewString(), "motivo na ordem do protocolo", "")
+			errCh <- err
+		}()
+		waitAdvisory(t, database, scope, invoiceAdvisoryKey(tenant, seed.invoice))
+		release()
+		if err := waitErr(t, errCh); err != nil {
+			t.Fatal(err)
+		}
+		assertCash(t, database, tenant, seed, cashExpect{status: "canceled", payments: 0, markers: 1, external: seed.external})
+	})
+}
+
+func seedOpenPair(t *testing.T, database *db.DB, tenant, user string) (string, []string) {
+	t.Helper()
+	source := "pair-" + strings.ReplaceAll(uuid.NewString(), "-", "")
+	var batch string
+	ids := make([]string, 2)
+	err := database.WithScope(context.Background(), tenancy.Scope{TenantID: tenant}, func(tx *db.Tx) error {
+		ctx := context.Background()
+		if err := tx.QueryRow(ctx, `insert into import_batches (tenant_id, source, kind, filename, totals, created_by)
+			values ($1::uuid, $2, 'invoices', 'par.csv', '{}'::jsonb, $3::uuid) returning id::text`, tenant, source, user).Scan(&batch); err != nil {
+			return err
+		}
+		for i := 0; i < 2; i++ {
+			ext := fmt.Sprintf("p%d-%s", i, uuid.NewString())
+			if err := tx.QueryRow(ctx, `insert into invoices (tenant_id, contract_id, subscriber_id, kind, due_date, amount_cents, status, external_source, external_id)
+				select $1::uuid, id, subscriber_id, 'manual', '2026-11-15', 1000, 'open', $2, $3 from contracts where tenant_id=$1::uuid order by id limit 1 returning id::text`,
+				tenant, source, ext).Scan(&ids[i]); err != nil {
+				return err
+			}
+			if err := tx.Exec(ctx, `insert into import_rows (tenant_id, batch_id, row_number, external_id, status, messages, entity_id)
+				values ($1::uuid, $2::uuid, $3, $4, 'created', '[]'::jsonb, $5::uuid)`, tenant, batch, i+1, ext, ids[i]); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return batch, ids
+}
+
+func issuanceRequest(t *testing.T, database *db.DB, tenant string, seed importedSeed) providers.Create {
+	t.Helper()
+	var connection, account string
+	var amount int
+	var due string
+	scanTenant(t, database, tenant, `insert into financial_connections (tenant_id, company_id, provider, environment, account_ref, name, status)
+		select tenant_id, company_id, 'efi', 'sandbox', $2, 'emissao sintetica', 'pending' from invoices where id=$1::uuid returning id::text`, []any{&connection}, seed.invoice, "acc-"+uuid.NewString())
+	scanTenant(t, database, tenant, `select account_ref, (select amount_cents from invoices where id=$2::uuid), (select due_date::text from invoices where id=$2::uuid)
+		from financial_connections where id=$1::uuid`, []any{&account, &amount, &due}, connection, seed.invoice)
+	return providers.Create{
+		Scope:     providers.Scope{TenantID: tenant, ConnectionID: connection, Provider: "efi", Environment: "sandbox", AccountRef: account},
+		IntentKey: uuid.NewString(), InvoiceID: seed.invoice, Money: providers.Money{Cents: int64(amount), Currency: "BRL"}, DueDate: due,
+	}
+}
+
+func assertNoIssuance(t *testing.T, database *db.DB, tenant string, seed importedSeed) {
+	t.Helper()
+	var issuances, ops int
+	scanTenant(t, database, tenant, `select (select count(*)::int from provider_issuance where invoice_id=$1::uuid),
+		(select count(*)::int from provider_operations where invoice_id=$1::uuid)`, []any{&issuances, &ops}, seed.invoice)
+	if issuances != 0 || ops != 0 {
+		t.Fatalf("issuance=%d operations=%d", issuances, ops)
+	}
+}
+
+func waitErr(t *testing.T, ch <-chan error) error {
+	t.Helper()
+	select {
+	case err := <-ch:
+		return err
+	case <-time.After(8 * time.Second):
+		t.Fatal("a transação concorrente não terminou")
+	}
+	return nil
+}
+
+func isDeadlock(err error) bool {
+	var pg *pgconn.PgError
+	return errors.As(err, &pg) && pg.Code == "40P01"
 }
 
 type importedSeed struct {
