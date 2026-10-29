@@ -25,16 +25,30 @@
   },
   "regra_de_banco": {
     "comandos": [
-      ["python3", "tests/contrato/nativo.py"],
-      ["python3", "tests/contrato/go_integration.py"]
+      [
+        "python3",
+        "tests/contrato/nativo.py"
+      ],
+      [
+        "python3",
+        "tests/contrato/go_integration.py"
+      ]
     ],
     "fonte_da_invocacao": ".github/workflows/native.yml, job verificar, sem -I, na raiz do repositório",
     "executados_nesta_reconciliacao": false,
     "skip_por_falta_de_postgresql_e_aprovacao": false,
     "falha_de_bootstrap_distinta_de_skip_de_banco": {
       "comandos": [
-        ["python3", "-I", "tests/contrato/nativo.py"],
-        ["python3", "-I", "tests/contrato/go_integration.py"]
+        [
+          "python3",
+          "-I",
+          "tests/contrato/nativo.py"
+        ],
+        [
+          "python3",
+          "-I",
+          "tests/contrato/go_integration.py"
+        ]
       ],
       "reproduzida": true,
       "data": "2026-10-29",
@@ -47,57 +61,241 @@
       "testes_alterados": false,
       "nao_e_o_gate": true
     },
-    "exigencia": "A gerência executa python3 tests/contrato/nativo.py e python3 tests/contrato/go_integration.py, sem -I, em laboratório PostgreSQL descartável, antes de publicar lote que toque banco, isolamento ou dinheiro. Ausência de execução e skip por falta de banco ficam como não executados. A forma com -I é falha de bootstrap e não substitui esses dois comandos."
+    "exigencia": "Publicar ainda exige python3 tests/contrato/nativo.py e python3 tests/contrato/go_integration.py, sem -I, no commit candidato. Em cc542a1 o Go terminou 0 e o HTTP terminou 1 sem concluir. A forma com -I é falha de bootstrap e não substitui esses dois comandos. Skip por falta de banco não aprova.",
+    "executados_na_base_cc542a1": {
+      "nativo_py": {
+        "exit": 1,
+        "concluiu": false,
+        "local": "import_compensate_contract.py:335",
+        "causa": "gateway_charge_id sem financial_connection_id"
+      },
+      "go_integration_py": {
+        "exit": 0,
+        "acoes_pass_incluindo_subtestes": 241,
+        "acoes_de_compensacao_pass": 58
+      },
+      "nao_reutiliza": [
+        "CI e193266",
+        "geracao ou gates de 6f4bf38"
+      ],
+      "fixture_posterior_b67d2f3": "compilado; nova chamada morreu em FileNotFoundError docker antes do PostgreSQL"
+    }
   },
   "estados": {
-    "implementado": ["sim", "parcial", "nao", "somente_desenho"],
-    "testado": ["nao_executado_nesta_reconciliacao", "relato_historico_local", "relato_historico_ci", "somente_documental", "ausente", "codigo_na_branch_banco_nao_executado"],
-    "homologado": ["sem_prova", "sem_recurso_externo", "nao_aplicavel"],
-    "publicado": ["somente_clone_local", "github_relatado_nao_reconsultado", "producao_nao", "branch_de_desenvolvimento_nao_publicada"]
+    "implementado": [
+      "sim",
+      "parcial",
+      "nao",
+      "somente_desenho"
+    ],
+    "testado": [
+      "nao_executado_nesta_reconciliacao",
+      "relato_historico_local",
+      "relato_historico_ci",
+      "somente_documental",
+      "ausente",
+      "codigo_na_branch_banco_nao_executado",
+      "execucao_parcial_com_prova",
+      "gerado_localmente_ci_nao_conferido",
+      "harness_entregue_ensaio_nao_executado"
+    ],
+    "homologado": [
+      "sem_prova",
+      "sem_recurso_externo",
+      "nao_aplicavel"
+    ],
+    "publicado": [
+      "somente_clone_local",
+      "github_relatado_nao_reconsultado",
+      "producao_nao",
+      "branch_de_desenvolvimento_nao_publicada"
+    ]
   },
   "fontes": [
-    {"path": "AGENTS.md", "papel": "ui_oficial"},
-    {"path": "docs/LOTE01-CONSOLIDADO.md", "papel": "b02"},
-    {"path": "docs/LOTE02-B03-CONEXOES.md", "papel": "b03"},
-    {"path": "docs/LOTE03-B04-MOVIMENTOS.md", "papel": "b04"},
-    {"path": "docs/LOTE04-B05-EFEITOS-PAGAMENTO.md", "papel": "b05"},
-    {"path": "docs/LOTE05-B06-PROVIDERS.md", "papel": "b06_b08"},
-    {"path": "docs/LOTE06-B07-BASE-EFI.md", "papel": "b07"},
-    {"path": "docs/LOTE07-B07-TRANSACIONAL.md", "papel": "b07"},
-    {"path": "docs/LOTE08-B07-PIPELINE-SANDBOX.md", "papel": "b07"},
-    {"path": "docs/LOTE09-B07-CANCELAMENTO-DEVOLUCAO.md", "papel": "b07"},
-    {"path": "docs/LOTE10-B07-INTERFACE.md", "papel": "b07"},
-    {"path": "docs/LOTE11-B07-ARTEFATOS-CALLBACKS.md", "papel": "b07"},
-    {"path": "docs/LOTE12-B10-TRANSPORTE.md", "papel": "b10"},
-    {"path": "docs/LOTE13-B09-ACS.md", "papel": "b09"},
-    {"path": "docs/LOTE14-B11-DISCONNECT.md", "papel": "b11"},
-    {"path": "docs/LOTE15-B11-ACCOUNTING.md", "papel": "b11"},
-    {"path": "docs/LOTE16-B07-TRIAGEM-NOTIFICACOES.md", "papel": "b07"},
-    {"path": "docs/LOTE18-B07-RESOLUCAO-REEMISSAO.md", "papel": "b07_resolucao_entregue"},
-    {"path": "docs/LOTE19-B11-HISTORICO.md", "papel": "b11"},
-    {"path": "docs/LOTE24-B13-DESENHO-COMPENSACAO.md", "papel": "b13_desenho_aprovado"},
-    {"path": "docs/LOTE24-B13-ACEITACAO.json", "papel": "b13_22_casos_planned_not_run"},
-    {"path": "docs/LOTE25-B13-COMPENSACAO.md", "papel": "b13_implementacao_na_branch_nao_publicada"},
-    {"path": "docs/LOTE25-B13-COMPENSACAO-ACEITE.json", "papel": "b13_22_casos_escritos_nao_executados"},
-    {"path": "docs/integracao-v0/PLANO.md", "papel": "sete_etapas_de_integracao_ui"},
-    {"path": "docs/integracao-v0/MATRIZ_FUNCIONAL.md", "papel": "matriz"},
-    {"path": "docs/integracao-v0/matriz-funcional.json", "papel": "matriz_174"},
-    {"path": "docs/integracao-v0/evidencias/fechamento-sete-etapas.json", "papel": "fechamento_ui_2026-10-19"},
-    {"path": "docs/SGP_COMPARATIVO_NEXOISP/matriz_capacidades.csv", "papel": "baseline_comparativo_nao_recalculado"},
-    {"path": "docs/SGP_COMPARATIVO_NEXOISP/matriz_superficies.csv", "papel": "baseline_comparativo_nao_recalculado"},
-    {"path": "docs/PILOTO.md", "papel": "b18"},
-    {"path": "docs/pendencias.md", "papel": "producao"},
-    {"path": ".github/workflows/native.yml", "papel": "gate_ci"},
-    {"path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/00_STATUS.md", "papel": "historico_ate_lote24"},
-    {"path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/08_BACKLOG_EXECUTAVEL.md", "papel": "criterios_b01_b18"},
-    {"path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/11_COMPLEMENTO_REVISAO.md", "papel": "historico_2026-10-25"},
-    {"path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/31_IMPLEMENTACAO_B07_RESOLUCAO.md", "papel": "b07"},
-    {"path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/32_IMPLEMENTACAO_B11_HISTORICO.md", "papel": "b11"},
-    {"path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/33_IMPLEMENTACAO_B11_TELEMETRIA.md", "papel": "b11_telemetria_entregue"},
-    {"path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/34_IMPLEMENTACAO_B13_CORTE.md", "papel": "b13"},
-    {"path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/35_IMPLEMENTACAO_B13_RECONCILIACAO.md", "papel": "b13"},
-    {"path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/36_IMPLEMENTACAO_B13_ELEGIBILIDADE_REVERSAO.md", "papel": "b13"},
-    {"path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/37_DESENHO_B13_COMPENSACAO.md", "papel": "b13_desenho"}
+    {
+      "path": "AGENTS.md",
+      "papel": "ui_oficial"
+    },
+    {
+      "path": "docs/LOTE01-CONSOLIDADO.md",
+      "papel": "b02"
+    },
+    {
+      "path": "docs/LOTE02-B03-CONEXOES.md",
+      "papel": "b03"
+    },
+    {
+      "path": "docs/LOTE03-B04-MOVIMENTOS.md",
+      "papel": "b04"
+    },
+    {
+      "path": "docs/LOTE04-B05-EFEITOS-PAGAMENTO.md",
+      "papel": "b05"
+    },
+    {
+      "path": "docs/LOTE05-B06-PROVIDERS.md",
+      "papel": "b06_b08"
+    },
+    {
+      "path": "docs/LOTE06-B07-BASE-EFI.md",
+      "papel": "b07"
+    },
+    {
+      "path": "docs/LOTE07-B07-TRANSACIONAL.md",
+      "papel": "b07"
+    },
+    {
+      "path": "docs/LOTE08-B07-PIPELINE-SANDBOX.md",
+      "papel": "b07"
+    },
+    {
+      "path": "docs/LOTE09-B07-CANCELAMENTO-DEVOLUCAO.md",
+      "papel": "b07"
+    },
+    {
+      "path": "docs/LOTE10-B07-INTERFACE.md",
+      "papel": "b07"
+    },
+    {
+      "path": "docs/LOTE11-B07-ARTEFATOS-CALLBACKS.md",
+      "papel": "b07"
+    },
+    {
+      "path": "docs/LOTE12-B10-TRANSPORTE.md",
+      "papel": "b10"
+    },
+    {
+      "path": "docs/LOTE13-B09-ACS.md",
+      "papel": "b09"
+    },
+    {
+      "path": "docs/LOTE14-B11-DISCONNECT.md",
+      "papel": "b11"
+    },
+    {
+      "path": "docs/LOTE15-B11-ACCOUNTING.md",
+      "papel": "b11"
+    },
+    {
+      "path": "docs/LOTE16-B07-TRIAGEM-NOTIFICACOES.md",
+      "papel": "b07"
+    },
+    {
+      "path": "docs/LOTE18-B07-RESOLUCAO-REEMISSAO.md",
+      "papel": "b07_resolucao_entregue"
+    },
+    {
+      "path": "docs/LOTE19-B11-HISTORICO.md",
+      "papel": "b11"
+    },
+    {
+      "path": "docs/LOTE24-B13-DESENHO-COMPENSACAO.md",
+      "papel": "b13_desenho_aprovado"
+    },
+    {
+      "path": "docs/LOTE24-B13-ACEITACAO.json",
+      "papel": "b13_22_casos_planned_not_run"
+    },
+    {
+      "path": "docs/LOTE25-B13-COMPENSACAO.md",
+      "papel": "b13_implementacao_na_branch_nao_publicada"
+    },
+    {
+      "path": "docs/LOTE25-B13-COMPENSACAO-ACEITE.json",
+      "papel": "b13_22_casos_escritos_nao_executados"
+    },
+    {
+      "path": "docs/integracao-v0/PLANO.md",
+      "papel": "sete_etapas_de_integracao_ui"
+    },
+    {
+      "path": "docs/integracao-v0/MATRIZ_FUNCIONAL.md",
+      "papel": "matriz"
+    },
+    {
+      "path": "docs/integracao-v0/matriz-funcional.json",
+      "papel": "matriz_174"
+    },
+    {
+      "path": "docs/integracao-v0/evidencias/fechamento-sete-etapas.json",
+      "papel": "fechamento_ui_2026-10-19"
+    },
+    {
+      "path": "docs/SGP_COMPARATIVO_NEXOISP/matriz_capacidades.csv",
+      "papel": "baseline_comparativo_nao_recalculado"
+    },
+    {
+      "path": "docs/SGP_COMPARATIVO_NEXOISP/matriz_superficies.csv",
+      "papel": "baseline_comparativo_nao_recalculado"
+    },
+    {
+      "path": "docs/PILOTO.md",
+      "papel": "b18"
+    },
+    {
+      "path": "docs/pendencias.md",
+      "papel": "producao"
+    },
+    {
+      "path": ".github/workflows/native.yml",
+      "papel": "gate_ci"
+    },
+    {
+      "path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/00_STATUS.md",
+      "papel": "historico_ate_lote24"
+    },
+    {
+      "path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/08_BACKLOG_EXECUTAVEL.md",
+      "papel": "criterios_b01_b18"
+    },
+    {
+      "path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/11_COMPLEMENTO_REVISAO.md",
+      "papel": "historico_2026-10-25"
+    },
+    {
+      "path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/31_IMPLEMENTACAO_B07_RESOLUCAO.md",
+      "papel": "b07"
+    },
+    {
+      "path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/32_IMPLEMENTACAO_B11_HISTORICO.md",
+      "papel": "b11"
+    },
+    {
+      "path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/33_IMPLEMENTACAO_B11_TELEMETRIA.md",
+      "papel": "b11_telemetria_entregue"
+    },
+    {
+      "path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/34_IMPLEMENTACAO_B13_CORTE.md",
+      "papel": "b13"
+    },
+    {
+      "path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/35_IMPLEMENTACAO_B13_RECONCILIACAO.md",
+      "papel": "b13"
+    },
+    {
+      "path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/36_IMPLEMENTACAO_B13_ELEGIBILIDADE_REVERSAO.md",
+      "papel": "b13"
+    },
+    {
+      "path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/37_DESENHO_B13_COMPENSACAO.md",
+      "papel": "b13_desenho"
+    },
+    {
+      "path": "docs/SBOM.md",
+      "papel": "b01_sbom_procedimento"
+    },
+    {
+      "path": "docs/LOTE26-VALIDACAO-B13-SBOM.md",
+      "papel": "validacao_cc542a1_b13_e_sbom_local"
+    },
+    {
+      "path": "docs/RESTORE-LAB-HOST-LIMPO.md",
+      "papel": "b12_harness_sintetico_nao_executado"
+    },
+    {
+      "path": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-summary-cc542a1.json",
+      "papel": "resumo_dos_gates_na_base_cc542a1"
+    }
   ],
   "matriz_funcional": {
     "arquivo": "docs/integracao-v0/matriz-funcional.json",
@@ -121,26 +319,102 @@
       "nota": "A matriz vigente tem 174 unidades. O fechamento de 19/10 não absorve sozinho os lotes financeiros e de rede posteriores."
     },
     "unidades_com_ressalva": [
-      {"id": "AC-02", "backend": "Demonstrativa", "integracao": "validated"},
-      {"id": "FI-15", "backend": "Demonstrativa", "integracao": "validated"},
-      {"id": "FI-16", "backend": "Demonstrativa", "integracao": "validated"},
-      {"id": "FI-17", "backend": "Não confirmado", "integracao": "backend-preserved", "causa_em_aberto": "Cobrança bancária pagável sem homologação. Pipeline Efí sandbox não reclassifica esta linha."},
-      {"id": "RE-13", "backend": "Demonstrativa", "integracao": "validated"},
-      {"id": "IN-03", "backend": "Parcial", "integracao": "validated"},
-      {"id": "IN-06", "backend": "Parcial", "integracao": "validated"},
-      {"id": "IN-11", "backend": "Parcial", "integracao": "validated"},
-      {"id": "IN-13", "backend": "Parcial", "integracao": "validated"},
-      {"id": "IN-15", "backend": "Parcial", "integracao": "validated"},
-      {"id": "AD-02", "backend": "Parcial", "integracao": "validated"},
-      {"id": "AD-17", "backend": "Parcial", "integracao": "validated", "limite": "Sem liquidação de comissão."},
-      {"id": "AD-18", "backend": "Parcial", "integracao": "validated", "limite": "DICI sem transmissão à ANATEL."},
-      {"id": "AD-20", "backend": "Parcial", "integracao": "backend-preserved", "limite": "CSV existe. Migração universal SGP/MK-Auth não."},
-      {"id": "PO-09", "backend": "Parcial", "integracao": "backend-preserved", "limite": "Portal não quita em instituição real."},
-      {"id": "BE-23", "backend": "Parcial", "integracao": "backend-preserved", "limite": "Multi-célula além de c1 sem prova."}
+      {
+        "id": "AC-02",
+        "backend": "Demonstrativa",
+        "integracao": "validated"
+      },
+      {
+        "id": "FI-15",
+        "backend": "Demonstrativa",
+        "integracao": "validated"
+      },
+      {
+        "id": "FI-16",
+        "backend": "Demonstrativa",
+        "integracao": "validated"
+      },
+      {
+        "id": "FI-17",
+        "backend": "Não confirmado",
+        "integracao": "backend-preserved",
+        "causa_em_aberto": "Cobrança bancária pagável sem homologação. Pipeline Efí sandbox não reclassifica esta linha."
+      },
+      {
+        "id": "RE-13",
+        "backend": "Demonstrativa",
+        "integracao": "validated"
+      },
+      {
+        "id": "IN-03",
+        "backend": "Parcial",
+        "integracao": "validated"
+      },
+      {
+        "id": "IN-06",
+        "backend": "Parcial",
+        "integracao": "validated"
+      },
+      {
+        "id": "IN-11",
+        "backend": "Parcial",
+        "integracao": "validated"
+      },
+      {
+        "id": "IN-13",
+        "backend": "Parcial",
+        "integracao": "validated"
+      },
+      {
+        "id": "IN-15",
+        "backend": "Parcial",
+        "integracao": "validated"
+      },
+      {
+        "id": "AD-02",
+        "backend": "Parcial",
+        "integracao": "validated"
+      },
+      {
+        "id": "AD-17",
+        "backend": "Parcial",
+        "integracao": "validated",
+        "limite": "Sem liquidação de comissão."
+      },
+      {
+        "id": "AD-18",
+        "backend": "Parcial",
+        "integracao": "validated",
+        "limite": "DICI sem transmissão à ANATEL."
+      },
+      {
+        "id": "AD-20",
+        "backend": "Parcial",
+        "integracao": "backend-preserved",
+        "limite": "CSV existe. Migração universal SGP/MK-Auth não."
+      },
+      {
+        "id": "PO-09",
+        "backend": "Parcial",
+        "integracao": "backend-preserved",
+        "limite": "Portal não quita em instituição real."
+      },
+      {
+        "id": "BE-23",
+        "backend": "Parcial",
+        "integracao": "backend-preserved",
+        "limite": "Multi-célula além de c1 sem prova."
+      }
     ],
     "sgp_comparativo": {
-      "capacidades": {"arquivo": "docs/SGP_COMPARATIVO_NEXOISP/matriz_capacidades.csv", "linhas": 45},
-      "superficies": {"arquivo": "docs/SGP_COMPARATIVO_NEXOISP/matriz_superficies.csv", "linhas": 1246},
+      "capacidades": {
+        "arquivo": "docs/SGP_COMPARATIVO_NEXOISP/matriz_capacidades.csv",
+        "linhas": 45
+      },
+      "superficies": {
+        "arquivo": "docs/SGP_COMPARATIVO_NEXOISP/matriz_superficies.csv",
+        "linhas": 1246
+      },
       "recalculado_em_2026_10_29": false,
       "nota": "Baseline anterior aos lotes 07–24. C11 do CSV não descreve o pipeline Efí sandbox atual. Contagens do CSV não são percentual do projeto."
     }
@@ -148,14 +422,25 @@
   "transversais": {
     "ui_oficial": {
       "implementado": "sim",
-      "evidencia": ["AGENTS.md", "apps/web", "docs/novo-design-nexoISP", "docs/integracao-v0/PLANO.md"],
+      "evidencia": [
+        "AGENTS.md",
+        "apps/web",
+        "docs/novo-design-nexoISP",
+        "docs/integracao-v0/PLANO.md"
+      ],
       "testado": "relato_historico_local",
       "homologado": "nao_aplicavel",
       "publicado": "github_relatado_nao_reconsultado",
       "fechado": false,
       "causa": "A integração das sete etapas fecha a adaptação da UI ao Go disponível em 19/10/2026. Lotes posteriores acrescentaram telas oficiais sem uma nova auditoria pixel a pixel de todas as 174 unidades.",
       "proximo_passo": "Em cada recorte de UI, preservar componentes oficiais e revisar a jornada afetada. Não tratar página demo como capacidade.",
-      "validacao": ["npm", "-w", "apps/web", "run", "typecheck"]
+      "validacao": [
+        "npm",
+        "-w",
+        "apps/web",
+        "run",
+        "typecheck"
+      ]
     },
     "isolamento_tenant_pop_portal_suporte": {
       "implementado": "sim",
@@ -173,25 +458,42 @@
       "evidencia_faltante": "Log fresco de laboratório PostgreSQL descartável, sem skip.",
       "proximo_passo": "A gerência executa os dois contratos nativos antes da próxima publicação.",
       "validacao": [
-        ["python3", "tests/contrato/nativo.py"],
-        ["python3", "tests/contrato/go_integration.py"]
+        [
+          "python3",
+          "tests/contrato/nativo.py"
+        ],
+        [
+          "python3",
+          "tests/contrato/go_integration.py"
+        ]
       ]
     },
     "seguranca_sessao": {
       "implementado": "sim",
-      "evidencia": ["docs/integracao-v0/MATRIZ_FUNCIONAL.md"],
-      "ids": ["AC-01", "AC-08", "BE-20"],
+      "evidencia": [
+        "docs/integracao-v0/MATRIZ_FUNCIONAL.md"
+      ],
+      "ids": [
+        "AC-01",
+        "AC-08",
+        "BE-20"
+      ],
       "testado": "relato_historico_ci",
       "homologado": "sem_prova",
       "publicado": "github_relatado_nao_reconsultado",
       "fechado": false,
       "causa": "Cookie HttpOnly, CSRF e MFA estão no produto. Revisão independente de segurança e pentest não têm prova neste clone.",
       "proximo_passo": "Manter o gate de CSRF nos contratos. Agendar revisão de segurança fora do piloto com dado real.",
-      "validacao": ["python3", "tests/contrato/nativo.py"]
+      "validacao": [
+        "python3",
+        "tests/contrato/nativo.py"
+      ]
     },
     "acessibilidade": {
       "implementado": "parcial",
-      "evidencia": ["apps/web/tests/audit-remediation.json"],
+      "evidencia": [
+        "apps/web/tests/audit-remediation.json"
+      ],
       "checkpoint": "audit-remediation-2026-10-18",
       "completion_registrada": "partial",
       "testado": "relato_historico_local",
@@ -200,18 +502,33 @@
       "fechado": false,
       "causa": "Não há suíte axe no workflow native.yml. T-UI-01 do backlog não tem corrida em 29/10.",
       "proximo_passo": "Incluir, num recorte próprio, navegação por teclado até erro e ação nas jornadas alteradas, sem amostra quando a API falha.",
-      "validacao": ["npm", "-w", "apps/web", "test"]
+      "validacao": [
+        "npm",
+        "-w",
+        "apps/web",
+        "test"
+      ]
     },
     "operacao_monitoramento": {
       "implementado": "parcial",
-      "evidencia": ["infra/monitoring/alerts.yml", "infra/monitoring/prometheus.yml", "docs/pendencias.md", "docs/PILOTO.md"],
+      "evidencia": [
+        "infra/monitoring/alerts.yml",
+        "infra/monitoring/prometheus.yml",
+        "docs/pendencias.md",
+        "docs/PILOTO.md"
+      ],
       "testado": "ausente",
       "homologado": "sem_prova",
       "publicado": "producao_nao",
       "fechado": false,
       "causa": "Regras de alerta existem no repositório. Não há prova de monitor externo no host do provedor, canal do responsável nem preflight de produção.",
       "proximo_passo": "No ambiente do piloto, configurar scrape e alerta de /api/health. Não apontar este clone para produção.",
-      "validacao": ["./nexo", "prod", "db", "preflight"]
+      "validacao": [
+        "./nexo",
+        "prod",
+        "db",
+        "preflight"
+      ]
     }
   },
   "areas": [
@@ -220,25 +537,85 @@
       "titulo": "Build, dependências e SBOM",
       "prioridade": "P0",
       "fechado": false,
-      "implementado": "parcial",
-      "testado": "relato_historico_ci",
+      "implementado": "sim",
+      "testado": "gerado_localmente_ci_nao_conferido",
       "homologado": "nao_aplicavel",
-      "publicado": "github_relatado_nao_reconsultado",
+      "publicado": "somente_clone_local",
       "evidencia": [
-        {"path": "package.json", "commit": "82c4251", "nota": "engines node >=22.23.4 <23 e npm >=10.9.9 <11"},
-        {"path": ".nvmrc", "commit": "82c4251", "nota": "22.23.4"},
-        {"path": "apps/api-go/go.mod", "commit": "82c4251", "nota": "go 1.27.3"},
-        {"path": ".github/workflows/native.yml", "commit": "82c4251", "nota": "build, vet, race, lint, web e contratos"}
+        {
+          "path": "package.json",
+          "commit": "82c4251",
+          "nota": "engines node >=22.23.4 <23 e npm >=10.9.9 <11"
+        },
+        {
+          "path": ".nvmrc",
+          "commit": "82c4251",
+          "nota": "22.23.4"
+        },
+        {
+          "path": "apps/api-go/go.mod",
+          "commit": "82c4251",
+          "nota": "go 1.27.3"
+        },
+        {
+          "path": ".github/workflows/native.yml",
+          "commit": "82c4251",
+          "nota": "build, vet, race, lint, web e contratos"
+        },
+        {
+          "path": "scripts/generate-sbom.sh",
+          "commit": "e1b17d8",
+          "nota": "geração CycloneDX; presente em cc542a1"
+        },
+        {
+          "path": "scripts/validate-sbom.py",
+          "commit": "e1b17d8"
+        },
+        {
+          "path": "docs/SBOM.md",
+          "commit": "e1b17d8"
+        },
+        {
+          "path": ".github/workflows/native.yml",
+          "commit": "e1b17d8",
+          "nota": "passo sbom-cyclonedx no arquivo; run hospedado não conferido para cc542a1"
+        },
+        {
+          "path": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-sbom-cc542a1-summary.json",
+          "commit": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+          "nota": "exit 0 local; go 52; npm 1075 incluindo aninhados; run local-l26-cc542a1"
+        }
       ],
-      "entregue": ["runtime pinado", "workflow nativo"],
+      "entregue": [
+        "runtime pinado",
+        "workflow nativo",
+        "geração local CycloneDX Go e npm na base cc542a1"
+      ],
       "criterios_abertos": [
         {
           "id": "B01-SBOM",
-          "causa": "Não há arquivo SBOM nem passo de SBOM no workflow.",
+          "causa": "O SBOM foi gerado localmente em cc542a1. O gate do CI hospedado e o artefato sbom-cyclonedx desse run não foram conferidos. CI e193266 e geração 6f4bf38 não validam esta base.",
           "dependencias": [],
-          "evidencia_faltante": "Artefato CycloneDX ou equivalente do módulo Go e do workspace npm, ligado a um run.",
-          "proximo_passo": "Gerar SBOM no mesmo job do native.yml e guardar o artefato. Não aplicar audit fix cego.",
-          "validacao": ["go", "version"]
+          "evidencia_faltante": "Run hospedado do native.yml no commit candidato, com os dois CycloneDX identificando commit e run. A geração local não basta.",
+          "proximo_passo": "Conferir o job verificar e o artefato hospedado. Não aplicar audit fix cego. Não reimplementar o gerador do lote 26.",
+          "validacao": [
+            "procedimento: conferir o run hospedado de .github/workflows/native.yml neste HEAD e o artefato sbom-cyclonedx; a geração local de cc542a1 já existe e não fecha o critério"
+          ],
+          "gerado_localmente": {
+            "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+            "exit_code": 0,
+            "run": "local-l26-cc542a1",
+            "go": {
+              "components": 52,
+              "sha256": "f8090a025b2555058213d0fc4684a5000d9795afb81cfa1d904b6a2c63cc84ac"
+            },
+            "npm": {
+              "components": 1075,
+              "top_level_components": 754,
+              "sha256": "003f12bca69988957ac9fb068d5f4ef41f890bced7f9a07501b788dc39d3e9bd"
+            },
+            "hosted_ci_verified": false
+          }
         }
       ]
     },
@@ -253,19 +630,37 @@
       "homologado": "nao_aplicavel",
       "publicado": "github_relatado_nao_reconsultado",
       "evidencia": [
-        {"path": "db/migrations/00064_manual_payment_intents.sql", "commit": "dc21fd1"},
-        {"path": "docs/LOTE01-CONSOLIDADO.md", "commit": "82c4251"},
-        {"path": "apps/web/features/finance/actions.tsx", "commit": "82c4251"}
+        {
+          "path": "db/migrations/00064_manual_payment_intents.sql",
+          "commit": "dc21fd1"
+        },
+        {
+          "path": "docs/LOTE01-CONSOLIDADO.md",
+          "commit": "82c4251"
+        },
+        {
+          "path": "apps/web/features/finance/actions.tsx",
+          "commit": "82c4251"
+        }
       ],
-      "entregue": ["intent_id obrigatório", "replay com o mesmo UUID", "conflito se o payload muda"],
+      "entregue": [
+        "intent_id obrigatório",
+        "replay com o mesmo UUID",
+        "conflito se o payload muda"
+      ],
       "criterios_abertos": [
         {
           "id": "B02-reexecucao-antes-de-publicar",
           "causa": "O lote 01 não se reabre. Qualquer publicação futura que toque baixa precisa repetir o contrato no lab.",
-          "dependencias": ["lab PostgreSQL descartável"],
+          "dependencias": [
+            "lab PostgreSQL descartável"
+          ],
           "evidencia_faltante": "Log desta worktree de nativo.py sem skip.",
           "proximo_passo": "Não implementar de novo. Rodar o contrato quando o próximo lote de dinheiro for publicado.",
-          "validacao": ["python3", "tests/contrato/nativo.py"]
+          "validacao": [
+            "python3",
+            "tests/contrato/nativo.py"
+          ]
         }
       ]
     },
@@ -279,20 +674,40 @@
       "homologado": "sem_recurso_externo",
       "publicado": "github_relatado_nao_reconsultado",
       "evidencia": [
-        {"path": "db/migrations/00065_financial_connections.sql", "commit": "f3a5b8e"},
-        {"path": "apps/api-go/internal/finance/connections.go", "commit": "82c4251"},
-        {"path": "docs/LOTE02-B03-CONEXOES.md", "commit": "82c4251"},
-        {"path": "apps/web/features/admin/financial-connections.tsx", "commit": "82c4251"}
+        {
+          "path": "db/migrations/00065_financial_connections.sql",
+          "commit": "f3a5b8e"
+        },
+        {
+          "path": "apps/api-go/internal/finance/connections.go",
+          "commit": "82c4251"
+        },
+        {
+          "path": "docs/LOTE02-B03-CONEXOES.md",
+          "commit": "82c4251"
+        },
+        {
+          "path": "apps/web/features/admin/financial-connections.tsx",
+          "commit": "82c4251"
+        }
       ],
-      "entregue": ["conexão por tenant, ambiente e conta", "UI administrativa"],
+      "entregue": [
+        "conexão por tenant, ambiente e conta",
+        "UI administrativa"
+      ],
       "criterios_abertos": [
         {
           "id": "B03-conta-real",
           "causa": "Nenhuma conta Efí, Asaas ou Inter real foi homologada.",
-          "dependencias": ["credencial sandbox do operador"],
+          "dependencias": [
+            "credencial sandbox do operador"
+          ],
           "evidencia_faltante": "Registro de conexão sandbox sem segredo e cenário de isolamento A/B com IDs iguais.",
           "proximo_passo": "Manter o código. Abrir homologação só com conta sandbox autorizada.",
-          "validacao": ["python3", "tests/contrato/financial_connections_migration.py"]
+          "validacao": [
+            "python3",
+            "tests/contrato/financial_connections_migration.py"
+          ]
         }
       ]
     },
@@ -306,18 +721,33 @@
       "homologado": "nao_aplicavel",
       "publicado": "github_relatado_nao_reconsultado",
       "evidencia": [
-        {"path": "db/migrations/00066_financial_movements.sql", "commit": "5327528"},
-        {"path": "docs/LOTE03-B04-MOVIMENTOS.md", "commit": "82c4251"}
+        {
+          "path": "db/migrations/00066_financial_movements.sql",
+          "commit": "5327528"
+        },
+        {
+          "path": "docs/LOTE03-B04-MOVIMENTOS.md",
+          "commit": "82c4251"
+        }
       ],
-      "entregue": ["movimentos append-only", "sombra de saldo", "comparação antes do corte"],
+      "entregue": [
+        "movimentos append-only",
+        "sombra de saldo",
+        "comparação antes do corte"
+      ],
       "criterios_abertos": [
         {
           "id": "B04-corte",
           "causa": "A sombra existe e o leitor antigo não foi promovido. Não há flag de corte no código. O corte fica fechado enquanto a comparação não autorizar a troca.",
-          "dependencias": ["B03"],
+          "dependencias": [
+            "B03"
+          ],
           "evidencia_faltante": "Consulta de discrepância zerada ou justificada no lab, registrada como decisão de corte.",
           "proximo_passo": "Não cortar neste ciclo. Repetir a migração 65 para 66 e a leitura comparativa do lote 03 no lab.",
-          "validacao": ["python3", "tests/contrato/financial_movements_migration.py"]
+          "validacao": [
+            "python3",
+            "tests/contrato/financial_movements_migration.py"
+          ]
         }
       ]
     },
@@ -331,19 +761,37 @@
       "homologado": "sem_prova",
       "publicado": "github_relatado_nao_reconsultado",
       "evidencia": [
-        {"path": "db/migrations/00067_payment_effects.sql", "commit": "48ce2f0"},
-        {"path": "apps/api-go/internal/finance/payment_effects.go", "commit": "82c4251"},
-        {"path": "docs/LOTE04-B05-EFEITOS-PAGAMENTO.md", "commit": "82c4251"}
+        {
+          "path": "db/migrations/00067_payment_effects.sql",
+          "commit": "48ce2f0"
+        },
+        {
+          "path": "apps/api-go/internal/finance/payment_effects.go",
+          "commit": "82c4251"
+        },
+        {
+          "path": "docs/LOTE04-B05-EFEITOS-PAGAMENTO.md",
+          "commit": "82c4251"
+        }
       ],
-      "entregue": ["recebimento commitado independente de falha técnica", "consumidor desligado até habilitação da instalação"],
+      "entregue": [
+        "recebimento commitado independente de falha técnica",
+        "consumidor desligado até habilitação da instalação"
+      ],
       "criterios_abertos": [
         {
           "id": "B05-ativacao-piloto",
           "causa": "O consumidor não está implantado em produção. Suspensão em NAS real depende de homologação de acesso.",
-          "dependencias": ["B04", "B11 homologado no NAS do piloto"],
+          "dependencias": [
+            "B04",
+            "B11 homologado no NAS do piloto"
+          ],
           "evidencia_faltante": "Fila payment_effects observada no ambiente do piloto, com rollback que pausa o consumidor e preserva eventos.",
           "proximo_passo": "Manter gates desligados até o piloto. Não reimplementar o outbox.",
-          "validacao": ["python3", "tests/contrato/payment_effects.py"]
+          "validacao": [
+            "python3",
+            "tests/contrato/payment_effects.py"
+          ]
         }
       ]
     },
@@ -357,11 +805,23 @@
       "homologado": "nao_aplicavel",
       "publicado": "github_relatado_nao_reconsultado",
       "evidencia": [
-        {"path": "apps/api-go/internal/finance/providers/contract.go", "commit": "82c4251"},
-        {"path": "apps/api-go/internal/finance/providers/lab_test.go", "commit": "82c4251"},
-        {"path": "docs/LOTE05-B06-PROVIDERS.md", "commit": "82c4251"}
+        {
+          "path": "apps/api-go/internal/finance/providers/contract.go",
+          "commit": "82c4251"
+        },
+        {
+          "path": "apps/api-go/internal/finance/providers/lab_test.go",
+          "commit": "82c4251"
+        },
+        {
+          "path": "docs/LOTE05-B06-PROVIDERS.md",
+          "commit": "82c4251"
+        }
       ],
-      "entregue": ["contrato de provedor", "simulador de laboratório"],
+      "entregue": [
+        "contrato de provedor",
+        "simulador de laboratório"
+      ],
       "criterios_abertos": [
         {
           "id": "B06-nao-e-banco",
@@ -369,7 +829,12 @@
           "dependencias": [],
           "evidencia_faltante": "Nada interno obrigatório além de regressão quando um adapter mudar o contrato.",
           "proximo_passo": "Usar o corpus do lote 05 como gate de B07 e de um futuro Asaas. Não reabrir B06 como implementação.",
-          "validacao": ["go", "test", "-count=1", "./internal/finance/providers/"]
+          "validacao": [
+            "go",
+            "test",
+            "-count=1",
+            "./internal/finance/providers/"
+          ]
         }
       ]
     },
@@ -384,13 +849,35 @@
       "publicado": "github_relatado_nao_reconsultado",
       "nota_entrega": "Resolução autenticada, reemissão na mesma fatura e retenção estão entregues no lote 18. Não listar esses itens como não iniciados.",
       "evidencia": [
-        {"path": "apps/api-go/internal/finance/providers/efi", "commit": "82c4251", "nota": "sandboxURL e environment sandbox obrigatórios"},
-        {"path": "apps/api-go/internal/finance/provider_resolution.go", "commit": "4006f55"},
-        {"path": "db/migrations/00077_provider_resolution.sql", "commit": "b5bad2b"},
-        {"path": "docs/LOTE18-B07-RESOLUCAO-REEMISSAO.md", "commit": "82c4251"},
-        {"path": "docs/LOTE08-B07-PIPELINE-SANDBOX.md", "commit": "82c4251"},
-        {"path": "docs/LOTE11-B07-ARTEFATOS-CALLBACKS.md", "commit": "82c4251"},
-        {"path": "docs/LOTE16-B07-TRIAGEM-NOTIFICACOES.md", "commit": "82c4251"}
+        {
+          "path": "apps/api-go/internal/finance/providers/efi",
+          "commit": "82c4251",
+          "nota": "sandboxURL e environment sandbox obrigatórios"
+        },
+        {
+          "path": "apps/api-go/internal/finance/provider_resolution.go",
+          "commit": "4006f55"
+        },
+        {
+          "path": "db/migrations/00077_provider_resolution.sql",
+          "commit": "b5bad2b"
+        },
+        {
+          "path": "docs/LOTE18-B07-RESOLUCAO-REEMISSAO.md",
+          "commit": "82c4251"
+        },
+        {
+          "path": "docs/LOTE08-B07-PIPELINE-SANDBOX.md",
+          "commit": "82c4251"
+        },
+        {
+          "path": "docs/LOTE11-B07-ARTEFATOS-CALLBACKS.md",
+          "commit": "82c4251"
+        },
+        {
+          "path": "docs/LOTE16-B07-TRIAGEM-NOTIFICACOES.md",
+          "commit": "82c4251"
+        }
       ],
       "entregue": [
         "Pix imediato, CobV e Bolix no código sandbox",
@@ -412,10 +899,15 @@
         {
           "id": "B07-homologacao-sandbox",
           "causa": "Os relatos dos lotes 06 a 18 não incluem chamada autenticada à conta Efí. Falta conta, certificado, escopo e origem TLS autorizados.",
-          "dependencias": ["conta sandbox Efí do operador"],
+          "dependencias": [
+            "conta sandbox Efí do operador"
+          ],
           "evidencia_faltante": "Emissão, consulta, recebimento, cancelamento e devolução dos três produtos na sandbox, sem segredo no relatório.",
           "proximo_passo": "Não reimplementar resolução nem reemissão. Homologar quando a conta existir. Produção continua fora de autorização.",
-          "validacao": ["python3", "tests/contrato/provider_operations_migration.py"]
+          "validacao": [
+            "python3",
+            "tests/contrato/provider_operations_migration.py"
+          ]
         }
       ]
     },
@@ -429,8 +921,15 @@
       "homologado": "sem_recurso_externo",
       "publicado": "producao_nao",
       "evidencia": [
-        {"path": "apps/api-go/internal/finance/providers", "commit": "82c4251", "nota": "somente contract, demo e efi"},
-        {"path": "docs/LOTE05-B06-PROVIDERS.md", "commit": "82c4251"}
+        {
+          "path": "apps/api-go/internal/finance/providers",
+          "commit": "82c4251",
+          "nota": "somente contract, demo e efi"
+        },
+        {
+          "path": "docs/LOTE05-B06-PROVIDERS.md",
+          "commit": "82c4251"
+        }
       ],
       "entregue": [],
       "inter_por_demanda": true,
@@ -439,19 +938,33 @@
         {
           "id": "B08-asaas",
           "causa": "Não há adapter Asaas. A homologação Efí ainda não existe, e ela é a dependência do backlog.",
-          "dependencias": ["B06", "B07 homologado", "credencial sandbox Asaas"],
+          "dependencias": [
+            "B06",
+            "B07 homologado",
+            "credencial sandbox Asaas"
+          ],
           "evidencia_faltante": "Pacote do adapter e corpus B06 com inbox antes do HTTP 200.",
           "proximo_passo": "Não iniciar Asaas neste evento. O código de B13 está na branch de desenvolvimento e o critério continua aberto até o lab. Asaas só depois da homologação Efí e de conta sandbox.",
-          "validacao": ["go", "test", "-count=1", "./internal/finance/providers/"]
+          "validacao": [
+            "go",
+            "test",
+            "-count=1",
+            "./internal/finance/providers/"
+          ]
         },
         {
           "id": "B08-inter",
           "causa": "Não há demanda explícita de Inter neste clone e não há adapter.",
-          "dependencias": ["demanda do operador", "convênio e homologação V3"],
+          "dependencias": [
+            "demanda do operador",
+            "convênio e homologação V3"
+          ],
           "evidencia_faltante": "Pedido registrado e contrato Inter. Ausência de pedido não vira integração habilitada.",
           "proximo_passo": "Deixar Inter sem tarefa até demanda explícita.",
           "procedimento": "Gate de fechamento, sem comando neste clone: o operador grava em arquivo versionado, sem segredo, a decisão 'Inter demandado' ou 'Inter não demandado'. 'Não demandado' fecha o critério como não aplicável. 'Demandado' só então autoriza o teste futuro de adapter com HTTP falso e isolamento por tenant, sem convênio de produção. Sem esse registro o critério permanece aberto.",
-          "validacao": ["procedimento: registro versionado e sem segredo da decisão do operador, 'Inter demandado' ou 'Inter não demandado'; a segunda fecha como não aplicável; a primeira exige depois teste de adapter com HTTP falso e isolamento por tenant"]
+          "validacao": [
+            "procedimento: registro versionado e sem segredo da decisão do operador, 'Inter demandado' ou 'Inter não demandado'; a segunda fecha como não aplicável; a primeira exige depois teste de adapter com HTTP falso e isolamento por tenant"
+          ]
         }
       ]
     },
@@ -465,19 +978,41 @@
       "homologado": "sem_recurso_externo",
       "publicado": "github_relatado_nao_reconsultado",
       "evidencia": [
-        {"path": "db/migrations/00075_acs_task_intents.sql", "commit": "8c9815d"},
-        {"path": "docs/LOTE13-B09-ACS.md", "commit": "82c4251"},
-        {"path": "apps/api-go/internal/acs/intents.go", "commit": "82c4251"}
+        {
+          "path": "db/migrations/00075_acs_task_intents.sql",
+          "commit": "8c9815d"
+        },
+        {
+          "path": "docs/LOTE13-B09-ACS.md",
+          "commit": "82c4251"
+        },
+        {
+          "path": "apps/api-go/internal/acs/intents.go",
+          "commit": "82c4251"
+        }
       ],
-      "entregue": ["journal de intenção", "isolamento", "readback", "gates em 0", "uma instância por instalação"],
+      "entregue": [
+        "journal de intenção",
+        "isolamento",
+        "readback",
+        "gates em 0",
+        "uma instância por instalação"
+      ],
       "criterios_abertos": [
         {
           "id": "B09-bancada",
           "causa": "Modelo, firmware e timestamp real de CPE não foram homologados. Múltiplos ACS por tenant, retenção de PSK e resolução administrativa sem readback continuam fora do lote 13.",
-          "dependencias": ["GenieACS e CPE de laboratório"],
+          "dependencias": [
+            "GenieACS e CPE de laboratório"
+          ],
           "evidencia_faltante": "Readback físico com TLS CWMP. observed no ACS não substitui essa prova.",
           "proximo_passo": "Recorte interno pequeno, se for o evento seguinte depois de B13: resolução de incerteza que não marca sucesso sem readback, com teste no pacote acs.",
-          "validacao": ["go", "test", "-count=1", "./internal/acs/"]
+          "validacao": [
+            "go",
+            "test",
+            "-count=1",
+            "./internal/acs/"
+          ]
         }
       ]
     },
@@ -491,18 +1026,38 @@
       "homologado": "sem_recurso_externo",
       "publicado": "github_relatado_nao_reconsultado",
       "evidencia": [
-        {"path": "docs/LOTE12-B10-TRANSPORTE.md", "commit": "82c4251"},
-        {"path": "docs/expansao-olt-onu.md", "commit": "82c4251"}
+        {
+          "path": "docs/LOTE12-B10-TRANSPORTE.md",
+          "commit": "82c4251"
+        },
+        {
+          "path": "docs/expansao-olt-onu.md",
+          "commit": "82c4251"
+        }
       ],
-      "entregue": ["pin e rotação de host key", "gate de produto e firmware", "resultado desconhecido preservado", "escrita desligada por padrão"],
+      "entregue": [
+        "pin e rotação de host key",
+        "gate de produto e firmware",
+        "resultado desconhecido preservado",
+        "escrita desligada por padrão"
+      ],
       "criterios_abertos": [
         {
           "id": "B10-olt-fisica",
           "causa": "IN-03 permanece parcial. Não há OLT física na evidência do lote 12.",
-          "dependencias": ["modelo e firmware do piloto"],
+          "dependencias": [
+            "modelo e firmware do piloto"
+          ],
           "evidencia_faltante": "Sessão real com fingerprint conferido fora da rede do equipamento, comando e readback.",
           "proximo_passo": "Não relaxar known_hosts. Homologar no equipamento quando a bancada existir.",
-          "validacao": ["python3", "-m", "unittest", "discover", "-s", "services/network-agent"]
+          "validacao": [
+            "python3",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "services/network-agent"
+          ]
         }
       ]
     },
@@ -518,11 +1073,26 @@
       "franquia": "nao_implementar",
       "nota_entrega": "Telemetria por NAS e consumo serializado por tenant estão entregues no lote 20. Não reabrir como ausência.",
       "evidencia": [
-        {"path": "docs/LOTE14-B11-DISCONNECT.md", "commit": "1d31df5"},
-        {"path": "docs/LOTE15-B11-ACCOUNTING.md", "commit": "9fd9d50"},
-        {"path": "db/migrations/00076_radius_accounting_events.sql", "commit": "9fd9d50"},
-        {"path": "docs/LOTE19-B11-HISTORICO.md", "commit": "15a482d"},
-        {"path": "apps/api-go/internal/modules/leitura/radius_telemetry.go", "commit": "cd4266f"}
+        {
+          "path": "docs/LOTE14-B11-DISCONNECT.md",
+          "commit": "1d31df5"
+        },
+        {
+          "path": "docs/LOTE15-B11-ACCOUNTING.md",
+          "commit": "9fd9d50"
+        },
+        {
+          "path": "db/migrations/00076_radius_accounting_events.sql",
+          "commit": "9fd9d50"
+        },
+        {
+          "path": "docs/LOTE19-B11-HISTORICO.md",
+          "commit": "15a482d"
+        },
+        {
+          "path": "apps/api-go/internal/modules/leitura/radius_telemetry.go",
+          "commit": "cd4266f"
+        }
       ],
       "entregue": [
         "Disconnect Code 40 com recuperação",
@@ -535,18 +1105,30 @@
         {
           "id": "B11-coa",
           "causa": "CoA Code 43 não foi implementado. O lote 14 entrega só Disconnect.",
-          "dependencias": ["decisão do piloto se a alteração de atributos sem queda é necessária"],
+          "dependencias": [
+            "decisão do piloto se a alteração de atributos sem queda é necessária"
+          ],
           "evidencia_faltante": "Teste sintético de CoA e, se o piloto exigir, NAS real.",
           "proximo_passo": "Deixar CoA atrás de B13. Não criar franquia.",
-          "validacao": ["go", "test", "-count=1", "./internal/radius/"]
+          "validacao": [
+            "go",
+            "test",
+            "-count=1",
+            "./internal/radius/"
+          ]
         },
         {
           "id": "B11-nas-real",
           "causa": "Laboratório e CHR não homologam o firmware do provedor. Transporte IPv6 de NAS e DHCPv6-PD reais seguem sem prova. IN-11 e IN-15 continuam parciais na matriz.",
-          "dependencias": ["equipamento do piloto"],
+          "dependencias": [
+            "equipamento do piloto"
+          ],
           "evidencia_faltante": "Roteiro de docs/lab-pppoe.md repetido no NAS do provedor, com mais de uma conta.",
           "proximo_passo": "Manter NEXO_RADIUS_DISCONNECT_WRITE em 0 até essa homologação.",
-          "validacao": ["python3", "tests/contrato/go_integration.py"]
+          "validacao": [
+            "python3",
+            "tests/contrato/go_integration.py"
+          ]
         }
       ]
     },
@@ -556,29 +1138,89 @@
       "prioridade": "P0",
       "fechado": false,
       "implementado": "parcial",
-      "testado": "relato_historico_local",
+      "testado": "harness_entregue_ensaio_nao_executado",
       "homologado": "sem_prova",
       "publicado": "producao_nao",
       "evidencia": [
-        {"path": "scripts/backup.sh", "commit": "82c4251"},
-        {"path": "scripts/backup-manifest.py", "commit": "82c4251"},
-        {"path": "scripts/restore-verify-prod.sh", "commit": "82c4251"},
-        {"path": "apps/api-go/internal/db/restore.go", "commit": "82c4251"},
-        {"path": "/home/enok/Documentos/projetos/Backup-center", "commit": "2e410d2", "nota": "Repositório irmão Backup-center, não este clone. git cat-file aqui não resolve 2e410d2 nem 118df92. Os testes tests/test_backup_integrity_isolated.py e tests/test_backup_executor_integrity_lab.py também pertencem a esse repositório e não existem neste clone. CONSOLIDACAO_LOTE01.md relata 258 testes Linux em 26/10/2026; 118df92 altera integridade. Não reexecutado aqui."}
+        {
+          "path": "scripts/backup.sh",
+          "commit": "82c4251"
+        },
+        {
+          "path": "scripts/backup-manifest.py",
+          "commit": "82c4251"
+        },
+        {
+          "path": "scripts/restore-verify-prod.sh",
+          "commit": "82c4251"
+        },
+        {
+          "path": "apps/api-go/internal/db/restore.go",
+          "commit": "82c4251"
+        },
+        {
+          "path": "/home/enok/Documentos/projetos/Backup-center",
+          "commit": "2e410d2",
+          "nota": "Repositório irmão Backup-center, não este clone. git cat-file aqui não resolve 2e410d2 nem 118df92. Os testes tests/test_backup_integrity_isolated.py e tests/test_backup_executor_integrity_lab.py também pertencem a esse repositório e não existem neste clone. CONSOLIDACAO_LOTE01.md relata 258 testes Linux em 26/10/2026; 118df92 altera integridade. Não reexecutado aqui."
+        },
+        {
+          "path": "tests/contrato/restore_clean_host.py",
+          "commit": "56b2187",
+          "nota": "harness entregue; ensaio real não executado porque docker estava ausente"
+        },
+        {
+          "path": "tests/operacao/test_restore_clean_host.py",
+          "commit": "56b2187",
+          "nota": "13 testes estáticos OK; não aprovam B12"
+        },
+        {
+          "path": "docs/RESTORE-LAB-HOST-LIMPO.md",
+          "commit": "56b2187"
+        },
+        {
+          "path": ".github/workflows/native.yml",
+          "commit": "56b2187",
+          "nota": "passo do ensaio no arquivo; run hospedado não conferido"
+        }
       ],
-      "entregue": ["scripts de backup no Nexo", "validação de integridade reivindicada no Backup-center em 26/10"],
+      "entregue": [
+        "scripts de backup no Nexo",
+        "validação de integridade reivindicada no Backup-center em 26/10, não reexecutada",
+        "harness de restore sintético em cluster vazio, commit 56b2187, ensaio não executado"
+      ],
       "criterios_abertos": [
         {
           "id": "B12-restore-host-novo",
-          "causa": "O próprio documento do Backup-center diz que integridade de arquivo não comprova restauração completa. Não há ensaio de host vazio com chaves, documentos, grants e filas.",
-          "dependencias": ["lab vazio autorizado pela gerência"],
-          "evidencia_faltante": "Restore isolado e conferência de RLS, descriptografia e referências. Contagem de linhas não basta.",
-          "proximo_passo": "A gerência executa os testes de integridade do Backup-center e um restore em host vazio. Não usar configuração herdada de produção.",
+          "causa": "O harness sintético está no clone e não foi executado. O Backup-center continua dizendo que integridade de arquivo não comprova restauração completa. Host físico, cópia externa, cofre, RPO/RTO e piloto não foram ensaiados.",
+          "dependencias": [
+            "Docker, Go, OpenSSL e postgres:16-alpine para o ensaio sintético",
+            "lab vazio e operador para o destino real"
+          ],
+          "evidencia_faltante": "JSON de tests/contrato/relatorios/restore-clean-host.json de uma corrida concluída; restore em host físico; cópia externa; e a suíte do repositório Backup-center.",
+          "proximo_passo": "Executar python3 tests/contrato/restore_clean_host.py. Não reimplementar o harness. Não encerrar host físico, cofre, RPO/RTO, piloto nem os testes do Backup-center por esse ensaio.",
           "nota": "O argv pytest roda no repositório Backup-center. tests/test_backup_integrity_isolated.py e tests/test_backup_executor_integrity_lab.py não estão neste clone, e git cat-file aqui não resolve 2e410d2.",
           "validacao": [
-            ["python3", "tests/contrato/go_integration.py"],
-            ["pytest", "tests/test_backup_integrity_isolated.py", "tests/test_backup_executor_integrity_lab.py"]
-          ]
+            [
+              "python3",
+              "tests/contrato/restore_clean_host.py"
+            ],
+            [
+              "pytest",
+              "tests/test_backup_integrity_isolated.py",
+              "tests/test_backup_executor_integrity_lab.py"
+            ]
+          ],
+          "limites": {
+            "harness_entregue": true,
+            "harness_executado": false,
+            "testes_estaticos": "13 OK; não aprovam B12",
+            "host_fisico": false,
+            "copia_externa": false,
+            "cofre": false,
+            "rpo_rto": false,
+            "piloto": false,
+            "backup_center_reexecutado": false
+          }
         }
       ]
     },
@@ -588,8 +1230,8 @@
       "prioridade": "P0",
       "fechado": false,
       "implementado": "sim",
-      "implementado_onde": "branch de desenvolvimento HEAD 8c10c1a; base de desenho 82c4251",
-      "testado": "codigo_na_branch_banco_nao_executado",
+      "implementado_onde": "código desde 8c10c1a; fixture PSP corrigido em b67d2f3; HEAD de integração e2f3b18",
+      "testado": "execucao_parcial_com_prova",
       "homologado": "sem_prova",
       "publicado": "branch_de_desenvolvimento_nao_publicada",
       "evidence_reverted": false,
@@ -600,22 +1242,84 @@
         "ultima": "Sol 6.1 medium",
         "motivo": "cota de Sonnet 5.5 high comprovadamente esgotada",
         "revisao_principal_ativa": false,
-        "executada": false
+        "executada": true,
+        "execucao": "harness dirigido exit 0 na base cc542a1; a revisão de código Sol 6.1 medium do lote 25 não é essa execução"
       },
       "evidencia": [
-        {"path": "apps/api-go/internal/modules/leitura/import_revert_eligibility.go", "commit": "ee80de1", "nota": "leitura do marcador sobre a elegibilidade de db41585"},
-        {"path": "apps/web/features/admin/import-batches.tsx", "commit": "8f06bae"},
-        {"path": "db/migrations/00078_import_batch_compensations.sql", "commit": "0a67a13"},
-        {"path": "apps/api-go/internal/finance/invoice_locks.go", "commit": "2da4e0c"},
-        {"path": "apps/api-go/internal/modules/escrita/import_compensate.go", "commit": "0c04ded"},
-        {"path": "apps/api-go/internal/modules/escrita/rotas.json", "commit": "e8fe763"},
-        {"path": "apps/api-go/rotas.json", "commit": "a5709b4", "nota": "inventário estático da rota; não é publicação"},
-        {"path": "docs/LOTE24-B13-DESENHO-COMPENSACAO.md", "commit": "9fe63f0", "nota": "histórico intocado"},
-        {"path": "docs/LOTE24-B13-ACEITACAO.json", "commit": "9fe63f0", "nota": "22 casos planned/not_run, executado false, intocado"},
-        {"path": "docs/LOTE25-B13-COMPENSACAO.md", "commit": "working tree sobre 8c10c1a", "nota": "relatório desta documentação; ainda sem commit"},
-        {"path": "docs/LOTE25-B13-COMPENSACAO-ACEITE.json", "commit": "6de0e98", "nota": "22 casos escritos, executado false; a documentação acrescenta a cobertura coletiva no working tree"},
-        {"path": "docs/importacao-csv.md", "commit": "working tree sobre 8c10c1a", "nota": "procedimento alinhado ao código da branch, sem declarar publicação"},
-        {"path": "e2e/frontend-v0-import.mjs", "commit": "1ec8569", "nota": "script presente; execução e screenshots ausentes"}
+        {
+          "path": "apps/api-go/internal/modules/leitura/import_revert_eligibility.go",
+          "commit": "ee80de1",
+          "nota": "leitura do marcador sobre a elegibilidade de db41585"
+        },
+        {
+          "path": "apps/web/features/admin/import-batches.tsx",
+          "commit": "8f06bae"
+        },
+        {
+          "path": "db/migrations/00078_import_batch_compensations.sql",
+          "commit": "0a67a13"
+        },
+        {
+          "path": "apps/api-go/internal/finance/invoice_locks.go",
+          "commit": "2da4e0c"
+        },
+        {
+          "path": "apps/api-go/internal/modules/escrita/import_compensate.go",
+          "commit": "0c04ded"
+        },
+        {
+          "path": "apps/api-go/internal/modules/escrita/rotas.json",
+          "commit": "e8fe763"
+        },
+        {
+          "path": "apps/api-go/rotas.json",
+          "commit": "a5709b4",
+          "nota": "inventário estático da rota; não é publicação"
+        },
+        {
+          "path": "docs/LOTE24-B13-DESENHO-COMPENSACAO.md",
+          "commit": "9fe63f0",
+          "nota": "histórico intocado"
+        },
+        {
+          "path": "docs/LOTE24-B13-ACEITACAO.json",
+          "commit": "9fe63f0",
+          "nota": "22 casos planned/not_run, executado false, intocado"
+        },
+        {
+          "path": "docs/LOTE25-B13-COMPENSACAO.md",
+          "commit": "working tree sobre 8c10c1a",
+          "nota": "relatório desta documentação; ainda sem commit"
+        },
+        {
+          "path": "docs/LOTE25-B13-COMPENSACAO-ACEITE.json",
+          "commit": "6de0e98",
+          "nota": "22 casos escritos, executado false; a documentação acrescenta a cobertura coletiva no working tree"
+        },
+        {
+          "path": "docs/importacao-csv.md",
+          "commit": "working tree sobre 8c10c1a",
+          "nota": "procedimento alinhado ao código da branch, sem declarar publicação"
+        },
+        {
+          "path": "e2e/frontend-v0-import.mjs",
+          "commit": "1ec8569",
+          "nota": "script presente; execução e screenshots ausentes"
+        },
+        {
+          "path": "docs/LOTE26-VALIDACAO-B13-SBOM.md",
+          "commit": "working tree sobre e2f3b18",
+          "nota": "leitura dos gates de cc542a1"
+        },
+        {
+          "path": "/home/enok/Documentos/projetos/implementacao-codex/lote26-validacao-b13-sbom-2026-10-29/evidencias/gate-summary-cc542a1.json",
+          "commit": "cc542a1b502b9b78bdd0673140bbba0f15a89716"
+        },
+        {
+          "path": "tests/contrato/import_compensate_contract.py",
+          "commit": "b67d2f3",
+          "nota": "fixture PSP corrigido; nativo.py desse commit não concluiu"
+        }
       ],
       "entregue": [
         "recusa de emissão nova para título importado",
@@ -628,18 +1332,48 @@
       "criterios_abertos": [
         {
           "id": "B13-compensacao",
-          "causa": "O código está na branch. Os 22 casos, o GET before/after/replay e a jornada de browser não foram executados em PostgreSQL nem no Playwright. Skip por falta de banco não aprova. python3 -I em nativo.py e go_integration.py falha no import de lib antes do laboratório e não é o gate. O lote não foi publicado.",
-          "dependencias": ["desenho do lote 24 já aprovado", "lab PostgreSQL descartável", "revisão independente antes de integrar a publicação"],
-          "evidencia_faltante": "Log fresco de nativo.py e go_integration.py sem skip, go test TestImportCompensate com URL de banco, e o harness e2e.py da jornada de importação.",
-          "proximo_passo": "A gerência executa o lab, corrige falha real e só então integra. Não redeclarar a implementação. Kinds diferentes de invoices permanecem recusados. Sem PSP e sem apagar histórico.",
+          "causa": "O Go de cc542a1 passou 58 ações de compensação dentro de 241. O browser dirigido passou. O nativo.py exit 1 não concluiu os 22 HTTP. O fixture b67d2f3 ainda não rodou em PostgreSQL. O lote não foi publicado.",
+          "dependencias": [
+            "desenho do lote 24 já aprovado",
+            "lab PostgreSQL descartável",
+            "revisão independente antes de integrar a publicação"
+          ],
+          "evidencia_faltante": "python3 tests/contrato/nativo.py exit 0 no HEAD que contém b67d2f3, e o job verificar hospedado nesse commit.",
+          "proximo_passo": "Repetir o nativo.py sem -I. Não redeclarar os 22 HTTP. Não reimplementar o lote 25. Kinds diferentes de invoices permanecem recusados. Sem PSP e sem apagar histórico.",
           "validacao": [
-            ["python3", "tests/contrato/nativo.py"],
-            ["python3", "tests/contrato/go_integration.py"],
-            ["go", "test", "-count=1", "-run", "TestImportCompensate", "./internal/modules/escrita/"],
-            ["env", "NEXO_E2E_ONLY=frontend-v0-import.mjs", "python3", "tests/contrato/e2e.py"]
+            [
+              "python3",
+              "tests/contrato/nativo.py"
+            ],
+            [
+              "python3",
+              "tests/contrato/go_integration.py"
+            ]
           ]
         }
-      ]
+      ],
+      "provas_cc542a1": {
+        "base": "cc542a1b502b9b78bdd0673140bbba0f15a89716",
+        "go_integration": {
+          "exit_code": 0,
+          "acoes_pass_incluindo_subtestes": 241,
+          "acoes_de_compensacao_pass": 58,
+          "falha_de_caso": 0
+        },
+        "browser_dirigido": {
+          "exit_code": 0,
+          "desktop_e_390": true,
+          "resposta_perdida_recuperada_pela_ui": true,
+          "segundo_estorno": false,
+          "declara_22_http": false
+        },
+        "nativo_py": {
+          "exit_code": 1,
+          "concluiu": false,
+          "local": "import_compensate_contract.py:335",
+          "http_22_passados": false
+        }
+      }
     },
     {
       "id": "B14",
@@ -653,18 +1387,28 @@
       "fiscal_ativo_documentado": false,
       "habilitacao_inventada": false,
       "evidencia": [
-        {"path": "docs/integracao-v0/MATRIZ_FUNCIONAL.md", "commit": "82c4251", "nota": "FI-13 exporta CSV. AD-18 não transmite DICI."}
+        {
+          "path": "docs/integracao-v0/MATRIZ_FUNCIONAL.md",
+          "commit": "82c4251",
+          "nota": "FI-13 exporta CSV. AD-18 não transmite DICI."
+        }
       ],
-      "entregue": ["exportação contábil que não é nota"],
+      "entregue": [
+        "exportação contábil que não é nota"
+      ],
       "criterios_abertos": [
         {
           "id": "B14-escopo",
           "causa": "Não há services/fiscal-adapter, CNPJ, UF, certificado nem parecer que ative NFCom. Referência legal em relatório financeiro não é habilitação.",
-          "dependencias": ["decisão do responsável fiscal"],
+          "dependencias": [
+            "decisão do responsável fiscal"
+          ],
           "evidencia_faltante": "Registro de que o fiscal está ativo ou inativo para o piloto, com documento e UF. Se inativo, o critério fecha como não aplicável.",
           "proximo_passo": "Não escrever emissor enquanto essa decisão não existir.",
           "procedimento": "Gate de fechamento, sem comando neste clone: o responsável fiscal grava em arquivo versionado, sem segredo, 'fiscal inativo neste piloto' ou o escopo real (UF, documento, emissor e CNPJ). 'Inativo' fecha o critério como não aplicável. Escopo real é a única autorização para tarefa de emissor. Sem esse registro o critério permanece aberto. Não há teste de XML enquanto o escopo não existir.",
-          "validacao": ["procedimento: registro versionado e sem segredo do responsável fiscal, 'fiscal inativo neste piloto' ou escopo real com UF, documento, emissor e CNPJ; inativo fecha como não aplicável; escopo real é o único gate que abre tarefa de emissor"]
+          "validacao": [
+            "procedimento: registro versionado e sem segredo do responsável fiscal, 'fiscal inativo neste piloto' ou escopo real com UF, documento, emissor e CNPJ; inativo fecha como não aplicável; escopo real é o único gate que abre tarefa de emissor"
+          ]
         }
       ]
     },
@@ -678,18 +1422,34 @@
       "homologado": "sem_recurso_externo",
       "publicado": "github_relatado_nao_reconsultado",
       "evidencia": [
-        {"path": "apps/web/features/admin/message-channels.tsx", "commit": "82c4251"},
-        {"path": "apps/api-go/internal/modules/escrita/avisos.go", "commit": "82c4251"}
+        {
+          "path": "apps/web/features/admin/message-channels.tsx",
+          "commit": "82c4251"
+        },
+        {
+          "path": "apps/api-go/internal/modules/escrita/avisos.go",
+          "commit": "82c4251"
+        }
       ],
-      "entregue": ["avisos e canal HTTP genérico com Authorization"],
+      "entregue": [
+        "avisos e canal HTTP genérico com Authorization"
+      ],
       "criterios_abertos": [
         {
           "id": "B15-cloud-api",
           "causa": "Não há adapter Cloud API, WABA, template aprovado nem dedupe de delivery de WhatsApp.",
-          "dependencias": ["B05", "conta WABA do operador"],
+          "dependencias": [
+            "B05",
+            "conta WABA do operador"
+          ],
           "evidencia_faltante": "Um emissor idempotente, opt-out e cancelamento da régua quando o pagamento ocorre antes do envio.",
           "proximo_passo": "Recorte interno só quando B13 estiver implementado ou quando o operador pedir o canal: adapter desligado por padrão e HTTP falso nos testes.",
-          "validacao": ["go", "test", "-count=1", "./internal/modules/escrita/"]
+          "validacao": [
+            "go",
+            "test",
+            "-count=1",
+            "./internal/modules/escrita/"
+          ]
         }
       ]
     },
@@ -703,18 +1463,28 @@
       "homologado": "nao_aplicavel",
       "publicado": "github_relatado_nao_reconsultado",
       "evidencia": [
-        {"path": "docs/integracao-v0/MATRIZ_FUNCIONAL.md", "commit": "82c4251", "nota": "CR-01 a CR-09 integradas"}
+        {
+          "path": "docs/integracao-v0/MATRIZ_FUNCIONAL.md",
+          "commit": "82c4251",
+          "nota": "CR-01 a CR-09 integradas"
+        }
       ],
-      "entregue": ["CRM e chamados na interface oficial"],
+      "entregue": [
+        "CRM e chamados na interface oficial"
+      ],
       "criterios_abertos": [
         {
           "id": "B16-chatwoot",
           "causa": "Não há adapter Chatwoot nem conta/inbox no clone. O CRM nativo não foi substituído.",
-          "dependencias": ["pedido explícito e contas Chatwoot"],
+          "dependencias": [
+            "pedido explícito e contas Chatwoot"
+          ],
           "evidencia_faltante": "Isolamento account/tenant, evento sem loop e ação financeira permanecendo no Nexo.",
           "proximo_passo": "Não abrir tarefa P2 antes de B13, salvo pedido do operador.",
           "procedimento": "Gate de fechamento, sem comando neste clone: o operador grava em arquivo versionado, sem segredo, 'Chatwoot demandado' ou 'Chatwoot não demandado'. 'Não demandado' fecha o critério como não aplicável. 'Demandado' só então autoriza o teste futuro com HTTP falso, isolamento account/tenant, evento sem loop e ação financeira permanecendo no Nexo. Sem esse registro o critério permanece aberto.",
-          "validacao": ["procedimento: registro versionado e sem segredo da decisão do operador, 'Chatwoot demandado' ou 'Chatwoot não demandado'; a segunda fecha como não aplicável; a primeira exige depois teste com HTTP falso e isolamento por tenant"]
+          "validacao": [
+            "procedimento: registro versionado e sem segredo da decisão do operador, 'Chatwoot demandado' ou 'Chatwoot não demandado'; a segunda fecha como não aplicável; a primeira exige depois teste com HTTP falso e isolamento por tenant"
+          ]
         }
       ]
     },
@@ -728,17 +1498,28 @@
       "homologado": "sem_prova",
       "publicado": "github_relatado_nao_reconsultado",
       "evidencia": [
-        {"path": "docs/integracao-v0/MATRIZ_FUNCIONAL.md", "commit": "82c4251", "nota": "IN-04, IN-05 e IN-09 implementadas; IN-06 parcial"}
+        {
+          "path": "docs/integracao-v0/MATRIZ_FUNCIONAL.md",
+          "commit": "82c4251",
+          "nota": "IN-04, IN-05 e IN-09 implementadas; IN-06 parcial"
+        }
       ],
-      "entregue": ["CTO/CEO, porta e mapa operacional de contratos, POPs e caixas"],
+      "entregue": [
+        "CTO/CEO, porta e mapa operacional de contratos, POPs e caixas"
+      ],
       "criterios_abertos": [
         {
           "id": "B17-projeto-fisico",
           "causa": "Projeto físico completo, versionamento de diagrama e corpus de desempenho não têm prova. IN-06 segue parcial.",
-          "dependencias": ["especificação além do mapa operacional"],
+          "dependencias": [
+            "especificação além do mapa operacional"
+          ],
           "evidencia_faltante": "Contrato de servidor para porta ocupada, ciclo e tenant cruzado, com teste de lab.",
           "proximo_passo": "Um teste Go da API FTTH já existente, sem canvas novo, quando a fila P0 interna permitir.",
-          "validacao": ["python3", "tests/contrato/go_integration.py"]
+          "validacao": [
+            "python3",
+            "tests/contrato/go_integration.py"
+          ]
         }
       ]
     },
@@ -752,39 +1533,90 @@
       "homologado": "sem_recurso_externo",
       "publicado": "producao_nao",
       "evidencia": [
-        {"path": ".github/workflows/native.yml", "commit": "82c4251"},
-        {"path": "docs/PILOTO.md", "commit": "82c4251", "nota": "checklist sem evidência preenchida"},
-        {"path": "docs/pendencias.md", "commit": "82c4251"},
-        {"path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/00_STATUS.md", "commit": "e193266", "nota": "CI main 40717836379 e dev 40717831261 relatados para e193266. Não reconsultados. 82c4251 sem push nesse relato."}
+        {
+          "path": ".github/workflows/native.yml",
+          "commit": "82c4251"
+        },
+        {
+          "path": "docs/PILOTO.md",
+          "commit": "82c4251",
+          "nota": "checklist sem evidência preenchida"
+        },
+        {
+          "path": "docs/pendencias.md",
+          "commit": "82c4251"
+        },
+        {
+          "path": "/home/enok/Documentos/projetos/resultados-analise-nexoisp/00_STATUS.md",
+          "commit": "e193266",
+          "nota": "CI main 40717836379 e dev 40717831261 relatados para e193266. Não reconsultados. 82c4251 sem push nesse relato."
+        }
       ],
-      "entregue": ["workflow de release", "roteiro de piloto", "separação C/T nos documentos de lote e H/P declarados ausentes"],
+      "entregue": [
+        "workflow de release",
+        "roteiro de piloto",
+        "separação C/T nos documentos de lote e H/P declarados ausentes"
+      ],
       "criterios_abertos": [
         {
           "id": "B18-piloto",
-          "causa": "Não há provedor, janela, grupo reversível, restore ensaiado, monitor externo nem deploy.",
-          "dependencias": ["B12 restore em host vazio", "B13 compensação testada antes de corte com dado importado", "recursos externos de banco, acesso e, se ativos, fisco"],
+          "causa": "Não há provedor, janela, grupo reversível, restore de destino real, monitor externo nem deploy. O SBOM local e o Go de cc542a1 não fecham o piloto.",
+          "dependencias": [
+            "B12 ensaio sintético ainda não executado e, à parte, restore de host real",
+            "B13 HTTP ainda não concluído antes de corte com dado importado",
+            "artefato SBOM hospedado",
+            "recursos externos de banco, acesso e, se ativos, fisco"
+          ],
           "evidencia_faltante": "Itens de docs/PILOTO.md com responsável, data e versão, sem segredo.",
-          "proximo_passo": "Continuar tarefas internas. O código de B13 está na branch e o lab ainda é gate. Não declarar piloto. Publicação de código exige o workflow nativo com PostgreSQL real no runner. Ausência de provedor não fecha o item.",
+          "proximo_passo": "Continuar as execuções pendentes. Não reimplementar os lotes 25 e 26. Não declarar piloto. Publicação de código exige o workflow nativo com PostgreSQL real no runner deste HEAD. Ausência de provedor não fecha o item.",
           "validacao": [
-            ["python3", "tests/contrato/nativo.py"],
-            ["python3", "tests/contrato/go_integration.py"]
+            [
+              "python3",
+              "tests/contrato/nativo.py"
+            ],
+            [
+              "python3",
+              "tests/contrato/go_integration.py"
+            ]
           ]
         }
       ]
     }
   ],
   "proximo_evento": {
-    "id": "lab-b13-e-proximo-recorte-interno",
+    "id": "repetir-http-b13-e-executar-restore-sintetico",
     "prioridade": "P0",
-    "motivo": "O código da compensação está na branch 8c10c1a e não foi executado em PostgreSQL nem publicado. A gerência roda o lab, corrige falha, revisa, integra e escolhe o próximo recorte interno aberto sem pedir nova ordem.",
-    "nao_reabrir": ["lote01", "b07-resolucao", "b11-telemetria", "b13-elegibilidade-leitura", "b13-implementacao-lote25"],
-    "candidato_interno_seguinte": "B01 SBOM",
-    "limites": ["sem franquia", "sem PSP real", "sem produção", "custo adicional zero", "executor Grok 4.7 medium", "revisão independente na fila", "não fechar item externo por ausência de recurso", "default não é homologação", "projeto não está em 100%"],
+    "motivo": "O Go e o browser de cc542a1 passaram. O HTTP morreu no fixture, corrigido em b67d2f3 e ainda sem PostgreSQL. O harness B12 está entregue e o ensaio não rodou. O SBOM local não tem CI hospedado.",
+    "nao_reabrir": [
+      "lote01",
+      "b07-resolucao",
+      "b11-telemetria",
+      "b13-elegibilidade-leitura",
+      "b13-implementacao-lote25",
+      "lote26-correcoes-e-sbom"
+    ],
+    "candidato_interno_seguinte": "repetir nativo.py no HEAD e2f3b18 e executar restore_clean_host.py; em seguida conferir o run hospedado do native.yml",
+    "limites": [
+      "sem franquia",
+      "sem PSP real",
+      "sem produção",
+      "custo adicional zero",
+      "executor Grok 4.7 medium",
+      "revisão independente na fila",
+      "não fechar item externo por ausência de recurso",
+      "default não é homologação",
+      "projeto não está em 100%",
+      "ensaio 27 não executado permanece pendente"
+    ],
     "validacao": [
-      ["python3", "tests/contrato/nativo.py"],
-      ["python3", "tests/contrato/go_integration.py"],
-      ["go", "test", "-count=1", "-run", "TestImportCompensate", "./internal/modules/escrita/"],
-      ["env", "NEXO_E2E_ONLY=frontend-v0-import.mjs", "python3", "tests/contrato/e2e.py"]
+      [
+        "python3",
+        "tests/contrato/nativo.py"
+      ],
+      [
+        "python3",
+        "tests/contrato/restore_clean_host.py"
+      ]
     ]
   },
   "continuacao_apos_lote25": {
@@ -792,13 +1624,17 @@
     "pedir_nova_ordem": false,
     "projeto_concluido": false,
     "percentual": null,
-    "instrucao": "A gerência executa os testes reais, corrige e revisa falhas, integra a branch de desenvolvimento e escolhe o próximo recorte interno aberto do mapa. Não fechar item externo por ausência de recurso. Não transformar default, sandbox ou skip em homologação. O projeto permanece aberto enquanto existir critério aberto."
+    "instrucao": "Os lotes 25 e 26 não se reimplementam. A gerência repete nativo.py no HEAD com b67d2f3, executa o harness de restore quando houver Docker e confere o CI hospedado deste HEAD. Não fechar item externo por ausência de recurso. Não transformar default, sandbox, skip, geração local ou teste estático em homologação. O projeto permanece aberto enquanto existir critério aberto."
   },
   "publicacao": {
     "producao": false,
     "lote25_publicado": false,
-    "github_e193266": "relatado em 00_STATUS.md e não reconsultado nesta sessão",
+    "github_e193266": "relato histórico de 00_STATUS.md; não valida cc542a1 nem e2f3b18",
     "head_82c4251": "base documental do desenho B13; o mesmo relato diz que o lote 24 não teve push nem deploy",
-    "head_desenvolvimento_8c10c1a": "código do lote 25 integrado na branch de desenvolvimento; esta documentação não publica esse HEAD"
+    "head_desenvolvimento_8c10c1a": "código do lote 25 integrado na branch de desenvolvimento; esta documentação não publica esse HEAD",
+    "lote26_publicado": false,
+    "lote27_publicado": false,
+    "head_cc542a1": "base dos gates Go, browser, SBOM local e da falha HTTP; não é publicação",
+    "head_desenvolvimento_e2f3b18": "inclui b67d2f3 e 56b2187; os ensaios desses commits não concluíram; esta documentação não publica esse HEAD"
   }
 }
