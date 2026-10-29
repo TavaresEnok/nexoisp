@@ -2,7 +2,6 @@ package escrita
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
@@ -16,6 +15,7 @@ import (
 	"nexoisp/api-go/internal/apierr"
 	"nexoisp/api-go/internal/auth"
 	"nexoisp/api-go/internal/db"
+	"nexoisp/api-go/internal/db/labtest"
 	"nexoisp/api-go/internal/finance"
 	"nexoisp/api-go/internal/finance/providers"
 	"nexoisp/api-go/internal/httpx"
@@ -23,7 +23,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
-	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -445,7 +444,7 @@ func TestImportCompensate_B13_16(t *testing.T) {
 		}
 	}
 	seed := seedImported(t, database, tenant, user, "open")
-	execImportRowOwner(t, tenant, `update import_rows set status = 'updated' where batch_id = $1::uuid`, seed.batch)
+	markSyntheticImportRowUpdated(t, tenant, seed.batch)
 	_, err := postCompensate(database, actor, seed.batch, "updated-"+uuid.NewString(), "motivo sem preimagem", "")
 	if statusCode(err) != 409 || err.Error() != "provenance_movement" {
 		t.Fatal(err)
@@ -1154,45 +1153,13 @@ func assertNoPSP(t *testing.T, database *db.DB, tenant, invoice string) {
 	}
 }
 
-func execImportRowOwner(t *testing.T, tenant, query string, args ...any) {
+func markSyntheticImportRowUpdated(t *testing.T, tenant, batch string) {
 	t.Helper()
 	dsn := os.Getenv("NEXO_GO_TEST_DATABASE_OWNER_URL")
 	if dsn == "" {
 		t.Fatal("NEXO_GO_TEST_DATABASE_OWNER_URL ausente; o estado sintético de import_rows exige o owner do laboratório nexo_test")
 	}
-	owner, err := sql.Open("pgx", dsn)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer owner.Close()
-	ctx := context.Background()
-	var name, user string
-	if err = owner.QueryRowContext(ctx, `select current_database(), current_user`).Scan(&name, &user); err != nil {
-		t.Fatal(err)
-	}
-	if name != "nexo_test" || user == "nexo_go" || user == "nexo_app" {
-		t.Fatalf("owner exclusivo de nexo_test exigido, db=%s user=%s", name, user)
-	}
-	tx, err := owner.BeginTx(ctx, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer tx.Rollback()
-	if _, err = tx.ExecContext(ctx, `select set_config('app.tenant_id', $1, true)`, tenant); err != nil {
-		t.Fatal(err)
-	}
-	res, err := tx.ExecContext(ctx, query, args...)
-	if err != nil {
-		t.Fatal(err)
-	}
-	n, err := res.RowsAffected()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if n != 1 {
-		t.Fatalf("import_rows sintético alterou %d linhas", n)
-	}
-	if err = tx.Commit(); err != nil {
+	if err := labtest.MarkSyntheticImportRowUpdated(context.Background(), dsn, tenant, batch); err != nil {
 		t.Fatal(err)
 	}
 }

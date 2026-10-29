@@ -1,4 +1,4 @@
-package finance
+package db_test
 
 import (
 	"context"
