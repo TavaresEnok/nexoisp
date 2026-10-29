@@ -203,6 +203,8 @@ func (s Service) importOperations(ops map[string]operation) {
 	schema := obj(o(f("kind", validate.Enum("subscribers", "contracts", "invoices", "history", "network", "documents", "users")), f("source", str().Pattern(`^[a-z0-9-]{2,40}$`, "origem: minúsculas, números e hífen").Def("csv-intermediario")), f("filename", str().Max(200).Opt()), f("csv", str().Min(1).Max(15*1024*1024)), f("mapping", validate.Record(str()).Opt()), f("plan_map", validate.Record(str().UUID()).Opt()), f("device_id", str().UUID().Nullish())))
 	ops["POST /api/import/preview"] = operation{nil, schema}
 	ops["POST /api/import/apply"] = operation{nil, schema}
+	// O registro entrega o corpo ao núcleo. UUID, query e Idempotency-Key continuam em importCompensate; a transação é a do Registry.
+	ops["POST /api/import/batches/:id/compensate"] = operation{s.importCompensate, obj(o(f("reason", str().Trimmed().Min(10, "motivo inválido").Max(200, "motivo inválido"))))}
 }
 func (s Service) importCSV(ctx context.Context, b map[string]any, apply bool) (any, error) {
 	table := parseCSV(b["csv"].(string))
