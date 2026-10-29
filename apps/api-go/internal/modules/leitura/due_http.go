@@ -125,10 +125,31 @@ func dueServe(ctx context.Context, id string, policy duePolicy, observe func(str
 	return dueBreakdownFromQuery(rows, nil)
 }
 
+// dueHTTPWith is the single GET due path.
+// Shadow false calls legacy once. Shadow true runs selection.SQL once, then Strip
+// and dueBreakdownFromRow. It does not call legacy after the variant.
+func dueHTTPWith(ctx context.Context, id string, policy balanceReadPolicy, query func(context.Context, string, ...any) ([]jsonx.Object, error), legacy func(context.Context, string) (map[string]any, error)) (map[string]any, error) {
+	selection, err := policy.pick(balanceReaderInvoiceDue, gen.Due)
+	if err != nil {
+		return nil, err
+	}
+	if !selection.Shadow {
+		return legacy(ctx, id)
+	}
+	rows, err := query(ctx, selection.SQL, id)
+	if err != nil {
+		return nil, err
+	}
+	if err = Strip(selection, rows); err != nil {
+		return nil, err
+	}
+	return dueBreakdownFromQuery(rows, nil)
+}
+
 // DueHTTP is the GET /api/invoices/{id}/due entry. Agreement and Manual keep calling DueBreakdown.
 // Compiled allowlists are empty, so this delegates to DueBreakdown and runs gen.Due once.
 func DueHTTP(ctx context.Context, tx *db.Tx, id string) (map[string]any, error) {
-	return dueServe(ctx, id, dueCompiledPolicy(), nil, func(ctx context.Context, sql string, args ...any) ([]jsonx.Object, error) {
+	return dueHTTPWith(ctx, id, productionBalancePolicy(), func(ctx context.Context, sql string, args ...any) ([]jsonx.Object, error) {
 		return tx.Objects(ctx, sql, args...)
 	}, func(ctx context.Context, id string) (map[string]any, error) {
 		return DueBreakdown(ctx, tx, id)
