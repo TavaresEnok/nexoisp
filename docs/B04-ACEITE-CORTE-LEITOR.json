@@ -616,10 +616,10 @@
     },
     {
       "id": "explain-indices",
-      "prova_minima": "EXPLAIN de um invoice_id e de uma pagina usa invoice_movements_invoice e payments_invoice",
+      "prova_minima": "EXPLAIN ANALYZE BUFFERS JSON de um invoice_id e de uma pagina, com enable_seqscan=on, consulta canonica e volume representativo. O mesmo no de Index Scan de invoice_movements (mv) e de payments (py) restringe invoice_id ao i.id externo e tenant_id ao i.tenant_id; tenant pode ser filtro desse scan se nao for chave. Indice equivalente, inclusive payments_tenant_invoice_identity_uq da migracao 74 unique(tenant_id, invoice_id, id) no lugar de payments_invoice da migracao 39, so vale com pg_index, pg_class, pg_attribute e pg_get_indexdef mostrando indice valido, pronto, na relacao certa, chaves capazes de buscar invoice_id e predicado satisfeito. Nome isolado nao aceita. RLS, subplan e condicoes em nos distintos nao contam.",
       "gate": "L1",
       "executado": false,
-      "prova": null
+      "prova": "Criterio reescrito para equivalencia estrutural da migracao 74. A corrida 7cde1e6 usou invoice_movements_invoice e payments_tenant_invoice_identity_uq com Index Cond ((tenant_id = i.tenant_id) AND (invoice_id = i.id)), 1 linha por loop, 1 loop na fatura e 7 na pagina, e falhou no verificador que exigia o nome payments_invoice. Essa corrida permanece falha historica e nao e reclassificada. Este texto nao e execucao. explain-indices continua pendente ate uma corrida nova com NEXO_BALANCE_READ_PG_REQUIRED=1."
     },
     {
       "id": "variante-shadow-isolada",
