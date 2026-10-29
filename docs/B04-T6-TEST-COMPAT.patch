@@ -1,0 +1,10 @@
+B04 t6 test compat: no-op
+
+arquivo_observado: apps/api-go/internal/modules/leitura/balance_read_inline_test.go
+sha256: 52229d13ff8fd13307eaa763ce76eaf6c966a33f1f5ff9bab29928ff6d072659
+bytes: 12440
+
+balance_read_inline_test.go já exige balanceVariants[balanceReaderContractFinanceTotals] igual à sentença própria e não apaga o mapa. Não há TestMain na frente t6. A única expectativa de mapa vazio está em balance_read_test.go, código comum substituído pelo commit desta corretiva. Não se edita o core antigo à mão nem a worktree parada.
+
+Nenhum hunk. Não aplicar patch em worktree alheia.
+Este arquivo existe para o registro explícito; git apply não deve ser usado.

@@ -1,0 +1,149 @@
+{
+  "lote": 29,
+  "tarefa": "t5a-b04-tests-composicao",
+  "head_antes_desta_corretiva": "040ac13527017602bcf0d16c1ce1a2507ac2c2ff",
+  "postgres_explain": "nao_executado",
+  "gates_db_explain_ci": "pendentes",
+  "git_sqlite_em_worktree_alheia": "nao_executado",
+  "worktrees_paradas_nao_alteradas": [
+    "/home/enok/srv_projetos/worktrees/08mu8zaz/task-71f482c9cff5-t4-b04-variantes-sqlc",
+    "/home/enok/srv_projetos/worktrees/08mu8zaz/task-71f482c9cff5-t6-b04-variante-totais"
+  ],
+  "proposta": {
+    "caminho_previsto_para_copia_da_gerencia": "orchestration/evidence/lote29-composition-repair-proposal.json",
+    "evidencia": "evidencias29",
+    "nota": "O objeto proposta está neste manifesto autorizado. A worktree desta tarefa não grava orchestration/ nem altera controlador ou estado. A gerência pode copiar este objeto depois da revisão.",
+    "t4": {
+      "arquivo": "apps/api-go/internal/modules/leitura/balance_read_sqlc_test.go",
+      "snapshot_sha256": "ffa6fa6b07cbbdf8177aa3d044f69ecb86da116bc35f6954d9858fe84d696838",
+      "snapshot_bytes": 14303,
+      "snapshot_origem": "leitura direta do arquivo na worktree parada, sem git e sem sqlite",
+      "patch": "docs/B04-T4-TEST-COMPAT.patch",
+      "patch_sha256": "f265db3699b8979a1ce4a740789378443c5f0df0e451badb1fb7a7fdbb9dc0a7",
+      "patch_bytes": 3506,
+      "patch_header": [
+        "diff --git a/apps/api-go/internal/modules/leitura/balance_read_sqlc_test.go b/apps/api-go/internal/modules/leitura/balance_read_sqlc_test.go",
+        "--- a/apps/api-go/internal/modules/leitura/balance_read_sqlc_test.go",
+        "+++ b/apps/api-go/internal/modules/leitura/balance_read_sqlc_test.go"
+      ],
+      "aplicado_na_worktree_t4": false,
+      "remove": [
+        "TestMain",
+        "esvaziamento de balanceVariants",
+        "exigencia de mapa vivo vazio",
+        "exigencia de comprimento exclusivo do registro sqlc"
+      ],
+      "mantem": [
+        "forma SQL",
+        "formula",
+        "politica local",
+        "Strip",
+        "allowlists vazias",
+        "gate pending",
+        "identidade da chave propria no mapa vivo"
+      ],
+      "passos": [
+        "Publicar e revisar o commit desta corretiva, que traz o codigo comum dos testes.",
+        "Atualizar a base parada de t4 com backup, preservando rascunhos e attempts.",
+        "Conferir que o arquivo de entrada ainda tem o sha256 do snapshot antes de aplicar.",
+        "Aplicar docs/B04-T4-TEST-COMPAT.patch com git apply -p1 somente na base ja atualizada com este codigo comum.",
+        "Nao editar balance_read_test.go antigo de t4 a mao: ele vem deste commit.",
+        "Rodar a suite da frente t4 de novo e abrir revisao independente. O patch nao comprova o teste do candidato t4.",
+        "Retomar integracoes ja revisadas so depois do fix DONE. Gates de PostgreSQL, EXPLAIN e CI continuam pendentes."
+      ]
+    },
+    "t6": {
+      "status": "noop",
+      "patch": "docs/B04-T6-TEST-COMPAT.patch",
+      "patch_sha256": "4bed06c7b2baecbd97d942ffc85cf217c645ec7acbf46319b96a7cc2765fa22a",
+      "patch_bytes": 682,
+      "motivo": "balance_read_inline_test.go já exige balanceVariants[balanceReaderContractFinanceTotals] igual à sentença própria e não apaga o mapa. Não há TestMain na frente t6. A única expectativa de mapa vazio está em balance_read_test.go, código comum substituído pelo commit desta corretiva. Não se edita o core antigo à mão nem a worktree parada.",
+      "arquivos_lidos": {
+        "balance_read_hooks_test.go": {
+          "sha256": "f5c24a2431fbb45d926f3667cf2b76814f5f595e7931dda6743cf97356056b6b",
+          "bytes": 9224,
+          "tem_TestMain": false,
+          "apaga_balanceVariants": false,
+          "exige_mapa_vazio": false
+        },
+        "balance_read_inline_test.go": {
+          "sha256": "52229d13ff8fd13307eaa763ce76eaf6c966a33f1f5ff9bab29928ff6d072659",
+          "bytes": 12440,
+          "tem_TestMain": false,
+          "apaga_balanceVariants": false,
+          "exige_mapa_vazio": false
+        },
+        "balance_read_query_test.go": {
+          "sha256": "d32909b6b53f85dfed7601c12d2088a5522ca1df4252e136e9a38fe2c6bd13a5",
+          "bytes": 2491,
+          "tem_TestMain": false,
+          "apaga_balanceVariants": false,
+          "exige_mapa_vazio": false
+        },
+        "balance_read_test.go": {
+          "sha256": "c220d8d3049bc8e8b36a0ab510c6838f6368fe79dfef4a8a54b7a3e58f103650",
+          "bytes": 14947,
+          "tem_TestMain": false,
+          "apaga_balanceVariants": false,
+          "exige_mapa_vazio": true
+        },
+        "due_http_test.go": {
+          "sha256": "6486dd8853d38b8645ab659f2bdcd72b0ae5a951a43f8c3937c1f66cde615cf6",
+          "bytes": 15993,
+          "tem_TestMain": false,
+          "apaga_balanceVariants": false,
+          "exige_mapa_vazio": false
+        },
+        "import_reconciliation_test.go": {
+          "sha256": "7b7b3794720b2abd587c09ff73a7a6ff393f81c6c6bd54d6953d5c5b5366dd19",
+          "bytes": 2591,
+          "tem_TestMain": false,
+          "apaga_balanceVariants": false,
+          "exige_mapa_vazio": false
+        },
+        "import_revert_eligibility_test.go": {
+          "sha256": "cc6e7bee0b4cbcc1183c285439f28bcdb66751478e7abacc02ac0c533717dea4",
+          "bytes": 4760,
+          "tem_TestMain": false,
+          "apaga_balanceVariants": false,
+          "exige_mapa_vazio": false
+        },
+        "paged_test.go": {
+          "sha256": "c59f57adc8fb2a93e5b5279f2eb9d0a2b11996095fd0413573e2054a82e3c4b8",
+          "bytes": 1093,
+          "tem_TestMain": false,
+          "apaga_balanceVariants": false,
+          "exige_mapa_vazio": false
+        },
+        "radius_history_test.go": {
+          "sha256": "789c7c8dcfdcf65af917391c9f8a8f4850795b804d073415b03594300ca3597b",
+          "bytes": 1802,
+          "tem_TestMain": false,
+          "apaga_balanceVariants": false,
+          "exige_mapa_vazio": false
+        },
+        "radius_telemetry_test.go": {
+          "sha256": "a99f5ade9471a11dad19664a70f9a4949207ad13e96f9c380bf7ba1ed5eda2ed",
+          "bytes": 2725,
+          "tem_TestMain": false,
+          "apaga_balanceVariants": false,
+          "exige_mapa_vazio": false
+        }
+      },
+      "aplicado": false,
+      "passos": [
+        "Nao aplicar hunk em t6.",
+        "Quando a base parada for atualizada, o balance_read_test.go comum deste commit substitui a expectativa de mapa vazio.",
+        "balance_read_inline_test.go permanece como esta no snapshot."
+      ]
+    },
+    "dependencias_aprovadas": [
+      "2e71c2cd3024aa8ff34d2a6a6bb5468f5625ab07",
+      "3ba6ea475211776daa3bd4d8093e3171095dd878",
+      "383ac2080f752da432278515152a06e4cf0ccf7c",
+      "981c646c85c73f608956ac42b078e1ea36980383",
+      "e025e468b81ef2ca385ae66d47ba32aaaa752df9",
+      "4acbbe373b01a8019ae8a20d6182e4e8e87ef18c"
+    ]
+  }
+}

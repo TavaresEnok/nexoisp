@@ -1,6 +1,6 @@
 # B04 — contrato de implementação do núcleo de leitura
 
-Este documento registra o contrato operacional B04-I1 da frente L1 no estado integrado com C3a. Ele complementa `docs/B04-DESENHO-CORTE-LEITOR.md` e não substitui a matriz em `docs/B04-ACEITE-CORTE-LEITOR.json`. A entrega L1 implementa o núcleo puro: consulta por ids, seleção, `Strip` e métrica. Não registra variante de produto e não abre allowlist. O gancho do GET due e a prévia pura estão em C3a (`due_http.go`, `due_calculation.go` e o ramo de `auxiliares.go`) e já fazem parte desta árvore. Os outros leitores fechados continuam sem gancho. A evolução seguinte do caminho Due pertence à frente t8.
+Este documento registra o contrato operacional B04-I1 da frente L1 e a composição já integrada nesta árvore: ganchos t3, variante da lista t5, agregados t7 e due t8. Ele complementa `docs/B04-DESENHO-CORTE-LEITOR.md` e não substitui a matriz em `docs/B04-ACEITE-CORTE-LEITOR.json`. A entrega L1 implementa o núcleo puro: consulta por ids, seleção, `Strip` e métrica. As allowlists compiladas de shadow e de cut continuam vazias. O gancho do GET due e a prévia pura estão em C3a (`due_http.go`, `due_calculation.go` e o ramo de `auxiliares.go`). As frentes t4 (sqlc) e t6 (totais) não estão neste HEAD; o ajuste de teste delas está no manifesto de recuperação e não foi aplicado nas worktrees paradas.
 
 O produto continua na sentença legada. Corte, centavos oficiais, escritores, schema, grants, SQLs legados e UI permanecem como estão. O histórico dos lotes 25 a 28 e o desenho aprovado não são reescritos.
 
@@ -16,7 +16,7 @@ O pacote `leitura` expõe:
 
 Funções internas:
 
-- `registerBalanceVariant(reader, sql string)`, usada só pelo `init` dos futuros `variants_*.go`. Nesta entrega ninguém a chama no produto, e o mapa global permanece vazio.
+- `registerBalanceVariant(reader, sql string)`, usada pelo `init` de `variants_dinamicas.go`, `variants_c2.go` e `variants_due.go` já integrados. Cada um grava só a própria chave e a própria sentença. O mapa global conserva esses registros durante a suíte. Allowlist vazia faz `Pick` devolver a sentença legada.
 - `dueBreakdownFromRow(jsonx.Object) map[string]any`, declarado uma vez em `due_calculation.go`. É a expressão de multa, juros e residual que `DueBreakdown` aplica depois de `gen.Due`, por `dueBreakdownFromQuery`. O shadow de `dueServe` usa essa função sobre a linha já lida. `balance_read.go` não declara `DueHTTP`, `dueHTTPWith`, `dueMapFromShadowRows` nem `dueBreakdownFromRow`.
 - `balanceRowsInTx(ctx, tx, reader, legacy, args...)` executa `Pick`, uma `tx.Objects` e `Strip` na mesma transação.
 - `Service.balanceRows` abre o `WithScope` já usado por `Service.rows` e delega a `balanceRowsInTx`. `Service.rows` não muda.
@@ -94,7 +94,7 @@ O caminho integrado, depois de C3a, fica assim:
 
 `balance_read.go` conserva `Pick`, `Strip`, o registro de variantes, a seleção pura, `balanceRows`, a métrica e a consulta dedicada. As allowlists compiladas de shadow e de cut continuam vazias. Uma leitura due em `off` executa uma sentença. A resposta servida não contém `cmp_`.
 
-Em `shadow` de teste de C3a, com política local que permite `invoice-due` e traz uma variante, `dueServe` faz uma única consulta, `stripDueCompare` e o mesmo `dueBreakdownFromRow`. A prévia de multa e juros não entra na sombra e não é relida em outra sentença. A próxima frente t8 é a dona da evolução desse caminho.
+Em `shadow` de teste, com política local que permite `invoice-due` e traz uma variante, o caminho due faz uma única consulta, retira `cmp_` e usa o mesmo `dueBreakdownFromRow`. A prévia de multa e juros não entra na sombra e não é relida em outra sentença. A frente t8 registrou `shadow/due.sql` em `variants_due.go`. As allowlists compiladas continuam vazias, então a produção segue em `gen.Due`.
 
 ## Gates pendentes
 
@@ -106,3 +106,11 @@ Pendente, com papel não privilegiado `nexo_app` e fixtures não vazias:
 - `EXPLAIN ANALYZE` de uma fatura e de uma página mostrando filtragem anterior aos agregados e uso de `invoice_movements_invoice` e `payments_invoice`, sem forçar o planner e sem exigir índice num conjunto vazio.
 
 O teste `TestBalanceReadQueryDatabaseGatePending` exige a constante `pending`. Um `t.Skip` não aprova esses dois itens. O resultado da amostra e os limites do plano serão anexados quando o gate rodar.
+
+## Composição dos testes
+
+Nesta correção nenhum arquivo de produção, SQL, allowlist, escritor, grant ou migração muda. A lista de faturas continua passando `dynamicSQL("/api/invoices", 1, …)` para `balanceRowsInTx`. Com allowlists vazias, `Pick` devolve essa sentença legada, sem coluna `cmp_`. O gancho não é proibido e a chamada direta antiga `tx.Objects` não é exigida no teste da lista.
+
+O registro de produto fica intacto. Não há `TestMain` por frente nem `init` de teste que apague, restaure ou troque `balanceVariants`. `TestBalanceReadRegisterVariant` copia o mapa antes das ações locais e da recusa de leitor inválido e exige que a cópia continue igual. Não exige mapa vazio, comprimento um nem ausência de chave de outra frente. Cada variante integrada exige a própria chave e o próprio SQL no mapa vivo.
+
+PostgreSQL e `EXPLAIN ANALYZE` não foram executados nesta correção. Teste estático não aprova esses gates. O patch de t4 e o no-op de t6 estão em `docs/B04-T4-TEST-COMPAT.patch`, `docs/B04-T6-TEST-COMPAT.patch` e `docs/B04-RECUPERACAO-DEPENDENCIAS.json`. A gerência aplica o patch de t4 só depois da revisão, sobre o snapshot preservado, junto com o refresh da base comum deste commit.

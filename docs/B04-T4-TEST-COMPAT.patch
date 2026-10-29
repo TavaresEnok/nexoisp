@@ -1,0 +1,82 @@
+diff --git a/apps/api-go/internal/modules/leitura/balance_read_sqlc_test.go b/apps/api-go/internal/modules/leitura/balance_read_sqlc_test.go
+--- a/apps/api-go/internal/modules/leitura/balance_read_sqlc_test.go
++++ b/apps/api-go/internal/modules/leitura/balance_read_sqlc_test.go
+@@ -11,20 +11,6 @@
+ 	dto "github.com/prometheus/client_model/go"
+ )
+ 
+-// sqlcVariantsAtInit keeps the four variants registered by variants_sqlc init.
+-// The live map is cleared afterwards so the frozen L1 registration test still
+-// sees an empty registry after a rejected reader. Production Pick is unchanged:
+-// the compiled allowlists stay empty and this process does not enable them.
+-var sqlcVariantsAtInit map[string]string
+-
+-func TestMain(m *testing.M) {
+-	sqlcVariantsAtInit = cloneVariants(balanceVariants)
+-	for key := range balanceVariants {
+-		delete(balanceVariants, key)
+-	}
+-	os.Exit(m.Run())
+-}
+-
+ func TestBalanceReadSqlcRegistrationAndLegacySelection(t *testing.T) {
+ 	readers := []sqlcReaderCase{
+ 		{id: balanceReaderInvoiceDetail, legacy: gen.Group91a4cc440, file: "shadow/group91a4cc44_0.sql", query: "queries/group91a4cc44_0.sql", whole: true},
+@@ -32,41 +18,38 @@
+ 		{id: balanceReaderReconciliationInvoices, legacy: gen.Group152f5ccd0, file: "shadow/group152f5ccd_0.sql", query: "queries/group152f5ccd_0.sql", whole: true},
+ 		{id: balanceReaderFinanceSummary, legacy: gen.Readf038858e, file: "shadow/readf038858e.sql", query: "queries/readf038858e.sql", whole: false},
+ 	}
+-	if len(balanceVariants) != 0 {
+-		t.Fatal("mapa vivo do teste deixou de estar vazio")
++	source, err := os.ReadFile("variants_sqlc.go")
++	if err != nil {
++		t.Fatal(err)
++	}
++	src := string(source)
++	if strings.Contains(src, "os.Getenv") || strings.Contains(src, "fmt.Sprintf") || strings.Contains(src, "http.") {
++		t.Fatal("registro com ambiente, HTTP ou concatenação")
+ 	}
+-	if len(sqlcVariantsAtInit) != len(readers) {
+-		t.Fatalf("registro sqlc: %d", len(sqlcVariantsAtInit))
++	if strings.Count(src, "registerBalanceVariant(") != len(readers) {
++		t.Fatalf("variants_sqlc registra %d leitores", strings.Count(src, "registerBalanceVariant("))
+ 	}
+ 	for _, other := range []string{
+-		balanceReaderContractFinanceTotals,
+-		balanceReaderInvoiceList,
+-		balanceReaderTodayOverdue,
+-		balanceReaderTerminationQuoteGet,
+-		balanceReaderInvoiceDue,
++		"balanceReaderContractFinanceTotals",
++		"balanceReaderInvoiceList",
++		"balanceReaderTodayOverdue",
++		"balanceReaderTerminationQuoteGet",
++		"balanceReaderInvoiceDue",
+ 	} {
+-		if _, ok := sqlcVariantsAtInit[other]; ok {
++		if strings.Contains(src, "registerBalanceVariant("+other) {
+ 			t.Fatalf("variants_sqlc registrou %s", other)
+ 		}
+ 	}
+ 	if len(productionShadowAllowlist()) != 0 || len(productionCutAllowlist()) != 0 {
+ 		t.Fatal("allowlist de produção")
+ 	}
+-	source, err := os.ReadFile("variants_sqlc.go")
+-	if err != nil {
+-		t.Fatal(err)
+-	}
+-	src := string(source)
+-	if strings.Contains(src, "os.Getenv") || strings.Contains(src, "fmt.Sprintf") || strings.Contains(src, "http.") {
+-		t.Fatal("registro com ambiente, HTTP ou concatenação")
+-	}
+ 	for _, reader := range readers {
+ 		t.Run(reader.id, func(t *testing.T) {
+ 			file, err := os.ReadFile(reader.file)
+ 			if err != nil {
+ 				t.Fatal(err)
+ 			}
+-			registered, ok := sqlcVariantsAtInit[reader.id]
++			registered, ok := balanceVariants[reader.id]
+ 			if !ok || registered != string(file) || strings.TrimSpace(registered) == "" {
+ 				t.Fatal("init não registrou o arquivo da variante")
+ 			}
