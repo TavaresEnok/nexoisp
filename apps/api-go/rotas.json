@@ -483,6 +483,10 @@
     },
     {
       "method": "GET",
+      "path": "/api/notice-log/:id/cloud-journal"
+    },
+    {
+      "method": "GET",
       "path": "/api/notice-page"
     },
     {
