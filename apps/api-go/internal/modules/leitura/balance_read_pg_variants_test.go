@@ -22,6 +22,15 @@ import (
 // errPgVariantsRollback força o rollback da fixture. Não é falha de SQL.
 var errPgVariantsRollback = errors.New("pgvariants rollback")
 
+// pgVariantsRole é o papel efetivo fechado da sessão. Só estes dois valores
+// existem; o nome não vem do ambiente e não é interpolado em SQL.
+type pgVariantsRole uint8
+
+const (
+	pgVariantsRoleGo pgVariantsRole = 1 + iota
+	pgVariantsRoleApp
+)
+
 var pgVariantsIDs = []string{
 	balanceReaderInvoiceDetail,
 	balanceReaderContractFinanceList,
@@ -185,8 +194,87 @@ func TestBalanceReadPGVariantsRLS(t *testing.T) {
 	})
 }
 
+func TestBalanceReadPGVariantsApp(t *testing.T) {
+	pgVariantsWithRole(t, pgVariantsRoleApp, func(ctx context.Context, tx *db.Tx, fx pgVariantsFixture) error {
+		if err := pgVariantsExpectApp(ctx, tx, fx.tenant); err != nil {
+			return err
+		}
+		readers := pgVariantsReaders(t)
+		if err := pgVariantsExercise(ctx, tx, readers, fx); err != nil {
+			return err
+		}
+		detail, err := pgVariantsPrimary(readers[balanceReaderInvoiceDetail], fx)
+		if err != nil {
+			return err
+		}
+		list, err := pgVariantsPrimary(readers[balanceReaderContractFinanceList], fx)
+		if err != nil {
+			return err
+		}
+		if err = pgVariantsOwnVisible(ctx, tx, fx.tenant, "", "", detail, list, fx, "provedor da fixture"); err != nil {
+			return err
+		}
+		if err = pgVariantsOwnVisible(ctx, tx, fx.tenant, fx.subscriber, "", detail, list, fx, "assinante titular"); err != nil {
+			return err
+		}
+		if err = pgVariantsOwnVisible(ctx, tx, fx.tenant, "", fx.pop, detail, list, fx, "POP da fixture"); err != nil {
+			return err
+		}
+		hiddenDetail := detail
+		hiddenDetail.shape = "none"
+		hiddenDetail.requireMatch = false
+		hiddenDetail.own = nil
+		hiddenList := list
+		hiddenList.shape = "none"
+		hiddenList.requireMatch = false
+		hiddenList.own = nil
+		var problems []string
+		foreign := []struct {
+			label, tenant, subscriber, pop string
+		}{
+			{"outro provedor", uuid.NewString(), "", ""},
+			{"outro assinante", fx.tenant, uuid.NewString(), ""},
+			{"outro POP", fx.tenant, "", fx.otherPop},
+		}
+		for _, item := range foreign {
+			if err = pgVariantsUnderScope(ctx, tx, item.tenant, item.subscriber, item.pop, hiddenDetail); err != nil {
+				problems = append(problems, item.label+" detalhe: "+err.Error())
+			}
+			if err = pgVariantsUnderScope(ctx, tx, item.tenant, item.subscriber, item.pop, hiddenList); err != nil {
+				problems = append(problems, item.label+" lista: "+err.Error())
+			}
+		}
+		restored, err := pgVariantsCompare(ctx, tx, detail)
+		if err != nil {
+			return err
+		}
+		if len(restored) != 1 || fmt.Sprint(restored[0].Get("id")) != fx.excess {
+			problems = append(problems, "o escopo RLS não foi desfeito")
+		}
+		restoredList, err := pgVariantsCompare(ctx, tx, list)
+		if err != nil {
+			return err
+		}
+		if err = pgVariantsExpectIDs(list.id, restoredList, []string{fx.future, fx.paid, fx.reconciling, fx.excess, fx.partial, fx.canceled}); err != nil {
+			problems = append(problems, "lista após restaurar: "+err.Error())
+		}
+		if err = pgVariantsExpectApp(ctx, tx, fx.tenant); err != nil {
+			return err
+		}
+		return pgVariantsJoin(problems)
+	})
+}
+
 func pgVariantsWithFixture(t *testing.T, fn func(context.Context, *db.Tx, pgVariantsFixture) error) {
 	t.Helper()
+	pgVariantsWithRole(t, pgVariantsRoleGo, fn)
+}
+
+func pgVariantsWithRole(t *testing.T, role pgVariantsRole, fn func(context.Context, *db.Tx, pgVariantsFixture) error) {
+	t.Helper()
+	if role != pgVariantsRoleGo && role != pgVariantsRoleApp {
+		t.Fatal("papel fora do conjunto fechado nexo_go/nexo_app")
+	}
 	d, scope, secret := pgVariantsDB(t)
 	ctx := context.Background()
 	err := d.WithScope(ctx, scope, func(tx *db.Tx) error {
@@ -204,6 +292,14 @@ func pgVariantsWithFixture(t *testing.T, fn func(context.Context, *db.Tx, pgVari
 		}
 		if again, err := pgVariantsSetting(ctx, tx, "TimeZone"); err != nil || again != zone {
 			return fmt.Errorf("timezone da sessão mudou de %s para %s", zone, again)
+		}
+		if err = pgVariantsUseRole(ctx, tx, role); err != nil {
+			return err
+		}
+		if role == pgVariantsRoleApp {
+			if err = pgVariantsExpectApp(ctx, tx, fx.tenant); err != nil {
+				return err
+			}
 		}
 		if err = fn(ctx, tx, fx); err != nil {
 			return err
@@ -264,6 +360,84 @@ func pgVariantsIdentity(ctx context.Context, tx *db.Tx, scope tenancy.Scope) err
 	}
 	if database != "nexo_test" || current != "nexo_go" || session != "nexo_go" || !member || tenant != scope.TenantID {
 		return fmt.Errorf("escopo nexo_app recusado: banco=%s current_user=%s session_user=%s membro_nexo_app=%v app_tenant=%s", database, current, session, member, tenant)
+	}
+	return nil
+}
+
+func pgVariantsUseRole(ctx context.Context, tx *db.Tx, role pgVariantsRole) error {
+	switch role {
+	case pgVariantsRoleGo:
+		return nil
+	case pgVariantsRoleApp:
+		if err := tx.Exec(ctx, `set local role nexo_app`); err != nil {
+			return fmt.Errorf("set local role nexo_app: %w", err)
+		}
+		return nil
+	default:
+		return errors.New("papel fora do conjunto fechado nexo_go/nexo_app")
+	}
+}
+
+func pgVariantsExpectApp(ctx context.Context, tx *db.Tx, tenant string) error {
+	var database, current, session, seen string
+	var super, bypass, owner bool
+	err := tx.QueryRow(ctx, `select current_database(), current_user, session_user::text, r.rolsuper, r.rolbypassrls,
+		(select pg_get_userbyid(c.relowner) = current_user from pg_class c where c.oid = 'public.invoices'::regclass),
+		app_tenant()::text
+		from pg_roles r where r.rolname = current_user`).Scan(&database, &current, &session, &super, &bypass, &owner, &seen)
+	if err != nil {
+		return err
+	}
+	if database != "nexo_test" || current != "nexo_app" || session != "nexo_go" || super || bypass || owner || seen != tenant {
+		return fmt.Errorf("papel efetivo recusado: banco=%s current_user=%s session_user=%s super=%v bypass=%v owner=%v app_tenant=%s", database, current, session, super, bypass, owner, seen)
+	}
+	return nil
+}
+
+func pgVariantsExercise(ctx context.Context, tx *db.Tx, readers map[string]balanceGateReader, fx pgVariantsFixture) error {
+	var problems []string
+	for _, id := range pgVariantsIDs {
+		call, err := pgVariantsPrimary(readers[id], fx)
+		if err != nil {
+			problems = append(problems, err.Error())
+			continue
+		}
+		rows, err := pgVariantsCompare(ctx, tx, call)
+		if err != nil {
+			problems = append(problems, err.Error())
+			continue
+		}
+		if len(rows) == 0 {
+			problems = append(problems, id+" veio vazio no provedor da fixture")
+			continue
+		}
+		if err = pgVariantsExpectPrimary(id, rows, fx); err != nil {
+			problems = append(problems, err.Error())
+		}
+	}
+	if err := pgVariantsInvoicePages(ctx, tx, readers[balanceReaderInvoiceList], fx); err != nil {
+		problems = append(problems, err.Error())
+	}
+	return pgVariantsJoin(problems)
+}
+
+func pgVariantsOwnVisible(ctx context.Context, tx *db.Tx, tenant, subscriber, pop string, detail, list pgVariantsCall, fx pgVariantsFixture, label string) error {
+	rows, err := pgVariantsScopedRows(ctx, tx, tenant, subscriber, pop, detail)
+	if err != nil {
+		return fmt.Errorf("%s: %w", label, err)
+	}
+	if len(rows) != 1 || fmt.Sprint(rows[0].Get("id")) != fx.excess {
+		return fmt.Errorf("%s não devolveu a fatura própria", label)
+	}
+	listed, err := pgVariantsScopedRows(ctx, tx, tenant, subscriber, pop, list)
+	if err != nil {
+		return fmt.Errorf("%s lista: %w", label, err)
+	}
+	if len(listed) == 0 {
+		return fmt.Errorf("%s lista vazia", label)
+	}
+	if err = pgVariantsExpectIDs(list.id, listed, []string{fx.future, fx.paid, fx.reconciling, fx.excess, fx.partial, fx.canceled}); err != nil {
+		return fmt.Errorf("%s: %w", label, err)
 	}
 	return nil
 }
