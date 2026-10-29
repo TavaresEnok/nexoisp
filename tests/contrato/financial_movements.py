@@ -31,6 +31,10 @@ assert old['received_cents']==4000 and old['residual_cents']==6000 and old['coll
 assert rows('select count(*) n from financial_payment_allocations where invoice_id in (select id from invoices where agreement_id='+quote(agreement['id'])+ ')')[0]['n']==0
 check('authenticated partial agreement transfers only residual; discount and installments reconcile without copying original receipts')
 k=rows('select id,tenant_id,subscriber_id from contracts where id='+quote(k['id']))[0]
+unproven=sql("begin;insert into agreements(tenant_id,contract_id,subscriber_id,total_cents,original_cents,discount_cents,installments,reason) select "+quote(k['tenant_id'])+','+quote(k['id'])+','+quote(k['subscriber_id'])+",5000,5500,500,1,'B04 gate source unproven';select count(*) from financial_agreement_shadow s join agreements a on a.id=s.id where s.source_unproven and not s.matches and a.reason='B04 gate source unproven';rollback;",'nexo_test')
+assert unproven=='1',unproven
+assert not rows("select id from agreements where reason='B04 gate source unproven'")
+check('agreement without source is source_unproven and unmatched; rollback removes it')
 pop=str(uuid.uuid4());sql('insert into pops(id,tenant_id,name) values('+quote(pop)+','+quote(k['tenant_id'])+",'B04 scoped POP');update contracts set pop_id="+quote(pop)+' where id='+quote(k['id']),'nexo_test')
 i=str(uuid.uuid4());p=str(uuid.uuid4());r=str(uuid.uuid4())
 q=quote
