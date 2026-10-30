@@ -2900,14 +2900,29 @@
     "backendState": "DONE 5/5",
     "integrationState": "validated",
     "validation": [
-      "HTTP real exit 0 em 8461e61; execução Go/PostgreSQL da gerência sem recibo neste registro"
+      "HTTP real exit 0 em 8461e61; execução Go/PostgreSQL da gerência sem recibo neste registro",
+      "docs/integracao-v0/evidencias/rastreio/frontend-v0-os-quotations.json"
     ],
-    "integrationClassification": "business-ui"
+    "integrationClassification": "business-ui",
+    "endpoints": "POST /api/work-orders/:id/attachments; GET /api/work-orders/:id/attachments; GET /api/work-orders/:id/attachments/:id/download; DELETE /api/work-orders/:id/attachments/:id; GET /api/stock/quotations; GET /api/stock/quotations/:id; POST /api/stock/quotations; POST /api/stock/quotations/:id/offers; POST /api/stock/quotations/:id/purchase",
+    "integrationNotes": [
+      "Rastreio positivo de anexo e conversão em pedido rascunho sem entrada de estoque; não comprova assinatura, operação offline, fiscal, pagamentos ou custo contábil."
+    ]
   },
   {
     "id": "LOTE41-marca-portal",
     "status": "DONE",
-    "integrationNote": "5/5 revisões e sete checks finais PASS em f9d6c9; CI candidato em andamento"
+    "integrationNote": "5/5 revisões e sete checks finais PASS em f9d6c9; CI 41068033843 falhou no frontend.",
+    "entry": "Portal do assinante",
+    "functionality": "Marca opcional do portal: salvar, exibir e remover nome e logotipo",
+    "endpoints": "PUT /api/settings/portal-branding; GET /api/tenant-branding; GET /api/tenant-branding/logo",
+    "integrationState": "validated",
+    "validation": [
+      "docs/integracao-v0/evidencias/rastreio/frontend-v0-portal-branding.json"
+    ],
+    "integrationNotes": [
+      "Cenário interno com raster sintético; sem homologação externa."
+    ]
   },
   {
     "id": "LOTE42-inventario-passivo",

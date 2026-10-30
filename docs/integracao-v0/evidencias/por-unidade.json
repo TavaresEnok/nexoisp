@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T21:26:24.938Z",
+  "generated_at": "2026-10-30T14:41:14.279Z",
   "method": "Chamadas à API feitas pelas páginas entre uma verificação e a anterior, gravadas por e2e/request-trace.mjs durante a fumaça; preparação via context.request não conta.",
   "scenarios": [
     {
@@ -113,6 +113,16 @@
       "checks": 6
     },
     {
+      "scenario": "frontend-v0-os-quotations.mjs",
+      "recorded_at": "2026-10-30T13:58:18.239Z",
+      "checks": 2
+    },
+    {
+      "scenario": "frontend-v0-portal-branding.mjs",
+      "recorded_at": "2026-10-30T13:58:21.602Z",
+      "checks": 1
+    },
+    {
       "scenario": "frontend-v0-portal-wifi.mjs",
       "recorded_at": "2026-10-20T21:10:04.470Z",
       "checks": 1
@@ -158,8 +168,8 @@
       "checks": 1
     }
   ],
-  "validated_units": 154,
-  "units_with_interface_check": 154,
+  "validated_units": 156,
+  "units_with_interface_check": 156,
   "units": [
     {
       "id": "AC-01",
@@ -786,6 +796,27 @@
         {
           "scenario": "frontend-v0-optical.mjs",
           "check": "Falha de consulta, permissões do NOC e isolamento das ONUs entre provedores são preservados",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-portal-branding.mjs",
+          "check": "Marca salva, exibida ao assinante e removida.",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1840,6 +1871,27 @@
           ]
         },
         {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-portal-branding.mjs",
+          "check": "Marca salva, exibida ao assinante e removida.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
           "scenario": "frontend-v0-portal-wifi.mjs",
           "check": "Titular altera SSID e senha do próprio TR-098 pela UI; ACS sintético confirma aplicação imediata e a consulta registra o nome observado\nTR-181 enfileirado mantém SSID observado anterior; mensagem explica que a mudança depende do próximo contato do roteador\nWi-Fi do portal rejeita contrato de outro titular e preserva layout utilizável no celular",
           "endpoints": [
@@ -2752,6 +2804,27 @@
         {
           "scenario": "frontend-v0-optical.mjs",
           "check": "Falha de consulta, permissões do NOC e isolamento das ONUs entre provedores são preservados",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque.",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-portal-branding.mjs",
+          "check": "Marca salva, exibida ao assinante e removida.",
           "endpoints": [
             "GET /api/today"
           ]
@@ -6603,6 +6676,14 @@
           ]
         },
         {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+          "endpoints": [
+            "GET /api/work-orders",
+            "GET /api/work-orders/:id"
+          ]
+        },
+        {
           "scenario": "frontend-v0-remediation.mjs",
           "check": "R02: alerta aparece pela lista e URL direta na aba inicial; anotação comum não vira alerta",
           "endpoints": [
@@ -6781,6 +6862,13 @@
         {
           "scenario": "frontend-v0-field.mjs",
           "check": "Perfil Técnico/NOC usa sua fila pessoal; Financeiro não acessa OS nem executa comandos",
+          "endpoints": [
+            "GET /api/staff"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
           "endpoints": [
             "GET /api/staff"
           ]
@@ -7020,6 +7108,13 @@
           "endpoints": [
             "GET /api/work-orders/:id"
           ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+          "endpoints": [
+            "GET /api/work-orders/:id"
+          ]
         }
       ]
     },
@@ -7156,6 +7251,13 @@
         {
           "scenario": "frontend-v0-finance-access.mjs",
           "check": "Ficha do titular conserva cadastro, versão e preço dos contratos; novo contrato é criado na ficha e abre sua consulta operacional",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
           "endpoints": [
             "GET /api/work-orders"
           ]
@@ -7364,6 +7466,20 @@
         {
           "scenario": "frontend-v0-field.mjs",
           "check": "Perfil Técnico/NOC usa sua fila pessoal; Financeiro não acessa OS nem executa comandos",
+          "endpoints": [
+            "GET /api/stock/items"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+          "endpoints": [
+            "GET /api/stock/items"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque.",
           "endpoints": [
             "GET /api/stock/items"
           ]
@@ -7615,6 +7731,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque.",
+          "endpoints": [
+            "GET /api/stock/warehouses"
+          ]
+        },
+        {
           "scenario": "frontend-v0-stock.mjs",
           "check": "Entradas, saídas e ajuste com sinal preservam os três movimentos e saldo calculado pelo Go",
           "endpoints": [
@@ -7656,6 +7779,13 @@
             "GET /api/stock/purchases",
             "POST /api/stock/purchases",
             "POST /api/stock/purchases/:id/receive"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque.",
+          "endpoints": [
+            "GET /api/stock/suppliers"
           ]
         }
       ]
@@ -11361,6 +11491,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+          "endpoints": [
+            "GET /api/install-kits"
+          ]
+        },
+        {
           "scenario": "frontend-v0-quality.mjs",
           "check": "Kit criado na UI exclui itens serializados; aplicação em OS baixa quantidades reais do estoque e conserva ativação",
           "endpoints": [
@@ -11601,6 +11738,13 @@
       "not_exercised_by_interface": [],
       "checks": [
         {
+          "scenario": "frontend-v0-portal-branding.mjs",
+          "check": "Marca salva, exibida ao assinante e removida.",
+          "endpoints": [
+            "GET /api/portal/overview"
+          ]
+        },
+        {
           "scenario": "frontend-v0-portal-wifi.mjs",
           "check": "Titular altera SSID e senha do próprio TR-098 pela UI; ACS sintético confirma aplicação imediata e a consulta registra o nome observado\nTR-181 enfileirado mantém SSID observado anterior; mensagem explica que a mudança depende do próximo contato do roteador\nWi-Fi do portal rejeita contrato de outro titular e preserva layout utilizável no celular",
           "endpoints": [
@@ -11684,6 +11828,13 @@
       ],
       "not_exercised_by_interface": [],
       "checks": [
+        {
+          "scenario": "frontend-v0-portal-branding.mjs",
+          "check": "Marca salva, exibida ao assinante e removida.",
+          "endpoints": [
+            "GET /api/portal/overview"
+          ]
+        },
         {
           "scenario": "frontend-v0-portal-wifi.mjs",
           "check": "Titular altera SSID e senha do próprio TR-098 pela UI; ACS sintético confirma aplicação imediata e a consulta registra o nome observado\nTR-181 enfileirado mantém SSID observado anterior; mensagem explica que a mudança depende do próximo contato do roteador\nWi-Fi do portal rejeita contrato de outro titular e preserva layout utilizável no celular",
@@ -11782,6 +11933,13 @@
       ],
       "not_exercised_by_interface": [],
       "checks": [
+        {
+          "scenario": "frontend-v0-portal-branding.mjs",
+          "check": "Marca salva, exibida ao assinante e removida.",
+          "endpoints": [
+            "GET /api/portal/overview"
+          ]
+        },
         {
           "scenario": "frontend-v0-portal-wifi.mjs",
           "check": "Titular altera SSID e senha do próprio TR-098 pela UI; ACS sintético confirma aplicação imediata e a consulta registra o nome observado\nTR-181 enfileirado mantém SSID observado anterior; mensagem explica que a mudança depende do próximo contato do roteador\nWi-Fi do portal rejeita contrato de outro titular e preserva layout utilizável no celular",
@@ -12062,6 +12220,13 @@
       ],
       "not_exercised_by_interface": [],
       "checks": [
+        {
+          "scenario": "frontend-v0-portal-branding.mjs",
+          "check": "Marca salva, exibida ao assinante e removida.",
+          "endpoints": [
+            "GET /api/portal/acceptances"
+          ]
+        },
         {
           "scenario": "frontend-v0-portal-wifi.mjs",
           "check": "Titular altera SSID e senha do próprio TR-098 pela UI; ACS sintético confirma aplicação imediata e a consulta registra o nome observado\nTR-181 enfileirado mantém SSID observado anterior; mensagem explica que a mudança depende do próximo contato do roteador\nWi-Fi do portal rejeita contrato de outro titular e preserva layout utilizável no celular",
@@ -12457,6 +12622,82 @@
           "check": "R04/BE-27: exclusão global de etiqueta confirmada e persistida",
           "endpoints": [
             "DELETE /api/tags/:id"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "LOTE40",
+      "functionality": "Anexos privados e cotação com conversão manual em pedido rascunho",
+      "declared_endpoints": [
+        "POST /api/work-orders/:id/attachments",
+        "GET /api/work-orders/:id/attachments",
+        "GET /api/work-orders/:id/attachments/:id/download",
+        "DELETE /api/work-orders/:id/attachments/:id",
+        "GET /api/stock/quotations",
+        "GET /api/stock/quotations/:id",
+        "POST /api/stock/quotations",
+        "POST /api/stock/quotations/:id/offers",
+        "POST /api/stock/quotations/:id/purchase"
+      ],
+      "exercised_by_interface": [
+        "DELETE /api/work-orders/:id/attachments/:id",
+        "GET /api/stock/quotations",
+        "GET /api/stock/quotations/:id",
+        "GET /api/work-orders/:id/attachments",
+        "GET /api/work-orders/:id/attachments/:id/download",
+        "POST /api/stock/quotations",
+        "POST /api/stock/quotations/:id/offers",
+        "POST /api/stock/quotations/:id/purchase",
+        "POST /api/work-orders/:id/attachments"
+      ],
+      "not_exercised_by_interface": [],
+      "checks": [
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+          "endpoints": [
+            "POST /api/work-orders/:id/attachments",
+            "GET /api/work-orders/:id/attachments",
+            "GET /api/work-orders/:id/attachments/:id/download",
+            "DELETE /api/work-orders/:id/attachments/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque.",
+          "endpoints": [
+            "GET /api/stock/quotations",
+            "GET /api/stock/quotations/:id",
+            "POST /api/stock/quotations",
+            "POST /api/stock/quotations/:id/offers",
+            "POST /api/stock/quotations/:id/purchase"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "LOTE41-marca-portal",
+      "functionality": "Marca opcional do portal: salvar, exibir e remover nome e logotipo",
+      "declared_endpoints": [
+        "PUT /api/settings/portal-branding",
+        "GET /api/tenant-branding",
+        "GET /api/tenant-branding/logo"
+      ],
+      "exercised_by_interface": [
+        "GET /api/tenant-branding",
+        "GET /api/tenant-branding/logo",
+        "PUT /api/settings/portal-branding"
+      ],
+      "not_exercised_by_interface": [],
+      "checks": [
+        {
+          "scenario": "frontend-v0-portal-branding.mjs",
+          "check": "Marca salva, exibida ao assinante e removida.",
+          "endpoints": [
+            "PUT /api/settings/portal-branding",
+            "GET /api/tenant-branding",
+            "GET /api/tenant-branding/logo"
           ]
         }
       ]

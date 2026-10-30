@@ -1,0 +1,20 @@
+{
+  "description": "Rastreios copiados dos artefatos reais fornecidos da execução de navegador de 30/10/2026 às 13:58; não representam nova execução.",
+  "frontend_build": "f9d6c9fc29095195c457550d397169afe42176cc",
+  "api_build": "5653788",
+  "build_delta": "Somente formatação TSX entre API e build final do frontend.",
+  "source": "Artefatos originais fornecidos pelo controlador; bytes preservados.",
+  "test_scope": "Cenários internos de anexos de OS, cotação e marca do portal; sem homologação externa.",
+  "traces": [
+    {
+      "path": "docs/integracao-v0/evidencias/rastreio/frontend-v0-os-quotations.json",
+      "original_sha256": "971cad0bd20b525e7b6a18c1ea972d96b79935e66649656b38dd8aab5f4f80bf",
+      "copied_sha256": "971cad0bd20b525e7b6a18c1ea972d96b79935e66649656b38dd8aab5f4f80bf"
+    },
+    {
+      "path": "docs/integracao-v0/evidencias/rastreio/frontend-v0-portal-branding.json",
+      "original_sha256": "2afec9b06f0875eebdeb1ed399f17466ff22555fdbb1569ba2531438fe7af505",
+      "copied_sha256": "2afec9b06f0875eebdeb1ed399f17466ff22555fdbb1569ba2531438fe7af505"
+    }
+  ]
+}
