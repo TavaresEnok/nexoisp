@@ -1962,7 +1962,7 @@
       "prioridade": "P1",
       "fechado": false,
       "implementado": "parcial",
-      "testado": "r1_sender_falso_exit_0_r2_g_postgresql_nao_executado",
+      "testado": "27_casos_internos_observados_em_804ce16_h01_e_journal_http_abertos",
       "homologado": "sem_recurso_externo",
       "publicado": "branch_de_desenvolvimento_nao_publicada",
       "cloud_api": {
@@ -1977,12 +1977,12 @@
         "base_documental_lote32": "f42256b558288590f8e804b558982f15651981fb",
         "objeto_33f42256b_neste_clone": false,
         "ci_lote33": "pendente",
-        "postgresql_r2_g": "pendente",
+        "postgresql_r2_g": "observado_em_804ce16_exit_0",
         "desenho": "docs/B15-DESENHO-CLOUD-API.md",
         "matriz": "docs/B15-ACEITE-CLOUD-API.json",
         "lote": "docs/LOTE33-B15-OFFLINE.md",
-        "casos": "doze R1 executados no pacote cloudapi; R2, G e B15-H01 não executados",
-        "execucao": "r1_pacote_cloudapi_exit_0_r2_g_h_pendentes",
+        "casos": "B15-C01 a B15-C27 observados na corrida 804ce16, externos false; B15-H01 aberto; GET cloud-journal ainda sem nativo",
+        "execucao": "go_integration_804ce16_exit_0_478_pass_106_b15_18_skips_h01_aberto",
         "r1_argv": ["go", "-C", "apps/api-go", "test", "-count=1", "-v", "./internal/outbound/cloudapi/"],
         "r1_exit": 0,
         "r1_data": "2026-10-29",
@@ -2014,11 +2014,26 @@
         {
           "path": "docs/B15-ACEITE-CLOUD-API.json",
           "commit": "6ca6d21",
-          "nota": "doze casos R1 com exit 0 do pacote cloudapi em 2026-10-29; R2, G e H01 não executados"
+          "nota": "C01 a C27 observados em 804ce16; H01 aberto; o journal HTTP do lote 36 não entra nessa corrida"
         },
         {
           "path": "docs/LOTE33-B15-OFFLINE.md",
-          "nota": "separa implementado, teste falso, PostgreSQL, CI e publicação"
+          "nota": "separa implementado, teste falso, PostgreSQL, CI e publicação; o adendo 804 não reexecuta o journal"
+        },
+        {
+          "path": "/home/enok/Documentos/projetos/implementacao-codex/lote35-b15-cleanup-completo-2026-10-29/evidencias/go-integration-804ce16-summary.json",
+          "sha256": "a028a439b710c7141721b945acd1bde04d0973a31286334300664ae32a3bd565",
+          "nota": "exit 0, 478 pass, 106 B15, 18 skips; não fecha H01 nem o CI 40936161250"
+        },
+        {
+          "path": "/home/enok/Documentos/projetos/implementacao-codex/lote35-b15-cleanup-completo-2026-10-29/evidencias/b15-coverage-804ce16.json",
+          "sha256": "fe081554ffdbb8aa8ba8e4df7b0162ffa38c256aefd9ea194814a6418a71544a",
+          "nota": "C01 a C27 observed true e external false; H01 observed false"
+        },
+        {
+          "path": "/home/enok/Documentos/projetos/implementacao-codex/lote35-b15-cleanup-completo-2026-10-29/evidencias/nativo-10a131c9d39d36eddfc4a47321838ff4e2262736509352c49b5b9a4466dcc559.json",
+          "sha256": "10a131c9d39d36eddfc4a47321838ff4e2262736509352c49b5b9a4466dcc559",
+          "nota": "nativo exit 0, 26 checks; o texto do check B15 ainda descreve o contrato anterior ao journal"
         },
         {
           "path": "docs/evidencias/B04-GATES-6963214-AUDIT.json",
@@ -2028,15 +2043,15 @@
       "entregue": [
         "avisos e canal HTTP genérico com Authorization",
         "MVP interno Cloud API offline e desligado, sem envio e sem conta",
-        "R1 com sender falso e exit 0; R2 e G ainda sem PostgreSQL"
+        "R1 com sender falso e exit 0; R2 e G observados em 804ce16; H01 e o journal HTTP seguem abertos"
       ],
       "criterios_abertos": [
         {
           "id": "B15-cloud-api",
-          "causa": "O código interno existe e permanece desligado. R2 e G não tiveram PostgreSQL. WABA, template, versão Graph e API real continuam sem recurso. O CI 40877414874 não cobre este lote.",
+          "causa": "Os 27 casos internos passaram em 804ce16. H01, WABA, template, versão Graph e API real continuam sem recurso. O CI 40936161250 falhou no lint e não fica verde por Go ou HTTP local. O GET do journal e o painel ainda não tiveram nativo.",
           "dependencias": [],
-          "evidencia_faltante": "NEXO_CLOUD_PG_REQUIRED=1 em python3 tests/contrato/go_integration.py, sem runner novo, e o CI do SHA deste lote. H permanece aberto.",
-          "proximo_passo": "A gerência executa o runner já existente com NEXO_CLOUD_PG_REQUIRED=1. Não chamar a Meta. Não tratar o exit 0 de R1 como homologação.",
+          "evidencia_faltante": "nativo.py novo para o GET /api/notice-log/{id}/cloud-journal, CI verde do SHA integrado e H01. A corrida 804 não cobre o journal.",
+          "proximo_passo": "Não chamar a Meta. Não tratar 804 nem o exit 0 de R1 como homologação. Não reclassificar os seis critérios B04 abertos. Revisão e CI/lint continuam obrigatórios antes de main.",
           "frentes": [
             {
               "id": "R1",
@@ -2215,7 +2230,7 @@
     "id": "provar-b15-postgresql-e-ci-do-lote33",
     "id_anterior": "implementar-b15-offline-r1-r2",
     "prioridade": "P1",
-    "motivo": "A corrida 6963214 tem Go exit 0 com 370 ações pass e zero falha, novos PG com zero skip, e nativo exit 0 com 25 grupos. Treze critérios B04 ficam executados. Seis critérios, as allowlists vazias e o gate de inclusão permanecem abertos. O run 40877414874 da candidata concluiu success em 2026-10-29T13:11:42Z e não cobre o lote 33. O pacote cloudapi teve exit 0 em 2026-10-29, sem rede. R2, G, H01, WABA, fiscal, extrato, host físico, cópia externa e main permanecem abertos.",
+    "motivo": "A corrida 6963214 tem Go exit 0 com 370 ações pass e zero falha, novos PG com zero skip, e nativo exit 0 com 25 grupos. Treze critérios B04 ficam executados. Seis critérios, as allowlists vazias e o gate de inclusão permanecem abertos. O run 40877414874 da candidata concluiu success em 2026-10-29T13:11:42Z e não cobre o lote 33. O pacote cloudapi teve exit 0 em 2026-10-29, sem rede. A corrida 804ce16 observou os 27 casos internos de B15 com go_integration.py exit 0 e nativo.py exit 0 em 26 checks. H01, WABA, fiscal, extrato, host físico, cópia externa e main permanecem abertos. O CI 40936161250 segue failure de lint. O GET do journal não está nessa corrida.",
     "nao_reabrir": [
       "lote01",
       "b07-resolucao",
@@ -2311,7 +2326,7 @@
     "pedir_nova_ordem": false,
     "projeto_concluido": false,
     "percentual": null,
-    "instrucao": "Os lotes 25 e 26 não se reimplementam. O fixture b67d2f3, o harness 56b2187, a corrida sintética 0086558, a expectativa 9c764d7, o desenho B04 728f2ff e a base de sombra do lote 29 também não se refazem. O plano 29 permanece DONE 13/13, o plano 30 8b78eab07512 permanece DONE 4/4 e o plano 31 permanece DONE em 6963214927aa45ae1963c58d4c14ba540d78c2f0. A corrida real 7cde1e6 permanece exit 1 e não é reclassificada. A corrida 6963214 tem go_integration.py exit 0 com 370 pass e zero falha, new_pg_skips 0, e nativo.py exit 0 com 25 grupos. Treze critérios B04 estão executados. Seis critérios, allowlists vazias e o gate de inclusão permanecem abertos. O run 40840682617 permanece falha. O run 40877414874 concluiu success em 2026-10-29T13:11:42Z na candidata e não é main nem cobre o lote 33. O lote 33 implementa o MVP B15 offline. R1 teve exit 0 no pacote cloudapi com sender falso em 2026-10-29. R2, G e H01 não foram executados. Go, browser e SBOM local continuam datados em cc542a1. Não fechar H, P, extrato, fiscal, host físico, cópia externa, WABA nem o projeto. Não transformar default, sandbox, skip, geração local, teste falso, correção entregue, desenho ou allowlist vazia em homologação. O projeto permanece aberto enquanto existir critério aberto."
+    "instrucao": "Os lotes 25 e 26 não se reimplementam. O fixture b67d2f3, o harness 56b2187, a corrida sintética 0086558, a expectativa 9c764d7, o desenho B04 728f2ff e a base de sombra do lote 29 também não se refazem. O plano 29 permanece DONE 13/13, o plano 30 8b78eab07512 permanece DONE 4/4 e o plano 31 permanece DONE em 6963214927aa45ae1963c58d4c14ba540d78c2f0. A corrida real 7cde1e6 permanece exit 1 e não é reclassificada. A corrida 6963214 tem go_integration.py exit 0 com 370 pass e zero falha, new_pg_skips 0, e nativo.py exit 0 com 25 grupos. Treze critérios B04 estão executados. Seis critérios, allowlists vazias e o gate de inclusão permanecem abertos. O run 40840682617 permanece falha. O run 40877414874 concluiu success em 2026-10-29T13:11:42Z na candidata e não é main nem cobre o lote 33. O lote 33 implementa o MVP B15 offline. R1 teve exit 0 no pacote cloudapi com sender falso em 2026-10-29. Naquele momento R2, G e H01 não tinham corrida. A corrida posterior 804ce16 observou C01 a C27 com exit 0 e manteve H01 aberto. O CI 40936161250 permanece failure de lint; Go ou HTTP local não o tornam verde. O journal HTTP do lote 36 aguarda nativo novo. Go, browser e SBOM local continuam datados em cc542a1. Não fechar H, P, extrato, fiscal, host físico, cópia externa, WABA nem o projeto. Não transformar default, sandbox, skip, geração local, teste falso, correção entregue, desenho ou allowlist vazia em homologação. O projeto permanece aberto enquanto existir critério aberto."
   },
   "publicacao": {
     "producao": false,

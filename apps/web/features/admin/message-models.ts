@@ -49,6 +49,7 @@ export const messageStates: Record<string, string> = {
   sent: "Enviado ao serviço",
   failed: "Falhou",
   skipped_no_consent: "Sem consentimento",
+  skipped_settled: "Não encaminhado",
   queued: "Na fila",
   sending: "Enviando",
   uncertain: "Resultado desconhecido",

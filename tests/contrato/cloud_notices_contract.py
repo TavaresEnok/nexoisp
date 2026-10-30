@@ -6,6 +6,8 @@ em tests/contrato/go_integration.py, o runner que já existe. Skip não aprova e
 """
 import json
 from pathlib import Path
+import subprocess
+import uuid
 
 from lib import quote
 
@@ -128,6 +130,14 @@ def verify(api, call, sql):
     routes = json.loads((ROOT / "apps/api-go/rotas.json").read_text())["routes"]
     listed = [route for route in routes if "cloud-api" in route.get("path", "")]
     assert len(listed) == 1 and listed[0]["method"] == "POST" and listed[0]["path"] == "/api/webhooks/cloud-api/:account", listed
+    journal_path = "/api/notice-log/{id}/cloud-journal"
+    assert journal_path in paths, sorted(key for key in paths if "notice-log" in key)
+    journal_item = paths[journal_path]
+    assert "get" in journal_item and "post" not in journal_item and "put" not in journal_item and "patch" not in journal_item and "delete" not in journal_item, journal_item
+    listed_journal = [route for route in routes if route.get("path") == "/api/notice-log/:id/cloud-journal"]
+    assert listed_journal == [{"method": "GET", "path": "/api/notice-log/:id/cloud-journal"}], listed_journal
+
+    prove_cloud_journal(call, sql, one)
 
     after = one(
         "select (select count(*) from cloud_accounts) as accounts,"
@@ -148,3 +158,416 @@ def verify(api, call, sql):
     ):
         assert str(after[key]) == str(before[key]), (key, before[key], after[key])
     assert quote(ACCOUNT)
+
+
+MARKER = "cn-journal-fixture"
+OPERATOR = "operador@nexoisp.demo"
+SUBSCRIBER = "cn-journal-subscriber@alfa.demo"
+SUBSCRIBER_ID = "c15c0000-0000-4000-8000-0000000000e1"
+assert str(uuid.UUID(SUBSCRIBER_ID)) == SUBSCRIBER_ID and uuid.UUID(SUBSCRIBER_ID).version == 4
+ACCOUNT_IDS = (
+    "c15c0000-0000-4000-8000-0000000000a1",
+    "c15c0000-0000-4000-8000-0000000000a2",
+    "c15c0000-0000-4000-8000-0000000000b1",
+)
+POISON = (
+    "v1.cj-fixture-token",
+    "v1.cj-fixture-hook",
+    "cj-excerpt-secret",
+    "cj-phone-a1",
+    "cj-phone-a2",
+    "cj-phone-b1",
+    "cj-msg-page",
+    "cj-msg-unlinked",
+    "cj-msg-beta",
+    "cj-raw-unlinked",
+    "cj-raw-foreign-account",
+    "cj-raw-other-tenant",
+    "v0.0",
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+) + ACCOUNT_IDS + (SUBSCRIBER_ID,)
+ROOT_KEYS = {
+    "notice_log_id", "log_status", "cloud_lock_timeouts", "attempts", "statuses",
+    "attempts_truncated", "statuses_truncated",
+}
+ATTEMPT_KEYS = {"attempt_no", "state", "created_at", "wire_at", "http_status"}
+STATUS_KEYS = {"attempt_no", "raw_status", "created_at"}
+STATES = {"reserved", "wire", "submitted", "refused", "uncertain", "not_sent"}
+
+SEED = """
+begin;
+insert into cloud_accounts (id, tenant_id, name, phone_number_id, graph_version, token_enc, webhook_secret_enc)
+select 'c15c0000-0000-4000-8000-0000000000a1', id, 'cnJournal', 'cj-phone-a1', 'v0.0', 'v1.cj-fixture-token', 'v1.cj-fixture-hook'
+from tenants where slug = 'alfa';
+insert into cloud_accounts (id, tenant_id, name, phone_number_id, graph_version, token_enc, webhook_secret_enc)
+select 'c15c0000-0000-4000-8000-0000000000a2', id, 'cnJournal', 'cj-phone-a2', 'v0.0', 'v1.cj-fixture-token', 'v1.cj-fixture-hook'
+from tenants where slug = 'alfa';
+insert into cloud_accounts (id, tenant_id, name, phone_number_id, graph_version, token_enc, webhook_secret_enc)
+select 'c15c0000-0000-4000-8000-0000000000b1', id, 'cnJournal', 'cj-phone-b1', 'v0.0', 'v1.cj-fixture-token', 'v1.cj-fixture-hook'
+from tenants where slug = 'beta';
+insert into notice_log (tenant_id, status, cloud_lock_timeouts, error)
+select id, 'sent', 2, 'cn-journal-fixture' from tenants where slug = 'alfa';
+insert into notice_log (tenant_id, status, cloud_lock_timeouts, error)
+select id, 'uncertain', 3, 'cn-journal-fixture' from tenants where slug = 'alfa';
+insert into notice_log (tenant_id, status, cloud_lock_timeouts, error)
+select id, 'failed', 1, 'cn-journal-fixture' from tenants where slug = 'alfa';
+insert into notice_log (tenant_id, status, cloud_lock_timeouts, error)
+select id, 'skipped_settled', 0, 'cn-journal-fixture' from tenants where slug = 'alfa';
+insert into notice_log (tenant_id, status, cloud_lock_timeouts, error)
+select id, 'queued', 0, 'cn-journal-fixture' from tenants where slug = 'beta';
+insert into cloud_notice_attempts (
+  tenant_id, cloud_account_id, notice_log_id, attempt_no, state, provider_message_id, http_status, excerpt, created_at, wire_at
+)
+select t.id, 'c15c0000-0000-4000-8000-0000000000a1', l.id, g,
+  case when g = 101 then 'submitted'
+       else (array['reserved','wire','submitted','refused','uncertain','not_sent'])[1 + ((g - 1) % 6)] end,
+  case when g = 101 then 'cj-msg-page' else null end,
+  case when g = 101 then 201 when 1 + ((g - 1) % 6) = 2 then 204 else null end,
+  'cj-excerpt-secret',
+  timestamptz '2026-02-01 00:00:00+00' + (g || ' seconds')::interval,
+  case when g = 101 then timestamptz '2026-02-02 03:04:05+00'
+       when 1 + ((g - 1) % 6) in (1, 6) then null
+       else timestamptz '2026-02-02 01:00:00+00' end
+from generate_series(1, 101) g
+join tenants t on t.slug = 'alfa'
+join notice_log l on l.tenant_id = t.id and l.error = 'cn-journal-fixture' and l.status = 'sent';
+insert into cloud_notice_attempts (
+  tenant_id, cloud_account_id, notice_log_id, attempt_no, state, excerpt, created_at
+)
+select t.id, 'c15c0000-0000-4000-8000-0000000000a1', l.id, g, 'not_sent', 'cj-excerpt-secret',
+  timestamptz '2026-02-03 00:00:00+00'
+from generate_series(1, 101) g
+join tenants t on t.slug = 'alfa'
+join notice_log l on l.tenant_id = t.id and l.error = 'cn-journal-fixture' and l.status = 'uncertain';
+insert into cloud_notice_attempts (
+  tenant_id, cloud_account_id, notice_log_id, attempt_no, state, excerpt, created_at
+)
+select t.id, 'c15c0000-0000-4000-8000-0000000000a1', l.id, g, 'reserved', 'cj-excerpt-secret',
+  timestamptz '2026-02-04 00:00:00+00'
+from generate_series(1, 100) g
+join tenants t on t.slug = 'alfa'
+join notice_log l on l.tenant_id = t.id and l.error = 'cn-journal-fixture' and l.status = 'failed';
+insert into cloud_notice_attempts (
+  tenant_id, cloud_account_id, notice_log_id, attempt_no, state, provider_message_id, excerpt, created_at
+)
+select t.id, 'c15c0000-0000-4000-8000-0000000000b1', l.id, 1, 'reserved', 'cj-msg-beta', 'cj-excerpt-secret',
+  timestamptz '2026-02-05 00:00:00+00'
+from tenants t
+join notice_log l on l.tenant_id = t.id and l.error = 'cn-journal-fixture' and l.status = 'queued'
+where t.slug = 'beta';
+insert into cloud_notice_status (id, tenant_id, cloud_account_id, provider_message_id, body_hash, raw_status, created_at)
+select ('00000000-0000-4000-8000-' || lpad(to_hex(g), 12, '0'))::uuid,
+  t.id, 'c15c0000-0000-4000-8000-0000000000a1', 'cj-msg-page', lpad(to_hex(g), 64, '0'),
+  'cj-raw-' || lpad(g::text, 3, '0'),
+  timestamptz '2026-03-01 00:00:00+00' + (g || ' seconds')::interval
+from generate_series(1, 99) g
+join tenants t on t.slug = 'alfa';
+insert into cloud_notice_status (id, tenant_id, cloud_account_id, provider_message_id, body_hash, raw_status, created_at)
+select '00000000-0000-4000-8000-0000000000aa', t.id, 'c15c0000-0000-4000-8000-0000000000a1', 'cj-msg-page',
+  lpad('aa', 64, 'a'), 'cj-raw-tie-lo', timestamptz '2026-03-01 00:00:00+00' + interval '1000 seconds'
+from tenants t where t.slug = 'alfa';
+insert into cloud_notice_status (id, tenant_id, cloud_account_id, provider_message_id, body_hash, raw_status, created_at)
+select '00000000-0000-4000-8000-0000000000bb', t.id, 'c15c0000-0000-4000-8000-0000000000a1', 'cj-msg-page',
+  lpad('bb', 64, 'b'), 'cj-raw-tie-hi', timestamptz '2026-03-01 00:00:00+00' + interval '1000 seconds'
+from tenants t where t.slug = 'alfa';
+insert into cloud_notice_status (tenant_id, cloud_account_id, provider_message_id, body_hash, raw_status, created_at)
+select t.id, 'c15c0000-0000-4000-8000-0000000000a1', 'cj-msg-unlinked', lpad('cc', 64, 'c'),
+  'cj-raw-unlinked', timestamptz '2090-01-01 00:00:00+00'
+from tenants t where t.slug = 'alfa';
+insert into cloud_notice_status (tenant_id, cloud_account_id, provider_message_id, body_hash, raw_status, created_at)
+select t.id, 'c15c0000-0000-4000-8000-0000000000a2', 'cj-msg-page', lpad('dd', 64, 'd'),
+  'cj-raw-foreign-account', timestamptz '2090-01-01 00:00:00+00'
+from tenants t where t.slug = 'alfa';
+insert into cloud_notice_status (tenant_id, cloud_account_id, provider_message_id, body_hash, raw_status, created_at)
+select t.id, 'c15c0000-0000-4000-8000-0000000000b1', 'cj-msg-beta', lpad('ee', 64, 'e'),
+  'cj-raw-other-tenant', timestamptz '2090-01-01 00:00:00+00'
+from tenants t where t.slug = 'beta';
+select json_build_object(
+  'full', (select id::text from notice_log where error = 'cn-journal-fixture' and status = 'sent'),
+  'busy', (select id::text from notice_log where error = 'cn-journal-fixture' and status = 'uncertain'),
+  'exact', (select id::text from notice_log where error = 'cn-journal-fixture' and status = 'failed'),
+  'empty', (select id::text from notice_log where error = 'cn-journal-fixture' and status = 'skipped_settled'),
+  'beta', (select id::text from notice_log where error = 'cn-journal-fixture' and status = 'queued'),
+  'active', (select coalesce(json_agg(active order by id), '[]'::json) from cloud_accounts where name = 'cnJournal')
+);
+commit;
+"""
+
+
+def clean_subscriber_fixtures(sql):
+    sql(
+        "delete from users where email in ("
+        + quote(SUBSCRIBER)
+        + ", 'cn-collision@alfa.demo', 'cn-collision-plpgsql@alfa.demo') "
+        "or subscriber_id = "
+        + quote(SUBSCRIBER_ID)
+        + "::uuid;"
+        "delete from subscribers where id = "
+        + quote(SUBSCRIBER_ID)
+        + "::uuid;",
+        "nexo_test",
+    )
+
+
+def prove_cloud_journal(call, sql, one):
+    """Fixtures inativas no banco do runner. GET não grava e não devolve segredo."""
+    journal_go = (ROOT / "apps/api-go/internal/modules/leitura/cloud_notice_journal.go").read_text()
+    assert "actor.PopIDs != nil" in journal_go
+    assert "actor.Support" in journal_go
+    assert 'actor.SubscriberID != ""' in journal_go
+    assert "insert " not in cloud_journal_sql(journal_go)
+    clean_subscriber_fixtures(sql)
+    alfa_modules = one("select modules::text as modules from tenants where slug = 'alfa'")["modules"]
+    preexisting = json.loads(sql(
+        "select coalesce(json_agg(id::text) filter (where support_tenant_id is not null), '[]') "
+        "from sessions where user_id = (select id from users where email = " + quote(OPERATOR) + ")",
+        "nexo_test",
+    ))
+    sql(
+        "update tenants t set modules = t.modules || array['messages']::text[] "
+        "where t.slug = 'alfa' and not ('messages' = any(t.modules))",
+        "nexo_test",
+    )
+    try:
+        seeded = json.loads(sql(SEED, "nexo_test"))
+        assert seeded["active"] == [False, False, False], seeded["active"]
+        for key in ("full", "busy", "exact", "empty", "beta"):
+            assert seeded[key] and str(int(seeded[key])) == seeded[key], seeded[key]
+        try:
+            exercise_cloud_journal(call, sql, one, seeded)
+        finally:
+            remove_cloud_journal_fixtures(sql)
+    finally:
+        restore_operator_support(sql, preexisting)
+        sql(
+            "update tenants set modules = " + quote(alfa_modules) + "::text[] where slug = 'alfa'",
+            "nexo_test",
+        )
+        clean_subscriber_fixtures(sql)
+
+
+def cloud_journal_sql(source):
+    start = source.index("const cloudNoticeJournalSQL = `")
+    body = source[start:].split("`", 2)[1]
+    return body.lower()
+
+
+def login(call, email):
+    response = call("/api/auth/login", {"email": email, "password": "demo1234", "bearer": True})
+    assert response["status"] == 200, response["status"]
+    token = response["json"].get("token")
+    assert token, response["status"]
+    return token
+
+
+def journal_get(call, token, path):
+    return call(path, method="GET", token=token)
+
+
+def surface(response):
+    raw = response.get("body") or b""
+    text = raw.decode("utf-8", "replace")
+    for marker in POISON:
+        assert marker not in text, response["status"]
+    return text
+
+
+def assert_journal(payload, notice_id, status, timeouts, attempt_numbers, statuses, attempts_truncated, statuses_truncated):
+    assert set(payload) == ROOT_KEYS, sorted(payload)
+    assert payload["notice_log_id"] == notice_id and isinstance(payload["notice_log_id"], str)
+    assert payload["log_status"] == status
+    assert payload["cloud_lock_timeouts"] == timeouts
+    assert payload["attempts_truncated"] is attempts_truncated
+    assert payload["statuses_truncated"] is statuses_truncated
+    assert [row["attempt_no"] for row in payload["attempts"]] == attempt_numbers
+    raws = []
+    for row in payload["attempts"]:
+        assert set(row) == ATTEMPT_KEYS, sorted(row)
+        assert row["state"] in STATES and row["attempt_no"] > 0
+        assert isinstance(row["created_at"], str) and row["created_at"].endswith("Z") and "T" in row["created_at"]
+        assert row["wire_at"] is None or (isinstance(row["wire_at"], str) and row["wire_at"].endswith("Z"))
+        assert row["http_status"] is None or 100 <= row["http_status"] <= 599
+    for row in payload["statuses"]:
+        assert set(row) == STATUS_KEYS, sorted(row)
+        assert row["attempt_no"] > 0 and isinstance(row["raw_status"], str) and 1 <= len(row["raw_status"]) <= 300
+        assert isinstance(row["created_at"], str) and row["created_at"].endswith("Z")
+        raws.append(row["raw_status"])
+    assert raws == statuses
+
+
+def fingerprint(one):
+    return one(
+        "select (select count(*) from cloud_accounts) as accounts,"
+        " (select count(*) filter (where active) from cloud_accounts) as active_accounts,"
+        " (select count(*) from cloud_notice_attempts) as attempts,"
+        " (select count(*) from cloud_notice_status) as statuses,"
+        " (select count(*) from notice_log) as notices,"
+        " (select count(*) from payments) as payments,"
+        " (select coalesce(sum(signed_cents), 0) from payments) as signed_cents,"
+        " (select count(*) from invoices) as invoices,"
+        " (select count(*) from invoice_movements) as movements,"
+        " (select md5(coalesce(string_agg(id::text || status || cloud_lock_timeouts::text || attempts::text, ',' order by id), '')) from notice_log) as notice_hash,"
+        " (select md5(coalesce(string_agg(id::text || state || attempt_no::text || coalesce(http_status::text, '') || coalesce(excerpt, ''), ',' order by id), '')) from cloud_notice_attempts) as attempt_hash,"
+        " (select md5(coalesce(string_agg(id::text || raw_status || body_hash, ',' order by id), '')) from cloud_notice_status) as status_hash"
+    )
+
+
+def exercise_cloud_journal(call, sql, one, seeded):
+    assert str(uuid.UUID(SUBSCRIBER_ID)) == SUBSCRIBER_ID
+    admin = login(call, "admin@alfa.demo")
+    attendant = login(call, "atendimento@alfa.demo")
+    operator = login(call, OPERATOR)
+    sql(
+        "insert into subscribers (id, tenant_id, name) "
+        "select " + quote(SUBSCRIBER_ID) + "::uuid, id, 'CN journal fixture subscriber' "
+        "from tenants where slug = 'alfa';"
+        "insert into users (tenant_id, email, name, password_hash, role, subscriber_id) "
+        "select t.id, " + quote(SUBSCRIBER) + ", 'CN journal', u.password_hash, 'subscriber', " + quote(SUBSCRIBER_ID) + "::uuid "
+        "from tenants t join users u on u.email = 'admin@alfa.demo' where t.slug = 'alfa';",
+        "nexo_test",
+    )
+    # Prova dirigida da colisão users_subscriber_uq (migration 00004, linha 11):
+    # O banco deve rejeitar um segundo usuário para o mesmo assinante
+    # disparando exatamente a restrição users_subscriber_uq.
+    # 1. Prova via PL/pgSQL capturando o nome exato da restrição violada
+    sql(
+        "do $$ declare v_con text; begin "
+        "begin "
+        "insert into users (tenant_id, email, name, password_hash, role, subscriber_id) "
+        "select t.id, 'cn-collision-plpgsql@alfa.demo', 'CN collision', u.password_hash, 'subscriber', " + quote(SUBSCRIBER_ID) + "::uuid "
+        "from tenants t join users u on u.email = 'admin@alfa.demo' where t.slug = 'alfa'; "
+        "raise exception 'users_subscriber_uq nao disparou'; "
+        "exception when unique_violation then "
+        "get stacked diagnostics v_con = CONSTRAINT_NAME; "
+        "if v_con <> 'users_subscriber_uq' then "
+        "raise exception 'violacao inesperada em vez de users_subscriber_uq: %', v_con; "
+        "end if; "
+        "end; end $$;",
+        "nexo_test",
+    )
+    # 2. Prova direta no cliente psql via chamada externa com assert na mensagem de erro
+    collision_failed = False
+    try:
+        sql(
+            "insert into users (tenant_id, email, name, password_hash, role, subscriber_id) "
+            "select t.id, 'cn-collision@alfa.demo', 'CN collision', u.password_hash, 'subscriber', " + quote(SUBSCRIBER_ID) + "::uuid "
+            "from tenants t join users u on u.email = 'admin@alfa.demo' where t.slug = 'alfa'",
+            "nexo_test",
+        )
+    except subprocess.CalledProcessError as exc:
+        collision_failed = True
+        err_msg = (exc.stderr or "") + (exc.stdout or "")
+        assert "users_subscriber_uq" in err_msg, err_msg
+    assert collision_failed, "inserção duplicada de assinante em users deve violar users_subscriber_uq"
+    assert int(one("select count(*) as n from users where subscriber_id = " + quote(SUBSCRIBER_ID))["n"]) == 1
+    subscriber = login(call, SUBSCRIBER)
+    sql(
+        "update sessions set support_tenant_id = (select id from tenants where slug = 'alfa') "
+        "where user_id = (select id from users where email = " + quote(OPERATOR) + ") "
+        "and support_tenant_id is null",
+        "nexo_test",
+    )
+    before = fingerprint(one)
+    assert int(before["accounts"]) == 3 and int(before["active_accounts"]) == 0, before
+    assert int(before["attempts"]) == 303 and int(before["statuses"]) == 104, before
+    full_id = seeded["full"]
+    path = "/api/notice-log/" + full_id + "/cloud-journal"
+    denied = journal_get(call, None, path)
+    assert denied["status"] == 401, denied["status"]
+    surface(denied)
+    for token in (attendant, subscriber):
+        blocked = journal_get(call, token, path)
+        assert blocked["status"] == 403 and blocked["json"].get("error") == "sem permissão para esta ação", blocked.get("json")
+        surface(blocked)
+    support = journal_get(call, operator, path)
+    assert support["status"] == 403 and support["json"].get("error") == "o histórico Cloud exige escopo integral do provedor, fora do suporte", support.get("json")
+    surface(support)
+    for bad in ("0", "0001", "-1", "1.2", "9223372036854775808"):
+        rejected = journal_get(call, admin, "/api/notice-log/" + bad + "/cloud-journal")
+        assert rejected["status"] == 400, (bad, rejected["status"])
+        surface(rejected)
+    for query, status in (("?page=1", 400), ("?a=1&a=2", 400), ("?a=%ZZ", 400)):
+        rejected = journal_get(call, admin, path + query)
+        assert rejected["status"] == status, (query, rejected["status"])
+        surface(rejected)
+    full = journal_get(call, admin, path)
+    assert full["status"] == 200, full.get("json")
+    surface(full)
+    assert_journal(
+        full["json"], full_id, "sent", 2, list(range(101, 1, -1)),
+        ["cj-raw-tie-hi", "cj-raw-tie-lo"] + ["cj-raw-" + str(i).zfill(3) for i in range(99, 1, -1)],
+        True, True,
+    )
+    assert full["json"]["statuses"][0]["created_at"] == full["json"]["statuses"][1]["created_at"]
+    assert full["json"]["statuses"][1]["created_at"] > full["json"]["statuses"][2]["created_at"]
+    assert {row["attempt_no"] for row in full["json"]["statuses"]} == {101}
+    assert {row["state"] for row in full["json"]["attempts"]} == STATES
+    sent = next(row for row in full["json"]["attempts"] if row["attempt_no"] == 101)
+    assert sent["state"] == "submitted" and sent["http_status"] == 201 and sent["wire_at"].startswith("2026-02-02T03:04:05")
+    reserved = next(row for row in full["json"]["attempts"] if row["attempt_no"] == 7)
+    assert reserved["state"] == "reserved" and reserved["wire_at"] is None and reserved["http_status"] is None
+    busy = journal_get(call, admin, "/api/notice-log/" + seeded["busy"] + "/cloud-journal")
+    assert busy["status"] == 200, busy["status"]
+    surface(busy)
+    assert_journal(busy["json"], seeded["busy"], "uncertain", 3, list(range(101, 1, -1)), [], True, False)
+    exact = journal_get(call, admin, "/api/notice-log/" + seeded["exact"] + "/cloud-journal")
+    assert exact["status"] == 200, exact["status"]
+    surface(exact)
+    assert_journal(exact["json"], seeded["exact"], "failed", 1, list(range(100, 0, -1)), [], False, False)
+    empty = journal_get(call, admin, "/api/notice-log/" + seeded["empty"] + "/cloud-journal")
+    assert empty["status"] == 200, empty["status"]
+    surface(empty)
+    assert_journal(empty["json"], seeded["empty"], "skipped_settled", 0, [], [], False, False)
+    missing = journal_get(call, admin, "/api/notice-log/9223372036854775807/cloud-journal")
+    other = journal_get(call, admin, "/api/notice-log/" + seeded["beta"] + "/cloud-journal")
+    assert missing["status"] == 404 and other["status"] == 404, (missing["status"], other["status"])
+    assert missing["json"] == other["json"] and missing["json"].get("error") == "aviso não encontrado"
+    assert seeded["beta"].encode() not in (other.get("body") or b"")
+    surface(missing)
+    surface(other)
+    posted = call(path, {}, method="POST", token=admin)
+    assert posted["status"] >= 400, posted["status"]
+    surface(posted)
+    again = journal_get(call, admin, path)
+    assert again["status"] == 200 and again["json"] == full["json"]
+    after = fingerprint(one)
+    assert after == before, (before, after)
+
+
+def remove_cloud_journal_fixtures(sql):
+    removed = sql(
+        "with gone as (delete from notice_log where error = " + quote(MARKER) + " returning id) "
+        "select count(*) from gone",
+        "nexo_test",
+    )
+    retained = {}
+    for slug in ("alfa", "beta"):
+        retained[slug] = sql(
+            "select set_config('app.tenant_id', (select id::text from tenants where slug = " + quote(slug) + "), false);"
+            "select set_config('app.subscriber_id', '', false);"
+            "select cloud_notice_retain_expired(timestamptz '2100-01-01+00');",
+            "nexo_test",
+        ).splitlines()[-1]
+    sql(
+        "delete from cloud_accounts where id in (" + ",".join(quote(item) for item in ACCOUNT_IDS) + ")",
+        "nexo_test",
+    )
+    left = sql(
+        "select (select count(*) from cloud_accounts) || ',' ||"
+        " (select count(*) from cloud_notice_attempts) || ',' ||"
+        " (select count(*) from cloud_notice_status) || ',' ||"
+        " (select count(*) from notice_log where error = " + quote(MARKER) + ")",
+        "nexo_test",
+    )
+    assert removed == "5" and retained == {"alfa": "103", "beta": "1"} and left == "0,0,0,0", (removed, retained, left)
+
+
+def restore_operator_support(sql, preexisting):
+    kept = "array[" + ",".join(quote(item) for item in preexisting) + "]::uuid[]" if preexisting else "array[]::uuid[]"
+    sql(
+        "update sessions set support_tenant_id = null "
+        "where user_id = (select id from users where email = " + quote(OPERATOR) + ") "
+        "and support_tenant_id is not null and not (id = any(" + kept + "))",
+        "nexo_test",
+    )
