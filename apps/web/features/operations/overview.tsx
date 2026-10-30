@@ -50,6 +50,10 @@ import {
 } from "@/features/network/models";
 import { orderKinds, orderStates } from "@/features/field/labels";
 import { canAccessPath, canonicalErpPath } from "./navigation";
+import {
+  useOverviewPreferences,
+  OverviewPreferencesControl,
+} from "./overview-preferences";
 
 import { cents } from "@/features/shared/schema";
 
@@ -135,6 +139,14 @@ function monthLabel(month: string) {
 
 export function ErpOverview() {
   const { me } = useSession();
+  const {
+    isTeam,
+    preferences,
+    storageStatus,
+    isWidgetVisible,
+    toggleWidget,
+    resetPreferences,
+  } = useOverviewPreferences(me);
   const navigate = useNavigate();
   const finance = can(me, "finance:read");
   const network = can(me, "network:read");
@@ -850,19 +862,19 @@ export function ErpOverview() {
               ]
             : null
         }
-        main={revenue}
+        main={isWidgetVisible("revenue") ? revenue : undefined}
         side={pulse}
         extra={
-          p && (
+          isWidgetVisible("contract-trends") && p ? (
             <div className="overview-main-grid overview-pair">
               {contractTrend("ativacoes")}
               {contractTrend("encerramentos")}
             </div>
-          )
+          ) : undefined
         }
         priorities={priorities("overview")}
         activities={activities}
-        agenda={agendaPanel}
+        agenda={isWidgetVisible("agenda") ? agendaPanel : undefined}
       />
     );
   };
@@ -882,6 +894,15 @@ export function ErpOverview() {
             <CalendarDays size={15} />
             {date(new Date().toISOString())}
           </span>
+          {area === "overview" && isTeam && (
+            <OverviewPreferencesControl
+              me={me}
+              preferences={preferences}
+              storageStatus={storageStatus}
+              onToggleWidget={toggleWidget}
+              onReset={resetPreferences}
+            />
+          )}
           <Button
             variant="outline"
             disabled={!dashboard.data}
