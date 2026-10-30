@@ -880,12 +880,21 @@
       "allowlist_shadow": [],
       "allowlist_cut": [],
       "balance_read_database_gate": "pending",
+      "reconciliacao_lote39": {
+        "matriz": "docs/B04-ACEITE-CORTE-LEITOR.json",
+        "recibo": "docs/evidencias/B04-GATES-B6DF0C3.json",
+        "origem": "gerencia_host; originais externos não montados no worker",
+        "criterios_com_prova_avaliada": 19,
+        "historicos": 13,
+        "adicionais": ["acordo-nao-comprovado", "importacao", "estorno", "excesso", "sem-fallback-silencioso", "matches-falso-bloqueia-corte"],
+        "limite": "Provas não autorizam corte, runtime ou homologação externa; migração 65→66 reutilizada de 01db028 sem nova execução."
+      },
       "marcos_37_38": {
       "base37": "75145eec65c92113166339a3c73f5ccccb001e5b",
       "origem": "marco 37 informado pelo controlador; consolidação externa indisponível nesta sessão",
       "resultado37": "PostgreSQL real, Go com race: 507 pass, 0 fail; nativo: 26 grupos aprovados. Estorno, excesso e diagnóstico foram executados no marco 37; detalhes por critério dependem da consolidação original.",
       "reuso36": "Migração do lote 36 reutilizada com bytes inalterados, conforme controlador; sem nova execução. Origem 01db028c9ad718e6c832d465585984067f4bdc76, ancestral de 75145eec65c92113166339a3c73f5ccccb001e5b. Não atribuir nova corrida ao reuso.",
-      "gate_g_lote38": "Código d1795a346b20cc5af31245510969b288438f8bc5 implementado e revisado segundo controlador; amostra não vazia só de true permite candidatura, falso ou amostra ausente, vazia ou inválida impede. PostgreSQL real no novo HEAD ainda não executado; não aprova admissão final.",
+      "gate_g_lote38": "Código d1795a346b20cc5af31245510969b288438f8bc5; nativo em PG real no HEAD b6df0c30913604226c6b473ddfc803a441c4fc57 exercitou candidatura com drift, recusa e rollback, exit 0, segundo gerência no host. Não aprova admissão final ou corte.",
       "corte_autorizado": false,
       "allowlist_shadow": [],
       "allowlist_cut": [],
@@ -1141,17 +1150,18 @@
         "provas PostgreSQL do lote 30, com a corrida 7cde1e6 reprovada no EXPLAIN",
         "correção de prova do lote 31, equivalência estrutural e papel nexo_app, sem mudança de produção",
         "corrida 6963214 com Go 370 pass, novos PG sem skip e nativo de 25 grupos",
-        "treze critérios executados no aceite d37603f, com allowlists vazias"
+        "treze critérios executados no aceite d37603f, com allowlists vazias",
+        "lote 39: seis provas adicionais avaliadas, total 19, conforme recibo da gerência; sem autorização de corte"
       ],
       "criterios_abertos": [
         {
           "id": "B04-corte",
-          "causa": "Na corrida histórica 6963214, treze critérios da matriz tinham prova e seis não tinham prova mínima inteira: acordo-nao-comprovado, estorno, excesso, importacao, matches-falso-bloqueia-corte e sem-fallback-silencioso. No marco 37 foram executados estorno, excesso e diagnóstico, conforme controlador; a confirmação da prova mínima por critério depende da consolidação original. A migração 36 foi reutilizada sem nova execução. O gate G novo de 38 ainda não tem prova PG real integrada. As allowlists continuam vazias, balanceReadDatabaseGate pending e corte não autorizado. A corrida 7cde1e6 permanece exit 1; a comparação 0086558 de 23 faturas e 0 acordos não autoriza a troca.",
+          "causa": "Os 19 critérios têm provas avaliadas na matriz do lote 39: 13 anteriores e seis adicionais atribuídas à gerência no host. Migração 65→66 executada em 01db028 foi reutilizada sem nova execução; gate de candidatura exercitado em b6df0c3. Allowlists vazias, balanceReadDatabaseGate pending e corte não autorizado. A falha histórica 7cde1e6 e a limitação da comparação 0086558 permanecem.",
           "dependencias": [
             "B03"
           ],
-          "evidencia_faltante": "Confirmar, nos registros originais do marco 37, a prova mínima individual dos critérios históricos ainda não comprovada nesta sessão; executar a prova PostgreSQL real do gate G novo e exigir revisão independente antes de qualquer nome na allowlist de corte. O CI 40877414874 success cobre o SHA 6963214 na candidata e não promove allowlist. O run 40840682617 permanece falha histórica.",
-          "proximo_passo": "Manter o corte fechado e as allowlists vazias. A inclusão de um leitor espera o gate G e revisão independente. Não reclassificar 7cde1e6. Não reimplementar a migração 66.",
+          "evidencia_faltante": "A autorização de inclusão de leitor requer gate de banco específico, revisão independente e decisão aplicável; os 19 critérios avaliados não autorizam corte nem homologação externa. A prova de candidatura não é corte em runtime. O CI histórico 40877414874 cobre 6963214; 40840682617 permanece falha histórica.",
+          "proximo_passo": "Manter corte fechado, gate pending e allowlists vazias; preservar dependências e revisão antes de qualquer inclusão. Não reclassificar 7cde1e6 nem reimplementar a migração 66.",
           "prova_limitada_0086558": {
             "alfa_faturas": 23,
             "alfa_sombra": 23,
@@ -2145,6 +2155,7 @@
     },
     {
       "id": "B17",
+      "prova_ftth_pg_lote39": {"teste": "TestFTTHContratoPG", "head": "b6df0c30913604226c6b473ddfc803a441c4fc57", "required": "NEXO_FTTH_PG_REQUIRED=1", "resultado": "pass", "duracao_segundos": 0.33, "origem": "gerencia_host; docs/evidencias/B04-GATES-B6DF0C3.json", "limite": "não comprova projeto físico nem benchmark"},
       "titulo": "Topologia",
       "prioridade": "P2",
       "fechado": false,
@@ -2161,7 +2172,7 @@
       ],
       "entregue": [
         "CTO/CEO, porta e mapa operacional de contratos, POPs e caixas",
-        "contrato FTTH do lote 38 implementado em 2109aececb52e2e32b570617fc07d928da18bfe5 e revisado segundo controlador; execução PG real pendente"
+        "contrato FTTH do lote 38 implementado em 2109aececb52e2e32b570617fc07d928da18bfe5; TestFTTHContratoPG passou em PG real no HEAD b6df0c30913604226c6b473ddfc803a441c4fc57 com NEXO_FTTH_PG_REQUIRED=1, 0,33 s, observado pela gerência no host"
       ],
       "criterios_abertos": [
         {
@@ -2170,8 +2181,8 @@
           "dependencias": [
             "especificação além do mapa operacional"
           ],
-          "evidencia_faltante": "Execução em PostgreSQL real do contrato FTTH do lote 38 e evidência de projeto físico e desempenho real. O contrato implementado e revisado não comprova banco nem benchmark.",
-          "proximo_passo": "Executar o contrato Go FTTH existente em PostgreSQL real após integração; não reimplementar o contrato.",
+          "evidencia_faltante": "Especificação aprovada e evidência de projeto físico e desempenho real. O contrato PG executado não comprova projeto físico nem benchmark.",
+          "proximo_passo": "Definir especificação e critérios de projeto físico e desempenho com dados reais; não reimplementar o contrato PG já executado.",
           "validacao": [
             "python3",
             "tests/contrato/go_integration.py"
@@ -2240,10 +2251,10 @@
     }
   ],
   "proximo_evento": {
-    "id": "validar-entregas-lote38-pg-real",
+    "id": "triagem-lote39-insumos-e-gates",
     "id_anterior": "provar-b15-postgresql-e-ci-do-lote33",
     "prioridade": "P0",
-    "motivo": "Marco 37 na base 75145ee: PG real Go race 507 pass e 0 fail, nativo 26 grupos, segundo controlador. B15 interno e journal publicados em 01db028 e comprovados em PG real, nativo e CI 41009564330; H01 externo permanece aberto. O gate G B04 novo e contrato FTTH B17 do lote 38 aguardam execução em PG real no HEAD integrado. Falhas históricas permanecem registradas.",
+    "motivo": "No HEAD b6df0c3, gerência observou PG real Go race 508 ações pass, 0 fail e 18 skips de outros testes; nativo exit 0, 26 grupos, incluindo gate B04; TestFTTHContratoPG passou com REQUIRED=1. B15 interno publicado em 01db028; H01 externo aberto. Triagem não identificou recorte interno aprovado pronto sem insumos.",
     "nao_reabrir": [
       "lote01",
       "b07-resolucao",
@@ -2266,16 +2277,16 @@
       "desenho-b15-6ca6d21",
       "aceite-b04-d37603f"
     ],
-    "candidato_interno_seguinte": "Gerência consolida provas e executa os gates PG reais das entregas 38 no HEAD integrado; allowlists B04 vazias e sem chamada Meta.",
+    "candidato_interno_seguinte": "Nenhum recorte interno aprovado pronto para implementação sem insumos; priorizar decisões e recursos identificados em docs/PENDENCIAS-INTERNAS-APROVADAS.json, mantendo os gates e sem chamada Meta.",
     "frentes": [
       {
         "id": "B04-gate-G-lote38",
-        "estado": "implementado e revisado segundo controlador; PG real no HEAD integrado pendente",
+        "estado": "nativo em PG real no HEAD b6df0c3 exit 0, candidatura com drift recusada e rollback, observado pela gerência; não autoriza corte",
         "commit": "d1795a346b20cc5af31245510969b288438f8bc5"
       },
       {
         "id": "B17-contrato-FTTH-lote38",
-        "estado": "implementado e revisado segundo controlador; PG real no HEAD integrado pendente",
+        "estado": "TestFTTHContratoPG em PG real no HEAD b6df0c3, REQUIRED=1, pass em 0,33 s, observado pela gerência; não é projeto físico nem benchmark",
         "commit": "2109aececb52e2e32b570617fc07d928da18bfe5"
       }
     ],
@@ -2352,10 +2363,11 @@
     "pedir_nova_ordem": false,
     "projeto_concluido": false,
     "percentual": null,
-    "instrucao": "Preservar lotes concluídos e falhas históricas, inclusive 7cde1e6 exit 1 e CI 40936161250 lint. Marco 37 DONE na base 75145eec65c92113166339a3c73f5ccccb001e5b: PG real Go race 507 pass, 0 fail e nativo 26 grupos, conforme controlador; migração do lote 36 reutilizada sem nova execução. B15 journal HTTP, R2 e G internos comprovados e publicados em 01db028, CI 41009564330; H01 e WABA externos continuam abertos e flags default off. Gate G novo B04 e contrato B17 do lote 38 implementados e revisados aguardam PG real integrado. Manter gate pending, allowlists vazias e corte não autorizado. Não fechar fiscal, extrato, host físico, cópia externa ou projeto por contagem."
+    "instrucao": "Preservar lotes e falhas históricas, inclusive 7cde1e6 e CI 40936161250. Em b6df0c3 a gerência observou PG real Go race 508 ações pass, 0 fail, 18 skips de outros testes e nativo 26 grupos exit 0; B04 e FTTH têm provas descritas no lote 39. Migração 36 reutilizada de 01db028 sem nova execução. B15 interno publicado em 01db028, H01 externo aberto. Gate pending, allowlists vazias e corte não autorizado. Nenhum recorte interno pronto sem insumos; não fechar limites externos por contagem."
 
   },
   "publicacao": {
+    "candidata_lote38": {"branch": "dev/lote38-b04-gate-ftth", "push": "confirmado pela gerência", "head": "b6df0c30913604226c6b473ddfc803a441c4fc57", "ci": {"run": 41031703591, "status": "in_progress", "conclusion": null, "origem": "observação da gerência no host; não reconsultada nesta entrega"}, "main_e_dev": "01db028c9ad718e6c832d465585984067f4bdc76 segundo gerência; até push verificado por ela", "deploy": false, "homologacao": false},
     "producao": false,
     "lote25_publicado": false,
     "github_e193266": "relato histórico de 00_STATUS.md; não valida cc542a1, 0086558 nem 027e461",
