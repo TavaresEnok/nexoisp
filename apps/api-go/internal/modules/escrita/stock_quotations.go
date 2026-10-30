@@ -92,6 +92,7 @@ func registerStockQuotations(api huma.API, registry *endpoint.Registry, s Servic
 	route("GET", "/api/stock/quotations/{id}", "stock:read", nil, func(ctx context.Context, tx *db.Tx, id string, _ *http.Request, _ map[string]any) (any, error) {
 		return detail(ctx, tx, id)
 	})
+	registerStockQuotationsExport(api, registry, s, detail)
 	route("POST", "/api/stock/quotations", "stock:write", &create, func(ctx context.Context, tx *db.Tx, _ string, _ *http.Request, b map[string]any) (any, error) {
 		seen := map[any]bool{}
 		for _, raw := range b["items"].([]any) {
