@@ -91,7 +91,10 @@
     "corrida_6963214": {
       "head": "6963214927aa45ae1963c58d4c14ba540d78c2f0",
       "go_integration": {
-        "comando": ["python3", "tests/contrato/go_integration.py"],
+        "comando": [
+          "python3",
+          "tests/contrato/go_integration.py"
+        ],
         "variavel": "NEXO_BALANCE_READ_PG_REQUIRED=1",
         "exit": 0,
         "required": 1,
@@ -103,7 +106,10 @@
         "recorded_at_gate_go_summary": "2026-10-29T12:52:51.344675+00:00"
       },
       "nativo": {
-        "comando": ["python3", "tests/contrato/nativo.py"],
+        "comando": [
+          "python3",
+          "tests/contrato/nativo.py"
+        ],
         "exit": 0,
         "grupos": 25,
         "b13_casos": 22,
@@ -886,21 +892,28 @@
         "origem": "gerencia_host; originais externos não montados no worker",
         "criterios_com_prova_avaliada": 19,
         "historicos": 13,
-        "adicionais": ["acordo-nao-comprovado", "importacao", "estorno", "excesso", "sem-fallback-silencioso", "matches-falso-bloqueia-corte"],
+        "adicionais": [
+          "acordo-nao-comprovado",
+          "importacao",
+          "estorno",
+          "excesso",
+          "sem-fallback-silencioso",
+          "matches-falso-bloqueia-corte"
+        ],
         "limite": "Provas não autorizam corte, runtime ou homologação externa; migração 65→66 reutilizada de 01db028 sem nova execução."
       },
       "marcos_37_38": {
-      "base37": "75145eec65c92113166339a3c73f5ccccb001e5b",
-      "origem": "marco 37 informado pelo controlador; consolidação externa indisponível nesta sessão",
-      "resultado37": "PostgreSQL real, Go com race: 507 pass, 0 fail; nativo: 26 grupos aprovados. Estorno, excesso e diagnóstico foram executados no marco 37; detalhes por critério dependem da consolidação original.",
-      "reuso36": "Migração do lote 36 reutilizada com bytes inalterados, conforme controlador; sem nova execução. Origem 01db028c9ad718e6c832d465585984067f4bdc76, ancestral de 75145eec65c92113166339a3c73f5ccccb001e5b. Não atribuir nova corrida ao reuso.",
-      "gate_g_lote38": "Código d1795a346b20cc5af31245510969b288438f8bc5; nativo em PG real no HEAD b6df0c30913604226c6b473ddfc803a441c4fc57 exercitou candidatura com drift, recusa e rollback, exit 0, segundo gerência no host. Não aprova admissão final ou corte.",
-      "corte_autorizado": false,
-      "allowlist_shadow": [],
-      "allowlist_cut": [],
-      "balance_read_database_gate": "pending"
-    },
-    "desenho_lote28": {
+        "base37": "75145eec65c92113166339a3c73f5ccccb001e5b",
+        "origem": "marco 37 informado pelo controlador; consolidação externa indisponível nesta sessão",
+        "resultado37": "PostgreSQL real, Go com race: 507 pass, 0 fail; nativo: 26 grupos aprovados. Estorno, excesso e diagnóstico foram executados no marco 37; detalhes por critério dependem da consolidação original.",
+        "reuso36": "Migração do lote 36 reutilizada com bytes inalterados, conforme controlador; sem nova execução. Origem 01db028c9ad718e6c832d465585984067f4bdc76, ancestral de 75145eec65c92113166339a3c73f5ccccb001e5b. Não atribuir nova corrida ao reuso.",
+        "gate_g_lote38": "Código d1795a346b20cc5af31245510969b288438f8bc5; nativo em PG real no HEAD b6df0c30913604226c6b473ddfc803a441c4fc57 exercitou candidatura com drift, recusa e rollback, exit 0, segundo gerência no host. Não aprova admissão final ou corte.",
+        "corte_autorizado": false,
+        "allowlist_shadow": [],
+        "allowlist_cut": [],
+        "balance_read_database_gate": "pending"
+      },
+      "desenho_lote28": {
         "commit": "728f2ff5712cb4b133fe7b07953db80836b72045",
         "implementado": false,
         "executado": false,
@@ -1033,8 +1046,17 @@
           "status": "in_progress",
           "conclusion": null,
           "updated_at": "2026-10-29T12:56:16Z",
-          "job_agente": {"id": 123459688220, "status": "completed", "conclusion": "success", "completed_at": "2026-10-29T12:56:29Z"},
-          "job_verificar": {"id": 123459687659, "status": "in_progress", "conclusion": null}
+          "job_agente": {
+            "id": 123459688220,
+            "status": "completed",
+            "conclusion": "success",
+            "completed_at": "2026-10-29T12:56:29Z"
+          },
+          "job_verificar": {
+            "id": 123459687659,
+            "status": "in_progress",
+            "conclusion": null
+          }
         },
         "leitura_publica_sem_token": {
           "consultada_em": "2026-10-29T13:21:13Z",
@@ -1043,8 +1065,18 @@
           "conclusion": "success",
           "updated_at": "2026-10-29T13:11:42Z",
           "jobs_url": "https://api.github.com/repos/TavaresEnok/nexoisp/actions/runs/40877414874/jobs",
-          "job_verificar": {"id": 123459687659, "status": "completed", "conclusion": "success", "completed_at": "2026-10-29T13:11:42Z"},
-          "job_agente": {"id": 123459688220, "status": "completed", "conclusion": "success", "completed_at": "2026-10-29T12:56:29Z"},
+          "job_verificar": {
+            "id": 123459687659,
+            "status": "completed",
+            "conclusion": "success",
+            "completed_at": "2026-10-29T13:11:42Z"
+          },
+          "job_agente": {
+            "id": 123459688220,
+            "status": "completed",
+            "conclusion": "success",
+            "completed_at": "2026-10-29T12:56:29Z"
+          },
           "passo_migracao_65_para_66": "success"
         },
         "cobre_commits_posteriores": false,
@@ -1900,7 +1932,10 @@
         "nativo_py": {
           "exit_code": 0,
           "checks": 24,
-          "inclui": ["B13", "financeiro"],
+          "inclui": [
+            "B13",
+            "financeiro"
+          ],
           "fonte": "relato da gerência neste plano",
           "reexecutado_no_gate_documental": false,
           "fecha_matriz_b04": false,
@@ -2005,7 +2040,15 @@
         "lote": "docs/LOTE33-B15-OFFLINE.md",
         "casos": "B15-C01 a B15-C27 observados em 804ce16; journal HTTP, R2 e G internos comprovados posteriormente em PG real, nativo e CI 41009564330 segundo controlador; H01 externo aberto",
         "execucao": "go_integration_804ce16_exit_0_478_pass_106_b15_18_skips_h01_aberto",
-        "r1_argv": ["go", "-C", "apps/api-go", "test", "-count=1", "-v", "./internal/outbound/cloudapi/"],
+        "r1_argv": [
+          "go",
+          "-C",
+          "apps/api-go",
+          "test",
+          "-count=1",
+          "-v",
+          "./internal/outbound/cloudapi/"
+        ],
         "r1_exit": 0,
         "r1_data": "2026-10-29",
         "r1_rede": false,
@@ -2082,7 +2125,12 @@
                 "apps/api-go/internal/outbound/cloudapi/redact.go",
                 "apps/api-go/internal/outbound/cloudapi/client_test.go"
               ],
-              "contrato": ["go", "test", "-count=1", "./internal/outbound/cloudapi/"],
+              "contrato": [
+                "go",
+                "test",
+                "-count=1",
+                "./internal/outbound/cloudapi/"
+              ],
               "depende_de": []
             },
             {
@@ -2092,7 +2140,12 @@
                 "apps/api-go/internal/outbound/cloudjournal/journal.go",
                 "apps/api-go/internal/outbound/cloudjournal/journal_test.go"
               ],
-              "contrato": ["go", "test", "-count=1", "./internal/outbound/cloudjournal/"],
+              "contrato": [
+                "go",
+                "test",
+                "-count=1",
+                "./internal/outbound/cloudjournal/"
+              ],
               "banco": "PostgreSQL de teste; skip não aprova",
               "depende_de": []
             },
@@ -2105,13 +2158,31 @@
                 "apps/api-go/internal/outbound/notices_cloud_test.go"
               ],
               "rota": "POST /api/webhooks/cloud-api/{account}",
-              "contrato": ["go", "test", "-count=1", "-run", "TestCloudNoticeGate", "./internal/outbound/"],
-              "depende_de": ["R1", "R2"],
-              "nao_bloqueia": ["R1", "R2"]
+              "contrato": [
+                "go",
+                "test",
+                "-count=1",
+                "-run",
+                "TestCloudNoticeGate",
+                "./internal/outbound/"
+              ],
+              "depende_de": [
+                "R1",
+                "R2"
+              ],
+              "nao_bloqueia": [
+                "R1",
+                "R2"
+              ]
             },
             {
               "id": "H",
-              "itens": ["conta WABA", "template aprovado", "versão Graph citada em fonte primária atual", "envio real deliberado"],
+              "itens": [
+                "conta WABA",
+                "template aprovado",
+                "versão Graph citada em fonte primária atual",
+                "envio real deliberado"
+              ],
               "fecha_mvp_offline": false
             }
           ]
@@ -2140,22 +2211,22 @@
       "criterios_abertos": [
         {
           "id": "B16-chatwoot",
-          "causa": "Não há adapter Chatwoot nem conta/inbox no clone. O CRM nativo não foi substituído.",
-          "dependencias": [
-            "pedido explícito e contas Chatwoot"
-          ],
-          "evidencia_faltante": "Isolamento account/tenant, evento sem loop e ação financeira permanecendo no Nexo.",
-          "proximo_passo": "Não abrir tarefa P2 antes de B13, salvo pedido do operador.",
-          "procedimento": "Gate de fechamento, sem comando neste clone: o operador grava em arquivo versionado, sem segredo, 'Chatwoot demandado' ou 'Chatwoot não demandado'. 'Não demandado' fecha o critério como não aplicável. 'Demandado' só então autoriza o teste futuro com HTTP falso, isolamento account/tenant, evento sem loop e ação financeira permanecendo no Nexo. Sem esse registro o critério permanece aberto.",
-          "validacao": [
-            "procedimento: registro versionado e sem segredo da decisão do operador, 'Chatwoot demandado' ou 'Chatwoot não demandado'; a segunda fecha como não aplicável; a primeira exige depois teste com HTTP falso e isolamento por tenant"
-          ]
+          "situacao": "fora_do_escopo",
+          "decisao": "Em 30/10/2026, o usuário excluiu Chatwoot do planejamento NexoISP; outro projeto trata do chat. Registro histórico, sem tarefa ou integração neste projeto."
         }
       ]
     },
     {
       "id": "B17",
-      "prova_ftth_pg_lote39": {"teste": "TestFTTHContratoPG", "head": "b6df0c30913604226c6b473ddfc803a441c4fc57", "required": "NEXO_FTTH_PG_REQUIRED=1", "resultado": "pass", "duracao_segundos": 0.33, "origem": "gerencia_host; docs/evidencias/B04-GATES-B6DF0C3.json", "limite": "não comprova projeto físico nem benchmark"},
+      "prova_ftth_pg_lote39": {
+        "teste": "TestFTTHContratoPG",
+        "head": "b6df0c30913604226c6b473ddfc803a441c4fc57",
+        "required": "NEXO_FTTH_PG_REQUIRED=1",
+        "resultado": "pass",
+        "duracao_segundos": 0.33,
+        "origem": "gerencia_host; docs/evidencias/B04-GATES-B6DF0C3.json",
+        "limite": "não comprova projeto físico nem benchmark"
+      },
       "titulo": "Topologia",
       "prioridade": "P2",
       "fechado": false,
@@ -2299,7 +2370,12 @@
           "apps/api-go/internal/outbound/cloudapi/redact.go",
           "apps/api-go/internal/outbound/cloudapi/client_test.go"
         ],
-        "contrato": ["go", "test", "-count=1", "./internal/outbound/cloudapi/"],
+        "contrato": [
+          "go",
+          "test",
+          "-count=1",
+          "./internal/outbound/cloudapi/"
+        ],
         "depende_de": []
       },
       {
@@ -2309,7 +2385,12 @@
           "apps/api-go/internal/outbound/cloudjournal/journal.go",
           "apps/api-go/internal/outbound/cloudjournal/journal_test.go"
         ],
-        "contrato": ["go", "test", "-count=1", "./internal/outbound/cloudjournal/"],
+        "contrato": [
+          "go",
+          "test",
+          "-count=1",
+          "./internal/outbound/cloudjournal/"
+        ],
         "depende_de": []
       },
       {
@@ -2320,9 +2401,22 @@
           "apps/api-go/internal/radius/sql/b2808f33_1.sql",
           "apps/api-go/internal/outbound/notices_cloud_test.go"
         ],
-        "contrato": ["go", "test", "-count=1", "-run", "TestCloudNoticeGate", "./internal/outbound/"],
-        "depende_de": ["R1", "R2"],
-        "nao_bloqueia": ["R1", "R2"]
+        "contrato": [
+          "go",
+          "test",
+          "-count=1",
+          "-run",
+          "TestCloudNoticeGate",
+          "./internal/outbound/"
+        ],
+        "depende_de": [
+          "R1",
+          "R2"
+        ],
+        "nao_bloqueia": [
+          "R1",
+          "R2"
+        ]
       }
     ],
     "limites": [
@@ -2364,10 +2458,22 @@
     "projeto_concluido": false,
     "percentual": null,
     "instrucao": "Preservar lotes e falhas históricas, inclusive 7cde1e6 e CI 40936161250. Em b6df0c3 a gerência observou PG real Go race 508 ações pass, 0 fail, 18 skips de outros testes e nativo 26 grupos exit 0; B04 e FTTH têm provas descritas no lote 39. Migração 36 reutilizada de 01db028 sem nova execução. B15 interno publicado em 01db028, H01 externo aberto. Gate pending, allowlists vazias e corte não autorizado. Nenhum recorte interno pronto sem insumos; não fechar limites externos por contagem."
-
   },
   "publicacao": {
-    "candidata_lote38": {"branch": "dev/lote38-b04-gate-ftth", "push": "confirmado pela gerência", "head": "b6df0c30913604226c6b473ddfc803a441c4fc57", "ci": {"run": 41031703591, "status": "in_progress", "conclusion": null, "origem": "observação da gerência no host; não reconsultada nesta entrega"}, "main_e_dev": "01db028c9ad718e6c832d465585984067f4bdc76 segundo gerência; até push verificado por ela", "deploy": false, "homologacao": false},
+    "candidata_lote38": {
+      "branch": "dev/lote38-b04-gate-ftth",
+      "push": "confirmado pela gerência",
+      "head": "b6df0c30913604226c6b473ddfc803a441c4fc57",
+      "ci": {
+        "run": 41031703591,
+        "status": "in_progress",
+        "conclusion": null,
+        "origem": "observação da gerência no host; não reconsultada nesta entrega"
+      },
+      "main_e_dev": "01db028c9ad718e6c832d465585984067f4bdc76 segundo gerência; até push verificado por ela",
+      "deploy": false,
+      "homologacao": false
+    },
     "producao": false,
     "lote25_publicado": false,
     "github_e193266": "relato histórico de 00_STATUS.md; não valida cc542a1, 0086558 nem 027e461",
@@ -2414,5 +2520,10 @@
     "copia_externa": false,
     "fiscal": false,
     "projeto_100": false
+  },
+  "lote40": {
+    "escopo": "Anexos privados de OS e cotações com conversão manual em pedido rascunho",
+    "estado": "integração em andamento; revisão independente e marco PostgreSQL real, nativo, navegador e CI pendentes",
+    "limites": "Catálogo de funcionalidades não é homologação; B04 permanece fechado para corte; base 39 e release 38 preservadas."
   }
 }

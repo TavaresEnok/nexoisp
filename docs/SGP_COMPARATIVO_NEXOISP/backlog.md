@@ -48,3 +48,6 @@ RH completo/frota, grupos arbitrários de permissões, portadores/CNAB/caixa com
 ## Trabalho de auditoria ainda aberto
 
 A revisão documental dos [101 títulos](revisao_101_menus.csv) e dos [956 controles](campos_44_formularios.csv) foi concluída para a retirada dos espelhos. Cada controle tem destinação, proposta/questão e aceite; não se trata de aprovação de todas as regras. Permanecem: decidir escopos e regras registrados por campo/formulário; completar cenários de leitura/edição/erro de cada capacidade fora do lote verificado; obter comportamentos sanitizados em homologação autorizada para o que depende do produto de origem. A cópia privada permite eventual consulta excepcional, mas não é dependência do backlog ou do verificador. Nenhum fluxo pode ser encerrado por contagem de arquivos ou HTTP 200.
+
+
+Lote 40 (30/10/2026): anexos privados de OS e cotação com conversão manual em pedido rascunho estão em integração; revisão independente e provas no PostgreSQL real, navegador e CI permanecem pendentes. A adaptação funcional não constitui homologação. Assinatura, operação offline, fiscal, pagamentos e custo contábil não integram este recorte. Por decisão do usuário, Chatwoot está fora do escopo NexoISP; outro projeto trata do chat.

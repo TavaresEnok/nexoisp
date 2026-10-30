@@ -114,6 +114,12 @@ def run():
         import re
         actual={(method.upper(),re.sub(r'\{([^}]+)\}',r':\1',path)) for path,item in schema['paths'].items() for method in item if method.upper() in ['GET','POST','PUT','PATCH','DELETE']}
         assert manifest==actual,(manifest-actual,actual-manifest);checks.append('operações reais iguais ao inventário')
+        from work_order_attachments_contract import verify as verify_attachments
+        verify_attachments(api, call, sql)
+        checks.append('Lote 40: anexos privados e LGPD')
+        from stock_quotations_contract import verify as verify_quotations
+        verify_quotations(api, call, sql, bases)
+        checks.append('Lote 40: cotação, conversão idempotente e recebimento')
         from radius_history_contract import verify as verify_radius_history
         verify_radius_history(api,call,sql)
         checks.append('B11: histórico, paginação, IPv6 CSV exato, auditoria e isolamento')

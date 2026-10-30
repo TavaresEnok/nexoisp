@@ -60,3 +60,6 @@ Não bloqueia automaticamente o primeiro piloto; priorizar conforme o uso real:
 - IA assistiva e novos canais: decisão de produto, serviço externo e regras de uso dos dados; sem escrita irrestrita em rede.
 
 Não reabrir como pendência busca global, linha do tempo, avisos de saída, degraus de cobrança, API pública, SLA básico, agenda, campos personalizados, combos ou migração Go: esses recursos já possuem implementação. As pendências acima tratam das lacunas e validações restantes.
+
+
+Lote 40 (30/10/2026): anexos privados de OS e cotação com conversão manual em pedido rascunho estão em integração; revisão independente e provas no PostgreSQL real, navegador e CI permanecem pendentes. A adaptação funcional não constitui homologação. Assinatura, operação offline, fiscal, pagamentos e custo contábil não integram este recorte. Por decisão do usuário, Chatwoot está fora do escopo NexoISP; outro projeto trata do chat.

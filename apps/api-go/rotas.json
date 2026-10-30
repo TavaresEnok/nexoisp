@@ -75,11 +75,19 @@
     },
     {
       "method": "DELETE",
+      "path": "/api/stock/quotations/:id/offers/:offerId"
+    },
+    {
+      "method": "DELETE",
       "path": "/api/tags/:id"
     },
     {
       "method": "DELETE",
       "path": "/api/webhook-endpoints/:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/work-orders/:id/attachments/:attachmentId"
     },
     {
       "method": "DELETE",
@@ -655,6 +663,14 @@
     },
     {
       "method": "GET",
+      "path": "/api/stock/quotations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/stock/quotations/:id"
+    },
+    {
+      "method": "GET",
       "path": "/api/stock/suppliers"
     },
     {
@@ -748,6 +764,14 @@
     {
       "method": "GET",
       "path": "/api/work-orders/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/work-orders/:id/attachments"
+    },
+    {
+      "method": "GET",
+      "path": "/api/work-orders/:id/attachments/:attachmentId/download"
     },
     {
       "method": "GET",
@@ -1395,6 +1419,22 @@
     },
     {
       "method": "POST",
+      "path": "/api/stock/quotations"
+    },
+    {
+      "method": "POST",
+      "path": "/api/stock/quotations/:id/cancel"
+    },
+    {
+      "method": "POST",
+      "path": "/api/stock/quotations/:id/offers"
+    },
+    {
+      "method": "POST",
+      "path": "/api/stock/quotations/:id/purchase"
+    },
+    {
+      "method": "POST",
       "path": "/api/stock/suppliers"
     },
     {
@@ -1488,6 +1528,10 @@
     {
       "method": "POST",
       "path": "/api/work-orders"
+    },
+    {
+      "method": "POST",
+      "path": "/api/work-orders/:id/attachments"
     },
     {
       "method": "POST",
