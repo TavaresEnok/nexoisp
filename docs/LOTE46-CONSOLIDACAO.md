@@ -1,0 +1,11 @@
+# Consolidação interna — lote 46
+
+A triagem [residual](LOTE46-BACKLOG-RESIDUAL.md) compara B01–B18 e C01–C44 com os contratos existentes. Nenhum recorte interno coeso foi identificado como pronto sem decisão ou recurso externo. Isso não encerra os objetivos, nem demonstra equivalência SGP. As capacidades parciais e seus critérios permanecem na matriz; campos adicionais, regras fiscais e comerciais, calendário, retenção, conectores, topologia, sandbox e cópia do piloto dependem de insumos concretos. Chatwoot e Webchat foram excluídos pelo usuário.
+
+A antiga linha C45 era uma referência a assets, robots e sitemap do produto de origem, classificada como não aplicável, não uma capacidade de negócio. Seu aceite histórico permanece: manter identidade própria e não incorporar assets ou segredos do SGP. As 44 capacidades C01–C44 permanecem na matriz.
+
+O lote 45 está DONE 5/5, com cinco revisões e dez checks PASS. A prova real focada de 30/10/2026, 18:21–18:22 UTC, passou em sites PostgreSQL 16 REQUIRED/race e nos três cenários Chromium: OS/cotações, locais de rede e preferências do workspace. O escopo foi UI e fonte 45 no HEAD `8b56d004af98d396837dd463911df30e3c7687cc`, com API 44 cujas fontes de produção são idênticas; binários API e banco foram reutilizados e a única diferença Go foi fixture de teste. Manifesto SHA-256 `b01359c25867c1c4653ee414302917c1c6f63896c285cea74e7927907bd6ba87`. Cotação PG44 e HTTP nativo CI44 são provas anteriores reutilizadas, não execuções novas. As falhas de sites PG e browser do lote 44 permanecem no histórico.
+
+O recibo original `host-milestone.json` foi preservado com `passed=false`: a verificação de identidade incluiu dois rastreios versionados reescritos intencionalmente pelo smoke. A proveniência derivada informa implementação inalterada e comandos sem falha; não é CI nem homologação. Os rastreios sufixados `-lote45` em `docs/integracao-v0/evidencias/rastreio/` preservam os cenários reais.
+
+O CI 45 run `41106278702` falhou em Cloud C27 por fixture sem linhas. A correção independente da fixture foi integrada em `9b2230b`; não há aqui prova de CI corrigido. CI e SBOM do SHA exato candidato, piloto e homologações externas permanecem gates. Nenhuma publicação, promoção ou corte é afirmado.

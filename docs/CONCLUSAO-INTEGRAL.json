@@ -571,7 +571,7 @@
     "sgp_comparativo": {
       "capacidades": {
         "arquivo": "docs/SGP_COMPARATIVO_NEXOISP/matriz_capacidades.csv",
-        "linhas": 45
+        "linhas": 44
       },
       "superficies": {
         "arquivo": "docs/SGP_COMPARATIVO_NEXOISP/matriz_superficies.csv",
@@ -2544,7 +2544,12 @@
   },
   "lote44_integracao": {
     "escopo": "exportações operacionais CSV cotação e locais de rede (C37); sem alteração de schema ou dependências externas",
-    "estado": "3 raízes integradas, 2 rotas GET adicionadas a rotas.json, contratos HTTP adicionados; validações PostgreSQL real e cenários de navegador dos novos CSVs pendentes de prova própria antes de publicação",
+    "estado": "Entregue; sites PG16 REQUIRED/race e cenários Chromium de locais e cotações PASS na prova real 45. Cotação PG44 e HTTP nativo CI44 são provas anteriores reutilizadas; falhas do lote 44 permanecem históricas.",
     "limites": "Sem homologação externa, publicação ou conclusão integral; Chatwoot fora do escopo."
+  },
+  "lote45_integracao": {
+    "estado": "DONE 5/5, cinco revisões e dez checks PASS; sites PG16 REQUIRED/race e três cenários Chromium PASS em 18:21–18:22 UTC. UI e fonte 45, API 44 com fontes de produção idênticas e binários reutilizados. CI 41106278702 falhou em Cloud C27 por fixture sem linhas; correção da fixture integrada em 9b2230b, sem prova de CI corrigido. CI/SBOM do SHA candidato pendentes.",
+    "proveniencia": "docs/LOTE46-CONSOLIDACAO.md; recibo original passed=false por dois rastreios gerados reescritos, implementação inalterada e comandos sem falha.",
+    "limites": "Preferências locais por escopo de sessão; sem homologação externa, publicação ou conclusão integral."
   }
 }

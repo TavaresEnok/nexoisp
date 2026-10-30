@@ -16,17 +16,19 @@ Os IDs Cxx apontam para [a matriz](matriz_capacidades.csv); AUD-xx apontam para 
 | AUD-08 | Ferramentas | Playwright corrigido, imagem alinhada e lockfile respeitado | Audit de dependências e navegador atualizado verificados; resultados em execucao.json |
 | UX-01 | C16 | Motivo de espera/cancelamento da OS explícito e botão coerente | Implementado; tipos/build e inspeção; fluxo visual específico não homologado |
 
-## Próximas entregas independentes de integração externa
+## Recortes parciais e decisões necessárias
+
+A triagem [residual 46](../LOTE46-BACKLOG-RESIDUAL.md) não identificou tarefa interna coesa pronta sem insumos adicionais. Os itens abaixo exigem as decisões ou recursos indicados; não são próximos lotes aprovados.
 
 | Prioridade | Entrega funcional | Dependência/decisão | Aceite mínimo |
 |---|---|---|---|
 | P1 | C03 — ampliar cadastro e instalação | Aprovar quais campos são necessários; E/EJ exigem documento/país e regras de duplicidade próprios | Cadastro/edição/consulta/importação/exportação/LGPD com os mesmos campos e sem exigir CPF de estrangeiro |
 | P1 | C19 — compras e depósitos | Aprovar recebimento, reserva, transferência, custo e cancelamento; não deduzir regras fiscais pelo HTML | Compra → recebimento → local → saída/OS → devolução, com saldo, série e auditoria; rollback em falha |
 | P1 | C15/C16 — expediente/SLA e campo | Definir calendário, feriados, fuso, check-in e uso de localização | Prazos reconciliados com exemplos, transições autorizadas e histórico; sem coletar geolocalização por padrão |
-| P1 | C37 — relatórios por tarefa | Lote 44 integra exportações CSV operacionais de cotação e locais por página (rotas GET e contrato HTTP); provas próprias de browser/SQL pendentes | Mesma base reconcilia UI/CSV, permissões e paginação; busca/filtro atual prevalece |
+| P1 | C37 — relatórios por tarefa | CSV de cotação e locais entregues; sites PG16/race e browser reais PASS na prova 45; outras métricas exigem critérios aprovados | Mesma base reconcilia UI/CSV, permissões e paginação; busca/filtro atual prevalece |
 | P1 | C36 — mapeamento de importação | Amostra autorizada e schema da origem; nenhum segredo dos espelhos é uma credencial autorizada | Relatório de perdas, N serviços, saldos e credenciais conferidos; ensaio idempotente |
 | P2 | C24/C42 — inventário de rede | CRUD passivo de poste, torre e condomínio por POP validado na matriz (lote 42 reconciliado com rastro real de browser 43); definir VLAN, QinQ e topologia restante | CRUD/consulta com consistência e permissão; sem comandos livres nem efeito no NAS |
-| P2 | C34 — marca do provedor e preferência visual | Recorte opcional de nome e logotipo no lote 41; lote 45 conclui recorte interno de preferências locais (favoritos de navegação até 12 páginas conectadas e seleção de 3 blocos opcionais na visão geral por usuário/navegador em localStorage); provas reais de browser pendentes de recibo | Limite local ao navegador (máx 8 KiB), isolado por sessionScope(me); sem API/schema/banco/chat; sem personalização de cores ou drag-and-drop |
+| P2 | C34 — marca do provedor e preferência visual | Marca no lote 41 e preferências locais no lote 45 entregues; browser real 45 PASS; ampliação exige contrato | Limite local ao navegador (máx 8 KiB), isolado por sessionScope(me); sem API/schema/banco/chat; sem personalização de cores ou drag-and-drop |
 
 Essas são especificações para decisão, não lacunas encerradas pela matriz. Não acrescentar somente tabelas/botões para marcar um módulo como entregue.
 
@@ -50,4 +52,6 @@ RH completo/frota, grupos arbitrários de permissões, portadores/CNAB/caixa com
 A revisão documental dos [101 títulos](revisao_101_menus.csv) e dos [956 controles](campos_44_formularios.csv) foi concluída para a retirada dos espelhos. Cada controle tem destinação, proposta/questão e aceite; não se trata de aprovação de todas as regras. Permanecem: decidir escopos e regras registrados por campo/formulário; completar cenários de leitura/edição/erro de cada capacidade fora do lote verificado; obter comportamentos sanitizados em homologação autorizada para o que depende do produto de origem. A cópia privada permite eventual consulta excepcional, mas não é dependência do backlog ou do verificador. Nenhum fluxo pode ser encerrado por contagem de arquivos ou HTTP 200.
 
 
-Lote 40 (30/10/2026): anexos privados de OS e cotação com conversão manual em pedido rascunho estão em integração; revisão independente e provas no PostgreSQL real, navegador e CI permanecem pendentes. A adaptação funcional não constitui homologação. Assinatura, operação offline, fiscal, pagamentos e custo contábil não integram este recorte. Por decisão do usuário, Chatwoot está fora do escopo NexoISP; outro projeto trata do chat.
+Lote 40 (30/10/2026): anexos privados de OS e cotação com conversão manual em pedido rascunho DONE 5/5, HTTP real exit 0; recibo Go/PostgreSQL da gerência não consta neste registro. Prova browser posterior 45 PASS. Assinatura, operação offline, fiscal, pagamentos e custo contábil não integram este recorte. Chatwoot/Webchat estão fora do escopo.
+
+Lote 45: DONE 5/5, cinco revisões e dez checks PASS; sites PG16/race e três cenários Chromium reais PASS com UI/fonte 45 e API 44 de fonte de produção idêntica. CI 41106278702 falhou em Cloud C27 por fixture sem linhas; correção da fixture integrada em 9b2230b, sem CI corrigido comprovado. CI/SBOM do SHA candidato e homologação externa continuam pendentes; veja [consolidação](../LOTE46-CONSOLIDACAO.md).
