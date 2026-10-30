@@ -31,7 +31,9 @@ export function PortalBranding() {
           className="h-12 w-24 shrink-0 object-contain"
         />
       )}
-      <span className="min-w-0 break-words [overflow-wrap:anywhere]">{name}</span>
+      <span className="min-w-0 break-words [overflow-wrap:anywhere]">
+        {name}
+      </span>
       {result.error && (
         <span className="text-muted-foreground">
           Identidade personalizada indisponível.
