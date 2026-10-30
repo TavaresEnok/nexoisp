@@ -1,0 +1,52 @@
+{
+  "scenario": "frontend-v0-workspace-preferences.mjs",
+  "recorded_at": "2026-10-30T18:22:30.264Z",
+  "steps": [
+    {
+      "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+      "requests": [
+        "GET /api/agenda",
+        "GET /api/contracts",
+        "GET /api/dashboard",
+        "GET /api/dashboard/panels",
+        "GET /api/finance/monthly",
+        "GET /api/finance/summary",
+        "GET /api/health",
+        "GET /api/me",
+        "GET /api/network/health",
+        "GET /api/plans",
+        "GET /api/tickets",
+        "GET /api/today",
+        "POST /api/auth/login"
+      ]
+    },
+    {
+      "check": "Seleção pessoal da Visão geral oculta bloco opcional e persiste após recarga sem afetar prioridades nem indicadores; restauração restabelece os blocos autorizados",
+      "requests": [
+        "GET /api/agenda",
+        "GET /api/dashboard",
+        "GET /api/dashboard/panels",
+        "GET /api/finance/monthly",
+        "GET /api/finance/summary",
+        "GET /api/me",
+        "GET /api/network/health",
+        "GET /api/tickets",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Logout e novo login com outra conta no mesmo contexto isola preferências por escopo de sessão e restringe widgets e favoritos sem permissão",
+      "requests": [
+        "GET /api/dashboard",
+        "GET /api/finance/monthly",
+        "GET /api/finance/summary",
+        "GET /api/health",
+        "GET /api/me",
+        "GET /api/tickets",
+        "GET /api/today",
+        "POST /api/auth/login",
+        "POST /api/auth/logout"
+      ]
+    }
+  ]
+}

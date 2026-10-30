@@ -1,0 +1,33 @@
+{
+  "head": "8b56d004af98d396837dd463911df30e3c7687cc",
+  "started_at": "2026-10-30T18:21:41.331626+00:00",
+  "finished_at": "2026-10-30T18:22:30.766072+00:00",
+  "original_receipt": {
+    "name": "host-milestone.json",
+    "preserved": true,
+    "passed": false,
+    "reason": "A verificação de identidade de fonte incluiu dois rastreios versionados regenerados intencionalmente pelo smoke."
+  },
+  "derived_provenance": {
+    "implementation_sources_unchanged": true,
+    "only_changed_tracked_paths": ["docs/integracao-v0/evidencias/rastreio/frontend-v0-network-sites.json", "docs/integracao-v0/evidencias/rastreio/frontend-v0-os-quotations.json"],
+    "expected_generated_trace_outputs": true,
+    "commands_passed": true,
+    "sites_pg_required_race": "PASS",
+    "browser_scenarios_passed": ["frontend-v0-os-quotations", "frontend-v0-network-sites", "frontend-v0-workspace-preferences"],
+    "scope": "Regressão focada PostgreSQL 16 real e fluxos Chromium; UI 45 e fontes de produção API 44 inalteradas. Não é CI nem homologação de produção."
+  },
+  "source": {
+    "snapshot": "/home/enok/Documentos/projetos/implementacao-codex/lote45-preferencias-workspace-2026-10-30/validation-source-20261030T182138Z",
+    "manifest": "/home/enok/Documentos/projetos/implementacao-codex/lote45-preferencias-workspace-2026-10-30/evidencias/source-manifest.json",
+    "manifest_sha256": "b01359c25867c1c4653ee414302917c1c6f63896c285cea74e7927907bd6ba87",
+    "tracked_files": 2596,
+    "dist": "/home/enok/Documentos/projetos/implementacao-codex/lote45-preferencias-workspace-2026-10-30/validation-source-20261030T182138Z/apps/web/dist",
+    "dist_source": "checkpoint final do controlador no mesmo HEAD",
+    "api_binary_source_head": "3655b9ca4724ca4d13bec61e1a1946f13604a1f9",
+    "go_db_delta_only_test_fixtures": ["apps/api-go/internal/modules/escrita/network_sites_export_test.go"],
+    "backend_production_sources_unchanged": true,
+    "binary_sha256": {"api": "55408f8548b7aba701c4f43dda01e95f65d3e775c0756ea90baab28ec014e317", "nexo-db": "754fd832419ecaa4de63210fe3620e54b30a168e6c3b9a5e3f0a7958621607aa"},
+    "reuse": "Binários API/db do lote 44 com fontes de produção inalteradas; PG cotação 44 PASS e HTTP nativo CI 44 anterior ao Go PG que falhou são reuso, não nova execução."
+  }
+}

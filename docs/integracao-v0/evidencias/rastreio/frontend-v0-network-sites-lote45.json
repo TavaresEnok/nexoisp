@@ -1,0 +1,21 @@
+{
+  "scenario": "frontend-v0-network-sites.mjs",
+  "recorded_at": "2026-10-30T18:22:23.794Z",
+  "steps": [
+    {
+      "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
+      "requests": [
+        "GET /api/health",
+        "GET /api/me",
+        "GET /api/network/sites",
+        "GET /api/network/sites/:id",
+        "GET /api/network/sites/export.csv",
+        "GET /api/pops",
+        "GET /api/today",
+        "PATCH /api/network/sites/:id",
+        "POST /api/auth/login",
+        "POST /api/network/sites"
+      ]
+    }
+  ]
+}
