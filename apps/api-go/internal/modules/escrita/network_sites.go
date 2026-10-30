@@ -184,7 +184,47 @@ func siteGet(ctx context.Context, tx *db.Tx, id string, lock bool) (jsonx.Object
 	}
 	return rows[0], nil
 }
+
+func sitePage(ctx context.Context, tx *db.Tx, filter siteFilter) (int, []jsonx.Object, error) {
+	if filter.pop != "" {
+		if e := sitePop(ctx, tx, filter.pop, false); e != nil {
+			return 0, nil, e
+		}
+	}
+	rows, e := tx.Objects(ctx, `with filtered as (select `+siteCols+` from network_sites s join pops p on p.tenant_id=s.tenant_id and p.id=s.pop_id where ($1='' or position(lower($1) in lower(s.name))>0 or position(lower($1) in lower(coalesce(s.city,'')))>0 or position(lower($1) in lower(coalesce(s.address,'')))>0) and ($2='' or s.kind=$2) and ($3='' or s.pop_id=nullif($3,'')::uuid) and ($4='all' or s.active=($4='active'))), page as (select * from filtered order by kind,name,id limit $5 offset $6) select (select count(*)::int from filtered) total,coalesce((select jsonb_agg(to_jsonb(page) order by kind,name,id) from page),'[]'::jsonb) items`, filter.q, filter.kind, filter.pop, filter.status, filter.limit, filter.offset)
+	if e != nil {
+		return 0, nil, e
+	}
+	total := 0
+	if t := rows[0].Get("total"); t != nil {
+		switch v := t.(type) {
+		case int:
+			total = v
+		case int32:
+			total = int(v)
+		case int64:
+			total = int(v)
+		case float64:
+			total = int(v)
+		}
+	}
+	items := []jsonx.Object{}
+	switch raw := rows[0].Get("items").(type) {
+	case []jsonx.Object:
+		items = raw
+	case []any:
+		items = make([]jsonx.Object, len(raw))
+		for i, v := range raw {
+			if obj, ok := v.(jsonx.Object); ok {
+				items[i] = obj
+			}
+		}
+	}
+	return total, items, nil
+}
+
 func registerNetworkSites(api huma.API, registry *endpoint.Registry, s Service) {
+	registerNetworkSitesExport(api, registry, s)
 	for _, route := range []struct{ method, path, permission string }{{"GET", "/api/network/sites", "network:read"}, {"GET", "/api/network/sites/{id}", "network:read"}, {"POST", "/api/network/sites", "network:write"}, {"PATCH", "/api/network/sites/{id}", "network:write"}} {
 		route := route
 		registry.Handle(api, route.method, route.path, route.permission, func(ctx context.Context, r *http.Request) (endpoint.Result, error) {
@@ -216,16 +256,11 @@ func registerNetworkSites(api huma.API, registry *endpoint.Registry, s Service) 
 						result, e = siteGet(ctx, tx, id, false)
 						return e
 					}
-					if filter.pop != "" {
-						if e := sitePop(ctx, tx, filter.pop, false); e != nil {
-							return e
-						}
-					}
-					rows, e := tx.Objects(ctx, `with filtered as (select `+siteCols+` from network_sites s join pops p on p.tenant_id=s.tenant_id and p.id=s.pop_id where ($1='' or position(lower($1) in lower(s.name))>0 or position(lower($1) in lower(coalesce(s.city,'')))>0 or position(lower($1) in lower(coalesce(s.address,'')))>0) and ($2='' or s.kind=$2) and ($3='' or s.pop_id=nullif($3,'')::uuid) and ($4='all' or s.active=($4='active'))), page as (select * from filtered order by kind,name,id limit $5 offset $6) select (select count(*)::int from filtered) total,coalesce((select jsonb_agg(to_jsonb(page) order by kind,name,id) from page),'[]'::jsonb) items`, filter.q, filter.kind, filter.pop, filter.status, filter.limit, filter.offset)
+					total, items, e := sitePage(ctx, tx, filter)
 					if e != nil {
 						return e
 					}
-					result = map[string]any{"items": rows[0].Get("items"), "total": rows[0].Get("total"), "limit": filter.limit, "offset": filter.offset}
+					result = map[string]any{"items": items, "total": total, "limit": filter.limit, "offset": filter.offset}
 					return nil
 				}
 				if route.method == "PATCH" {
