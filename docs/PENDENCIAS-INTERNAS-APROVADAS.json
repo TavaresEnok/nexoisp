@@ -7,6 +7,11 @@
       "id": "LOTE40",
       "assunto": "Anexos privados de OS e cotação pré-compra",
       "situacao": "DONE 5/5; HTTP real exit 0 em 8461e61; Go/PostgreSQL da gerência sem recibo aqui"
+    },
+    {
+      "id": "LOTE45",
+      "assunto": "Preferências pessoais locais do workspace e painel (C34)",
+      "situacao": "DONE 3/3 raízes integradas; cenário browser focado criado e adicionado à fumaça; prova real pendente de recibo pelo controlador"
     }
   ],
   "dependencia_externa_decisao_ou_escopo_ausente": [
@@ -278,7 +283,12 @@
   },
   "lote44_integracao": {
     "escopo": "exportações operacionais CSV cotação e locais de rede (C37); sem alteração de schema ou dependências externas",
-    "estado": "3 raízes integradas, 2 rotas GET adicionadas a rotas.json, contratos HTTP adicionados; validações PostgreSQL real e cenários de navegador dos novos CSVs pendentes de prova própria antes de publicação",
+    "estado": "3 raízes integradas, 2 rotas GET adicionadas a rotas.json, contratos HTTP adicionados; fixture de TestNetworkSitesExportPG corrigida em T1 (slug max length); asserções de aspas nos testes de browser corrigidas em T5; validações de sites em PostgreSQL real e cenários de navegador dos novos CSVs pendentes de recibo real antes de publicação",
     "limites": "Sem homologação externa, publicação ou conclusão integral; Chatwoot fora do escopo."
+  },
+  "lote45_integracao": {
+    "escopo": "C34 interno: favoritos de navegação na barra lateral e seleção de 3 blocos opcionais na Visão geral salvos em localStorage por usuário/navegador",
+    "estado": "3 raízes integradas (T1 fixture PG, T2 widgets do painel, T3 favoritos); cenário browser focado criado em e2e/frontend-v0-workspace-preferences.mjs e incorporado a smoke.mjs; provas reais de browser e PG pendentes de recibo",
+    "limites": "Preferências estritamente locais no navegador (máx 8 KiB), isoladas por sessionScope(me); sem API/schema/banco/chat; sem alteração de métricas, permissões ou regras de backend."
   }
 }

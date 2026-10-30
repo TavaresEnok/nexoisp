@@ -26,7 +26,7 @@ Os IDs Cxx apontam para [a matriz](matriz_capacidades.csv); AUD-xx apontam para 
 | P1 | C37 — relatórios por tarefa | Lote 44 integra exportações CSV operacionais de cotação e locais por página (rotas GET e contrato HTTP); provas próprias de browser/SQL pendentes | Mesma base reconcilia UI/CSV, permissões e paginação; busca/filtro atual prevalece |
 | P1 | C36 — mapeamento de importação | Amostra autorizada e schema da origem; nenhum segredo dos espelhos é uma credencial autorizada | Relatório de perdas, N serviços, saldos e credenciais conferidos; ensaio idempotente |
 | P2 | C24/C42 — inventário de rede | CRUD passivo de poste, torre e condomínio por POP validado na matriz (lote 42 reconciliado com rastro real de browser 43); definir VLAN, QinQ e topologia restante | CRUD/consulta com consistência e permissão; sem comandos livres nem efeito no NAS |
-| P2 | C34 — marca do provedor e preferência visual | Recorte opcional de nome e logotipo em integração no lote 41 | Provas combinadas e revisão pendentes; sem assets externos ou personalização de cores |
+| P2 | C34 — marca do provedor e preferência visual | Recorte opcional de nome e logotipo no lote 41; lote 45 conclui recorte interno de preferências locais (favoritos de navegação até 12 páginas conectadas e seleção de 3 blocos opcionais na visão geral por usuário/navegador em localStorage); provas reais de browser pendentes de recibo | Limite local ao navegador (máx 8 KiB), isolado por sessionScope(me); sem API/schema/banco/chat; sem personalização de cores ou drag-and-drop |
 
 Essas são especificações para decisão, não lacunas encerradas pela matriz. Não acrescentar somente tabelas/botões para marcar um módulo como entregue.
 

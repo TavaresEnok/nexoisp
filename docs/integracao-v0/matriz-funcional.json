@@ -2937,5 +2937,35 @@
     "integrationNotes": [
       "Rastreio positivo de criação, consulta, edição, filtro, arquivo e reativação de postes/torres por POP no browser 43; sem homologação externa, publicação, comandos físicos ou GIS; exportações CSV pertencem ao recorte do lote 44 pendente de verificação própria; Chatwoot fora do escopo."
     ]
+  },
+  {
+    "id": "LOTE45-FAVORITOS",
+    "entry": "Navegação lateral do workspace",
+    "functionality": "Favoritos pessoais de navegação por usuário/navegador (C34)",
+    "backendState": "Implementada",
+    "integrationState": "pending",
+    "validation": [
+      "e2e/frontend-v0-workspace-preferences.mjs"
+    ],
+    "integrationClassification": "business-ui",
+    "endpoints": "Nenhum endpoint adicional; preferências locais em localStorage por sessão",
+    "integrationNotes": [
+      "Implementação integrada; revisão independente e prova real em browser focado dependem de recibo do controlador; persistência local isolada por sessionScope(me), até 12 páginas conectadas do catálogo, sem dados sensíveis, APIs externas ou Chatwoot."
+    ]
+  },
+  {
+    "id": "LOTE45-PAINEL",
+    "entry": "Visão geral (/)",
+    "functionality": "Seleção pessoal de 3 widgets existentes na Visão geral por usuário/navegador (C34)",
+    "backendState": "Implementada",
+    "integrationState": "pending",
+    "validation": [
+      "e2e/frontend-v0-workspace-preferences.mjs"
+    ],
+    "integrationClassification": "business-ui",
+    "endpoints": "GET /api/dashboard; GET /api/dashboard/panels; GET /api/today",
+    "integrationNotes": [
+      "Implementação integrada; revisão independente e prova real em browser focado dependem de recibo do controlador; alternância dos blocos revenue, contract-trends e agenda; fallback seguro e restauração do padrão; sem alteração de métricas, cálculos ou requisições de backend."
+    ]
   }
 ]
