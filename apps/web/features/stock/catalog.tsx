@@ -33,6 +33,7 @@ import { StockPurchases, StockSuppliers, StockWarehouses } from "./purchasing";
 import { normalize } from "@/lib/format";
 import { stockItemSchema, useStockRefresh, type StockItem } from "./models";
 import { StockMovements } from "./movements";
+import { StockQuotations } from "./quotations";
 import { StockUnits } from "./units";
 import { useCreateRequest } from "@/features/shared/create-request";
 
@@ -46,7 +47,7 @@ export function StockCatalog() {
   );
   const [query, setQuery] = useState("");
   const [params, setParams] = useSearchParams();
-  const tab = ["depositos", "fornecedores", "compras"].includes(
+  const tab = ["depositos", "fornecedores", "compras", "cotacoes"].includes(
     params.get("aba") ?? "",
   )
     ? params.get("aba")!
@@ -97,6 +98,7 @@ export function StockCatalog() {
             <TabsTrigger value="depositos">Depósitos</TabsTrigger>
             <TabsTrigger value="fornecedores">Fornecedores</TabsTrigger>
             <TabsTrigger value="compras">Compras</TabsTrigger>
+            <TabsTrigger value="cotacoes">Cotações</TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="depositos">
@@ -104,6 +106,9 @@ export function StockCatalog() {
         </TabsContent>
         <TabsContent value="fornecedores">
           <StockSuppliers />
+        </TabsContent>
+        <TabsContent value="cotacoes">
+          <StockQuotations onPurchases={() => setParams((current) => { const next = new URLSearchParams(current); next.set("aba", "compras"); return next; }, { replace: true })} />
         </TabsContent>
         <TabsContent value="compras">
           <StockPurchases />
