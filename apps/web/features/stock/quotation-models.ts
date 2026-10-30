@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { api } from "@/platform/erp-client";
+import { api, download } from "@/platform/erp-client";
 
 const id = z.string().uuid();
 const amount = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
@@ -118,8 +118,13 @@ export const quotationsApi = {
       .parse(
         await api(`/stock/quotations/${id}/purchase`, { method: "POST", body }),
       ),
+  exportCsv: async (id: string) =>
+    download(`/stock/quotations/${id}/export.csv`, quotationExportFilename(id)),
 };
 const idSchema = id;
+export function quotationExportFilename(id: string): string {
+  return `cotacao-${id.slice(0, 8)}.csv`;
+}
 export function integerInput(value: string, min: number, max: number): number {
   if (!/^\d+$/.test(value))
     throw new Error("Informe um número inteiro válido.");

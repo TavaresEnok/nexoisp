@@ -65,8 +65,48 @@ try {
   assert.equal(purchase.status, 'draft');
   assert.equal(purchase.items.find(line => line.item_id === item.id).qty, 4);
   assert.equal((await request('/stock/items', null, 'GET')).find(row => row.id === item.id).balance, 0);
+
+  await page.getByText('Valores em centavos', { exact: true }).waitFor();
+  const quoteCsvRequestPromise = page.waitForRequest(
+    request =>
+      request.method() === 'GET' &&
+      new URL(request.url()).pathname === `/api/stock/quotations/${quoteId}/export.csv`
+  );
+  const quoteCsvPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Exportar comparação CSV', exact: true }).click();
+  await quoteCsvRequestPromise;
+  const quoteCsvDownload = await quoteCsvPromise;
+  assert.equal(quoteCsvDownload.suggestedFilename(), `cotacao-${quoteId.slice(0, 8)}.csv`);
+  const quoteCsvBuffer = await readFile(await quoteCsvDownload.path());
+  assert.equal(quoteCsvBuffer[0] === 0xef && quoteCsvBuffer[1] === 0xbb && quoteCsvBuffer[2] === 0xbf, true);
+  const quoteCsvText = quoteCsvBuffer.toString('utf8');
+  assert.equal(
+    quoteCsvText.includes(
+      'cotacao_id;cotacao;status;fornecedor_id;fornecedor;item_id;item;unidade;quantidade;preco_unitario_centavos;subtotal_centavos;pedido_id'
+    ),
+    true
+  );
+  const expectedRow = [
+    quoteId,
+    title,
+    quote.status,
+    supplier.id,
+    supplierName,
+    item.id,
+    itemName,
+    'un',
+    '4',
+    '125',
+    '500',
+    purchase.id,
+  ].join(';');
+  const quoteCsvRows = quoteCsvText.trim().split(/\r?\n/);
+  const matchedRow = quoteCsvRows.find(line => line.startsWith(quoteId));
+  assert.equal(matchedRow, expectedRow);
+  assert.equal(quoteCsvText.includes(expectedRow), true);
+
   assert.deepEqual(errors, []);
-  console.log('Cotação e oferta geraram pedido em rascunho sem entrada de estoque.');
+  console.log('Cotação e oferta geraram pedido em rascunho sem entrada de estoque e exportação CSV comparativa concluída.');
 } finally {
   await browser.close();
 }
