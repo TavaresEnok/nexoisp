@@ -23,3 +23,11 @@ Aberto: H01, protocolo Meta, WABA, template aprovado, versão Graph de fonte pri
 ## Composição desta entrega
 
 `apps/api-go/internal/outbound/cloud_notice_contract_test.go` compõe as travas locais sob `TestCloudNoticeContract`. Não duplica identificador de raiz. `tests/contrato/cloud_notices_contract.py` exporta `verify(api, call, sql)` e só é chamado por `tests/contrato/nativo.py`. Não envia HTTP para fora do laboratório.
+
+## Prova física 804, posterior a este lote
+
+A corrida `804ce163a0b13d37c6b42b62a4fd6dbd780fe229` não substitui o relato acima. Ela o complementa. `python3 tests/contrato/go_integration.py` com `NEXO_CLOUD_PG_REQUIRED=1` terminou exit 0: 478 ações pass, 106 ações B15 e 18 skips antigos. O resumo `go-integration-804ce16-summary.json` tem sha256 `a028a439b710c7141721b945acd1bde04d0973a31286334300664ae32a3bd565`. `b15-coverage-804ce16.json` (`fe081554ffdbb8aa8ba8e4df7b0162ffa38c256aefd9ea194814a6418a71544a`) marca B15-C01 a B15-C27 como observados e externos false. B15-H01 continua observed false. `nativo.py` terminou exit 0 com 26 checks; o snapshot `nativo-10a131c9d39d36eddfc4a47321838ff4e2262736509352c49b5b9a4466dcc559.json` tem esse mesmo sha256. Os dois arquivos `.exit` têm sha256 `9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa`.
+
+O CI `40936161250`, no mesmo HEAD, concluiu failure no passo de golangci-lint. Go local e HTTP local não tornam esse CI verde. H01, WABA e API real seguem abertos. Seis critérios B04 abertos não mudam de classe. O projeto não está em 100%.
+
+O GET `/api/notice-log/{id}/cloud-journal` e o botão Detalhes do envio vieram depois dessa corrida. `verify` agora também prova projeção, ordem, limite, 404 de outro tenant, isolamento e ausência de escrita, com contas sintéticas inativas. Essa prova ainda não foi executada por `nativo.py`. Presença do teste não marca o endpoint nem o painel como testados fisicamente.

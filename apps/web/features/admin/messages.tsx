@@ -17,6 +17,23 @@ import {
   noticeLog,
   messageStates,
 } from "./message-models";
+import { CloudNoticeJournal } from "./cloud-notice-journal";
+
+const MAX_NOTICE_LOG_ID = 9223372036854775807n;
+
+function noticeJournalTarget(value: string | number): string {
+  if (typeof value === "number") {
+    if (!Number.isSafeInteger(value) || value < 1) return "invalid";
+    return String(value);
+  }
+  if (!/^[1-9]\d{0,18}$/.test(value)) return "invalid";
+  try {
+    if (BigInt(value) > MAX_NOTICE_LOG_ID) return "invalid";
+  } catch {
+    return "invalid";
+  }
+  return value;
+}
 const MessageChannels = lazy(() =>
   import("./message-channels").then((m) => ({ default: m.MessageChannels })),
 );
@@ -76,6 +93,7 @@ export function SubscriberMessages() {
   );
 }
 function MessageHistory() {
+  const [journalID, setJournalID] = useState<string | null>(null);
   const result = useSWR(
     "erp-notice-log",
     async () => z.array(noticeLog).parse(await api("/notice-log?limit=100")),
@@ -97,21 +115,37 @@ function MessageHistory() {
           "Resultado",
           "Tentativas / erro",
         ]}
-        rows={(result.data ?? []).map((item) => ({
-          id: String(item.id),
-          cells: [
-            new Date(item.created_at).toLocaleString("pt-BR"),
-            <>
-              {item.subscriber_name ?? "Teste"}
-              <small className="table-subline">
-                {item.contact_value ?? "Sem contato"}
-              </small>
-            </>,
-            item.rule_name ?? "Teste ou aviso operacional",
-            messageStates[item.status] ?? item.status,
-            `${item.attempts}${item.error ? ` · ${item.error}` : ""}`,
-          ],
-        }))}
+        rows={(result.data ?? []).map((item, index) => {
+          const target = noticeJournalTarget(item.id);
+          return {
+            id: target === "invalid" ? `invalid-${index}` : target,
+            cells: [
+              new Date(item.created_at).toLocaleString("pt-BR"),
+              <>
+                {item.subscriber_name ?? "Teste"}
+                <small className="table-subline">
+                  {item.contact_value ?? "Sem contato"}
+                </small>
+              </>,
+              item.rule_name ?? "Teste ou aviso operacional",
+              messageStates[item.status] ?? item.status,
+              `${item.attempts}${item.error ? ` · ${item.error}` : ""}`,
+            ],
+            actions: (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setJournalID(target)}
+              >
+                Detalhes do envio
+              </Button>
+            ),
+          };
+        })}
+      />
+      <CloudNoticeJournal
+        noticeLogID={journalID}
+        onClose={() => setJournalID(null)}
       />
     </QueryBoundary>
   );
