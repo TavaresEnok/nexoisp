@@ -1,1 +1,1 @@
-update documents set content = null, deleted_at = now(), deleted_by = $2 where id = $1 and deleted_at is null returning subscriber_id
+update documents set content = null, deleted_at = now(), deleted_by = $2 where id = $1 and deleted_at is null and work_order_id is null returning subscriber_id
