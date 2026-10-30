@@ -86,7 +86,7 @@ try {
     ),
     true
   );
-  const expectedRow = [
+  const expectedCells = [
     quoteId,
     title,
     quote.status,
@@ -99,10 +99,14 @@ try {
     '125',
     '500',
     purchase.id,
-  ].join(';');
+  ];
+  const expectedRow = expectedCells.map(cell => `"${cell}"`).join(';');
   const quoteCsvRows = quoteCsvText.trim().split(/\r?\n/);
-  const matchedRow = quoteCsvRows.find(line => line.startsWith(quoteId));
+  const matchedRow = quoteCsvRows.find(line => line.startsWith(`"${quoteId}"`));
+  assert.ok(matchedRow, 'linha da cotação exportada deve existir');
   assert.equal(matchedRow, expectedRow);
+  const matchedCells = matchedRow.split(';').map(cell => (cell.startsWith('"') && cell.endsWith('"') ? cell.slice(1, -1) : cell));
+  assert.deepEqual(matchedCells, expectedCells);
   assert.equal(quoteCsvText.includes(expectedRow), true);
 
   assert.deepEqual(errors, []);

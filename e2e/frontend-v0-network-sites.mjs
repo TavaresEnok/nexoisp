@@ -30,7 +30,18 @@ try {
   await dialog('Novo local').getByLabel('POP do local', { exact: true }).selectOption(pop.id);
   await dialog('Novo local').getByLabel('Nome do local', { exact: true }).fill(siteName);
   await dialog('Novo local').getByLabel('Cidade do local', { exact: true }).fill('Cidade sintética');
+  const createSitePromise = page.waitForResponse(response =>
+    response.request().method() === 'POST' &&
+    new URL(response.url()).pathname === '/api/network/sites'
+  );
   await save('Novo local');
+  const createSiteResponse = await createSitePromise;
+  assert.equal(createSiteResponse.ok(), true, await createSiteResponse.text());
+  const createdSite = await createSiteResponse.json();
+  const siteId = createdSite.id;
+  assert.ok(typeof siteId === 'string' && siteId.length > 0, 'local_id sintético criado deve ser válido');
+  assert.equal(createdSite.name, siteName);
+  assert.equal(createdSite.pop_id, pop.id);
   await page.getByLabel('POP do filtro', { exact: true }).selectOption(pop.id);
   await page.getByLabel('Tipo de local', { exact: true }).selectOption('pole');
   await page.getByLabel('Buscar locais', { exact: true }).fill(siteName);
@@ -60,10 +71,33 @@ try {
     ),
     true
   );
-  assert.equal(siteText.includes(`;pole;${siteName};${pop.id};${popName};`), true);
-  assert.equal(siteText.includes(siteName), true);
-  assert.equal(siteText.includes(pop.id), true);
-  assert.equal(siteText.includes(popName), true);
+  const expectedSiteRow = `"${siteId}";"pole";"${siteName}";"${pop.id}";"${popName}";"Cidade sintética";;;;true;`;
+  const siteRows = siteText.trim().split(/\r?\n/);
+  const matchedSiteRow = siteRows.find(line => line.startsWith(`"${siteId}";`));
+  assert.ok(matchedSiteRow, 'linha do local exportado deve existir');
+  assert.equal(matchedSiteRow, expectedSiteRow);
+  const siteCells = matchedSiteRow.split(';');
+  assert.equal(siteCells.length, 11);
+  assert.equal(siteCells[0], `"${siteId}"`);
+  const unquotedCells = siteCells.map(cell => (cell.startsWith('"') && cell.endsWith('"') ? cell.slice(1, -1) : cell));
+  assert.deepEqual(unquotedCells, [
+    siteId,
+    'pole',
+    siteName,
+    pop.id,
+    popName,
+    'Cidade sintética',
+    '',
+    '',
+    '',
+    'true',
+    '',
+  ]);
+  assert.equal(siteText.includes(expectedSiteRow), true);
+  assert.equal(siteText.includes(`;"pole";"${siteName}";"${pop.id}";"${popName}";`), true);
+  assert.equal(siteText.includes(`"${siteName}"`), true);
+  assert.equal(siteText.includes(`"${pop.id}"`), true);
+  assert.equal(siteText.includes(`"${popName}"`), true);
   await row(siteName).getByRole('button', { name: 'Consultar', exact: true }).click();
   await dialog('Consultar local').getByText(siteName, { exact: false }).waitFor();
   await dialog('Consultar local').locator('[data-slot=dialog-close]').click();
