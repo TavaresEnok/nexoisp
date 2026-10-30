@@ -43,7 +43,13 @@ try {
   await confirm();
   await page.getByLabel('Situação dos locais', { exact: true }).selectOption('archived');
   await row(editedName).getByRole('button', { name: 'Reativar', exact: true }).click();
+  const reactivation = page.waitForResponse(response =>
+    response.request().method() === 'PATCH' &&
+    /\/api\/network\/sites\/[^/]+$/.test(new URL(response.url()).pathname) &&
+    response.request().postDataJSON()?.active === true
+  );
   await confirm();
+  assert.equal((await reactivation).status(), 200);
   await page.getByLabel('Situação dos locais', { exact: true }).selectOption('active');
   await row(editedName).getByText('Ativo', { exact: true }).waitFor();
   console.log('Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.');
