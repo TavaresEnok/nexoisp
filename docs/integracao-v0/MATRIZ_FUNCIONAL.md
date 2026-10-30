@@ -179,13 +179,15 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 174 unidades incluem capacidades p
 | BE-26 | Somente backend | Criar cobrança avulsa | Integrada e validada |
 | BE-27 | Somente backend | Excluir etiqueta do catálogo | Integrada e validada |
 
-Cobertura de interface: **154 unidades integradas e validadas**, sem unidade operacional pendente ou parcial; 12 delas refletem capacidade demonstrativa (AC-02, FI-15, FI-16, RE-13) ou parcial (IN-03, IN-06, IN-11, IN-13, IN-15, AD-02, AD-17, AD-18) do Go e aparecem identificadas na interface. A evidência de cada unidade está em [por-unidade.json](evidencias/por-unidade.json). As **20 unidades preservadas** são 14 serviços internos, dois contratos de API externa e quatro limitações existentes. A [triagem individual](CAPACIDADES-BACKEND.md) explica a classificação; o JSON mantém os comportamentos históricos e acrescenta notas sobre a apresentação atual, sem alterar o estado original do backend.
+Cobertura de interface: **156 unidades integradas e validadas**, sem unidade operacional pendente ou parcial; 12 delas refletem capacidade demonstrativa (AC-02, FI-15, FI-16, RE-13) ou parcial (IN-03, IN-06, IN-11, IN-13, IN-15, AD-02, AD-17, AD-18) do Go e aparecem identificadas na interface. A evidência de cada unidade está em [por-unidade.json](evidencias/por-unidade.json). As **20 unidades preservadas** são 14 serviços internos, dois contratos de API externa e quatro limitações existentes. A [triagem individual](CAPACIDADES-BACKEND.md) explica a classificação; o JSON mantém os comportamentos históricos e acrescenta notas sobre a apresentação atual, sem alterar o estado original do backend.
 
 Nota de triagem do lote 39: as classificações e evidências de validação acima permanecem históricas. As descrições atuais de AD-02, IN-15, FI-17, PO-09 e BE-23 foram corrigidas no JSON: há controle de reset, histórico IPv6 por período e adapter Efí sandbox; o diretório resolve células por provedor. Essas constatações não homologam PSP, comprovam sessões de rede ou estabelecem arquitetura multicélulas. Consulte [a triagem técnica](../LOTE39-TRIAGEM-TECNICA.md) para limites e dependências.
 
 
 Lote 40 (30/10/2026): anexos privados de OS e cotação com conversão manual em pedido rascunho estão DONE 5/5, com HTTP real exit 0 em 8461e61; a execução Go/PostgreSQL da gerência ainda não possui recibo neste registro. A adaptação funcional não constitui homologação. Assinatura, operação offline, fiscal, pagamentos e custo contábil não integram este recorte. Por decisão do usuário, Chatwoot está fora do escopo NexoISP; outro projeto trata do chat.
 
-Marca opcional do portal (lote 41): DONE: 5/5 revisões e sete checks finais PASS em f9d6c9; CI candidato em andamento. Ver [lote 41](../LOTE41-MARCA-PORTAL.md).
+Marca opcional do portal (lote 41): DONE: 5/5 revisões e sete checks finais PASS em f9d6c9; CI 41068033843 falhou no frontend. Ver [lote 41](../LOTE41-MARCA-PORTAL.md).
 
-Inventário passivo por POP (lote 42): postes, torres e condomínios em integração; validação combinada pendente. C42 permanece parcial. Ver [lote 42](../LOTE42-INVENTARIO-PASSIVO.md).
+Inventário passivo por POP (lote 42): postes, torres e condomínios em integração; PostgreSQL/race e HTTP passaram, navegador falhou e validação combinada permanece pendente. C42 permanece parcial. Ver [lote 42](../LOTE42-INVENTARIO-PASSIVO.md).
+
+Lote 43: rastreios reais de OS/cotação e marca foram incorporados ao registro por unidade; a geração atual agrega evidências anteriores e não é nova execução de navegador. CI e SBOM do candidato corrigido permanecem pendentes. Ver [lote 43](../LOTE43-CORRECOES-ENTREGA.md).
