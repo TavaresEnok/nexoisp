@@ -444,10 +444,18 @@ try {
       exact: true,
     })
     .click();
+  // O botão muda de nome enquanto processa; isso não confirma a exclusão.
+  const deletedTag = page.waitForResponse(
+    (r) =>
+      r.request().method() === "DELETE" &&
+      /^\/api\/tags\/[^/]+$/.test(new URL(r.url()).pathname),
+  );
   await page
     .getByRole("dialog", { name: "Confirme a ação", exact: true })
     .getByRole("button", { name: "Confirmar", exact: true })
     .click();
+  const deleteResponse = await deletedTag;
+  assert.ok(deleteResponse.ok(), `DELETE etiqueta: ${deleteResponse.status()}`);
   await dialog
     .getByRole("button", {
       name: "Excluir etiqueta Etiqueta para excluir",
