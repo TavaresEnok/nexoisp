@@ -55,7 +55,7 @@ Não bloqueia automaticamente o primeiro piloto; priorizar conforme o uso real:
 - Campo: trabalho sem conexão, fotos/assinatura na OS e check-in/check-out; armazenamento e acesso precisam de definição.
 - SLA: calendário de expediente e feriados feito em 20/10/2026; falta validar com a operação real (feriados municipais, plantões).
 - Estoque: depósitos, transferências, fornecedores e pedidos de compra feitos em 20/10/2026; faltam cotação, contas a pagar e custo médio.
-- Comercial: viabilidade pública, regras adicionais de comissão e identidade visual opcional do provedor no portal (lote 41 em integração; provas combinadas pendentes).
+- Comercial: viabilidade pública, regras adicionais de comissão e identidade visual opcional do provedor no portal (lote 41 DONE; CI candidato em andamento).
 - OLT: perfis/VLANs automatizados e fabricantes adicionais, um equipamento homologado por vez. O catálogo de modelos/templates de ONU e a consulta de portas PON existem desde 20/10/2026 como documentação e consulta; não aplicam nada na OLT.
 - IA assistiva e novos canais: decisão de produto, serviço externo e regras de uso dos dados; sem escrita irrestrita em rede.
 
@@ -63,3 +63,5 @@ Não reabrir como pendência busca global, linha do tempo, avisos de saída, deg
 
 
 Lote 40 (30/10/2026): anexos privados de OS e cotação com conversão manual em pedido rascunho estão DONE 5/5; HTTP real exit 0 em 8461e61. A execução Go/PostgreSQL da gerência ainda aguarda recibo. A adaptação funcional não constitui homologação. Assinatura, operação offline, fiscal, pagamentos e custo contábil não integram este recorte. Por decisão do usuário, Chatwoot está fora do escopo NexoISP; outro projeto trata do chat.
+
+- C42: integração do inventário passivo por POP em revisão; topologia completa e homologação externa permanecem abertas.

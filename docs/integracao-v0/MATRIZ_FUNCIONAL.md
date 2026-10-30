@@ -186,4 +186,6 @@ Nota de triagem do lote 39: as classificações e evidências de validação aci
 
 Lote 40 (30/10/2026): anexos privados de OS e cotação com conversão manual em pedido rascunho estão DONE 5/5, com HTTP real exit 0 em 8461e61; a execução Go/PostgreSQL da gerência ainda não possui recibo neste registro. A adaptação funcional não constitui homologação. Assinatura, operação offline, fiscal, pagamentos e custo contábil não integram este recorte. Por decisão do usuário, Chatwoot está fora do escopo NexoISP; outro projeto trata do chat.
 
-Marca opcional do portal (lote 41): integração preparada; revisão independente e provas combinadas de PostgreSQL, navegador e CI pendentes. Ver [lote 41](../LOTE41-MARCA-PORTAL.md).
+Marca opcional do portal (lote 41): DONE: 5/5 revisões e sete checks finais PASS em f9d6c9; CI candidato em andamento. Ver [lote 41](../LOTE41-MARCA-PORTAL.md).
+
+Inventário passivo por POP (lote 42): postes, torres e condomínios em integração; validação combinada pendente. C42 permanece parcial. Ver [lote 42](../LOTE42-INVENTARIO-PASSIVO.md).

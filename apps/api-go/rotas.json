@@ -475,6 +475,14 @@
     },
     {
       "method": "GET",
+      "path": "/api/network/sites"
+    },
+    {
+      "method": "GET",
+      "path": "/api/network/sites/:id"
+    },
+    {
+      "method": "GET",
       "path": "/api/noc/overview"
     },
     {
@@ -860,6 +868,10 @@
     {
       "method": "PATCH",
       "path": "/api/leads/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/network/sites/:id"
     },
     {
       "method": "PATCH",
@@ -1280,6 +1292,10 @@
     {
       "method": "POST",
       "path": "/api/network/disconnect"
+    },
+    {
+      "method": "POST",
+      "path": "/api/network/sites"
     },
     {
       "method": "POST",

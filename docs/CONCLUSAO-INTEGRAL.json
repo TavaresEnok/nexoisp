@@ -2528,8 +2528,13 @@
   },
   "lote41_integracao": {
     "escopo": "marca opcional no portal; sem Chatwoot",
-    "estado": "integração preparada; revisão independente e provas combinadas pendentes",
-    "base": "8461e61",
+    "estado": "DONE 5/5 revisões; sete checks finais PASS em f9d6c9fc29095195c457550d397169afe42176cc; CI 41068033843 em andamento",
+    "base": "f9d6c9fc29095195c457550d397169afe42176cc",
     "lote40": "DONE 5/5; HTTP real exit 0; execução Go/PostgreSQL da gerência sem recibo neste registro"
+  },
+  "lote42_integracao": {
+    "escopo": "C42 parcial: inventário passivo de postes, torres e condomínios por POP; sem comandos físicos, GIS ou topologia completa",
+    "estado": "integração em revisão; PostgreSQL, HTTP, navegador e CI do lote 42 pendentes",
+    "limites": "Sem homologação externa, publicação ou conclusão integral; Chatwoot fora do escopo."
   }
 }
