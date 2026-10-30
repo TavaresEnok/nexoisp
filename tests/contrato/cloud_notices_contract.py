@@ -42,15 +42,16 @@ def verify(api, call, sql):
     assert "NEXO_CLOUD_API" not in nativo
 
     migrations = sorted((ROOT / "db/migrations").glob("[0-9][0-9][0-9][0-9][0-9]_*.sql"))
-    assert migrations and migrations[-1].name == "00081_stock_quotations.sql", migrations[-1:]
+    assert migrations and migrations[-1].name == "00082_tenant_branding.sql", migrations[-1:]
     latest = int(migrations[-1].name[:5])
     applied = one(
         "select count(*) filter (where version_id = 79 and is_applied) as v79,"
         " count(*) filter (where version_id = 80 and is_applied) as v80,"
         " count(*) filter (where version_id = 81 and is_applied) as v81,"
+        " count(*) filter (where version_id = 82 and is_applied) as v82,"
         " max(version_id) as max_version from goose_db_version"
     )
-    assert int(applied["v79"]) == 1 and int(applied["v80"]) == 1 and int(applied["v81"]) == 1 and int(applied["max_version"]) == latest, applied
+    assert int(applied["v79"]) == 1 and int(applied["v80"]) == 1 and int(applied["v81"]) == 1 and int(applied["v82"]) == 1 and int(applied["max_version"]) == latest, applied
 
     # Antes de qualquer fixture deste contrato.
     before = one(

@@ -2897,11 +2897,16 @@
     "id": "LOTE40",
     "entry": "OS e estoque",
     "functionality": "Anexos privados e cotação com conversão manual em pedido rascunho",
-    "backendState": "Em integração",
-    "integrationState": "pending",
+    "backendState": "DONE 5/5",
+    "integrationState": "validated",
     "validation": [
-      "Revisão independente e marco PostgreSQL real, navegador e CI pendentes"
+      "HTTP real exit 0 em 8461e61; execução Go/PostgreSQL da gerência sem recibo neste registro"
     ],
     "integrationClassification": "business-ui"
+  },
+  {
+    "id": "LOTE41-marca-portal",
+    "status": "integracao_pendente_validacao",
+    "integrationNote": "integração preparada; revisão independente e provas combinadas pendentes"
   }
 ]

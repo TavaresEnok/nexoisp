@@ -727,6 +727,14 @@
     },
     {
       "method": "GET",
+      "path": "/api/tenant-branding"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tenant-branding/logo"
+    },
+    {
+      "method": "GET",
       "path": "/api/tenants"
     },
     {
@@ -1652,6 +1660,10 @@
     {
       "method": "PUT",
       "path": "/api/pops/:id/location"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/settings/portal-branding"
     },
     {
       "method": "PUT",

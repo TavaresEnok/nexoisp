@@ -30,6 +30,8 @@ const scenarios = [
   'frontend-v0-admin-reports.mjs',
   'frontend-v0-saas.mjs',
   'frontend-v0-portal.mjs',
+  'frontend-v0-portal-branding.mjs',
+  'frontend-v0-os-quotations.mjs',
   'frontend-v0-messages.mjs',
   'frontend-v0-integrations.mjs',
   'frontend-v0-financial-connections.mjs',
