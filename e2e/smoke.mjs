@@ -22,6 +22,7 @@ const scenarios = [
   'frontend-v0-optical.mjs',
   'frontend-v0-maintenance.mjs',
   'frontend-v0-workspace.mjs',
+  'frontend-v0-workspace-preferences.mjs',
   'frontend-v0-ftth.mjs',
   'frontend-v0-ipam.mjs',
   'frontend-v0-cgnat-legal.mjs',

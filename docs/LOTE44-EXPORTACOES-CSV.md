@@ -25,8 +25,10 @@ Implementação de exportações operacionais em CSV segundo os requisitos do ba
 
 ## Integração e verificação
 
+- Lote 44 permanece DONE no marco anterior; a execução local posterior registrou sites PG FAIL e cotação PG PASS. Após as correções T1/T5, sites PG e browser CSV estão NOTRUN até novos recibos; CI 41093365872 no SHA base ainda não aprovado no plano.
 - As 3 raízes (backend cotação, backend sites, UI de exportação) foram unificadas.
 - As duas rotas GET foram adicionadas ao inventário estático `apps/api-go/rotas.json`, garantindo `assert manifest == actual` no contrato nativo.
 - Testes essenciais de contrato HTTP foram incorporados em `tests/contrato/stock_quotations_contract.py` e `tests/contrato/network_sites_contract.py` usando fixtures originais para validar status 200, Content-Type, Content-Disposition, BOM, cabeçalhos e valores.
-- Testes de navegador dos downloads e validações com PostgreSQL real dos novos endpoints de CSV permanecem como recorte pendente de comprovação própria antes de release/publicação.
+- **Falha e correção de fixture PostgreSQL (T1)**: `TestNetworkSitesExportPG` falhava devido ao tamanho do slug do tenant na fixture; T1 limitou a parte do UUID a 30 caracteres (`[:30]`). Cotação em PG foi comprovada PASS; a validação de sites em PostgreSQL real permanece pendente de recibo formal de execução.
+- **Expectativas de aspas nos testes de browser (T5)**: a execução real de browser em Lote 44 apontou expectativas que desconsideravam aspas legítimas em células de texto com caracteres especiais nos CSVs; T5 corrigiu estritamente essas asserções em `e2e/frontend-v0-network-sites.mjs` e `e2e/frontend-v0-os-quotations.mjs`, preservando BOM, cabeçalhos, IDs, valores e paginação. Prova real em navegador desses cenários permanece pendente de recibo antes de release/publicação.
 - Chatwoot permanece excluído do escopo.
