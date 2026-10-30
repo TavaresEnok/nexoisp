@@ -29,7 +29,11 @@
     "caminho_quente": "consulta dedicada futura por invoice_id, formula identica a da view, filtro antes do agregado",
     "resposta_servida": "expressao legada de cada leitor ate o id entrar na allowlist de corte",
     "variavel": "NEXO_BALANCE_READ",
-    "valores": ["off", "shadow", "cut"],
+    "valores": [
+      "off",
+      "shadow",
+      "cut"
+    ],
     "ausencia_equivale_a": "off",
     "cut_com_allowlist_vazia": "devolve o corpo legado e executa so a sentenca legada",
     "sentenca_off": "somente o SQL que o leitor executa hoje",
@@ -56,17 +60,34 @@
   ],
   "indice_novo_autorizado": false,
   "rls": {
-    "tenant": ["t_inv", "t_pay", "db/migrations/00003_financeiro.sql"],
-    "portal": ["portal_inv", "portal_pay", "db/migrations/00004_portal_importacao.sql"],
-    "pop": ["pop_invoices", "db/migrations/00034_escopo_pop_aviso_documentos.sql"],
-    "movimentos": ["movements_visible", "db/migrations/00066_financial_movements.sql"],
+    "tenant": [
+      "t_inv",
+      "t_pay",
+      "db/migrations/00003_financeiro.sql"
+    ],
+    "portal": [
+      "portal_inv",
+      "portal_pay",
+      "db/migrations/00004_portal_importacao.sql"
+    ],
+    "pop": [
+      "pop_invoices",
+      "db/migrations/00034_escopo_pop_aviso_documentos.sql"
+    ],
+    "movimentos": [
+      "movements_visible",
+      "db/migrations/00066_financial_movements.sql"
+    ],
     "payments_nao_tem_politica_pop": true,
     "consulta_dedicada_soma_pagamentos_so_da_fatura_visivel": true
   },
   "gates_existentes": [
     {
       "id": "nativo",
-      "comando": ["python3", "tests/contrato/nativo.py"],
+      "comando": [
+        "python3",
+        "tests/contrato/nativo.py"
+      ],
       "ambiente": "NEXO_PAYMENT_LAB=1",
       "inclui": "tests/contrato/financial_movements.py",
       "reimplementar": false,
@@ -74,7 +95,10 @@
     },
     {
       "id": "migracao-66",
-      "comando": ["python3", "tests/contrato/financial_movements_migration.py"],
+      "comando": [
+        "python3",
+        "tests/contrato/financial_movements_migration.py"
+      ],
       "ambiente": "NEXO_PAYMENT_LAB=1",
       "reimplementar": false,
       "executado_neste_recorte": false
@@ -386,7 +410,9 @@
         "apps/api-go/internal/modules/leitura/queries/group152f5ccd_0.sql",
         "apps/api-go/internal/modules/leitura/queries/readf038858e.sql"
       ],
-      "depende_de": ["L1"],
+      "depende_de": [
+        "L1"
+      ],
       "aceite_proprio": "diff vazio nos SQL legados; com a variavel desligada Pick devolve gen.Group91a4cc440, gen.Groupc47037ac0, gen.Group152f5ccd0 e gen.Readf038858e; corpo sem chave cmp_",
       "executado": false
     },
@@ -402,7 +428,9 @@
         "apps/api-go/internal/modules/leitura/dinamicas.json",
         "apps/api-go/internal/modules/leitura/dinamicas/4a483e96_1.sql"
       ],
-      "depende_de": ["L1"],
+      "depende_de": [
+        "L1"
+      ],
       "aceite_proprio": "com a variavel desligada Pick devolve dynamicSQL(/api/invoices, 1); o indice 1 de dinamicas.json permanece 4a483e96_1.sql; corpo sem chave cmp_",
       "executado": false
     },
@@ -417,7 +445,9 @@
         "apps/api-go/internal/modules/leitura/grupos.go",
         "apps/api-go/internal/modules/leitura/contract_finance_totals.go"
       ],
-      "depende_de": ["L1"],
+      "depende_de": [
+        "L1"
+      ],
       "aceite_proprio": "a string legada permanece em contract_finance_totals.go; a variante repete essa string e so acrescenta colunas cmp_; modo desligado executa a string legada",
       "executado": false
     },
@@ -435,7 +465,9 @@
         "apps/api-go/internal/modules/leitura/dinamicas/8d9dae54_3.sql",
         "apps/api-go/internal/modules/leitura/dinamicas/4facfb98_0.sql"
       ],
-      "depende_de": ["L1"],
+      "depende_de": [
+        "L1"
+      ],
       "aceite_proprio": "modo desligado executa os embeds atuais; ids permanecem fora da allowlist de corte enquanto houver ::int",
       "executado": false
     },
@@ -476,7 +508,10 @@
         "apps/api-go/internal/finance/core.go",
         "apps/api-go/internal/finance/advanced.go"
       ],
-      "depende_de": ["L1", "C3a"],
+      "depende_de": [
+        "L1",
+        "C3a"
+      ],
       "aceite_proprio": "DueBreakdown e gen.Due permanecem a sentenca de Agreement e Manual. A variante so e escolhida dentro de DueHTTP. A previa de multa e juros e o mapa devolvido aos escritores ficam intactos",
       "executado": false
     },
@@ -487,7 +522,15 @@
         "docs/B04-DESENHO-CORTE-LEITOR.md",
         "docs/B04-ACEITE-CORTE-LEITOR.json"
       ],
-      "depende_de": ["L1", "C1-sqlc", "C1-dinamicas", "C1-inline", "C2", "C3a", "C3b"],
+      "depende_de": [
+        "L1",
+        "C1-sqlc",
+        "C1-dinamicas",
+        "C1-inline",
+        "C2",
+        "C3a",
+        "C3b"
+      ],
       "aceite_proprio": "so documenta allowlist depois da matriz nao vazia e da revisao independente; nao aprova L1 nem C3a",
       "executado": false
     }
@@ -541,22 +584,25 @@
       "id": "acordo-nao-comprovado",
       "prova_minima": "acordo anterior a migracao sem agreement_sources; source_unproven verdadeiro; matches falso; vinculo nao inferido por nota",
       "gate": "migracao-66",
-      "executado": false,
-      "prova": "Aberto. O gate migracao-66, financial_movements_migration.py, não faz parte de nativo.py nem da suíte Go 6963214. Esse script é a prova do acordo anterior à migração, sem agreement_sources, source_unproven, matches falso e sem inferir vínculo pela nota. O insert com rollback dentro de financial_movements.py ocorre numa base já na migração 66. O PASS 65→66 do plano 29, base 5ca3036, permanece histórico e não é corrida deste commit."
+      "executado": true,
+      "prova": "Execução 01db028c9ad718e6c832d465585984067f4bdc76, migração 65→66, exit 0, reutilizada sem nova execução: acordo histórico sem fontes, source_unproven e matches falso, sem inferência pela nota. Relatório e log com hashes no recibo gerencia_host; caminhos da migração sem diferenças até b6df0c3, ancestralidade conferida no Git.",
+      "prova_historica_6963214": "Aberto. O gate migracao-66, financial_movements_migration.py, não faz parte de nativo.py nem da suíte Go 6963214. Esse script é a prova do acordo anterior à migração, sem agreement_sources, source_unproven, matches falso e sem inferir vínculo pela nota. O insert com rollback dentro de financial_movements.py ocorre numa base já na migração 66. O PASS 65→66 do plano 29, base 5ca3036, permanece histórico e não é corrida deste commit."
     },
     {
       "id": "estorno",
       "prova_minima": "linha kind reversal com signed_cents negativo; residual restaurado; segunda reversao do mesmo recebimento recusada",
       "gate": "nativo",
-      "executado": false,
-      "prova": "Aberto. Na corrida nativo 6963214, financial_movements.py inseriu kind reversal e o residual passou de 5500 para 9500. A prova mínima também pede signed_cents negativo na linha e a recusa da segunda reversão do mesmo recebimento. Essas duas asserções não rodaram. O índice payments_one_reversal_uq não foi exercido por esse teste."
+      "executado": true,
+      "prova": "Nativo exit 0 nas execuções 75145eec65c92113166339a3c73f5ccccb001e5b e b6df0c30913604226c6b473ddfc803a441c4fc57: financial_movements.py exige reversal com signed_cents negativo, residual restaurado e segunda reversão recusada sem histórico adicional. Relatos e hashes no recibo gerencia_host.",
+      "prova_historica_6963214": "Aberto. Na corrida nativo 6963214, financial_movements.py inseriu kind reversal e o residual passou de 5500 para 9500. A prova mínima também pede signed_cents negativo na linha e a recusa da segunda reversão do mesmo recebimento. Essas duas asserções não rodaram. O índice payments_one_reversal_uq não foi exercido por esse teste."
     },
     {
       "id": "excesso",
       "prova_minima": "recebido acima de nominal+encargos-desconto; excess_cents > 0; residual 0; excesso nao vira credito de outro contrato",
       "gate": "nativo",
-      "executado": false,
-      "prova": "Aberto. financial_movements.py na corrida nativo 6963214 conferiu excess_cents 2500, residual 0 e a soma de allocated_cents 12000 na mesma fatura, com recebido acima de nominal+encargos-desconto. Não há asserção de que esse excesso não virou crédito de outro contrato. O trecho numérico não fecha a prova mínima inteira."
+      "executado": true,
+      "prova": "Nativo exit 0 nas execuções 75145eec65c92113166339a3c73f5ccccb001e5b e b6df0c30913604226c6b473ddfc803a441c4fc57: financial_movements.py exige excesso 2500, residual 0 e saldo, recebimentos e alocações de outro contrato inalterados. Relatos e hashes no recibo gerencia_host.",
+      "prova_historica_6963214": "Aberto. financial_movements.py na corrida nativo 6963214 conferiu excess_cents 2500, residual 0 e a soma de allocated_cents 12000 na mesma fatura, com recebido acima de nominal+encargos-desconto. Não há asserção de que esse excesso não virou crédito de outro contrato. O trecho numérico não fecha a prova mínima inteira."
     },
     {
       "id": "refund-psp",
@@ -569,8 +615,9 @@
       "id": "importacao",
       "prova_minima": "titulo importado com abertura de movimento e recebido assinado conferido contra a sombra; contagem > 0",
       "gate": "nativo ou financial_movements_migration.py, sem runner novo",
-      "executado": false,
-      "prova": "Aberto. A prova de título importado com movimento origin=opening e recebido assinado conferido contra a sombra está em financial_movements_migration.py, que não rodou em 6963214. A reconciliação B13 do nativo confere received_cents do lote e a compensação confere signed_cents; nenhuma das duas exige a abertura origin=opening. O PASS antigo do plano 29 não é esta corrida."
+      "executado": true,
+      "prova": "Execução 01db028c9ad718e6c832d465585984067f4bdc76, migração 65→66, exit 0, reutilizada sem nova execução: título importado, abertura origin=opening e recebido assinado comparado à sombra, contagem não vazia. Relatório e log no recibo gerencia_host; caminhos da migração sem diferenças até b6df0c3, ancestralidade conferida no Git.",
+      "prova_historica_6963214": "Aberto. A prova de título importado com movimento origin=opening e recebido assinado conferido contra a sombra está em financial_movements_migration.py, que não rodou em 6963214. A reconciliação B13 do nativo confere received_cents do lote e a compensação confere signed_cents; nenhuma das duas exige a abertura origin=opening. O PASS antigo do plano 29 não é esta corrida."
     },
     {
       "id": "compensacao",
@@ -604,15 +651,17 @@
       "id": "matches-falso-bloqueia-corte",
       "prova_minima": "uma linha not matches no escopo impede entrada daquele leitor na allowlist de corte",
       "gate": "G",
-      "executado": false,
-      "prova": "Aberto. Nenhuma prova de 6963214 impediu a entrada de um leitor na allowlist de corte por uma linha not matches. O drift mostra matches falso e em seguida o rollback. As allowlists compiladas seguiram vazias e balanceReadDatabaseGate seguiu pending. O Strip de mismatch em memória não é essa trava do gate G."
+      "executado": true,
+      "prova": "Nativo exit 0 na execução b6df0c30913604226c6b473ddfc803a441c4fc57: verify/documentary_candidate, papel nexo_app e tenant próprio, exige baseline não vazio, injeta drift transacional, recusa candidatura com matches falso e restaura baseline por rollback. É gate documental de candidatura; não executa nem autoriza corte, nem substitui gate específico futuro. Relato e hashes no recibo gerencia_host.",
+      "prova_historica_6963214": "Aberto. Nenhuma prova de 6963214 impediu a entrada de um leitor na allowlist de corte por uma linha not matches. O drift mostra matches falso e em seguida o rollback. As allowlists compiladas seguiram vazias e balanceReadDatabaseGate seguiu pending. O Strip de mismatch em memória não é essa trava do gate G."
     },
     {
       "id": "sem-fallback-silencioso",
       "prova_minima": "divergencia de um campo devolve o corpo legado inteiro; log sem nota, documento, gateway, segredo nem centavos",
       "gate": "L1",
-      "executado": false,
-      "prova": "Aberto. TestBalanceReadGateMoneyFixtures e TestBalanceReadGateDuePreviewOneQuery passaram em memória, dentro das 370 ações, em 0,00 s: o corpo legado permanece e a projeção inválida não cai no legado. A prova mínima pede também log sem nota, documento, gateway, segredo nem centavos. Essa asserção de log não rodou. O subteste em memória tenant_chave_so_no_filtro do verificador de EXPLAIN também não supre plano real. Memória não fecha o critério."
+      "executado": true,
+      "prova": "Go integration exit 0 nas execuções 75145eec65c92113166339a3c73f5ccccb001e5b e b6df0c30913604226c6b473ddfc803a441c4fc57: TestBalanceReadSanitizedLog e TestBalanceReadMismatchSanitizedPG pass, com corpo legado íntegro na divergência e log sanitizado sem nota, documento, gateway, segredo ou centavos. Eventos e hashes no recibo gerencia_host.",
+      "prova_historica_6963214": "Aberto. TestBalanceReadGateMoneyFixtures e TestBalanceReadGateDuePreviewOneQuery passaram em memória, dentro das 370 ações, em 0,00 s: o corpo legado permanece e a projeção inválida não cai no legado. A prova mínima pede também log sem nota, documento, gateway, segredo nem centavos. Essa asserção de log não rodou. O subteste em memória tenant_chave_so_no_filtro do verificador de EXPLAIN também não supre plano real. Memória não fecha o critério."
     },
     {
       "id": "explain-indices",
@@ -659,12 +708,21 @@
     "revisao_desenho_728f2ff": "Sonnet, relato da gerência; não carimba teste nem matriz",
     "compilacao": {
       "diretorio": "apps/api-go",
-      "comando": ["go", "build", "./..."],
+      "comando": [
+        "go",
+        "build",
+        "./..."
+      ],
       "exit_code": 0
     },
     "suite_local_leitura": {
       "diretorio": "apps/api-go",
-      "comando": ["go", "test", "-count=1", "./internal/modules/leitura/"],
+      "comando": [
+        "go",
+        "test",
+        "-count=1",
+        "./internal/modules/leitura/"
+      ],
       "exit_code": 0,
       "duracao_s": 0.031,
       "fecha_matriz": false,
@@ -693,14 +751,98 @@
       "DueBreakdown": "apps/api-go/internal/modules/leitura/auxiliares.go"
     },
     "frentes": [
-      {"id": "L1", "commit": "2e71c2c", "ganchos": "383ac20", "codigo": "presente", "testado_local": "suite leitura exit 0", "ci": "nao", "homologado": "nao", "publicado": "nao", "db_explain": "pendente", "executado_matriz": false},
-      {"id": "C1-sqlc", "commit": "d94a268", "codigo": "presente", "testado_local": "suite leitura exit 0", "ci": "nao", "homologado": "nao", "publicado": "nao", "db_explain": "pendente", "executado_matriz": false},
-      {"id": "C1-dinamicas", "commit": "981c646", "codigo": "presente", "testado_local": "suite leitura exit 0", "ci": "nao", "homologado": "nao", "publicado": "nao", "db_explain": "pendente", "executado_matriz": false},
-      {"id": "C1-inline", "commit": "ebb9d88", "codigo": "presente", "testado_local": "suite leitura exit 0", "ci": "nao", "homologado": "nao", "publicado": "nao", "db_explain": "pendente", "executado_matriz": false},
-      {"id": "C2", "commit": "e025e46", "codigo": "presente", "testado_local": "suite leitura exit 0", "ci": "nao", "homologado": "nao", "publicado": "nao", "db_explain": "pendente", "executado_matriz": false},
-      {"id": "C3a", "commit": "3ba6ea4", "integracao": "ddf7e49", "codigo": "presente", "testado_local": "suite leitura exit 0", "ci": "nao", "homologado": "nao", "publicado": "nao", "db_explain": "pendente", "executado_matriz": false},
-      {"id": "C3b", "commit": "4acbbe3", "codigo": "presente", "testado_local": "suite leitura exit 0", "ci": "nao", "homologado": "nao", "publicado": "nao", "db_explain": "pendente", "executado_matriz": false},
-      {"id": "G", "commit": "ab6166a", "codigo": "documentado", "testado_local": "json.tool e git diff --check", "ci": "nao", "homologado": "nao", "publicado": "nao", "db_explain": "pendente", "executado_matriz": false, "aprova_l1": false, "aprova_c3a": false}
+      {
+        "id": "L1",
+        "commit": "2e71c2c",
+        "ganchos": "383ac20",
+        "codigo": "presente",
+        "testado_local": "suite leitura exit 0",
+        "ci": "nao",
+        "homologado": "nao",
+        "publicado": "nao",
+        "db_explain": "pendente",
+        "executado_matriz": false
+      },
+      {
+        "id": "C1-sqlc",
+        "commit": "d94a268",
+        "codigo": "presente",
+        "testado_local": "suite leitura exit 0",
+        "ci": "nao",
+        "homologado": "nao",
+        "publicado": "nao",
+        "db_explain": "pendente",
+        "executado_matriz": false
+      },
+      {
+        "id": "C1-dinamicas",
+        "commit": "981c646",
+        "codigo": "presente",
+        "testado_local": "suite leitura exit 0",
+        "ci": "nao",
+        "homologado": "nao",
+        "publicado": "nao",
+        "db_explain": "pendente",
+        "executado_matriz": false
+      },
+      {
+        "id": "C1-inline",
+        "commit": "ebb9d88",
+        "codigo": "presente",
+        "testado_local": "suite leitura exit 0",
+        "ci": "nao",
+        "homologado": "nao",
+        "publicado": "nao",
+        "db_explain": "pendente",
+        "executado_matriz": false
+      },
+      {
+        "id": "C2",
+        "commit": "e025e46",
+        "codigo": "presente",
+        "testado_local": "suite leitura exit 0",
+        "ci": "nao",
+        "homologado": "nao",
+        "publicado": "nao",
+        "db_explain": "pendente",
+        "executado_matriz": false
+      },
+      {
+        "id": "C3a",
+        "commit": "3ba6ea4",
+        "integracao": "ddf7e49",
+        "codigo": "presente",
+        "testado_local": "suite leitura exit 0",
+        "ci": "nao",
+        "homologado": "nao",
+        "publicado": "nao",
+        "db_explain": "pendente",
+        "executado_matriz": false
+      },
+      {
+        "id": "C3b",
+        "commit": "4acbbe3",
+        "codigo": "presente",
+        "testado_local": "suite leitura exit 0",
+        "ci": "nao",
+        "homologado": "nao",
+        "publicado": "nao",
+        "db_explain": "pendente",
+        "executado_matriz": false
+      },
+      {
+        "id": "G",
+        "commit": "ab6166a",
+        "codigo": "documentado",
+        "testado_local": "json.tool e git diff --check",
+        "ci": "nao",
+        "homologado": "nao",
+        "publicado": "nao",
+        "db_explain": "pendente",
+        "executado_matriz": false,
+        "aprova_l1": false,
+        "aprova_c3a": false
+      }
     ],
     "criterios_banco_pendentes": [
       "estado-open",
@@ -724,12 +866,35 @@
       "flag-fechada"
     ],
     "provas_anteriores_nao_reexecutadas": [
-      {"commit": "55e0d29", "relato": "nativo.py exit 0, 24 checks, incluindo B13 e financeiro", "fecha_matriz_b04": false},
-      {"commit": "55e0d29", "relato": "CI 40840682617 falhou no depguard", "fecha_matriz_b04": false},
-      {"relato": "financial_movements_migration.py 65 para 66 exit 0", "fecha_matriz_b04": false},
-      {"commit": "cc542a1", "relato": "Go, browser e SBOM local exit 0", "fecha_matriz_b04": false},
-      {"commit": "0086558", "relato": "restore sintético exit 0 em 17 fases", "fecha_matriz_b04": false},
-      {"commit": "0086558", "relato": "23 faturas, 0 acordos, 0 drift", "fecha_matriz_b04": false}
+      {
+        "commit": "55e0d29",
+        "relato": "nativo.py exit 0, 24 checks, incluindo B13 e financeiro",
+        "fecha_matriz_b04": false
+      },
+      {
+        "commit": "55e0d29",
+        "relato": "CI 40840682617 falhou no depguard",
+        "fecha_matriz_b04": false
+      },
+      {
+        "relato": "financial_movements_migration.py 65 para 66 exit 0",
+        "fecha_matriz_b04": false
+      },
+      {
+        "commit": "cc542a1",
+        "relato": "Go, browser e SBOM local exit 0",
+        "fecha_matriz_b04": false
+      },
+      {
+        "commit": "0086558",
+        "relato": "restore sintético exit 0 em 17 fases",
+        "fecha_matriz_b04": false
+      },
+      {
+        "commit": "0086558",
+        "relato": "23 faturas, 0 acordos, 0 drift",
+        "fecha_matriz_b04": false
+      }
     ]
   },
   "registro_6963214": {
@@ -827,5 +992,13 @@
     "prova_pendente": "nativo PostgreSQL real no novo HEAD e revisao independente",
     "base_codigo": "75145eec65c92113166339a3c73f5ccccb001e5b",
     "evidencia": "docs/LOTE38-B04-ADMISSAO.md"
+  },
+  "reconciliacao_lote39": {
+    "recibo": "docs/evidencias/B04-GATES-B6DF0C3.json",
+    "origem": "gerencia_host",
+    "criterios_historicos_preservados": 13,
+    "criterios_reconciliados": 6,
+    "corte_autorizado": false,
+    "observacao": "Prova documental não autoriza runtime, corte, homologação externa ou deploy; gate específico futuro e restrições dos leitores permanecem."
   }
 }

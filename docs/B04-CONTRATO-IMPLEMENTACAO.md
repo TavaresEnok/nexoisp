@@ -129,4 +129,4 @@ Allowlists de shadow e de cut continuam vazias. Corte, homologação, `main` e d
 
 ### Recorte documental do gate G, lote 38
 
-A decisão de candidatura no contrato executável exige amostra não vazia de booleanos verdadeiros no escopo observado; qualquer falso ou amostra inválida recusa a candidatura. Não é admissão final nem altera allowlists. A prova PostgreSQL nova e a revisão independente permanecem pendentes; detalhes e limites em `docs/LOTE38-B04-ADMISSAO.md`.
+A decisão de candidatura no contrato executável exige amostra não vazia de booleanos verdadeiros no escopo observado; qualquer falso ou amostra inválida recusa a candidatura. Não é admissão final nem altera allowlists. Na redação do lote 38, a prova PostgreSQL nova e a revisão independente estavam pendentes. A execução posterior e seus limites constam em `docs/LOTE39-B04-PROVAS-CONSOLIDADAS.md`.
