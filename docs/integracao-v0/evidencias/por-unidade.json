@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-30T14:41:14.279Z",
+  "generated_at": "2026-10-30T16:06:56.968Z",
   "method": "Chamadas à API feitas pelas páginas entre uma verificação e a anterior, gravadas por e2e/request-trace.mjs durante a fumaça; preparação via context.request não conta.",
   "scenarios": [
     {
@@ -103,6 +103,11 @@
       "checks": 3
     },
     {
+      "scenario": "frontend-v0-network-sites.mjs",
+      "recorded_at": "2026-10-30T15:08:41.215Z",
+      "checks": 1
+    },
+    {
       "scenario": "frontend-v0-network.mjs",
       "recorded_at": "2026-10-20T21:08:28.708Z",
       "checks": 13
@@ -168,8 +173,8 @@
       "checks": 1
     }
   ],
-  "validated_units": 156,
-  "units_with_interface_check": 156,
+  "validated_units": 157,
+  "units_with_interface_check": 157,
   "units": [
     {
       "id": "AC-01",
@@ -736,6 +741,15 @@
           ]
         },
         {
+          "scenario": "frontend-v0-network-sites.mjs",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.",
+          "endpoints": [
+            "POST /api/auth/login",
+            "GET /api/me",
+            "GET /api/health"
+          ]
+        },
+        {
           "scenario": "frontend-v0-network.mjs",
           "check": "Agente criado no Go; token e chave pública exibidos na emissão, sem token na consulta posterior",
           "endpoints": [
@@ -1167,6 +1181,14 @@
         {
           "scenario": "frontend-v0-finance.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Geração pela UI repetida preserva uma mensalidade por contrato/competência\",\"Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor\",\"Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento\",\"Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI\",\"Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos\",\"Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada\",\"Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido\",\"Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go\",\"Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis\",\"Faturas isoladas entre provedores e ações financeiras restritas pelo perfil\"]}",
+          "endpoints": [
+            "GET /api/health",
+            "POST /api/auth/login"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network-sites.mjs",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.",
           "endpoints": [
             "GET /api/health",
             "POST /api/auth/login"
@@ -1803,6 +1825,13 @@
         {
           "scenario": "frontend-v0-network-final.mjs",
           "check": "Leitura de handshake sintético aparece na ficha; troca para L2TP e regeneração produzem novas credenciais, depois ocultas por marcadores, sem abrir túnel físico",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network-sites.mjs",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.",
           "endpoints": [
             "GET /api/me"
           ]
@@ -2741,6 +2770,13 @@
         {
           "scenario": "frontend-v0-network-final.mjs",
           "check": "Leitura de handshake sintético aparece na ficha; troca para L2TP e regeneração produzem novas credenciais, depois ocultas por marcadores, sem abrir túnel físico",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network-sites.mjs",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.",
           "endpoints": [
             "GET /api/today"
           ]
@@ -5232,6 +5268,13 @@
         {
           "scenario": "frontend-v0-messages.mjs",
           "check": "Régua filtra plano e data, respeita consentimento e não repete envio do mesmo título/regra; modelo em uso não é excluído",
+          "endpoints": [
+            "GET /api/pops"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network-sites.mjs",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.",
           "endpoints": [
             "GET /api/pops"
           ]
@@ -10791,6 +10834,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-network-sites.mjs",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.",
+          "endpoints": [
+            "GET /api/pops"
+          ]
+        },
+        {
           "scenario": "frontend-v0-remediation.mjs",
           "check": "R04: indicação cadastrada pela interface, persistida e apresentada no relatório real",
           "endpoints": [
@@ -12698,6 +12748,35 @@
             "PUT /api/settings/portal-branding",
             "GET /api/tenant-branding",
             "GET /api/tenant-branding/logo"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "LOTE42-inventario-passivo",
+      "functionality": "C42 parcial: inventário passivo de postes, torres e condomínios por POP; sem comandos físicos, GIS ou topologia completa",
+      "declared_endpoints": [
+        "GET /api/network/sites",
+        "GET /api/network/sites/:id",
+        "POST /api/network/sites",
+        "PATCH /api/network/sites/:id"
+      ],
+      "exercised_by_interface": [
+        "GET /api/network/sites",
+        "GET /api/network/sites/:id",
+        "PATCH /api/network/sites/:id",
+        "POST /api/network/sites"
+      ],
+      "not_exercised_by_interface": [],
+      "checks": [
+        {
+          "scenario": "frontend-v0-network-sites.mjs",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.",
+          "endpoints": [
+            "GET /api/network/sites",
+            "GET /api/network/sites/:id",
+            "POST /api/network/sites",
+            "PATCH /api/network/sites/:id"
           ]
         }
       ]

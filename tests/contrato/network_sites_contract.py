@@ -43,3 +43,23 @@ def verify(api, call, sql):
     assert scoped('?pop_id=' + hidden)['status'] == 404
     assert scoped(item, {'pop_id': hidden}, 'PATCH')['status'] == 404
     assert call(path + item, token=beta['json']['token'])['status'] == 404
+    csv_res = scoped('/export.csv?pop_id=' + visible + '&limit=20&offset=0')
+    assert csv_res['status'] == 200, csv_res
+    assert csv_res['headers'].get('content-type', '').startswith('text/csv')
+    assert 'attachment' in csv_res['headers'].get('content-disposition', '')
+    assert 'locais-infraestrutura-pagina.csv' in csv_res['headers'].get('content-disposition', '')
+    assert int(csv_res['headers'].get('x-total-count', '0')) == 1
+    raw_body = csv_res['body']
+    assert raw_body.startswith(b'\xef\xbb\xbf')
+    csv_text = raw_body.decode('utf-8-sig')
+    lines = [line.strip('\r') for line in csv_text.split('\n') if line.strip('\r')]
+    assert len(lines) == 2
+    assert lines[0] == 'local_id;tipo;local;pop_id;pop;cidade;endereco;latitude;longitude;ativo;observacoes'
+    cols = [c.strip('"') for c in lines[1].split(';')]
+    assert cols[0] == site and cols[1] == 'pole' and cols[2] == 'Poste alterado' and cols[3] == visible and cols[10] == 'preservada'
+    csv_page2 = scoped('/export.csv?pop_id=' + visible + '&limit=20&offset=1')
+    assert csv_page2['status'] == 200, csv_page2
+    assert int(csv_page2['headers'].get('x-total-count', '0')) == 1
+    page2_lines = [line.strip('\r') for line in csv_page2['body'].decode('utf-8-sig').split('\n') if line.strip('\r')]
+    assert len(page2_lines) == 1
+    assert page2_lines[0] == 'local_id;tipo;local;pop_id;pop;cidade;endereco;latitude;longitude;ativo;observacoes'

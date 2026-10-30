@@ -23,9 +23,9 @@ Os IDs Cxx apontam para [a matriz](matriz_capacidades.csv); AUD-xx apontam para 
 | P1 | C03 — ampliar cadastro e instalação | Aprovar quais campos são necessários; E/EJ exigem documento/país e regras de duplicidade próprios | Cadastro/edição/consulta/importação/exportação/LGPD com os mesmos campos e sem exigir CPF de estrangeiro |
 | P1 | C19 — compras e depósitos | Aprovar recebimento, reserva, transferência, custo e cancelamento; não deduzir regras fiscais pelo HTML | Compra → recebimento → local → saída/OS → devolução, com saldo, série e auditoria; rollback em falha |
 | P1 | C15/C16 — expediente/SLA e campo | Definir calendário, feriados, fuso, check-in e uso de localização | Prazos reconciliados com exemplos, transições autorizadas e histórico; sem coletar geolocalização por padrão |
-| P1 | C37 — relatórios por tarefa | Aprovar filtros e fórmulas/totais prioritários | Mesma base reconcilia UI/CSV, permissões e paginação; busca/filtro atual prevalece |
+| P1 | C37 — relatórios por tarefa | Lote 44 integra exportações CSV operacionais de cotação e locais por página (rotas GET e contrato HTTP); provas próprias de browser/SQL pendentes | Mesma base reconcilia UI/CSV, permissões e paginação; busca/filtro atual prevalece |
 | P1 | C36 — mapeamento de importação | Amostra autorizada e schema da origem; nenhum segredo dos espelhos é uma credencial autorizada | Relatório de perdas, N serviços, saldos e credenciais conferidos; ensaio idempotente |
-| P2 | C24/C42 — inventário de rede | Lote 42 integra cadastro passivo de poste, torre e condomínio por POP; definir VLAN, QinQ e topologia restante | CRUD/consulta com consistência e permissão; sem comandos livres nem efeito no NAS |
+| P2 | C24/C42 — inventário de rede | CRUD passivo de poste, torre e condomínio por POP validado na matriz (lote 42 reconciliado com rastro real de browser 43); definir VLAN, QinQ e topologia restante | CRUD/consulta com consistência e permissão; sem comandos livres nem efeito no NAS |
 | P2 | C34 — marca do provedor e preferência visual | Recorte opcional de nome e logotipo em integração no lote 41 | Provas combinadas e revisão pendentes; sem assets externos ou personalização de cores |
 
 Essas são especificações para decisão, não lacunas encerradas pela matriz. Não acrescentar somente tabelas/botões para marcar um módulo como entregue.

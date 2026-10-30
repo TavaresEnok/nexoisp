@@ -1,0 +1,14 @@
+{
+  "description": "Rastreio copiado do artefato real fornecido da execução de navegador do Lote 43 em 30/10/2026 às 15:08:41.215Z; não representa nova execução de navegador.",
+  "frontend_head": "5111ce33c6be1c7b1e74285697624b5ca9bbb63e",
+  "backend_head": "19eb8bb01f503c2242e15e048f474ec24713b56b",
+  "source": "Artefato autossuficiente original fornecido pelo controlador; bytes preservados.",
+  "test_scope": "Cenário interno de inventário passivo de locais de infraestrutura (postes, torres e condomínios por POP); sem homologação externa ou comandos físicos.",
+  "traces": [
+    {
+      "path": "docs/integracao-v0/evidencias/rastreio/frontend-v0-network-sites.json",
+      "original_sha256": "3b94444ebd5b002ae379008aa87c1eecaa430077d622d54e00765902a53ccaf7",
+      "copied_sha256": "3b94444ebd5b002ae379008aa87c1eecaa430077d622d54e00765902a53ccaf7"
+    }
+  ]
+}

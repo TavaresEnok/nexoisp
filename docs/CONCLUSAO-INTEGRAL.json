@@ -2534,7 +2534,17 @@
   },
   "lote42_integracao": {
     "escopo": "C42 parcial: inventário passivo de postes, torres e condomínios por POP; sem comandos físicos, GIS ou topologia completa",
-    "estado": "integração em revisão; PostgreSQL, HTTP, navegador e CI do lote 42 pendentes",
+    "estado": "CRUD validado na matriz funcional (PostgreSQL/race e HTTP em 19eb8bb; rastreio de browser do lote 43 em 5111ce3 incorporado a por-unidade.json); CSV é recorte separado do lote 44",
+    "limites": "Sem homologação externa, publicação ou conclusão integral; Chatwoot fora do escopo."
+  },
+  "lote43_integracao": {
+    "escopo": "correções de entrega, rastreios integrados e diagnóstico CI",
+    "estado": "DONE 3/3 revisões, sete checks finais PASS, browser inventário passivo PASS; CI 41078534322 falhou na etapa Go PG geral (reprodução local exit 0, diagnóstico persistido em T5); CI/SBOM finais pendentes",
+    "base": "5111ce33c6be1c7b1e74285697624b5ca9bbb63e"
+  },
+  "lote44_integracao": {
+    "escopo": "exportações operacionais CSV cotação e locais de rede (C37); sem alteração de schema ou dependências externas",
+    "estado": "3 raízes integradas, 2 rotas GET adicionadas a rotas.json, contratos HTTP adicionados; validações PostgreSQL real e cenários de navegador dos novos CSVs pendentes de prova própria antes de publicação",
     "limites": "Sem homologação externa, publicação ou conclusão integral; Chatwoot fora do escopo."
   }
 }
