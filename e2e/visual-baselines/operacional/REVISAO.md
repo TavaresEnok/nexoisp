@@ -1,5 +1,9 @@
 # Referências operacionais — 26/10/2026
 
+## Lote 48 — reconciliação C34
+
+Os seis pares foram examinados individualmente; hashes, dimensões e observações estão em [LOTE48](../../../docs/LOTE48-REFERENCIAS-VISUAIS-C34.md). As diferenças adotadas correspondem à barra lateral de favoritos e estrelas do C34 aprovado no lote 45; a referência de celular é binariamente idêntica. A captura manual não é aprovação do cenário normal: ele falhou posteriormente na exclusão de etiqueta. Revisão independente dos seis pares e execução sem atualização, CI completo e SBOM permanecem pendentes antes da integração.
+
 As seis referências PNG foram confrontadas com uma compilação do HEAD local recebido antes do lote B01/B02/B12. As imagens anteriores ainda exibiam um banner de demonstração e navegação sem as setas dos submenus que já haviam mudado no código recebido. Os componentes, estilos e a interface oficial não foram alterados para acomodar o teste.
 
 As imagens adotadas foram capturadas **do código recebido**, usando as dependências travadas atuais, e examinadas individualmente. A compilação do lote reproduziu o mesmo layout. Originais, capturas de ambas as versões, hashes e comparação estão em `fechamento-03/evidencias/visual-review/` e `visual-baseline-review.json` da entrega.
