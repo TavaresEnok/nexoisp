@@ -45,16 +45,38 @@ sql('update invoices set fee_cents=500,discount_cents=1000 where id='+q(i),'nexo
 sql("insert into payments(id,tenant_id,invoice_id,amount_cents,paid_at,source) values("+','.join(map(q,[p,k['tenant_id'],i]))+",4000,now(),'manual')",'nexo_test')
 s=state();assert (s['nominal_cents'],s['fee_cents'],s['discount_cents'],s['received_cents'],s['residual_cents'])==(10000,500,1000,4000,5500),s
 check('nominal fees discount and partial receipt reconstruct independently')
-sql("insert into payments(id,tenant_id,invoice_id,amount_cents,paid_at,source,kind,reversal_of) values("+','.join(map(q,[r,k['tenant_id'],i]))+",4000,now(),'manual','reversal',"+q(p)+")",'nexo_test');assert state()['residual_cents']==9500
-sql("insert into payments(tenant_id,invoice_id,amount_cents,paid_at,source) values("+q(k['tenant_id'])+','+q(i)+",12000,now(),'manual')",'nexo_test');s=state();assert s['excess_cents']==2500 and s['residual_cents']==0
-assert rows('select sum(allocated_cents)::bigint n from financial_payment_allocations where invoice_id='+q(i))[0]['n']==12000
-check('signed reversal restores residual; excess remains explicit without duplicated cash')
 errors=[]
 def rejected(name,query,expected):
  try:sql(query,'nexo_test')
  except subprocess.CalledProcessError as e:
   assert expected in e.stderr,e.stderr;errors.append({'case':name,'error':e.stderr})
  else:raise AssertionError(name)
+
+sql("insert into payments(id,tenant_id,invoice_id,amount_cents,paid_at,source,kind,reversal_of) values("+','.join(map(q,[r,k['tenant_id'],i]))+",4000,now(),'manual','reversal',"+q(p)+")",'nexo_test')
+s=state();assert s['received_cents']==0 and s['residual_cents']==9500,s
+assert rows('select signed_cents from payments where id='+q(r))==[{'signed_cents':-4000}]
+assert rows('select allocated_cents from financial_payment_allocations where payment_id='+q(r))==[{'allocated_cents':-4000}]
+def invoice_history():
+ return [rows('select * from '+table+' where invoice_id='+q(i)+' order by '+order) for table,order in [('payments','id'),('invoice_movements','id'),('financial_payment_allocations','payment_id')]]
+before_history=invoice_history();before_state=state()
+rejected('duplicate reversal',"insert into payments(id,tenant_id,invoice_id,amount_cents,paid_at,source,kind,reversal_of) values("+','.join(map(q,[str(uuid.uuid4()),k['tenant_id'],i]))+",4000,now(),'manual','reversal',"+q(p)+")",'payments_one_reversal_uq')
+assert invoice_history()==before_history and state()==before_state
+check('negative signed reversal restores residual; duplicate reversal is rejected without additional history')
+# A separate owned contract and invoice make cross-contract credit observable.
+other_sub=api('/subscribers',{'name':'B04 excess isolation '+uuid.uuid4().hex[:8]})
+other_contract=api('/contracts',{'subscriber_id':other_sub['id'],'plan_id':api('/plans')[0]['id'],'due_day':15})
+other_invoice=api('/invoices',{'contract_id':other_contract['id'],'description':'B04 excess isolation','amount_cents':7000,'due_date':'2026-01-15'})['id']
+def other_snapshot():
+ return (rows('select * from financial_balance_shadow where invoice_id='+q(other_invoice)),
+         rows('select * from financial_payment_allocations where invoice_id='+q(other_invoice)+' order by payment_id'))
+other_before=other_snapshot()
+assert len(other_before[0])==1 and other_before[0][0]['contract_id']==other_contract['id']
+assert other_before[0][0]['received_cents']==0 and other_before[0][0]['residual_cents']==7000 and other_before[1]==[],other_before
+sql("insert into payments(tenant_id,invoice_id,amount_cents,paid_at,source) values("+q(k['tenant_id'])+','+q(i)+",12000,now(),'manual')",'nexo_test');s=state();assert s['excess_cents']==2500 and s['residual_cents']==0
+assert rows('select sum(allocated_cents)::bigint n from financial_payment_allocations where invoice_id='+q(i))[0]['n']==12000
+assert other_snapshot()==other_before
+check('signed reversal restores residual; excess remains explicit without duplicated cash')
+check('excess does not alter another contract balance, receipts or allocations')
 rejected('mutable movement','update invoice_movements set nominal_delta=0 where invoice_id='+q(i),'append-only')
 rejected('mutable payment','delete from payments where id='+q(p),'append-only')
 rejected('cross-invoice reversal',"insert into payments(tenant_id,invoice_id,amount_cents,paid_at,source,kind,reversal_of) select tenant_id,id,4000,now(),'manual','reversal',"+q(p)+' from invoices where id<>'+q(i)+' limit 1','reversal must match')
