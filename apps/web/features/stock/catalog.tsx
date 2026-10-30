@@ -108,7 +108,18 @@ export function StockCatalog() {
           <StockSuppliers />
         </TabsContent>
         <TabsContent value="cotacoes">
-          <StockQuotations onPurchases={() => setParams((current) => { const next = new URLSearchParams(current); next.set("aba", "compras"); return next; }, { replace: true })} />
+          <StockQuotations
+            onPurchases={() =>
+              setParams(
+                (current) => {
+                  const next = new URLSearchParams(current);
+                  next.set("aba", "compras");
+                  return next;
+                },
+                { replace: true },
+              )
+            }
+          />
         </TabsContent>
         <TabsContent value="compras">
           <StockPurchases />
