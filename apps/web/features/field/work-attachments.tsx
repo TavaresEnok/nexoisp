@@ -17,7 +17,13 @@ import {
   validateAttachment,
 } from "./work-attachments-model";
 
-export function WorkAttachments({ id, status }: { id: string; status: string }) {
+export function WorkAttachments({
+  id,
+  status,
+}: {
+  id: string;
+  status: string;
+}) {
   const { me } = useSession();
   const readable = can(me, "os:read") && hasModule(me, "field");
   const writable = can(me, "os:write") && hasModule(me, "field");
@@ -44,7 +50,8 @@ export function WorkAttachments({ id, status }: { id: string; status: string }) 
       let binary = "";
       for (let i = 0; i < bytes.length; i += 0x8000)
         binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-      if (!currentActions.current.upload) throw new Error("O envio de anexos não está disponível para esta OS.");
+      if (!currentActions.current.upload)
+        throw new Error("O envio de anexos não está disponível para esta OS.");
       attachmentSchema.parse(
         await api<unknown>(path, {
           method: "POST",
@@ -120,7 +127,9 @@ export function WorkAttachments({ id, status }: { id: string; status: string }) 
                   confirm="Excluir este anexo? O conteúdo será removido e o registro de auditoria preservado."
                   onClick={async () => {
                     if (!currentActions.current.delete)
-                      throw new Error("A exclusão de anexos não está disponível para esta OS.");
+                      throw new Error(
+                        "A exclusão de anexos não está disponível para esta OS.",
+                      );
                     const response = await api<unknown>(
                       `${path}/${encodeURIComponent(item.id)}`,
                       { method: "DELETE" },

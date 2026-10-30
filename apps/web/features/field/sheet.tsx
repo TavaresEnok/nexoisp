@@ -229,7 +229,9 @@ function LiveOrder({ id, onClose }: { id: string; onClose: () => void }) {
                 </p>
               </ProfileSection>
             }
-            attachments={<WorkAttachments id={order.id} status={order.status} />}
+            attachments={
+              <WorkAttachments id={order.id} status={order.status} />
+            }
             sections={
               <div className="commercial-detail-body">
                 <div className="profile-two-columns">
