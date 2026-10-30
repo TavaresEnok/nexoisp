@@ -1,0 +1,14 @@
+# Lote 48 — referências visuais C34
+
+Seis pares foram examinados visualmente, individualmente, antes da cópia dos candidatos. A captura administrativa foi feita em snapshot/lab com a flag manual de atualização, a partir do head 47 `75f9f2ca180f5ae7c1907998ff2613d9f38e1336`; o manifesto informa fonte efetiva do frontend `8b56d004af98d396837dd463911df30e3c7687cc`, UI do lote 45 e produção sem alteração em relação à API 44. Os originais ficam nos artefatos administrativos externos ao repositório. SHA-256 abaixo identifica a referência anterior e o candidato copiado, respectivamente.
+
+| Par | Dimensões anterior/candidato | SHA anterior | SHA copiado | Observação visual |
+| --- | --- | --- | --- | --- |
+| assinantes-desktop-claro | 1342×805 / 1342×805 | `ee8cf8f13d8eb8b138cc75274b3c21ff56f422ed16fc0605c107badf4e15c776` | `ad3afbacac229eea9993b5d3eac16a6e8f66ff01150a6ca00fd3443f87e433cd` | Favoritos vazios e estrelas deslocam menus; tabela, valores e controles permanecem coerentes. |
+| assinantes-desktop-escuro | 1342×805 / 1342×805 | `fc556161afa2837778773a7a2d1fa843673f6d07baf1961b7720c50e7fd04007` | `7d1b8b59e1483777d54ce5e3e29806f781e880e855231b24773ff868df506750` | Mesma mudança lateral no tema escuro; conteúdo e controles legíveis. |
+| assinantes-celular | 390×844 / 390×844 | `6818e6169b06eb9f97905c987a3eb9f0395f57d682787ae668fb814eabfba48c` | `6818e6169b06eb9f97905c987a3eb9f0395f57d682787ae668fb814eabfba48c` | Imagem idêntica; navegação móvel fechada e controles preservados. |
+| ficha-alerta-multiplos-contratos | 1342×805 / 1342×805 | `de4ddfa592cf4c0db5bf10461185a2d3d850405406fbbb78b3e0d08ec2a8e247` | `243a62c5d8ec4f286a0751c18775816fe0f0cfd2dc9b5dcf4ab0591d2480f3d2` | Mudança lateral aparece no fundo desfocado; ficha, alerta, valores e controles preservados. |
+| assinantes-vazio | 1342×805 / 1342×805 | `ade005db8598182d3f3befccf8767741276477d9841ce2740dfed5152e72c63d` | `11852c0ac01fd5333c0d8ffa94d0863f98978dc2fbc1ebf6b484b04ad077694a` | Mudança lateral esperada; busca sem resultados e limpeza de filtros preservadas. |
+| assinantes-erro | 1342×805 / 1342×805 | `48ece1fed8dee1c936b20761b5255ec065a4e3dc2a9dc41917adcabda3319b08` | `df3bb8290f6d0e2c86b83b4467a817bfb1f47b3d89476fae201fe10682cd8190` | Mudança lateral esperada; mensagem de indisponibilidade e botão de nova tentativa preservados. |
+
+A captura dos seis PNGs terminou, mas o cenário completo falhou depois, em `frontend-v0-remediation.mjs:457`, pois a etiqueta excluída ainda aparecia em `/tags`. Isto é prova de captura, não PASS da comparação normal nem do cenário completo; a investigação funcional é independente. Não foram alterados comparador, máscaras, tolerância ou workflow. A revisão independente dos seis pares deve aprová-los antes da integração; depois, a gerência deve executar o cenário sem UPDATE, CI completo e SBOM. O resultado visual não corrige nem encobre a falha funcional.
