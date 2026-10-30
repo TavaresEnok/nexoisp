@@ -1285,9 +1285,9 @@
     "backendState": "Não confirmado",
     "entry": "Sem interface de gateway real",
     "functionality": "Cobrança bancária real, Pix/boleto pagável",
-    "behavior": "Não foi localizado conector de gateway além de none/demo; emissão real, extrato real, reembolso e homologação dependem de implementação/fornecedor. Este item registra ausência de comprovação, não uma capacidade disponível.",
+    "behavior": "Existe adapter Efí sandbox e gestão de credenciais; emissão e operações dependem de configuração, conta e homologação. Código e testes sintéticos não comprovam cobrança bancária real ou extrato real.",
     "endpoints": "—",
-    "evidence": "G/finance/core.go (Charges/Demo); G/finance/gateway.go (chargePayments); E/gateway.go; E/ordens.go",
+    "evidence": "apps/api-go/internal/finance/credentials.go (LoadCredentialClient); apps/api-go/internal/finance/providers/efi/; docs/LOTE09-B07-CANCELAMENTO-DEVOLUCAO.md",
     "integrationState": "backend-preserved",
     "validation": [],
     "validationNotes": [
@@ -1746,9 +1746,9 @@
     "backendState": "Parcial",
     "entry": "/ipam → Delegações IPv6",
     "functionality": "Reservar prefixo para contrato",
-    "behavior": "Cria/libera delegação manual ou automática com comprimento permitido e unicidade; o código RADIUS examinado não entrega automaticamente prefixo IPv6 ao NAS. Portanto o ciclo de provisionamento IPv6 não está completo.",
+    "behavior": "Cria e libera delegação manual ou automática com comprimento permitido e unicidade. O provisionamento consulta a delegação e o RADIUS integrado inclui Delegated-IPv6-Prefix; a entrega em equipamento físico permanece sem homologação.",
     "endpoints": "POST /api/ipam/pools/:id/delegations; DELETE /api/ipam/delegations/:id",
-    "evidence": "P/Ipam.tsx; E/ipam.go; G/radius/vendor.go; M/00017_ipv6_delegacao.sql",
+    "evidence": "apps/api-go/internal/modules/escrita/ipam.go; apps/api-go/internal/network/engine.go: provisionamento; apps/api-go/internal/radius/vendor.go: Delegated-IPv6-Prefix; db/migrations/00017_ipv6_delegacao.sql",
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-ipam.mjs",
@@ -1756,7 +1756,7 @@
       "docs/integracao-v0/evidencias/producao-ipam.json"
     ],
     "validationNotes": [
-      "Reserva e liberação de prefixo validadas; a entrega automática IPv6 ao NAS não existe no backend e permanece explícita na interface."
+      "Reserva e liberação de prefixo validadas nas evidências existentes; o código integrado entrega o atributo RADIUS, sem comprovar homologação em NAS físico."
     ],
     "integrationClassification": "business-ui",
     "integrationNote": " Desde 20/10/2026 o RADIUS integrado entrega o prefixo reservado como Delegated-IPv6-Prefix no provisionamento; concentradores por agente continuam sem entrega automática e não há homologação em equipamento."
@@ -1782,9 +1782,9 @@
     "backendState": "Parcial",
     "entry": "/ipam → Rastrear CGNAT",
     "functionality": "Encontrar o responsável em um instante",
-    "behavior": "Busca IP público e porta, com horário opcional; backend inclui titulares históricos, mas a tela apresenta dados atuais e não exibe a coleção holders_at. A resposta visual isolada pode não comprovar titularidade histórica.",
+    "behavior": "Busca IP público e porta, com horário opcional; o backend inclui titulares históricos e a tela apresenta holders_at em Titulares no instante consultado. A resposta visual isolada não comprova titularidade além dos dados históricos disponíveis.",
     "endpoints": "GET /api/cgnat/trace",
-    "evidence": "P/Ipam.tsx; E/ipam.go; M/00010_ipam_cgnat.sql",
+    "evidence": "apps/api-go/internal/modules/escrita/ipam.go; apps/web/features/network/cgnat.tsx: CgnatTrace e traceSchema; db/migrations/00010_ipam_cgnat.sql",
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-cgnat-legal.mjs",
@@ -1814,9 +1814,9 @@
     "backendState": "Parcial",
     "entry": "/consulta-ip → IPv6 histórico",
     "functionality": "Identificar titular IPv6 anterior",
-    "behavior": "A consulta usa delegações registradas e sua data de criação; não foi encontrada manutenção completa de titulares de delegação anteriores após liberação. Resultados históricos exigem conferência das fontes existentes.",
+    "behavior": "A consulta jurídica busca delegações IPv6 pelos períodos de titularidade; a liberação encerra o período sem apagar o histórico. Delegações removidas antes da implantação do histórico não são recuperadas e registro cadastral não comprova sessão.",
     "endpoints": "POST /api/legal/ip-lookup",
-    "evidence": "E/ipam.go; M/00017_ipv6_delegacao.sql",
+    "evidence": "apps/api-go/internal/modules/escrita/ipam.go (legalIP); apps/api-go/internal/modules/escrita/sql/62a0bfbd_0.sql; db/migrations/00062_ipv6_historico.sql",
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-cgnat-legal.mjs",
@@ -1887,9 +1887,9 @@
     "backendState": "Parcial",
     "entry": "/usuarios",
     "functionality": "Redefinição de senha de outro usuário",
-    "behavior": "O backend permite atualização da senha pelo endpoint de administração, mas não foi encontrado controle correspondente na tela de usuários, embora o texto de ajuda de login sugira procurar o administrador.",
+    "behavior": "A tela permite redefinir a senha de outro usuário por PATCH administrativo; a senha anterior não é exibida.",
     "endpoints": "PATCH /api/users/:id",
-    "evidence": "P/Users.tsx; P/Login.tsx; I/",
+    "evidence": "apps/web/features/admin/users.tsx (Users, editor password); endpoint /api/users/:id",
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-admin-team.mjs",
@@ -2358,9 +2358,9 @@
     "backendState": "Parcial",
     "entry": "Portal → Pagamento online real",
     "functionality": "Quitar fatura em instituição financeira",
-    "behavior": "O botão mostra meios disponibilizados pelo backend; hoje a geração localizada é demonstrativa ou ausente. Não foi encontrada operação real de Pix/boleto no código do gateway.",
+    "behavior": "O portal apresenta meios disponibilizados pelo backend; existe adapter Efí sandbox, mas pagamento bancário real depende de conta, configuração e homologação.",
     "endpoints": "GET /api/portal/overview",
-    "evidence": "P/Portal.tsx; G/finance/core.go; G/finance/gateway.go",
+    "evidence": "apps/api-go/internal/finance/credentials.go (LoadCredentialClient); apps/api-go/internal/finance/providers/efi/; docs/LOTE09-B07-CANCELAMENTO-DEVOLUCAO.md",
     "integrationState": "backend-preserved",
     "validation": [
       "e2e/frontend-v0-portal.mjs",
@@ -2799,9 +2799,9 @@
     "backendState": "Parcial",
     "entry": "Diretório de células",
     "functionality": "Distribuição em múltiplas células de dados",
-    "behavior": "Há tabelas e diretório para células, porém a implementação de escopo inspecionada limita o acesso à célula c1. Migração e operação distribuída entre células não estão completas.",
+    "behavior": "O diretório resolve a célula por provedor quando disponível; escopo vazio usa c1. A existência desse roteamento não comprova migração ou operação distribuída nem define arquitetura multicélulas aprovada.",
     "endpoints": "—",
-    "evidence": "M/00056_diretorio_celulas.sql; G/db/; G/tenancy/",
+    "evidence": "apps/api-go/internal/tenancy/scope.go (Directory.Resolve); apps/api-go/internal/db/db.go (DB.Resolve); db/migrations/00056_diretorio_celulas.sql",
     "integrationState": "backend-preserved",
     "validation": [],
     "validationNotes": [
