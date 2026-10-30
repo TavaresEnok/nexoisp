@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -50,6 +51,27 @@ returning l.id, l.contact_value, l.message,
 
 func TestCloudNoticeGate_B15_C17(t *testing.T) {
 	t.Run("offline", func(t *testing.T) { cgGateAssertOffline(t) })
+	t.Run("seleção ignora tenants sem precondições", func(t *testing.T) {
+		candidates := []string{"tenant-sem-settings", "tenant-sem-contrato", "tenant-preparado"}
+		selected, err := cgGateSelectTenant(candidates, func(id string) (bool, bool, error) {
+			switch id {
+			case candidates[0]:
+				return false, false, nil
+			case candidates[1]:
+				return true, false, nil
+			default:
+				return true, true, nil
+			}
+		})
+		if err != nil || selected != candidates[2] {
+			t.Fatalf("seleção=%q erro=%v", selected, err)
+		}
+		if _, err := cgGateSelectTenant(candidates[:2], func(id string) (bool, bool, error) {
+			return id == candidates[1], false, nil
+		}); err == nil {
+			t.Fatal("seleção aceitou tenants sem ambas as precondições")
+		}
+	})
 	t.Run("postgres", func(t *testing.T) {
 		opened, scope := cgGateDatabase(t)
 		t.Run("flag ou versão vazia fecha antes do fio", func(t *testing.T) {
@@ -717,19 +739,45 @@ func cgGateDatabase(t *testing.T) (*db.DB, tenancy.Scope) {
 		t.Fatalf("db.Open falhou com URL presente; skip não se aplica: %s", cgGateRedact(err))
 	}
 	t.Cleanup(opened.Close)
-	var name, sessionUser, currentUser, tenant string
+	var name, sessionUser, currentUser string
+	var candidates []string
 	if err = opened.WithScope(ctx, tenancy.Scope{}, func(tx *db.Tx) error {
 		if err := tx.QueryRow(ctx, `select current_database(), session_user::text, current_user::text`).Scan(&name, &sessionUser, &currentUser); err != nil {
 			return err
 		}
-		return tx.QueryRow(ctx, `select tenant_id::text from nexo_go_directory() order by tenant_id limit 1`).Scan(&tenant)
+		return tx.QueryRow(ctx, `select coalesce(array_agg(tenant_id::text order by tenant_id), array[]::text[]) from nexo_go_directory()`).Scan(&candidates)
 	}); err != nil {
 		t.Fatalf("identidade do laboratório: %s", cgGateRedact(err))
 	}
-	if name != "nexo_test" || sessionUser != "nexo_go" || currentUser != "nexo_go" || tenant == "" {
+	if name != "nexo_test" || sessionUser != "nexo_go" || currentUser != "nexo_go" {
 		t.Fatalf("conexão fora de nexo_test/nexo_go: database=%s session_user=%s current_user=%s", name, sessionUser, currentUser)
 	}
+	tenant, err := cgGateSelectTenant(candidates, func(id string) (bool, bool, error) {
+		var settings, contract bool
+		err := opened.WithScope(ctx, tenancy.Scope{TenantID: id}, func(tx *db.Tx) error {
+			return tx.QueryRow(ctx, `select
+				exists (select 1 from tenant_settings where tenant_id = app_tenant()),
+				exists (select 1 from contracts where tenant_id = app_tenant() and status = 'active')`).Scan(&settings, &contract)
+		})
+		return settings, contract, err
+	})
+	if err != nil {
+		t.Fatalf("precondições da fixture Cloud: %s", cgGateRedact(err))
+	}
 	return opened, tenancy.Scope{TenantID: tenant}
+}
+
+func cgGateSelectTenant(candidates []string, check func(string) (bool, bool, error)) (string, error) {
+	for _, tenant := range candidates {
+		settings, contract, err := check(tenant)
+		if err != nil {
+			return "", err
+		}
+		if settings && contract {
+			return tenant, nil
+		}
+	}
+	return "", fmt.Errorf("nenhum tenant do laboratório possui tenant_settings e contrato ativo")
 }
 
 func cgGateSeed(t *testing.T, opened *db.DB, scope tenancy.Scope, opt cgGateSeedOpt) cgGateRow {
