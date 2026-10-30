@@ -2,7 +2,13 @@
   "lote": "39",
   "base_informada_pelo_controlador": "b6df0c30913604226c6b473ddfc803a441c4fc57",
   "metodo": "Leitura focada do backlog B01–B18 e unidades com ressalva; nenhuma suíte de produto executada. Provas externas atribuídas ao controlador.",
-  "pronta_para_implementar": [],
+  "pronta_para_implementar": [
+    {
+      "id": "LOTE40",
+      "assunto": "Anexos privados de OS e cotação pré-compra",
+      "situacao": "integração em andamento; revisão e provas finais pendentes"
+    }
+  ],
   "dependencia_externa_decisao_ou_escopo_ausente": [
     {
       "id": "B01",
@@ -93,12 +99,6 @@
       "assunto": "Cloud API externa",
       "evidencia": "docs/LOTE38-CONSOLIDACAO.md: B15",
       "insumos_ou_proximo_passo": "WABA, template aprovado, versão Graph, recursos e autorização para H01; provas internas não homologam envio."
-    },
-    {
-      "id": "B16",
-      "assunto": "Adapter Chatwoot",
-      "evidencia": "docs/CONCLUSAO-INTEGRAL.json: B16-chatwoot",
-      "insumos_ou_proximo_passo": "Pedido explícito do operador, contas e contrato de isolamento account/tenant e eventos sem loop."
     },
     {
       "id": "B17",
@@ -252,5 +252,12 @@
       "PO-09": "FI-17/PO-09; B07",
       "BE-23": "BE-23"
     }
-  }
+  },
+  "nota_snapshot": "A lista vazia do lote 39 era snapshot anterior à autorização de 30/10/2026; os recortes de anexos privados e cotação foram autorizados no lote 40.",
+  "fora_escopo": [
+    {
+      "id": "B16-chatwoot",
+      "decisao": "Usuário excluiu Chatwoot do planejamento NexoISP em 30/10/2026; outro projeto cuida do chat."
+    }
+  ]
 }

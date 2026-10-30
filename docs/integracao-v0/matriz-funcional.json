@@ -2892,5 +2892,16 @@
     "integrationNotes": [
       "Exclusão global de etiqueta com confirmação e atualização dos vínculos exibidos."
     ]
+  },
+  {
+    "id": "LOTE40",
+    "entry": "OS e estoque",
+    "functionality": "Anexos privados e cotação com conversão manual em pedido rascunho",
+    "backendState": "Em integração",
+    "integrationState": "pending",
+    "validation": [
+      "Revisão independente e marco PostgreSQL real, navegador e CI pendentes"
+    ],
+    "integrationClassification": "business-ui"
   }
 ]
