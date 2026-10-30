@@ -8,7 +8,7 @@ import { FormField } from "@/features/shared/form";
 import { RecordEditor } from "@/features/shared/record-editor";
 import { QueryBoundary } from "@/features/shared/feedback";
 import { ActionButton } from "@/features/shared/action";
-import { api } from "@/platform/erp-client";
+import { api, download } from "@/platform/erp-client";
 import {
   physicalSiteSchema,
   physicalSitesPageSchema,
@@ -140,9 +140,22 @@ export function PhysicalSites({
           description={`${result.data?.total ?? 0} local(is) encontrado(s).`}
           columns={["Local", "Tipo", "POP", "Cidade", "Situação"]}
           actions={
-            write && (
-              <Button onClick={() => setEditor("create")}>Novo local</Button>
-            )
+            <div className="erp-inline-actions">
+              <ActionButton
+                disabled={result.isLoading || !!result.error || !result.data}
+                onClick={async () => {
+                  await download(
+                    `/network/sites/export.csv?${params.toString()}`,
+                    "locais-infraestrutura-pagina.csv",
+                  );
+                }}
+              >
+                Exportar página CSV
+              </ActionButton>
+              {write && (
+                <Button onClick={() => setEditor("create")}>Novo local</Button>
+              )}
+            </div>
           }
           rows={(result.data?.items ?? []).map((site) => ({
             id: site.id,

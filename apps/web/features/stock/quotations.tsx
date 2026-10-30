@@ -319,6 +319,16 @@ function QuotationDetail({
                     .map((i) => `${i.qty} ${i.unit} ${i.item_name}`)
                     .join(" · ")}
                 </p>
+                <div className="erp-inline-actions">
+                  <ActionButton
+                    onClick={async () => {
+                      await quotationsApi.exportCsv(q.id);
+                    }}
+                  >
+                    Exportar comparação CSV
+                  </ActionButton>
+                  <span className="profile-footnote">Valores em centavos</span>
+                </div>
                 {q.offers.length ? (
                   <div className="overflow-x-auto">
                     <Table>
