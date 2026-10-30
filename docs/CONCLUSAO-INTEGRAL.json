@@ -16,8 +16,9 @@
   "autorizacao": {
     "data": "2026-10-29",
     "texto": "Continuar de forma autônoma até os critérios do mapa integral estarem fechados. Não encerrar o projeto no fim de cada lote. Não duplicar plano ou tarefa já concluídos.",
-    "executor": "Grok 4.7 medium",
-    "revisao_independente": "Sonnet 5.5 high, ou Sol medium somente com cota do revisor principal comprovadamente indisponível",
+    "executor": "Controlador: Grok 4.7 medium; após quota esgotada confirmada, codex-programmer GPT-6.1 Terra medium em conta isolada; depois Gemini 3.8 Flash High em antigravity2 high. Transporte e autenticação não são quota; sem quota nas três opções, aguardar renovação.",
+    "revisao_independente": "Sonnet 5.5 high prioritário; sem Sonnet, Sol high revisa Grok, Terra e Gemini e Sol medium revisa Sol; sem GPT e Sonnet, Grok high se disponível. Sessões independentes.",
+    "gerencia": "Codex GPT-6.1 Sol high; reserva Claude Sonnet 5.5 high. Gerente não implementa. Astra medium apenas nas condições da política vigente, com retorno ao Sol high mediante prova positiva mais nova.",
     "custo_adicional": 0,
     "franquia": "decisao_comercial_sem_franquia",
     "psp_real_ou_producao_neste_ciclo": false,
@@ -879,7 +880,18 @@
       "allowlist_shadow": [],
       "allowlist_cut": [],
       "balance_read_database_gate": "pending",
-      "desenho_lote28": {
+      "marcos_37_38": {
+      "base37": "75145eec65c92113166339a3c73f5ccccb001e5b",
+      "origem": "marco 37 informado pelo controlador; consolidação externa indisponível nesta sessão",
+      "resultado37": "PostgreSQL real, Go com race: 507 pass, 0 fail; nativo: 26 grupos aprovados. Estorno, excesso e diagnóstico foram executados no marco 37; detalhes por critério dependem da consolidação original.",
+      "reuso36": "Migração do lote 36 reutilizada com bytes inalterados, conforme controlador; sem nova execução. Origem 01db028c9ad718e6c832d465585984067f4bdc76, ancestral de 75145eec65c92113166339a3c73f5ccccb001e5b. Não atribuir nova corrida ao reuso.",
+      "gate_g_lote38": "Código d1795a346b20cc5af31245510969b288438f8bc5 implementado e revisado segundo controlador; amostra não vazia só de true permite candidatura, falso ou amostra ausente, vazia ou inválida impede. PostgreSQL real no novo HEAD ainda não executado; não aprova admissão final.",
+      "corte_autorizado": false,
+      "allowlist_shadow": [],
+      "allowlist_cut": [],
+      "balance_read_database_gate": "pending"
+    },
+    "desenho_lote28": {
         "commit": "728f2ff5712cb4b133fe7b07953db80836b72045",
         "implementado": false,
         "executado": false,
@@ -1134,11 +1146,11 @@
       "criterios_abertos": [
         {
           "id": "B04-corte",
-          "causa": "Treze critérios da matriz têm prova na corrida 6963214. As allowlists compiladas continuam vazias e balanceReadDatabaseGate continua pending. flag-fechada mostra off, shadow e cut na sentença legada. O gate de inclusão matches-falso-bloqueia-corte continua aberto e separado. Seis critérios seguem sem a prova mínima inteira: acordo-nao-comprovado, estorno, excesso, importacao, matches-falso-bloqueia-corte e sem-fallback-silencioso. A corrida 7cde1e6 permanece exit 1. A comparação 0086558 de 23 faturas e 0 acordos não autoriza a troca.",
+          "causa": "Na corrida histórica 6963214, treze critérios da matriz tinham prova e seis não tinham prova mínima inteira: acordo-nao-comprovado, estorno, excesso, importacao, matches-falso-bloqueia-corte e sem-fallback-silencioso. No marco 37 foram executados estorno, excesso e diagnóstico, conforme controlador; a confirmação da prova mínima por critério depende da consolidação original. A migração 36 foi reutilizada sem nova execução. O gate G novo de 38 ainda não tem prova PG real integrada. As allowlists continuam vazias, balanceReadDatabaseGate pending e corte não autorizado. A corrida 7cde1e6 permanece exit 1; a comparação 0086558 de 23 faturas e 0 acordos não autoriza a troca.",
           "dependencias": [
             "B03"
           ],
-          "evidencia_faltante": "Prova mínima dos seis critérios abertos e revisão independente antes de qualquer nome na allowlist de corte. O CI 40877414874 success cobre o SHA 6963214 na candidata e não promove allowlist. O run 40840682617 permanece falha histórica.",
+          "evidencia_faltante": "Confirmar, nos registros originais do marco 37, a prova mínima individual dos critérios históricos ainda não comprovada nesta sessão; executar a prova PostgreSQL real do gate G novo e exigir revisão independente antes de qualquer nome na allowlist de corte. O CI 40877414874 success cobre o SHA 6963214 na candidata e não promove allowlist. O run 40840682617 permanece falha histórica.",
           "proximo_passo": "Manter o corte fechado e as allowlists vazias. A inclusão de um leitor espera o gate G e revisão independente. Não reclassificar 7cde1e6. Não reimplementar a migração 66.",
           "prova_limitada_0086558": {
             "alfa_faturas": 23,
@@ -1962,9 +1974,9 @@
       "prioridade": "P1",
       "fechado": false,
       "implementado": "parcial",
-      "testado": "27_casos_internos_observados_em_804ce16_h01_e_journal_http_abertos",
+      "testado": "interno_pg_real_nativo_e_ci_41009564330_journal_http_r2_g; h01_externo_aberto",
       "homologado": "sem_recurso_externo",
-      "publicado": "branch_de_desenvolvimento_nao_publicada",
+      "publicado": "desenvolvimento_01db028c9ad718e6c832d465585984067f4bdc76; nao_implica_producao",
       "cloud_api": {
         "estado": "mvp_interno_offline_default_off",
         "implementado": true,
@@ -1976,12 +1988,12 @@
         "base_ci_verde": "6963214927aa45ae1963c58d4c14ba540d78c2f0",
         "base_documental_lote32": "f42256b558288590f8e804b558982f15651981fb",
         "objeto_33f42256b_neste_clone": false,
-        "ci_lote33": "pendente",
+        "ci_lote33": "falha histórica 40936161250 de lint; CI posterior 41009564330 aprovado no marco publicado",
         "postgresql_r2_g": "observado_em_804ce16_exit_0",
         "desenho": "docs/B15-DESENHO-CLOUD-API.md",
         "matriz": "docs/B15-ACEITE-CLOUD-API.json",
         "lote": "docs/LOTE33-B15-OFFLINE.md",
-        "casos": "B15-C01 a B15-C27 observados na corrida 804ce16, externos false; B15-H01 aberto; GET cloud-journal ainda sem nativo",
+        "casos": "B15-C01 a B15-C27 observados em 804ce16; journal HTTP, R2 e G internos comprovados posteriormente em PG real, nativo e CI 41009564330 segundo controlador; H01 externo aberto",
         "execucao": "go_integration_804ce16_exit_0_478_pass_106_b15_18_skips_h01_aberto",
         "r1_argv": ["go", "-C", "apps/api-go", "test", "-count=1", "-v", "./internal/outbound/cloudapi/"],
         "r1_exit": 0,
@@ -2043,15 +2055,15 @@
       "entregue": [
         "avisos e canal HTTP genérico com Authorization",
         "MVP interno Cloud API offline e desligado, sem envio e sem conta",
-        "R1 com sender falso e exit 0; R2 e G observados em 804ce16; H01 e o journal HTTP seguem abertos"
+        "R1 com sender falso; R2, G e journal HTTP internos comprovados em PG real, nativo e CI 41009564330; H01 externo aberto; publicado em desenvolvimento 01db028"
       ],
       "criterios_abertos": [
         {
           "id": "B15-cloud-api",
-          "causa": "Os 27 casos internos passaram em 804ce16. H01, WABA, template, versão Graph e API real continuam sem recurso. O CI 40936161250 falhou no lint e não fica verde por Go ou HTTP local. O GET do journal e o painel ainda não tiveram nativo.",
+          "causa": "Os casos internos, incluindo journal HTTP, R2 e G, foram comprovados em PG real, nativo e CI 41009564330 e publicados em desenvolvimento 01db028, conforme controlador. CI 40936161250 falhou no lint historicamente; não é bloqueio atual. H01, WABA, template, versão Graph e API real permanecem abertos; flags seguem default off.",
           "dependencias": [],
-          "evidencia_faltante": "nativo.py novo para o GET /api/notice-log/{id}/cloud-journal, CI verde do SHA integrado e H01. A corrida 804 não cobre o journal.",
-          "proximo_passo": "Não chamar a Meta. Não tratar 804 nem o exit 0 de R1 como homologação. Não reclassificar os seis critérios B04 abertos. Revisão e CI/lint continuam obrigatórios antes de main.",
+          "evidencia_faltante": "H01 externo: WABA, template aprovado, versão Graph e envio real deliberado com recursos e autorização apropriados. A corrida 804 não cobre o journal; a prova posterior o cobre segundo controlador.",
+          "proximo_passo": "Preservar a publicação e as provas internas; não chamar a Meta sem recurso e autorização. Não confundir prova interna com homologação externa.",
           "frentes": [
             {
               "id": "R1",
@@ -2148,7 +2160,8 @@
         }
       ],
       "entregue": [
-        "CTO/CEO, porta e mapa operacional de contratos, POPs e caixas"
+        "CTO/CEO, porta e mapa operacional de contratos, POPs e caixas",
+        "contrato FTTH do lote 38 implementado em 2109aececb52e2e32b570617fc07d928da18bfe5 e revisado segundo controlador; execução PG real pendente"
       ],
       "criterios_abertos": [
         {
@@ -2157,8 +2170,8 @@
           "dependencias": [
             "especificação além do mapa operacional"
           ],
-          "evidencia_faltante": "Contrato de servidor para porta ocupada, ciclo e tenant cruzado, com teste de lab.",
-          "proximo_passo": "Um teste Go da API FTTH já existente, sem canvas novo, quando a fila P0 interna permitir.",
+          "evidencia_faltante": "Execução em PostgreSQL real do contrato FTTH do lote 38 e evidência de projeto físico e desempenho real. O contrato implementado e revisado não comprova banco nem benchmark.",
+          "proximo_passo": "Executar o contrato Go FTTH existente em PostgreSQL real após integração; não reimplementar o contrato.",
           "validacao": [
             "python3",
             "tests/contrato/go_integration.py"
@@ -2227,10 +2240,10 @@
     }
   ],
   "proximo_evento": {
-    "id": "provar-b15-postgresql-e-ci-do-lote33",
-    "id_anterior": "implementar-b15-offline-r1-r2",
-    "prioridade": "P1",
-    "motivo": "A corrida 6963214 tem Go exit 0 com 370 ações pass e zero falha, novos PG com zero skip, e nativo exit 0 com 25 grupos. Treze critérios B04 ficam executados. Seis critérios, as allowlists vazias e o gate de inclusão permanecem abertos. O run 40877414874 da candidata concluiu success em 2026-10-29T13:11:42Z e não cobre o lote 33. O pacote cloudapi teve exit 0 em 2026-10-29, sem rede. A corrida 804ce16 observou os 27 casos internos de B15 com go_integration.py exit 0 e nativo.py exit 0 em 26 checks. H01, WABA, fiscal, extrato, host físico, cópia externa e main permanecem abertos. O CI 40936161250 segue failure de lint. O GET do journal não está nessa corrida.",
+    "id": "validar-entregas-lote38-pg-real",
+    "id_anterior": "provar-b15-postgresql-e-ci-do-lote33",
+    "prioridade": "P0",
+    "motivo": "Marco 37 na base 75145ee: PG real Go race 507 pass e 0 fail, nativo 26 grupos, segundo controlador. B15 interno e journal publicados em 01db028 e comprovados em PG real, nativo e CI 41009564330; H01 externo permanece aberto. O gate G B04 novo e contrato FTTH B17 do lote 38 aguardam execução em PG real no HEAD integrado. Falhas históricas permanecem registradas.",
     "nao_reabrir": [
       "lote01",
       "b07-resolucao",
@@ -2253,8 +2266,21 @@
       "desenho-b15-6ca6d21",
       "aceite-b04-d37603f"
     ],
-    "candidato_interno_seguinte": "NEXO_CLOUD_PG_REQUIRED=1 python3 tests/contrato/go_integration.py no runner já existente, e o CI do SHA do lote 33; allowlists B04 vazias; sem Meta, sem main e sem agente fora do controlador",
+    "candidato_interno_seguinte": "Gerência consolida provas e executa os gates PG reais das entregas 38 no HEAD integrado; allowlists B04 vazias e sem chamada Meta.",
     "frentes": [
+      {
+        "id": "B04-gate-G-lote38",
+        "estado": "implementado e revisado segundo controlador; PG real no HEAD integrado pendente",
+        "commit": "d1795a346b20cc5af31245510969b288438f8bc5"
+      },
+      {
+        "id": "B17-contrato-FTTH-lote38",
+        "estado": "implementado e revisado segundo controlador; PG real no HEAD integrado pendente",
+        "commit": "2109aececb52e2e32b570617fc07d928da18bfe5"
+      }
+    ],
+    "frentes_b15_historicas_estado": "R1, R2 e G internos concluídos; journal HTTP, R2 e G comprovados em PG real, nativo e CI 41009564330 e publicados em 01db028 segundo controlador. H01 externo permanece aberto.",
+    "frentes_b15_historicas": [
       {
         "id": "R1",
         "arquivos": [
@@ -2293,8 +2319,8 @@
       "sem PSP real",
       "sem produção",
       "custo adicional zero",
-      "executor Grok 4.7 medium",
-      "revisão independente Sonnet alto, Sol médio só sem cota",
+      "programação pela cadeia vigente do controlador; troca apenas após quota esgotada confirmada",
+      "revisão independente Sonnet alto prioritária; reservas conforme autorização vigente",
       "até 10 workers deste chat, sem agente fora do controlador",
       "este executor não cria plano, agente nem submissão",
       "não fechar item externo por ausência de recurso",
@@ -2309,10 +2335,10 @@
       "lote 31 não altera produção nem allowlists",
       "CI success da candidata não é main nem homologação",
       "CI 40877414874 não cobre o lote 33",
-      "R1 com sender falso não fecha R2, G, H01 nem WABA",
+      "R1 com sender falso isoladamente não prova R2, G, H01 nem WABA; R2 e G têm prova posterior",
       "presença de Test no arquivo não é execução",
       "skip de PostgreSQL não aprova B15",
-      "B15 implementado offline não foi enviado nem publicado"
+      "B15 publicado em desenvolvimento; sem envio real nem homologação externa"
     ],
     "validacao": [
       [
@@ -2326,7 +2352,8 @@
     "pedir_nova_ordem": false,
     "projeto_concluido": false,
     "percentual": null,
-    "instrucao": "Os lotes 25 e 26 não se reimplementam. O fixture b67d2f3, o harness 56b2187, a corrida sintética 0086558, a expectativa 9c764d7, o desenho B04 728f2ff e a base de sombra do lote 29 também não se refazem. O plano 29 permanece DONE 13/13, o plano 30 8b78eab07512 permanece DONE 4/4 e o plano 31 permanece DONE em 6963214927aa45ae1963c58d4c14ba540d78c2f0. A corrida real 7cde1e6 permanece exit 1 e não é reclassificada. A corrida 6963214 tem go_integration.py exit 0 com 370 pass e zero falha, new_pg_skips 0, e nativo.py exit 0 com 25 grupos. Treze critérios B04 estão executados. Seis critérios, allowlists vazias e o gate de inclusão permanecem abertos. O run 40840682617 permanece falha. O run 40877414874 concluiu success em 2026-10-29T13:11:42Z na candidata e não é main nem cobre o lote 33. O lote 33 implementa o MVP B15 offline. R1 teve exit 0 no pacote cloudapi com sender falso em 2026-10-29. Naquele momento R2, G e H01 não tinham corrida. A corrida posterior 804ce16 observou C01 a C27 com exit 0 e manteve H01 aberto. O CI 40936161250 permanece failure de lint; Go ou HTTP local não o tornam verde. O journal HTTP do lote 36 aguarda nativo novo. Go, browser e SBOM local continuam datados em cc542a1. Não fechar H, P, extrato, fiscal, host físico, cópia externa, WABA nem o projeto. Não transformar default, sandbox, skip, geração local, teste falso, correção entregue, desenho ou allowlist vazia em homologação. O projeto permanece aberto enquanto existir critério aberto."
+    "instrucao": "Preservar lotes concluídos e falhas históricas, inclusive 7cde1e6 exit 1 e CI 40936161250 lint. Marco 37 DONE na base 75145eec65c92113166339a3c73f5ccccb001e5b: PG real Go race 507 pass, 0 fail e nativo 26 grupos, conforme controlador; migração do lote 36 reutilizada sem nova execução. B15 journal HTTP, R2 e G internos comprovados e publicados em 01db028, CI 41009564330; H01 e WABA externos continuam abertos e flags default off. Gate G novo B04 e contrato B17 do lote 38 implementados e revisados aguardam PG real integrado. Manter gate pending, allowlists vazias e corte não autorizado. Não fechar fiscal, extrato, host físico, cópia externa ou projeto por contagem."
+
   },
   "publicacao": {
     "producao": false,
@@ -2366,9 +2393,9 @@
     "head_documental_2b80d7e": "merge de d37603f e 6ca6d21; este mapa não publica esse HEAD",
     "base_documental_f42256b": "f42256b558288590f8e804b558982f15651981fb; ancestral conferido; o objeto 33f42256b não está neste clone",
     "lote33_publicado": false,
-    "lote33_ci": "pendente",
-    "lote33_postgresql": "pendente",
-    "b15_implementado": "mvp interno offline no clone; não é envio nem homologação",
+    "lote33_ci": "histórico: 40936161250 falhou lint; CI posterior 41009564330 aprovado segundo controlador",
+    "lote33_postgresql": "interno comprovado posteriormente em PG real segundo controlador",
+    "b15_implementado": "interno publicado em desenvolvimento 01db028c9ad718e6c832d465585984067f4bdc76; não é envio nem homologação externa",
     "b15_enviado": false,
     "waba": false,
     "host_fisico": false,
