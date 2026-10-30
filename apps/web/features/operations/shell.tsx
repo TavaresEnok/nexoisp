@@ -5,7 +5,11 @@ import type {
   ShellAttention,
   ShellRecordSearch,
 } from "@/components/shell-context";
-import { roleLabels, type Session } from "@/features/session/model";
+import {
+  roleLabels,
+  sessionScope,
+  type Session,
+} from "@/features/session/model";
 import { useSession } from "@/features/session/provider";
 import { api } from "@/platform/erp-client";
 import { initials } from "@/lib/format";
@@ -30,6 +34,18 @@ function searchable(me: Session | null) {
   return Boolean(
     me && !me.mfa_pending && me.tenant && me.role !== "subscriber",
   );
+}
+
+function operationalPreferenceScope(me: Session | null): string | null {
+  if (
+    !me ||
+    me.mfa_pending ||
+    me.role === "subscriber" ||
+    (me.role === "saas_operator" && !me.tenant)
+  ) {
+    return null;
+  }
+  return sessionScope(me);
 }
 
 /** Liga o shell original do v0 à sessão, às permissões e ao catálogo operacional. */
@@ -106,6 +122,7 @@ export function useOperationalShell(): ShellAdapter {
             support: Boolean(me.support),
           }
         : null,
+      preferenceScope: operationalPreferenceScope(me),
       canAccess: (path) => canAccessPath(me, path),
       connected: (path) => integrationStatus(path) === "connected",
       title: operationalTitle,

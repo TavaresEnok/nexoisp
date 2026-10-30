@@ -11,7 +11,12 @@ export type ShellRecordSearch = {
   loading: boolean;
 };
 export type ShellAttention = {
-  items: { id: string; title: string; href: string; area: "network" | "support" | "field" | "other" }[];
+  items: {
+    id: string;
+    title: string;
+    href: string;
+    area: "network" | "support" | "field" | "other";
+  }[];
   loading: boolean;
   error?: Error;
 };
@@ -24,6 +29,7 @@ export type ShellAdapter = {
     demo: boolean;
     support: boolean;
   } | null;
+  preferenceScope?: string | null;
   canAccess: (path: string) => boolean;
   connected: (path: string) => boolean;
   title: (path: string) => string | undefined;
@@ -31,7 +37,11 @@ export type ShellAdapter = {
   findPage: (path: string) => NavigationNode | undefined;
   branch: (node: NavigationNode) => NavigationNode;
   searchPages: (query: string) => NavigationNode[];
-  personal: { href: string; label: string; audience: NavigationNode["audience"] } | null;
+  personal: {
+    href: string;
+    label: string;
+    audience: NavigationNode["audience"];
+  } | null;
   useRecordSearch: (query: string) => ShellRecordSearch;
   useAttention: () => ShellAttention;
   logout: () => Promise<void>;
