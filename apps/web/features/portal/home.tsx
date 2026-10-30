@@ -7,6 +7,7 @@ import { QueryBoundary, ConnectedNotice } from "@/features/shared/feedback";
 import { useSession } from "@/features/session/provider";
 import { hasModule } from "@/features/session/model";
 import { api } from "@/platform/erp-client";
+import { PortalBranding } from "./branding";
 import { overview } from "./models";
 import { portalSectionKeys, type PortalSectionKey } from "./section-keys";
 import { PortalAcceptances } from "./requests";
@@ -74,6 +75,7 @@ export function PortalHome() {
   return (
     <>
       <ConnectedNotice demo={me?.demo} />
+      <PortalBranding />
       <PageHeading
         title={`Olá, ${(data?.subscriber.name ?? me?.name ?? "assinante").split(" ")[0]}`}
         description={`Seu atendimento e seus serviços com ${me?.tenant?.name ?? "o provedor"}.`}
