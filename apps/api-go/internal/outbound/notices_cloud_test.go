@@ -52,24 +52,21 @@ returning l.id, l.contact_value, l.message,
 func TestCloudNoticeGate_B15_C17(t *testing.T) {
 	t.Run("offline", func(t *testing.T) { cgGateAssertOffline(t) })
 	t.Run("seleção ignora tenants sem precondições", func(t *testing.T) {
-		candidates := []string{"tenant-sem-settings", "tenant-sem-contrato", "tenant-preparado"}
-		selected, err := cgGateSelectTenant(candidates, func(id string) (bool, bool, error) {
-			switch id {
-			case candidates[0]:
-				return false, false, nil
-			case candidates[1]:
-				return true, false, nil
-			default:
-				return true, true, nil
-			}
+		candidates := []string{"tenant-sem-contrato", "tenant-sem-settings-com-contrato"}
+		selected, err := cgGateSelectTenant(candidates, func(id string) (bool, error) {
+			return id == candidates[1], nil
 		})
-		if err != nil || selected != candidates[2] {
+		if err != nil || selected != candidates[1] {
 			t.Fatalf("seleção=%q erro=%v", selected, err)
 		}
-		if _, err := cgGateSelectTenant(candidates[:2], func(id string) (bool, bool, error) {
-			return id == candidates[1], false, nil
+		if _, err := cgGateSelectTenant(candidates[:1], func(string) (bool, error) {
+			return false, nil
 		}); err == nil {
-			t.Fatal("seleção aceitou tenants sem ambas as precondições")
+			t.Fatal("seleção aceitou tenant sem contrato ativo")
+		}
+		checkErr := errors.New("erro SQL")
+		if _, err := cgGateSelectTenant(candidates, func(string) (bool, error) { return false, checkErr }); !errors.Is(err, checkErr) {
+			t.Fatalf("erro da consulta não propagado: %v", err)
 		}
 	})
 	t.Run("postgres", func(t *testing.T) {
@@ -230,6 +227,21 @@ func cgGateAccountAbsent(t *testing.T) {
 }
 
 func TestCloudNoticeGate_B15_C27(t *testing.T) {
+	t.Run("retenção opcional", func(t *testing.T) {
+		configured := 17
+		for _, tc := range []struct {
+			name string
+			days *int
+			env  string
+			want int
+		}{{"ausente", nil, "", 400}, {"null", nil, "45", 45}, {"mínimo fallback", nil, "5", 30}, {"configurado", &configured, "45", 17}} {
+			t.Run(tc.name, func(t *testing.T) {
+				if got := cgGateResolveNoticeDays(tc.days, tc.env); got != tc.want {
+					t.Fatalf("retenção=%d, esperado=%d", got, tc.want)
+				}
+			})
+		}
+	})
 	noticeSQL := cgGateRead(filepath.Join("sql", "69b06ce3_3.sql"))
 	purgeSQL := cgGateRead(filepath.Join("..", "radius", "sql", "b2808f33_1.sql"))
 	routines := cgGateRead("rotinas.json")
@@ -752,14 +764,12 @@ func cgGateDatabase(t *testing.T) (*db.DB, tenancy.Scope) {
 	if name != "nexo_test" || sessionUser != "nexo_go" || currentUser != "nexo_go" {
 		t.Fatalf("conexão fora de nexo_test/nexo_go: database=%s session_user=%s current_user=%s", name, sessionUser, currentUser)
 	}
-	tenant, err := cgGateSelectTenant(candidates, func(id string) (bool, bool, error) {
-		var settings, contract bool
+	tenant, err := cgGateSelectTenant(candidates, func(id string) (bool, error) {
+		var contract bool
 		err := opened.WithScope(ctx, tenancy.Scope{TenantID: id}, func(tx *db.Tx) error {
-			return tx.QueryRow(ctx, `select
-				exists (select 1 from tenant_settings where tenant_id = app_tenant()),
-				exists (select 1 from contracts where tenant_id = app_tenant() and status = 'active')`).Scan(&settings, &contract)
+			return tx.QueryRow(ctx, `select exists (select 1 from contracts where tenant_id = app_tenant() and status = 'active')`).Scan(&contract)
 		})
-		return settings, contract, err
+		return contract, err
 	})
 	if err != nil {
 		t.Fatalf("precondições da fixture Cloud: %s", cgGateRedact(err))
@@ -767,17 +777,17 @@ func cgGateDatabase(t *testing.T) (*db.DB, tenancy.Scope) {
 	return opened, tenancy.Scope{TenantID: tenant}
 }
 
-func cgGateSelectTenant(candidates []string, check func(string) (bool, bool, error)) (string, error) {
+func cgGateSelectTenant(candidates []string, check func(string) (bool, error)) (string, error) {
 	for _, tenant := range candidates {
-		settings, contract, err := check(tenant)
+		contract, err := check(tenant)
 		if err != nil {
 			return "", err
 		}
-		if settings && contract {
+		if contract {
 			return tenant, nil
 		}
 	}
-	return "", fmt.Errorf("nenhum tenant do laboratório possui tenant_settings e contrato ativo")
+	return "", fmt.Errorf("nenhum tenant do laboratório possui contrato ativo")
 }
 
 func cgGateSeed(t *testing.T, opened *db.DB, scope tenancy.Scope, opt cgGateSeedOpt) cgGateRow {
@@ -1047,12 +1057,16 @@ func cgGateNoticeDays(t *testing.T, opened *db.DB, scope tenancy.Scope) int {
 	t.Helper()
 	var days *int
 	cgGateInTx(t, opened, scope, func(tx *db.Tx) error {
-		return tx.QueryRow(context.Background(), `select retention_notice_log_days from tenant_settings where tenant_id = app_tenant()`).Scan(&days)
+		return tx.QueryRow(context.Background(), `select (select retention_notice_log_days from tenant_settings where tenant_id = app_tenant())`).Scan(&days)
 	})
+	return cgGateResolveNoticeDays(days, os.Getenv("NEXO_NOTICE_LOG_DAYS"))
+}
+
+func cgGateResolveNoticeDays(days *int, env string) int {
 	if days != nil {
 		return *days
 	}
-	parsed := int(validate.JSNumber(os.Getenv("NEXO_NOTICE_LOG_DAYS")))
+	parsed := int(validate.JSNumber(env))
 	if parsed == 0 {
 		parsed = 400
 	}
