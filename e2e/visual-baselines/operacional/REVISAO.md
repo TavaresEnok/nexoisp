@@ -1,5 +1,9 @@
 # Referências operacionais — 26/10/2026
 
+## Lote 49 — ambiente canônico de CI
+
+Os seis pares do lote 48 foram examinados individualmente e as referências alinhadas à captura no container canônico. Proveniência, hashes, dimensões e observações estão em [LOTE49](../../../docs/LOTE49-REFERENCIAS-CONTAINER-CI.md). A falha do CI 48 permanece registrada; captura com atualização não é aprovação do cenário normal. Revisão independente dos seis pares, resultado normal canônico confirmado e gates de CI e SBOM no SHA exato continuam obrigatórios.
+
 ## Lote 48 — reconciliação C34
 
 Os seis pares foram examinados individualmente; hashes, dimensões e observações estão em [LOTE48](../../../docs/LOTE48-REFERENCIAS-VISUAIS-C34.md). As diferenças adotadas correspondem à barra lateral de favoritos e estrelas do C34 aprovado no lote 45; a referência de celular é binariamente idêntica. A captura manual não é aprovação do cenário normal: ele falhou posteriormente na exclusão de etiqueta. Revisão independente dos seis pares e execução sem atualização, CI completo e SBOM permanecem pendentes antes da integração.
