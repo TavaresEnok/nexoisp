@@ -18,7 +18,8 @@ import {
 import { RecordEditor } from "@/features/shared/record-editor";
 import { QueryBoundary } from "@/features/shared/feedback";
 import { ActionButton } from "@/features/shared/action";
-import { can } from "@/features/session/model";
+import { can, sessionScope } from "@/features/session/model";
+import { PhysicalSites } from "./physical-sites";
 import { useSession } from "@/features/session/provider";
 import { api } from "@/platform/erp-client";
 const popSchema = z.object({
@@ -35,7 +36,7 @@ type Pop = z.infer<typeof popSchema>;
 export function NetworkPops() {
   const { me } = useSession();
   const navigate = useNavigate();
-  const result = useSWR("erp-pops", async () =>
+  const result = useSWR(me ? ["erp-pops", sessionScope(me)] : null, async () =>
     z.array(popSchema).parse(await api("/pops")),
   );
   const [editor, setEditor] = useState<Pop | "create" | null>(null);
@@ -129,6 +130,14 @@ export function NetworkPops() {
           )}
         </QueryBoundary>
       </Panel>
+      {me && can(me, "network:read") && result.data && (
+        <PhysicalSites
+          key={sessionScope(me)}
+          scope={sessionScope(me)}
+          pops={result.data}
+          write={write}
+        />
+      )}
       {editor && (
         <RecordEditor
           title={editing ? "Editar POP" : "Novo POP"}
