@@ -816,5 +816,16 @@
     "allowlist_cut": [],
     "homologacao": false,
     "publicado": false
+  },
+  "gate_g_admissao_lote38": {
+    "implementado": true,
+    "executado": false,
+    "escopo": "invoice-detail, fixture visivel no tenant dono",
+    "decisao": "amostra nao vazia exclusivamente verdadeira permite somente candidatura; falso ou amostra invalida impede",
+    "admissao_final": false,
+    "allowlists_alteradas": false,
+    "prova_pendente": "nativo PostgreSQL real no novo HEAD e revisao independente",
+    "base_codigo": "75145eec65c92113166339a3c73f5ccccb001e5b",
+    "evidencia": "docs/LOTE38-B04-ADMISSAO.md"
   }
 }
