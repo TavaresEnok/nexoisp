@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-30T16:06:56.968Z",
+  "generated_at": "2026-10-30T18:30:12.157Z",
   "method": "Chamadas à API feitas pelas páginas entre uma verificação e a anterior, gravadas por e2e/request-trace.mjs durante a fumaça; preparação via context.request não conta.",
   "scenarios": [
     {
@@ -104,6 +104,11 @@
     },
     {
       "scenario": "frontend-v0-network-sites.mjs",
+      "recorded_at": "2026-10-30T18:22:23.794Z",
+      "checks": 1
+    },
+    {
+      "scenario": "frontend-v0-network-sites.mjs",
       "recorded_at": "2026-10-30T15:08:41.215Z",
       "checks": 1
     },
@@ -116,6 +121,11 @@
       "scenario": "frontend-v0-optical.mjs",
       "recorded_at": "2026-10-20T21:08:58.403Z",
       "checks": 6
+    },
+    {
+      "scenario": "frontend-v0-os-quotations.mjs",
+      "recorded_at": "2026-10-30T18:22:18.957Z",
+      "checks": 2
     },
     {
       "scenario": "frontend-v0-os-quotations.mjs",
@@ -163,6 +173,11 @@
       "checks": 11
     },
     {
+      "scenario": "frontend-v0-workspace-preferences.mjs",
+      "recorded_at": "2026-10-30T18:22:30.264Z",
+      "checks": 3
+    },
+    {
       "scenario": "frontend-v0-workspace.mjs",
       "recorded_at": "2026-10-20T21:09:16.701Z",
       "checks": 6
@@ -173,8 +188,8 @@
       "checks": 1
     }
   ],
-  "validated_units": 157,
-  "units_with_interface_check": 157,
+  "validated_units": 159,
+  "units_with_interface_check": 159,
   "units": [
     {
       "id": "AC-01",
@@ -742,6 +757,15 @@
         },
         {
           "scenario": "frontend-v0-network-sites.mjs",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
+          "endpoints": [
+            "POST /api/auth/login",
+            "GET /api/me",
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network-sites.mjs",
           "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.",
           "endpoints": [
             "POST /api/auth/login",
@@ -810,6 +834,20 @@
         {
           "scenario": "frontend-v0-optical.mjs",
           "check": "Falha de consulta, permissões do NOC e isolamento das ONUs entre provedores são preservados",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque e exportação CSV comparativa concluída.",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1087,6 +1125,32 @@
           ]
         },
         {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "POST /api/auth/login",
+            "GET /api/me",
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Seleção pessoal da Visão geral oculta bloco opcional e persiste após recarga sem afetar prioridades nem indicadores; restauração restabelece os blocos autorizados",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Logout e novo login com outra conta no mesmo contexto isola preferências por escopo de sessão e restringe widgets e favoritos sem permissão",
+          "endpoints": [
+            "POST /api/auth/login",
+            "POST /api/auth/logout",
+            "GET /api/me",
+            "GET /api/health"
+          ]
+        },
+        {
           "scenario": "frontend-v0-workspace.mjs",
           "check": "Contas sintéticas só aparecem com health.demo; preencher uma conta não cria sessão nem contorna o login Go",
           "endpoints": [
@@ -1188,6 +1252,14 @@
         },
         {
           "scenario": "frontend-v0-network-sites.mjs",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
+          "endpoints": [
+            "GET /api/health",
+            "POST /api/auth/login"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network-sites.mjs",
           "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.",
           "endpoints": [
             "GET /api/health",
@@ -1220,6 +1292,22 @@
         {
           "scenario": "frontend-v0-stock.mjs",
           "check": "Catálogo cadastra material com código, unidade e mínimo; alerta usa saldo real",
+          "endpoints": [
+            "GET /api/health",
+            "POST /api/auth/login"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "GET /api/health",
+            "POST /api/auth/login"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Logout e novo login com outra conta no mesmo contexto isola preferências por escopo de sessão e restringe widgets e favoritos sem permissão",
           "endpoints": [
             "GET /api/health",
             "POST /api/auth/login"
@@ -1831,6 +1919,13 @@
         },
         {
           "scenario": "frontend-v0-network-sites.mjs",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network-sites.mjs",
           "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.",
           "endpoints": [
             "GET /api/me"
@@ -1895,6 +1990,20 @@
         {
           "scenario": "frontend-v0-optical.mjs",
           "check": "Falha de consulta, permissões do NOC e isolamento das ONUs entre provedores são preservados",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque e exportação CSV comparativa concluída.",
           "endpoints": [
             "GET /api/me"
           ]
@@ -2155,6 +2264,27 @@
         {
           "scenario": "frontend-v0-stock.mjs",
           "check": "Erro na consulta de estoque não introduz catálogo ou saldos demonstrativos",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Seleção pessoal da Visão geral oculta bloco opcional e persiste após recarga sem afetar prioridades nem indicadores; restauração restabelece os blocos autorizados",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Logout e novo login com outra conta no mesmo contexto isola preferências por escopo de sessão e restringe widgets e favoritos sem permissão",
           "endpoints": [
             "GET /api/me"
           ]
@@ -2776,6 +2906,13 @@
         },
         {
           "scenario": "frontend-v0-network-sites.mjs",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network-sites.mjs",
           "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.",
           "endpoints": [
             "GET /api/today"
@@ -2840,6 +2977,20 @@
         {
           "scenario": "frontend-v0-optical.mjs",
           "check": "Falha de consulta, permissões do NOC e isolamento das ONUs entre provedores são preservados",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque e exportação CSV comparativa concluída.",
           "endpoints": [
             "GET /api/today"
           ]
@@ -3045,6 +3196,30 @@
           ]
         },
         {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Seleção pessoal da Visão geral oculta bloco opcional e persiste após recarga sem afetar prioridades nem indicadores; restauração restabelece os blocos autorizados",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Logout e novo login com outra conta no mesmo contexto isola preferências por escopo de sessão e restringe widgets e favoritos sem permissão",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
           "scenario": "frontend-v0-workspace.mjs",
           "check": "Contas sintéticas só aparecem com health.demo; preencher uma conta não cria sessão nem contorna o login Go",
           "endpoints": [
@@ -3121,6 +3296,20 @@
         {
           "scenario": "frontend-v0-saas.mjs",
           "check": "Entrada de suporte exige motivo, identifica o contexto e audita ações; saída restaura a plataforma sem permitir gestão SaaS dentro do provedor",
+          "endpoints": [
+            "GET /api/dashboard/panels"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "GET /api/dashboard/panels"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Seleção pessoal da Visão geral oculta bloco opcional e persiste após recarga sem afetar prioridades nem indicadores; restauração restabelece os blocos autorizados",
           "endpoints": [
             "GET /api/dashboard/panels"
           ]
@@ -4168,6 +4357,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "GET /api/plans"
+          ]
+        },
+        {
           "scenario": "frontend-v0-workspace.mjs",
           "check": "Busca operacional encontra nome, login, IP, MAC, ONU e OS e abre fichas reais de assinante e contrato",
           "endpoints": [
@@ -4629,6 +4825,13 @@
         {
           "scenario": "frontend-v0-stock.mjs",
           "check": "Contrato mostra série, comodato e OS; retirada confirmada devolve a unidade ao saldo e encerra a pendência de recolhimento",
+          "endpoints": [
+            "GET /api/contracts"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
           "endpoints": [
             "GET /api/contracts"
           ]
@@ -5268,6 +5471,13 @@
         {
           "scenario": "frontend-v0-messages.mjs",
           "check": "Régua filtra plano e data, respeita consentimento e não repete envio do mesmo título/regra; modelo em uso não é excluído",
+          "endpoints": [
+            "GET /api/pops"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network-sites.mjs",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
           "endpoints": [
             "GET /api/pops"
           ]
@@ -6409,6 +6619,27 @@
           ]
         },
         {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "GET /api/tickets"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Seleção pessoal da Visão geral oculta bloco opcional e persiste após recarga sem afetar prioridades nem indicadores; restauração restabelece os blocos autorizados",
+          "endpoints": [
+            "GET /api/tickets"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Logout e novo login com outra conta no mesmo contexto isola preferências por escopo de sessão e restringe widgets e favoritos sem permissão",
+          "endpoints": [
+            "GET /api/tickets"
+          ]
+        },
+        {
           "scenario": "frontend-v0-workspace.mjs",
           "check": "Contas sintéticas só aparecem com health.demo; preencher uma conta não cria sessão nem contorna o login Go",
           "endpoints": [
@@ -6727,6 +6958,14 @@
           ]
         },
         {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+          "endpoints": [
+            "GET /api/work-orders",
+            "GET /api/work-orders/:id"
+          ]
+        },
+        {
           "scenario": "frontend-v0-remediation.mjs",
           "check": "R02: alerta aparece pela lista e URL direta na aba inicial; anotação comum não vira alerta",
           "endpoints": [
@@ -6905,6 +7144,13 @@
         {
           "scenario": "frontend-v0-field.mjs",
           "check": "Perfil Técnico/NOC usa sua fila pessoal; Financeiro não acessa OS nem executa comandos",
+          "endpoints": [
+            "GET /api/staff"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
           "endpoints": [
             "GET /api/staff"
           ]
@@ -7158,6 +7404,13 @@
           "endpoints": [
             "GET /api/work-orders/:id"
           ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+          "endpoints": [
+            "GET /api/work-orders/:id"
+          ]
         }
       ]
     },
@@ -7306,6 +7559,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
           "scenario": "frontend-v0-remediation.mjs",
           "check": "R02: alerta aparece pela lista e URL direta na aba inicial; anotação comum não vira alerta",
           "endpoints": [
@@ -7373,6 +7633,20 @@
         {
           "scenario": "frontend-v0-saas.mjs",
           "check": "Entrada de suporte exige motivo, identifica o contexto e audita ações; saída restaura a plataforma sem permitir gestão SaaS dentro do provedor",
+          "endpoints": [
+            "GET /api/agenda"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "GET /api/agenda"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Seleção pessoal da Visão geral oculta bloco opcional e persiste após recarga sem afetar prioridades nem indicadores; restauração restabelece os blocos autorizados",
           "endpoints": [
             "GET /api/agenda"
           ]
@@ -7509,6 +7783,20 @@
         {
           "scenario": "frontend-v0-field.mjs",
           "check": "Perfil Técnico/NOC usa sua fila pessoal; Financeiro não acessa OS nem executa comandos",
+          "endpoints": [
+            "GET /api/stock/items"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+          "endpoints": [
+            "GET /api/stock/items"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque e exportação CSV comparativa concluída.",
           "endpoints": [
             "GET /api/stock/items"
           ]
@@ -7775,6 +8063,13 @@
         },
         {
           "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque e exportação CSV comparativa concluída.",
+          "endpoints": [
+            "GET /api/stock/warehouses"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
           "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque.",
           "endpoints": [
             "GET /api/stock/warehouses"
@@ -7822,6 +8117,13 @@
             "GET /api/stock/purchases",
             "POST /api/stock/purchases",
             "POST /api/stock/purchases/:id/receive"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque e exportação CSV comparativa concluída.",
+          "endpoints": [
+            "GET /api/stock/suppliers"
           ]
         },
         {
@@ -7903,6 +8205,30 @@
         {
           "scenario": "frontend-v0-saas.mjs",
           "check": "Entrada de suporte exige motivo, identifica o contexto e audita ações; saída restaura a plataforma sem permitir gestão SaaS dentro do provedor",
+          "endpoints": [
+            "GET /api/finance/summary",
+            "GET /api/finance/monthly"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "GET /api/finance/summary",
+            "GET /api/finance/monthly"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Seleção pessoal da Visão geral oculta bloco opcional e persiste após recarga sem afetar prioridades nem indicadores; restauração restabelece os blocos autorizados",
+          "endpoints": [
+            "GET /api/finance/summary",
+            "GET /api/finance/monthly"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Logout e novo login com outra conta no mesmo contexto isola preferências por escopo de sessão e restringe widgets e favoritos sem permissão",
           "endpoints": [
             "GET /api/finance/summary",
             "GET /api/finance/monthly"
@@ -8693,6 +9019,20 @@
         {
           "scenario": "frontend-v0-saas.mjs",
           "check": "Entrada de suporte exige motivo, identifica o contexto e audita ações; saída restaura a plataforma sem permitir gestão SaaS dentro do provedor",
+          "endpoints": [
+            "GET /api/network/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "GET /api/network/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Seleção pessoal da Visão geral oculta bloco opcional e persiste após recarga sem afetar prioridades nem indicadores; restauração restabelece os blocos autorizados",
           "endpoints": [
             "GET /api/network/health"
           ]
@@ -10835,6 +11175,13 @@
         },
         {
           "scenario": "frontend-v0-network-sites.mjs",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
+          "endpoints": [
+            "GET /api/pops"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network-sites.mjs",
           "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.",
           "endpoints": [
             "GET /api/pops"
@@ -11548,6 +11895,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+          "endpoints": [
+            "GET /api/install-kits"
+          ]
+        },
+        {
           "scenario": "frontend-v0-quality.mjs",
           "check": "Kit criado na UI exclui itens serializados; aplicação em OS baixa quantidades reais do estoque e conserva ativação",
           "endpoints": [
@@ -11861,6 +12215,13 @@
         {
           "scenario": "frontend-v0-session.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Login do navegador não expõe o token da sessão no corpo; cliente de API recebe Bearer só ao pedir explicitamente\",\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
+          "endpoints": [
+            "POST /api/auth/logout"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Logout e novo login com outra conta no mesmo contexto isola preferências por escopo de sessão e restringe widgets e favoritos sem permissão",
           "endpoints": [
             "POST /api/auth/logout"
           ]
@@ -12715,6 +13076,27 @@
         },
         {
           "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque e exportação CSV comparativa concluída.",
+          "endpoints": [
+            "GET /api/stock/quotations",
+            "GET /api/stock/quotations/:id",
+            "POST /api/stock/quotations",
+            "POST /api/stock/quotations/:id/offers",
+            "POST /api/stock/quotations/:id/purchase"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+          "endpoints": [
+            "POST /api/work-orders/:id/attachments",
+            "GET /api/work-orders/:id/attachments",
+            "GET /api/work-orders/:id/attachments/:id/download",
+            "DELETE /api/work-orders/:id/attachments/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
           "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque.",
           "endpoints": [
             "GET /api/stock/quotations",
@@ -12771,12 +13153,62 @@
       "checks": [
         {
           "scenario": "frontend-v0-network-sites.mjs",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
+          "endpoints": [
+            "GET /api/network/sites",
+            "GET /api/network/sites/:id",
+            "POST /api/network/sites",
+            "PATCH /api/network/sites/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network-sites.mjs",
           "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.",
           "endpoints": [
             "GET /api/network/sites",
             "GET /api/network/sites/:id",
             "POST /api/network/sites",
             "PATCH /api/network/sites/:id"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "LOTE44-CSV-COTACAO",
+      "functionality": "Exportar comparação de cotação em CSV",
+      "declared_endpoints": [
+        "GET /api/stock/quotations/:id/export.csv"
+      ],
+      "exercised_by_interface": [
+        "GET /api/stock/quotations/:id/export.csv"
+      ],
+      "not_exercised_by_interface": [],
+      "checks": [
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque e exportação CSV comparativa concluída.",
+          "endpoints": [
+            "GET /api/stock/quotations/:id/export.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "LOTE44-CSV-LOCAIS",
+      "functionality": "Exportar página filtrada de locais de infraestrutura em CSV",
+      "declared_endpoints": [
+        "GET /api/network/sites/export.csv"
+      ],
+      "exercised_by_interface": [
+        "GET /api/network/sites/export.csv"
+      ],
+      "not_exercised_by_interface": [],
+      "checks": [
+        {
+          "scenario": "frontend-v0-network-sites.mjs",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
+          "endpoints": [
+            "GET /api/network/sites/export.csv"
           ]
         }
       ]

@@ -2935,8 +2935,28 @@
       "tests/contrato/network_sites_contract.py"
     ],
     "integrationNotes": [
-      "Rastreio positivo de criação, consulta, edição, filtro, arquivo e reativação de postes/torres por POP no browser 43; sem homologação externa, publicação, comandos físicos ou GIS; exportações CSV pertencem ao recorte do lote 44 pendente de verificação própria; Chatwoot fora do escopo."
+      "Rastreio positivo de criação, consulta, edição, filtro, arquivo e reativação de postes/torres por POP no browser 43; exportação CSV comprovada no browser 45 em unidade própria; sem homologação externa, publicação, comandos físicos ou GIS; Chatwoot fora do escopo."
     ]
+  },
+  {
+    "id": "LOTE44-CSV-COTACAO",
+    "entry": "Estoque",
+    "functionality": "Exportar comparação de cotação em CSV",
+    "integrationState": "validated",
+    "integrationClassification": "business-ui",
+    "endpoints": "GET /api/stock/quotations/:id/export.csv",
+    "validation": ["docs/integracao-v0/evidencias/rastreio/frontend-v0-os-quotations-lote45.json"],
+    "integrationNotes": ["Browser 45 PASS; PostgreSQL de cotação PASS reutilizado do lote 44, sem nova execução PG de cotação."]
+  },
+  {
+    "id": "LOTE44-CSV-LOCAIS",
+    "entry": "POPs",
+    "functionality": "Exportar página filtrada de locais de infraestrutura em CSV",
+    "integrationState": "validated",
+    "integrationClassification": "business-ui",
+    "endpoints": "GET /api/network/sites/export.csv",
+    "validation": ["docs/integracao-v0/evidencias/rastreio/frontend-v0-network-sites-lote45.json"],
+    "integrationNotes": ["Browser 45 e PostgreSQL real de sites com race PASS; sem homologação externa."]
   },
   {
     "id": "LOTE45-FAVORITOS",
@@ -2945,12 +2965,13 @@
     "backendState": "Implementada",
     "integrationState": "pending",
     "validation": [
-      "e2e/frontend-v0-workspace-preferences.mjs"
+      "e2e/frontend-v0-workspace-preferences.mjs",
+      "docs/integracao-v0/evidencias/rastreio/frontend-v0-workspace-preferences-lote45.json"
     ],
     "integrationClassification": "business-ui",
     "endpoints": "Nenhum endpoint adicional; preferências locais em localStorage por sessão",
     "integrationNotes": [
-      "Implementação integrada; revisão independente e prova real em browser focado dependem de recibo do controlador; persistência local isolada por sessionScope(me), até 12 páginas conectadas do catálogo, sem dados sensíveis, APIs externas ou Chatwoot."
+      "Browser 45 PASS para adição, navegação, persistência local, remoção e isolamento; o verificador exige endpoint declarado e não representa prova exclusivamente local, por isso pending não significa ausência da prova. GET /api/me consta do rastreio como contexto de autenticação, não é CRUD de preferências no servidor."
     ]
   },
   {
@@ -2960,12 +2981,13 @@
     "backendState": "Implementada",
     "integrationState": "pending",
     "validation": [
-      "e2e/frontend-v0-workspace-preferences.mjs"
+      "e2e/frontend-v0-workspace-preferences.mjs",
+      "docs/integracao-v0/evidencias/rastreio/frontend-v0-workspace-preferences-lote45.json"
     ],
     "integrationClassification": "business-ui",
     "endpoints": "GET /api/dashboard; GET /api/dashboard/panels; GET /api/today",
     "integrationNotes": [
-      "Implementação integrada; revisão independente e prova real em browser focado dependem de recibo do controlador; alternância dos blocos revenue, contract-trends e agenda; fallback seguro e restauração do padrão; sem alteração de métricas, cálculos ou requisições de backend."
+      "Browser 45 PASS para ocultação, persistência local, restauração e isolamento. As chamadas de dados são contexto do cenário, não CRUD de preferências no servidor; o verificador não representa diretamente a persistência local e a unidade permanece pending."
     ]
   }
 ]

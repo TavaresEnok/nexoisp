@@ -1,0 +1,38 @@
+{
+  "scenario": "frontend-v0-os-quotations.mjs",
+  "recorded_at": "2026-10-30T18:22:18.957Z",
+  "steps": [
+    {
+      "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+      "requests": [
+        "DELETE /api/work-orders/:id/attachments/:id",
+        "GET /api/install-kits",
+        "GET /api/me",
+        "GET /api/staff",
+        "GET /api/stock/items",
+        "GET /api/today",
+        "GET /api/work-orders",
+        "GET /api/work-orders/:id",
+        "GET /api/work-orders/:id/attachments",
+        "GET /api/work-orders/:id/attachments/:id/download",
+        "POST /api/work-orders/:id/attachments"
+      ]
+    },
+    {
+      "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque e exportação CSV comparativa concluída.",
+      "requests": [
+        "GET /api/me",
+        "GET /api/stock/items",
+        "GET /api/stock/quotations",
+        "GET /api/stock/quotations/:id",
+        "GET /api/stock/quotations/:id/export.csv",
+        "GET /api/stock/suppliers",
+        "GET /api/stock/warehouses",
+        "GET /api/today",
+        "POST /api/stock/quotations",
+        "POST /api/stock/quotations/:id/offers",
+        "POST /api/stock/quotations/:id/purchase"
+      ]
+    }
+  ]
+}
