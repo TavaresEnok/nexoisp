@@ -483,6 +483,10 @@
     },
     {
       "method": "GET",
+      "path": "/api/network/sites/export.csv"
+    },
+    {
+      "method": "GET",
       "path": "/api/noc/overview"
     },
     {
@@ -676,6 +680,10 @@
     {
       "method": "GET",
       "path": "/api/stock/quotations/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/stock/quotations/:id/export.csv"
     },
     {
       "method": "GET",

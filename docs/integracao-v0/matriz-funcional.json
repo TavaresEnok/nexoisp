@@ -2928,13 +2928,14 @@
     "id": "LOTE42-inventario-passivo",
     "entry": "POPs",
     "functionality": "C42 parcial: inventário passivo de postes, torres e condomínios por POP; sem comandos físicos, GIS ou topologia completa",
-    "integrationState": "integration_pending_validation",
+    "endpoints": "GET /api/network/sites; GET /api/network/sites/:id; POST /api/network/sites; PATCH /api/network/sites/:id",
+    "integrationState": "validated",
     "validation": [
-      "e2e/frontend-v0-network-sites.mjs",
+      "docs/integracao-v0/evidencias/rastreio/frontend-v0-network-sites.json",
       "tests/contrato/network_sites_contract.py"
     ],
     "integrationNotes": [
-      "Sem homologação externa, publicação ou conclusão integral; Chatwoot fora do escopo."
+      "Rastreio positivo de criação, consulta, edição, filtro, arquivo e reativação de postes/torres por POP no browser 43; sem homologação externa, publicação, comandos físicos ou GIS; exportações CSV pertencem ao recorte do lote 44 pendente de verificação própria; Chatwoot fora do escopo."
     ]
   }
 ]

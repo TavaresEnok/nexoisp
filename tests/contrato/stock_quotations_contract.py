@@ -69,3 +69,23 @@ def verify(api, call, sql, bases):
     assert counts() == {'orders': 1, 'movements': 1}
     assert api('/api/stock/purchases/' + purchase + '/receive', {})['status'] in (400, 409)
     assert counts()['movements'] == 1
+    assert call(path + '/export.csv', token=reader)['status'] == 200
+    csv_res = api(path + '/export.csv')
+    assert csv_res['status'] == 200, csv_res
+    assert csv_res['headers'].get('content-type', '').startswith('text/csv')
+    assert 'attachment' in csv_res['headers'].get('content-disposition', '')
+    assert ('cotacao-' + q['id'][:8].lower() + '.csv') in csv_res['headers'].get('content-disposition', '')
+    raw_body = csv_res['body']
+    assert raw_body.startswith(b'\xef\xbb\xbf')
+    csv_text = raw_body.decode('utf-8-sig')
+    lines = [line.strip('\r') for line in csv_text.split('\n') if line.strip('\r')]
+    assert lines[0] == 'cotacao_id;cotacao;status;fornecedor_id;fornecedor;item_id;item;unidade;quantidade;preco_unitario_centavos;subtotal_centavos;pedido_id'
+    assert len(lines) == 2
+    cols = [c.strip('"') for c in lines[1].split(';')]
+    assert cols[0] == q['id']
+    assert cols[3] == supplier['id']
+    assert cols[5] == item['id']
+    assert cols[8] == '2'
+    assert cols[9] == '123'
+    assert cols[10] == '246'
+    assert cols[11] == purchase
