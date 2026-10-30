@@ -3,6 +3,7 @@ package leitura
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -222,6 +223,9 @@ func observeBalanceRead(reader, result string) error {
 		return errBalanceCompareProjection
 	}
 	balanceReadCompare.WithLabelValues(reader, result).Inc()
+	if result == balanceReadMismatch {
+		slog.Warn("balance_read_mismatch", "reader", reader, "result", balanceReadMismatch)
+	}
 	return nil
 }
 
