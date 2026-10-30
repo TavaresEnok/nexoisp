@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { Panel } from "@/components/workspace-ui";
 import { OperationalCatalog } from "@/components/operational-catalog";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,7 @@ export function PhysicalSites({
   pops: SitePop[];
   write: boolean;
 }) {
+  const { mutate } = useSWRConfig();
   const [q, setQ] = useState("");
   const [kind, setKind] = useState("");
   const [pop, setPop] = useState("");
@@ -62,6 +63,15 @@ export function PhysicalSites({
     }
   }, [offset, result.data]);
   const editing = editor && editor !== "create" ? editor : null;
+  const refreshSites = () =>
+    mutate(
+      (key) =>
+        Array.isArray(key) &&
+        (key[0] === "network-sites" || key[0] === "network-site") &&
+        key[1] === scope,
+      undefined,
+      { revalidate: true },
+    );
   const updateFilter = (setter: (value: string) => void, value: string) => {
     setter(value);
     setOffset(0);
@@ -172,7 +182,7 @@ export function PhysicalSites({
                           method: "PATCH",
                           body: { active: !site.active },
                         });
-                        await result.mutate();
+                        await refreshSites();
                       }}
                     >
                       {site.active ? "Arquivar" : "Reativar"}
@@ -338,7 +348,7 @@ export function PhysicalSites({
               { method: editing ? "PATCH" : "POST", body: patch },
             );
             setEditor(null);
-            await result.mutate();
+            await refreshSites();
           }}
         />
       )}
