@@ -1,0 +1,7 @@
+# Lote 38: candidatura documental B04
+
+Base de código: `75145eec65c92113166339a3c73f5ccccb001e5b`. O caminho `verify` do contrato existente contém uma decisão conservadora: uma amostra não vazia, composta exclusivamente de booleanos verdadeiros, permite somente candidatar o leitor observado. Qualquer falso ou amostra ausente, vazia ou inválida impede a candidatura. Isso não é admissão final: os demais gates e revisão independente continuam exigidos; nenhuma allowlist é editada.
+
+A prova prevista observa `invoice-detail` na fatura da fixture sob `nexo_app` e no tenant dono, injeta drift na mesma transação, exige um falso e recusa a candidatura, e verifica a restauração após rollback. Não usa amostra de outro tenant. Diagnósticos não incluem valores nem identificadores. A implementação e compilação não são execução da prova: o nativo PostgreSQL real no novo HEAD permanece pendente de execução e registro pela gerência.
+
+A consolidação solicitada em `lote37-b04-provas-diagnostico-2026-10-30/evidencias/consolidacao-75145ee.json` não estava disponível nesta sessão. Assim, não se promovem estorno, excesso ou log sem os novos logs exit 0 e as asserções; tampouco acordo não comprovado ou importação sem verificar a igualdade dos bytes e ancestralidade do eventual reuso histórico `01db028`. Nenhuma execução histórica é atribuída a `75145ee` por inferência. As provas e falhas históricas já registradas permanecem intactas. Migração 36 não foi repetida. Revisão independente e reconciliação da evidência ficam pendentes da gerência.

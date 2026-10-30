@@ -13,6 +13,12 @@ ROOT = Path(__file__).resolve().parents[2]
 EXPLAIN_ANALYZE = "pending"
 
 
+def documentary_candidate(matches):
+    """Candidatura documental somente; não autoriza corte nem altera allowlists."""
+    return (isinstance(matches, list) and bool(matches)
+            and all(value is True for value in matches))
+
+
 def verify(api, call, sql):
     if EXPLAIN_ANALYZE != "pending":
         raise AssertionError("EXPLAIN ANALYZE não está aceito nesta entrega")
@@ -54,6 +60,26 @@ def verify(api, call, sql):
         "join financial_balance_shadow s on s.invoice_id=i.id "
         "where s.matches and c.pop_id is not null limit 1"
     )
+    # O leitor observado é invoice-detail e a amostra é a fatura visível no
+    # escopo da fixture. A consulta devolve somente booleanos, sem diagnósticos
+    # de valores ou identificadores. A corrupção ocorre na mesma transação.
+    scope = ("set local role nexo_app;set local app.tenant_id=" + quote(sample["tenant_id"]) + ";")
+    observation = ("select coalesce(json_agg(matches),'[]'::json) from financial_balance_shadow "
+                   "where invoice_id=" + quote(sample["invoice_id"]) + "::uuid;")
+
+    def observe(prefix=""):
+        return json.loads(sql("begin;" + prefix + scope + observation + "rollback;", "nexo_test").splitlines()[-1])
+
+    baseline = observe()
+    assert documentary_candidate(baseline), "amostra inicial inválida ou divergente"
+    assert not documentary_candidate([]) and not documentary_candidate(None), "amostra ausente aprovada"
+    assert not documentary_candidate([True, None]), "amostra inválida aprovada"
+    drift = observe("alter table invoices disable trigger invoice_movement_record;"
+                    "update invoices set amount_cents=amount_cents+1 where id="
+                    + quote(sample["invoice_id"]) + "::uuid;")
+    assert drift and False in drift and not documentary_candidate(drift), "drift não impediu candidatura"
+    assert observe() == baseline, "rollback não restaurou a amostra"
+
     beta = call("/api/auth/login", {"email": "admin@beta.demo", "password": "demo1234", "bearer": True})
     assert beta["status"] == 200 and beta["json"].get("token"), beta["json"]
     hidden = call("/api/invoices/" + sample["invoice_id"], token=beta["json"]["token"])

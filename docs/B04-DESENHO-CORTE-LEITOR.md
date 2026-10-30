@@ -241,3 +241,7 @@ Essa amostra não exercita acordo comprovado, acordo `source_unproven`, estorno,
 ## Estado lido no lote 29
 
 O texto acima é o contrato desenhado em `728f2ff`. O código posterior está integrado na worktree de desenvolvimento e inventariado em `docs/LOTE29-B04-BASE-SHADOW.md`. `NEXO_BALANCE_READ` existe. As allowlists compiladas de shadow e de cut estão vazias, então a resposta servida continua a sentença legada. Variantes registradas não são entrada na allowlist. O gate G desta fase só documenta esse alcance. Ele não aprova L1 nem C3a e não altera produto.
+
+### Recorte documental do gate G no lote 38
+
+O `verify` existente passa a exercitar a decisão de candidatura com amostra visível não vazia, drift transacional e rollback. A candidatura não autoriza corte: demais gates e revisão continuam necessários. A execução PostgreSQL real dessa prova no novo HEAD permanece pendente, conforme `docs/LOTE38-B04-ADMISSAO.md`.
