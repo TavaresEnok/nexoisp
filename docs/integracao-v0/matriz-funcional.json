@@ -2906,7 +2906,20 @@
   },
   {
     "id": "LOTE41-marca-portal",
-    "status": "integracao_pendente_validacao",
-    "integrationNote": "integração preparada; revisão independente e provas combinadas pendentes"
+    "status": "DONE",
+    "integrationNote": "5/5 revisões e sete checks finais PASS em f9d6c9; CI candidato em andamento"
+  },
+  {
+    "id": "LOTE42-inventario-passivo",
+    "entry": "POPs",
+    "functionality": "C42 parcial: inventário passivo de postes, torres e condomínios por POP; sem comandos físicos, GIS ou topologia completa",
+    "integrationState": "integration_pending_validation",
+    "validation": [
+      "e2e/frontend-v0-network-sites.mjs",
+      "tests/contrato/network_sites_contract.py"
+    ],
+    "integrationNotes": [
+      "Sem homologação externa, publicação ou conclusão integral; Chatwoot fora do escopo."
+    ]
   }
 ]

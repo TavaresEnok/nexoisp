@@ -114,6 +114,9 @@ def run():
         import re
         actual={(method.upper(),re.sub(r'\{([^}]+)\}',r':\1',path)) for path,item in schema['paths'].items() for method in item if method.upper() in ['GET','POST','PUT','PATCH','DELETE']}
         assert manifest==actual,(manifest-actual,actual-manifest);checks.append('operações reais iguais ao inventário')
+        from network_sites_contract import verify as verify_network_sites
+        verify_network_sites(api, call, sql)
+        checks.append('Lote 42: inventário passivo e isolamento')
         from tenant_branding_contract import verify as verify_branding
         verify_branding(api, call)
         checks.append('Lote 41: marca do portal, isolamento e autorização')

@@ -25,7 +25,7 @@ Os IDs Cxx apontam para [a matriz](matriz_capacidades.csv); AUD-xx apontam para 
 | P1 | C15/C16 — expediente/SLA e campo | Definir calendário, feriados, fuso, check-in e uso de localização | Prazos reconciliados com exemplos, transições autorizadas e histórico; sem coletar geolocalização por padrão |
 | P1 | C37 — relatórios por tarefa | Aprovar filtros e fórmulas/totais prioritários | Mesma base reconcilia UI/CSV, permissões e paginação; busca/filtro atual prevalece |
 | P1 | C36 — mapeamento de importação | Amostra autorizada e schema da origem; nenhum segredo dos espelhos é uma credencial autorizada | Relatório de perdas, N serviços, saldos e credenciais conferidos; ensaio idempotente |
-| P2 | C24/C42 — inventário de rede | Definir VLAN, QinQ, POP, caixa e vínculos de topologia usados | CRUD/consulta com consistência e permissão; sem comandos livres nem efeito no NAS |
+| P2 | C24/C42 — inventário de rede | Lote 42 integra cadastro passivo de poste, torre e condomínio por POP; definir VLAN, QinQ e topologia restante | CRUD/consulta com consistência e permissão; sem comandos livres nem efeito no NAS |
 | P2 | C34 — marca do provedor e preferência visual | Recorte opcional de nome e logotipo em integração no lote 41 | Provas combinadas e revisão pendentes; sem assets externos ou personalização de cores |
 
 Essas são especificações para decisão, não lacunas encerradas pela matriz. Não acrescentar somente tabelas/botões para marcar um módulo como entregue.

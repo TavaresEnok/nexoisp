@@ -17,6 +17,7 @@ const scenarios = [
   'frontend-v0-field.mjs',
   'frontend-v0-stock.mjs',
   'frontend-v0-network.mjs',
+  'frontend-v0-network-sites.mjs',
   'frontend-v0-access.mjs',
   'frontend-v0-optical.mjs',
   'frontend-v0-maintenance.mjs',
