@@ -16,6 +16,7 @@ import { orderDetailSchema, projectOrder } from "./models";
 import { WorkActions } from "./work-actions";
 import { WorkCollaboration, WorkHistory } from "./work-log";
 import { WorkMaterials } from "./work-materials";
+import { WorkAttachments } from "./work-attachments";
 import {
   formatDocument,
   formatPhone,
@@ -59,6 +60,7 @@ function LiveOrder({ id, onClose }: { id: string; onClose: () => void }) {
           typeof key[0] === "string" &&
           [
             "erp-order",
+            "erp-work-attachments",
             "erp-orders",
             "erp-ticket",
             "erp-unit-search",
@@ -227,14 +229,7 @@ function LiveOrder({ id, onClose }: { id: string; onClose: () => void }) {
                 </p>
               </ProfileSection>
             }
-            attachments={
-              <ProfileSection title="Anexos e assinaturas">
-                <p className="profile-footnote">
-                  Esta ficha não oferece anexos nem assinatura eletrônica. O
-                  relato e as anotações ficam no histórico da OS.
-                </p>
-              </ProfileSection>
-            }
+            attachments={<WorkAttachments id={order.id} status={order.status} />}
             sections={
               <div className="commercial-detail-body">
                 <div className="profile-two-columns">
