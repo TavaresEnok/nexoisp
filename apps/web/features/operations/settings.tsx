@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/features/shared/form";
 import { useSession } from "@/features/session/provider";
+import { PortalBrandingSettings } from "@/features/admin/portal-branding";
+import { can, sessionScope } from "@/features/session/model";
 import { roleLabels } from "@/features/session/model";
 import { canAccessPath } from "./navigation";
 export function OperationalSettings() {
@@ -72,6 +74,9 @@ export function OperationalSettings() {
           </div>
         </Panel>
       </div>
+      {me?.tenant && can(me, "settings:manage") && (
+        <PortalBrandingSettings key={sessionScope(me)} />
+      )}
     </>
   );
 }
