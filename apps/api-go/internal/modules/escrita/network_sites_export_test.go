@@ -266,7 +266,7 @@ func TestNetworkSitesExportPG(t *testing.T) {
 	pops := []string{uuid.NewString(), uuid.NewString(), uuid.NewString()}
 	err = d.WithScope(ctx, op, func(tx *db.Tx) error {
 		for _, id := range tenants {
-			if e := tx.Exec(ctx, `insert into tenants(id,name,slug) values($1,'Teste locais CSV',$2)`, id, "sites-csv-"+strings.ReplaceAll(id, "-", "")); e != nil {
+			if e := tx.Exec(ctx, `insert into tenants(id,name,slug) values($1,'Teste locais CSV',$2)`, id, "sites-csv-"+strings.ReplaceAll(id, "-", "")[:30]); e != nil {
 				return e
 			}
 		}
