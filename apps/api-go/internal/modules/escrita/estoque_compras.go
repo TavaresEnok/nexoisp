@@ -21,7 +21,7 @@ import (
 // por número de série continuam movimentados pelas unidades.
 const purchaseColumns = `p.id, p.number, p.status, p.supplier_id, s.name as supplier_name, p.warehouse_id,
 	coalesce(h.name, 'Depósito principal') as warehouse_name, p.expected_at, p.note, p.created_at, p.ordered_at, p.received_at,
-	coalesce((select sum(x.qty * x.unit_cost_cents)::bigint from purchase_order_items x where x.order_id = p.id), 0) as total_cents,
+	coalesce((select sum(x.qty::bigint * x.unit_cost_cents::bigint)::bigint from purchase_order_items x where x.order_id = p.id), 0) as total_cents,
 	coalesce((select jsonb_agg(jsonb_build_object('item_id', x.item_id, 'item_name', i.name, 'unit', i.unit, 'qty', x.qty, 'unit_cost_cents', x.unit_cost_cents) order by i.name)
 		from purchase_order_items x join stock_items i on i.id = x.item_id where x.order_id = p.id), '[]'::jsonb) as items`
 const purchaseFrom = ` from purchase_orders p join suppliers s on s.id = p.supplier_id left join stock_warehouses h on h.id = p.warehouse_id`
