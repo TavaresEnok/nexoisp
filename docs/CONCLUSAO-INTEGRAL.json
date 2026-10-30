@@ -2523,7 +2523,13 @@
   },
   "lote40": {
     "escopo": "Anexos privados de OS e cotações com conversão manual em pedido rascunho",
-    "estado": "integração em andamento; revisão independente e marco PostgreSQL real, nativo, navegador e CI pendentes",
+    "estado": "DONE 5/5; HTTP real exit 0 em 8461e61; execução Go/PostgreSQL da gerência sem recibo neste registro",
     "limites": "Catálogo de funcionalidades não é homologação; B04 permanece fechado para corte; base 39 e release 38 preservadas."
+  },
+  "lote41_integracao": {
+    "escopo": "marca opcional no portal; sem Chatwoot",
+    "estado": "integração preparada; revisão independente e provas combinadas pendentes",
+    "base": "8461e61",
+    "lote40": "DONE 5/5; HTTP real exit 0; execução Go/PostgreSQL da gerência sem recibo neste registro"
   }
 }

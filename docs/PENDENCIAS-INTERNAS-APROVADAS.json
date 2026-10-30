@@ -6,7 +6,7 @@
     {
       "id": "LOTE40",
       "assunto": "Anexos privados de OS e cotação pré-compra",
-      "situacao": "integração em andamento; revisão e provas finais pendentes"
+      "situacao": "DONE 5/5; HTTP real exit 0 em 8461e61; Go/PostgreSQL da gerência sem recibo aqui"
     }
   ],
   "dependencia_externa_decisao_ou_escopo_ausente": [
@@ -253,11 +253,17 @@
       "BE-23": "BE-23"
     }
   },
-  "nota_snapshot": "A lista vazia do lote 39 era snapshot anterior à autorização de 30/10/2026; os recortes de anexos privados e cotação foram autorizados no lote 40.",
+  "nota_snapshot": "O lote 39 é um snapshot histórico; não afirma que todos os arquivos Markdown estejam concluídos. Os lotes 40 e 41 foram autorizados posteriormente.",
   "fora_escopo": [
     {
       "id": "B16-chatwoot",
       "decisao": "Usuário excluiu Chatwoot do planejamento NexoISP em 30/10/2026; outro projeto cuida do chat."
     }
-  ]
+  ],
+  "lote41_integracao": {
+    "escopo": "marca opcional no portal; sem Chatwoot",
+    "estado": "integração preparada; revisão independente e provas combinadas pendentes",
+    "base": "8461e61",
+    "lote40": "DONE 5/5; HTTP real exit 0; execução Go/PostgreSQL da gerência sem recibo neste registro"
+  }
 }
