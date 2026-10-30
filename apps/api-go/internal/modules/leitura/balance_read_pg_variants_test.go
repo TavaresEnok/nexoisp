@@ -1,9 +1,12 @@
 package leitura
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"reflect"
 	"sort"
@@ -1215,4 +1218,49 @@ func pgVariantsRedact(err error, secret string) string {
 		msg = strings.ReplaceAll(msg, secret, "[dsn]")
 	}
 	return msg
+}
+
+// TestBalanceReadMismatchSanitizedPG exercises the actual database row decoding
+// and Strip path inside the rolled-back fixture, without enabling a production gate.
+func TestBalanceReadMismatchSanitizedPG(t *testing.T) {
+	var logs bytes.Buffer
+	previous := slog.Default()
+	slog.SetDefault(slog.New(slog.NewJSONHandler(&logs, nil)))
+	t.Cleanup(func() { slog.SetDefault(previous) })
+	pgVariantsWithFixture(t, func(ctx context.Context, tx *db.Tx, _ pgVariantsFixture) error {
+		const query = `select 'note-private'::text as note, 'document-private'::text as document,
+			'gateway-private'::text as gateway, 'secret-private'::text as secret,
+			987654321::bigint as cents, false as cmp_matches, 'hidden-private'::text as cmp_detail`
+		rows, err := tx.Objects(ctx, query)
+		if err != nil {
+			return err
+		}
+		if len(rows) != 1 {
+			return errors.New("consulta sintética não retornou uma linha")
+		}
+		body := withoutCompareColumns(rows[0])
+		before := counterValue(balanceReaderInvoiceDetail, balanceReadMismatch)
+		if err = Strip(BalanceReadSelection{Reader: balanceReaderInvoiceDetail, Shadow: true}, rows); err != nil {
+			return err
+		}
+		if !reflect.DeepEqual(rows[0], body) || len(rows[0]) != 5 {
+			return errors.New("corpo legado não preservado")
+		}
+		if counterValue(balanceReaderInvoiceDetail, balanceReadMismatch)-before != 1 {
+			return errors.New("contador mismatch incorreto")
+		}
+		var entry map[string]any
+		if err = json.Unmarshal(logs.Bytes(), &entry); err != nil {
+			return err
+		}
+		if len(entry) != 5 || entry["msg"] != "balance_read_mismatch" || entry["level"] != "WARN" || entry["reader"] != balanceReaderInvoiceDetail || entry["result"] != balanceReadMismatch {
+			return errors.New("diagnóstico fora do vocabulário fechado")
+		}
+		for _, value := range []string{"note-private", "document-private", "gateway-private", "secret-private", "987654321", "hidden-private"} {
+			if strings.Contains(logs.String(), value) {
+				return errors.New("diagnóstico contém dado privado")
+			}
+		}
+		return nil
+	})
 }
