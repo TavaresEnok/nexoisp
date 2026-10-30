@@ -1,0 +1,256 @@
+{
+  "lote": "39",
+  "base_informada_pelo_controlador": "b6df0c30913604226c6b473ddfc803a441c4fc57",
+  "metodo": "Leitura focada do backlog B01–B18 e unidades com ressalva; nenhuma suíte de produto executada. Provas externas atribuídas ao controlador.",
+  "pronta_para_implementar": [],
+  "dependencia_externa_decisao_ou_escopo_ausente": [
+    {
+      "id": "B01",
+      "assunto": "Conferir SBOM hospedado do candidato",
+      "evidencia": "docs/CONCLUSAO-INTEGRAL.json: B01-SBOM",
+      "insumos_ou_proximo_passo": "Artefatos CycloneDX e identificação do SHA/run no CI candidato."
+    },
+    {
+      "id": "B02",
+      "assunto": "Idempotência existente; gate antes de publicação",
+      "evidencia": "docs/CONCLUSAO-INTEGRAL.json: B02-reexecucao-antes-de-publicar",
+      "insumos_ou_proximo_passo": "Evidência de execução no SHA candidato quando houver publicação; não repetir neste lote."
+    },
+    {
+      "id": "B03",
+      "assunto": "Isolamento de contas",
+      "evidencia": "docs/LOTE02-B03-CONEXOES.md",
+      "insumos_ou_proximo_passo": "Conta sandbox autorizada e cenário A/B sem segredo."
+    },
+    {
+      "id": "B04",
+      "assunto": "Corte financeiro",
+      "evidencia": "docs/B04-ACEITE-CORTE-LEITOR.json: B04-corte-leitura-v1",
+      "insumos_ou_proximo_passo": "Reconciliação de critérios e decisão de gate na outra frente; allowlists vazias e corte não autorizado."
+    },
+    {
+      "id": "B05",
+      "assunto": "Ativação dos efeitos",
+      "evidencia": "docs/LOTE04-B05-EFEITOS-PAGAMENTO.md",
+      "insumos_ou_proximo_passo": "Piloto, NAS homologado e operação/rollback observados no ambiente."
+    },
+    {
+      "id": "B06",
+      "assunto": "Contrato PSP existente",
+      "evidencia": "docs/LOTE05-B06-PROVIDERS.md",
+      "insumos_ou_proximo_passo": "Corpus de regressão quando adapter alterar contrato; não reimplementar."
+    },
+    {
+      "id": "B07",
+      "assunto": "Homologação Efí",
+      "evidencia": "apps/api-go/internal/finance/credentials.go: LoadCredentialClient",
+      "insumos_ou_proximo_passo": "Conta sandbox autorizada, credenciais e cenários de emissão, consulta, recebimento, cancelamento e devolução; nenhum segredo no relato."
+    },
+    {
+      "id": "B08",
+      "assunto": "Asaas e Inter",
+      "evidencia": "docs/CONCLUSAO-INTEGRAL.json: B08-asaas e B08-inter",
+      "insumos_ou_proximo_passo": "Efí homologado e conta sandbox Asaas antes de iniciar; Inter somente com demanda e contrato."
+    },
+    {
+      "id": "B09",
+      "assunto": "Bancada ACS",
+      "evidencia": "apps/api-go/internal/acs/intents.go: RetryTaskLookup e runTask",
+      "insumos_ou_proximo_passo": "GenieACS/CPE de bancada, TLS CWMP e readback físico; retomada de consulta já existe."
+    },
+    {
+      "id": "B10",
+      "assunto": "OLT real",
+      "evidencia": "docs/LOTE12-B10-TRANSPORTE.md",
+      "insumos_ou_proximo_passo": "Equipamento, fingerprint conferido independentemente, sessão e readback reais."
+    },
+    {
+      "id": "B11",
+      "assunto": "CoA e NAS",
+      "evidencia": "docs/CONCLUSAO-INTEGRAL.json: B11-coa e B11-nas-real",
+      "insumos_ou_proximo_passo": "Decisão do piloto sobre CoA, contrato e NAS para homologação; não inventar franquia."
+    },
+    {
+      "id": "B12",
+      "assunto": "Restore operacional",
+      "evidencia": "docs/CONCLUSAO-INTEGRAL.json: B12-restore-host-novo",
+      "insumos_ou_proximo_passo": "Host físico, cópia externa, cofre, medidas RPO/RTO, piloto e suíte Backup-center; ensaio sintético existente não comprova esses pontos."
+    },
+    {
+      "id": "B13",
+      "assunto": "Homologação importação",
+      "evidencia": "docs/LOTE25-B13-COMPENSACAO.md",
+      "insumos_ou_proximo_passo": "Dados reais autorizados e validação do piloto; compensação invoices já implementada."
+    },
+    {
+      "id": "B14",
+      "assunto": "Fiscal",
+      "evidencia": "docs/CONCLUSAO-INTEGRAL.json: B14-escopo",
+      "insumos_ou_proximo_passo": "Decisão fiscal ativa ou inativa para o piloto, documento e UF; escopo de emissor se aplicável."
+    },
+    {
+      "id": "B15",
+      "assunto": "Cloud API externa",
+      "evidencia": "docs/LOTE38-CONSOLIDACAO.md: B15",
+      "insumos_ou_proximo_passo": "WABA, template aprovado, versão Graph, recursos e autorização para H01; provas internas não homologam envio."
+    },
+    {
+      "id": "B16",
+      "assunto": "Adapter Chatwoot",
+      "evidencia": "docs/CONCLUSAO-INTEGRAL.json: B16-chatwoot",
+      "insumos_ou_proximo_passo": "Pedido explícito do operador, contas e contrato de isolamento account/tenant e eventos sem loop."
+    },
+    {
+      "id": "B17",
+      "assunto": "Projeto físico FTTH",
+      "evidencia": "apps/api-go/internal/modules/escrita/infraestrutura_ftth_test.go: contrato FTTH",
+      "insumos_ou_proximo_passo": "Especificação de projeto físico, critérios e dados de desempenho reais; PG real do contrato relatado pelo controlador, não é benchmark."
+    },
+    {
+      "id": "B18",
+      "assunto": "Release e piloto",
+      "evidencia": "docs/PILOTO.md",
+      "insumos_ou_proximo_passo": "Responsáveis, datas, versão, recursos e evidências dos gates aplicáveis; workflow no SHA tagueado antes de release."
+    },
+    {
+      "id": "AD-20",
+      "assunto": "Migração SGP universal",
+      "evidencia": "apps/api-go/internal/modules/escrita/importacao.go: importação CSV",
+      "insumos_ou_proximo_passo": "Inventário e exportação reais, mapeamento, política de senhas e relacionamentos; não inferir conector universal aprovado."
+    },
+    {
+      "id": "BE-23",
+      "assunto": "Multicélulas",
+      "evidencia": "apps/api-go/internal/tenancy/scope.go: Directory.Resolve",
+      "insumos_ou_proximo_passo": "Decisão de arquitetura, migração, operação e critérios de isolamento; roteamento existente não aprova distribuição."
+    },
+    {
+      "id": "FI-17/PO-09",
+      "assunto": "Cobrança bancária real",
+      "evidencia": "apps/api-go/internal/finance/providers/efi/",
+      "insumos_ou_proximo_passo": "Conta, configuração e homologação Efí; extrato real não foi comprovado."
+    },
+    {
+      "id": "IN-03",
+      "vinculo": "B10",
+      "assunto": "Cobertura e homologação OLT",
+      "evidencia": "services/network-agent/nexo_agent/drivers/; docs/LOTE12-B10-TRANSPORTE.md",
+      "insumos_ou_proximo_passo": "OLT Huawei física, fingerprint e readback para homologação; fabricantes adicionais exigem demanda e especificação de modelo e contrato."
+    },
+    {
+      "id": "IN-06",
+      "vinculo": "B17",
+      "assunto": "Projeto físico FTTH",
+      "evidencia": "apps/api-go/internal/modules/escrita/infraestrutura.go; apps/api-go/internal/modules/escrita/infraestrutura_ftth_test.go",
+      "insumos_ou_proximo_passo": "Especificação aprovada de traçado, fusões, OTDR e/ou GIS, critérios e dados físicos; não há escopo de projeto completo definido."
+    },
+    {
+      "id": "IN-11",
+      "vinculo": "B11",
+      "assunto": "Homologação de delegação IPv6",
+      "evidencia": "apps/api-go/internal/network/engine.go: provisionamento; apps/api-go/internal/radius/vendor.go: Delegated-IPv6-Prefix",
+      "insumos_ou_proximo_passo": "NAS físico e cenário do piloto para verificar entrega e readback; o atributo no RADIUS integrado já existe."
+    },
+    {
+      "id": "IN-13",
+      "assunto": "Titularidade CGNAT histórica",
+      "evidencia": "apps/web/features/network/cgnat.tsx: traceSchema e CgnatTrace; apps/api-go/internal/modules/escrita/ipam.go",
+      "insumos_ou_proximo_passo": "Qualquer ampliação exige requisito concreto de retenção e fontes históricas; holders_at já é exibido e depende dos dados disponíveis."
+    },
+    {
+      "id": "AD-17",
+      "assunto": "Apuração e liquidação de comissões",
+      "evidencia": "apps/api-go/internal/modules/escrita/relatorios.go: Service.commissions",
+      "insumos_ou_proximo_passo": "Decisão sobre necessidade de congelar regras históricas e de liquidar/pagar comissões; se aprovadas, especificar regras, eventos, competência, correções e integração financeira."
+    },
+    {
+      "id": "AD-18",
+      "assunto": "DICI e transmissão ANATEL",
+      "evidencia": "apps/api-go/internal/modules/escrita/relatorios.go: Service.dici; apps/web/features/admin/anatel.tsx: aviso de conferência do leiaute",
+      "insumos_ou_proximo_passo": "Decisão sobre transmissão automática, contrato de integração e leiaute oficial vigente aplicável; conferir dados e arquivo antes do envio operacional."
+    }
+  ],
+  "ja_entregue": [
+    {
+      "id": "AD-02",
+      "evidencia": "apps/web/features/admin/users.tsx: editor password envia PATCH /users/:id",
+      "limite": "Preserva classificação e validações históricas."
+    },
+    {
+      "id": "IN-15",
+      "evidencia": "apps/api-go/internal/modules/escrita/ipam.go: legalIP; db/migrations/00062_ipv6_historico.sql",
+      "limite": "Não recupera delegações removidas antes do histórico nem comprova sessão."
+    },
+    {
+      "id": "B09-retomada",
+      "evidencia": "apps/api-go/internal/acs/intents.go: RetryTaskLookup",
+      "limite": "Retoma consulta de estado incerto/em fila/revisão; não prova aplicação no CPE."
+    },
+    {
+      "id": "B13-compensacao",
+      "evidencia": "docs/LOTE25-B13-COMPENSACAO.md; apps/api-go/internal/modules/escrita/import_compensate.go",
+      "limite": "Invoices; homologação real permanece aberta."
+    },
+    {
+      "id": "B15-interno",
+      "evidencia": "docs/LOTE38-CONSOLIDACAO.md: B15",
+      "limite": "H01 externo pendente; provas e publicação em desenvolvimento atribuídas ao controlador."
+    },
+    {
+      "id": "B17-contrato",
+      "evidencia": "apps/api-go/internal/modules/escrita/infraestrutura_ftth_test.go",
+      "limite": "PG real informado pelo controlador; não comprova projeto físico ou benchmark."
+    },
+    {
+      "id": "demo-intencional",
+      "evidencia": "docs/integracao-v0/matriz-funcional.json: AC-02, FI-15, FI-16, RE-13 e BE-13",
+      "limite": "Conta/login, gateway e drivers demo são intencionais; não constituem tarefa de remoção."
+    },
+    {
+      "id": "IN-11-atributo",
+      "vinculo": "IN-11 / B11",
+      "evidencia": "apps/api-go/internal/network/engine.go: delegated_ipv6_prefix; apps/api-go/internal/radius/vendor.go: Delegated-IPv6-Prefix",
+      "limite": "Código integrado não comprova entrega em NAS físico; agentes dependem de versão e implementação."
+    },
+    {
+      "id": "IN-13-holders",
+      "vinculo": "IN-13",
+      "evidencia": "apps/web/features/network/cgnat.tsx: traceSchema e CgnatTrace",
+      "limite": "Exibição de holders_at não cria histórico ausente nem comprova titularidade física."
+    },
+    {
+      "id": "AD-17-relatorio",
+      "vinculo": "AD-17",
+      "evidencia": "apps/api-go/internal/modules/escrita/relatorios.go: Service.commissions",
+      "limite": "Apuração usa regras vigentes; não comprova liquidação."
+    },
+    {
+      "id": "AD-18-csv",
+      "vinculo": "AD-18",
+      "evidencia": "apps/api-go/internal/modules/escrita/relatorios.go: Service.dici; apps/web/features/admin/anatel.tsx",
+      "limite": "CSV e prévia não comprovam leiaute vigente ou transmissão."
+    }
+  ],
+  "nota": "Nenhum escopo interno coeso e aprovado foi identificado como pronto sem insumos adicionais. Isso não declara sistema integral ou homologado.",
+  "cobertura_unidades_com_ressalva": {
+    "fonte": "docs/CONCLUSAO-INTEGRAL.json: matriz_funcional.unidades_com_ressalva",
+    "mapeamento": {
+      "AC-02": "demo-intencional",
+      "FI-15": "demo-intencional",
+      "FI-16": "demo-intencional",
+      "FI-17": "FI-17/PO-09; B07",
+      "RE-13": "demo-intencional",
+      "IN-03": "IN-03; B10",
+      "IN-06": "IN-06; B17",
+      "IN-11": "IN-11; IN-11-atributo; B11",
+      "IN-13": "IN-13; IN-13-holders",
+      "IN-15": "IN-15",
+      "AD-02": "AD-02",
+      "AD-17": "AD-17; AD-17-relatorio",
+      "AD-18": "AD-18; AD-18-csv",
+      "AD-20": "AD-20",
+      "PO-09": "FI-17/PO-09; B07",
+      "BE-23": "BE-23"
+    }
+  }
+}
