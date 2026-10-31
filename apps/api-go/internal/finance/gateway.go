@@ -293,13 +293,19 @@ func AutoSuspend(ctx context.Context, tx *db.Tx, tenant string, contract any) (i
 					return count, e
 				}
 			}
-			current, e := one(ctx, tx, "autoSuspend", 2, inv.Get("id"))
-			if e != nil {
-				return count, e
-			}
-			if current.Get("status") != "open" {
-				continue
-			}
+		}
+		// Re-read after acquiring the invoice lock and importing any receipts.
+		current, e := one(ctx, tx, "autoSuspend", 2, inv.Get("id"), s.Get("suspend_after_days"), s.Get("timezone"), k.Get("resource_id"))
+		if e != nil {
+			return count, e
+		}
+		if current == nil {
+			continue
+		}
+		k = current
+		target = autoSuspendTarget(k)
+		if target == "" {
+			continue
 		}
 		when := strings.Split(fmt.Sprint(k.Get("due")), "-")
 		if len(when) == 3 {
