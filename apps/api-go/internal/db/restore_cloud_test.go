@@ -185,4 +185,3 @@ func r06ForeignCipher(t *testing.T, plain string) string {
 	encode := base64.StdEncoding.EncodeToString
 	return "v1." + encode(iv) + "." + encode(sealed[cut:]) + "." + encode(sealed[:cut])
 }
-
