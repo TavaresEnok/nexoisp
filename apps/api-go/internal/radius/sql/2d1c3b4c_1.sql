@@ -4,4 +4,4 @@ update service_resources r set observed_policy = a.policy, observed_profile = a.
        from radius_account a, devices d
        where a.tenant_id = r.tenant_id and a.username = r.pppoe_username and d.id = r.device_id and d.driver = 'radius' and r.desired_version > 0
          and r.pppoe_username in (select username from radius_account where $1::timestamptz is null or updated_at > $1
-                      union select username from radius_acct where $1::timestamptz is not null and changed_at > $1)
+                      union select username from radius_acct where ($1::timestamptz is not null and changed_at > $1) or id in (select accounting_id from r05_accounting_batch))
