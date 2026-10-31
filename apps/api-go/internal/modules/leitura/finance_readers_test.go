@@ -13,6 +13,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"nexoisp/api-go/internal/apierr"
+	"nexoisp/api-go/internal/db/labtest"
 	"nexoisp/api-go/internal/jsonx"
 	"nexoisp/api-go/internal/modules/leitura/gen"
 )
@@ -85,26 +86,8 @@ func r08Postgres(t *testing.T, fn func(context.Context, pgx.Tx, time.Time, time.
 		}
 		t.Skip("NEXO_GO_TEST_DATABASE_URL absent: PostgreSQL NOT RUN; set PG_REQUIRED=1 to forbid SKIP")
 	}
-	cfg, err := pgx.ParseConfig(url)
-	if err != nil || cfg.Database != "nexo_test" || cfg.User != "nexo_go" {
-		t.Fatal("fixture requires disposable nexo_test as nexo_go")
-	}
-	ctx := context.Background()
-	conn, err := pgx.ConnectConfig(ctx, cfg)
-	if err != nil {
-		t.Fatal("cannot connect to disposable PostgreSQL (details redacted)")
-	}
-	defer conn.Close(ctx)
-	var database, user string
-	if err := conn.QueryRow(ctx, "select current_database(), current_user").Scan(&database, &user); err != nil || database != "nexo_test" || user != "nexo_go" {
-		t.Fatal("unexpected database or effective role; fixture refused")
-	}
-	tx, err := conn.Begin(ctx)
-	if err != nil {
-		t.Fatal("cannot begin synthetic fixture")
-	}
-	defer tx.Rollback(ctx)
-	_, err = tx.Exec(ctx, `
+	ctx, tx := labtest.FinanceReadersTransaction(t, url)
+	_, err := tx.Exec(ctx, `
 set local timezone = 'UTC';
 select set_config('app.tenant_id', '19819819-8198-4198-8198-198198198198', true);
 create temp table tenant_settings (tenant_id uuid, timezone text) on commit drop;
