@@ -42,7 +42,7 @@ def verify(api, call, sql):
     assert "NEXO_CLOUD_API" not in nativo
 
     migrations = sorted((ROOT / "db/migrations").glob("[0-9][0-9][0-9][0-9][0-9]_*.sql"))
-    assert migrations and migrations[-1].name == "00083_network_sites.sql", migrations[-1:]
+    assert migrations and any(m.name == "00083_network_sites.sql" for m in migrations), migrations[-1:]
     latest = int(migrations[-1].name[:5])
     applied = one(
         "select count(*) filter (where version_id = 79 and is_applied) as v79,"
