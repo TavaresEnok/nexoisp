@@ -292,17 +292,33 @@ func Reverse(ctx context.Context, tx *db.Tx, id, payment, user, reason string) (
 		}
 		return nil, e
 	}
-	r, e := one(ctx, tx, "reversePayment", 3, id)
-	if e != nil {
+	var total, obligation int64
+	if e = tx.QueryRow(ctx, query("reversePayment", 3), id).Scan(&total, &obligation); e != nil {
 		return nil, e
 	}
-	total := num(r.Get("t"))
+	status := "open"
+	if total == obligation {
+		status = "paid"
+	} else if total > obligation {
+		status = "reconciling"
+	}
 	note := "baixa estornada: " + reason
 	if total > 0 {
-		note = fmt.Sprintf("baixa estornada (%s); restam %g centavos pagos", reason, total)
+		note = fmt.Sprintf("baixa estornada (%s); restam %d centavos pagos", reason, total)
 	}
-	if e = exec(ctx, tx, "reversePayment", 4, id, note); e != nil {
+	// Scope the trigger marker to this one statement and restore any prior value.
+	var previous string
+	if e = tx.QueryRow(ctx, `select coalesce(current_setting('nexo.reversal_reclassification', true), '')`).Scan(&previous); e != nil {
 		return nil, e
 	}
-	return map[string]any{"status": "open", "paid_cents": total}, nil
+	if e = tx.Exec(ctx, `select set_config('nexo.reversal_reclassification', 'on', true)`); e != nil {
+		return nil, e
+	}
+	if e = exec(ctx, tx, "reversePayment", 4, id, note, status); e != nil {
+		return nil, e
+	}
+	if e = tx.Exec(ctx, `select set_config('nexo.reversal_reclassification', $1, true)`, previous); e != nil {
+		return nil, e
+	}
+	return map[string]any{"status": status, "paid_cents": total}, nil
 }
