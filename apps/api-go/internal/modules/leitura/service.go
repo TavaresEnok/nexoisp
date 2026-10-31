@@ -108,7 +108,7 @@ func (s Service) me(ctx context.Context, _ *http.Request) (endpoint.Result, erro
 	err := s.DB.WithScope(ctx, tenancy.Scope{}, func(tx *db.Tx) error {
 		return tx.QueryRow(ctx, "select mfa_enabled from user_self_get($1)", c.UserID).Scan(&enabled)
 	})
-	return endpoint.Result{Value: map[string]any{"id": c.UserID, "name": c.Name, "email": c.Email, "role": c.Role, "perms": c.Permissions, "support": c.Support, "tenant": tenant, "modules": c.Modules, "pop_restricted": len(c.PopIDs) > 0, "demo": os.Getenv("NEXO_DEMO_MODE") == "1", "mfa_enabled": enabled, "csrf_token": auth.CSRF(c.TokenHash), "mfa_pending": os.Getenv("NEXO_REQUIRE_ADMIN_MFA") == "1" && (c.Role == "admin" || c.Role == "saas_operator") && !c.MFAEnabled}}, err
+	return endpoint.Result{Value: map[string]any{"id": c.UserID, "name": c.Name, "email": c.Email, "role": c.Role, "perms": c.Permissions, "support": c.Support, "tenant": tenant, "modules": c.Modules, "pop_restricted": len(c.PopIDs) > 0, "demo": os.Getenv("NEXO_DEMO_MODE") == "1", "mfa_enabled": enabled, "csrf_token": auth.CSRF(c.TokenHash), "session_context": auth.ContextMarker(c), "mfa_pending": os.Getenv("NEXO_REQUIRE_ADMIN_MFA") == "1" && (c.Role == "admin" || c.Role == "saas_operator") && !c.MFAEnabled}}, err
 }
 func (s Service) ticket(ctx context.Context, r *http.Request) (endpoint.Result, error) {
 	sid := auth.From(ctx).SubscriberID

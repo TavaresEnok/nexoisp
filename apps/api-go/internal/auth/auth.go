@@ -285,12 +285,26 @@ func (a *Auth) Require(perm string, allowMFA bool, next http.Handler) http.Handl
 			apierr.Write(w, err)
 			return
 		}
-		c, err := a.Load(r.Context(), token)
+		var c *Ctx
+		if r.Header.Get("X-Nexo-Context") != "" || r.URL.Path == "/api/me" {
+			// A precondição precisa do contexto atual, não de uma entrada de cache
+			// que ainda aguarda uma notificação de invalidação.
+			c, err = a.loader.Load(r.Context(), hashToken(token))
+		} else {
+			c, err = a.Load(r.Context(), token)
+		}
 		current = c
 		if c != nil {
 			if state := requestctx.From(r.Context()); state != nil {
 				state.UserID = c.UserID
 				state.TenantID = c.TenantID
+			}
+		}
+		if err == nil {
+			marker := ContextMarker(c)
+			w.Header().Set("X-Nexo-Context", marker)
+			if expected := r.Header.Get("X-Nexo-Context"); expected != "" && subtle.ConstantTimeCompare([]byte(expected), []byte(marker)) != 1 {
+				err = &apierr.Error{Status: 409, Message: "contexto da sessão alterado; entre novamente", Code: "session_context_changed"}
 			}
 		}
 		if err == nil {
