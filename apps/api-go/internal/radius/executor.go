@@ -528,12 +528,34 @@ func (x *Executor) Sync(ctx context.Context, tenant string) error {
 		if e := tx.Exec(ctx, `select pg_advisory_xact_lock(hashtextextended($1,77))`, "nexo-radius-usage:"+tenant); e != nil {
 			return e
 		}
+		// Ingestion locks NAS before accounting and its pending mark. Execute
+		// the NAS update before taking any marks, so it cannot wait for a
+		// producer which is itself waiting for one of our marks.
+		if e := tx.Exec(ctx, query("syncAccounting", 5), since); e != nil {
+			return e
+		}
+		// Freeze and lock only visible marks. A producer updating the same row
+		// waits on the mark and recreates it after our acknowledgement commits.
+		// The accounting source is read with MVCC, never locked in reverse order.
+		if e := tx.Exec(ctx, `create temporary table r05_accounting_batch (accounting_id bigint primary key) on commit drop`); e != nil {
+			return e
+		}
+		if e := tx.Exec(ctx, `create temporary table r05_accounting_incorporated (accounting_id bigint primary key) on commit drop`); e != nil {
+			return e
+		}
+		if e := tx.Exec(ctx, `insert into r05_accounting_batch select accounting_id from radius_accounting_pending where tenant_id=$1 order by accounting_id for update`, tenant); e != nil {
+			return e
+		}
 		r, e := one(ctx, tx, "syncAccounting", 0)
 		if e != nil {
 			return e
 		}
 		next = r.Get("t")
 		for i := 1; i < 7; i++ {
+			// Statement 2 also writes the baseline from its materialized source.
+			if i == 3 || i == 5 {
+				continue
+			}
 			args := []any{since}
 			if i == 2 {
 				args = []any{since, tenant, hours()}
@@ -544,6 +566,11 @@ func (x *Executor) Sync(ctx context.Context, tenant string) error {
 			if e = tx.Exec(ctx, query("syncAccounting", i), args...); e != nil {
 				return e
 			}
+		}
+		// Only mapped rows in the frozen batch were incorporated. Unmapped rows
+		// remain pending until a resource exists (or accounting is purged).
+		if e := tx.Exec(ctx, `delete from radius_accounting_pending p using r05_accounting_batch b, r05_accounting_incorporated i where p.tenant_id=$1 and p.accounting_id=b.accounting_id and i.accounting_id=b.accounting_id`, tenant); e != nil {
+			return e
 		}
 		return nil
 	})
