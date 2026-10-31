@@ -135,8 +135,12 @@ try {
   await moves.getByLabel('Depósito de origem', { exact: true }).selectOption({ label: `Depósito ${token}` });
   await moves.getByLabel('Depósito de destino', { exact: true }).selectOption({ label: 'Depósito principal' });
   await moves.getByLabel('Quantidade a transferir', { exact: true }).fill('15');
-  await moves.getByRole('button', { name: 'Transferir entre depósitos', exact: true }).click();
-  await moves.getByRole('cell', { name: `Compra #${purchase.number}`, exact: false }).first().waitFor({ state: 'attached' }).catch(() => {});
+  const transferUrl = `${base}/api/stock/items/${item.id}/transfer`;
+  const [transferResponse] = await Promise.all([
+    page.waitForResponse((response) => response.url() === transferUrl && response.request().method() === 'POST'),
+    moves.getByRole('button', { name: 'Transferir entre depósitos', exact: true }).click(),
+  ]);
+  assert.equal(transferResponse.ok(), true, `POST ${transferUrl}: ${await transferResponse.text()}`);
   const after = await request(`/stock/items/${item.id}/balances`, null, 'GET');
   assert.equal(after.find((row) => row.warehouse_id === null).balance, 15);
   assert.equal(after.find((row) => row.name === `Depósito ${token}`).balance, 25);
