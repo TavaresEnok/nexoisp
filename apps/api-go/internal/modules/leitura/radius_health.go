@@ -2,12 +2,27 @@ package leitura
 
 import (
 	"context"
+	"net/http"
+	"nexoisp/api-go/internal/apierr"
 	"nexoisp/api-go/internal/auth"
 	"nexoisp/api-go/internal/db"
 	"os"
 )
 
+// radiusStatusScope rejects partial POP views before either installation-wide or
+// tenant-wide data is queried. A non-nil empty slice is a restricted scope too.
+func radiusStatusScope(ctx context.Context) error {
+	actor := auth.From(ctx)
+	if actor == nil || actor.Scope.PopIDs != nil {
+		return apierr.New(http.StatusForbidden, "status RADIUS indisponível para escopo POP restrito")
+	}
+	return nil
+}
+
 func (s Service) radiusCapabilities(ctx context.Context, tx *db.Tx) (map[string]any, error) {
+	if err := radiusStatusScope(ctx); err != nil {
+		return nil, err
+	}
 	health, err := tx.Objects(ctx, `select (select count(*) from radius_account) as accounts,
  (select count(*) from radius_nas) as nas,
  (select count(*) from radius_nas where last_packet_at>now()-interval '15 minutes') as recent_nas,

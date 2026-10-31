@@ -94,6 +94,11 @@ func registerDinamicas(api huma.API, registry *endpoint.Registry, s Service) {
 		spec := dynamicSpecs[path]
 		pattern := strings.ReplaceAll(path, ":id", "{id}")
 		registry.Get(api, pattern, spec.Permission, false, func(ctx context.Context, r *http.Request) (endpoint.Result, error) {
+			if path == "/api/radius/status" {
+				if err := radiusStatusScope(ctx); err != nil {
+					return endpoint.Result{}, err
+				}
+			}
 			id := chi.URLParam(r, "id")
 			if strings.Contains(pattern, "{id}") {
 				if err := validate.UUID(id); err != nil {

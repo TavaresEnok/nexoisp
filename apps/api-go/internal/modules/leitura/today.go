@@ -136,6 +136,9 @@ func vpnHost() string {
 	return radiusHost()
 }
 func (s Service) radiusStatus(ctx context.Context, tx *db.Tx, _ *http.Request, _ map[string]any) (endpoint.Result, error) {
+	if err := radiusStatusScope(ctx); err != nil {
+		return endpoint.Result{}, err
+	}
 	rows, err := complexRows(ctx, tx, "/api/radius/status", 0)
 	if err != nil {
 		return endpoint.Result{}, err
