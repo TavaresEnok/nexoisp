@@ -1,0 +1,237 @@
+{
+  "schema_version": 1,
+  "supplied_by": "NexoISP root manager, HOST observations and preserved receipts",
+  "provided_at": "2026-10-31T03:57:12.652472+00:00",
+  "purpose": "Independent source furnished by manager, separate from documentary report under review. Receipt hashes identify originals on host; reviewers can inspect this supplied source without host access. No new product checks performed.",
+  "independent_reexecution_by_document_author": false,
+  "declaration": {
+    "R01": {
+      "job": "25aba610da55",
+      "commit": "9f337517a0afd380d4df4f6e99ca9e710f645a8c",
+      "verification": "Real Chromium two tabs, shared cookies, Alfa/Beta, same document/filter/cache, old intent denied and conscious recovery PASS; final test adjustment79ed4d662046fca2b9632afec17c9aa9d1e4c0d6; browser after adjustmentPASS, prior failure preserved",
+      "receipt": "implementacao-codex/correcoes-revisao-r01-r02-2026-10-31/r01-browser-followup.json"
+    },
+    "R02": {
+      "commit": "28e5b449a2ea5fa71b61a6f7e9254e621d0bcc14",
+      "verification": "RealPG -race2namedtests zeroSKIP, fee/discountnet10500, below/equal/above, concurrentreversals, prior-effectpreservation; subsequent unchangedfinance187hashes reuses proof",
+      "receipt": "implementacao-codex/correcoes-revisao-r01-r02-2026-10-31/r02-reviewed-pg.json"
+    },
+    "R03_R05": {
+      "job": "93437cb47ae2",
+      "head": "2fd809fa0725265996e1ade7cad3d246e43cf6b5",
+      "commits": {
+        "R03": "cb91bbb04c6755b95508805ed5a6f34ecffafd5a",
+        "R04": "d10469be872c0b074e09419801200eacabbc364d",
+        "R05": "e1bc96c09613278549d62fccb3b1621fa9e857f2"
+      },
+      "verification": "RealPG -race5namedtests zeroSKIP; actual browserR03 commitresponse lost, reload+sameUUID replaystock9 and newUUIDstock8PASS; schema85/86; snapshotsdepssetupfailurepreserved then buildPASS",
+      "receipts": [
+        "implementacao-codex/correcoes-revisao-r03-r05-2026-10-31/pg-summary.json",
+        "implementacao-codex/correcoes-revisao-r03-r05-2026-10-31/browser-milestone.json"
+      ]
+    },
+    "R06_R09": {
+      "job": "dcc1ff749864",
+      "head": "4b1f4f4b25765df0ff4f52911fa5e5e2e7848aed",
+      "commits": {
+        "R06": "ee212c0c8f5f30371ddf8dbb012df833c011d69e",
+        "R07": "254e54c72f3ccf2bfd908c0326dfdb908618df7b",
+        "R08_R09": "70da3f3a50c87795428507b770a9b009a031aafb"
+      },
+      "verification": "RealPG PG_REQUIRED1 -race allTestR06/7/8/9 pass;9topleveltests and42test+subtestpassactions,0fail0skip; restore8cases+redirectcomposition/terminaljournal+int32/int64/JSsaferange/negative/bothmonthboundaries; localinjectedtransport zeroexternalHTTP. npm -w apps/web run build exit0 exactcombinedhead (tsc+vite), noUIbrowserrerun forthisbatch",
+      "receipts": [
+        "implementacao-codex/correcoes-revisao-r06-r09-2026-10-31/pg-summary.json",
+        "implementacao-codex/correcoes-revisao-r06-r09-2026-10-31/frontend-milestone.json"
+      ],
+      "actual_test_action_counts": {
+        "pass": 42,
+        "toplevel": 9,
+        "skip": 0,
+        "fail": 0
+      }
+    }
+  },
+  "primary_receipts": {
+    "implementacao-codex/correcoes-revisao-r01-r02-2026-10-31/r01-browser-followup.json": {
+      "primary_file_sha256": "75d498b2dec77f610b5b91f8be5b55946be54a8b76e8cdb3c47250d040e55558",
+      "receipt_content": {
+        "head": "aafd81cf4664bd194f5b256b3ac3747b4b157eff",
+        "snapshot": "/home/enok/Documentos/projetos/implementacao-codex/correcoes-revisao-r01-r02-2026-10-31/validation-followup-aafd81cf4664",
+        "changed_paths": [
+          "docs/CORRECAO-R01-VERIFICACAO-INTEGRADA.md",
+          "e2e/frontend-v0-session-cross-tab.mjs"
+        ],
+        "product_binary_dist_reused_from": "0627e1da3f85540415ae8d19adb6ce3d7608a9b3",
+        "production": false,
+        "started_at": "2026-10-31T01:14:13.665656+00:00",
+        "exit_code": 0,
+        "passed": true,
+        "finished_at": "2026-10-31T01:14:20.448328+00:00",
+        "own_processes_terminated": true
+      },
+      "content_policy": "Full sanitized receipt except combined-validation-source: relevant reuse fields only."
+    },
+    "implementacao-codex/correcoes-revisao-r01-r02-2026-10-31/r02-reviewed-pg.json": {
+      "primary_file_sha256": "85544df71640bb519a6d9e55e4ce79a12aeb6dd50e2470be6a989b0e07be5e35",
+      "receipt_content": {
+        "started_at": "2026-10-31T00:42:14.705321+00:00",
+        "finished_at": "2026-10-31T00:42:28.387959+00:00",
+        "integration_head": "b2ec097880d4016198c8543b46469b1cd5d3cf8b",
+        "task_commit": "28e5b449a2ea5fa71b61a6f7e9254e621d0bcc14",
+        "snapshot": "/home/enok/Documentos/projetos/implementacao-codex/correcoes-revisao-r01-r02-2026-10-31/validation-r02-reviewed-b2ec097880d4",
+        "independent_review": "pass",
+        "command": [
+          "/home/enok/.local/share/go1.27.3/bin/go",
+          "-C",
+          "apps/api-go",
+          "test",
+          "-json",
+          "-race",
+          "./internal/finance",
+          "-run",
+          "^TestR02",
+          "-count=1"
+        ],
+        "exit_code": 0,
+        "database": "nexo_test",
+        "database_required": true,
+        "migration84_matches_applied": true,
+        "source_manifest": "/home/enok/Documentos/projetos/implementacao-codex/correcoes-revisao-r01-r02-2026-10-31/r02-reviewed-source-manifest.json",
+        "source_unchanged": true,
+        "passed_tests": [
+          "TestR02ConcurrentReversal",
+          "TestR02ReversalCoverageAndEffects"
+        ],
+        "failed_tests": [],
+        "skipped_tests": [],
+        "passed": true,
+        "coverage": "R02sixthsourcereviewed: concurrentreversal + belowequalaboveinclfee700discount200 +priorpaid-effecthistory +AutoSuspendreal; nophysicaleffects",
+        "production": false,
+        "performed_by": "manager on host; newtargetedexecution justified by newlyaddedtests6"
+      },
+      "content_policy": "Full sanitized receipt except combined-validation-source: relevant reuse fields only."
+    },
+    "implementacao-codex/correcoes-revisao-r01-r02-2026-10-31/combined-validation-source.json": {
+      "primary_file_sha256": "d9c5c13a89e956cbb08c99ce83bae2721111bff9109e456c83dbd0cb32121650",
+      "receipt_content": {
+        "head": "0627e1da3f85540415ae8d19adb6ce3d7608a9b3",
+        "r02_pg_reused": true,
+        "relevant_hashes_compared": 187,
+        "scope": "Targeted browser will be new; PG and frontendbuild reused by exactsource/artifact identity."
+      },
+      "content_policy": "Full sanitized receipt except combined-validation-source: relevant reuse fields only."
+    },
+    "implementacao-codex/correcoes-revisao-r03-r05-2026-10-31/pg-summary.json": {
+      "primary_file_sha256": "81481c03c8189299db2868ee1e5fd0d1cb63d61f9179a7be8a4fedd933e3fd00",
+      "receipt_content": {
+        "head": "2fd809fa0725265996e1ade7cad3d246e43cf6b5",
+        "passed_tests": [
+          "TestR03MaterialIntentRequired",
+          "TestR04DeniedBeforeDatabase",
+          "TestR03MaterialIntentPG",
+          "TestR04Postgres",
+          "TestR05AccountingSnapshot"
+        ],
+        "failures": [],
+        "skips": [],
+        "PG_REQUIRED": true,
+        "race": true
+      },
+      "content_policy": "Full sanitized receipt except combined-validation-source: relevant reuse fields only."
+    },
+    "implementacao-codex/correcoes-revisao-r03-r05-2026-10-31/browser-milestone.json": {
+      "primary_file_sha256": "2e2f9b428e45e39e9907b3593a8fa582418013eb7db753e5da8fa51ebe697c66",
+      "receipt_content": {
+        "head": "2fd809fa0725265996e1ade7cad3d246e43cf6b5",
+        "snapshot": "/home/enok/Documentos/projetos/implementacao-codex/correcoes-revisao-r03-r05-2026-10-31/validation-2fd809fa0725",
+        "steps": [
+          {
+            "step": "build-web",
+            "exit_code": 0
+          },
+          {
+            "step": "real-browser-r03",
+            "exit_code": 0
+          }
+        ],
+        "passed": true,
+        "api_reused_same_source": true,
+        "production": false,
+        "own_processes_terminated": true
+      },
+      "content_policy": "Full sanitized receipt except combined-validation-source: relevant reuse fields only."
+    },
+    "implementacao-codex/correcoes-revisao-r06-r09-2026-10-31/pg-summary.json": {
+      "primary_file_sha256": "eb3b0cd3364c64d082be382c44a55e6184d592cd403706c9d80af0d8f1d521ca",
+      "receipt_content": {
+        "head": "4b1f4f4b25765df0ff4f52911fa5e5e2e7848aed",
+        "passed_tests": [
+          "TestR07RedirectRefused/body",
+          "TestR07RedirectRefused/no_body",
+          "TestR07RedirectRefused/transport_error",
+          "TestR07RedirectRefused",
+          "TestR08ExactJSON",
+          "TestR08SQLOverflowSanitized",
+          "TestR08RejectsEntireSeriesOutsideSafeRange",
+          "TestR07ClassifyRedirect/0",
+          "TestR07ClassifyRedirect/99",
+          "TestR07ClassifyRedirect/100",
+          "TestR07ClassifyRedirect/199",
+          "TestR07ClassifyRedirect/200",
+          "TestR07ClassifyRedirect/299",
+          "TestR07ClassifyRedirect/300",
+          "TestR07ClassifyRedirect/302",
+          "TestR07ClassifyRedirect/399",
+          "TestR07ClassifyRedirect/400",
+          "TestR07ClassifyRedirect/429",
+          "TestR07ClassifyRedirect/499",
+          "TestR07ClassifyRedirect/500",
+          "TestR07ClassifyRedirect/599",
+          "TestR07ClassifyRedirect/600",
+          "TestR07ClassifyRedirect",
+          "TestR08PostgresAggregates/above-int32",
+          "TestR08PostgresAggregates/negative-reversals",
+          "TestR08PostgresAggregates/safe-positive",
+          "TestR08PostgresAggregates/safe-negative",
+          "TestR08PostgresAggregates/unsafe-positive",
+          "TestR08PostgresAggregates/unsafe-negative",
+          "TestR08PostgresAggregates/int64-overflow",
+          "TestR08PostgresAggregates",
+          "TestR06RestoreCloud/both_valid",
+          "TestR07RedirectWorkerJournalPG",
+          "TestR06RestoreCloud/corrupt_token",
+          "TestR06RestoreCloud/corrupt_webhook",
+          "TestR09PostgresProviderMonth",
+          "TestR06RestoreCloud/wrong_key_token",
+          "TestR06RestoreCloud/wrong_key_webhook",
+          "TestR06RestoreCloud/pre79_absent",
+          "TestR06RestoreCloud/missing_token_column",
+          "TestR06RestoreCloud/missing_webhook_column",
+          "TestR06RestoreCloud"
+        ],
+        "failures": [],
+        "skips": [],
+        "PG_REQUIRED": true,
+        "race": true
+      },
+      "content_policy": "Full sanitized receipt except combined-validation-source: relevant reuse fields only."
+    },
+    "implementacao-codex/correcoes-revisao-r06-r09-2026-10-31/frontend-milestone.json": {
+      "primary_file_sha256": "f5400e720a1ee0b77549f0b1a1e5f7072f1f77538c4c63fe2e463789396ef348",
+      "receipt_content": {
+        "head": "4b1f4f4b25765df0ff4f52911fa5e5e2e7848aed",
+        "snapshot": "/home/enok/Documentos/projetos/implementacao-codex/correcoes-revisao-r06-r09-2026-10-31/validation-4b1f4f4b2576",
+        "command": [
+          "npm",
+          "-w",
+          "apps/web",
+          "run",
+          "build"
+        ],
+        "exit_code": 0,
+        "passed": true
+      },
+      "content_policy": "Full sanitized receipt except combined-validation-source: relevant reuse fields only."
+    }
+  }
+}
