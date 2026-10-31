@@ -24,6 +24,34 @@ const (
 	caTestKey    = "attempt-local-not-on-wire"
 )
 
+func TestR07RedirectRefused(t *testing.T) {
+	for _, mode := range []string{"body", "no body", "transport error"} {
+		t.Run(mode, func(t *testing.T) {
+			rt := &caTestCount{fn: func(r *http.Request) (*http.Response, error) {
+				if r.URL.Host != "graph.facebook.com" || r.Header.Get("Authorization") != "Bearer "+caTestBearer {
+					t.Fatal("requisição fora do destino original ou sem bearer da fixture")
+				}
+				resp, _ := caTestStatus(302, caTestBearer+caTestPhone)(r)
+				resp.Header.Set("Location", "https://invalid.test/"+caTestBearer)
+				if mode == "no body" {
+					resp.Body = nil
+				}
+				if mode == "transport error" {
+					return resp, errors.New(caTestBearer)
+				}
+				return resp, nil
+			}}
+			res, err := caTestClient(t, true, []string{"v0.0"}, rt, 0).Send(context.Background(), caTestRequest())
+			if err == nil || !res.Refused || res.Uncertain || res.Submitted || res.HTTPStatus != 302 || res.ProviderMessageID != "" || rt.n != 1 {
+				t.Fatalf("redirect não terminou em recusa: result=%+v err=%v viagens=%d", res, err, rt.n)
+			}
+			if res.BodyExcerpt != "redirect recusado" || err.Error() != "redirect recusado" {
+				t.Fatal("diagnóstico de redirect deve ser fixo e sanitizado")
+			}
+		})
+	}
+}
+
 func caTestRequest() Request {
 	return Request{
 		Version:       "v0.0",

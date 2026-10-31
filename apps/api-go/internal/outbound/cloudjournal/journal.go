@@ -688,7 +688,9 @@ func classifyResult(httpStatus int, providerMessageID string, uncertain, refused
 	}
 	switch {
 	case refused:
-		if status != 0 && (status < 400 || status > 499) {
+		// Redirects explicitly refused by the client are terminal too. A bare
+		// 3xx without that classification still falls through to errResult.
+		if status != 0 && (status < 300 || status > 499) {
 			return "", "", "", 0, errResult
 		}
 		return "refused", "failed", "", status, nil
