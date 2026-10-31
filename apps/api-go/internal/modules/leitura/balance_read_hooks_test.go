@@ -92,6 +92,7 @@ func TestBalanceReadHooksScope(t *testing.T) {
 	today := mustRead(t, "today.go")
 	totals := mustRead(t, "contract_finance_totals.go")
 	service := mustRead(t, "service.go")
+	finance := mustRead(t, "finance_readers.go")
 	generated := mustRead(t, "grupos_generated.go") + mustRead(t, "consultas_generated.go")
 
 	if strings.Count(grupos, "balanceRowsInTx(") != 3 || strings.Contains(grupos, ".balanceRows(") || strings.Contains(grupos, "nominal_open_cents") {
@@ -115,11 +116,22 @@ func TestBalanceReadHooksScope(t *testing.T) {
 		t.Fatal("os outros caminhos de grupo deixaram de consultar direto")
 	}
 
-	if strings.Count(consultas, "s.balanceRows(") != 1 || strings.Count(consultas, "s.rows(") != 1 || strings.Contains(consultas, "balanceRowsInTx(") || strings.Contains(consultas, "WithScope") {
-		t.Fatal("consultas.go deve usar s.balanceRows só no resumo, sem escopo aninhado")
+	if strings.Count(consultas, "s.financeSummaryRows(") != 1 || strings.Count(consultas, "s.rows(") != 1 || strings.Contains(consultas, "s.balanceRows(") || strings.Contains(consultas, "balanceRowsInTx(") || strings.Contains(consultas, "WithScope") {
+		t.Fatal("consultas.go deve usar s.financeSummaryRows só no resumo, sem escopo aninhado")
 	}
-	if !strings.Contains(consultas, `spec.Path == "/api/finance/summary"`) || strings.Count(consultas, "balanceReaderFinanceSummary") != 1 {
+	if !strings.Contains(consultas, "if spec.Path == \"/api/finance/summary\" {\n\t\t\t\trows, err = s.financeSummaryRows(ctx, spec.SQL, args...)\n\t\t\t} else {\n\t\t\t\trows, err = s.rows(ctx, spec.SQL, args...)") || strings.Contains(consultas, "balanceReaderFinanceSummary") {
 		t.Fatal("resumo financeiro sem o leitor fechado")
+	}
+	// The adapter owns exactly one authenticated scope. Passing the whole Scope
+	// retains tenant, actor and POP instead of reconstructing a partial scope.
+	financeFn := finance[strings.Index(finance, "func (s Service) financeSummaryRows("):]
+	if strings.Count(finance, "balanceReaderFinanceSummary") != 1 || strings.Count(finance, "WithScope(") != 1 || strings.Count(financeFn, "Pick(") != 1 || strings.Count(financeFn, "Strip(") != 1 ||
+		!strings.Contains(financeFn, "selection, err := Pick(balanceReaderFinanceSummary, legacy)") ||
+		!strings.Contains(financeFn, "s.DB.WithScope(ctx, auth.From(ctx).Scope, func(tx *db.Tx) error {") ||
+		!strings.Contains(financeFn, "rows, err = financeReadRows(ctx, tx, selection.SQL, args...)") ||
+		!strings.Contains(financeFn, "if err != nil {\n\t\t\treturn err\n\t\t}\n\t\treturn Strip(selection, rows)") ||
+		strings.Contains(financeFn, "balanceRows") || strings.Contains(financeFn, "tx.Objects(") {
+		t.Fatal("adaptador financeiro deve preservar Pick/Strip, SQL selecionado e escopo autenticado integral, sem escopo aninhado")
 	}
 
 	quoteFn := dinamicas[strings.Index(dinamicas, "func (s Service) terminationQuote("):strings.Index(dinamicas, "func (s Service) invoices(")]
@@ -166,7 +178,7 @@ func TestBalanceReadHooksScope(t *testing.T) {
 	if strings.Contains(generated, "balanceRows") || strings.Contains(generated, "cmp_") {
 		t.Fatal("metadado gerado mudou")
 	}
-	for _, src := range []string{grupos, consultas, dinamicas, today, totals} {
+	for _, src := range []string{grupos, consultas, dinamicas, today, totals, finance} {
 		if strings.Contains(src, "func Pick(") || strings.Contains(src, "func Strip(") || strings.Contains(src, "func DueHTTP(") || strings.Contains(src, "func dueBreakdownFromRow(") || strings.Contains(src, "registerBalanceVariant(") {
 			t.Fatal("gancho redeclarou superfície canônica")
 		}

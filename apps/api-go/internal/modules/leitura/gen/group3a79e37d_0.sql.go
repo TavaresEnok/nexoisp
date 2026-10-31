@@ -7,23 +7,23 @@ package gen
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const Group3a79e37d0 = `-- name: Group3a79e37d0 :many
 select to_char(m, 'YYYY-MM') as month,
-                coalesce((select sum(p.signed_cents) from payments p where date_trunc('month', p.paid_at at time zone $1) = m), 0)::int as received_cents
-         from generate_series(date_trunc('month', now() at time zone $1) - interval '5 months', date_trunc('month', now() at time zone $1), interval '1 month') m order by m
+                coalesce((select sum(p.signed_cents) from payments p
+                  where p.paid_at >= (m at time zone $1::text)
+                    and p.paid_at < ((m + interval '1 month') at time zone $1::text)), 0)::bigint as received_cents
+         from generate_series(date_trunc('month', now() at time zone $1::text) - interval '5 months', date_trunc('month', now() at time zone $1::text), interval '1 month') m order by m
 `
 
 type Group3a79e37d0Row struct {
 	Month         string `json:"month"`
-	ReceivedCents int32  `json:"received_cents"`
+	ReceivedCents int64  `json:"received_cents"`
 }
 
-func (q *Queries) Group3a79e37d0(ctx context.Context, timezone pgtype.Interval) ([]Group3a79e37d0Row, error) {
-	rows, err := q.db.Query(ctx, Group3a79e37d0, timezone)
+func (q *Queries) Group3a79e37d0(ctx context.Context, dollar_1 string) ([]Group3a79e37d0Row, error) {
+	rows, err := q.db.Query(ctx, Group3a79e37d0, dollar_1)
 	if err != nil {
 		return nil, err
 	}

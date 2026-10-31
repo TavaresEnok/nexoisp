@@ -24,15 +24,31 @@ export const invoiceSchema = z.object({
   discount_cents: cents(),
 });
 export type ErpInvoice = z.infer<typeof invoiceSchema>;
+// These aggregates have a numeric JSON contract and must retain every cent.
+const aggregateCents = () => z.number().int().min(-Number.MAX_SAFE_INTEGER).max(Number.MAX_SAFE_INTEGER);
+// Dividing a large safe integer by 100 can already lose its final cent.
+export function aggregateMoney(cents: number) {
+  aggregateCents().parse(cents);
+  const value = BigInt(cents);
+  const whole = value / 100n;
+  const fraction = (value < 0n ? -value % 100n : value % 100n).toString().padStart(2, "0");
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" })
+    .formatToParts(whole === 0n && value < 0n ? -0 : whole)
+    .map((part) => part.type === "fraction" ? fraction : part.value).join("");
+}
+export const monthlySchema = z.array(z.object({
+  month: z.string(),
+  received_cents: aggregateCents(),
+}));
 export const summarySchema = z.object({
   open: z.coerce.number(),
-  open_cents: cents(),
-  nominal_open_cents: cents(),
-  received_open_cents: cents(),
+  open_cents: aggregateCents(),
+  nominal_open_cents: aggregateCents(),
+  received_open_cents: aggregateCents(),
   overdue: z.coerce.number(),
-  overdue_cents: cents(),
+  overdue_cents: aggregateCents(),
   reconciling: z.coerce.number(),
-  received_month_cents: cents(),
+  received_month_cents: aggregateCents(),
 });
 export type FinanceSummary = z.infer<typeof summarySchema>;
 export type Due = {

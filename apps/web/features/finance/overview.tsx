@@ -14,8 +14,8 @@ import { RevenueChart } from "@/components/revenue-chart";
 import { EmptyState } from "@/components/workspace-feedback";
 import { QueryBoundary } from "@/features/shared/feedback";
 import { api } from "@/platform/erp-client";
-import { money } from "@/lib/format";
 import type { FinanceSummary } from "./models";
+import { aggregateMoney, monthlySchema } from "./models";
 export function FinanceOverview({
   summary,
   loading,
@@ -27,8 +27,8 @@ export function FinanceOverview({
   error?: unknown;
   company: string;
 }) {
-  const series = useSWR("erp-finance-monthly", () =>
-    api<{ month: string; received_cents: number }[]>("/finance/monthly"),
+  const series = useSWR("erp-finance-monthly", async () =>
+    monthlySchema.parse(await api("/finance/monthly")),
   );
   return (
     <>
@@ -38,19 +38,19 @@ export function FinanceOverview({
             {[
               {
                 title: "Em aberto",
-                value: money(summary.open_cents / 100),
-                detail: `${summary.open} fatura(s); nominal ${money(summary.nominal_open_cents / 100)}; recebido ${money(summary.received_open_cents / 100)}`,
+                value: aggregateMoney(summary.open_cents),
+                detail: `${summary.open} fatura(s); nominal ${aggregateMoney(summary.nominal_open_cents)}; recebido ${aggregateMoney(summary.received_open_cents)}`,
                 icon: CircleDollarSign,
               },
               {
                 title: "Recebido no mês",
-                value: money(summary.received_month_cents / 100),
+                value: aggregateMoney(summary.received_month_cents),
                 detail: "Pagamentos menos estornos no mês corrente",
                 icon: ArrowDownLeft,
               },
               {
                 title: "Vencido e não pago",
-                value: money(summary.overdue_cents / 100),
+                value: aggregateMoney(summary.overdue_cents),
                 detail: `${summary.overdue} fatura(s) vencida(s)`,
                 icon: TriangleAlert,
               },
@@ -86,14 +86,14 @@ export function FinanceOverview({
             retry={() => series.mutate()}
           >
             {series.data &&
-              !series.data.some((month) => month.received_cents > 0) && (
+              !series.data.some((month) => month.received_cents !== 0) && (
                 <EmptyState
                   icon={CircleDollarSign}
                   title="Nenhum recebimento nos últimos meses"
                   description="O gráfico aparece quando houver pagamentos registrados."
                 />
               )}
-            {series.data?.some((month) => month.received_cents > 0) && (
+            {series.data?.some((month) => month.received_cents !== 0) && (
               <RevenueChart
                 data={series.data.map((month) => ({
                   day: month.month.split("-").reverse().join("/"),

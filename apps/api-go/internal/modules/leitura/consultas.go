@@ -78,7 +78,7 @@ func registerConsultas(api huma.API, registry *endpoint.Registry, s Service) {
 			var rows []jsonx.Object
 			var err error
 			if spec.Path == "/api/finance/summary" {
-				rows, err = s.balanceRows(ctx, balanceReaderFinanceSummary, spec.SQL, args...)
+				rows, err = s.financeSummaryRows(ctx, spec.SQL, args...)
 			} else {
 				rows, err = s.rows(ctx, spec.SQL, args...)
 			}
