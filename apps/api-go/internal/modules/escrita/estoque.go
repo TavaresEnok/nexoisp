@@ -39,7 +39,7 @@ func (s Service) stockOperations(ops map[string]operation) {
 	ops["POST /api/work-orders/:id/helpers"] = operation{s.addHelper, obj(o(f("user_id", uuid)))}
 	ops["DELETE /api/work-orders/:id/helpers/:userId"] = operation{s.deleteHelper, nil}
 	ops["POST /api/work-orders/:id/notes"] = operation{s.workNote, obj(o(f("note", str().Trimmed().Min(1).Max(2000))))}
-	ops["POST /api/work-orders/:id/materials"] = operation{s.workMaterials, obj(o(f("item_id", uuid), f("qty", qty(10000))))}
+	ops["POST /api/work-orders/:id/materials"] = operation{s.workMaterials, obj(o(f("intention_id", uuid), f("item_id", uuid), f("qty", qty(10000))))}
 	ops["POST /api/work-orders/:id/kit"] = operation{s.workKit, obj(o(f("kit_id", uuid)))}
 }
 func stockMove(ctx context.Context, tx *db.Tx, item any, qty float64, kind string, note, work any, byUnit bool) (jsonx.Object, error) {
