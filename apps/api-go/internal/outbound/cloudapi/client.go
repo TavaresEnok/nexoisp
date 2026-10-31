@@ -219,8 +219,10 @@ func (c *Client) Send(ctx context.Context, in Request) (Result, error) {
 	if doErr != nil && (resp == nil || resp.StatusCode < 300 || resp.StatusCode >= 400) {
 		return uncertainTransport(doErr, in), errors.New(boundSecret(doErr.Error(), in.Bearer, in.To))
 	}
-	if doErr != nil && resp != nil && resp.StatusCode >= 300 && resp.StatusCode < 400 {
-		return Result{HTTPStatus: resp.StatusCode, Refused: true}, errors.New("redirect recusado")
+	if resp != nil && resp.StatusCode >= 300 && resp.StatusCode < 400 {
+		// Never consume a redirect body or Location as diagnostics. Refusal
+		// remains definitive even if the response body cannot be read.
+		return Result{HTTPStatus: resp.StatusCode, Refused: true, BodyExcerpt: "redirect recusado"}, errors.New("redirect recusado")
 	}
 	if resp == nil {
 		return Result{Uncertain: true}, errors.New("falha cloud api")

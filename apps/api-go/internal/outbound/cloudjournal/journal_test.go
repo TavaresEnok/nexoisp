@@ -30,6 +30,34 @@ const cjJournalInvoiceSalt int64 = 7411005
 
 var errCjJournalRollback = errors.New("cjJournal rollback")
 
+func TestR07ClassifyRedirect(t *testing.T) {
+	for _, code := range []int{0, 99, 100, 199, 200, 299, 300, 302, 399, 400, 429, 499, 500, 599, 600} {
+		t.Run(fmt.Sprint(code), func(t *testing.T) {
+			state, log, id, status, err := classifyResult(code, "", false, true)
+			valid := code == 0 || (code >= 300 && code <= 499)
+			if !valid {
+				if !errors.Is(err, errResult) {
+					t.Fatal("recusa incoerente aceita")
+				}
+				return
+			}
+			if err != nil || state != "refused" || log != "failed" || id != "" || status != code {
+				t.Fatalf("classificação=%s/%s/%q/%d err=%v", state, log, id, status, err)
+			}
+		})
+	}
+	for _, tc := range []struct {
+		id                 string
+		uncertain, refused bool
+	}{
+		{"", false, false}, {"", true, true}, {"inventado", false, true},
+	} {
+		if _, _, _, _, err := classifyResult(302, tc.id, tc.uncertain, tc.refused); !errors.Is(err, errResult) {
+			t.Fatal("redirect sem recusa coerente aceito")
+		}
+	}
+}
+
 func TestCloudJournal_MachineContract(t *testing.T) {
 	if MaxLockRequeues != 3 || lockBudget != "2s" || sweepMinutes != 10 {
 		t.Fatalf("orçamento timeouts=%d lock=%s sweep=%d", MaxLockRequeues, lockBudget, sweepMinutes)
