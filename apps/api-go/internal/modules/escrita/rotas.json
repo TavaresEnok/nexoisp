@@ -903,7 +903,12 @@
     "file": "field.ts",
     "queries": [
       "b106e3aa_0.sql",
-      "b106e3aa_1.sql"
+      "b106e3aa_1.sql",
+      "b106e3aa_2.sql",
+      "b106e3aa_3.sql",
+      "b106e3aa_4.sql",
+      "b106e3aa_5.sql",
+      "b106e3aa_6.sql"
     ],
     "sha256": "66081c8fba2f0f0b60f6aae9b98dfe0e163a2bc97ca93a6f22d5d3bc8253dc7d"
   },

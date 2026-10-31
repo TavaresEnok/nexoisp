@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useSWR from "swr";
 import { ProfileSection } from "@/components/subscriber-profile-sections";
 import { Input } from "@/components/ui/input";
@@ -14,8 +14,10 @@ import { FormField, MutationForm } from "@/features/shared/form";
 import { ActionButton } from "@/features/shared/action";
 import { QueryBoundary } from "@/features/shared/feedback";
 import { useSession } from "@/features/session/provider";
-import { can } from "@/features/session/model";
+import { can, sessionScope } from "@/features/session/model";
+import { ApiError } from "@/data/erp/http";
 import { api } from "@/platform/erp-client";
+import { acquireMaterialIntent, materialIntentKey, readMaterialIntent, settleMaterialIntent, type MaterialIntent } from "./material-intent";
 import type { OrderDetail } from "./models";
 type Item = {
   id: string;
@@ -40,6 +42,24 @@ export function WorkMaterials({
   refresh: () => Promise<void>;
 }) {
   const { me } = useSession();
+  if (!me) return null;
+  return <WorkMaterialsScoped key={`${sessionScope(me)}:${order.id}`} order={order} refresh={refresh} scope={sessionScope(me)} me={me} />;
+}
+function WorkMaterialsScoped({ order, refresh, scope, me }: { order: OrderDetail; refresh: () => Promise<void>; scope: string; me: NonNullable<ReturnType<typeof useSession>["me"]> }) {
+  const key = materialIntentKey(scope, order.id);
+  const [pending, setPending] = useState<MaterialIntent | null>(null);
+  const [storageError, setStorageError] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    try {
+      const intent = readMaterialIntent(window.localStorage, key);
+      setPending(intent);
+      if (intent) setForm({ item_id: intent.item_id, qty: String(intent.qty) });
+    } catch {
+      setStorageError("Não foi possível acessar a intenção guardada. O lançamento não será enviado.");
+    }
+    setLoaded(true);
+  }, [key]);
   const writable =
     can(me, "os:write") && !["done", "canceled"].includes(order.status);
   const items = useSWR(
@@ -88,7 +108,7 @@ export function WorkMaterials({
             Nenhum material registrado nesta OS.
           </p>
         )}
-        {writable && can(me, "stock:read") && (
+        {(writable || (pending && can(me, "os:write"))) && can(me, "stock:read") && (
           <>
             <QueryBoundary
               loading={items.isLoading}
@@ -96,20 +116,46 @@ export function WorkMaterials({
               retry={() => items.mutate()}
             >
               <MutationForm
-                submit="Lançar material"
+                submit={pending ? "Confirmar lançamento pendente" : "Lançar material"}
                 onSubmit={async () => {
-                  await api(`/work-orders/${order.id}/materials`, {
-                    body: { item_id: form.item_id, qty: Number(form.qty) },
-                  });
-                  setForm({ item_id: "", qty: "1" });
+                  if (!loaded || storageError) throw new Error("Armazenamento indisponível; lançamento não enviado.");
+                  let intent = pending;
+                  if (!intent) {
+                    const qty = Number(form.qty);
+                    if (!form.item_id || !Number.isInteger(qty) || qty === 0 || Math.abs(qty) > 10000) throw new Error("Informe material e quantidade inteira entre -10000 e 10000, diferente de zero.");
+                    const proposed = { intention_id: crypto.randomUUID(), item_id: form.item_id, qty };
+                    try { intent = await acquireMaterialIntent(window.localStorage, navigator.locks, key, () => proposed); }
+                    catch { throw new Error("Não foi possível guardar e coordenar a intenção; lançamento não enviado."); }
+                    setPending(intent);
+                    if (intent.intention_id !== proposed.intention_id) {
+                      setForm({ item_id: intent.item_id, qty: String(intent.qty) });
+                      throw new Error("Há um lançamento pendente; confirme-o antes de continuar.");
+                    }
+                  }
+                  try {
+                    await api(`/work-orders/${order.id}/materials`, { body: intent });
+                  } catch (error) {
+                    if (error instanceof ApiError && (error.status === 400 || (error.status === 409 && error.message.startsWith("saldo insuficiente")))) {
+                      const current = await settleMaterialIntent(window.localStorage, navigator.locks, key, intent.intention_id);
+                      setPending(current);
+                      if (current) setForm({ item_id: current.item_id, qty: String(current.qty) });
+                    }
+                    throw error;
+                  }
+                  const current = await settleMaterialIntent(window.localStorage, navigator.locks, key, intent.intention_id);
+                  setPending(current);
+                  setForm(current ? { item_id: current.item_id, qty: String(current.qty) } : { item_id: "", qty: "1" });
                   await Promise.all([items.mutate(), refresh()]);
                 }}
               >
                 <div className="erp-columns">
+                  {storageError && <p role="alert">{storageError}</p>}
+                  {pending && <p>Resultado pendente: confirme este lançamento antes de registrar outro.</p>}
                   <FormField label="Material do estoque">
                     <select
                       className="commercial-select"
                       required
+                      disabled={!loaded || !!storageError || !!pending}
                       value={form.item_id}
                       onChange={(e) =>
                         setForm({ ...form, item_id: e.target.value })
@@ -131,6 +177,7 @@ export function WorkMaterials({
                   >
                     <Input
                       required
+                      disabled={!loaded || !!storageError || !!pending}
                       type="number"
                       step={1}
                       value={form.qty}
@@ -142,7 +189,7 @@ export function WorkMaterials({
                 </div>
               </MutationForm>
             </QueryBoundary>
-            <FormField
+            {writable && <><FormField
               label="Buscar equipamento por série"
               hint="Digite ao menos três caracteres. A instalação usa a modalidade comodato."
             >
@@ -184,7 +231,7 @@ export function WorkMaterials({
                   Nenhuma unidade disponível com essa série.
                 </p>
               )}
-            </QueryBoundary>
+            </QueryBoundary></>}
           </>
         )}
       </div>

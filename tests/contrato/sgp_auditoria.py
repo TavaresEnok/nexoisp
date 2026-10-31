@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 import json
 import os
 import subprocess
+import uuid
 
 from lib import ROOT, LOCAL, command, go, go_env, request, sql, wait
 from nativo import up
@@ -130,9 +131,9 @@ def main():
             kit = api('/install-kits', {'name': 'Kit sintético', 'items': [{'item_id': item['id'], 'qty': 3}]})
             api(racepath+'/kit', {'kit_id': kit['id']}, expected=409)
             assert next(i for i in api('/stock/items') if i['id'] == item['id'])['balance'] == 2
-            api(racepath+'/materials', {'item_id': item['id'], 'qty': 1})
-            api(racepath+'/materials', {'item_id': item['id'], 'qty': -2}, expected=400)
-            api(racepath+'/materials', {'item_id': item['id'], 'qty': -1})
+            api(racepath+'/materials', {'intention_id': str(uuid.uuid4()), 'item_id': item['id'], 'qty': 1})
+            api(racepath+'/materials', {'intention_id': str(uuid.uuid4()), 'item_id': item['id'], 'qty': -2}, expected=400)
+            api(racepath+'/materials', {'intention_id': str(uuid.uuid4()), 'item_id': item['id'], 'qty': -1})
             assert next(i for i in api('/stock/items') if i['id'] == item['id'])['balance'] == 2
             small = api('/install-kits', {'name': 'Kit suficiente', 'items': [{'item_id': item['id'], 'qty': 1}]})
             api(racepath+'/kit', {'kit_id': small['id']})

@@ -2,6 +2,7 @@ package escrita
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"nexoisp/api-go/internal/apierr"
 	"nexoisp/api-go/internal/auth"
@@ -110,9 +111,34 @@ func (s Service) workNote(ctx context.Context, tx *db.Tx, id string, b map[strin
 }
 func (s Service) workMaterials(ctx context.Context, tx *db.Tx, id string, b map[string]any) (any, error) {
 	const key = "POST /api/work-orders/:id/materials"
+	if err := tx.Exec(ctx, query(key, 2), b["intention_id"]); err != nil {
+		return nil, err
+	}
 	w, err := mustRow(ctx, tx, key, 0, "ordem de serviço não encontrada", id)
 	if err != nil {
 		return nil, err
+	}
+	c := auth.From(ctx)
+	prior, err := one(ctx, tx, key, 3, b["intention_id"])
+	if err != nil {
+		return nil, err
+	}
+	if prior != nil {
+		var matches bool
+		if err = tx.QueryRow(ctx, query(key, 4), b["intention_id"], c.UserID, id, b["item_id"], int32(num(b["qty"]))).Scan(&matches); err != nil {
+			return nil, err
+		}
+		if !matches {
+			return nil, apierr.New(409, "intenção de material já utilizada")
+		}
+		return prior.Get("receipt"), nil
+	}
+	var exists bool
+	if err = tx.QueryRow(ctx, query(key, 6), b["intention_id"]).Scan(&exists); err != nil {
+		return nil, err
+	}
+	if exists {
+		return nil, apierr.New(404, "ordem de serviço não encontrada")
 	}
 	if finished(w.Get("status")) {
 		return nil, apierr.New(400, "ordem de serviço encerrada não aceita material")
@@ -135,7 +161,21 @@ func (s Service) workMaterials(ctx context.Context, tx *db.Tx, id string, b map[
 	if err != nil {
 		return nil, err
 	}
-	return movement, workEvent(ctx, tx, id, "material", map[string]any{"item": movement.Get("item_name"), "qty": b["qty"]})
+	if err = workEvent(ctx, tx, id, "material", map[string]any{"item": movement.Get("item_name"), "qty": b["qty"]}); err != nil {
+		return nil, err
+	}
+	receipt, err := json.Marshal(movement)
+	if err != nil {
+		return nil, err
+	}
+	n, err := tx.Affected(ctx, query(key, 5), b["intention_id"], c.TenantID, c.UserID, id, b["item_id"], int32(qty), int64(num(movement.Get("id"))), receipt)
+	if err != nil {
+		return nil, err
+	}
+	if n == 0 {
+		return nil, apierr.New(409, "intenção de material já utilizada")
+	}
+	return movement, nil
 }
 func (s Service) workKit(ctx context.Context, tx *db.Tx, id string, b map[string]any) (any, error) {
 	const key = "POST /api/work-orders/:id/kit"
