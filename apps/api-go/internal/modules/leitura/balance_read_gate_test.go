@@ -352,7 +352,7 @@ func balanceGateReaders(t *testing.T) []balanceGateReader {
 		{id: balanceReaderContractFinanceList, legacy: gen.Groupc47037ac0, casts: true},
 		{id: balanceReaderContractFinanceTotals, legacy: contractFinanceTotalsSQL, casts: false},
 		{id: balanceReaderReconciliationInvoices, legacy: gen.Group152f5ccd0, casts: true},
-		{id: balanceReaderFinanceSummary, legacy: gen.Readf038858e, casts: true},
+		{id: balanceReaderFinanceSummary, legacy: gen.Readf038858e, casts: false},
 		{id: balanceReaderInvoiceList, legacy: listSQL, casts: true},
 		{id: balanceReaderTodayOverdue, legacy: dynamicSQL("/api/today", 3, nil), casts: true},
 		{id: balanceReaderTerminationQuoteGet, legacy: dynamicSQL("helper:terminationQuote", 0, nil), casts: true},

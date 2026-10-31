@@ -232,7 +232,7 @@ func (s Service) grupo(ctx context.Context, tx *db.Tx, spec grupo, id string) (a
 		if tz == nil {
 			tz = "America/Sao_Paulo"
 		}
-		return query(0, tz)
+		return financeReadRows(ctx, tx, spec.SQL[0], tz)
 	case "/api/contracts/{id}/states":
 		rows, err := query(0, id)
 		if err != nil {

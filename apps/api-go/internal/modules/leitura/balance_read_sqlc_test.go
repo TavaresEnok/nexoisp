@@ -127,7 +127,7 @@ func assertSqlcVariantShape(t *testing.T, reader sqlcReaderCase, variant string)
 		for _, piece := range []string{
 			"where i.status in ('open', 'reconciling') and ($1::uuid is null or i.company_id = $1)",
 			"(now() at time zone coalesce((select timezone from tenant_settings where tenant_id = app_tenant()), 'America/Sao_Paulo'))::date as d",
-			"date_trunc('month', now())",
+			"date_trunc('month', now() at time zone zone.tz)",
 			"(select coalesce(sum(p.signed_cents),0) from payments p where p.invoice_id=i.id) as paid_cents",
 		} {
 			if !strings.Contains(variant, piece) {
@@ -152,9 +152,10 @@ func assertSqlcVariantShape(t *testing.T, reader sqlcReaderCase, variant string)
 			t.Fatal("conciliação alterou filtro, cast ou limite")
 		}
 	case balanceReaderFinanceSummary:
-		if strings.Count(variant, "date_trunc('month', now())") != 1 || strings.Count(variant, "::int") != 1 {
-			t.Fatal("caixa do mês foi reescrito")
+		if strings.Count(variant, "date_trunc('month', now() at time zone zone.tz)") != 2 || strings.Contains(variant, "::int") {
+			t.Fatal("caixa do mês deve usar bigint e ambas as fronteiras locais")
 		}
+		requireAll(t, variant, "coalesce(sum(p.signed_cents),0)::bigint", "p.paid_at >= (date_trunc", "p.paid_at < ((date_trunc", "+ interval '1 month') at time zone zone.tz)")
 		clause := cmpMatchesClause(variant)
 		if strings.Contains(clause, "received_month") || strings.Contains(clause, "date_trunc") {
 			t.Fatal("cmp_matches promoveu o caixa do mês a saldo")

@@ -766,11 +766,19 @@ func pgVariantsCompare(ctx context.Context, tx *db.Tx, call pgVariantsCall) ([]j
 	if err = pgVariantsExplain(ctx, tx, call.variant, call.args); err != nil {
 		return fail(fmt.Errorf("%s explain variante: %w", call.id, err))
 	}
-	legacyRows, err := tx.Objects(ctx, call.legacy, call.args...)
+	readRows := tx.Objects
+	if call.id == balanceReaderFinanceSummary {
+		// Exercise the same exact integer adapter as the HTTP summary, for
+		// both projections, within the existing tenant/actor/POP transaction.
+		readRows = func(ctx context.Context, query string, args ...any) ([]jsonx.Object, error) {
+			return financeReadRows(ctx, tx, query, args...)
+		}
+	}
+	legacyRows, err := readRows(ctx, call.legacy, call.args...)
 	if err != nil {
 		return fail(fmt.Errorf("%s SQL legado: %w", call.id, err))
 	}
-	variantRows, err := tx.Objects(ctx, call.variant, call.args...)
+	variantRows, err := readRows(ctx, call.variant, call.args...)
 	if err != nil {
 		return fail(fmt.Errorf("%s SQL variante: %w", call.id, err))
 	}
@@ -957,8 +965,8 @@ func pgVariantsExpectNumbers(id string, rows []jsonx.Object, want map[string]int
 		}
 	}
 	if id == balanceReaderFinanceSummary {
-		if _, ok := rows[0].Get("received_month_cents").(int32); !ok {
-			return fmt.Errorf("caixa do mês perdeu ::int: %T", rows[0].Get("received_month_cents"))
+		if _, ok := rows[0].Get("received_month_cents").(int64); !ok {
+			return fmt.Errorf("caixa do mês perdeu bigint/int64 exato: %T", rows[0].Get("received_month_cents"))
 		}
 	}
 	return nil
