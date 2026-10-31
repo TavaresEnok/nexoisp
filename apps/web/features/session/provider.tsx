@@ -7,9 +7,10 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { flushSync } from "react-dom";
 import { SWRConfig } from "swr";
 import { ApiError } from "@/data/erp/http";
-import { api, sessionExpiredEvent } from "@/platform/erp-client";
+import { api, erpClient, sessionExpiredEvent } from "@/platform/erp-client";
 import { isOperational } from "@/platform/execution";
 import { sessionSchema, sessionScope, type Session } from "./model";
 
@@ -35,15 +36,21 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const generation = useRef(0);
   const reload = useCallback(async () => {
     const current = ++generation.current;
+    erpClient.beginSessionTransition();
+    // Impede que formulários e efeitos da árvore anterior usem a nova prova.
+    flushSync(() => setState((previous) => ({
+      me: null,
+      error: null,
+      loading: true,
+      revision: previous.revision + 1,
+    })));
     try {
-      const me = sessionSchema.parse(await api<unknown>("/me"));
-      if (current === generation.current)
-        setState((previous) => ({
-          me,
-          error: null,
-          loading: false,
-          revision: previous.revision + 1,
-        }));
+      const candidate = await erpClient.session();
+      const me = sessionSchema.parse(candidate.data);
+      if (current === generation.current) {
+        candidate.accept();
+        setState((previous) => ({ ...previous, me, loading: false }));
+      }
       return me;
     } catch (error) {
       if (current === generation.current)
