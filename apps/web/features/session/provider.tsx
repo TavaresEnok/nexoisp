@@ -38,12 +38,14 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     const current = ++generation.current;
     erpClient.beginSessionTransition();
     // Impede que formulários e efeitos da árvore anterior usem a nova prova.
-    flushSync(() => setState((previous) => ({
-      me: null,
-      error: null,
-      loading: true,
-      revision: previous.revision + 1,
-    })));
+    flushSync(() =>
+      setState((previous) => ({
+        me: null,
+        error: null,
+        loading: true,
+        revision: previous.revision + 1,
+      })),
+    );
     try {
       const candidate = await erpClient.session();
       const me = sessionSchema.parse(candidate.data);
