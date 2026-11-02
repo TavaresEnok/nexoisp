@@ -105,6 +105,7 @@ services:
       NEXO_RADIUS_DB_PASSWORD: ${NEXO_RADIUS_DB_PASSWORD:?}
       NEXO_NEW_PASSWORD: ${NEXO_NEW_PASSWORD:-}
       NEXO_BACKUP_COPY: ${NEXO_BACKUP_COPY:-}
+      NEXO_PILOTO_FASE: ${NEXO_PILOTO_FASE:-}
     volumes: ["./certs:/certs:ro"]
   # Túnel integrado Go, com as mesmas chaves persistidas em vpnstate.
   # O servidor RADIUS compartilha a rede deste serviço; por isso as portas dele são publicadas aqui.

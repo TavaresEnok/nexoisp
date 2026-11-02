@@ -196,7 +196,9 @@ A resposta depende do registro de sessões: mantenha o accounting ligado nos con
 
 Não altera nada. **FALHA** impede a entrada (modo demonstração ligado, MFA não obrigatório, cookie sem HTTPS, contas ou equipamentos de demonstração,
 gateway de demonstração, migration pendente, operação incerta). **AVISO** é uma decisão que alguém precisa ter tomado (provedor sem gateway,
-suspensão automática ligada, módulo de OLT ligado, agente que não conecta, alerta sem webhook). Sair sem falhas não substitui a homologação no
+suspensão automática ligada, módulo de OLT ligado, agente que não conecta, alerta sem webhook). Com `NEXO_PILOTO_FASE=1` no ambiente, o preflight
+aplica as decisões da fase 1 do piloto ([Estado](ESTADO.md)): gateway configurado, geração automática de cobrança, suspensão automática, reativação automática
+por pagamento ou canal de aviso ao assinante ativo passam a ser **FALHA**. Sair sem falhas não substitui a homologação no
 equipamento nem o ensaio do ciclo completo.
 
 ### Homologação local

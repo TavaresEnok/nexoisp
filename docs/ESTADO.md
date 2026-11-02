@@ -29,30 +29,33 @@ Cada jornada lista o que já existe e **apenas** o que impede usá-la no piloto.
 | Jornada | O que existe | Lacuna que impede o uso | Tipo |
 |---|---|---|---|
 | J1 Cadastro e contrato | Cadastro, contratos, planos e importação CSV completa, incluindo IP fixo | Exportação autorizada da origem (SGP ou IXC) e conferência do mapeamento | Recurso externo |
-| J2 Cobrança e recebimento | Geração de títulos, baixa manual, estorno, acordos, CSV contábil | Sem gateway homologado o NexoISP não emite boleto/Pix real; falta decidir quem cobra no piloto e se o fiscal está ativo | Decisão + recurso externo (sandbox Efí) |
-| J3 Ativação, bloqueio e reativação | Provisionamento, suspensão por rejeição ou perfil, reativação e desconexão pelo agente e RADIUS integrado; suspensão automática desligada por padrão e conferida pelo preflight | Só validado no MikroTik CHR virtual; falta o NAS físico do piloto. Falta decidir se a suspensão será manual ou automática e se o pagamento reativa sozinho | Decisão + recurso externo (NAS) |
-| J4 Atendimento e OS | Chamados, OS, agenda, estoque, campo e anexos | Nenhuma para uso interno. Avisos automáticos ao assinante dependem de canal (WhatsApp oficial ou HTTP) | Decisão (avisos sim/não) |
-| J5 Recuperação | Backup diário, manifesto, `restore-check`, gancho `NEXO_BACKUP_COPY`, preflight, alertas Prometheus; ensaio em cluster limpo | Host do piloto, destino externo da cópia, cofre de chaves, canal de alertas; falta definir RPO/RTO | Recurso externo + decisão |
+| J2 Cobrança e recebimento | Geração de títulos, baixa manual, estorno, acordos, CSV contábil | Na fase 1 a cobrança fica no sistema atual (decisão abaixo); nada impede o piloto. Cobrança pelo NexoISP exige gateway homologado | Fora da fase 1 (sandbox Efí no futuro) |
+| J3 Ativação, bloqueio e reativação | Provisionamento, suspensão por rejeição ou perfil, reativação e desconexão pelo agente e RADIUS integrado, todos manuais na fase 1 e conferidos pelo preflight | Só validado no MikroTik CHR virtual; falta o NAS físico do piloto | Recurso externo (NAS) |
+| J4 Atendimento e OS | Chamados, OS, agenda, estoque, campo e anexos | Nenhuma: sem avisos automáticos na fase 1 | Pronta para homologação de uso |
+| J5 Recuperação | Backup diário, manifesto, `restore-check`, gancho `NEXO_BACKUP_COPY`, preflight, alertas Prometheus; ensaio em cluster limpo | Host do piloto, destino externo da cópia, cofre de chaves, canal de alertas | Recurso externo |
 
 ## Correções internas
 
 | Item | Situação |
 |---|---|
 | IP fixo na importação CSV | Feito em 02/11/2026, com testes em PostgreSQL real (aceite, rejeições, reimportação, prévia, permissão, isolamento entre provedores e concorrência) |
-| Outras lacunas internas das jornadas | Nenhuma encontrada que não dependa de decisão ou recurso abaixo |
+| Preflight da fase 1 do piloto | Feito em 02/11/2026: `NEXO_PILOTO_FASE=1` faz o preflight conferir as decisões abaixo, com teste em PostgreSQL real |
+| Outras lacunas internas das jornadas | Nenhuma encontrada que não dependa de recurso externo |
 
-## Decisões do dono
+## Decisões do piloto — fase 1
 
-As recomendações abaixo são sugestões e não foram tomadas como decisão.
+Tomadas pelo dono em 02/11/2026, que pediu as opções recomendadas e informou não poder fornecer, por ora, equipamento físico, contas de pagamento, OLT nem concentrador.
 
-| Pergunta | Recomendação |
+| Tema | Decisão |
 |---|---|
-| No piloto, a cobrança fica no sistema atual ou passa ao NexoISP com baixa manual? | Manter no sistema atual na primeira fase; NexoISP com cadastro, acesso e OS. Evita dois financeiros sobre os mesmos títulos |
-| O fiscal está ativo neste piloto? | Registrar "fiscal inativo neste piloto" se a cobrança ficar no sistema atual |
-| Suspensão manual ou automática? Por rejeição ou por perfil de bloqueio? | Manual, com o modo que o NAS do piloto suportar; automática só depois de gateway e conciliação homologados |
-| O pagamento confirmado reativa sozinho? | Não na primeira fase; reativação manual |
-| O piloto envia avisos automáticos ao assinante? | Não na primeira fase |
-| Qual perda de dados e tempo de recuperação aceitáveis? | RPO de 24 h (backup diário) e RTO de 4 h, a confirmar com o provedor |
+| Cobrança | Fica no sistema atual do provedor. O NexoISP cuida de cadastro, contratos, acesso e OS; títulos podem ser importados apenas para consulta, sem dois financeiros sobre os mesmos títulos |
+| Fiscal | **Fiscal inativo neste piloto** (fecha B14 como não aplicável nesta fase) |
+| Suspensão | Manual, pelo painel, no modo que o NAS do piloto suportar (rejeição ou perfil de bloqueio) |
+| Reativação | Manual; o pagamento não reativa sozinho |
+| Avisos ao assinante | Nenhum aviso automático |
+| Recuperação | Meta de RPO 24 h (backup diário) e RTO 4 h, a confirmar com o provedor quando ele for definido |
+
+Com `NEXO_PILOTO_FASE=1`, o `./nexo prod db preflight` reprova o ambiente se houver gateway configurado, geração automática de cobrança, suspensão automática, reativação automática por pagamento ou canal de aviso ao assinante ativo. Essas decisões são revistas quando houver gateway homologado e NAS do piloto.
 
 ## Recursos externos necessários
 
@@ -61,8 +64,9 @@ As recomendações abaixo são sugestões e não foram tomadas como decisão.
 - NAS e firmware usados pelo provedor, com acesso para o roteiro PPPoE/RADIUS.
 - Host do piloto com domínio, DNS, HTTPS e segredos próprios.
 - Destino externo para backup, cofre para chaves e canal para alertas.
-- Conta sandbox Efí, somente se a cobrança passar ao NexoISP.
-- WhatsApp oficial (WABA) ou canal HTTP, somente se houver avisos automáticos.
+- Para fases seguintes, não para a fase 1: conta sandbox Efí (cobrança pelo NexoISP), WhatsApp oficial ou canal HTTP (avisos automáticos), OLT e CPEs do provedor.
+
+Em 02/11/2026 o dono informou que nenhum desses recursos está disponível agora. Até chegarem, o piloto não pode começar; o que dá para adiantar sem eles já está feito.
 
 ## Homologações pendentes
 

@@ -178,6 +178,26 @@ func rotate(ctx context.Context, c *sql.DB, out io.Writer) error {
 	return nil
 }
 
+// pilotPhaseChecks confere as decisões da fase 1 do piloto (docs/ESTADO.md): cobrança e fiscal no
+// sistema anterior, suspensão e reativação manuais e nenhum aviso automático ao assinante.
+// Ativado por NEXO_PILOTO_FASE=1; cada desvio reprova o preflight.
+func pilotPhaseChecks(ctx context.Context, c *sql.DB, check func(ok, warn bool, name string)) error {
+	for _, q := range []struct{ sql, name string }{
+		{`select count(*) from tenant_settings where gateway<>'none'`, "piloto fase 1: sem gateway (cobrança no sistema anterior)"},
+		{`select count(*) from tenant_settings where billing_auto`, "piloto fase 1: geração automática de cobrança desligada"},
+		{`select count(*) from tenant_settings where auto_suspend`, "piloto fase 1: suspensão automática desligada"},
+		{`select count(*) from tenant_settings where auto_resume_on_payment`, "piloto fase 1: reativação automática por pagamento desligada"},
+		{`select (select count(*) from notice_channels where active)+(select count(*) from cloud_accounts where active)`, "piloto fase 1: nenhum canal de aviso ao assinante ativo"},
+	} {
+		var n int64
+		if e := c.QueryRowContext(ctx, q.sql).Scan(&n); e != nil {
+			return e
+		}
+		check(n == 0, false, q.name)
+	}
+	return nil
+}
+
 func preflight(ctx context.Context, c *sql.DB, out io.Writer) error {
 	failures, warnings := 0, 0
 	check := func(ok, warn bool, name string) {
@@ -251,6 +271,12 @@ func preflight(ctx context.Context, c *sql.DB, out io.Writer) error {
 	if e != nil {
 		return e
 	}
+	pilot := os.Getenv("NEXO_PILOTO_FASE") == "1"
+	if pilot {
+		if e = pilotPhaseChecks(ctx, c, check); e != nil {
+			return e
+		}
+	}
 	for _, q := range []struct {
 		sql, name string
 		warn      bool
@@ -270,6 +296,10 @@ func preflight(ctx context.Context, c *sql.DB, out io.Writer) error {
 		{`select count(*) from radius_nas where last_packet_at is null or last_packet_at<now()-interval '1 day'`, "NAS enviando pacotes", true},
 		{`select count(*) from vpn_peers where last_handshake_at is null or last_handshake_at<now()-interval '1 day'`, "túneis estabelecidos", true},
 	} {
+		// Na fase 1 do piloto estas duas viram falha em pilotPhaseChecks; o aviso genérico seria contraditório.
+		if pilot && (q.name == "suspensão automática desligada" || q.name == "provedores com gateway configurado") {
+			continue
+		}
 		var n int64
 		if e = c.QueryRowContext(ctx, q.sql).Scan(&n); e != nil {
 			return e
