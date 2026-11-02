@@ -17,7 +17,7 @@ Documentação de referência e de operação. Planos já executados, prompts de
 | [API pública](api-publica.md) | Tokens, escopos, idempotência e webhooks para integrações |
 | [Importação CSV](importacao-csv.md) | Formatos de assinantes, contratos, títulos, histórico e tipos estruturais; prévia, corte e reversão |
 | [Migração SGP](10-migracao-sgp.md) | Uso das ferramentas de leitura e mapeamento dos dados de origem |
-| [Laboratório PPPoE](lab-pppoe.md) | Roteiro reproduzível e limites da validação de rede |
+| [Laboratório PPPoE](lab-pppoe.md) | Roteiro reproduzível e limites da validação de rede, incluindo o laboratório multi-fabricante de 100 assinantes (seção 6) |
 | [OLT/ONU](expansao-olt-onu.md) | Operação do driver Huawei, comandos e roteiro de homologação |
 | [Análise dos três relatórios recebidos](ANALISE_RELATORIOS_FINANCEIRO_E_EQUIPAMENTOS_2026-10-24.md) | Comparação das versões financeiras, avaliação do dossiê de equipamentos, aderência ao código e prioridades propostas |
 | [Relatório financeiro consolidado v2](NexoISP_Relatorio_Financeiro_Consolidado_v2_2026-10-24.md) | Planejamento financeiro recebido em 24/10/2026; propostas A01–A20, sem comprovação de implementação |

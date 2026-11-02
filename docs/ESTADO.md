@@ -70,7 +70,7 @@ Em 02/11/2026 o dono informou que nenhum desses recursos está disponível agora
 
 ## Homologações pendentes
 
-PPPoE/RADIUS no NAS físico; suspensão, perfil e página de aviso no NAS; gateway em sandbox e depois real; OLT e TR-069 nos modelos do piloto; CGNAT e IPv6 no concentrador real; failover do RADIUS e do banco em hosts distintos; restauração em host físico; capacidade com o volume do piloto; uso assistido e revisão de segurança independente. Detalhes em [Pendências](pendencias.md).
+PPPoE/RADIUS no NAS físico (o laboratório de 02/11/2026 exercitou o RADIUS integrado com um MikroTik virtual real e simuladores Huawei/Cisco, sem homologar Huawei/Cisco: [Laboratório PPPoE, seção 6](lab-pppoe.md)); suspensão, perfil e página de aviso no NAS; gateway em sandbox e depois real; OLT e TR-069 nos modelos do piloto; CGNAT e IPv6 no concentrador real; failover do RADIUS e do banco em hosts distintos; restauração em host físico; capacidade com o volume do piloto; uso assistido e revisão de segurança independente. Detalhes em [Pendências](pendencias.md).
 
 ## Backlog fora do piloto
 

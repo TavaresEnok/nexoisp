@@ -150,6 +150,16 @@ Diferenças em relação à seção 3, para não ler mais do que foi feito:
 - **Achado do cenário:** dois clientes PPPoE com o mesmo MAC em VLANs diferentes derrubam um ao outro no concentrador (`one-session-per-host`);
   por isso os clientes de teste usam MAC próprio. Não é defeito do NexoISP, mas vale lembrar ao montar bancada.
 
+## 6. Laboratório multi-fabricante com 100 assinantes (02/11/2026)
+
+Projeto separado, `radius-lab-pnetlab` (fora deste repositório, em `/home/enok/Documentos/projetos/radius-lab-pnetlab`, com README e `./lab.sh up|test|down`).
+Testa o **RADIUS integrado** (esquema real até a migração 86, PostgreSQL descartável) com três concentradores e 100 assinantes:
+
+- **MikroTik RouterOS 7.17, real** (imagem CHR do PNETLab em QEMU/KVM): 34 clientes PPPoE (`pppd`) autenticados por CHAP, filas 50M/100M vindas de `Mikrotik-Rate-Limit`, accounting gravado e bloqueio/reativação (`Auth-Type := Reject`) reproduzidos.
+- **Huawei e Cisco, simulados** (`tools/radsim.py`, 33 assinantes cada): aceitos com `Huawei-Input/Output-Average-Rate` e `Cisco-AVPair`; accounting Start/Interim/Stop; segredo errado, NAS desconhecido, senha errada e usuário inexistente tratados.
+- **Isto não homologa Huawei nem Cisco.** O PNETLab desta máquina não tem imagem Cisco. As imagens Huawei NE40E (sem licença, sem `radius-server`) e CE6800 (sem `radius-server`) sobem mas não funcionam como cliente RADIUS; o AR1000v pede login desconhecido.
+- Não cobre desconexão/CoA, IPoE/hotspot, IPv6, `Simultaneous-Use` nem carga acima de 100. As contas são gravadas direto em `radius_*` com os atributos do motor (`apps/api-go/internal/radius/vendor.go`), sem passar pela API do NexoISP.
+
 ## Pendências conhecidas do driver
 
 - Suspensão pode negar autenticação ou aplicar perfil de bloqueio, conforme política. Perfil, pool e redirecionamento precisam de configuração e homologação no NAS do provedor.
