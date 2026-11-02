@@ -38,8 +38,18 @@ e nunca troca POP, fidelidade ou indicador que já estejam preenchidos (isso é 
 | `pop` | Nome de um POP já cadastrado. Inexistente vira **aviso** (a linha entra); cadastre o POP e reimporte |
 | `fidelidade_ate`, `multa_valor`, `multa_modelo` | Fim da carência, valor da multa e `fixo` (padrão) ou `mensal` (por mês restante). `multa_valor` é obrigatório com `fidelidade_ate` |
 | `indicado_por` | `id_externo` do assinante que indicou (da mesma origem; importe-o antes) |
+| `ip_fixo` | IPv4 fixo do contrato (`200.0.113.10` ou `200.0.113.10/32`). Segue as regras da alocação manual do IPAM: o endereço precisa estar num bloco IPv4 já cadastrado no provedor; endereço inválido, fora de bloco, já alocado a outro contrato ou reservado sem contrato rejeita a linha; contrato que já tem outro IPv4 fixo rejeita a linha (nunca troca). Reimportar o mesmo endereço não duplica. Exige permissão de rede (`network:write`). **Não envia nada ao equipamento**: o endereço entra no provisionamento; se a conta já estiver provisionada, use "Reaplicar" no contrato |
 
-**Não entram no CSV:** IP fixo (depende de pool no IPAM), documentos anexos, mais de um serviço por assinante e histórico de sessões.
+**Não entram no CSV:** prefixo IPv6 delegado e histórico de sessões. Mais de um contrato por assinante, documentos, usuários e inventário de rede usam os tipos próprios descritos na seção 4.
+
+## 4. Tipos estruturais (administrador sem restrição de POP)
+
+| Tipo | Colunas | Observação |
+|---|---|---|
+| Contratos (`contracts`) | `id_externo`, `id_externo_assinante`, `plano`, `vencimento_dia` obrigatórias; `inicio_contrato`, `pppoe_usuario`, `pppoe_senha`, `equipamento`, `pop`, `etiquetas`, `fidelidade_ate`, `multa_valor`, `multa_modelo`, `indicado_por`, `ip_fixo` | Um contrato por linha: permite vários serviços por assinante. Reimportar com conteúdo diferente é recusado; ajuste pelo cadastro |
+| Inventário de rede (`network`) | `id_externo`, `tipo`, `dados` (objeto JSON); `pai` | Usa as mesmas validações e permissões das telas de inventário |
+| Documentos (`documents`) | `id_externo`, `id_externo_assinante`, `nome`, `tipo`, `conteudo_base64`; `id_externo_contrato` | Arquivo guardado como documento privado do assinante |
+| Usuários (`users`) | `id_externo`, `nome`, `email`, `perfil`; `senha`, `ativo`, `pops` | Perfis existentes do NexoISP; não cria grupos de acesso |
 
 ## 2. Títulos em aberto (`titulos.csv`) — importar depois dos assinantes
 
@@ -112,7 +122,7 @@ Reversão (preserva o que aconteceu depois da migração)
 
 A compensação contábil de lote está implementada nesta branch de desenvolvimento, somente para `kind=invoices`. O desenho aprovado continua em [docs/LOTE24-B13-DESENHO-COMPENSACAO.md](LOTE24-B13-DESENHO-COMPENSACAO.md). A matriz histórica [docs/LOTE24-B13-ACEITACAO.json](LOTE24-B13-ACEITACAO.json) permanece `planned/not_run`. O que a branch entrega, o que o runner chegou a executar e o que falta publicar estão em [docs/LOTE25-B13-COMPENSACAO.md](LOTE25-B13-COMPENSACAO.md) e [docs/LOTE25-B13-COMPENSACAO-ACEITE.json](LOTE25-B13-COMPENSACAO-ACEITE.json).
 
-Implementado na branch, ainda sem publicação e sem homologação:
+Publicado em `main` (CI verde em 42b8154), sem homologação com dados reais:
 
 - `POST /api/import/batches/{id}/compensate`, permissão `import:run`, escopo integral do provedor, fora de portal, POP e suporte. Cookie de sessão continua exigindo CSRF. O corpo é `{"reason":"..."}`. Depois de remover espaços nas pontas, o motivo tem de 10 a 200 caracteres. O cabeçalho `Idempotency-Key` é obrigatório, um só valor, de 8 a 200 caracteres imprimíveis. Query string responde 400. O default de permissão é só `import:run`; a rota não exige `finance:write`.
 - O POST revalida o lote debaixo do lock. Não usa o GET como autorização. Lote que não seja `invoices` responde 409 `kind_not_compensatable` e não grava. Linha `updated`, linha `created` sem fatura, fatura duplicada, mais de 200 linhas `created` ou nenhuma linha `created` recusam o lote inteiro.
@@ -122,6 +132,6 @@ Implementado na branch, ainda sem publicação e sem homologação:
 - O GET `/api/import/batches/{id}/revert-eligibility` continua sendo leitura. Acrescenta `compensation` `absent` ou `committed`, sem `idempotency_key` e sem `request_hash`. `eligible=true` não compensa.
 - Na ficha do lote, em `apps/web/features/admin/import-batches.tsx`, o botão só aparece para títulos, escopo integral, `import:run` e marcador ausente. O motivo é obrigatório e há confirmação. 409 mostra os bloqueios do POST. Sucesso diz que nada foi apagado. Se a resposta se perde depois do commit, a ficha relê o GET e mostra a compensação registrada, sem segundo estorno.
 
-O que isto não é: teste de banco aprovado, teste de browser executado, CI deste HEAD, homologação de provedor ou rota publicada. Skip de `tests/contrato/nativo.py` ou `tests/contrato/go_integration.py` por falta de PostgreSQL não aprova concorrência, RLS, rollback nem o contrato HTTP. A gerência precisa rodá-los num PostgreSQL descartável, com container, porta e prefixo exclusivos, antes de publicar. A invocação executável, a mesma de `.github/workflows/native.yml`, é `python3 tests/contrato/nativo.py` e `python3 tests/contrato/go_integration.py`, na raiz do repositório, sem `-I`. `python3 -I` nesses dois scripts termina em `ModuleNotFoundError: No module named 'lib'` antes do banco; essa falha de bootstrap não é skip por ausência de PostgreSQL e não aprova o laboratório. O procedimento de corte acima continua valendo: reapontar RADIUS, modo manutenção, exportar eventos posteriores e lançá-los no sistema antigo. Não restaurar backup antigo por cima da compensação.
+O que isto não é: homologação de provedor nem migração real. Skip de `tests/contrato/nativo.py` ou `tests/contrato/go_integration.py` por falta de PostgreSQL não aprova concorrência, RLS, rollback nem o contrato HTTP. A gerência precisa rodá-los num PostgreSQL descartável, com container, porta e prefixo exclusivos, antes de publicar. A invocação executável, a mesma de `.github/workflows/native.yml`, é `python3 tests/contrato/nativo.py` e `python3 tests/contrato/go_integration.py`, na raiz do repositório, sem `-I`. `python3 -I` nesses dois scripts termina em `ModuleNotFoundError: No module named 'lib'` antes do banco; essa falha de bootstrap não é skip por ausência de PostgreSQL e não aprova o laboratório. O procedimento de corte acima continua valendo: reapontar RADIUS, modo manutenção, exportar eventos posteriores e lançá-los no sistema antigo. Não restaurar backup antigo por cima da compensação.
 
 Nenhuma migração de produção foi executada: este procedimento depende de autorização explícita e do piloto definido. O lote 25 não encerra o projeto.

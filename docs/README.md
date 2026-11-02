@@ -4,6 +4,7 @@ Documentação de referência e de operação. Planos já executados, prompts de
 
 | Documento | Quando consultar |
 |---|---|
+| [Estado atual](ESTADO.md) | **Primeira leitura**: o que existe, jornadas do piloto, decisões e recursos pendentes |
 | [Arquitetura](arquitetura.md) | Componentes atuais, decisões técnicas e garantias que devem ser preservadas |
 | [Integração do frontend v0](integracao-v0/PLANO.md) | Sete etapas, regra obrigatória de UI/UX, preservação e situação da integração |
 | [Aplicação oficial e validação](integracao-v0/OPERACAO.md) | Execução do frontend, laboratório descartável e limites preservados |
@@ -14,7 +15,7 @@ Documentação de referência e de operação. Planos já executados, prompts de
 | [Robustez operacional](ROBUSTEZ-OPERACIONAL.md) | Jobs por provedor, limite entre réplicas, provas de recuperação, monitoramento e limites de aceite |
 | [Operação](operacao.md) | Instalação, segurança, configuração dos módulos, monitoramento, backup e recuperação |
 | [API pública](api-publica.md) | Tokens, escopos, idempotência e webhooks para integrações |
-| [Importação CSV](importacao-csv.md) | Formatos de assinantes, títulos e histórico; prévia, corte e reversão |
+| [Importação CSV](importacao-csv.md) | Formatos de assinantes, contratos, títulos, histórico e tipos estruturais; prévia, corte e reversão |
 | [Migração SGP](10-migracao-sgp.md) | Uso das ferramentas de leitura e mapeamento dos dados de origem |
 | [Laboratório PPPoE](lab-pppoe.md) | Roteiro reproduzível e limites da validação de rede |
 | [OLT/ONU](expansao-olt-onu.md) | Operação do driver Huawei, comandos e roteiro de homologação |

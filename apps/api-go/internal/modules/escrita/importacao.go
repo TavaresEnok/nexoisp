@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"net/netip"
 	"nexoisp/api-go/internal/apierr"
 	"nexoisp/api-go/internal/auth"
 	"nexoisp/api-go/internal/cryptox"
@@ -26,13 +27,13 @@ import (
 )
 
 var importFields = map[string][]string{
-	"subscribers": strings.Split("id_externo,nome,cpf_cnpj,email,telefone,logradouro,numero,bairro,cidade,uf,cep,observacoes,situacao,plano,vencimento_dia,pppoe_usuario,pppoe_senha,nascimento,rg,nome_mae,nome_fantasia,celular,whatsapp,aceita_avisos,inicio_contrato,mac,etiquetas,pop,fidelidade_ate,multa_valor,multa_modelo,indicado_por", ","),
+	"subscribers": strings.Split("id_externo,nome,cpf_cnpj,email,telefone,logradouro,numero,bairro,cidade,uf,cep,observacoes,situacao,plano,vencimento_dia,pppoe_usuario,pppoe_senha,nascimento,rg,nome_mae,nome_fantasia,celular,whatsapp,aceita_avisos,inicio_contrato,mac,etiquetas,pop,fidelidade_ate,multa_valor,multa_modelo,indicado_por,ip_fixo", ","),
 	"invoices":    strings.Split("id_externo,id_externo_contrato,id_externo_assinante,vencimento,valor,competencia,descricao,situacao,pago_em,valor_pago,forma_pagamento", ","),
 	"history":     strings.Split("id_externo,id_externo_assinante,tipo,data,assunto,descricao,situacao,encerrado_em,solucao,responsavel,categoria,tipo_os", ","),
 }
 
 func init() {
-	importFields["contracts"] = strings.Split("id_externo,id_externo_assinante,plano,vencimento_dia,inicio_contrato,pppoe_usuario,pppoe_senha,equipamento,pop,etiquetas,fidelidade_ate,multa_valor,multa_modelo,indicado_por", ",")
+	importFields["contracts"] = strings.Split("id_externo,id_externo_assinante,plano,vencimento_dia,inicio_contrato,pppoe_usuario,pppoe_senha,equipamento,pop,etiquetas,fidelidade_ate,multa_valor,multa_modelo,indicado_por,ip_fixo", ",")
 	importFields["network"] = []string{"id_externo", "tipo", "pai", "dados"}
 	importFields["documents"] = []string{"id_externo", "id_externo_assinante", "id_externo_contrato", "nome", "tipo", "conteudo_base64"}
 	importFields["users"] = []string{"id_externo", "nome", "email", "perfil", "senha", "ativo", "pops"}
@@ -244,7 +245,7 @@ func (s Service) importCSV(ctx context.Context, b map[string]any, apply bool) (a
 		}
 	}
 	totals := map[string]any{"rows": float64(len(table) - 1), "plans_unmatched": []string{}, "pops_unmatched": []string{}}
-	for _, key := range strings.Split("created,updated,unchanged,error,contracts_created,accounts_created,accounts_without_secret,amount_cents_total,contacts_created,tags_applied,loyalty_set,invoices_paid,invoices_partial,invoices_canceled,paid_cents_total", ",") {
+	for _, key := range strings.Split("created,updated,unchanged,error,contracts_created,accounts_created,accounts_without_secret,amount_cents_total,contacts_created,tags_applied,loyalty_set,invoices_paid,invoices_partial,invoices_canceled,paid_cents_total,fixed_ips_allocated", ",") {
 		totals[key] = float64(0)
 	}
 	results := []map[string]any{}
@@ -643,6 +644,9 @@ func importSubscriber(ctx context.Context, tx *db.Tx, b map[string]any, r map[st
 	} else if r["pppoe_usuario"] != "" {
 		msgs = append(msgs, "pppoe_usuario ignorado: linha sem plano/contrato")
 	}
+	if r["plano"] == "" && r["ip_fixo"] != "" {
+		msgs = append(msgs, "ip_fixo ignorado: linha sem plano/contrato")
+	}
 	return importResult(ext, status, sub.Get("id"), msgs), nil
 }
 func importExtras(ctx context.Context, tx *db.Tx, b map[string]any, contract any, r map[string]string, mapped map[string]bool, t map[string]any, msgs *[]string) (bool, error) {
@@ -736,7 +740,97 @@ func importExtras(ctx context.Context, tx *db.Tx, b map[string]any, contract any
 			changed = changed || n > 0
 		}
 	}
+	if mapped["ip_fixo"] && r["ip_fixo"] != "" {
+		n, e := importFixedIP(ctx, tx, b, contract, r, msgs)
+		if e != nil {
+			return false, e
+		}
+		if n {
+			inc(t, "fixed_ips_allocated", 1)
+			changed = true
+		}
+	}
 	return changed, nil
+}
+
+// importFixedIPAddress aceita um IPv4 único, com ou sem /32, e devolve a forma canônica.
+func importFixedIPAddress(v string) (string, bool) {
+	v = strings.TrimSuffix(validate.Trim(v), "/32")
+	address, err := netip.ParseAddr(v)
+	if err != nil || !address.Is4() || address.Zone() != "" {
+		return "", false
+	}
+	return address.String(), true
+}
+
+// importFixedIP repete as regras da alocação manual do IPAM (bloco existente, endereço livre,
+// um IPv4 fixo por contrato, contrato ativo) sem enviar nada ao equipamento: a importação não provisiona.
+func importFixedIP(ctx context.Context, tx *db.Tx, b map[string]any, contract any, r map[string]string, msgs *[]string) (bool, error) {
+	const key = "POST /api/ipam/pools/:id/allocations"
+	c := auth.From(ctx)
+	if !slices.Contains(c.Permissions, specs[key].Permission) {
+		return false, rowError("permissão insuficiente para alocar IP fixo")
+	}
+	for _, module := range auth.Modules(strings.TrimPrefix(key, "POST ")) {
+		if !slices.Contains(c.Modules, module) {
+			return false, rowError("módulo não habilitado para IP fixo: " + module)
+		}
+	}
+	address, ok := importFixedIPAddress(r["ip_fixo"])
+	if !ok {
+		return false, rowError(fmt.Sprintf("ip_fixo inválido: \"%s\" (informe um IPv4 único, ex.: 200.0.113.10)", r["ip_fixo"]))
+	}
+	// O bloco é travado como na alocação manual, serializando importações e alocações do mesmo bloco.
+	pool, e := importOne(ctx, tx, "select id, host(cidr) || '/' || masklen(cidr) as cidr from ip_pools where family(cidr) = 4 and $1::inet << cidr for update", address)
+	if e != nil {
+		return false, e
+	}
+	if pool == nil {
+		return false, rowError(fmt.Sprintf("ip_fixo %s não pertence a nenhum bloco IPv4 cadastrado; cadastre o bloco no IPAM e reimporte", address))
+	}
+	taken, e := importOne(ctx, tx, "select contract_id from ip_allocations where address = $1::inet", address)
+	if e != nil {
+		return false, e
+	}
+	if taken != nil {
+		if fmt.Sprint(taken.Get("contract_id")) == fmt.Sprint(contract) {
+			return false, nil
+		}
+		if taken.Get("contract_id") == nil {
+			return false, rowError(fmt.Sprintf("ip_fixo %s está reservado no IPAM sem contrato; libere a reserva antes de importar", address))
+		}
+		return false, rowError(fmt.Sprintf("ip_fixo %s já está alocado a outro contrato", address))
+	}
+	k, e := one(ctx, tx, key, 1, contract)
+	if e != nil {
+		return false, e
+	}
+	if k == nil || k.Get("status") != "active" {
+		return false, rowError("contrato encerrado: ip_fixo não alocado")
+	}
+	other, e := importOne(ctx, tx, "select host(address) as address from ip_allocations where contract_id = $1 and family(address) = 4", contract)
+	if e != nil {
+		return false, e
+	}
+	if other != nil {
+		return false, rowError(fmt.Sprintf("o contrato já tem o IPv4 fixo %v; libere-o no IPAM antes de importar outro", other.Get("address")))
+	}
+	description := cut(fmt.Sprintf("importação %v/%s", b["source"], r["id_externo"]), 200)
+	a, e := one(ctx, tx, key, 6, c.TenantID, pool.Get("id"), address, contract, description, c.UserID)
+	if e != nil {
+		return false, e
+	}
+	if e = record(ctx, tx, "ipam.allocate", "ip_allocation", a.Get("id"), map[string]any{"address": a.Get("address"), "contract_id": contract, "import_source": b["source"], "external_id": r["id_externo"]}); e != nil {
+		return false, e
+	}
+	provisioned, e := importOne(ctx, tx, "select 1 from service_resources where contract_id = $1 and desired_version > 0", contract)
+	if e != nil {
+		return false, e
+	}
+	if provisioned != nil {
+		*msgs = append(*msgs, fmt.Sprintf("IP fixo %s registrado; a importação não envia ao equipamento: use “Reaplicar” no contrato", address))
+	}
+	return true, nil
 }
 
 func importSource(b map[string]any) string {

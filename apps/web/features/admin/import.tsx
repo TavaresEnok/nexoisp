@@ -364,7 +364,8 @@ export function DataImport() {
                 <p>
                   {result.totals.contracts_created} contratos ·{" "}
                   {result.totals.accounts_created} contas PPPoE ·{" "}
-                  {result.totals.accounts_without_secret} contas sem senha
+                  {result.totals.accounts_without_secret} contas sem senha ·{" "}
+                  {result.totals.fixed_ips_allocated ?? 0} IPs fixos
                 </p>
               ) : kind === "history" ? (
                 <p>

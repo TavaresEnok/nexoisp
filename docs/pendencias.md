@@ -1,5 +1,7 @@
 # Pendências do NexoISP
 
+> Resumo atual e jornadas do piloto: [Estado](ESTADO.md). As seções abaixo detalham as pendências.
+
 Consolidado em 17/10/2026 a partir do código e dos planos anteriores. Esta lista mantém trabalho ainda necessário, sem repetir entregas concluídas nem transformar ensaio sintético em homologação de produção.
 
 ## Entrada em produção

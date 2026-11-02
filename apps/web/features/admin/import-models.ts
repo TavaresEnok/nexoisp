@@ -28,6 +28,7 @@ export const totals = z.object({
   invoices_paid: z.coerce.number().optional(),
   invoices_partial: z.coerce.number().optional(),
   invoices_canceled: z.coerce.number().optional(),
+  fixed_ips_allocated: z.coerce.number().optional(),
 });
 export const importRow = z.object({
   row: z.coerce.number(),
@@ -111,6 +112,7 @@ export const fieldLabels: Record<string, string> = {
   multa_valor: "Valor da multa",
   multa_modelo: "Modelo da multa",
   indicado_por: "Indicado por",
+  ip_fixo: "IP fixo (IPv4)",
   vencimento: "Vencimento",
   valor: "Valor",
   competencia: "Competência",
