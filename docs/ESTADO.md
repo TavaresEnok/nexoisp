@@ -6,7 +6,7 @@
 
 A [auditoria de 06/11/2026](auditoria-2026-11-06/RELATORIO.md) corrige guardas de recuperação e produtividade das filas sem publicar o serviço. A baseline inicial foi `9119c57`, com diretório limpo. O relatório distingue provas novas, evidências históricas e limitações. A causa da divergência entre os dois CIs dessa baseline continua **inconclusiva**, pois os logs completos exigem acesso autenticado. Uma execução local verde não a resolve.
 
-Avaliação local sintética: aprovada no recorte validado. Publicação e piloto: **ainda bloqueados**; ações exatas na [lista externa única](auditoria-2026-11-06/PENDENCIAS-EXTERNAS.md). Backup local não protege contra perda do host; metas de RPO/RTO ainda precisam do operador. A aplicação antiga está parada e o virtual host local responde como PNETLab; [configuração proposta de publicação](auditoria-2026-11-06/PUBLICACAO.md), sem alterações no proxy.
+Avaliação local sintética: aprovada no recorte validado. Publicação e piloto: **ainda bloqueados**; ações exatas na [lista externa única](auditoria-2026-11-06/PENDENCIAS-EXTERNAS.md). Backup local não protege contra perda do host; metas de RPO/RTO ainda precisam do operador. A aplicação antiga está parada e o virtual host local responde como PNETLab; [configuração proposta de publicação](auditoria-2026-11-06/PUBLICACAO.md), atualizada para Nginx central → Apache com VirtualHost exclusivo → Caddy em loopback, sem alterações nos serviços. O ChatISP já tem VirtualHost próprio; o NexoISP ainda não tem upstream ativo validado.
 
 ## Base
 

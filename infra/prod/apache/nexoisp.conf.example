@@ -1,0 +1,29 @@
+# PREPARADO, NÃO HABILITADO. Exige Caddy NexoISP em 127.0.0.1:18380.
+# Cadeia: Nginx 10.10.0.10 -> Apache 10.10.0.26:443 -> Caddy -> API Go.
+# Pré-requisito: módulo headers (ainda não habilitado neste Apache).
+# Preservar zz-chatisp.conf e os VirtualHosts de PNETLab.
+# Estes certificados são do enlace interno existente, não do HTTPS público.
+<VirtualHost *:443>
+    ServerName nexoisp.tokstiloesporte.com
+
+    SSLEngine On
+    SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
+    SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+
+    ProxyRequests Off
+    ProxyPreserveHost On
+    RequestHeader set X-Forwarded-Proto "https"
+
+    # Upgrade genérico; NexoISP não possui rota WebSocket própria atualmente.
+    # Só validar handshake se existir uma rota efetiva no candidato publicado.
+    RewriteEngine On
+    RewriteCond %{HTTP:Upgrade} =websocket [NC]
+    RewriteCond %{HTTP:Connection} upgrade [NC]
+    RewriteRule ^/(.*)$ ws://127.0.0.1:18380/$1 [P,L]
+
+    ProxyPass / http://127.0.0.1:18380/ connectiontimeout=5 timeout=75
+    ProxyPassReverse / http://127.0.0.1:18380/
+
+    ErrorLog ${APACHE_LOG_DIR}/nexoisp-error.log
+    CustomLog ${APACHE_LOG_DIR}/nexoisp-access.log combined
+</VirtualHost>
