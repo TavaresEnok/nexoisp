@@ -13,6 +13,7 @@ exactly-once de transporte externo.
 """
 import base64
 import hashlib
+import ipaddress
 import json
 import os
 from pathlib import Path
@@ -48,6 +49,7 @@ TOOLCHAIN_KEYS = frozenset({
     'http_proxy', 'https_proxy', 'no_proxy', 'TMPDIR', 'LANG', 'LC_ALL', 'TZ',
 })
 NAME_RE = re.compile(r'^nexo-b12-(src|dst)-[0-9a-f]{12}$')
+NETWORK_RE = re.compile(r'^nexo-b12-net-[0-9a-f]{12}$')
 VOLUME_RE = re.compile(r'^nexo-b12-(src|dst)-vol-[0-9a-f]{12}$')
 RESTORE_DB_RE = re.compile(r'^nexo_restore_check_[0-9]+_[0-9]+$')
 UUID_RE = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
@@ -107,6 +109,7 @@ def sample_spec():
     passwords = [format(index, 'x') * 32 for index in range(1, 10)]
     return Spec(
         run_id=run_id,
+        network=f'nexo-b12-net-{run_id}',
         source_container=f'nexo-b12-src-{run_id}',
         dest_container=f'nexo-b12-dst-{run_id}',
         source_volume=f'nexo-b12-src-vol-{run_id}',
@@ -145,6 +148,7 @@ def new_spec():
     suffix = secrets.token_hex(4)
     return Spec(
         run_id=run_id,
+        network=f'nexo-b12-net-{run_id}',
         source_container=f'nexo-b12-src-{run_id}',
         dest_container=f'nexo-b12-dst-{run_id}',
         source_volume=f'nexo-b12-src-vol-{run_id}',
@@ -193,6 +197,8 @@ def _distinct_ports(count, taken=None):
 
 def assert_lab_identity(spec):
     """Recusa destino herdado, nome reservado ou par origem/destino incompleto."""
+    if spec.network != f'nexo-b12-net-{spec.run_id}' or not NETWORK_RE.fullmatch(spec.network):
+        raise RestoreRefused('rede fora desta execução')
     pairs = (
         ('source_container', spec.source_container, NAME_RE, 'src'),
         ('dest_container', spec.dest_container, NAME_RE, 'dst'),
@@ -270,7 +276,7 @@ def begin_mutations(spec, mutate):
 
 
 def refuse_if_present(name, inspect_code):
-    if name in FORBIDDEN_NAMES or name.startswith('nexoisp') or not (NAME_RE.match(name) or VOLUME_RE.match(name)):
+    if name in FORBIDDEN_NAMES or name.startswith('nexoisp') or not (NAME_RE.match(name) or VOLUME_RE.match(name) or NETWORK_RE.match(name)):
         raise RestoreRefused('recurso recusado antes de inspecionar mutação')
     if inspect_code == 0:
         raise RestoreRefused('recurso já existe; abortado antes de reutilizar ou apagar')
@@ -434,7 +440,7 @@ def cleanup_plan(items, run_id):
         name = item.get('name')
         if item.get('run') != run_id or item.get('label') != LAB_LABEL:
             raise RestoreRefused('limpeza recusou recurso de outra execução')
-        if item.get('kind') not in ('container', 'volume'):
+        if item.get('kind') not in ('container', 'volume', 'network'):
             raise RestoreRefused('limpeza recusou tipo desconhecido')
         if name in FORBIDDEN_NAMES or not isinstance(name, str) or name.startswith('nexoisp') or not name.endswith(run_id):
             raise RestoreRefused('limpeza recusou nome reservado')
@@ -442,6 +448,8 @@ def cleanup_plan(items, run_id):
             raise RestoreRefused('limpeza recusou container fora do padrão')
         if item['kind'] == 'volume' and not VOLUME_RE.match(name):
             raise RestoreRefused('limpeza recusou volume fora do padrão')
+        if item['kind'] == 'network' and not NETWORK_RE.fullmatch(name):
+            raise RestoreRefused('limpeza recusou rede fora do padrão')
         plan.append({'kind': item['kind'], 'name': name})
     return plan
 
@@ -480,6 +488,18 @@ def _inspect_code(name):
     return subprocess.run(['docker', 'inspect', name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode
 
 
+def _create_network(spec, ambient):
+    assert_lab_identity(spec)
+    refuse_if_present(spec.network, subprocess.run(['docker', 'network', 'inspect', spec.network], capture_output=True).returncode)
+    network_args = []
+    if ambient.get('NEXO_B12_SUBNET'):
+        subnet = ipaddress.ip_network(ambient['NEXO_B12_SUBNET'], strict=True)
+        if subnet.version != 4 or not subnet.is_private or subnet.prefixlen != 28:
+            raise RestoreRefused('sub-rede do laboratório exige IPv4 privada /28')
+        network_args = ['--subnet', str(subnet)]
+    _checked(['docker', 'network', 'create', '--label', f'nexo.lab={LAB_LABEL}', '--label', f'nexo.lab.run={spec.run_id}', *network_args, spec.network], spec)
+
+
 def _create_volume(spec, name, role):
     refuse_if_present(name, _inspect_code(name))
     _checked([
@@ -498,6 +518,7 @@ def _create_container(spec, name, volume, published, password, role):
         '--label', f'nexo.lab={LAB_LABEL}',
         '--label', f'nexo.lab.run={spec.run_id}',
         '--label', f'nexo.lab.role={role}',
+        '--network', spec.network,
         '-p', f'127.0.0.1:{published}:5432',
         '-e', 'POSTGRES_USER=nexo_owner',
         '-e', f'POSTGRES_PASSWORD={password}',
@@ -515,7 +536,7 @@ def _create_container(spec, name, volume, published, password, role):
 
 def _wait_db(name):
     for _ in range(100):
-        if subprocess.run(['docker', 'exec', name, 'pg_isready', '-p', '5432', '-U', 'nexo_owner'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
+        if subprocess.run(['docker', 'exec', name, 'pg_isready', '-h', '127.0.0.1', '-p', '5432', '-U', 'nexo_owner'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
             return
         time.sleep(0.2)
     raise RuntimeError('PostgreSQL do ensaio não ficou pronto')
@@ -581,7 +602,7 @@ def _stop_process(process):
 
 def _api(env, spec, log_path):
     log = open(log_path, 'w', encoding='utf-8')
-    process = subprocess.Popen([str(ROOT / 'apps' / 'api-go' / 'bin' / 'api')], cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT)
+    process = subprocess.Popen([str(Path(spec.work_dir) / 'bin' / 'api')], cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT)
     base = 'http://' + env['NEXO_GO_ADDR']
     internal = 'http://' + env['NEXO_GO_INTERNAL_ADDR']
     try:
@@ -619,19 +640,20 @@ def _discover(spec):
     for kind, argv in (
         ('container', ['docker', 'ps', '-aq', '--filter', f'label=nexo.lab.run={spec.run_id}']),
         ('volume', ['docker', 'volume', 'ls', '-q', '--filter', f'label=nexo.lab.run={spec.run_id}']),
+        ('network', ['docker', 'network', 'ls', '-q', '--filter', f'label=nexo.lab.run={spec.run_id}']),
     ):
         result = subprocess.run(argv, capture_output=True, text=True)
         if result.returncode != 0:
-            continue
+            raise RestoreRefused('não foi possível descobrir os recursos da própria execução')
         for name in result.stdout.split():
             if kind == 'container':
                 inspected = json.loads(subprocess.run(['docker', 'inspect', name], capture_output=True, check=True).stdout)
                 labels = inspected[0]['Config']['Labels'] or {}
                 items.append({'kind': 'container', 'name': inspected[0]['Name'].lstrip('/'), 'run': labels.get('nexo.lab.run'), 'label': labels.get('nexo.lab')})
             else:
-                inspected = json.loads(subprocess.run(['docker', 'volume', 'inspect', name], capture_output=True, check=True).stdout)
+                inspected = json.loads(subprocess.run(['docker', kind, 'inspect', name], capture_output=True, check=True).stdout)
                 labels = inspected[0]['Labels'] or {}
-                items.append({'kind': 'volume', 'name': inspected[0]['Name'], 'run': labels.get('nexo.lab.run'), 'label': labels.get('nexo.lab')})
+                items.append({'kind': kind, 'name': inspected[0]['Name'], 'run': labels.get('nexo.lab.run'), 'label': labels.get('nexo.lab')})
     return items
 
 
@@ -640,10 +662,14 @@ def cleanup(spec):
     plan = cleanup_plan(items, spec.run_id)
     for item in plan:
         if item['kind'] == 'container':
-            subprocess.run(['docker', 'rm', '-f', item['name']], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(['docker', 'rm', '-f', item['name']], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     for item in plan:
         if item['kind'] == 'volume':
-            subprocess.run(['docker', 'volume', 'rm', item['name']], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(['docker', 'volume', 'rm', item['name']], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    for item in plan:
+        if item['kind'] == 'network':
+            subprocess.run(['docker', 'network', 'rm', item['name']], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 def _roles_ok(spec, container):
@@ -749,7 +775,7 @@ def _run_scenario(spec, ambient, phases, refusals):
     assert_lab_identity(spec)
     _phase(phases, 'identidade')
     work = Path(spec.work_dir)
-    bin_dir = ROOT / 'apps' / 'api-go' / 'bin'
+    bin_dir = work / 'bin'
     bin_dir.mkdir(parents=True, exist_ok=True)
     tool_env = toolchain_env(ambient)
     _checked(['go', 'build', '-o', str(bin_dir / 'nexo-db'), './cmd/nexo-db'], spec, env=tool_env, cwd=ROOT / 'apps' / 'api-go')
@@ -761,6 +787,7 @@ def _run_scenario(spec, ambient, phases, refusals):
     dest_env = process_env(spec, 'destination', ambient)
     if source_env['DATABASE_URL_OWNER'] == dest_env['DATABASE_URL_OWNER']:
         raise RestoreRefused('URLs de origem e destino coincidem')
+    _create_network(spec, ambient)
     _create_volume(spec, spec.source_volume, 'source')
     _create_volume(spec, spec.dest_volume, 'destination')
     _create_container(spec, spec.source_container, spec.source_volume, spec.source_port, spec.source_owner_password, 'source')
@@ -1058,6 +1085,7 @@ def _report(ok, phases, refusals, spec, error=None):
         'static_approval': False,
         'secrets': 'omitidos',
         'resources': None if spec is None else {
+            'network': spec.network,
             'source_container': spec.source_container,
             'destination_container': spec.dest_container,
             'source_volume': spec.source_volume,
@@ -1096,12 +1124,12 @@ def main():
         assert_lab_identity(spec)
         try:
             _run_scenario(spec, dict(os.environ), phases, refusals)
-            _report(True, phases, refusals, spec)
         finally:
             try:
                 cleanup(spec)
             finally:
                 work.cleanup()
+        _report(True, phases, refusals, spec)
     except SystemExit:
         raise
     except Exception as exc:

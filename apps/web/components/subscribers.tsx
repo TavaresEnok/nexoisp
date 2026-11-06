@@ -64,6 +64,7 @@ export type SubscriberListRow = {
 };
 export type SubscriberSummaryItem = { icon: LucideIcon; value: ReactNode; label: string; warning?: boolean };
 export type SubscriberDirectoryViewProps = {
+  operational?: boolean;
   description: string;
   actions: ReactNode;
   before?: ReactNode;
@@ -210,6 +211,7 @@ export function Subscribers() {
 }
 
 export function SubscriberDirectoryView({
+  operational = false,
   description,
   actions,
   before,
@@ -236,7 +238,7 @@ export function SubscriberDirectoryView({
   boundary = (content) => content,
   footer,
 }: SubscriberDirectoryViewProps) {
-  return (
+  const content = (
     <>
       <PageHeading
         title="Assinantes"
@@ -258,7 +260,7 @@ export function SubscriberDirectoryView({
         ))}
       </div>
       <Panel
-        title="Uma base. Todas as conexões."
+        title={operational ? "Cadastro de assinantes" : "Uma base. Todas as conexões."}
         description={panelDescription}
         action={<Badge variant="outline">{badge}</Badge>}
         className="list-panel"
@@ -452,4 +454,5 @@ export function SubscriberDirectoryView({
       {footer}
     </>
   );
+  return operational ? <div className="erp-daily erp-daily-subscribers">{content}</div> : content;
 }

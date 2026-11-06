@@ -15,7 +15,7 @@ DBP="${NEXO_DB_PORT:-5432}"
 psqlc() { docker exec -i "$DBC" psql -v ON_ERROR_STOP=1 -X -q -p "$DBP" -U nexo_owner "$@"; }
 TABLES="tenants users subscribers contracts plan_versions service_resources operations invoices payments gateway_events audit_events"
 counts() { for t in $TABLES; do printf "%s=%s " "$t" "$(psqlc -d "$1" -Atc "select count(*) from $t")"; done; }
-verify() { [ -f "$1.sha256" ] && (cd "$(dirname "$1")" && sha256sum -c --quiet "$(basename "$1").sha256") || { echo "ERRO: soma de verificação ausente ou inválida para $1"; exit 1; }; }
+verify() { python3 "$SCRIPT_DIR/backup-integrity.py" "$1"; }
 load() { # banco arquivo
   psqlc -d postgres -c "do \$\$ begin if not exists (select 1 from pg_roles where rolname = 'nexo_app') then create role nexo_app nologin; end if; if not exists (select 1 from pg_roles where rolname = 'nexo_radius') then create role nexo_radius nologin; end if; if not exists (select 1 from pg_roles where rolname = 'nexo_go') then create role nexo_go nologin inherit; grant nexo_app to nexo_go; end if; end \$\$"
   psqlc -d postgres -c "drop database if exists $1 with (force)" -c "create database $1"
@@ -48,8 +48,20 @@ case "${1:-}" in
     echo "restore-check OK (snapshot e isolamento conferidos)" ;;
   restore)
     f="$2"; [ "${3:-}" = "--yes" ] || { echo "confirme com --yes: o banco principal será SUBSTITUÍDO"; exit 1; }
-    verify "$f"; eval "${NEXO_API_SERVICE_STOP:-true}"
-    load nexo "$f"; eval "${NEXO_API_SERVICE_START:-true}"
+    [ "${NEXO_RESTORE_TARGET:-}" = "$DBC/nexo" ] || { echo "ERRO: defina NEXO_RESTORE_TARGET=$DBC/nexo após conferir o destino"; exit 1; }
+    for setting in NEXO_API_SERVICE_STOP NEXO_API_SERVICE_START NEXO_RESTORE_PREPARE NEXO_RESTORE_VERIFY; do
+      [ -n "${!setting:-}" ] || { echo "ERRO: $setting obrigatório para restore; use o wrapper ./nexo prod"; exit 1; }
+    done
+    verify "$f"
+    # Prove snapshot, RLS and keys before stopping writers or replacing data.
+    bash "$0" restore-check "$f"
+    eval "$NEXO_API_SERVICE_STOP"
+    # Any failure below leaves writers stopped. No EXIT trap may reopen them.
+    load nexo "$f"
+    python3 "$SCRIPT_DIR/backup-manifest.py" verify "$f" --database nexo
+    psqlc -d nexo -f - < "$SCRIPT_DIR/restore-isolation.sql"
+    eval "$NEXO_RESTORE_PREPARE"
+    eval "$NEXO_API_SERVICE_START"
     echo "banco restaurado de $f: $(counts nexo)" ;;
   *) sed -n '2,6p' "$0"; exit 1 ;;
 esac

@@ -45,10 +45,11 @@ case "${1:-help}" in
       sh -c "npm ci --no-audit --no-fund --silent >/dev/null && BASE=${BASE:-http://localhost:18080} node smoke.mjs" ;;
   agent-test) docker build -q $NEXO_BUILD_OPTS -t nexoisp-agent services/network-agent >/dev/null && docker run --rm $NEXO_RUN_OPTS nexoisp-agent python -m unittest discover -s tests -t . ;;
   backup)    scripts/backup.sh backup "${2:-backups}" ;;
-  restore-check) scripts/backup.sh restore-check "$2" ;;
-  restore)   running="$($COMPOSE ps --services --filter status=running | rg '^(api|api-go|vpn|radius|radius2)$' | tr '\n' ' ' || true)"
-             stop=true; start=true; if [ -n "$running" ]; then stop="$COMPOSE stop $running"; start="$COMPOSE run --rm migrate prepare && $COMPOSE start $running"; fi
-             NEXO_API_SERVICE_STOP="$stop" NEXO_API_SERVICE_START="$start" scripts/backup.sh restore "$2" "${3:-}" ;;
+  restore-check) NEXO_RESTORE_VERIFY="bash scripts/restore-verify-dev.sh" scripts/backup.sh restore-check "$2" ;;
+  restore)   running_output="$($COMPOSE ps --services --filter status=running)"
+             running=""; while read -r service; do case "$service" in api|api-go|vpn|radius|radius2) running+="$service ";; esac; done <<< "$running_output"
+             stop=true; start=true; if [ -n "$running" ]; then stop="$COMPOSE stop $running"; start="$COMPOSE start $running"; fi
+             NEXO_API_SERVICE_STOP="$stop" NEXO_API_SERVICE_START="$start" NEXO_RESTORE_PREPARE="$COMPOSE run --rm migrate prepare" NEXO_RESTORE_VERIFY="bash scripts/restore-verify-dev.sh" scripts/backup.sh restore "$2" "${3:-}" ;;
   prod)      shift; bash scripts/prod-go.sh "$@" ;;
   lab-radius) scripts/lab-radius.sh ;;
   lab-up)    infra/lab/lab.sh up ;;

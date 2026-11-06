@@ -1,3 +1,4 @@
+import { useState } from "react";
 import useSWR from "swr";
 import { Link } from "react-router-dom";
 import {
@@ -27,11 +28,16 @@ export function FinanceOverview({
   error?: unknown;
   company: string;
 }) {
-  const series = useSWR("erp-finance-monthly", async () =>
+  const [expanded, setExpanded] = useState(false);
+  const series = useSWR(expanded ? "erp-finance-monthly" : null, async () =>
     monthlySchema.parse(await api("/finance/monthly")),
   );
   return (
-    <>
+    <details
+      className="erp-management"
+      onToggle={(event) => setExpanded(event.currentTarget.open)}
+    >
+      <summary>Resumo financeiro e visão gerencial</summary>
       <QueryBoundary loading={loading} error={error}>
         {summary && (
           <div className="metrics-grid financial-metrics">
@@ -111,7 +117,7 @@ export function FinanceOverview({
           )}
         </Panel>
         <Panel
-          title="Uma baixa com confiança"
+          title="Conciliação pendente"
           description="Conciliação antes da confirmação"
           className="reconciliation-summary"
         >
@@ -132,6 +138,6 @@ export function FinanceOverview({
           </Button>
         </Panel>
       </div>
-    </>
+    </details>
   );
 }

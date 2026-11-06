@@ -33,15 +33,16 @@ case "${1:-}" in
     ;;
   restore-check) NEXO_DB_CONTAINER="$project-db-1" NEXO_RESTORE_VERIFY="bash scripts/restore-verify-prod.sh" bash scripts/backup.sh "$@" ;;
   restore)
-    running=();while read -r service;do case "$service" in api|api-go|vpn|radius|radius2) running+=("$service");; esac;done < <("${compose[@]}" ps --services --filter status=running)
+    running_output="$("${compose[@]}" ps --services --filter status=running)"
+    running=();while read -r service;do case "$service" in api|api-go|vpn|radius|radius2) running+=("$service");; esac;done <<< "$running_output"
     # The restore tool validates its --yes argument and checksum before stopping anything.
     printf -v base '%q ' "${compose[@]}"
     stop=true;start=true
     if ((${#running[@]}));then
       printf -v services '%q ' "${running[@]}"
-      stop="${base}stop $services";start="${base}run --rm migrate prepare && ${base}start $services"
+      stop="${base}stop $services";start="${base}start $services"
     fi
-    NEXO_DB_CONTAINER="$project-db-1" NEXO_API_SERVICE_STOP="$stop" NEXO_API_SERVICE_START="$start" bash scripts/backup.sh "$@"
+    NEXO_DB_CONTAINER="$project-db-1" NEXO_API_SERVICE_STOP="$stop" NEXO_API_SERVICE_START="$start" NEXO_RESTORE_PREPARE="${base}run --rm migrate prepare" NEXO_RESTORE_VERIFY="bash scripts/restore-verify-prod.sh" bash scripts/backup.sh "$@"
     ;;
   *) printf '%s\n' 'uso: ./nexo prod {up|db <comando>|ps|logs|down|backup|restore-check|restore <arquivo> --yes}';exit 2 ;;
 esac

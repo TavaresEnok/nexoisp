@@ -42,3 +42,37 @@ input[type="checkbox"] { accent-color: var(--primary); width: 16px; height: 16px
 
 /* Telas conectadas podem ter mais ações no cabeçalho que a demonstração; no celular elas quebram linha em vez de alargar a página. */
 @media (max-width: 700px) { .heading-actions { flex-wrap: wrap; } }
+
+/* Daily queues retain the v0 components and tokens with a shorter overview. */
+.erp-daily .page-heading { margin-bottom: 12px; padding-bottom: 12px; }
+.erp-daily .subscriber-summary { margin-bottom: 12px; padding: 12px 0; }
+.erp-daily .subscriber-summary strong { font-size: 18px; }
+.erp-daily .summary-icon { width: 30px; height: 30px; }
+.erp-daily .erp-source { margin-bottom: 12px; }
+.erp-daily .financial-metrics { gap: 10px; margin-bottom: 12px; }
+.erp-daily .metric-card { padding: 12px; }
+.erp-daily .metric-main { margin: 6px 0; }
+.erp-daily .metric-main strong { font-size: 22px; }
+.erp-management { margin: 0 0 12px; }
+.erp-management > summary { cursor: pointer; padding: 8px 0; color: var(--foreground); font-size: var(--text-caption); }
+.erp-management .financial-top-grid { margin-top: 12px; }
+.erp-daily .list-panel [data-slot="table-cell"], .erp-daily .list-panel [data-slot="table-head"] { padding-top: 10px; padding-bottom: 10px; }
+.erp-daily .list-panel [data-slot="table-cell"]:last-child,
+.erp-daily .list-panel [data-slot="table-head"]:last-child { position: sticky; right: 0; z-index: 1; background: var(--card); }
+.erp-daily-subscribers .list-panel [data-slot="table-cell"]:nth-child(2),
+.erp-daily-subscribers .list-panel [data-slot="table-head"]:nth-child(2),
+.erp-daily-invoices .list-panel [data-slot="table-cell"]:first-child,
+.erp-daily-invoices .list-panel [data-slot="table-head"]:first-child,
+.erp-daily-tickets .list-panel [data-slot="table-cell"]:first-child,
+.erp-daily-tickets .list-panel [data-slot="table-head"]:first-child { position: sticky; left: 0; z-index: 1; background: var(--card); }
+.erp-daily :is(button, input, select, summary):focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
+@media (max-width: 600px) {
+  .erp-daily .subscriber-summary { gap: 10px; }
+  .erp-daily .subscriber-summary > div { padding: 4px 8px; }
+  .erp-daily .summary-icon { display: none; }
+  .erp-daily .financial-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .erp-daily .metric-main strong { font-size: 18px; }
+  .erp-daily .metric-card p { font-size: 11px; }
+  .erp-daily .list-panel [data-slot="table-cell"]:nth-child(2) { max-width: 190px; }
+  .erp-daily .table-person { min-width: 0; }
+}

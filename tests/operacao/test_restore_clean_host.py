@@ -11,6 +11,7 @@ import os
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -234,6 +235,27 @@ class RestoreCleanHostGuards(unittest.TestCase):
         self.assertEqual(saved['base'], payload['base'])
         self.assertNotIn(spec.aes_key, buffer.getvalue())
         self.assertNotIn(spec.source_owner_password, buffer.getvalue())
+
+    def test_readiness_uses_tcp_not_temporary_init_socket(self):
+        calls = []
+        def run(argv, **kwargs):
+            calls.append(argv)
+            # The official image's initialization server only has a Unix socket.
+            return subprocess.CompletedProcess(argv, 1 if '-h' in argv and len(calls) == 1 else 0)
+        with patch.object(harness.subprocess, 'run', side_effect=run), patch.object(harness.time, 'sleep'):
+            harness._wait_db('synthetic-postgres')
+        self.assertEqual(len(calls), 2)
+        self.assertIn('127.0.0.1', calls[0])
+
+    def test_network_identity_and_cleanup_reject_foreign_run(self):
+        spec = harness.sample_spec()
+        plan = harness.cleanup_plan([{'kind': 'network', 'name': spec.network, 'run': spec.run_id, 'label': harness.LAB_LABEL}], spec.run_id)
+        self.assertEqual(plan, [{'kind': 'network', 'name': spec.network}])
+        spec.network = 'bridge'
+        with self.assertRaises(harness.RestoreRefused):
+            harness.assert_lab_identity(spec)
+        with self.assertRaises(harness.RestoreRefused):
+            harness.cleanup_plan([{'kind': 'network', 'name': 'bridge', 'run': spec.run_id, 'label': harness.LAB_LABEL}], spec.run_id)
 
     def test_generated_identity_is_acceptable(self):
         spec = harness.new_spec()

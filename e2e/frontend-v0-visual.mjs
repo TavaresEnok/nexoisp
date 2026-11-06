@@ -2,7 +2,7 @@ import { chromium } from 'playwright';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
-const output = new URL('../docs/integracao-v0/evidencias/', import.meta.url);
+const output = new URL(process.env.VISUAL_OUTPUT ?? '../docs/integracao-v0/evidencias/', import.meta.url);
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
 const checks = [];

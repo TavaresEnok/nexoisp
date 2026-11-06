@@ -91,11 +91,11 @@ export function TicketQueue({ tickets, openSubscriber, operational = false, acti
       icon: ShieldAlert,
     },
   ];
-  return (
+  const content = (
     <>
       {!embedded && <><PageHeading
         title="Atendimentos"
-        description="Uma fila organizada. Um assinante compreendido. Uma resolução melhor."
+        description={operational ? "Consulte pendências, protocolos e prazos de atendimento." : "Uma fila organizada. Um assinante compreendido. Uma resolução melhor."}
         actions={
           <>
             {actions}{!operational && <Button variant="outline" onClick={() => setRules(true)}>
@@ -146,7 +146,7 @@ export function TicketQueue({ tickets, openSubscriber, operational = false, acti
         ))}
       </div>
       </>}<Panel
-        title="Nenhuma conversa fica para trás"
+        title={operational ? "Fila de atendimento" : "Nenhuma conversa fica para trás"}
         description={operational ? "Consulta paginada, ordenada por atualização; indicadores de situação são desta página." : `${tickets.length} chamados da amostra demonstrativa · ordenados por abertura`}
         action={<>{embedded && actions}<Badge variant="outline">{operational ? "Protocolos do ERP" : "WhatsApp e telefone · cenário"}</Badge></>}
         className={cn("list-panel", styles.supportPanel)}
@@ -315,6 +315,7 @@ export function TicketQueue({ tickets, openSubscriber, operational = false, acti
       </Dialog>
     </>
   );
+  return operational && !embedded ? <div className="erp-daily erp-daily-tickets">{content}</div> : content;
 }
 
 export function TicketDetails({ticket:selected,onClose,openSubscriber,operational=false,children,isOpen,loading,error}:{ticket:TicketDisplay|null;onClose:()=>void;openSubscriber:(id:string)=>void;operational?:boolean;children?:ReactNode;isOpen?:boolean;loading?:boolean;error?:unknown}) {

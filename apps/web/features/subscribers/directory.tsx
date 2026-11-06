@@ -124,7 +124,8 @@ export function SubscriberDirectory() {
   return (
     <>
       <SubscriberDirectoryView
-        description="Cadastro, contratos e atendimento. Todo o contexto em uma única ficha."
+        operational
+        description="Consulte cadastros, contratos e atendimentos."
         actions={
           <>
             <Button

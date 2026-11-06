@@ -91,11 +91,11 @@ export function InvoiceCatalog({ invoices, snapshot: s, openSubscriber, operatio
       ]),
     );
   const receivedTrend = s ? revenueTrend(s.series) : null;
-  return (
+  const content = (
     <>
       <PageHeading
         title="Faturas"
-        description="Do recebimento à conciliação, sem perder de vista quem está do outro lado."
+        description={operational ? "Consulte títulos, vencimentos e recebimentos." : "Do recebimento à conciliação, sem perder de vista quem está do outro lado."}
         actions={
           <>{actions}<Button variant="outline" onClick={onExport ?? exportRows}>
             <Download data-icon="inline-start" />
@@ -174,7 +174,7 @@ export function InvoiceCatalog({ invoices, snapshot: s, openSubscriber, operatio
         </Panel>
       </div>
       </>}<Panel
-        title="Cada fatura, no seu lugar"
+        title={operational ? "Faturas registradas" : "Cada fatura, no seu lugar"}
         description={operational ? "Consulta paginada de cobranças registradas no ERP" : "Registros vinculados à amostra demonstrativa de assinantes"}
         action={<Badge variant="secondary">{money(total)} na seleção</Badge>}
         className="list-panel"
@@ -296,6 +296,7 @@ export function InvoiceCatalog({ invoices, snapshot: s, openSubscriber, operatio
       <InvoiceDetails invoice={selected} onClose={() => setSelected(null)} openSubscriber={openSubscriber} />
     </>
   );
+  return operational ? <div className="erp-daily erp-daily-invoices">{content}</div> : content;
 }
 
 export function InvoiceDetails({ invoice: selected, onClose, openSubscriber, operational = false, children, isOpen, loading, error }: { invoice: Invoice | null; onClose: () => void; openSubscriber: (id: string) => void; operational?: boolean; children?: ReactNode; isOpen?: boolean; loading?: boolean; error?: unknown }) {
