@@ -1,0 +1,13 @@
+Fri Nov  6 16:53:28 2026 : Info: Starting - reading configuration files ...
+Fri Nov  6 16:53:28 2026 : Info: Debug state unknown (cap_sys_ptrace capability not set)
+Fri Nov  6 16:53:28 2026 : Info: systemd watchdog is disabled
+Fri Nov  6 16:53:28 2026 : Info: rlm_sql (sql): Driver rlm_sql_postgresql (module rlm_sql_postgresql) loaded and linked
+Fri Nov  6 16:53:28 2026 : Warning: rlm_sql (sql): Ignoring read_groups as group_membership_query is not configured
+Fri Nov  6 16:53:28 2026 : Info: rlm_sql (sql): Attempting to connect to database "dbname=nexo_b12_source host=nexo-b12-src-31da7415ee51 port=5432 user=nexo_radius password=[omitido] application_name=nexo-radius"
+Fri Nov  6 16:53:28 2026 : Info: Loaded virtual server <default>
+Fri Nov  6 16:53:28 2026 : Warning: Ignoring "ldap" (see raddb/mods-available/README.rst)
+Fri Nov  6 16:53:28 2026 : Info:  # Skipping contents of 'if' as it is always 'false' -- /etc/freeradius/sites-enabled/inner-tunnel:366
+Fri Nov  6 16:53:28 2026 : Info: Loaded virtual server inner-tunnel
+Fri Nov  6 16:53:28 2026 : Info: Loaded virtual server default
+Fri Nov  6 16:53:28 2026 : Info: Loaded virtual server nexo_clients
+Fri Nov  6 16:53:28 2026 : Error: Thread create failed: Operation not permitted

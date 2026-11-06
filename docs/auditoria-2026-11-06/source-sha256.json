@@ -1,0 +1,24 @@
+{
+  "implementation_commit": "cbbb7518f15668959beb083380e18d74e8825522",
+  "baseline": "9119c57e67561b3bc28ace64440785f6e0a3842c",
+  "files": {
+    "apps/web/components/financial.tsx": "94f74895f3758c1565543a0b52fa0310a27388e2f69e248e74aad82bd4a12ea4",
+    "apps/web/components/subscribers.tsx": "ff98e8aa9bbb51932403895c51dcb8c635feb46bbff673c73a5af14b2082467e",
+    "apps/web/components/support.tsx": "a44fa0eb538a0b4c13042bfbaf36fc6e268e3a4f0ed9fdeb1058ef56f2c5cf5d",
+    "apps/web/features/finance/overview.tsx": "d23008a70b1c755aaffabb11c723d13b55e32ddeec96d3137088b44c50892b22",
+    "apps/web/features/subscribers/directory.tsx": "0691724bfa9ada1e2d39854ed4376ec4aca79ae5157c2349befa32fde710928c",
+    "apps/web/src/erp.css": "36739a88ce3acfffdb4e06c4198a2a6047022dce6120f08d1424571cc58d3caa",
+    "e2e/frontend-v0-visual.mjs": "1b00454c2ad79559fa78e4406c0ff29a50f662d205ebc4e14e972b9a2f068f31",
+    "e2e/pilot-audit.mjs": "306941f905b8b5ecf5f9e0f124599e28845de6b6c97d7e5f29e8631dd2f2722f",
+    "nexo": "42d4f8aa8cd2ef6a3b014b43e9f753353f14a447640a7511b40118187952b220",
+    "scripts/backup-integrity.py": "61eff1c07dc53f4c1cfd36fca62d2aaa192a48abdbe7ceee3d1071d640eb9d99",
+    "scripts/backup.sh": "43293ba6e6bdbf864a039572efc5efb11ed19265af34f5c8dde00a3788127105",
+    "scripts/prod-go.sh": "488255fcd66e0c426598162c36e4f14ffbc811045bcd32be3a7ced1361890120",
+    "scripts/restore-verify-dev.sh": "8cb56d0440691cc57b0f6e556bf21dc5370aa73d0113bbb501768ae7f760886e",
+    "tests/contrato/pilot_audit.py": "5e013cace36ac77c27d9b3ab4dbace0dab9418f394f067f5f5c6f5895e1e3171",
+    "tests/contrato/radius_api_lab.py": "e815fe7b64c0d3176d69a89169fb38374d009c1d64c1b969975cde6c4a48a7d2",
+    "tests/contrato/restore_clean_host.py": "60bba5ffce7f5989c3be5ec41a0df96fe229d3fb86cd0868007ba56ea0a77ed5",
+    "tests/operacao/test_backup_restore.py": "b16e1cce9f0dcb7a8a01d192501c162b3dd297ee9e794b07b6db82e321a5c2aa",
+    "tests/operacao/test_restore_clean_host.py": "4e593cb3edfbdf171369f3efe1399a8c8f66b77039d2ebf1de53fa61276573ef"
+  }
+}

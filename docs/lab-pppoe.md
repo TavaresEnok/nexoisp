@@ -160,6 +160,12 @@ Testa o **RADIUS integrado** (esquema real até a migração 86, PostgreSQL desc
 - **Isto não homologa Huawei nem Cisco.** O PNETLab desta máquina não tem imagem Cisco. As imagens Huawei NE40E (sem licença, sem `radius-server`) e CE6800 (sem `radius-server`) sobem mas não funcionam como cliente RADIUS; o AR1000v pede login desconhecido.
 - Não cobre desconexão/CoA, IPoE/hotspot, IPv6, `Simultaneous-Use` nem carga acima de 100. As contas são gravadas direto em `radius_*` com os atributos do motor (`apps/api-go/internal/radius/vendor.go`), sem passar pela API do NexoISP.
 
+## 7. API até FreeRADIUS em UDP (06/11/2026)
+
+A [prova sintética atual](auditoria-2026-11-06/radius-api.json), executada por `tests/contrato/radius_api_lab.py`, cria assinante, plano, contrato, NAS sintético e credencial pela API Go. O job River confirma a operação, cuja identidade é conferida por leitura SQL; o FreeRADIUS atual responde PAP Access-Accept com a senha correta e Access-Reject com senha incorreta. Não há inserção direta em `radius_*` nessa prova. O autenticador da resposta UDP é validado.
+
+Isso fecha uma prova local de integração que faltava ao ensaio de 100 contas, sem transformar os dois ensaios numa homologação fim a fim de PPPoE. Não cobre sessão no NAS, accounting, suspensão/reativação física, carga ou fabricantes. O FreeRADIUS foi compilado da configuração atual em imagem de laboratório exclusiva. Neste Docker 20.10.9, a imagem recusou criar threads com o filtro padrão (`Operation not permitted`); somente o container descartável de teste usou `seccomp=unconfined`, conforme registrado no recibo. Não aplicar esse ajuste à produção como consequência desta prova.
+
 ## Pendências conhecidas do driver
 
 - Suspensão pode negar autenticação ou aplicar perfil de bloqueio, conforme política. Perfil, pool e redirecionamento precisam de configuração e homologação no NAS do provedor.

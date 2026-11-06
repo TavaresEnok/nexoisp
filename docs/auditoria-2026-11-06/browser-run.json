@@ -1,0 +1,10 @@
+{
+  "base": "9119c57e67561b3bc28ace64440785f6e0a3842c",
+  "ok": true,
+  "synthetic": true,
+  "checks": [
+    "HTTP real: OS/anexos privados, POP/LGPD; cotação/estoque, concorrência em uma réplica e isolamento",
+    "browser desktop e estreito: assinantes, faturas e atendimento; cookie/CSRF/API Go"
+  ],
+  "scope": "browser only; prior backend proof is separate"
+}

@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-06",
+  "implementation_commit": "cbbb7518f15668959beb083380e18d74e8825522",
+  "go": "go1.27.3 linux/amd64",
+  "postgres": "16.15 (postgres:16-alpine local image)",
+  "docker": "20.10.9",
+  "node": "22.23.4",
+  "npm": "10.9.9",
+  "playwright": "1.55.1",
+  "notes": [
+    "Node/npm extraídos de node:22.23.4-bookworm-slim para execução no host; Docker antigo recusa threads Node com seccomp padrão",
+    "FreeRADIUS descartável usou seccomp=unconfined por opção explícita; nenhuma configuração de produção alterada",
+    "Nenhum recurso B12 permaneceu após as provas; servidores Vite próprios foram encerrados"
+  ]
+}

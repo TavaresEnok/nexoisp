@@ -1,0 +1,26 @@
+{
+  "ok": true,
+  "base": "9119c57e67561b3bc28ace64440785f6e0a3842c",
+  "synthetic": true,
+  "checks": [
+    "API cadastro/contrato/credencial -> job River -> operação SUCCEEDED; identidade SQL conferida",
+    "FreeRADIUS real: PAP Access-Accept e senha errada Access-Reject; autenticador da resposta conferido"
+  ],
+  "limits": [
+    "PAP/UDP real; sem sessão PPPoE, accounting ou NAS físico",
+    "MikroTik/Huawei/Cisco físicos não homologados",
+    "não prova carga de 100 usuários nem RPO/RTO"
+  ],
+  "identity": {
+    "resource_id": "84f8c27e-cf81-4531-8d70-143d8f5c6a6b",
+    "contract_id": "f6007a55-56a0-4c51-964b-b8cc5b9cd898",
+    "subscriber_id": "651d49f5-ceb3-4b20-a752-72c158658d3b",
+    "pppoe_username": "audit-887077006dc7",
+    "operation_id": "4612f0b9-3fa6-42a9-98fe-9dc5c4b0b614",
+    "status": "SUCCEEDED"
+  },
+  "docker_security_opt": [
+    "--security-opt",
+    "seccomp=unconfined"
+  ]
+}

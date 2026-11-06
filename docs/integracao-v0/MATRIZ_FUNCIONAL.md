@@ -1,5 +1,7 @@
 # Matriz de cobertura funcional
 
+Nota de 06/11/2026: estados e recibos abaixo preservam a integração validada nas suas versões. A [auditoria operacional](../auditoria-2026-11-06/RELATORIO.md) acrescenta provas com escopo próprio, sem promover unidades ou declarar nova cobertura integral da etapa 7.
+
 Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 174 unidades incluem capacidades parciais, demonstrativas e internas; os estados do backend são preservados. O JSON correspondente mantém endpoints, restrições e evidências. A situação de cada unidade é independente da presença de uma página ou de um menu.
 
 | ID | Estado histórico no backend | Funcionalidade | Integração |

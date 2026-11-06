@@ -1,6 +1,6 @@
 # NexoISP
 
-ERP SaaS para provedores de internet. Consulte o [índice da documentação](docs/README.md), a
+ERP SaaS para provedores de internet. A situação operacional vigente está em [ESTADO](docs/ESTADO.md), com [auditoria de 06/11/2026](docs/auditoria-2026-11-06/RELATORIO.md) e [pendências externas consolidadas](docs/auditoria-2026-11-06/PENDENCIAS-EXTERNAS.md). Consulte o [índice da documentação](docs/README.md), a
 [arquitetura atual](docs/arquitetura.md) e as [pendências para produção](docs/pendencias.md).
 
 A interface oficial usa o frontend do v0, com as sete etapas de integração concluídas. A [matriz funcional](docs/integracao-v0/MATRIZ_FUNCIONAL.md) registra 154 unidades integradas e validadas, das quais 12 refletem capacidade demonstrativa (4) ou parcial (8) do Go, e 20 serviços internos, contratos externos e limitações do Go preservados. A igualdade pixel a pixel com o v0 original está comprovada para a demonstração; as telas conectadas têm prova estrutural e de regressão visual ([fidelidade](docs/integracao-v0/FIDELIDADE-V0.md)). Recursos somente previstos no desenho são identificados como planejados. O [plano e a validação](docs/integracao-v0/PLANO.md) documentam o fechamento; [execução e limites](docs/integracao-v0/OPERACAO.md) explicam a aplicação oficial e os laboratórios. A referência original e o frontend anterior foram preservados.
@@ -51,4 +51,4 @@ Configuração dos módulos: [operação](docs/operacao.md). Driver e homologaç
 Bloqueios do lançamento e evolução ainda necessária: [pendências](docs/pendencias.md).
 
 Simulado x real: os drivers `demo` e `olt_demo` e o gateway `demo` são simulações identificadas na interface e bloqueadas fora do modo
-demonstração. A integração MikroTik/PPPoE foi validada em laboratório virtual (CHR 7.24.5), não no equipamento do piloto, e não há gateway de pagamento real integrado.
+demonstração. A integração MikroTik/PPPoE foi validada em laboratório virtual (CHR 7.24.5), não no equipamento do piloto, e o pipeline Efí está limitado ao sandbox interno, sem homologação real. Na fase 1, a cobrança permanece no sistema anterior.

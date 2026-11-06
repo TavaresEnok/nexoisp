@@ -1,5 +1,7 @@
 # Roteiro do primeiro piloto
 
+> Auditoria local de 06/11/2026: [relatório e limites](auditoria-2026-11-06/RELATORIO.md). [Lista única de ações externas](auditoria-2026-11-06/PENDENCIAS-EXTERNAS.md).
+>
 > Jornadas do piloto, decisões e recursos pendentes: [Estado](ESTADO.md).
 
 Este roteiro organiza as decisões e evidências necessárias para operar o NexoISP com um primeiro provedor. A conclusão de uma etapa exige evidência registrada e responsável definido. Ele complementa as [pendências de produção](pendencias.md) e não substitui a homologação de equipamentos.

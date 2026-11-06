@@ -1,0 +1,70 @@
+{
+  "ok": true,
+  "checks": [
+    "login real por cookie HttpOnly e comando sem CSRF recusado",
+    "cadastro, contrato, fatura e baixa manual idempotente pela API; título pago relido",
+    "titular e título recusados para outro provedor",
+    "três filas em desktop/390 px: tabela visível, sem overflow da página, ação fixa; gerencial recolhido abre pelo teclado"
+  ],
+  "screens": [
+    {
+      "name": "assinantes",
+      "size": "desktop",
+      "firstRowY": 445.375,
+      "pageWidth": 1440,
+      "viewport": 1440,
+      "tableScrolls": false,
+      "managementCollapsed": null
+    },
+    {
+      "name": "assinantes",
+      "size": "estreito",
+      "firstRowY": 624.203125,
+      "pageWidth": 390,
+      "viewport": 390,
+      "tableScrolls": true,
+      "managementCollapsed": null
+    },
+    {
+      "name": "faturas",
+      "size": "desktop",
+      "firstRowY": 413.078125,
+      "pageWidth": 1440,
+      "viewport": 1440,
+      "tableScrolls": false,
+      "managementCollapsed": true
+    },
+    {
+      "name": "faturas",
+      "size": "estreito",
+      "firstRowY": 580.609375,
+      "pageWidth": 390,
+      "viewport": 390,
+      "tableScrolls": true,
+      "managementCollapsed": true
+    },
+    {
+      "name": "atendimentos",
+      "size": "desktop",
+      "firstRowY": 506.375,
+      "pageWidth": 1440,
+      "viewport": 1440,
+      "tableScrolls": false,
+      "managementCollapsed": null
+    },
+    {
+      "name": "atendimentos",
+      "size": "estreito",
+      "firstRowY": 698.890625,
+      "pageWidth": 390,
+      "viewport": 390,
+      "tableScrolls": true,
+      "managementCollapsed": null
+    }
+  ],
+  "limits": [
+    "Vite e HTTP locais; não valida TLS/proxy público",
+    "avaliação automatizada não substitui uso com atendente real",
+    "somente dados sintéticos"
+  ]
+}

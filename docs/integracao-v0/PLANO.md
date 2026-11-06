@@ -2,6 +2,9 @@
 
 ## Resultado
 
+O fechamento abaixo é histórico da integração. A auditoria operacional de 06/11/2026 está em [relatório](../auditoria-2026-11-06/RELATORIO.md); ela não reclassifica unidades por presença de menu nem renova a homologação de toda a etapa 7. Ajustes de produtividade atuais evoluem somente em `apps/web`, mantendo a referência original.
+
+
 Aceite revisado em 19/10/2026 após resolver e validar R01–R06. Consulte o [relatório de correções](CORRECOES-REVISAO.md) e a [revisão histórica](REVISAO-ARQUITETURA-E-CHECKUP.md).
 
 Depois de uma auditoria independente, as telas de maior destaque (painel inicial, lista e ficha de assinantes, rede) passaram a usar os componentes originais do v0 em vez de reescritas, com travas automáticas de fidelidade: veja [Fidelidade ao frontend v0](FIDELIDADE-V0.md).

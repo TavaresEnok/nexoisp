@@ -1,10 +1,16 @@
 # Estado do NexoISP
 
-**Atualizado em 02/11/2026.** Este é o resumo de referência. Os documentos `LOTE*`, `CONCLUSAO-INTEGRAL*`, `RELATORIO-GERAL-*` e `CORRECOES-*` ficam como histórico: os estados que eles descrevem eram válidos na data de cada um e não são repetidos aqui.
+**Atualizado em 06/11/2026.** Este é o resumo de referência. Os documentos `LOTE*`, `CONCLUSAO-INTEGRAL*`, `RELATORIO-GERAL-*` e `CORRECOES-*` ficam como histórico: os estados que eles descrevem eram válidos na data de cada um e não são repetidos aqui.
+
+## Auditoria local atual
+
+A [auditoria de 06/11/2026](auditoria-2026-11-06/RELATORIO.md) corrige guardas de recuperação e produtividade das filas sem publicar o serviço. A baseline inicial foi `9119c57`, com diretório limpo. O relatório distingue provas novas, evidências históricas e limitações. A causa da divergência entre os dois CIs dessa baseline continua **inconclusiva**, pois os logs completos exigem acesso autenticado. Uma execução local verde não a resolve.
+
+Avaliação local sintética: aprovada no recorte validado. Publicação e piloto: **ainda bloqueados**; ações exatas na [lista externa única](auditoria-2026-11-06/PENDENCIAS-EXTERNAS.md). Backup local não protege contra perda do host; metas de RPO/RTO ainda precisam do operador. A aplicação antiga está parada e o virtual host local responde como PNETLab; [configuração proposta de publicação](auditoria-2026-11-06/PUBLICACAO.md), sem alterações no proxy.
 
 ## Base
 
-- Código publicado em `main` e `dev/lote01-consolidado-2026-10-26` no commit `42b8154`. O workflow `backend Go e painel` passou nesse commit (execuções 41174481523 em `main` e 41174481387 em `dev`), incluindo os contratos com PostgreSQL, o painel real contra o Go e o SBOM.
+- Evidência histórica: código em `main` e `dev/lote01-consolidado-2026-10-26` no commit `42b8154` à época da validação. A auditoria atual partiu de `9119c57` e gera somente commits locais; não houve push. O workflow `backend Go e painel` passou nesse commit (execuções 41174481523 em `main` e 41174481387 em `dev`), incluindo os contratos com PostgreSQL, o painel real contra o Go e o SBOM.
 - Não houve deploy, produção, migração de dados reais nem homologação em equipamento físico ou com gateway real.
 - Entregue nesta etapa: coluna `ip_fixo` na importação CSV (assinantes e contratos), com as regras da alocação manual do IPAM e sem enviar nada ao equipamento ([Importação CSV](importacao-csv.md)).
 
@@ -32,7 +38,7 @@ Cada jornada lista o que já existe e **apenas** o que impede usá-la no piloto.
 | J2 Cobrança e recebimento | Geração de títulos, baixa manual, estorno, acordos, CSV contábil | Na fase 1 a cobrança fica no sistema atual (decisão abaixo); nada impede o piloto. Cobrança pelo NexoISP exige gateway homologado | Fora da fase 1 (sandbox Efí no futuro) |
 | J3 Ativação, bloqueio e reativação | Provisionamento, suspensão por rejeição ou perfil, reativação e desconexão pelo agente e RADIUS integrado, todos manuais na fase 1 e conferidos pelo preflight | Só validado no MikroTik CHR virtual; falta o NAS físico do piloto | Recurso externo (NAS) |
 | J4 Atendimento e OS | Chamados, OS, agenda, estoque, campo e anexos | Nenhuma: sem avisos automáticos na fase 1 | Pronta para homologação de uso |
-| J5 Recuperação | Backup diário, manifesto, `restore-check`, gancho `NEXO_BACKUP_COPY`, preflight, alertas Prometheus; ensaio em cluster limpo | Host do piloto, destino externo da cópia, cofre de chaves, canal de alertas | Recurso externo |
+| J5 Recuperação | Backup diário, manifesto, `restore-check`, gancho `NEXO_BACKUP_COPY`, preflight, alertas Prometheus; ensaio em cluster limpo e guardas do restore operacional auditadas | Host do piloto, destino externo da cópia, cofre de chaves, canal de alertas | Recurso externo |
 
 ## Correções internas
 
@@ -40,7 +46,7 @@ Cada jornada lista o que já existe e **apenas** o que impede usá-la no piloto.
 |---|---|
 | IP fixo na importação CSV | Feito em 02/11/2026, com testes em PostgreSQL real (aceite, rejeições, reimportação, prévia, permissão, isolamento entre provedores e concorrência) |
 | Preflight da fase 1 do piloto | Feito em 02/11/2026: `NEXO_PILOTO_FASE=1` faz o preflight conferir as decisões abaixo, com teste em PostgreSQL real |
-| Outras lacunas internas das jornadas | Nenhuma encontrada que não dependa de recurso externo |
+| Recuperação auditada em 06/11 | Corrigidas lacunas locais: destino explícito, autenticação de dump/manifesto, validação antes da substituição e retomada bloqueada em falha. Ver relatório para prova e limites |
 
 ## Decisões do piloto — fase 1
 
@@ -66,7 +72,7 @@ Com `NEXO_PILOTO_FASE=1`, o `./nexo prod db preflight` reprova o ambiente se hou
 - Destino externo para backup, cofre para chaves e canal para alertas.
 - Para fases seguintes, não para a fase 1: conta sandbox Efí (cobrança pelo NexoISP), WhatsApp oficial ou canal HTTP (avisos automáticos), OLT e CPEs do provedor.
 
-Em 02/11/2026 o dono informou que nenhum desses recursos está disponível agora. Até chegarem, o piloto não pode começar; o que dá para adiantar sem eles já está feito.
+Em 02/11/2026 o dono informou que nenhum desses recursos está disponível agora. Até chegarem, o piloto não pode começar. A auditoria atual encontrou e corrigiu lacunas locais adicionais; não presumir ausência de lacunas por falta de recursos externos.
 
 ## Homologações pendentes
 

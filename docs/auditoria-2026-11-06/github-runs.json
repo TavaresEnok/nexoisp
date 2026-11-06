@@ -1,0 +1,724 @@
+[
+  {
+    "run": "41547653818",
+    "head_sha": "9119c57e67561b3bc28ace64440785f6e0a3842c",
+    "conclusion": "failure",
+    "path": ".github/workflows/native.yml",
+    "run_attempt": 1,
+    "created_at": "2026-11-02T23:43:57Z",
+    "event": "push",
+    "head_branch": "main",
+    "jobs": [
+      {
+        "id": 125627072031,
+        "name": "agente",
+        "conclusion": "success",
+        "labels": [
+          "ubuntu-24.04"
+        ],
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-02T23:44:01Z",
+            "completed_at": "2026-11-02T23:44:01Z"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-02T23:44:01Z",
+            "completed_at": "2026-11-02T23:44:03Z"
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-02T23:44:03Z",
+            "completed_at": "2026-11-02T23:44:03Z"
+          },
+          {
+            "name": "Run pip install --require-hashes -r services/network-agent/requirements.txt && pip check",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-02T23:44:03Z",
+            "completed_at": "2026-11-02T23:44:10Z"
+          },
+          {
+            "name": "Run python -m unittest discover -s tests -t .",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-11-02T23:44:10Z",
+            "completed_at": "2026-11-02T23:44:13Z"
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-02T23:44:13Z",
+            "completed_at": "2026-11-02T23:44:13Z"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-11-02T23:44:13Z",
+            "completed_at": "2026-11-02T23:44:13Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-11-02T23:44:13Z",
+            "completed_at": "2026-11-02T23:44:13Z"
+          }
+        ]
+      },
+      {
+        "id": 125627072240,
+        "name": "verificar",
+        "conclusion": "failure",
+        "labels": [
+          "ubuntu-24.04"
+        ],
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-02T23:44:00Z",
+            "completed_at": "2026-11-02T23:44:02Z"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-02T23:44:02Z",
+            "completed_at": "2026-11-02T23:44:04Z"
+          },
+          {
+            "name": "Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-02T23:44:04Z",
+            "completed_at": "2026-11-02T23:44:15Z"
+          },
+          {
+            "name": "Build, an\u00e1lise e testes Go",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-02T23:44:15Z",
+            "completed_at": "2026-11-02T23:46:09Z"
+          },
+          {
+            "name": "Run golangci/golangci-lint-action@v8",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-11-02T23:46:09Z",
+            "completed_at": "2026-11-02T23:46:19Z"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-02T23:46:19Z",
+            "completed_at": "2026-11-02T23:46:21Z"
+          },
+          {
+            "name": "Frontend preservado",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-02T23:46:21Z",
+            "completed_at": "2026-11-02T23:47:01Z"
+          },
+          {
+            "name": "Instala\u00e7\u00e3o, administra\u00e7\u00e3o, financeiro e outbox com duas r\u00e9plicas Go",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-02T23:47:01Z",
+            "completed_at": "2026-11-02T23:47:58Z"
+          },
+          {
+            "name": "Migra\u00e7\u00e3o 64 para 65 e v\u00ednculos financeiros pendentes",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-02T23:47:58Z",
+            "completed_at": "2026-11-02T23:48:02Z"
+          },
+          {
+            "name": "Migra\u00e7\u00e3o 65 para 66 e movimentos financeiros hist\u00f3ricos",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-11-02T23:48:02Z",
+            "completed_at": "2026-11-02T23:48:06Z"
+          },
+          {
+            "name": "Migra\u00e7\u00e3o 66 para 67 sem reativacoes retroativas",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-11-02T23:48:06Z",
+            "completed_at": "2026-11-02T23:48:10Z"
+          },
+          {
+            "name": "Provider issuance migration and logical recovery",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12,
+            "started_at": "2026-11-02T23:48:10Z",
+            "completed_at": "2026-11-02T23:48:16Z"
+          },
+          {
+            "name": "Reserva de emissao, vinculo e recuperacao da migracao 69",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13,
+            "started_at": "2026-11-02T23:48:16Z",
+            "completed_at": "2026-11-02T23:48:22Z"
+          },
+          {
+            "name": "Contrato 69 para 72 e recuperacao com schema atual",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14,
+            "started_at": "2026-11-02T23:48:22Z",
+            "completed_at": "2026-11-02T23:48:29Z"
+          },
+          {
+            "name": "Devolucoes e operacoes 72 para 74 com restauracao logica",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15,
+            "started_at": "2026-11-02T23:48:29Z",
+            "completed_at": "2026-11-02T23:48:36Z"
+          },
+          {
+            "name": "Recebimento independente de falha tecnica e retomada",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16,
+            "started_at": "2026-11-02T23:48:36Z",
+            "completed_at": "2026-11-02T23:48:49Z"
+          },
+          {
+            "name": "Isolamento, RLS, locks e rein\u00edcio Go com PostgreSQL descart\u00e1vel",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17,
+            "started_at": "2026-11-02T23:48:49Z",
+            "completed_at": "2026-11-02T23:51:21Z"
+          },
+          {
+            "name": "Falha por provedor, filas, limites compartilhados e recupera\u00e7\u00e3o",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18,
+            "started_at": "2026-11-02T23:51:21Z",
+            "completed_at": "2026-11-02T23:51:38Z"
+          },
+          {
+            "name": "Restore sint\u00e9tico em cluster vazio exclusivo",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 19,
+            "started_at": "2026-11-02T23:51:38Z",
+            "completed_at": "2026-11-02T23:51:41Z"
+          },
+          {
+            "name": "Ferramentas de opera\u00e7\u00e3o e confer\u00eancia de migra\u00e7\u00e3o",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 20,
+            "started_at": "2026-11-02T23:51:41Z",
+            "completed_at": "2026-11-02T23:51:41Z"
+          },
+          {
+            "name": "Integridade de cadastro, campos personalizados, equipe e estoque",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 21,
+            "started_at": "2026-11-02T23:51:41Z",
+            "completed_at": "2026-11-02T23:51:41Z"
+          },
+          {
+            "name": "Painel real contra Go",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 22,
+            "started_at": "2026-11-02T23:51:41Z",
+            "completed_at": "2026-11-02T23:51:41Z"
+          },
+          {
+            "name": "Imagem da VPN Go",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 23,
+            "started_at": "2026-11-02T23:51:41Z",
+            "completed_at": "2026-11-02T23:51:41Z"
+          },
+          {
+            "name": "SBOM CycloneDX do m\u00f3dulo Go e do workspace npm",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 24,
+            "started_at": "2026-11-02T23:51:41Z",
+            "completed_at": "2026-11-02T23:51:41Z"
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 25,
+            "started_at": "2026-11-02T23:51:41Z",
+            "completed_at": "2026-11-02T23:51:41Z"
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 26,
+            "started_at": "2026-11-02T23:51:41Z",
+            "completed_at": "2026-11-02T23:51:42Z"
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 27,
+            "started_at": "2026-11-02T23:51:42Z",
+            "completed_at": "2026-11-02T23:51:43Z"
+          },
+          {
+            "name": "Limpeza do laborat\u00f3rio",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 28,
+            "started_at": "2026-11-02T23:51:43Z",
+            "completed_at": "2026-11-02T23:51:43Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 53,
+            "started_at": "2026-11-02T23:51:43Z",
+            "completed_at": "2026-11-02T23:51:43Z"
+          },
+          {
+            "name": "Post Run golangci/golangci-lint-action@v8",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 54,
+            "started_at": "2026-11-02T23:51:43Z",
+            "completed_at": "2026-11-02T23:51:44Z"
+          },
+          {
+            "name": "Post Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 55,
+            "started_at": "2026-11-02T23:51:44Z",
+            "completed_at": "2026-11-02T23:51:44Z"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 56,
+            "started_at": "2026-11-02T23:51:44Z",
+            "completed_at": "2026-11-02T23:51:44Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 57,
+            "started_at": "2026-11-02T23:51:44Z",
+            "completed_at": "2026-11-02T23:51:44Z"
+          }
+        ]
+      }
+    ],
+    "full_logs": "HTTP 403 unauthenticated; no stored GitHub credential available"
+  },
+  {
+    "run": "41547651078",
+    "head_sha": "9119c57e67561b3bc28ace64440785f6e0a3842c",
+    "conclusion": "success",
+    "path": ".github/workflows/native.yml",
+    "run_attempt": 1,
+    "created_at": "2026-11-02T23:43:56Z",
+    "event": "push",
+    "head_branch": "dev/lote01-consolidado-2026-10-26",
+    "jobs": [
+      {
+        "id": 125627063512,
+        "name": "verificar",
+        "conclusion": "success",
+        "labels": [
+          "ubuntu-24.04"
+        ],
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-02T23:43:59Z",
+            "completed_at": "2026-11-02T23:44:00Z"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-02T23:44:00Z",
+            "completed_at": "2026-11-02T23:44:02Z"
+          },
+          {
+            "name": "Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-02T23:44:02Z",
+            "completed_at": "2026-11-02T23:44:14Z"
+          },
+          {
+            "name": "Build, an\u00e1lise e testes Go",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-02T23:44:14Z",
+            "completed_at": "2026-11-02T23:46:30Z"
+          },
+          {
+            "name": "Run golangci/golangci-lint-action@v8",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-11-02T23:46:30Z",
+            "completed_at": "2026-11-02T23:46:41Z"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-02T23:46:41Z",
+            "completed_at": "2026-11-02T23:46:43Z"
+          },
+          {
+            "name": "Frontend preservado",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-02T23:46:43Z",
+            "completed_at": "2026-11-02T23:47:39Z"
+          },
+          {
+            "name": "Instala\u00e7\u00e3o, administra\u00e7\u00e3o, financeiro e outbox com duas r\u00e9plicas Go",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-02T23:47:39Z",
+            "completed_at": "2026-11-02T23:48:49Z"
+          },
+          {
+            "name": "Migra\u00e7\u00e3o 64 para 65 e v\u00ednculos financeiros pendentes",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-02T23:48:49Z",
+            "completed_at": "2026-11-02T23:48:54Z"
+          },
+          {
+            "name": "Migra\u00e7\u00e3o 65 para 66 e movimentos financeiros hist\u00f3ricos",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-11-02T23:48:54Z",
+            "completed_at": "2026-11-02T23:48:59Z"
+          },
+          {
+            "name": "Migra\u00e7\u00e3o 66 para 67 sem reativacoes retroativas",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-11-02T23:48:59Z",
+            "completed_at": "2026-11-02T23:49:04Z"
+          },
+          {
+            "name": "Provider issuance migration and logical recovery",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12,
+            "started_at": "2026-11-02T23:49:04Z",
+            "completed_at": "2026-11-02T23:49:11Z"
+          },
+          {
+            "name": "Reserva de emissao, vinculo e recuperacao da migracao 69",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13,
+            "started_at": "2026-11-02T23:49:11Z",
+            "completed_at": "2026-11-02T23:49:19Z"
+          },
+          {
+            "name": "Contrato 69 para 72 e recuperacao com schema atual",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14,
+            "started_at": "2026-11-02T23:49:19Z",
+            "completed_at": "2026-11-02T23:49:27Z"
+          },
+          {
+            "name": "Devolucoes e operacoes 72 para 74 com restauracao logica",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15,
+            "started_at": "2026-11-02T23:49:27Z",
+            "completed_at": "2026-11-02T23:49:36Z"
+          },
+          {
+            "name": "Recebimento independente de falha tecnica e retomada",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16,
+            "started_at": "2026-11-02T23:49:36Z",
+            "completed_at": "2026-11-02T23:49:52Z"
+          },
+          {
+            "name": "Isolamento, RLS, locks e rein\u00edcio Go com PostgreSQL descart\u00e1vel",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17,
+            "started_at": "2026-11-02T23:49:52Z",
+            "completed_at": "2026-11-02T23:52:39Z"
+          },
+          {
+            "name": "Falha por provedor, filas, limites compartilhados e recupera\u00e7\u00e3o",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18,
+            "started_at": "2026-11-02T23:52:39Z",
+            "completed_at": "2026-11-02T23:53:11Z"
+          },
+          {
+            "name": "Restore sint\u00e9tico em cluster vazio exclusivo",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19,
+            "started_at": "2026-11-02T23:53:11Z",
+            "completed_at": "2026-11-02T23:53:24Z"
+          },
+          {
+            "name": "Ferramentas de opera\u00e7\u00e3o e confer\u00eancia de migra\u00e7\u00e3o",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20,
+            "started_at": "2026-11-02T23:53:24Z",
+            "completed_at": "2026-11-02T23:53:25Z"
+          },
+          {
+            "name": "Integridade de cadastro, campos personalizados, equipe e estoque",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21,
+            "started_at": "2026-11-02T23:53:25Z",
+            "completed_at": "2026-11-02T23:53:28Z"
+          },
+          {
+            "name": "Painel real contra Go",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 22,
+            "started_at": "2026-11-02T23:53:28Z",
+            "completed_at": "2026-11-03T00:00:34Z"
+          },
+          {
+            "name": "Imagem da VPN Go",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 23,
+            "started_at": "2026-11-03T00:00:34Z",
+            "completed_at": "2026-11-03T00:02:07Z"
+          },
+          {
+            "name": "SBOM CycloneDX do m\u00f3dulo Go e do workspace npm",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 24,
+            "started_at": "2026-11-03T00:02:07Z",
+            "completed_at": "2026-11-03T00:02:19Z"
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 25,
+            "started_at": "2026-11-03T00:02:19Z",
+            "completed_at": "2026-11-03T00:02:21Z"
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 26,
+            "started_at": "2026-11-03T00:02:21Z",
+            "completed_at": "2026-11-03T00:02:22Z"
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 27,
+            "started_at": "2026-11-03T00:02:22Z",
+            "completed_at": "2026-11-03T00:02:23Z"
+          },
+          {
+            "name": "Limpeza do laborat\u00f3rio",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 28,
+            "started_at": "2026-11-03T00:02:23Z",
+            "completed_at": "2026-11-03T00:02:23Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 53,
+            "started_at": "2026-11-03T00:02:23Z",
+            "completed_at": "2026-11-03T00:02:24Z"
+          },
+          {
+            "name": "Post Run golangci/golangci-lint-action@v8",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 54,
+            "started_at": "2026-11-03T00:02:24Z",
+            "completed_at": "2026-11-03T00:02:24Z"
+          },
+          {
+            "name": "Post Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 55,
+            "started_at": "2026-11-03T00:02:24Z",
+            "completed_at": "2026-11-03T00:02:24Z"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 56,
+            "started_at": "2026-11-03T00:02:24Z",
+            "completed_at": "2026-11-03T00:02:24Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 57,
+            "started_at": "2026-11-03T00:02:24Z",
+            "completed_at": "2026-11-03T00:02:24Z"
+          }
+        ]
+      },
+      {
+        "id": 125627063824,
+        "name": "agente",
+        "conclusion": "success",
+        "labels": [
+          "ubuntu-24.04"
+        ],
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-02T23:43:59Z",
+            "completed_at": "2026-11-02T23:44:00Z"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-02T23:44:00Z",
+            "completed_at": "2026-11-02T23:44:03Z"
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-02T23:44:03Z",
+            "completed_at": "2026-11-02T23:44:03Z"
+          },
+          {
+            "name": "Run pip install --require-hashes -r services/network-agent/requirements.txt && pip check",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-02T23:44:04Z",
+            "completed_at": "2026-11-02T23:44:11Z"
+          },
+          {
+            "name": "Run python -m unittest discover -s tests -t .",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-11-02T23:44:11Z",
+            "completed_at": "2026-11-02T23:44:14Z"
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-02T23:44:14Z",
+            "completed_at": "2026-11-02T23:44:14Z"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-11-02T23:44:15Z",
+            "completed_at": "2026-11-02T23:44:15Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-11-02T23:44:15Z",
+            "completed_at": "2026-11-02T23:44:15Z"
+          }
+        ]
+      }
+    ],
+    "full_logs": "HTTP 403 unauthenticated; no stored GitHub credential available"
+  }
+]

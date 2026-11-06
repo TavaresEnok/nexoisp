@@ -2,7 +2,7 @@
 
 > Resumo atual e jornadas do piloto: [Estado](ESTADO.md). As seções abaixo detalham as pendências.
 
-Consolidado em 17/10/2026 a partir do código e dos planos anteriores. Esta lista mantém trabalho ainda necessário, sem repetir entregas concluídas nem transformar ensaio sintético em homologação de produção.
+Reconciliado em 06/11/2026. Decisões vigentes em [Estado](ESTADO.md); evidências e limites em [Auditoria](auditoria-2026-11-06/RELATORIO.md). Esta lista mantém trabalho ainda necessário, sem repetir entregas concluídas nem transformar ensaio sintético em homologação de produção.
 
 ## Entrada em produção
 
@@ -10,9 +10,9 @@ Consolidado em 17/10/2026 a partir do código e dos planos anteriores. Esta list
 |---|---|---|
 | P0 | Provedor, responsáveis e grupo inicial | Definir contratos/NAS do piloto, janela, responsável por incidentes e fonte autoritativa por grupo |
 | P0 | Ambiente definitivo | Domínio/DNS, HTTPS, roteamento/firewall, segredos e certificados exclusivos, MFA administrativo e ausência de dados demo; executar `./nexo prod db preflight` |
-| P0 | Gateway de pagamento | Escolher provedor, implementar adaptador e homologar emissão, evento repetido/perdido, baixa, cancelamento e conciliação em sandbox antes de credenciais de produção |
-| P0 | Política comercial e fiscal | Definir suspensão, redução, reativação, proporcionalidade e processo fiscal; exportação contábil não emite nota |
-| P0 | Homologação PPPoE no provedor | Repetir [o roteiro](lab-pppoe.md) no equipamento/firmware físico, com VPN/RADIUS e vários clientes; conferir também o ciclo financeiro completo |
+| Fora da fase 1 | Gateway de pagamento | Pipeline Efí sandbox interno implementado; obter conta autorizada e homologar emissão, eventos, baixa, cancelamento e conciliação antes de uso real |
+| Definida para fase 1 | Política comercial e fiscal | Cobrança na origem, fiscal inativo, suspensão/reativação manuais, sem avisos automáticos; conferir preflight e uso assistido |
+| P0 | Homologação PPPoE no provedor | Repetir [o roteiro](lab-pppoe.md) no equipamento/firmware físico, com VPN/RADIUS e vários clientes; conferir suspensão/reativação manuais; ciclo financeiro integrado fica fora da fase 1 |
 | P0 | Dados reais e ensaio de corte | Exportação autorizada da origem, mapeamento, prévia e conferência de clientes, contratos, credenciais e saldos; reversão preservando alterações posteriores |
 | P0 | Backup e recuperação definitivos | Configurar destino externo, habilitar o agendamento já disponível, executar cópia real e `restore-check`, guardar chaves/certificados em cofre; definir perda de dados e tempo de recuperação aceitáveis |
 | P0 | Monitoramento real | Monitor externo de `/api/health`, alertas no canal do responsável, acompanhamento de agentes, operações incertas, erros financeiros e capacidade de disco |
@@ -43,7 +43,7 @@ O código inclui configuração de produção, preflight, backup/restauração e
 
 - SGP: ferramentas de leitura e exportação existem, mas faltam amostra real e mapeamento confirmado. O backup cifrado analisado não foi aberto; obter exportação legível ou procedimento oficial, sem presumir compatibilidade.
 - IXC: faltam formato de exportação/backup e respostas da API necessárias ao mapeamento.
-- Importação CSV: ainda não transfere todo o inventário de rede, IP fixo, documentos, usuários/permissões nem múltiplos serviços por assinante. MAC, etiquetas e histórico de atendimentos/OS/anotações já têm formato documentado.
+- Importação CSV: há tipos próprios para inventário de rede, documentos, usuários e contratos adicionais; IP fixo segue o IPAM e exige permissão de rede. Prefixo IPv6 delegado e histórico de sessões não entram. A implementação não comprova migração de uma base real; conferir mapeamento e saldos da exportação autorizada. [Formatos e limites](importacao-csv.md).
 - API nativa e webhooks já existem. Compatibilidade com rotas de SGP/IXC é outra entrega: identificar integrações realmente usadas e contratos de resposta antes de escrever adaptadores.
 
 Consulte [Migração SGP](10-migracao-sgp.md) e [Importação CSV](importacao-csv.md) para procedimentos e limites.
@@ -64,6 +64,11 @@ Não bloqueia automaticamente o primeiro piloto; priorizar conforme o uso real:
 Não reabrir como pendência busca global, linha do tempo, avisos de saída, degraus de cobrança, API pública, SLA básico, agenda, campos personalizados, combos ou migração Go: esses recursos já possuem implementação. As pendências acima tratam das lacunas e validações restantes.
 
 
+## Registros históricos de consolidação
+
+Os registros abaixo preservam o estado das suas datas. Referências a CI/SBOM pendentes foram superadas pelas execuções posteriores citadas em ESTADO; não comprovam o candidato desta auditoria.
+
+
 Lote 40 (30/10/2026): anexos privados de OS e cotação com conversão manual em pedido rascunho estão DONE 5/5; HTTP real exit 0 em 8461e61. A execução Go/PostgreSQL da gerência ainda aguarda recibo. A adaptação funcional não constitui homologação. Assinatura, operação offline, fiscal, pagamentos e custo contábil não integram este recorte. Por decisão do usuário, Chatwoot está fora do escopo NexoISP; outro projeto trata do chat.
 
 - C42 (Lote 42): CRUD de inventário passivo por POP (postes, torres e condomínios) validado na matriz funcional (PostgreSQL/race e HTTP em 19eb8bb; rastreio de browser em 5111ce3 incorporado a por-unidade.json); topologia completa, GIS, comandos físicos e homologação externa permanecem abertas.
@@ -71,4 +76,4 @@ Lote 40 (30/10/2026): anexos privados de OS e cotação com conversão manual em
 - C37 (Lote 44): CSV de cotação e locais entregues; sites PG16 REQUIRED/race e cenários Chromium de locais e cotações PASS na prova real 45. Cotação PG44 e HTTP nativo CI44 são reuso de provas anteriores; as falhas 44 permanecem históricas.
 - C34 (Lote 45): preferências locais do workspace DONE 5/5, cinco revisões e dez checks PASS; cenário Chromium real PASS, incluindo isolamento entre contas. UI e fonte 45 com API 44 de fonte de produção idêntica e binários reutilizados; detalhes em [consolidação 46](LOTE46-CONSOLIDACAO.md). Homologação externa permanece pendente.
 
-A triagem [residual 46](LOTE46-BACKLOG-RESIDUAL.md) não identificou tarefa interna coesa pronta sem decisão ou recurso externo. O CI 45 run 41106278702 falhou em Cloud C27 por fixture sem linhas; a correção da fixture foi integrada em 9b2230b, sem comprovação de CI corrigido. CI e SBOM do SHA candidato e piloto continuam gates; Chatwoot/Webchat estão fora do escopo.
+A triagem [residual 46](LOTE46-BACKLOG-RESIDUAL.md) não identificou tarefa interna coesa pronta sem decisão ou recurso externo. À época, o CI 45 run 41106278702 falhou em Cloud C27 por fixture sem linhas; a correção da fixture foi integrada em 9b2230b, sem comprovação de CI corrigido. CI/SBOM do novo candidato e piloto continuam gates; Chatwoot/Webchat estão fora do escopo.

@@ -54,7 +54,7 @@ não homologado em equipamento real: a conferência de produção avisa quando e
 
 | Área | Operação e limites |
 |---|---|
-| IPAM | Rede → Endereços IP: cadastrar blocos e reservar endereço ou vincular IP fixo ao contrato. Blocos do provedor não se sobrepõem. IPv6 é planejamento/registro; ainda não há entrega automática de prefixo pelo RADIUS |
+| IPAM | Rede → Endereços IP: cadastrar blocos e reservar endereço ou vincular IP fixo ao contrato. Blocos do provedor não se sobrepõem. o RADIUS integrado entrega Delegated-IPv6-Prefix; a entrega pelo agente e a homologação DHCPv6-PD no NAS físico permanecem pendentes |
 | CGNAT | Criar plano, conferir capacidade e gerar script RouterOS para revisão humana. O plano mantém a vigência histórica; mudanças exigem encerrar e criar outro. O sistema não aplica o script no roteador. Ao importar, revisar a interface de saída e a ordem em relação às regras existentes |
 | Rastreio | IP público + porta + data permitem consultar o plano vigente e cruzar com as sessões disponíveis. A consulta fica auditada; sem accounting ou sem porta, não presumir um titular único. Ver também Consulta de IP para ofício |
 | Estoque e OS | Materiais lançados na OS baixam estoque na mesma transação; devolução é limitada ao consumo da OS. Corrigir movimentos com ajuste justificado, sem apagar o histórico. Unidades com série registram técnico, contrato e histórico. Concluir uma OS não provisiona automaticamente o acesso |
@@ -284,12 +284,12 @@ systemctl list-timers nexoisp-backup.timer
 ```
 
 Antes de habilitar o agendamento, execute um backup manual e um `restore-check` do arquivo gerado. O timer só é considerado pronto quando a cópia externa também concluir sem erro.
-O wrapper Go pausa os escritores em execução (API, VPN e RADIUS), prepara os papéis/migrations do banco restaurado e reinicia os mesmos serviços. Usar o script de baixo nível diretamente exige fornecer os comandos de parada/retomada; ele não descobre serviços sozinho.
+Antes de qualquer restore destrutivo, confirme o container e exporte `NEXO_RESTORE_TARGET=<container>/nexo` (produção padrão: `nexoisp-prod-db-1/nexo`), então use `./nexo prod restore <arquivo> --yes`. O wrapper pausa os escritores em execução (API, VPN e RADIUS). A identificação explícita do destino, dump e manifesto autenticados, restore temporário com prova de RLS/chaves, conferência do banco substituído e `prepare` são obrigatórios antes da retomada. Falha posterior à parada deixa os escritores parados; diagnostique e repita a recuperação em manutenção. Não reinicie os escritores manualmente para contornar uma recusa. O script direto exige os comandos `NEXO_API_SERVICE_STOP`, `NEXO_API_SERVICE_START`, `NEXO_RESTORE_PREPARE` e `NEXO_RESTORE_VERIFY`; os wrappers os fornecem. Backups antigos sem manifesto autenticado devem ser tratados em recuperação isolada, sem contornar as guardas no destino real.
 Exercício feito em 10/10/2026 (ambiente local): backup → criação de um registro → `restore-check` → `restore` → registro posterior ausente, login e consultas funcionando, 31 políticas RLS presentes; arquivo adulterado recusado pela soma de verificação.
 
 - O backup do banco **não** inclui: `.env`, certificados, SQLite dos agentes e do RADIUS (ficam nos sites).
 - Site: copiar `infra/site/data/` (SQLite do RADIUS e do agente) periodicamente. Perda do site: reinstalar, subir o RADIUS, "Aceitar novo certificado" se o certificado mudou, e Rede → **"Reaplicar todas as contas"** no equipamento (o agente regrava autorização e política; as senhas vêm da nuvem) — exercitado no laboratório.
-- RPO/RTO não definidos (dependem do provedor). Restaurar um backup desfaz pagamentos registrados depois dele: após um `restore`, executar Conciliação → "Consultar gateway agora".
+- Metas provisórias da fase 1: RPO 24 h e RTO 4 h, ainda sem aceite/medição operacional do provedor. Restaurar um backup desfaz pagamentos registrados depois dele: na fase 1, reconciliar com o sistema de cobrança anterior antes de reabrir comandos. Consulta ao gateway exige integração homologada na fase correspondente.
 
 ## 5. Limites e procedimentos
 
