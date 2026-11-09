@@ -122,6 +122,13 @@ func (s Service) updateBox(ctx context.Context, tx *db.Tx, id string, b map[stri
 	if num(merged["ports"]) < num(top.Get("p")) {
 		return nil, apierr.New(409, fmt.Sprintf("a porta %g está ocupada; libere-a antes de reduzir a caixa", num(top.Get("p"))))
 	}
+	fused, err := tx.Objects(ctx, `select coalesce(max(b_port),0)::int as p from ftth_fusions where box_id=$1`, id)
+	if err != nil {
+		return nil, err
+	}
+	if num(merged["ports"]) < num(fused[0].Get("p")) {
+		return nil, apierr.New(409, fmt.Sprintf("a porta %g recebe uma fusão; remova-a antes de reduzir a caixa", num(fused[0].Get("p"))))
+	}
 	row, err := one(ctx, tx, key, 2, boxArgs(id, merged)...)
 	if err != nil {
 		return nil, err
@@ -136,6 +143,13 @@ func (s Service) deleteBox(ctx context.Context, tx *db.Tx, id string, _ map[stri
 	}
 	if num(box.Get("used")) > 0 || num(box.Get("children")) > 0 {
 		return nil, apierr.New(409, "a caixa tem portas ocupadas ou caixas derivadas")
+	}
+	design, err := tx.Objects(ctx, `select (select count(*)::int from ftth_fusions where box_id=$1) + (select count(*)::int from ftth_cables where a_box_id=$1 or b_box_id=$1) as n`, id)
+	if err != nil {
+		return nil, err
+	}
+	if num(design[0].Get("n")) > 0 {
+		return nil, apierr.New(409, "a caixa tem fusões ou é ponta de cabos; remova esses vínculos antes de excluí-la")
 	}
 	if err = tx.Exec(ctx, query(key, 1), id); err != nil {
 		return nil, err

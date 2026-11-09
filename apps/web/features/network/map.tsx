@@ -17,6 +17,12 @@ import { can, hasModule } from "@/features/session/model";
 import { api } from "@/platform/erp-client";
 import styles from "@/components/network-explorer.module.css";
 import { MapExplorerFrame, MapListPanel } from "@/components/network-explorer";
+import {
+  cableKindLabel,
+  cableMapSchema,
+  formatMeters,
+  type MapCable,
+} from "./ftth-design-models";
 const MapCanvas = lazy(() => import("./map-canvas"));
 const point = z.object({
   id: z.string().uuid(),
@@ -68,6 +74,7 @@ export type OperationalMapPoint = {
   state: string;
   address: string;
 };
+export type { MapCable };
 export type MapPlacement = {
   id: string;
   name: string;
@@ -89,6 +96,7 @@ export function NetworkMap() {
     contracts: true,
     boxes: hasModule(me, "ftth"),
     pops: true,
+    cables: hasModule(me, "ftth"),
   });
   const [status, setStatus] = useState("");
   const [list, setList] = useState(false);
@@ -98,7 +106,7 @@ export function NetworkMap() {
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
   const enabled = Object.entries(layers)
-    .filter(([, on]) => on)
+    .filter(([key, on]) => on && key !== "cables")
     .map(([key]) => key)
     .join(",");
   const points = useSWR(
@@ -117,6 +125,17 @@ export function NetworkMap() {
       pointsSchema.parse(
         await api(
           `/map/points?${new URLSearchParams({ ...Object.fromEntries(Object.entries(bounds).map(([key, value]) => [key, String(value)])), layers: enabled, ...(status ? { status } : {}) })}`,
+        ),
+      ),
+  );
+  const cables = useSWR(
+    layers.cables && hasModule(me, "ftth")
+      ? ["erp-map-cables", bounds.south, bounds.north, bounds.west, bounds.east]
+      : null,
+    async () =>
+      cableMapSchema.parse(
+        await api(
+          `/ftth/cables/map?${new URLSearchParams(Object.fromEntries(Object.entries(bounds).map(([key, value]) => [key, String(value)])))}`,
         ),
       ),
   );
@@ -165,7 +184,7 @@ export function NetworkMap() {
     })),
   ];
   const refresh = async () => {
-    await Promise.all([points.mutate(), coverage.mutate()]);
+    await Promise.all([points.mutate(), coverage.mutate(), cables.mutate()]);
   };
   const saveLocation = async (
     place: MapPlacement,
@@ -188,7 +207,7 @@ export function NetworkMap() {
   const initial = coverage.data?.contracts;
   return (
     <MapExplorerFrame
-      description="Localize contratos, caixas ópticas e POPs com coordenadas registradas."
+      description="Localize contratos, caixas ópticas, traçados de cabos e POPs com coordenadas registradas."
       actions={
         <Button
           size="sm"
@@ -201,8 +220,11 @@ export function NetworkMap() {
       }
       controls={
         <div className="erp-inline-actions">
-          {(["contracts", "boxes", "pops"] as const)
-            .filter((key) => key !== "boxes" || hasModule(me, "ftth"))
+          {(["contracts", "boxes", "cables", "pops"] as const)
+            .filter(
+              (key) =>
+                (key !== "boxes" && key !== "cables") || hasModule(me, "ftth"),
+            )
             .map((key) => (
               <Button
                 key={key}
@@ -225,6 +247,7 @@ export function NetworkMap() {
                   {
                     contracts: "Contratos",
                     boxes: "Caixas ópticas",
+                    cables: "Cabos ópticos",
                     pops: "POPs",
                   }[key]
                 }
@@ -235,7 +258,12 @@ export function NetworkMap() {
       toolbar={
         <>
           <div className={styles.mapCounts}>
-            <span>{rows.length} ponto(s) na área consultada</span>
+            <span>
+              {rows.length} ponto(s) na área consultada
+              {layers.cables && cables.data
+                ? ` · ${cables.data.items.length} cabo(s)`
+                : ""}
+            </span>
           </div>
           <select
             className="commercial-select"
@@ -281,6 +309,13 @@ export function NetworkMap() {
             }
             onBounds={setBounds}
             onSelect={setSelected}
+            lines={layers.cables ? (cables.data?.items ?? []) : []}
+            describeLine={(cable) =>
+              `${cableKindLabel(cable.kind)} · ${cable.fiber_count} fibras · ${formatMeters(cable.computed_length_m)} · ${cable.pop_name}`
+            }
+            onLine={(cable) =>
+              navigate(`/rede/ftth/fttx-cto?aba=cabos&cabo=${cable.id}`)
+            }
             placing={placing}
             onPlace={async (lat, lng) => {
               if (placing) await saveLocation(placing, lat, lng);
@@ -343,6 +378,21 @@ export function NetworkMap() {
         error={points.error}
         retry={() => points.mutate()}
       >
+        {cables.data?.truncated && (
+          <p role="status">
+            Mais de 500 cabos nesta área. Aproxime o mapa para consultar os
+            demais traçados.
+          </p>
+        )}
+        {cables.error && (
+          <p role="status">
+            Traçados de cabos indisponíveis:{" "}
+            {cables.error instanceof Error
+              ? cables.error.message
+              : "consulta não concluída"}
+            .
+          </p>
+        )}
         {points.data?.contracts_truncated && (
           <p role="status">
             Mais de 3.000 contratos nesta área. Aproxime o mapa para consultar

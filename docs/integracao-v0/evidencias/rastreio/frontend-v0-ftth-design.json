@@ -1,0 +1,94 @@
+{
+  "scenario": "frontend-v0-ftth-design.mjs",
+  "recorded_at": "2026-11-09T22:08:09.711Z",
+  "steps": [
+    {
+      "check": "Cabo: cadastro com traçado, ponta em caixa, comprimento calculado pelo Go e filtros da lista.",
+      "requests": [
+        "GET /api/ftth/boxes",
+        "GET /api/ftth/cables",
+        "GET /api/health",
+        "GET /api/me",
+        "GET /api/network/sites",
+        "GET /api/pops",
+        "GET /api/today",
+        "POST /api/auth/login",
+        "POST /api/ftth/cables"
+      ]
+    },
+    {
+      "check": "OTDR: medição por fibra com eventos ordenados e download autenticado do arquivo bruto.",
+      "requests": [
+        "GET /api/ftth/cables",
+        "GET /api/ftth/cables/:id",
+        "GET /api/ftth/cables/:id/otdr",
+        "GET /api/ftth/cables/:id/otdr/:id/file",
+        "GET /api/me",
+        "POST /api/ftth/cables/:id/otdr"
+      ]
+    },
+    {
+      "check": "Fusões: fibra a fibra na ficha da caixa; o Go recusa a mesma fibra duas vezes na caixa.",
+      "requests": [
+        "GET /api/ftth/boxes/:id",
+        "GET /api/ftth/boxes/:id/fusions",
+        "GET /api/ftth/cables",
+        "GET /api/me",
+        "POST /api/ftth/boxes/:id/fusions"
+      ]
+    },
+    {
+      "check": "Fusões: remoção confirmada libera a fibra na caixa.",
+      "requests": [
+        "DELETE /api/ftth/fusions/:id",
+        "GET /api/ftth/boxes/:id/fusions",
+        "GET /api/me"
+      ]
+    },
+    {
+      "check": "KML: prévia lista caixas e cabos candidatos com pontas e ignora polígonos sem gravar.",
+      "requests": [
+        "GET /api/me",
+        "GET /api/pops",
+        "POST /api/ftth/gis/kml/preview"
+      ]
+    },
+    {
+      "check": "KML: aplicação explícita grava caixas e cabos do POP numa única operação.",
+      "requests": [
+        "GET /api/ftth/boxes",
+        "GET /api/me",
+        "POST /api/ftth/gis/kml/apply"
+      ]
+    },
+    {
+      "check": "KML: reimportação mostra erro por item e bloqueia a aplicação; DTD/entidades externas são recusados.",
+      "requests": [
+        "GET /api/me",
+        "POST /api/ftth/gis/kml/preview"
+      ]
+    },
+    {
+      "check": "Mapa: camada de cabos ópticos desenha os traçados ativos da área consultada.",
+      "requests": [
+        "GET /api/ftth/cables/map",
+        "GET /api/map/coverage",
+        "GET /api/map/points",
+        "GET /api/me",
+        "GET /api/pops",
+        "GET /api/today"
+      ]
+    },
+    {
+      "check": "Cabos: arquivamento preserva o histórico; outro provedor não lê cabo nem arquivo OTDR.",
+      "requests": [
+        "GET /api/ftth/boxes",
+        "GET /api/ftth/cables",
+        "GET /api/me",
+        "GET /api/pops",
+        "GET /api/today",
+        "PATCH /api/ftth/cables/:id"
+      ]
+    }
+  ]
+}

@@ -35,6 +35,10 @@
     },
     {
       "method": "DELETE",
+      "path": "/api/ftth/fusions/:id"
+    },
+    {
+      "method": "DELETE",
       "path": "/api/ipam/allocations/:id"
     },
     {
@@ -384,6 +388,30 @@
     {
       "method": "GET",
       "path": "/api/ftth/boxes/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/ftth/boxes/:id/fusions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/ftth/cables"
+    },
+    {
+      "method": "GET",
+      "path": "/api/ftth/cables/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/ftth/cables/:id/otdr"
+    },
+    {
+      "method": "GET",
+      "path": "/api/ftth/cables/:id/otdr/:measurementId/file"
+    },
+    {
+      "method": "GET",
+      "path": "/api/ftth/cables/map"
     },
     {
       "method": "GET",
@@ -915,6 +943,10 @@
     },
     {
       "method": "PATCH",
+      "path": "/api/ftth/cables/:id"
+    },
+    {
+      "method": "PATCH",
       "path": "/api/install-kits/:id"
     },
     {
@@ -1256,6 +1288,26 @@
     {
       "method": "POST",
       "path": "/api/ftth/boxes/:id/drops"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ftth/boxes/:id/fusions"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ftth/cables"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ftth/cables/:id/otdr"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ftth/gis/kml/apply"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ftth/gis/kml/preview"
     },
     {
       "method": "POST",

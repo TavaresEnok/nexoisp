@@ -2,7 +2,7 @@
 
 Nota de 06/11/2026: estados e recibos abaixo preservam a integração validada nas suas versões. A [auditoria operacional](../auditoria-2026-11-06/RELATORIO.md) acrescenta provas com escopo próprio, sem promover unidades ou declarar nova cobertura integral da etapa 7.
 
-Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 190 unidades incluem capacidades parciais, demonstrativas e internas; os estados do backend são preservados. O JSON correspondente mantém endpoints, restrições e evidências. A situação de cada unidade é independente da presença de uma página ou de um menu.
+Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 194 unidades incluem capacidades parciais, demonstrativas e internas; os estados do backend são preservados. O JSON correspondente mantém endpoints, restrições e evidências. A situação de cada unidade é independente da presença de uma página ou de um menu.
 
 | ID | Estado histórico no backend | Funcionalidade | Integração |
 |---|---|---|---|
@@ -111,7 +111,11 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 190 unidades incluem capacidades p
 | IN-03 | Parcial | Cobertura de equipamentos OLT | Integrada e validada |
 | IN-04 | Implementada | Cadastrar e manter CTO/CEO | Integrada e validada |
 | IN-05 | Implementada | Reservar e liberar porta | Integrada e validada |
-| IN-06 | Parcial | Projeto físico completo da rede óptica | Integrada e validada |
+| IN-06 | Implementada | Projeto físico completo da rede óptica | Integrada e validada |
+| IN-06-CABOS | Implementada | Cabos ópticos com traçado | Integrada e validada |
+| IN-06-FUSOES | Implementada | Fusões fibra a fibra na caixa | Integrada e validada |
+| IN-06-OTDR | Implementada | Medições OTDR por cabo e fibra | Integrada e validada |
+| IN-06-KML | Implementada | Importação de projeto GIS em KML | Integrada e validada |
 | IN-07 | Implementada | Visão operacional e configurações | Integrada e validada |
 | IN-08 | Implementada | Diagnóstico baseado em regras e evidências | Integrada e validada |
 | IN-09 | Implementada | Mapa de contratos, POPs e caixas | Integrada e validada |
@@ -182,7 +186,7 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 190 unidades incluem capacidades p
 | BE-26 | Somente backend | Criar cobrança avulsa | Integrada e validada |
 | BE-27 | Somente backend | Excluir etiqueta do catálogo | Integrada e validada |
 
-Cobertura de interface: **170 unidades integradas e validadas**, sem unidade operacional pendente ou parcial; 12 delas refletem capacidade demonstrativa (AC-02, FI-15, FI-16, RE-13) ou parcial (IN-03, IN-06, IN-11, IN-13, IN-15, AD-02, AD-17, AD-18) do Go e aparecem identificadas na interface. A evidência de cada unidade está em [por-unidade.json](evidencias/por-unidade.json). As **20 unidades preservadas** são 14 serviços internos, dois contratos de API externa e quatro limitações existentes. A [triagem individual](CAPACIDADES-BACKEND.md) explica a classificação; o JSON mantém os comportamentos históricos e acrescenta notas sobre a apresentação atual, sem alterar o estado original do backend.
+Cobertura de interface: **174 unidades integradas e validadas**, sem unidade operacional pendente ou parcial; 12 delas refletem capacidade demonstrativa (AC-02, FI-15, FI-16, RE-13) ou parcial (IN-03, IN-06, IN-11, IN-13, IN-15, AD-02, AD-17, AD-18) do Go e aparecem identificadas na interface. A evidência de cada unidade está em [por-unidade.json](evidencias/por-unidade.json). As **20 unidades preservadas** são 14 serviços internos, dois contratos de API externa e quatro limitações existentes. A [triagem individual](CAPACIDADES-BACKEND.md) explica a classificação; o JSON mantém os comportamentos históricos e acrescenta notas sobre a apresentação atual, sem alterar o estado original do backend.
 
 Nota de triagem do lote 39: as classificações e evidências de validação acima permanecem históricas. As descrições atuais de AD-02, IN-15, FI-17, PO-09 e BE-23 foram corrigidas no JSON: há controle de reset, histórico IPv6 por período e adapter Efí sandbox; o diretório resolve células por provedor. Essas constatações não homologam PSP, comprovam sessões de rede ou estabelecem arquitetura multicélulas. Consulte a triagem técnica para limites e dependências.
 
@@ -204,3 +208,5 @@ Trabalho de campo na OS (09/11/2026): unidades `CAMPO-PRESENCA`, `CAMPO-ASSINATU
 Template ACS, acompanhamento e assistente (09/11/2026): os três destinos antes marcados como recurso planejado têm página operacional e nenhum destino do catálogo cai mais em `PlannedFeature`. Quatro unidades novas: `REDE-ACS-TEMPLATES` (cadastro com curingas, variáveis validadas, inform periódico e revisão; migração 00091), `REDE-ACS-TEMPLATE-APLICACAO` (sugestão pelo CPE, pré-visualização com senhas mascaradas e intenção ACS durável pelo mesmo diário das tarefas CPE), `GESTAO-ACOMPANHAMENTO` (painel somente leitura com permissão `network:read`) e `GESTAO-ASSISTENTE` (regras determinísticas, sem modelo de linguagem, sobre consultas existentes e permissões da sessão). Testes Go com PostgreSQL e testes de reconhecimento de intenções passaram; os cenários de navegador `frontend-v0-acs-templates.mjs`, `frontend-v0-monitoring.mjs`, `frontend-v0-assistant.mjs` e `frontend-v0-acs-template-apply.mjs` (ACS sintético) foram escritos e aguardam a execução da fumaça para gerar o rastreio por unidade. Sem homologação em roteador físico.
 
 Viabilidade, DICI, senha provisória e encargos Efí (09/11/2026): `CR-10` publica a consulta de viabilidade sem login (`/viabilidade/:slug`), com resposta idêntica para provedor inexistente ou desativado, limite por IP e prospecto com origem "viabilidade"; `AD-18` gera o CSV no leiaute de acessos SCM por empresa e bloqueia a exportação listando pendências (o envio à ANATEL segue manual); `AD-02` exige troca da senha provisória e encerra as sessões do usuário; a política de cobrança envia multa (até 2%) e juros (até 1% ao mês) ao boleto/Bolix Efí sandbox, sem encargos no Pix imediato. Testes Go com PostgreSQL e com servidor HTTP simulado cobrem o backend; os cenários de navegador `frontend-v0-viability.mjs`, `frontend-v0-admin-team.mjs` e `frontend-v0-admin-reports.mjs` dependem da execução da fumaça e da regeneração de `evidencias/por-unidade.json`.
+
+Projeto físico FTTH (09/11/2026, migração 00087): IN-06 passa a Implementada e as unidades `IN-06-CABOS`, `IN-06-FUSOES`, `IN-06-OTDR` e `IN-06-KML` registram cabos com traçado e comprimento calculado no Go, fusões fibra a fibra na caixa, medições OTDR com arquivo bruto privado e importação KML com prévia e aplicação atômica, além da camada de cabos no mapa. O cenário `e2e/frontend-v0-ftth-design.mjs` passou em pilha Go/PostgreSQL/Caddy isolada de desenvolvimento; não houve homologação externa. O cadastro não prova conectividade física, continuidade óptica nem o trajeto real da fibra.

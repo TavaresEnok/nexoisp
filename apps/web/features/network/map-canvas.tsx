@@ -3,6 +3,7 @@ import {
   MapContainer,
   TileLayer,
   CircleMarker,
+  Polyline,
   Popup,
   useMap,
   useMapEvents,
@@ -12,7 +13,12 @@ import { latLngBounds } from "leaflet";
 import { LocateFixed } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import type { MapBounds, MapPlacement, OperationalMapPoint } from "./map";
+import type {
+  MapBounds,
+  MapCable,
+  MapPlacement,
+  OperationalMapPoint,
+} from "./map";
 import styles from "@/components/network-explorer.module.css";
 import "leaflet/dist/leaflet.css";
 type Props = {
@@ -23,6 +29,9 @@ type Props = {
   onSelect: (point: OperationalMapPoint) => void;
   placing: MapPlacement | null;
   onPlace: (lat: number, lng: number) => Promise<void>;
+  lines?: MapCable[];
+  describeLine?: (cable: MapCable) => string;
+  onLine?: (cable: MapCable) => void;
 };
 function MapControls({
   rows,
@@ -124,6 +133,28 @@ export default function MapCanvas(props: Props) {
         />
         <ZoomControl position="bottomright" />
         <MapControls {...props} />
+        {(props.lines ?? []).map((cable) => (
+          <Polyline
+            key={`cable/${cable.id}`}
+            positions={cable.path.map(
+              (p) => [p.lat, p.lng] as [number, number],
+            )}
+            pathOptions={{ color: "var(--primary)", weight: 4, opacity: 0.75 }}
+          >
+            <Popup>
+              <div className={styles.popup}>
+                <span className={styles.overline}>Cabo óptico</span>
+                <strong>{cable.name}</strong>
+                <p>{props.describeLine?.(cable)}</p>
+                {props.onLine && (
+                  <Button size="sm" onClick={() => props.onLine?.(cable)}>
+                    Abrir ficha do cabo
+                  </Button>
+                )}
+              </div>
+            </Popup>
+          </Polyline>
+        ))}
         {props.rows.map((point) => (
           <CircleMarker
             key={`${point.kind}/${point.id}`}
