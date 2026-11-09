@@ -3,9 +3,7 @@ package escrita
 import (
 	"context"
 	"fmt"
-	"net"
 	"net/http"
-	"os"
 	"slices"
 	"strings"
 	"time"
@@ -130,16 +128,9 @@ func publicError(status int, message, code string) error {
 }
 func (s Service) publicAuth(ctx context.Context, r *http.Request, scope string) (jsonx.Object, error) {
 	const key = "helper:guardApi"
-	ip, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err != nil {
-		ip = r.RemoteAddr
-	}
-	if os.Getenv("NEXO_TRUST_PROXY") == "1" && r.Header.Get("X-Forwarded-For") != "" {
-		ip = strings.TrimSpace(strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0])
-	}
-	throttle := "apikey:ip:" + ip
+	throttle := "apikey:ip:" + httpx.ClientIP(r)
 	var token jsonx.Object
-	err = s.DB.WithScope(ctx, tenancy.Scope{}, func(tx *db.Tx) error {
+	err := s.DB.WithScope(ctx, tenancy.Scope{}, func(tx *db.Tx) error {
 		row, e := one(ctx, tx, key, 0, throttle, 30)
 		if e != nil {
 			return e

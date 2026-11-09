@@ -1,5 +1,17 @@
 # Rotas HTTP nativas do backend Go.
+# Endereço real do cliente: só os proxies listados em NEXO_TRUSTED_PROXIES (ex.: o IP do
+# Apache visto pelo container) podem informar X-Forwarded-For; com trusted_proxies_strict o
+# Caddy usa o primeiro endereço não confiável da direita para a esquerda, que o cliente não forja.
+{
+  servers {
+    trusted_proxies static {$NEXO_TRUSTED_PROXIES:127.0.0.1/32 ::1/128}
+    trusted_proxies_strict
+    client_ip_headers X-Forwarded-For
+  }
+}
 {$NEXO_DOMAIN:localhost} {
+  # Sobrescreve qualquer valor enviado pelo cliente; a API lê este cabeçalho com NEXO_TRUST_PROXY=1.
+  request_header X-Nexo-Client-Ip {client_ip}
   log {
     format json
   }

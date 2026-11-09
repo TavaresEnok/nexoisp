@@ -5,17 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
-	"net"
 	"net/http"
-	"os"
 	"regexp"
 	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/danielgtaylor/huma/v2"
-	"github.com/go-chi/chi/v5"
 	"nexoisp/api-go/internal/apierr"
 	"nexoisp/api-go/internal/auth"
 	"nexoisp/api-go/internal/db"
@@ -23,6 +19,9 @@ import (
 	"nexoisp/api-go/internal/httpx"
 	"nexoisp/api-go/internal/jsonx"
 	"nexoisp/api-go/internal/tenancy"
+
+	"github.com/danielgtaylor/huma/v2"
+	"github.com/go-chi/chi/v5"
 )
 
 // Viabilidade pública: o interessado informa coordenadas e recebe apenas
@@ -52,13 +51,7 @@ func viabilityUnavailable() error {
 func viabilityBad() error { return apierr.New(400, "dados da consulta inválidos") }
 
 func viabilityIP(r *http.Request) string {
-	if os.Getenv("NEXO_TRUST_PROXY") == "1" && r.Header.Get("X-Forwarded-For") != "" {
-		return strings.TrimSpace(strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0])
-	}
-	if host, _, err := net.SplitHostPort(r.RemoteAddr); err == nil {
-		return host
-	}
-	return r.RemoteAddr
+	return httpx.ClientIP(r)
 }
 
 func (s Service) viabilityRate(ctx context.Context, r *http.Request, kind string) error {

@@ -2,9 +2,6 @@ package escrita
 
 import (
 	"context"
-	"net"
-	"os"
-	"strings"
 	"time"
 	"unicode/utf16"
 
@@ -153,17 +150,7 @@ func (s Service) cancelAcceptance(ctx context.Context, tx *db.Tx, id string, _ m
 	return map[string]any{"ok": true}, record(ctx, tx, "acceptance.cancel", "contract", row.Get("contract_id"), map[string]any{"acceptance_id": id})
 }
 func clientIP(ctx context.Context) string {
-	r := httpx.Request(ctx)
-	if os.Getenv("NEXO_TRUST_PROXY") == "1" {
-		if forwarded := r.Header.Get("X-Forwarded-For"); forwarded != "" {
-			return strings.TrimSpace(strings.Split(forwarded, ",")[0])
-		}
-	}
-	host, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err == nil {
-		return host
-	}
-	return r.RemoteAddr
+	return httpx.ClientIP(httpx.Request(ctx))
 }
 func (s Service) portalAccept(ctx context.Context, id string) (any, error) {
 	const key = "POST /api/portal/acceptances/:id/accept"

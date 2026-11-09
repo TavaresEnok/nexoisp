@@ -249,7 +249,7 @@ Compatibilidade: o manifesto traz `protocol_schema` (envelope) e `local_schema` 
 
 ## 3. Monitoramento básico
 
-**Limite de login:** as tentativas ficam no banco (8 falhas por e-mail e 40 por endereço de origem, em janela de 10 minutos), então valem para todas as réplicas e sobrevivem a reinício. Atrás do Caddy a instalação define `NEXO_TRUST_PROXY=1` para usar o endereço real do cliente; **sem proxy confiável essa variável não deve ser ligada** (o cabeçalho seria forjável).
+**Limite de login:** as tentativas ficam no banco (8 falhas por e-mail e 40 por endereço de origem, em janela de 10 minutos), então valem para todas as réplicas e sobrevivem a reinício. Atrás do Caddy a instalação define `NEXO_TRUST_PROXY=1`: a API lê `X-Nexo-Client-Ip`, que o Caddy sempre sobrescreve com o primeiro endereço não confiável da cadeia `X-Forwarded-For`. Informe em `NEXO_TRUSTED_PROXIES` (no Caddy) os endereços dos proxies à frente dele, por exemplo o Apache visto pelo container; sem isso, todos os clientes aparecem com o endereço do proxy e compartilham o mesmo limite. **Sem o Caddy do NexoISP à frente, `NEXO_TRUST_PROXY` não deve ser ligada.**
 
 | O quê | Onde |
 |---|---|

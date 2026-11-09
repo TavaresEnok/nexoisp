@@ -7,8 +7,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
-	"net"
 	"net/http"
+	"nexoisp/api-go/internal/httpx"
 	"os"
 	"regexp"
 	"strings"
@@ -147,14 +147,7 @@ func Register(api huma.API, registry *endpoint.Registry, s Service) {
 	}
 }
 func ip(r *http.Request) string {
-	if os.Getenv("NEXO_TRUST_PROXY") == "1" && r.Header.Get("X-Forwarded-For") != "" {
-		return strings.TrimSpace(strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0])
-	}
-	host, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err == nil {
-		return host
-	}
-	return r.RemoteAddr
+	return httpx.ClientIP(r)
 }
 func cookie(r *http.Request, token string) string {
 	age := 0
