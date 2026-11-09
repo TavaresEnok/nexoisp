@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-field.mjs",
-  "recorded_at": "2026-11-09T21:46:31.455Z",
+  "recorded_at": "2026-11-09T22:09:01.391Z",
   "steps": [
     {
       "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
@@ -24,6 +24,8 @@
         "GET /api/work-orders",
         "GET /api/work-orders/:id",
         "GET /api/work-orders/:id/attachments",
+        "GET /api/work-orders/:id/signature",
+        "GET /api/work-orders/:id/visits",
         "POST /api/auth/login",
         "POST /api/work-orders"
       ]
@@ -37,6 +39,8 @@
         "GET /api/work-orders",
         "GET /api/work-orders/:id",
         "GET /api/work-orders/:id/attachments",
+        "GET /api/work-orders/:id/signature",
+        "GET /api/work-orders/:id/visits",
         "PATCH /api/work-orders/:id"
       ]
     },
@@ -51,7 +55,9 @@
         "GET /api/stock/items",
         "GET /api/today",
         "GET /api/work-orders/:id",
-        "GET /api/work-orders/:id/attachments"
+        "GET /api/work-orders/:id/attachments",
+        "GET /api/work-orders/:id/signature",
+        "GET /api/work-orders/:id/visits"
       ]
     },
     {
@@ -64,7 +70,9 @@
         "GET /api/today",
         "GET /api/work-orders",
         "GET /api/work-orders/:id",
-        "GET /api/work-orders/:id/attachments"
+        "GET /api/work-orders/:id/attachments",
+        "GET /api/work-orders/:id/signature",
+        "GET /api/work-orders/:id/visits"
       ]
     },
     {
@@ -90,7 +98,9 @@
         "GET /api/today",
         "GET /api/work-orders",
         "GET /api/work-orders/:id",
-        "GET /api/work-orders/:id/attachments"
+        "GET /api/work-orders/:id/attachments",
+        "GET /api/work-orders/:id/signature",
+        "GET /api/work-orders/:id/visits"
       ]
     },
     {
@@ -105,6 +115,8 @@
         "GET /api/work-orders",
         "GET /api/work-orders/:id",
         "GET /api/work-orders/:id/attachments",
+        "GET /api/work-orders/:id/signature",
+        "GET /api/work-orders/:id/visits",
         "POST /api/work-orders/:id/checklist",
         "POST /api/work-orders/:id/checklist/:id",
         "POST /api/work-orders/:id/helpers"
@@ -113,7 +125,14 @@
     {
       "check": "Go rejeita saída sem saldo e devolução superior ao consumo da OS sem alterar o estoque",
       "requests": [
+        "GET /api/install-kits",
         "GET /api/me",
+        "GET /api/stock/items",
+        "GET /api/work-orders",
+        "GET /api/work-orders/:id",
+        "GET /api/work-orders/:id/attachments",
+        "GET /api/work-orders/:id/signature",
+        "GET /api/work-orders/:id/visits",
         "POST /api/work-orders/:id/materials"
       ]
     },
@@ -126,6 +145,8 @@
         "GET /api/work-orders",
         "GET /api/work-orders/:id",
         "GET /api/work-orders/:id/attachments",
+        "GET /api/work-orders/:id/signature",
+        "GET /api/work-orders/:id/visits",
         "POST /api/work-orders/:id/kit",
         "POST /api/work-orders/:id/materials"
       ]
@@ -140,6 +161,8 @@
         "GET /api/work-orders",
         "GET /api/work-orders/:id",
         "GET /api/work-orders/:id/attachments",
+        "GET /api/work-orders/:id/signature",
+        "GET /api/work-orders/:id/visits",
         "POST /api/work-orders/:id/units"
       ]
     },
@@ -152,9 +175,21 @@
         "GET /api/work-orders",
         "GET /api/work-orders/:id",
         "GET /api/work-orders/:id/attachments",
+        "GET /api/work-orders/:id/signature",
+        "GET /api/work-orders/:id/visits",
         "PATCH /api/work-orders/:id",
         "POST /api/work-orders/:id/notes",
         "POST /api/work-orders/:id/status"
+      ]
+    },
+    {
+      "check": "Ficha A4 usa os registros do ERP, indica o contrato e exclui descrição/anotações internas",
+      "requests": [
+        "GET /api/work-orders",
+        "GET /api/work-orders/:id",
+        "GET /api/work-orders/:id/attachments",
+        "GET /api/work-orders/:id/signature",
+        "GET /api/work-orders/:id/visits"
       ]
     },
     {
@@ -177,6 +212,8 @@
         "GET /api/work-orders",
         "GET /api/work-orders/:id",
         "GET /api/work-orders/:id/attachments",
+        "GET /api/work-orders/:id/signature",
+        "GET /api/work-orders/:id/visits",
         "PATCH /api/work-orders/:id",
         "POST /api/work-orders/:id/status"
       ]
@@ -226,7 +263,9 @@
         "GET /api/today",
         "GET /api/work-orders",
         "GET /api/work-orders/:id",
-        "GET /api/work-orders/:id/attachments"
+        "GET /api/work-orders/:id/attachments",
+        "GET /api/work-orders/:id/signature",
+        "GET /api/work-orders/:id/visits"
       ]
     }
   ]

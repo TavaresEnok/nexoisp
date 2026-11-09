@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-09T21:53:49.865Z",
+  "generated_at": "2026-11-09T22:09:22.779Z",
   "method": "Chamadas à API feitas pelas páginas entre uma verificação e a anterior, gravadas por e2e/request-trace.mjs durante a fumaça; preparação via context.request não conta.",
   "scenarios": [
     {
@@ -48,9 +48,14 @@
       "checks": 4
     },
     {
+      "scenario": "frontend-v0-field-work.mjs",
+      "recorded_at": "2026-11-09T22:09:11.252Z",
+      "checks": 7
+    },
+    {
       "scenario": "frontend-v0-field.mjs",
-      "recorded_at": "2026-11-09T21:46:31.455Z",
-      "checks": 16
+      "recorded_at": "2026-11-09T22:09:01.391Z",
+      "checks": 17
     },
     {
       "scenario": "frontend-v0-finance-access.mjs",
@@ -203,8 +208,8 @@
       "checks": 1
     }
   ],
-  "validated_units": 161,
-  "units_with_interface_check": 161,
+  "validated_units": 165,
+  "units_with_interface_check": 165,
   "units": [
     {
       "id": "AC-01",
@@ -587,6 +592,57 @@
         {
           "scenario": "frontend-v0-evolution.mjs",
           "check": "Estoque: depósito, fornecedor e pedido de compra pela interface; recebimento gera entrada no depósito e a transferência move o saldo para o principal",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "POST /api/auth/login",
+            "GET /api/me",
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Foto pela câmera do celular é reduzida no navegador para 1920 px em JPEG e enviada com legenda como anexo privado",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Assinatura desenhada na tela é gravada como PNG privado da OS com SHA-256 conferido, exibida na ficha e não aceita segunda assinatura",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Sem conexão, check-out, anotação e checklist ficam na fila do aparelho como pendentes, com chave e horário local, sem chegar ao servidor",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Ao reconectar, a fila envia em ordem e mostra Enviado; repetir a mesma chave devolve o mesmo resultado sem duplicar e outro conteúdo é recusado",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Ação da fila recusada pelo servidor aparece como Recusado com o motivo e só sai da fila quando o técnico descarta",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "OS encerrada mantém a assinatura na ficha, bloqueia nova coleta e imprime assinatura, hash e presenças sem anotações internas",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1732,6 +1788,14 @@
           ]
         },
         {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "GET /api/health",
+            "POST /api/auth/login"
+          ]
+        },
+        {
           "scenario": "frontend-v0-field.mjs",
           "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
           "endpoints": [
@@ -2258,6 +2322,55 @@
         {
           "scenario": "frontend-v0-evolution.mjs",
           "check": "Estoque: depósito, fornecedor e pedido de compra pela interface; recebimento gera entrada no depósito e a transferência move o saldo para o principal",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Foto pela câmera do celular é reduzida no navegador para 1920 px em JPEG e enviada com legenda como anexo privado",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Assinatura desenhada na tela é gravada como PNG privado da OS com SHA-256 conferido, exibida na ficha e não aceita segunda assinatura",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Sem conexão, check-out, anotação e checklist ficam na fila do aparelho como pendentes, com chave e horário local, sem chegar ao servidor",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Ao reconectar, a fila envia em ordem e mostra Enviado; repetir a mesma chave devolve o mesmo resultado sem duplicar e outro conteúdo é recusado",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Ação da fila recusada pelo servidor aparece como Recusado com o motivo e só sai da fila quando o técnico descarta",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "OS encerrada mantém a assinatura na ficha, bloqueia nova coleta e imprime assinatura, hash e presenças sem anotações internas",
           "endpoints": [
             "GET /api/me"
           ]
@@ -3660,6 +3773,28 @@
           ]
         },
         {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Sem conexão, check-out, anotação e checklist ficam na fila do aparelho como pendentes, com chave e horário local, sem chegar ao servidor",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "OS encerrada mantém a assinatura na ficha, bloqueia nova coleta e imprime assinatura, hash e presenças sem anotações internas",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
           "scenario": "frontend-v0-field.mjs",
           "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
           "endpoints": [
@@ -4368,6 +4503,13 @@
       ],
       "not_exercised_by_interface": [],
       "checks": [
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "GET /api/dashboard/panels"
+          ]
+        },
         {
           "scenario": "frontend-v0-field.mjs",
           "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
@@ -7791,6 +7933,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "GET /api/tickets"
+          ]
+        },
+        {
           "scenario": "frontend-v0-field.mjs",
           "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
           "endpoints": [
@@ -8092,6 +8241,45 @@
           ]
         },
         {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "GET /api/work-orders",
+            "GET /api/work-orders/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Assinatura desenhada na tela é gravada como PNG privado da OS com SHA-256 conferido, exibida na ficha e não aceita segunda assinatura",
+          "endpoints": [
+            "GET /api/work-orders/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Sem conexão, check-out, anotação e checklist ficam na fila do aparelho como pendentes, com chave e horário local, sem chegar ao servidor",
+          "endpoints": [
+            "GET /api/work-orders",
+            "GET /api/work-orders/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Ao reconectar, a fila envia em ordem e mostra Enviado; repetir a mesma chave devolve o mesmo resultado sem duplicar e outro conteúdo é recusado",
+          "endpoints": [
+            "GET /api/work-orders",
+            "GET /api/work-orders/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "OS encerrada mantém a assinatura na ficha, bloqueia nova coleta e imprime assinatura, hash e presenças sem anotações internas",
+          "endpoints": [
+            "GET /api/work-orders",
+            "GET /api/work-orders/:id"
+          ]
+        },
+        {
           "scenario": "frontend-v0-field.mjs",
           "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
           "endpoints": [
@@ -8140,6 +8328,14 @@
         },
         {
           "scenario": "frontend-v0-field.mjs",
+          "check": "Go rejeita saída sem saldo e devolução superior ao consumo da OS sem alterar o estoque",
+          "endpoints": [
+            "GET /api/work-orders",
+            "GET /api/work-orders/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
           "check": "Material lançado, devolvido e kit aplicado com saldos reais e históricos preservados",
           "endpoints": [
             "GET /api/work-orders",
@@ -8157,6 +8353,14 @@
         {
           "scenario": "frontend-v0-field.mjs",
           "check": "Espera, reagendamento, deslocamento, execução e conclusão registram datas; OS finalizada preserva anotações sem reabrir controles",
+          "endpoints": [
+            "GET /api/work-orders",
+            "GET /api/work-orders/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Ficha A4 usa os registros do ERP, indica o contrato e exclui descrição/anotações internas",
           "endpoints": [
             "GET /api/work-orders",
             "GET /api/work-orders/:id"
@@ -8330,6 +8534,27 @@
         {
           "scenario": "frontend-v0-evolution.mjs",
           "check": "SLA: calendário de expediente, feriado e política \"Somente no expediente\" gravados pela interface e relidos no Go",
+          "endpoints": [
+            "GET /api/staff"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "GET /api/staff"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Sem conexão, check-out, anotação e checklist ficam na fila do aparelho como pendentes, com chave e horário local, sem chegar ao servidor",
+          "endpoints": [
+            "GET /api/staff"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "OS encerrada mantém a assinatura na ficha, bloqueia nova coleta e imprime assinatura, hash e presenças sem anotações internas",
           "endpoints": [
             "GET /api/staff"
           ]
@@ -8510,6 +8735,13 @@
       "not_exercised_by_interface": [],
       "checks": [
         {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Ao reconectar, a fila envia em ordem e mostra Enviado; repetir a mesma chave devolve o mesmo resultado sem duplicar e outro conteúdo é recusado",
+          "endpoints": [
+            "POST /api/work-orders/:id/checklist/:itemId"
+          ]
+        },
+        {
           "scenario": "frontend-v0-field.mjs",
           "check": "Auxiliar adicionado/removido e checklist concluído com registro do autor",
           "endpoints": [
@@ -8592,6 +8824,42 @@
       "not_exercised_by_interface": [],
       "checks": [
         {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "GET /api/work-orders/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Assinatura desenhada na tela é gravada como PNG privado da OS com SHA-256 conferido, exibida na ficha e não aceita segunda assinatura",
+          "endpoints": [
+            "GET /api/work-orders/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Sem conexão, check-out, anotação e checklist ficam na fila do aparelho como pendentes, com chave e horário local, sem chegar ao servidor",
+          "endpoints": [
+            "GET /api/work-orders/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Ao reconectar, a fila envia em ordem e mostra Enviado; repetir a mesma chave devolve o mesmo resultado sem duplicar e outro conteúdo é recusado",
+          "endpoints": [
+            "POST /api/work-orders/:id/notes",
+            "GET /api/work-orders/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "OS encerrada mantém a assinatura na ficha, bloqueia nova coleta e imprime assinatura, hash e presenças sem anotações internas",
+          "endpoints": [
+            "GET /api/work-orders/:id"
+          ]
+        },
+        {
           "scenario": "frontend-v0-field.mjs",
           "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
           "endpoints": [
@@ -8635,6 +8903,13 @@
         },
         {
           "scenario": "frontend-v0-field.mjs",
+          "check": "Go rejeita saída sem saldo e devolução superior ao consumo da OS sem alterar o estoque",
+          "endpoints": [
+            "GET /api/work-orders/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
           "check": "Material lançado, devolvido e kit aplicado com saldos reais e históricos preservados",
           "endpoints": [
             "GET /api/work-orders/:id"
@@ -8652,6 +8927,13 @@
           "check": "Espera, reagendamento, deslocamento, execução e conclusão registram datas; OS finalizada preserva anotações sem reabrir controles",
           "endpoints": [
             "POST /api/work-orders/:id/notes",
+            "GET /api/work-orders/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Ficha A4 usa os registros do ERP, indica o contrato e exclui descrição/anotações internas",
+          "endpoints": [
             "GET /api/work-orders/:id"
           ]
         },
@@ -8725,6 +9007,34 @@
           ]
         },
         {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Sem conexão, check-out, anotação e checklist ficam na fila do aparelho como pendentes, com chave e horário local, sem chegar ao servidor",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Ao reconectar, a fila envia em ordem e mostra Enviado; repetir a mesma chave devolve o mesmo resultado sem duplicar e outro conteúdo é recusado",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "OS encerrada mantém a assinatura na ficha, bloqueia nova coleta e imprime assinatura, hash e presenças sem anotações internas",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
           "scenario": "frontend-v0-field.mjs",
           "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
           "endpoints": [
@@ -8761,6 +9071,13 @@
         },
         {
           "scenario": "frontend-v0-field.mjs",
+          "check": "Go rejeita saída sem saldo e devolução superior ao consumo da OS sem alterar o estoque",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
           "check": "Material lançado, devolvido e kit aplicado com saldos reais e históricos preservados",
           "endpoints": [
             "GET /api/work-orders"
@@ -8776,6 +9093,13 @@
         {
           "scenario": "frontend-v0-field.mjs",
           "check": "Espera, reagendamento, deslocamento, execução e conclusão registram datas; OS finalizada preserva anotações sem reabrir controles",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Ficha A4 usa os registros do ERP, indica o contrato e exclui descrição/anotações internas",
           "endpoints": [
             "GET /api/work-orders"
           ]
@@ -8894,6 +9218,13 @@
       "not_exercised_by_interface": [],
       "checks": [
         {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "GET /api/agenda"
+          ]
+        },
+        {
           "scenario": "frontend-v0-field.mjs",
           "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
           "endpoints": [
@@ -8996,6 +9327,20 @@
           ]
         },
         {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "GET /api/stock/items"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Sem conexão, check-out, anotação e checklist ficam na fila do aparelho como pendentes, com chave e horário local, sem chegar ao servidor",
+          "endpoints": [
+            "GET /api/stock/items"
+          ]
+        },
+        {
           "scenario": "frontend-v0-field.mjs",
           "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
           "endpoints": [
@@ -9033,6 +9378,13 @@
         {
           "scenario": "frontend-v0-field.mjs",
           "check": "Auxiliar adicionado/removido e checklist concluído com registro do autor",
+          "endpoints": [
+            "GET /api/stock/items"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Go rejeita saída sem saldo e devolução superior ao consumo da OS sem alterar o estoque",
           "endpoints": [
             "GET /api/stock/items"
           ]
@@ -9443,6 +9795,14 @@
           "endpoints": [
             "GET /api/invoices",
             "GET /api/finance/summary"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "GET /api/finance/summary",
+            "GET /api/finance/monthly"
           ]
         },
         {
@@ -10091,6 +10451,13 @@
           "check": "Diálogo aberto por /rede/manutencoes/novo-aviso em /rede/manutencoes",
           "endpoints": [
             "GET /api/devices"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "GET /api/network/health"
           ]
         },
         {
@@ -13159,6 +13526,20 @@
       "not_exercised_by_interface": [],
       "checks": [
         {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "GET /api/install-kits"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Sem conexão, check-out, anotação e checklist ficam na fila do aparelho como pendentes, com chave e horário local, sem chegar ao servidor",
+          "endpoints": [
+            "GET /api/install-kits"
+          ]
+        },
+        {
           "scenario": "frontend-v0-field.mjs",
           "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
           "endpoints": [
@@ -13196,6 +13577,13 @@
         {
           "scenario": "frontend-v0-field.mjs",
           "check": "Auxiliar adicionado/removido e checklist concluído com registro do autor",
+          "endpoints": [
+            "GET /api/install-kits"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Go rejeita saída sem saldo e devolução superior ao consumo da OS sem alterar o estoque",
           "endpoints": [
             "GET /api/install-kits"
           ]
@@ -14477,6 +14865,35 @@
       "not_exercised_by_interface": [],
       "checks": [
         {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Foto pela câmera do celular é reduzida no navegador para 1920 px em JPEG e enviada com legenda como anexo privado",
+          "endpoints": [
+            "POST /api/work-orders/:id/attachments",
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Sem conexão, check-out, anotação e checklist ficam na fila do aparelho como pendentes, com chave e horário local, sem chegar ao servidor",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "OS encerrada mantém a assinatura na ficha, bloqueia nova coleta e imprime assinatura, hash e presenças sem anotações internas",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
           "scenario": "frontend-v0-field.mjs",
           "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
           "endpoints": [
@@ -14520,6 +14937,13 @@
         },
         {
           "scenario": "frontend-v0-field.mjs",
+          "check": "Go rejeita saída sem saldo e devolução superior ao consumo da OS sem alterar o estoque",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
           "check": "Material lançado, devolvido e kit aplicado com saldos reais e históricos preservados",
           "endpoints": [
             "GET /api/work-orders/:id/attachments"
@@ -14535,6 +14959,13 @@
         {
           "scenario": "frontend-v0-field.mjs",
           "check": "Espera, reagendamento, deslocamento, execução e conclusão registram datas; OS finalizada preserva anotações sem reabrir controles",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Ficha A4 usa os registros do ERP, indica o contrato e exclui descrição/anotações internas",
           "endpoints": [
             "GET /api/work-orders/:id/attachments"
           ]
@@ -15138,6 +15569,29 @@
         {
           "scenario": "frontend-v0-evolution.mjs",
           "check": "Estoque: depósito, fornecedor e pedido de compra pela interface; recebimento gera entrada no depósito e a transferência move o saldo para o principal",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/dashboard/panels",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Sem conexão, check-out, anotação e checklist ficam na fila do aparelho como pendentes, com chave e horário local, sem chegar ao servidor",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "OS encerrada mantém a assinatura na ficha, bloqueia nova coleta e imprime assinatura, hash e presenças sem anotações internas",
           "endpoints": [
             "GET /api/today"
           ]
@@ -15845,6 +16299,482 @@
           "endpoints": [
             "GET /api/dashboard",
             "GET /api/today"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CAMPO-PRESENCA",
+      "functionality": "Check-in e check-out do técnico com horário do servidor, geolocalização opcional, distância até a instalação e tempo em atendimento",
+      "declared_endpoints": [
+        "GET /api/work-orders/:id/visits",
+        "POST /api/work-orders/:id/check-in",
+        "POST /api/work-orders/:id/check-out"
+      ],
+      "exercised_by_interface": [
+        "GET /api/work-orders/:id/visits",
+        "POST /api/work-orders/:id/check-in",
+        "POST /api/work-orders/:id/check-out"
+      ],
+      "not_exercised_by_interface": [],
+      "checks": [
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "GET /api/work-orders/:id/visits",
+            "POST /api/work-orders/:id/check-in"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Sem conexão, check-out, anotação e checklist ficam na fila do aparelho como pendentes, com chave e horário local, sem chegar ao servidor",
+          "endpoints": [
+            "GET /api/work-orders/:id/visits"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Ao reconectar, a fila envia em ordem e mostra Enviado; repetir a mesma chave devolve o mesmo resultado sem duplicar e outro conteúdo é recusado",
+          "endpoints": [
+            "GET /api/work-orders/:id/visits",
+            "POST /api/work-orders/:id/check-out"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Ação da fila recusada pelo servidor aparece como Recusado com o motivo e só sai da fila quando o técnico descarta",
+          "endpoints": [
+            "POST /api/work-orders/:id/check-in"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "OS encerrada mantém a assinatura na ficha, bloqueia nova coleta e imprime assinatura, hash e presenças sem anotações internas",
+          "endpoints": [
+            "GET /api/work-orders/:id/visits"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
+          "endpoints": [
+            "GET /api/work-orders/:id/visits"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Atribuição e agendamento persistem no Go, com conversão correta do horário local",
+          "endpoints": [
+            "GET /api/work-orders/:id/visits"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Agenda em fuso do provedor mostra sobreposição, janela livre real, fila de espera e abre a ficha compartilhada",
+          "endpoints": [
+            "GET /api/work-orders/:id/visits"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Meu trabalho exibe a fila real do responsável no celular, com telefone, mapa e abertura da OS",
+          "endpoints": [
+            "GET /api/work-orders/:id/visits"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Fichas do titular e do contrato consultam apenas as OS do vínculo e preservam o contexto ao fechar",
+          "endpoints": [
+            "GET /api/work-orders/:id/visits"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Auxiliar adicionado/removido e checklist concluído com registro do autor",
+          "endpoints": [
+            "GET /api/work-orders/:id/visits"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Go rejeita saída sem saldo e devolução superior ao consumo da OS sem alterar o estoque",
+          "endpoints": [
+            "GET /api/work-orders/:id/visits"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Material lançado, devolvido e kit aplicado com saldos reais e históricos preservados",
+          "endpoints": [
+            "GET /api/work-orders/:id/visits"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Instalação por série vincula equipamento ao contrato em comodato",
+          "endpoints": [
+            "GET /api/work-orders/:id/visits"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Espera, reagendamento, deslocamento, execução e conclusão registram datas; OS finalizada preserva anotações sem reabrir controles",
+          "endpoints": [
+            "GET /api/work-orders/:id/visits"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Ficha A4 usa os registros do ERP, indica o contrato e exclui descrição/anotações internas",
+          "endpoints": [
+            "GET /api/work-orders/:id/visits"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Cancelamento exige motivo e atribuir somente responsável preserva a situação de espera",
+          "endpoints": [
+            "GET /api/work-orders/:id/visits"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Perfil Técnico/NOC usa sua fila pessoal; Financeiro não acessa OS nem executa comandos",
+          "endpoints": [
+            "GET /api/work-orders/:id/visits"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CAMPO-ASSINATURA",
+      "functionality": "Assinatura do cliente em canvas gravada como PNG privado da OS com SHA-256, exibida na ficha e na impressão",
+      "declared_endpoints": [
+        "GET /api/work-orders/:id/signature",
+        "POST /api/work-orders/:id/signature",
+        "GET /api/work-orders/:id/signature/image"
+      ],
+      "exercised_by_interface": [
+        "GET /api/work-orders/:id/signature",
+        "GET /api/work-orders/:id/signature/image",
+        "POST /api/work-orders/:id/signature"
+      ],
+      "not_exercised_by_interface": [],
+      "checks": [
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "GET /api/work-orders/:id/signature"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Assinatura desenhada na tela é gravada como PNG privado da OS com SHA-256 conferido, exibida na ficha e não aceita segunda assinatura",
+          "endpoints": [
+            "GET /api/work-orders/:id/signature",
+            "POST /api/work-orders/:id/signature",
+            "GET /api/work-orders/:id/signature/image"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Sem conexão, check-out, anotação e checklist ficam na fila do aparelho como pendentes, com chave e horário local, sem chegar ao servidor",
+          "endpoints": [
+            "GET /api/work-orders/:id/signature",
+            "GET /api/work-orders/:id/signature/image"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "OS encerrada mantém a assinatura na ficha, bloqueia nova coleta e imprime assinatura, hash e presenças sem anotações internas",
+          "endpoints": [
+            "GET /api/work-orders/:id/signature",
+            "GET /api/work-orders/:id/signature/image"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
+          "endpoints": [
+            "GET /api/work-orders/:id/signature"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Atribuição e agendamento persistem no Go, com conversão correta do horário local",
+          "endpoints": [
+            "GET /api/work-orders/:id/signature"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Agenda em fuso do provedor mostra sobreposição, janela livre real, fila de espera e abre a ficha compartilhada",
+          "endpoints": [
+            "GET /api/work-orders/:id/signature"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Meu trabalho exibe a fila real do responsável no celular, com telefone, mapa e abertura da OS",
+          "endpoints": [
+            "GET /api/work-orders/:id/signature"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Fichas do titular e do contrato consultam apenas as OS do vínculo e preservam o contexto ao fechar",
+          "endpoints": [
+            "GET /api/work-orders/:id/signature"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Auxiliar adicionado/removido e checklist concluído com registro do autor",
+          "endpoints": [
+            "GET /api/work-orders/:id/signature"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Go rejeita saída sem saldo e devolução superior ao consumo da OS sem alterar o estoque",
+          "endpoints": [
+            "GET /api/work-orders/:id/signature"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Material lançado, devolvido e kit aplicado com saldos reais e históricos preservados",
+          "endpoints": [
+            "GET /api/work-orders/:id/signature"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Instalação por série vincula equipamento ao contrato em comodato",
+          "endpoints": [
+            "GET /api/work-orders/:id/signature"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Espera, reagendamento, deslocamento, execução e conclusão registram datas; OS finalizada preserva anotações sem reabrir controles",
+          "endpoints": [
+            "GET /api/work-orders/:id/signature"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Ficha A4 usa os registros do ERP, indica o contrato e exclui descrição/anotações internas",
+          "endpoints": [
+            "GET /api/work-orders/:id/signature"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Cancelamento exige motivo e atribuir somente responsável preserva a situação de espera",
+          "endpoints": [
+            "GET /api/work-orders/:id/signature"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Perfil Técnico/NOC usa sua fila pessoal; Financeiro não acessa OS nem executa comandos",
+          "endpoints": [
+            "GET /api/work-orders/:id/signature"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CAMPO-FOTO",
+      "functionality": "Foto pela câmera do celular reduzida no navegador (até 1920 px, JPEG) com legenda opcional no anexo da OS",
+      "declared_endpoints": [
+        "POST /api/work-orders/:id/attachments",
+        "GET /api/work-orders/:id/attachments"
+      ],
+      "exercised_by_interface": [
+        "GET /api/work-orders/:id/attachments",
+        "POST /api/work-orders/:id/attachments"
+      ],
+      "not_exercised_by_interface": [],
+      "checks": [
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Foto pela câmera do celular é reduzida no navegador para 1920 px em JPEG e enviada com legenda como anexo privado",
+          "endpoints": [
+            "POST /api/work-orders/:id/attachments",
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Sem conexão, check-out, anotação e checklist ficam na fila do aparelho como pendentes, com chave e horário local, sem chegar ao servidor",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "OS encerrada mantém a assinatura na ficha, bloqueia nova coleta e imprime assinatura, hash e presenças sem anotações internas",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Atribuição e agendamento persistem no Go, com conversão correta do horário local",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Agenda em fuso do provedor mostra sobreposição, janela livre real, fila de espera e abre a ficha compartilhada",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Meu trabalho exibe a fila real do responsável no celular, com telefone, mapa e abertura da OS",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Fichas do titular e do contrato consultam apenas as OS do vínculo e preservam o contexto ao fechar",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Auxiliar adicionado/removido e checklist concluído com registro do autor",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Go rejeita saída sem saldo e devolução superior ao consumo da OS sem alterar o estoque",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Material lançado, devolvido e kit aplicado com saldos reais e históricos preservados",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Instalação por série vincula equipamento ao contrato em comodato",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Espera, reagendamento, deslocamento, execução e conclusão registram datas; OS finalizada preserva anotações sem reabrir controles",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Ficha A4 usa os registros do ERP, indica o contrato e exclui descrição/anotações internas",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Cancelamento exige motivo e atribuir somente responsável preserva a situação de espera",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Perfil Técnico/NOC usa sua fila pessoal; Financeiro não acessa OS nem executa comandos",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+          "endpoints": [
+            "POST /api/work-orders/:id/attachments",
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+          "endpoints": [
+            "POST /api/work-orders/:id/attachments",
+            "GET /api/work-orders/:id/attachments"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CAMPO-OFFLINE",
+      "functionality": "Fila offline de check-in/check-out, anotações e checklist com chave de idempotência, estados e envio ao reconectar",
+      "declared_endpoints": [
+        "POST /api/work-orders/:id/check-out",
+        "POST /api/work-orders/:id/notes",
+        "POST /api/work-orders/:id/checklist/:itemId"
+      ],
+      "exercised_by_interface": [
+        "POST /api/work-orders/:id/check-out",
+        "POST /api/work-orders/:id/checklist/:itemId",
+        "POST /api/work-orders/:id/notes"
+      ],
+      "not_exercised_by_interface": [],
+      "checks": [
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Ao reconectar, a fila envia em ordem e mostra Enviado; repetir a mesma chave devolve o mesmo resultado sem duplicar e outro conteúdo é recusado",
+          "endpoints": [
+            "POST /api/work-orders/:id/check-out",
+            "POST /api/work-orders/:id/notes",
+            "POST /api/work-orders/:id/checklist/:itemId"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Auxiliar adicionado/removido e checklist concluído com registro do autor",
+          "endpoints": [
+            "POST /api/work-orders/:id/checklist/:itemId"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Espera, reagendamento, deslocamento, execução e conclusão registram datas; OS finalizada preserva anotações sem reabrir controles",
+          "endpoints": [
+            "POST /api/work-orders/:id/notes"
           ]
         }
       ]

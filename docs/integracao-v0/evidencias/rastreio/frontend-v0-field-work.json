@@ -1,0 +1,98 @@
+{
+  "scenario": "frontend-v0-field-work.mjs",
+  "recorded_at": "2026-11-09T22:09:11.252Z",
+  "steps": [
+    {
+      "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+      "requests": [
+        "GET /api/agenda",
+        "GET /api/dashboard",
+        "GET /api/dashboard/panels",
+        "GET /api/finance/monthly",
+        "GET /api/finance/summary",
+        "GET /api/health",
+        "GET /api/install-kits",
+        "GET /api/me",
+        "GET /api/network/health",
+        "GET /api/staff",
+        "GET /api/stock/items",
+        "GET /api/tickets",
+        "GET /api/today",
+        "GET /api/work-orders",
+        "GET /api/work-orders/:id",
+        "GET /api/work-orders/:id/attachments",
+        "GET /api/work-orders/:id/signature",
+        "GET /api/work-orders/:id/visits",
+        "POST /api/auth/login",
+        "POST /api/work-orders/:id/check-in"
+      ]
+    },
+    {
+      "check": "Foto pela câmera do celular é reduzida no navegador para 1920 px em JPEG e enviada com legenda como anexo privado",
+      "requests": [
+        "GET /api/me",
+        "GET /api/work-orders/:id/attachments",
+        "POST /api/work-orders/:id/attachments"
+      ]
+    },
+    {
+      "check": "Assinatura desenhada na tela é gravada como PNG privado da OS com SHA-256 conferido, exibida na ficha e não aceita segunda assinatura",
+      "requests": [
+        "GET /api/me",
+        "GET /api/work-orders/:id",
+        "GET /api/work-orders/:id/signature",
+        "GET /api/work-orders/:id/signature/image",
+        "POST /api/work-orders/:id/signature"
+      ]
+    },
+    {
+      "check": "Sem conexão, check-out, anotação e checklist ficam na fila do aparelho como pendentes, com chave e horário local, sem chegar ao servidor",
+      "requests": [
+        "GET /api/install-kits",
+        "GET /api/me",
+        "GET /api/staff",
+        "GET /api/stock/items",
+        "GET /api/today",
+        "GET /api/work-orders",
+        "GET /api/work-orders/:id",
+        "GET /api/work-orders/:id/attachments",
+        "GET /api/work-orders/:id/signature",
+        "GET /api/work-orders/:id/signature/image",
+        "GET /api/work-orders/:id/visits"
+      ]
+    },
+    {
+      "check": "Ao reconectar, a fila envia em ordem e mostra Enviado; repetir a mesma chave devolve o mesmo resultado sem duplicar e outro conteúdo é recusado",
+      "requests": [
+        "GET /api/me",
+        "GET /api/work-orders",
+        "GET /api/work-orders/:id",
+        "GET /api/work-orders/:id/visits",
+        "POST /api/work-orders/:id/check-out",
+        "POST /api/work-orders/:id/checklist/:id",
+        "POST /api/work-orders/:id/notes"
+      ]
+    },
+    {
+      "check": "Ação da fila recusada pelo servidor aparece como Recusado com o motivo e só sai da fila quando o técnico descarta",
+      "requests": [
+        "GET /api/me",
+        "POST /api/work-orders/:id/check-in"
+      ]
+    },
+    {
+      "check": "OS encerrada mantém a assinatura na ficha, bloqueia nova coleta e imprime assinatura, hash e presenças sem anotações internas",
+      "requests": [
+        "GET /api/me",
+        "GET /api/staff",
+        "GET /api/today",
+        "GET /api/work-orders",
+        "GET /api/work-orders/:id",
+        "GET /api/work-orders/:id/attachments",
+        "GET /api/work-orders/:id/signature",
+        "GET /api/work-orders/:id/signature/image",
+        "GET /api/work-orders/:id/visits"
+      ]
+    }
+  ]
+}

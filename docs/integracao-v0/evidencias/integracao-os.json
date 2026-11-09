@@ -1,7 +1,7 @@
 {
   "ok": true,
   "base": "http://127.0.0.1:18390",
-  "verified_at": "2026-11-09T21:46:31.391Z",
+  "verified_at": "2026-11-09T22:09:01.321Z",
   "backend": "Go isolado, dados sintéticos",
   "checks": [
     "OS criada pela interface v0 com titular, contrato e endereço específico reais",

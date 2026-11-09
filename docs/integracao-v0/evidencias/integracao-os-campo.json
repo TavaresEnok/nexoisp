@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:18390",
+  "verified_at": "2026-11-09T22:09:11.193Z",
+  "backend": "Go isolado, dados sintéticos",
+  "checks": [
+    "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+    "Foto pela câmera do celular é reduzida no navegador para 1920 px em JPEG e enviada com legenda como anexo privado",
+    "Assinatura desenhada na tela é gravada como PNG privado da OS com SHA-256 conferido, exibida na ficha e não aceita segunda assinatura",
+    "Sem conexão, check-out, anotação e checklist ficam na fila do aparelho como pendentes, com chave e horário local, sem chegar ao servidor",
+    "Ao reconectar, a fila envia em ordem e mostra Enviado; repetir a mesma chave devolve o mesmo resultado sem duplicar e outro conteúdo é recusado",
+    "Ação da fila recusada pelo servidor aparece como Recusado com o motivo e só sai da fila quando o técnico descarta",
+    "OS encerrada mantém a assinatura na ficha, bloqueia nova coleta e imprime assinatura, hash e presenças sem anotações internas",
+    "Presenças e assinatura respeitam o isolamento entre provedores e a permissão de OS"
+  ]
+}
