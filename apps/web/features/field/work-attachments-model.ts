@@ -11,6 +11,7 @@ export const attachmentSchema = z.object({
     .min(1)
     .max(5 * 1024 * 1024),
   sha256: z.string().regex(/^[a-fA-F0-9]{64}$/),
+  caption: z.string().max(200).nullable(),
   created_at: z.string().datetime({ offset: true }),
 });
 
@@ -22,6 +23,9 @@ export const attachmentsSchema = z.object({
 
 export const attachmentAccept =
   "application/pdf,image/jpeg,image/png,image/webp";
+/** Abre a câmera traseira no celular; a foto é reduzida no navegador antes do envio. */
+export const cameraAccept = "image/*";
+export const captionLimit = 200;
 export function attachmentActions(
   status: string,
   writable: boolean,

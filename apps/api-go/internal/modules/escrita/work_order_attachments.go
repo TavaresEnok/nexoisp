@@ -20,7 +20,7 @@ import (
 	"nexoisp/api-go/internal/validate"
 )
 
-const attachmentColumns = `id, name, kind, mime, size_bytes, sha256, created_at`
+const attachmentColumns = `id, name, kind, mime, size_bytes, sha256, caption, created_at`
 
 func attachmentContent(encoded string) ([]byte, string, error) {
 	if len(encoded) > 6990508 {
@@ -63,12 +63,13 @@ func registerWorkOrderAttachments(api huma.API, registry *endpoint.Registry, s S
 			}
 			var content []byte
 			var mime, name string
+			var caption any
 			if route.method == "POST" {
 				var raw any
 				if err := apierr.DecodeJSON(r, &raw); err != nil {
 					return endpoint.Result{}, err
 				}
-				b, err := validate.Object(validate.F("name", validate.String().Trimmed().Min(1).Max(120)), validate.F("content_base64", validate.String().Min(1).Max(6990508))).Parse(raw, true)
+				b, err := validate.Object(validate.F("name", validate.String().Trimmed().Min(1).Max(120)), validate.F("content_base64", validate.String().Min(1).Max(6990508)), validate.F("caption", validate.String().Trimmed().Max(200, "legenda de até 200 caracteres").Nullish())).Parse(raw, true)
 				if err != nil {
 					return endpoint.Result{}, err
 				}
@@ -77,6 +78,7 @@ func registerWorkOrderAttachments(api huma.API, registry *endpoint.Registry, s S
 					return endpoint.Result{}, err
 				}
 				name = regexp.MustCompile(`[\\/\x00-\x1f"<>|:*?]`).ReplaceAllString(b["name"].(string), "_")
+				caption = nilEmpty(b["caption"])
 			}
 			var result endpoint.Result
 			err := s.DB.WithScope(ctx, auth.From(ctx).Scope, func(tx *db.Tx) error {
@@ -116,7 +118,7 @@ func registerWorkOrderAttachments(api huma.API, registry *endpoint.Registry, s S
 					if mime == "application/pdf" {
 						kind = "other"
 					}
-					rows, err := tx.Objects(ctx, `insert into documents (tenant_id, subscriber_id, contract_id, work_order_id, kind, name, mime, size_bytes, sha256, content, created_by) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) returning `+attachmentColumns, auth.From(ctx).TenantID, parent.Get("subscriber_id"), parent.Get("contract_id"), id, kind, name, mime, len(content), hex.EncodeToString(sum[:]), content, auth.From(ctx).UserID)
+					rows, err := tx.Objects(ctx, `insert into documents (tenant_id, subscriber_id, contract_id, work_order_id, kind, name, mime, size_bytes, sha256, content, created_by, caption) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) returning `+attachmentColumns, auth.From(ctx).TenantID, parent.Get("subscriber_id"), parent.Get("contract_id"), id, kind, name, mime, len(content), hex.EncodeToString(sum[:]), content, auth.From(ctx).UserID, caption)
 					if err != nil {
 						return err
 					}
@@ -124,7 +126,7 @@ func registerWorkOrderAttachments(api huma.API, registry *endpoint.Registry, s S
 					return record(ctx, tx, "document.upload", "document", rows[0].Get("id"), map[string]any{"subscriber_id": parent.Get("subscriber_id"), "work_order_id": id, "kind": kind, "mime": mime, "size_bytes": len(content)})
 				}
 				if aid == "" {
-					rows, err := tx.Objects(ctx, `select `+attachmentColumns+` from documents where work_order_id=$1 and deleted_at is null order by created_at desc,id desc`, id)
+					rows, err := tx.Objects(ctx, `select `+attachmentColumns+` from documents where work_order_id=$1 and deleted_at is null and kind<>'signature' order by created_at desc,id desc`, id)
 					if err != nil {
 						return err
 					}
@@ -132,7 +134,7 @@ func registerWorkOrderAttachments(api huma.API, registry *endpoint.Registry, s S
 					result.Value = map[string]any{"items": rows, "can_upload": can, "can_delete": can}
 					return nil
 				}
-				rows, err := tx.Objects(ctx, `select `+attachmentColumns+`, content from documents where id=$1 and work_order_id=$2 and deleted_at is null`, aid, id)
+				rows, err := tx.Objects(ctx, `select `+attachmentColumns+`, content from documents where id=$1 and work_order_id=$2 and deleted_at is null and kind<>'signature'`, aid, id)
 				if err != nil {
 					return err
 				}

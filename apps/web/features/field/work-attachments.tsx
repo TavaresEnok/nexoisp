@@ -14,8 +14,16 @@ import {
   attachmentActions,
   attachmentSchema,
   attachmentsSchema,
+  cameraAccept,
+  captionLimit,
   validateAttachment,
 } from "./work-attachments-model";
+import {
+  blobToBase64,
+  browserPhotoCodec,
+  photoName,
+  reducePhoto,
+} from "./image-reduce";
 
 export function WorkAttachments({
   id,
@@ -32,33 +40,44 @@ export function WorkAttachments({
     api<unknown>(path).then((data) => attachmentsSchema.parse(data)),
   );
   const [busy, setBusy] = useState(false);
+  const [caption, setCaption] = useState("");
   const locked = useRef(false);
   const actions = attachmentActions(status, writable, result.data);
   const currentActions = useRef(actions);
   currentActions.current = actions;
-  const upload = async (file?: File) => {
-    if (!file || locked.current || !currentActions.current.upload) return;
-    const error = validateAttachment(file);
-    if (error) {
-      toast.error(error);
-      return;
-    }
+  const upload = async (picked?: File, camera = false) => {
+    if (!picked || locked.current || !currentActions.current.upload) return;
     locked.current = true;
     setBusy(true);
     try {
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      let binary = "";
-      for (let i = 0; i < bytes.length; i += 0x8000)
-        binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+      let file: Blob = picked;
+      let name = picked.name;
+      if (camera) {
+        // Câmera do celular: reduz o lado maior a 1920 px e recodifica em JPEG.
+        file = (await reducePhoto(picked, browserPhotoCodec)).blob;
+        name = photoName(new Date());
+      }
+      const error = validateAttachment(
+        camera ? new File([file], name, { type: file.type }) : picked,
+      );
+      if (error) throw new Error(error);
+      if (Array.from(caption.trim()).length > captionLimit)
+        throw new Error(`A legenda deve ter até ${captionLimit} caracteres.`);
+      const content = await blobToBase64(file);
       if (!currentActions.current.upload)
         throw new Error("O envio de anexos não está disponível para esta OS.");
       attachmentSchema.parse(
         await api<unknown>(path, {
           method: "POST",
-          body: { name: file.name, content_base64: btoa(binary) },
+          body: {
+            name,
+            content_base64: content,
+            caption: caption.trim() || null,
+          },
         }),
       );
-      toast.success("Anexo enviado.");
+      setCaption("");
+      toast.success(camera ? "Foto enviada." : "Anexo enviado.");
       await result.mutate();
     } catch (error) {
       toast.error(
@@ -82,20 +101,49 @@ export function WorkAttachments({
         retry={() => result.mutate()}
       >
         {actions.upload && (
-          <FormField
-            label={busy ? "Enviando arquivo…" : "Adicionar foto ou PDF"}
-          >
-            <Input
-              type="file"
-              accept={attachmentAccept}
-              disabled={busy}
-              onChange={(event) => {
-                const file = event.currentTarget.files?.[0];
-                event.currentTarget.value = "";
-                void upload(file);
-              }}
-            />
-          </FormField>
+          <>
+            <FormField
+              label="Legenda do próximo envio (opcional)"
+              hint="Até 200 caracteres; acompanha a foto ou o PDF enviado em seguida."
+            >
+              <Input
+                maxLength={captionLimit}
+                disabled={busy}
+                value={caption}
+                onChange={(event) => setCaption(event.target.value)}
+              />
+            </FormField>
+            <FormField
+              label={busy ? "Enviando foto…" : "Tirar foto com a câmera"}
+              hint="No celular abre a câmera traseira; a foto é reduzida para até 1920 px em JPEG antes do envio."
+            >
+              <Input
+                type="file"
+                accept={cameraAccept}
+                capture="environment"
+                disabled={busy}
+                onChange={(event) => {
+                  const file = event.currentTarget.files?.[0];
+                  event.currentTarget.value = "";
+                  void upload(file, true);
+                }}
+              />
+            </FormField>
+            <FormField
+              label={busy ? "Enviando arquivo…" : "Adicionar foto ou PDF"}
+            >
+              <Input
+                type="file"
+                accept={attachmentAccept}
+                disabled={busy}
+                onChange={(event) => {
+                  const file = event.currentTarget.files?.[0];
+                  event.currentTarget.value = "";
+                  void upload(file);
+                }}
+              />
+            </FormField>
+          </>
         )}
         {result.data && result.data.items.length === 0 && (
           <p className="profile-footnote">Nenhum anexo nesta OS.</p>
@@ -103,6 +151,9 @@ export function WorkAttachments({
         {result.data?.items.map((item) => (
           <div className="erp-contract-card" key={item.id}>
             <strong>{item.name}</strong>
+            {item.caption && (
+              <p className="whitespace-pre-wrap">{item.caption}</p>
+            )}
             <small>
               {item.kind === "photo" ? "Foto" : "Documento"} ·{" "}
               {Math.ceil(item.size_bytes / 1024)} KiB ·{" "}

@@ -54,7 +54,7 @@ Não bloqueia automaticamente o primeiro piloto; priorizar conforme o uso real:
 
 - Fiscal integrado: emissor, documento e regras do provedor; emissão por empresa e certificados quando aplicável.
 - Gateway: juros/multa na cobrança emitida e estorno pelo gateway; segundo gateway somente depois do primeiro homologado.
-- Campo: trabalho sem conexão, fotos/assinatura na OS e check-in/check-out; armazenamento e acesso precisam de definição.
+- Campo: check-in/check-out com geolocalização, assinatura do cliente, foto pela câmera e fila offline implementados em 09/11/2026 (migração 00088); falta uso assistido com técnicos em aparelhos reais e cobertura de sinal ruim. A fila guarda só a ação pendente no navegador e não funciona sem uma sessão aberta antes da perda de conexão.
 - SLA: calendário de expediente e feriados feito em 20/10/2026; falta validar com a operação real (feriados municipais, plantões).
 - Estoque: depósitos, transferências, fornecedores, pedidos e cotação com pedido rascunho existem; contas a pagar e custo médio dependem de regras aprovadas.
 - Comercial: viabilidade pública, regras adicionais de comissão e identidade visual opcional do provedor no portal (lote 41 DONE; CI candidato em andamento).

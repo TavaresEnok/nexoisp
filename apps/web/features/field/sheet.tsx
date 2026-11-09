@@ -17,6 +17,15 @@ import { WorkActions } from "./work-actions";
 import { WorkCollaboration, WorkHistory } from "./work-log";
 import { WorkMaterials } from "./work-materials";
 import { WorkAttachments } from "./work-attachments";
+import { FieldVisit } from "./field-visit";
+import { WorkSignature } from "./work-signature";
+import { FieldQueuePanel } from "./field-queue-panel";
+import {
+  useSignatureImage,
+  useWorkSignature,
+  useWorkVisits,
+} from "./field-hooks";
+import { safePngDataUrl } from "./field-model";
 import {
   formatDocument,
   formatPhone,
@@ -52,6 +61,10 @@ function LiveOrder({ id, onClose }: { id: string; onClose: () => void }) {
     api<{ id: string; name: string }[]>("/staff"),
   );
   const order = result.data;
+  const visits = useWorkVisits(id);
+  const signature = useWorkSignature(id);
+  const signed = signature.data?.signature ?? null;
+  const signatureImage = useSignatureImage(id, signed?.document_id);
   const refresh = async () => {
     await mutate((key) =>
       typeof key === "string"
@@ -61,6 +74,8 @@ function LiveOrder({ id, onClose }: { id: string; onClose: () => void }) {
           [
             "erp-order",
             "erp-work-attachments",
+            "erp-work-visits",
+            "erp-work-signature",
             "erp-orders",
             "erp-ticket",
             "erp-unit-search",
@@ -83,9 +98,15 @@ function LiveOrder({ id, onClose }: { id: string; onClose: () => void }) {
     >
       <QueryBoundary
         loading={result.isLoading}
-        error={result.error}
+        error={order ? undefined : result.error}
         retry={() => result.mutate()}
       >
+        {order && result.error && (
+          <p className="profile-footnote" role="status">
+            Sem resposta do servidor: exibindo a última consulta desta OS. As
+            ações de campo ficam na fila do aparelho até a reconexão.
+          </p>
+        )}
         {order && (
           <ServiceOrderDetails
             key={order.id}
@@ -105,6 +126,25 @@ function LiveOrder({ id, onClose }: { id: string; onClose: () => void }) {
               operational: true,
               contractId: order.contract_id,
               serviceAddress: order.service_address,
+              visits: visits.data
+                ? {
+                    attendanceSeconds: visits.data.attendance_seconds,
+                    items: visits.data.items.map((visit) => ({
+                      technician: visit.technician_name,
+                      checkIn: visit.check_in_at,
+                      checkOut: visit.check_out_at,
+                    })),
+                  }
+                : undefined,
+              signature: signed
+                ? {
+                    signerName: signed.signer_name,
+                    signerDocument: signed.signer_document,
+                    signedAt: signed.signed_at,
+                    sha256: signed.sha256,
+                    image: safePngDataUrl(signatureImage.data),
+                  }
+                : undefined,
             }}
             onOpenSubscriber={() =>
               navigate(`/assinantes?ficha=${order.subscriber_id}`)
@@ -234,6 +274,11 @@ function LiveOrder({ id, onClose }: { id: string; onClose: () => void }) {
             }
             sections={
               <div className="commercial-detail-body">
+                <FieldQueuePanel orderId={order.id} />
+                <div className="profile-two-columns">
+                  <FieldVisit order={order} />
+                  <WorkSignature order={order} />
+                </div>
                 <div className="profile-two-columns">
                   <div className="erp-stack">
                     <WorkCollaboration

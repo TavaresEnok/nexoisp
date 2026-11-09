@@ -17,6 +17,9 @@ func parameter(ctx context.Context, name string) string {
 	return chi.URLParam(httpx.Request(ctx), name)
 }
 func (s Service) checklist(ctx context.Context, tx *db.Tx, id string, b map[string]any) (any, error) {
+	return fieldIdempotent(ctx, tx, "checklist_add", id, b, func() (any, error) { return s.addChecklist(ctx, tx, id, b) })
+}
+func (s Service) addChecklist(ctx context.Context, tx *db.Tx, id string, b map[string]any) (any, error) {
 	const key = "POST /api/work-orders/:id/checklist"
 	w, err := mustRow(ctx, tx, key, 0, "ordem de serviço não encontrada", id)
 	if err != nil {
@@ -35,9 +38,17 @@ func (s Service) checklist(ctx context.Context, tx *db.Tx, id string, b map[stri
 			return nil, err
 		}
 	}
-	return map[string]any{"ok": true}, workEvent(ctx, tx, id, "checklist", map[string]any{"added": len(items)})
+	return map[string]any{"ok": true}, workEvent(ctx, tx, id, "checklist", deviceDetail(b, map[string]any{"added": len(items)}))
 }
 func (s Service) checklistDone(ctx context.Context, tx *db.Tx, id string, b map[string]any) (any, error) {
+	// The item belongs to the hashed request, so one key cannot be reused for another item.
+	scoped := map[string]any{"item_id": parameter(ctx, "itemId")}
+	for name, value := range b {
+		scoped[name] = value
+	}
+	return fieldIdempotent(ctx, tx, "checklist_done", id, scoped, func() (any, error) { return s.markChecklist(ctx, tx, id, b) })
+}
+func (s Service) markChecklist(ctx context.Context, tx *db.Tx, id string, b map[string]any) (any, error) {
 	const key = "POST /api/work-orders/:id/checklist/:itemId"
 	w, err := mustRow(ctx, tx, key, 0, "ordem de serviço não encontrada", id)
 	if err != nil {
@@ -54,7 +65,7 @@ func (s Service) checklistDone(ctx context.Context, tx *db.Tx, id string, b map[
 	if b["done"] == true {
 		event = "checklist_done"
 	}
-	return map[string]any{"ok": true}, workEvent(ctx, tx, id, event, map[string]any{"item": r.Get("label")})
+	return map[string]any{"ok": true}, workEvent(ctx, tx, id, event, deviceDetail(b, map[string]any{"item": r.Get("label")}))
 }
 func (s Service) addHelper(ctx context.Context, tx *db.Tx, id string, b map[string]any) (any, error) {
 	const key = "POST /api/work-orders/:id/helpers"
@@ -104,10 +115,20 @@ func (s Service) deleteHelper(ctx context.Context, tx *db.Tx, id string, _ map[s
 	return map[string]any{"ok": true}, history(ctx, tx, key, 1, id, map[string]any{"user_id": user})
 }
 func (s Service) workNote(ctx context.Context, tx *db.Tx, id string, b map[string]any) (any, error) {
-	if _, err := mustRow(ctx, tx, "POST /api/work-orders/:id/notes", 0, "ordem de serviço não encontrada", id); err != nil {
-		return nil, err
+	return fieldIdempotent(ctx, tx, "note", id, b, func() (any, error) {
+		if _, err := mustRow(ctx, tx, "POST /api/work-orders/:id/notes", 0, "ordem de serviço não encontrada", id); err != nil {
+			return nil, err
+		}
+		return map[string]any{"ok": true}, workEvent(ctx, tx, id, "note", deviceDetail(b, map[string]any{"note": b["note"]}))
+	})
+}
+
+// deviceDetail keeps the device clock as extra information; the event time is the server's.
+func deviceDetail(b map[string]any, detail map[string]any) map[string]any {
+	if b["device_at"] != nil {
+		detail["device_at"] = b["device_at"]
 	}
-	return map[string]any{"ok": true}, workEvent(ctx, tx, id, "note", map[string]any{"note": b["note"]})
+	return detail
 }
 func (s Service) workMaterials(ctx context.Context, tx *db.Tx, id string, b map[string]any) (any, error) {
 	const key = "POST /api/work-orders/:id/materials"

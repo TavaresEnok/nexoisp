@@ -34,11 +34,13 @@ func (s Service) stockOperations(ops map[string]operation) {
 	ops["POST /api/stock/items/:id/units"] = operation{s.receiveUnits, obj(o(f("serials", validate.Array(str().Trimmed().Pattern(`^[A-Za-z0-9._:-]{4,40}$`, "série: 4 a 40 letras, números, . _ : -").Upper()).Min(1).Max(500)), f("note", text(300).Nullish())))}
 	ops["POST /api/stock/units/:id/transfer"] = operation{s.transferUnit, obj(o(f("holder_id", uuid.Null())))}
 	ops["POST /api/stock/units/:id/status"] = operation{s.unitStatus, obj(o(f("status", e("in_stock", "defective", "written_off")), f("note", text(300).Nullish())))}
-	ops["POST /api/work-orders/:id/checklist"] = operation{s.checklist, obj(o(f("items", validate.Array(str().Trimmed().Min(2).Max(160)).Min(1).Max(30))))}
-	ops["POST /api/work-orders/:id/checklist/:itemId"] = operation{s.checklistDone, obj(o(f("done", b())))}
+	// Optional key and device clock let the field offline queue replay an action without duplicating it.
+	idempotency, deviceAt := f("idempotency_key", uuid.Opt()), f("device_at", str().Refine(validDateTime, "data e hora do dispositivo inválida").Nullish())
+	ops["POST /api/work-orders/:id/checklist"] = operation{s.checklist, obj(o(f("items", validate.Array(str().Trimmed().Min(2).Max(160)).Min(1).Max(30)), idempotency, deviceAt))}
+	ops["POST /api/work-orders/:id/checklist/:itemId"] = operation{s.checklistDone, obj(o(f("done", b()), idempotency, deviceAt))}
 	ops["POST /api/work-orders/:id/helpers"] = operation{s.addHelper, obj(o(f("user_id", uuid)))}
 	ops["DELETE /api/work-orders/:id/helpers/:userId"] = operation{s.deleteHelper, nil}
-	ops["POST /api/work-orders/:id/notes"] = operation{s.workNote, obj(o(f("note", str().Trimmed().Min(1).Max(2000))))}
+	ops["POST /api/work-orders/:id/notes"] = operation{s.workNote, obj(o(f("note", str().Trimmed().Min(1).Max(2000)), idempotency, deviceAt))}
 	ops["POST /api/work-orders/:id/materials"] = operation{s.workMaterials, obj(o(f("intention_id", uuid), f("item_id", uuid), f("qty", qty(10000))))}
 	ops["POST /api/work-orders/:id/kit"] = operation{s.workKit, obj(o(f("kit_id", uuid)))}
 }

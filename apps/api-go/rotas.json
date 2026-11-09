@@ -803,6 +803,18 @@
     },
     {
       "method": "GET",
+      "path": "/api/work-orders/:id/signature"
+    },
+    {
+      "method": "GET",
+      "path": "/api/work-orders/:id/signature/image"
+    },
+    {
+      "method": "GET",
+      "path": "/api/work-orders/:id/visits"
+    },
+    {
+      "method": "GET",
       "path": "/aviso/:slug"
     },
     {
@@ -1567,6 +1579,14 @@
     },
     {
       "method": "POST",
+      "path": "/api/work-orders/:id/check-in"
+    },
+    {
+      "method": "POST",
+      "path": "/api/work-orders/:id/check-out"
+    },
+    {
+      "method": "POST",
       "path": "/api/work-orders/:id/checklist"
     },
     {
@@ -1588,6 +1608,10 @@
     {
       "method": "POST",
       "path": "/api/work-orders/:id/notes"
+    },
+    {
+      "method": "POST",
+      "path": "/api/work-orders/:id/signature"
     },
     {
       "method": "POST",
