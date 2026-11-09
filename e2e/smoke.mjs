@@ -6,7 +6,8 @@ import { begin, end } from './request-trace.mjs';
 // Cada cenário grava em docs/integracao-v0/evidencias/rastreio/ as chamadas à API
 // feitas pela interface em cada verificação (evidência por unidade da matriz).
 // FROM retoma a fumaça a partir de um cenário; ONLY roda cenários avulsos, como
-// os que exigem o ACS sintético (frontend-v0-cpe.mjs, frontend-v0-portal-wifi.mjs).
+// os que exigem o ACS sintético (frontend-v0-cpe.mjs, frontend-v0-portal-wifi.mjs,
+// frontend-v0-acs-template-apply.mjs), com NEXO_V0_ACS=1 no harness.
 const scenarios = [
   'frontend-v0.mjs',
   'frontend-v0-session.mjs',
@@ -19,6 +20,9 @@ const scenarios = [
   'frontend-v0-stock.mjs',
   'frontend-v0-network.mjs',
   'frontend-v0-network-sites.mjs',
+  'frontend-v0-acs-templates.mjs',
+  'frontend-v0-monitoring.mjs',
+  'frontend-v0-assistant.mjs',
   'frontend-v0-access.mjs',
   'frontend-v0-optical.mjs',
   'frontend-v0-maintenance.mjs',

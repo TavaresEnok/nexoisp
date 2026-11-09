@@ -19,6 +19,7 @@ import { api } from "@/platform/erp-client";
 import { stamp } from "./models";
 import { duration } from "./telemetry";
 import { CpeTasks, useCpeCommands } from "./cpe-tasks";
+import { CpeTemplateAction } from "./cpe-template";
 export const cpeDeviceSchema = z.object({
   id: z.string(),
   manufacturer: z.string().nullable(),
@@ -268,6 +269,13 @@ export function ContractCpe({ id }: { id: string }) {
                       >
                         Reiniciar roteador
                       </ActionButton>
+                      {d && (
+                        <CpeTemplateAction
+                          contract={id}
+                          commands={commands}
+                          onApplied={() => result.mutate()}
+                        />
+                      )}
                       <ActionButton
                         danger
                         disabled={commands.blocked}

@@ -1,7 +1,7 @@
 /** Persist only identity/kind. Wi-Fi passwords never enter browser storage. */
 export type CpeIntent = {
   intent_id: string;
-  kind: "wifi" | "refresh" | "reboot";
+  kind: "wifi" | "refresh" | "reboot" | "template";
 };
 export function cpeIntentKey(tenant: string, actor: string, contract: string) {
   return `nexo:cpe-intent:v1:${tenant}:${actor}:${contract}`;
@@ -14,7 +14,7 @@ export function readCpeIntent(storage: Storage, key: string): CpeIntent | null {
     !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
       value.intent_id,
     ) ||
-    !["wifi", "refresh", "reboot"].includes(value.kind)
+    !["wifi", "refresh", "reboot", "template"].includes(value.kind)
   )
     throw Error(
       "Intenção CPE inválida; confira o histórico antes de continuar.",

@@ -77,7 +77,7 @@ A tela de login foi refeita com os tokens, fontes e temas do v0 (`features/sessi
 | D7 · CSV cortado em 5.000 linhas sem aviso | Fechado. As cinco exportações avisam quando `X-Total-Count` passa do limite. | `features/shared/export.ts` |
 | D8 · `z.coerce.number` em dinheiro | Fechado. Campos monetários usam `cents()`/`money()`: nulo ou ausente é erro, nunca R$ 0,00. | `features/shared/schema.ts` |
 | D9 · `tests/` fora do `tsc` | Fechado. | `tsconfig.json` |
-| D10 · `<a href>` interno | Fechado. Links internos usam o roteador; teste impede regressão. `/assistente` e `/acompanhamento` têm destino (página de recurso planejado). | `tests/audit-hardening.test.ts` |
+| D10 · `<a href>` interno | Fechado. Links internos usam o roteador; teste impede regressão. `/assistente` e `/acompanhamento` têm página operacional (assistente por regras e acompanhamento somente leitura). | `tests/audit-hardening.test.ts` |
 | D11 · portal em um componente | Fechado. Seções em `features/portal/sections.tsx`; cada destino `/portal/<seção>` abre só a sua seção, com e2e por endereço. | `features/portal/home.tsx` |
 
 O que a prova visual não cobre: igualdade pixel a pixel entre tela conectada e v0 (os dados diferem) e telas fora da lista. A igualdade com o v0 original continua comprovada para a demonstração.
