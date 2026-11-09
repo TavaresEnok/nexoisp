@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-stock.mjs",
-  "recorded_at": "2026-11-09T21:46:43.804Z",
+  "recorded_at": "2026-11-09T22:38:16.743Z",
   "steps": [
     {
       "check": "Catálogo cadastra material com código, unidade e mínimo; alerta usa saldo real",
@@ -8,6 +8,7 @@
         "GET /api/health",
         "GET /api/me",
         "GET /api/stock/items",
+        "GET /api/stock/valuation",
         "GET /api/today",
         "POST /api/auth/login",
         "POST /api/stock/items"
@@ -19,7 +20,9 @@
         "GET /api/me",
         "GET /api/stock/items",
         "GET /api/stock/items/:id/balances",
+        "GET /api/stock/items/:id/costs",
         "GET /api/stock/items/:id/movements",
+        "GET /api/stock/valuation",
         "POST /api/stock/items/:id/movements"
       ]
     },
@@ -28,6 +31,7 @@
       "requests": [
         "GET /api/me",
         "GET /api/stock/items",
+        "GET /api/stock/valuation",
         "PATCH /api/stock/items/:id"
       ]
     },
@@ -38,6 +42,7 @@
         "GET /api/staff",
         "GET /api/stock/items",
         "GET /api/stock/items/:id/units",
+        "GET /api/stock/valuation",
         "POST /api/stock/items",
         "POST /api/stock/items/:id/units"
       ]
@@ -48,6 +53,7 @@
         "GET /api/me",
         "GET /api/stock/items",
         "GET /api/stock/items/:id/units",
+        "GET /api/stock/valuation",
         "POST /api/stock/units/:id/transfer"
       ]
     },
@@ -68,6 +74,7 @@
         "GET /api/staff",
         "GET /api/stock/items",
         "GET /api/stock/items/:id/units",
+        "GET /api/stock/valuation",
         "GET /api/today",
         "POST /api/stock/units/:id/status"
       ]
@@ -78,6 +85,7 @@
         "GET /api/me",
         "GET /api/stock/items",
         "GET /api/stock/items/:id/units",
+        "GET /api/stock/valuation",
         "POST /api/stock/units/:id/status"
       ]
     },
@@ -92,6 +100,7 @@
       "requests": [
         "GET /api/me",
         "GET /api/stock/items",
+        "GET /api/stock/valuation",
         "GET /api/today"
       ]
     },
@@ -101,6 +110,7 @@
         "GET /api/me",
         "GET /api/stock/items",
         "GET /api/stock/items/:id/units",
+        "GET /api/stock/valuation",
         "GET /api/today"
       ]
     },
@@ -109,6 +119,7 @@
       "requests": [
         "GET /api/me",
         "GET /api/stock/items",
+        "GET /api/stock/valuation",
         "GET /api/today"
       ]
     }

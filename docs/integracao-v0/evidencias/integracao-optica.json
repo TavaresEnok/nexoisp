@@ -1,7 +1,7 @@
 {
   "ok": true,
   "base": "http://127.0.0.1:18390",
-  "verified_at": "2026-11-09T21:47:43.207Z",
+  "verified_at": "2026-11-09T22:39:39.600Z",
   "backend": "Go/PostgreSQL e protocolo do agente isolados; sem OLT física",
   "checks": [
     "Descoberta relatada pelo agente é vinculada pela UI ao contrato, PON, perfis e VLAN; driver Huawei mantém a limitação de homologação explícita",

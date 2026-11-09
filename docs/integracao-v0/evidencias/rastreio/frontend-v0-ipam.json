@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-ipam.mjs",
-  "recorded_at": "2026-11-09T21:48:32.116Z",
+  "recorded_at": "2026-11-09T22:40:26.318Z",
   "steps": [
     {
       "check": "Cadastro e edição de pool IPv4 preservam CIDR; reserva automática ignora endereço de rede e grava descrição no Go",

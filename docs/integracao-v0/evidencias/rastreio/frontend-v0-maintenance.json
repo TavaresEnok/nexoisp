@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-maintenance.mjs",
-  "recorded_at": "2026-11-09T21:47:50.177Z",
+  "recorded_at": "2026-11-09T22:39:45.969Z",
   "steps": [
     {
       "check": "Cadastro, edição, normalização de UF e ativação/inativação de POP persistem no Go",

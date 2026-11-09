@@ -1,7 +1,7 @@
 {
   "ok": true,
   "base": "http://127.0.0.1:18390",
-  "verified_at": "2026-11-09T21:47:50.080Z",
+  "verified_at": "2026-11-09T22:39:45.878Z",
   "backend": "Go/PostgreSQL isolados; canal HTTP em loopback, sem mensagens externas",
   "deliveries_observed": 2,
   "checks": [

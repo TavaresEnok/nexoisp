@@ -1,0 +1,56 @@
+{
+  "scenario": "frontend-v0-stock-cost-payables.mjs",
+  "recorded_at": "2026-11-09T22:38:23.685Z",
+  "steps": [
+    {
+      "check": "Entradas com custo recalculam o custo médio com arredondamento em centavos; a saída usa o médio vigente e o catálogo mostra custo e valor",
+      "requests": [
+        "GET /api/me",
+        "GET /api/stock/items",
+        "GET /api/stock/items/:id/balances",
+        "GET /api/stock/items/:id/costs",
+        "GET /api/stock/items/:id/movements",
+        "GET /api/stock/valuation",
+        "GET /api/today",
+        "POST /api/stock/items/:id/movements"
+      ]
+    },
+    {
+      "check": "Recebimento do pedido gera títulos parcelados ao fornecedor e recalcula o custo médio pelo custo do pedido",
+      "requests": [
+        "GET /api/me",
+        "GET /api/stock/items",
+        "GET /api/stock/purchases",
+        "GET /api/stock/valuation",
+        "GET /api/today",
+        "POST /api/stock/purchases/:id/receive"
+      ]
+    },
+    {
+      "check": "Contas a pagar filtra por fornecedor e situação, baixa com data e forma, cancela com motivo e recalcula os totais",
+      "requests": [
+        "GET /api/finance/payables",
+        "GET /api/me",
+        "GET /api/today",
+        "POST /api/finance/payables/:id/cancel",
+        "POST /api/finance/payables/:id/pay"
+      ]
+    },
+    {
+      "check": "Lançamento manual parcelado divide centavos, segue vencimentos mensais e aparece no filtro de vencidos",
+      "requests": [
+        "GET /api/finance/payables",
+        "GET /api/me",
+        "POST /api/finance/payables"
+      ]
+    },
+    {
+      "check": "Contas a pagar exige finance:read/finance:write, custo do estoque exige stock:read e o Go isola os provedores",
+      "requests": [
+        "GET /api/finance/payables",
+        "GET /api/me",
+        "GET /api/today"
+      ]
+    }
+  ]
+}

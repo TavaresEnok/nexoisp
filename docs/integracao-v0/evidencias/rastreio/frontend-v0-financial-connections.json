@@ -1,9 +1,9 @@
 {
   "scenario": "frontend-v0-financial-connections.mjs",
-  "recorded_at": "2026-11-09T21:50:08.806Z",
+  "recorded_at": "2026-11-09T22:42:10.658Z",
   "steps": [
     {
-      "check": "{\"ok\":true,\"checks\":[\"cadastro pela interface persiste conexão pendente\",\"segredo não retorna nem cifrado na listagem\",\"ativação sandbox, troca de padrão e desativação confirmadas no backend\",\"reload preserva estado; componentes oficiais e API reais\",\"cofre pela UI persiste certificado sintético e versão; segredo não retorna nem fica no armazenamento do navegador\"],\"connection\":\"dd8a22ab-0aba-49eb-a951-90b3140309b6\"}",
+      "check": "{\"ok\":true,\"checks\":[\"cadastro pela interface persiste conexão pendente\",\"segredo não retorna nem cifrado na listagem\",\"ativação sandbox, troca de padrão e desativação confirmadas no backend\",\"reload preserva estado; componentes oficiais e API reais\",\"cofre pela UI persiste certificado sintético e versão; segredo não retorna nem fica no armazenamento do navegador\"],\"connection\":\"462d1934-67b2-4e0e-afe2-1f0439bb0c3c\"}",
       "requests": [
         "GET /api/companies",
         "GET /api/financial-connections",

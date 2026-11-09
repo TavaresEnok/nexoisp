@@ -1,12 +1,34 @@
 # Estado do NexoISP
 
-**Atualizado em 06/11/2026.** Este é o resumo de referência. Os relatórios de lotes (`LOTE*`, `CONCLUSAO-INTEGRAL*`, `RELATORIO-GERAL-*`, `CORRECOES-*`) saíram do repositório em 09/11/2026 e continuam acessíveis na tag `arquivo/pre-limpeza-2026-11-09`.
+**Atualizado em 09/11/2026.** Este é o resumo de referência. Os relatórios de lotes (`LOTE*`, `CONCLUSAO-INTEGRAL*`, `RELATORIO-GERAL-*`, `CORRECOES-*`) saíram do repositório em 09/11/2026 e continuam acessíveis na tag `arquivo/pre-limpeza-2026-11-09`.
 
 ## Auditoria local atual
 
 A [auditoria de 06/11/2026](auditoria-2026-11-06/RELATORIO.md) corrige guardas de recuperação e produtividade das filas sem publicar o serviço. A baseline inicial foi `9119c57`, com diretório limpo. O relatório distingue provas novas, evidências históricas e limitações. A causa da divergência entre os dois CIs dessa baseline continua **inconclusiva**, pois os logs completos exigem acesso autenticado. Uma execução local verde não a resolve.
 
 Avaliação local sintética: aprovada no recorte validado. Publicação e piloto: **ainda bloqueados**; ações exatas na [lista externa única](auditoria-2026-11-06/PENDENCIAS-EXTERNAS.md). Backup local não protege contra perda do host; metas de RPO/RTO ainda precisam do operador. A aplicação antiga está parada e o virtual host local responde como PNETLab; [configuração proposta de publicação](auditoria-2026-11-06/PUBLICACAO.md), atualizada para Nginx central → Apache com VirtualHost exclusivo → Caddy em loopback, sem alterações nos serviços. O ChatISP já tem VirtualHost próprio; o NexoISP ainda não tem upstream ativo validado.
+
+## Rodada de conclusão — 09/11/2026
+
+Tudo o que estava pela metade ou só planejado e dependia apenas de código foi implementado, testado com PostgreSQL real e validado no navegador. Decisões e itens deliberadamente não implementados estão em [Decisões](DECISOES.md).
+
+| Entrega | Situação | Migração |
+|---|---|---|
+| Projeto físico FTTH: cabos com traçado, fusões por caixa, medições OTDR com arquivo bruto, importação KML com prévia | Pronto | 00087 |
+| Campo: check-in/check-out com geolocalização, assinatura do cliente, foto pela câmera, fila offline idempotente | Pronto | 00088 |
+| Liquidação de comissões: período congelado, pagamento, estorno, CSV | Pronto | 00089 |
+| Estoque: custo médio ponderado, valor do estoque e contas a pagar geradas no recebimento | Pronto | 00090 |
+| Template TR-069 de CPE (`/rede/ftth/acs-template`) com aplicação por intenção ACS durável | Pronto | 00091 |
+| Acompanhamento operacional (`/acompanhamento`) e assistente determinístico (`/assistente`) | Pronto | — |
+| Consulta pública de viabilidade (`/viabilidade/<slug>`) com captação de prospecto | Pronto | 00092 |
+| Senha provisória com troca obrigatória e encerramento de sessões na redefinição | Pronto | 00093 |
+| Arquivo DICI no leiaute do Manual de Coleta SCM, com bloqueio por pendências | Pronto (tabela de tecnologias a conferir) | — |
+| Multa e juros da política na emissão de boleto Efí | Pronto em código; homologação Efí pendente | — |
+| Deduplicação de alertas persistida no banco | Pronto | 00094 |
+| IP real do cliente atrás de Nginx → Apache → Caddy (`NEXO_TRUSTED_PROXIES`) | Pronto em código; conferir na publicação | — |
+| Loop de reinício da VPN, `./nexo doctor`, travas de versão/documentação/material de terceiro | Pronto | — |
+
+Nenhum destino do menu cai mais em "Recurso planejado". A matriz funcional não tem unidade pendente.
 
 ## Base
 
@@ -19,14 +41,14 @@ Avaliação local sintética: aprovada no recorte validado. Publicação e pilot
 | Área | O que existe |
 |---|---|
 | Cadastro e privacidade | Assinantes, ficha, vários contratos por titular, contatos e consentimento, documentos, anotações, linha do tempo, exportação pessoal e anonimização |
-| Comercial | Planos versionados, adicionais e combos, vencimento, fidelidade e multa, descontos, mudança agendada, aditivo, aceite simples, etiquetas, empresa e POP |
-| Financeiro | Geração por competência, baixa manual integral/parcial com taxas e desconto, estorno, cancelamento, acordos, prazo de confiança, degraus de cobrança, relatórios, CSV contábil; conexões financeiras isoladas e pipeline Efí apenas em sandbox interno |
-| Atendimento e campo | Chamados, protocolos, OS com checklist, kits, materiais, equipamentos por série, anexos privados, agenda, SLA com expediente e feriados, pesquisa de satisfação, tela móvel |
-| Estoque e compras | Materiais, depósitos, transferências, fornecedores, pedidos, cotações com pedido rascunho |
+| Comercial | Planos versionados, adicionais e combos, vencimento, fidelidade e multa, descontos, mudança agendada, aditivo, aceite simples, etiquetas, empresa e POP, viabilidade pública com captação de prospecto, liquidação de comissões |
+| Financeiro | Geração por competência, baixa manual integral/parcial com taxas e desconto, estorno, cancelamento, acordos, prazo de confiança, degraus de cobrança, relatórios, CSV contábil; conexões financeiras isoladas e pipeline Efí apenas em sandbox interno; multa e juros enviados na emissão Efí; contas a pagar |
+| Atendimento e campo | Chamados, protocolos, OS com checklist, kits, materiais, equipamentos por série, anexos privados, agenda, SLA com expediente e feriados, pesquisa de satisfação, tela móvel, check-in/check-out, assinatura do cliente, foto pela câmera e fila offline |
+| Estoque e compras | Materiais, depósitos, transferências, fornecedores, pedidos, cotações com pedido rascunho, custo médio e valor do estoque, contas a pagar |
 | Portal do assinante | Contratos, títulos, uso, Wi-Fi do próprio CPE, atendimento, aceite e marca opcional do provedor |
-| Rede e acesso | Agente com mTLS e comandos assinados, RADIUS integrado, provisionar/suspender/reativar/desconectar, IP fixo e prefixo IPv6, VPN WireGuard e L2TP/IPsec, TR-069, OLT Huawei (apenas emulador), CGNAT e IPAM, NOC por regras |
-| Administração e integrações | Equipe e perfis, módulos por provedor, API pública com tokens, webhooks assinados, auditoria e retenção, prévia DICI, importação CSV (assinantes, contratos, títulos, histórico, documentos, usuários, rede) |
-| Operação | Preflight de produção, backup diário por systemd com manifesto, `restore-check`, gancho de cópia externa, métricas Prometheus e alertas, réplica em espera |
+| Rede e acesso | Agente com mTLS e comandos assinados, RADIUS integrado, provisionar/suspender/reativar/desconectar, IP fixo e prefixo IPv6, VPN WireGuard e L2TP/IPsec, TR-069, OLT Huawei (apenas emulador), CGNAT e IPAM, NOC por regras, templates TR-069 por modelo, projeto físico FTTH (cabos, fusões, OTDR, KML) |
+| Administração e integrações | Equipe e perfis, módulos por provedor, API pública com tokens, webhooks assinados, auditoria e retenção, prévia DICI, importação CSV (assinantes, contratos, títulos, histórico, documentos, usuários, rede), arquivo DICI no leiaute SCM, senha provisória com troca obrigatória, acompanhamento operacional e assistente |
+| Operação | Preflight de produção, backup diário por systemd com manifesto, `restore-check`, gancho de cópia externa, métricas Prometheus e alertas, réplica em espera, `./nexo doctor`, deduplicação de alertas persistida |
 
 ## Jornadas do primeiro piloto
 
@@ -80,4 +102,4 @@ PPPoE/RADIUS no NAS físico (o laboratório de 02/11/2026 exercitou o RADIUS int
 
 ## Backlog fora do piloto
 
-Fiscal integrado, segundo gateway, trabalho offline e assinatura na OS, OLT de outros fabricantes, CoA, IA assistiva, multicélulas, liquidação de comissões e transmissão DICI. Continuam registrados em [Pendências](pendencias.md); Chatwoot/Webchat estão fora do escopo.
+Itens deliberadamente não implementados, com motivo em [Decisões](DECISOES.md): fiscal integrado (NFCom/NFS-e), segundo gateway, OLT de outros fabricantes sem equipamento, CoA (mudança de perfil sem derrubar a sessão; hoje a troca de plano reautentica a sessão), IA com modelo externo, multicélulas e transmissão automática do DICI (a ANATEL não oferece API). Trabalho offline, assinatura na OS, liquidação de comissões e arquivo DICI foram entregues em 09/11/2026. Chatwoot/Webchat estão fora do escopo.

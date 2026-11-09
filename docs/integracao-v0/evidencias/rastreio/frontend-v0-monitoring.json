@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-monitoring.mjs",
-  "recorded_at": "2026-11-09T22:14:25.069Z",
+  "recorded_at": "2026-11-09T22:38:59.329Z",
   "steps": [
     {
       "check": "Acompanhamento: saúde da API e do banco, agentes, operações, filas e rotinas sem conteúdo sensível",

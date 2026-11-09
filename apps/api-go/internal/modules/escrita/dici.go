@@ -91,6 +91,8 @@ func diciSpeed(mbps float64) string {
 // diciCSV gera o arquivo do leiaute. As linhas já chegam validadas.
 func diciCSV(competence string, rows []diciRow) []byte {
 	year, month, _ := strings.Cut(competence, "-")
+	// Manual da coleta: um dígito de janeiro a setembro, dois de outubro a dezembro.
+	month = strings.TrimLeft(month, "0")
 	lines := []string{strings.Join(diciHeader, ";")}
 	sorted := append([]diciRow(nil), rows...)
 	sort.SliceStable(sorted, func(i, j int) bool {
@@ -189,7 +191,7 @@ func (s Service) dici(ctx context.Context, tx *db.Tx, _ string, _ map[string]any
 	}
 	grouped, err := tx.Objects(ctx, diciBase+`select cnpj, ibge_code, case when length(coalesce(document, '')) = 14 then 'PJ' else 'PF' end as tipo_cliente,
        case service_area when 'rural' then 'RURAL' else 'URBANO' end as tipo_atendimento, access_technology,
-       round(down_kbps / 1000.0, 2)::float8 as velocidade_mbps, count(*)::int as acessos
+       (down_kbps / 1000.0)::float8 as velocidade_mbps, count(*)::int as acessos
   from base where company_id is not null and ibge_code is not null and access_technology is not null
   group by 1, 2, 3, 4, 5, 6 order by 1, 2, 3, 4, 5, 6`, first, companyArg)
 	if err != nil {

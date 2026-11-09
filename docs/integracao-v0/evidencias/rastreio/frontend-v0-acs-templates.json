@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-acs-templates.mjs",
-  "recorded_at": "2026-11-09T22:14:22.244Z",
+  "recorded_at": "2026-11-09T22:38:56.424Z",
   "steps": [
     {
       "check": "Templates ACS: cadastro recusa variável desconhecida e grava parâmetros TR-098, curingas e inform periódico",

@@ -1,11 +1,11 @@
 {
   "ok": true,
   "base": "http://127.0.0.1:18390",
-  "verified_at": "2026-11-09T21:53:34.217Z",
+  "verified_at": "2026-11-09T22:43:55.607Z",
   "backend": "Go/PostgreSQL isolados; dados sintéticos",
   "checks": [
     "Catálogo de ONU: modelo e template cadastrados pela tela original do v0, associação persistida e exclusão de modelo em uso recusada pelo Go",
-    "Portas PON: 0 porta(s) derivadas das ONUs e descobertas; assinantes da porta abertos pela tela do v0",
+    "Portas PON: 3 porta(s) derivadas das ONUs e descobertas; assinantes da porta abertos pela tela do v0",
     "SLA: calendário de expediente, feriado e política \"Somente no expediente\" gravados pela interface e relidos no Go",
     "Estoque: depósito, fornecedor e pedido de compra pela interface; recebimento gera entrada no depósito e a transferência move o saldo para o principal"
   ]

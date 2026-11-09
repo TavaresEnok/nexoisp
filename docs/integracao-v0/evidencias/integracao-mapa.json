@@ -1,7 +1,7 @@
 {
   "ok": true,
   "base": "http://127.0.0.1:18390",
-  "verified_at": "2026-11-09T21:48:42.596Z",
+  "verified_at": "2026-11-09T22:40:37.284Z",
   "backend": "Go/PostgreSQL isolados; blocos de mapa sintéticos apenas no teste",
   "checks": [
     "Localização do contrato é gravada pelo endpoint Go, sem geocodificação nem aproximação de endereço",

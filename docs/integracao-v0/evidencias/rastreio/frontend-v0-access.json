@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-access.mjs",
-  "recorded_at": "2026-11-09T21:47:31.037Z",
+  "recorded_at": "2026-11-09T22:39:26.366Z",
   "steps": [
     {
       "check": "Provisionamento pela ficha usa equipamento real, emite senha apenas uma vez e mantém intenção separada da leitura ausente",

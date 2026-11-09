@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-os-quotations.mjs",
-  "recorded_at": "2026-11-09T21:49:44.115Z",
+  "recorded_at": "2026-11-09T22:41:46.770Z",
   "steps": [
     {
       "check": "Anexo sintético enviado, baixado e excluído pela OS.",
@@ -15,6 +15,8 @@
         "GET /api/work-orders/:id",
         "GET /api/work-orders/:id/attachments",
         "GET /api/work-orders/:id/attachments/:id/download",
+        "GET /api/work-orders/:id/signature",
+        "GET /api/work-orders/:id/visits",
         "POST /api/work-orders/:id/attachments"
       ]
     },
@@ -27,6 +29,7 @@
         "GET /api/stock/quotations/:id",
         "GET /api/stock/quotations/:id/export.csv",
         "GET /api/stock/suppliers",
+        "GET /api/stock/valuation",
         "GET /api/stock/warehouses",
         "GET /api/today",
         "POST /api/stock/quotations",

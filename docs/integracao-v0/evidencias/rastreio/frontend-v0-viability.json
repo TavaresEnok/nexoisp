@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-viability.mjs",
-  "recorded_at": "2026-11-09T22:20:24.556Z",
+  "recorded_at": "2026-11-09T22:39:08.537Z",
   "steps": [
     {
       "check": "Painel publica a consulta com raio de 250 m, mensagem, contatos e criação de prospecto; o Go recusa raio fora da faixa.",

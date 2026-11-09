@@ -35,9 +35,9 @@ func TestDICILayoutHeaderOrderSeparatorsAndDomains(t *testing.T) {
 	lines := strings.Split(strings.TrimSuffix(strings.TrimPrefix(raw, "\ufeff"), "\r\n"), "\r\n")
 	want := []string{
 		"CNPJ;ANO;MES;COD_IBGE;TIPO_CLIENTE;TIPO_ATENDIMENTO;TIPO_MEIO;TIPO_PRODUTO;TIPO_TECNOLOGIA;VELOCIDADE;ACESSOS",
-		"11222333000181;2026;03;2303709;PF;URBANO;cabo_metalico;internet;xDSL;15,75;7",
-		"11222333000181;2026;03;2304400;PF;RURAL;radio;internet;Wi-Fi;0,5;1",
-		"11222333000181;2026;03;2304400;PJ;URBANO;fibra;internet;FTTH;300;2",
+		"11222333000181;2026;3;2303709;PF;URBANO;cabo_metalico;internet;xDSL;15,75;7",
+		"11222333000181;2026;3;2304400;PF;RURAL;radio;internet;Wi-Fi;0,5;1",
+		"11222333000181;2026;3;2304400;PJ;URBANO;fibra;internet;FTTH;300;2",
 	}
 	if len(lines) != len(want) {
 		t.Fatalf("linhas: %q", lines)
@@ -84,6 +84,15 @@ func TestDICIIssuesBlockMissingCodesTechnologyAndCNPJ(t *testing.T) {
 	} {
 		if !strings.Contains(joined, want) {
 			t.Fatalf("pendência ausente %q em:\n%s", want, joined)
+		}
+	}
+}
+
+// Exemplos do Manual de Coleta de Acessos SCM: vírgula decimal, sem milhar, Mbps.
+func TestDICISpeedManualExamples(t *testing.T) {
+	for kbps, want := range map[float64]string{512: "0,512", 10000: "10", 25500: "25,5", 100000: "100", 1000000: "1000"} {
+		if got := diciSpeed(kbps / 1000); got != want {
+			t.Fatalf("%v kbps: %s, esperado %s", kbps, got, want)
 		}
 	}
 }

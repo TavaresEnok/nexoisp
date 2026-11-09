@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-network-sites.mjs",
-  "recorded_at": "2026-11-09T21:47:12.583Z",
+  "recorded_at": "2026-11-09T22:38:51.859Z",
   "steps": [
     {
       "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",

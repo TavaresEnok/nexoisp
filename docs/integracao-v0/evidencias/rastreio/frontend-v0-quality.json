@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-quality.mjs",
-  "recorded_at": "2026-11-09T21:49:02.668Z",
+  "recorded_at": "2026-11-09T22:40:58.460Z",
   "steps": [
     {
       "check": "Catálogo criado, renomeado e desativado/reativado; seleções operacionais respeitam itens ativos",
@@ -61,6 +61,7 @@
       "check": "Regra de comissão mantém centavos e apura OS concluída com responsável real; relatório explicita regras vigentes sem executar pagamento",
       "requests": [
         "GET /api/commission-rules",
+        "GET /api/commission-settlements",
         "GET /api/me",
         "GET /api/reports/commissions",
         "GET /api/today",

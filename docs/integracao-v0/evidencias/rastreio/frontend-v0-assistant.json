@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-assistant.mjs",
-  "recorded_at": "2026-11-09T22:14:29.979Z",
+  "recorded_at": "2026-11-09T22:39:03.513Z",
   "steps": [
     {
       "check": "Assistente: busca de cliente pela busca global com link para a ficha",

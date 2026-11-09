@@ -66,8 +66,13 @@ try {
   check('Liquidação aberta criada pela interface congela origem, regra e valor de cada OS e recusa liquidar de novo os mesmos registros');
 
   await detail.getByRole('button', { name: `Retirar OS #${orders[1].number} de ${lineOf(orders[1]).user_name}`, exact: true }).click();
-  await detail.getByRole('button', { name: `Retirar OS #${orders[1].number} de ${lineOf(orders[1]).user_name}`, exact: true }).waitFor({ state: 'hidden' });
-  full = await settlementOf(settlement.id);
+  // O botão vira "Processando…" durante a chamada; espera o servidor confirmar a retirada.
+  for (let attempt = 0; attempt < 50; attempt++) {
+    full = await settlementOf(settlement.id);
+    if (!lineOf(orders[1])) break;
+    await page.waitForTimeout(200);
+  }
+  await detail.getByRole('button', { name: `Retirar OS #${orders[1].number} de ${full.lines[0]?.user_name ?? ''}`, exact: true }).waitFor({ state: 'hidden' });
   assert.equal(lineOf(orders[1]), undefined);
   assert.ok(lineOf(orders[0]));
   check('Revisão do rascunho retira uma linha e devolve a OS à apuração pendente');

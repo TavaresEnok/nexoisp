@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-messages.mjs",
-  "recorded_at": "2026-11-09T21:49:54.641Z",
+  "recorded_at": "2026-11-09T22:41:56.594Z",
   "steps": [
     {
       "check": "Webhook da equipe é configurado pela UI, recebe teste e entrega aviso real originado por chamado do portal no receptor local",

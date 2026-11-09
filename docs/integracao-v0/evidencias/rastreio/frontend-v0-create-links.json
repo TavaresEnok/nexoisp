@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-create-links.mjs",
-  "recorded_at": "2026-11-09T21:53:26.094Z",
+  "recorded_at": "2026-11-09T22:43:47.159Z",
   "steps": [
     {
       "check": "Diálogo aberto por /assinantes/novo-assinante em /assinantes",
@@ -62,6 +62,7 @@
       "requests": [
         "GET /api/me",
         "GET /api/stock/items",
+        "GET /api/stock/valuation",
         "GET /api/today"
       ]
     },
@@ -110,6 +111,9 @@
         "GET /api/me",
         "GET /api/network/health",
         "GET /api/network/online",
+        "GET /api/radius/accounting/events",
+        "GET /api/radius/accounting/sessions",
+        "GET /api/radius/accounting/telemetry",
         "GET /api/radius/status",
         "GET /api/today"
       ]

@@ -1,11 +1,12 @@
 {
   "scenario": "frontend-v0-map.mjs",
-  "recorded_at": "2026-11-09T21:48:42.650Z",
+  "recorded_at": "2026-11-09T22:40:37.341Z",
   "steps": [
     {
       "check": "Localização do contrato é gravada pelo endpoint Go, sem geocodificação nem aproximação de endereço",
       "requests": [
         "GET /api/contracts",
+        "GET /api/ftth/cables/map",
         "GET /api/map/coverage",
         "GET /api/map/points",
         "GET /api/me",
@@ -19,6 +20,8 @@
       "requests": [
         "GET /api/ftth/boxes",
         "GET /api/ftth/boxes/:id",
+        "GET /api/ftth/boxes/:id/fusions",
+        "GET /api/ftth/cables/map",
         "GET /api/map/coverage",
         "GET /api/map/points",
         "GET /api/me",
@@ -28,6 +31,7 @@
     {
       "check": "Clique no mapa move o contrato com coordenadas exatas e confirmação do Go",
       "requests": [
+        "GET /api/ftth/cables/map",
         "GET /api/map/coverage",
         "GET /api/map/points",
         "GET /api/me",
@@ -39,6 +43,7 @@
     {
       "check": "Remoção de coordenadas exige confirmação; camadas e situação alteram a consulta sem inventar pontos",
       "requests": [
+        "GET /api/ftth/cables/map",
         "GET /api/map/coverage",
         "GET /api/map/points",
         "GET /api/me",
@@ -48,6 +53,7 @@
     {
       "check": "Mapa mantém consulta no celular, isolamento por provedor e CSP; blocos OSM foram interceptados apenas no teste",
       "requests": [
+        "GET /api/ftth/cables/map",
         "GET /api/map/points"
       ]
     }

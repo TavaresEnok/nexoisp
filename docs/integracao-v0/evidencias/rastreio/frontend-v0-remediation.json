@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-remediation.mjs",
-  "recorded_at": "2026-11-09T21:53:18.829Z",
+  "recorded_at": "2026-11-09T22:43:39.749Z",
   "steps": [
     {
       "check": "R01: submenus NAS e OLT abrem equipamento operacional em vez de planejado",
@@ -175,11 +175,7 @@
       "check": "R04/BE-27: exclusão global de etiqueta confirmada e persistida",
       "requests": [
         "DELETE /api/tags/:id",
-        "GET /api/contracts",
-        "GET /api/contracts/:id",
-        "GET /api/contracts/:id/addons",
         "GET /api/me",
-        "GET /api/plans",
         "GET /api/tags",
         "POST /api/tags"
       ]
@@ -187,10 +183,14 @@
     {
       "check": "R04/BE-05: prospecto convertido para assinante existente sem duplicar cadastro",
       "requests": [
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
         "GET /api/leads",
         "GET /api/leads/:id",
         "GET /api/leads/summary",
         "GET /api/me",
+        "GET /api/plans",
         "GET /api/subscribers",
         "GET /api/subscribers/:id",
         "GET /api/today",

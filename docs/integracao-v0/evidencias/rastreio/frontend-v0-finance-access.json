@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-finance-access.mjs",
-  "recorded_at": "2026-11-09T21:50:45.218Z",
+  "recorded_at": "2026-11-09T22:43:08.040Z",
   "steps": [
     {
       "check": "Política salva na UI executa verificação real de inadimplência e solicita suspensão no Go sem inventar confirmação de equipamento",
@@ -30,6 +30,12 @@
       ]
     },
     {
+      "check": "Baixa quita a confiança e o consumidor solicita a retomada automática após o commit; suspensão manual é preservada pelo Go, sem afirmar aplicação física no NAS",
+      "requests": [
+        "GET /api/today"
+      ]
+    },
+    {
       "check": "Ficha do titular conserva cadastro, versão e preço dos contratos; novo contrato é criado na ficha e abre sua consulta operacional",
       "requests": [
         "GET /api/catalogs",
@@ -54,11 +60,9 @@
     {
       "check": "(sem verificação posterior)",
       "requests": [
-        "GET /api/addons",
         "GET /api/contracts",
         "GET /api/contracts/:id",
         "GET /api/contracts/:id/addons",
-        "GET /api/contracts/:id/states",
         "GET /api/plans"
       ]
     }

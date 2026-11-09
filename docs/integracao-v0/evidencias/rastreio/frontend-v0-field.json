@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-field.mjs",
-  "recorded_at": "2026-11-09T22:09:01.391Z",
+  "recorded_at": "2026-11-09T22:37:53.316Z",
   "steps": [
     {
       "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
@@ -189,7 +189,8 @@
         "GET /api/work-orders/:id",
         "GET /api/work-orders/:id/attachments",
         "GET /api/work-orders/:id/signature",
-        "GET /api/work-orders/:id/visits"
+        "GET /api/work-orders/:id/visits",
+        "POST /api/work-orders/:id/notes"
       ]
     },
     {

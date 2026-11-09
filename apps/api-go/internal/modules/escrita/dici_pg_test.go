@@ -147,6 +147,7 @@ func TestDICIExportPG(t *testing.T) {
 		t.Fatal(err)
 	}
 	year, month, _ := strings.Cut(competence, "-")
+	month = strings.TrimLeft(month, "0")
 	get := func(token, query string, want int) *httptest.ResponseRecorder {
 		t.Helper()
 		req := httptest.NewRequest("GET", "/api/anatel/dici?competence="+competence+query, nil)

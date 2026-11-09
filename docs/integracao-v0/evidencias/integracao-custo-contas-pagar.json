@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:18390",
+  "verified_at": "2026-11-09T22:38:23.612Z",
+  "backend": "Go/PostgreSQL isolados; somente dados sintéticos",
+  "checks": [
+    "Entradas com custo recalculam o custo médio com arredondamento em centavos; a saída usa o médio vigente e o catálogo mostra custo e valor",
+    "Recebimento do pedido gera títulos parcelados ao fornecedor e recalcula o custo médio pelo custo do pedido",
+    "Relatório de valor do estoque por depósito usa saldo × custo médio calculado pelo servidor",
+    "Contas a pagar filtra por fornecedor e situação, baixa com data e forma, cancela com motivo e recalcula os totais",
+    "Lançamento manual parcelado divide centavos, segue vencimentos mensais e aparece no filtro de vencidos",
+    "Contas a pagar exige finance:read/finance:write, custo do estoque exige stock:read e o Go isola os provedores"
+  ]
+}

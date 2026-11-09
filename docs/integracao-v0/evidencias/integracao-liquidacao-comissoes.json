@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:18390",
+  "verified_at": "2026-11-09T22:41:04.440Z",
+  "backend": "Go/PostgreSQL isolados; somente dados sintéticos",
+  "checks": [
+    "Liquidação aberta criada pela interface congela origem, regra e valor de cada OS e recusa liquidar de novo os mesmos registros",
+    "Revisão do rascunho retira uma linha e devolve a OS à apuração pendente",
+    "Fechamento torna o período imutável e o relatório mantém o valor congelado depois da mudança da regra",
+    "Exportação CSV da liquidação traz as linhas congeladas e o total",
+    "Pagamento registra data, forma e observação da liquidação fechada",
+    "Estorno da liquidação paga gera registro, preserva linhas e pagamento e libera os registros",
+    "Rascunho criado após o estorno reúne os registros liberados e pode ser descartado",
+    "Leitura com finance:read, ações com finance:write e isolamento entre provedores aplicados pelo Go"
+  ]
+}

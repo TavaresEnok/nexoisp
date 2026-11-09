@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-ftth-design.mjs",
-  "recorded_at": "2026-11-09T22:08:09.711Z",
+  "recorded_at": "2026-11-09T22:44:04.650Z",
   "steps": [
     {
       "check": "Cabo: cadastro com traçado, ponta em caixa, comprimento calculado pelo Go e filtros da lista.",

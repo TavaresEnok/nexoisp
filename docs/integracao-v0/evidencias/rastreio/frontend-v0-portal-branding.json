@@ -1,13 +1,17 @@
 {
   "scenario": "frontend-v0-portal-branding.mjs",
-  "recorded_at": "2026-11-09T21:49:40.207Z",
+  "recorded_at": "2026-11-09T22:41:42.761Z",
   "steps": [
     {
       "check": "Marca salva, exibida ao assinante e removida.",
       "requests": [
         "GET /api/me",
         "GET /api/portal/acceptances",
+        "GET /api/portal/cpe",
         "GET /api/portal/overview",
+        "GET /api/portal/surveys",
+        "GET /api/portal/tickets",
+        "GET /api/settings/viability",
         "GET /api/tenant-branding",
         "GET /api/tenant-branding/logo",
         "GET /api/today",

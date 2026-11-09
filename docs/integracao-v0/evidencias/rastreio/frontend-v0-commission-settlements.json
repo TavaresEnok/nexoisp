@@ -1,0 +1,75 @@
+{
+  "scenario": "frontend-v0-commission-settlements.mjs",
+  "recorded_at": "2026-11-09T22:41:04.503Z",
+  "steps": [
+    {
+      "check": "Liquidação aberta criada pela interface congela origem, regra e valor de cada OS e recusa liquidar de novo os mesmos registros",
+      "requests": [
+        "GET /api/commission-rules",
+        "GET /api/commission-settlements",
+        "GET /api/commission-settlements/:id",
+        "GET /api/me",
+        "GET /api/reports/commissions",
+        "GET /api/today",
+        "POST /api/commission-settlements"
+      ]
+    },
+    {
+      "check": "Revisão do rascunho retira uma linha e devolve a OS à apuração pendente",
+      "requests": [
+        "DELETE /api/commission-settlements/:id/lines/:id",
+        "GET /api/commission-settlements",
+        "GET /api/commission-settlements/:id",
+        "GET /api/me",
+        "GET /api/reports/commissions"
+      ]
+    },
+    {
+      "check": "Fechamento torna o período imutável e o relatório mantém o valor congelado depois da mudança da regra",
+      "requests": [
+        "GET /api/commission-settlements",
+        "GET /api/commission-settlements/:id",
+        "GET /api/me",
+        "GET /api/reports/commissions",
+        "POST /api/commission-settlements/:id/close"
+      ]
+    },
+    {
+      "check": "Exportação CSV da liquidação traz as linhas congeladas e o total",
+      "requests": [
+        "GET /api/commission-settlements/:id/export.csv"
+      ]
+    },
+    {
+      "check": "Pagamento registra data, forma e observação da liquidação fechada",
+      "requests": [
+        "GET /api/commission-settlements",
+        "GET /api/commission-settlements/:id",
+        "GET /api/me",
+        "GET /api/reports/commissions",
+        "POST /api/commission-settlements/:id/pay"
+      ]
+    },
+    {
+      "check": "Estorno da liquidação paga gera registro, preserva linhas e pagamento e libera os registros",
+      "requests": [
+        "GET /api/commission-settlements",
+        "GET /api/commission-settlements/:id",
+        "GET /api/me",
+        "GET /api/reports/commissions",
+        "POST /api/commission-settlements/:id/reverse"
+      ]
+    },
+    {
+      "check": "Rascunho criado após o estorno reúne os registros liberados e pode ser descartado",
+      "requests": [
+        "DELETE /api/commission-settlements/:id",
+        "GET /api/commission-settlements",
+        "GET /api/commission-settlements/:id",
+        "GET /api/me",
+        "GET /api/reports/commissions",
+        "POST /api/commission-settlements"
+      ]
+    }
+  ]
+}

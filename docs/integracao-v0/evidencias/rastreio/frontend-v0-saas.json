@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-saas.mjs",
-  "recorded_at": "2026-11-09T21:49:14.237Z",
+  "recorded_at": "2026-11-09T22:41:16.159Z",
   "steps": [
     {
       "check": "Novo provedor e primeiro administrador criados na UI autenticam no Go com contexto próprio",

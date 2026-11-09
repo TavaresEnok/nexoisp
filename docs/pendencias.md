@@ -36,7 +36,10 @@ O código inclui configuração de produção, preflight, backup/restauração e
 | Comunicação | Canal HTTP de avisos e webhooks no serviço real, com consentimento e confirmação dos resultados |
 | Recuperação do site | Atualização que efetivamente altere o schema local, rollback e falhas de disco no ambiente do provedor |
 | Continuidade | RADIUS e banco em hosts distintos, promoção/retorno, falha de enlace e de servidor; duas instâncias locais cobrem apenas parte das falhas |
+| DICI/ANATEL | Arquivo segue o Manual de Coleta de Acessos SCM; antes do primeiro envio, conferir os códigos de tecnologia (`Wi-Fi`, `VSAT`, `LTE` etc., tabela em `dici.go`) na tabela oficial do gov.br, que não pôde ser lida automaticamente. O envio continua manual no sistema de coleta |
 | Capacidade | Medir o volume do piloto; benchmarks sintéticos não estabelecem SLA |
+| Campo | Check-in/check-out, assinatura, fotos e fila offline com técnicos em aparelhos reais e sinal ruim |
+| Proxy na publicação | Definir `NEXO_TRUSTED_PROXIES` com o endereço do Apache visto pelo Caddy e confirmar, de fora da LAN, que limites e auditoria registram o IP do visitante |
 | Uso e segurança | Sessão de uso com atendentes/técnicos, leitor de tela e revisão de segurança independente |
 
 ## Migração e integrações por origem
@@ -52,13 +55,14 @@ Consulte [Migração SGP](10-migracao-sgp.md) e [Importação CSV](importacao-cs
 
 Não bloqueia automaticamente o primeiro piloto; priorizar conforme o uso real:
 
-- Fiscal integrado: emissor, documento e regras do provedor; emissão por empresa e certificados quando aplicável.
-- Gateway: juros/multa na cobrança emitida e estorno pelo gateway; segundo gateway somente depois do primeiro homologado.
+- Fiscal integrado (NFCom/NFS-e): **não implementado por decisão** ([Decisões](DECISOES.md)). Exige certificado A1, credenciamento e homologação na SEFAZ/município do provedor; fica inativo na fase 1.
+- Gateway: multa e juros da política vão na emissão de boleto Efí desde 09/11/2026 (testado contra servidor simulado); falta homologar em conta Efí sandbox e depois real. Boleto não tem estorno pela API Efí (devolução só em Pix). Segundo gateway somente depois do primeiro homologado.
 - Campo: check-in/check-out com geolocalização, assinatura do cliente, foto pela câmera e fila offline implementados em 09/11/2026 (migração 00088); falta uso assistido com técnicos em aparelhos reais e cobertura de sinal ruim. A fila guarda só a ação pendente no navegador e não funciona sem uma sessão aberta antes da perda de conexão.
+- FTTH: cabos com traçado, fusões, OTDR e importação KML existem desde 09/11/2026 (migração 00087); o cadastro não prova conectividade física e falta conferir com o projeto real do provedor.
 - SLA: calendário de expediente e feriados feito em 20/10/2026; falta validar com a operação real (feriados municipais, plantões).
 - Estoque: depósitos, transferências, fornecedores, pedidos, cotação com pedido rascunho, custo médio ponderado global por material e contas a pagar geradas no recebimento existem desde 09/11/2026; falta validar com a operação real o custo médio global (não por depósito), o vencimento padrão de 30 dias e a ausência de custeio fiscal (frete, impostos, PEPS).
-- Comercial: viabilidade pública, regras adicionais de comissão (a liquidação com congelamento, pagamento e estorno existe desde 09/11/2026) e identidade visual opcional do provedor no portal (lote 41 DONE; CI candidato em andamento).
-- OLT: perfis/VLANs automatizados e fabricantes adicionais, um equipamento homologado por vez. O catálogo de modelos/templates de ONU e a consulta de portas PON existem desde 20/10/2026 como documentação e consulta; não aplicam nada na OLT.
-- IA assistiva e novos canais: decisão de produto, serviço externo e regras de uso dos dados; sem escrita irrestrita em rede.
+- Comercial: viabilidade pública (`/viabilidade/<slug>`) e liquidação de comissões com congelamento, pagamento e estorno existem desde 09/11/2026; falta validar com a operação real o raio padrão de 250 m e as regras de comissão do provedor.
+- OLT: perfis/VLANs automatizados e fabricantes adicionais, um equipamento homologado por vez (sem driver novo sem equipamento, ver [Decisões](DECISOES.md)). Templates TR-069 de CPE por modelo existem desde 09/11/2026 (`/rede/ftth/acs-template`). O catálogo de modelos/templates de ONU e a consulta de portas PON existem desde 20/10/2026 como documentação e consulta; não aplicam nada na OLT.
+- IA assistiva: o assistente determinístico (`/assistente`) existe desde 09/11/2026, sem serviço externo; usar modelo de linguagem continua dependendo de decisão sobre envio de dados a terceiros. Novos canais de aviso dependem de conta/canal autorizado.
 
 Não reabrir como pendência busca global, linha do tempo, avisos de saída, degraus de cobrança, API pública, SLA básico, agenda, campos personalizados, combos ou migração Go: esses recursos já possuem implementação. As pendências acima tratam das lacunas e validações restantes.

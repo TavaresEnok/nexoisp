@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-cgnat-legal.mjs",
-  "recorded_at": "2026-11-09T21:48:37.683Z",
+  "recorded_at": "2026-11-09T22:40:32.121Z",
   "steps": [
     {
       "check": "UI consulta capacidade no Go, cria plano imutável, apresenta mapa/lookup e exporta script sem aplicá-lo ao NAS",

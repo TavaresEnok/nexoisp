@@ -1,7 +1,7 @@
 {
   "ok": true,
   "base": "http://127.0.0.1:18390",
-  "verified_at": "2026-11-09T22:20:34.279Z",
+  "verified_at": "2026-11-09T22:40:47.260Z",
   "backend": "Go/PostgreSQL isolados; usuários e empresas sintéticos",
   "checks": [
     "Usuário criado pela UI autentica no Go; perfil é atualizado sem expor senha na listagem",
