@@ -192,6 +192,11 @@ export const operationalPages = {
     access: ["finance:read"],
     aliases: ["/politica-cobranca"],
   },
+  payables: {
+    paths: ["/financeiro/contas-a-pagar"],
+    access: ["finance:read"],
+    title: "Contas a pagar",
+  },
   reconciliation: {
     paths: ["/financeiro/conciliacao"],
     access: ["finance:read"],

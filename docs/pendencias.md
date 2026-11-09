@@ -56,8 +56,8 @@ Não bloqueia automaticamente o primeiro piloto; priorizar conforme o uso real:
 - Gateway: juros/multa na cobrança emitida e estorno pelo gateway; segundo gateway somente depois do primeiro homologado.
 - Campo: check-in/check-out com geolocalização, assinatura do cliente, foto pela câmera e fila offline implementados em 09/11/2026 (migração 00088); falta uso assistido com técnicos em aparelhos reais e cobertura de sinal ruim. A fila guarda só a ação pendente no navegador e não funciona sem uma sessão aberta antes da perda de conexão.
 - SLA: calendário de expediente e feriados feito em 20/10/2026; falta validar com a operação real (feriados municipais, plantões).
-- Estoque: depósitos, transferências, fornecedores, pedidos e cotação com pedido rascunho existem; contas a pagar e custo médio dependem de regras aprovadas.
-- Comercial: viabilidade pública, regras adicionais de comissão e identidade visual opcional do provedor no portal (lote 41 DONE; CI candidato em andamento).
+- Estoque: depósitos, transferências, fornecedores, pedidos, cotação com pedido rascunho, custo médio ponderado global por material e contas a pagar geradas no recebimento existem desde 09/11/2026; falta validar com a operação real o custo médio global (não por depósito), o vencimento padrão de 30 dias e a ausência de custeio fiscal (frete, impostos, PEPS).
+- Comercial: viabilidade pública, regras adicionais de comissão (a liquidação com congelamento, pagamento e estorno existe desde 09/11/2026) e identidade visual opcional do provedor no portal (lote 41 DONE; CI candidato em andamento).
 - OLT: perfis/VLANs automatizados e fabricantes adicionais, um equipamento homologado por vez. O catálogo de modelos/templates de ONU e a consulta de portas PON existem desde 20/10/2026 como documentação e consulta; não aplicam nada na OLT.
 - IA assistiva e novos canais: decisão de produto, serviço externo e regras de uso dos dados; sem escrita irrestrita em rede.
 

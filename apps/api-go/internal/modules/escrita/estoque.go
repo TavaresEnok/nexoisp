@@ -30,7 +30,7 @@ func (s Service) stockOperations(ops map[string]operation) {
 	qty := func(max float64) validate.Rule {
 		return n().Int().Min(-max).Max(max).Refine(func(v any) bool { return num(v) != 0 }, "quantidade não pode ser zero")
 	}
-	ops["POST /api/stock/items/:id/movements"] = operation{s.stockMovement, obj(o(f("kind", e("in", "out", "adjust")), f("qty", qty(1000000)), f("note", text(300).Nullish())))}
+	ops["POST /api/stock/items/:id/movements"] = operation{s.stockMovement, obj(o(f("kind", e("in", "out", "adjust")), f("qty", qty(1000000)), f("note", text(300).Nullish()), f("unit_cost_cents", n().Int().Min(0).Max(100000000).Nullish())))}
 	ops["POST /api/stock/items/:id/units"] = operation{s.receiveUnits, obj(o(f("serials", validate.Array(str().Trimmed().Pattern(`^[A-Za-z0-9._:-]{4,40}$`, "série: 4 a 40 letras, números, . _ : -").Upper()).Min(1).Max(500)), f("note", text(300).Nullish())))}
 	ops["POST /api/stock/units/:id/transfer"] = operation{s.transferUnit, obj(o(f("holder_id", uuid.Null())))}
 	ops["POST /api/stock/units/:id/status"] = operation{s.unitStatus, obj(o(f("status", e("in_stock", "defective", "written_off")), f("note", text(300).Nullish())))}
@@ -45,6 +45,13 @@ func (s Service) stockOperations(ops map[string]operation) {
 	ops["POST /api/work-orders/:id/kit"] = operation{s.workKit, obj(o(f("kit_id", uuid)))}
 }
 func stockMove(ctx context.Context, tx *db.Tx, item any, qty float64, kind string, note, work any, byUnit bool) (jsonx.Object, error) {
+	return stockMoveCost(ctx, tx, item, qty, kind, note, work, byUnit, nil)
+}
+
+// stockMoveCost registra o movimento; cost (centavos) só vale para entradas e
+// recalcula o custo médio no gatilho stock_movement_cost. Sem custo, o
+// movimento usa o custo médio vigente do material.
+func stockMoveCost(ctx context.Context, tx *db.Tx, item any, qty float64, kind string, note, work any, byUnit bool, cost any) (jsonx.Object, error) {
 	const key = "helper:stockMove"
 	i, err := mustRow(ctx, tx, key, 0, "item de estoque não encontrado", item)
 	if err != nil {
@@ -69,11 +76,12 @@ func stockMove(ctx context.Context, tx *db.Tx, item any, qty float64, kind strin
 		return nil, apierr.New(409, fmt.Sprintf("saldo insuficiente de “%v”: há %g", i.Get("name"), count))
 	}
 	c := auth.From(ctx)
-	row, err := one(ctx, tx, key, 2, c.TenantID, item, qty, kind, work, note, c.UserID)
+	row, err := one(ctx, tx, key, 2, c.TenantID, item, qty, kind, work, note, c.UserID, cost)
 	if err != nil {
 		return nil, err
 	}
-	return jsonx.Object{{Name: "id", Value: row.Get("id")}, {Name: "item_name", Value: i.Get("name")}, {Name: "balance", Value: count + qty}}, nil
+	return jsonx.Object{{Name: "id", Value: row.Get("id")}, {Name: "item_name", Value: i.Get("name")}, {Name: "balance", Value: count + qty},
+		{Name: "unit_cost_cents", Value: row.Get("unit_cost_cents")}, {Name: "avg_cost_cents", Value: row.Get("avg_cost_cents")}}, nil
 }
 func staff(ctx context.Context, tx *db.Tx, id any) (jsonx.Object, error) {
 	row, err := one(ctx, tx, "helper:staff", 0, id)
@@ -142,14 +150,18 @@ func (s Service) stockMovement(ctx context.Context, tx *db.Tx, id string, b map[
 	if kind == "adjust" && (b["note"] == nil || b["note"] == "") {
 		return nil, apierr.New(400, "ajuste de estoque exige justificativa")
 	}
+	if b["unit_cost_cents"] != nil && kind != "in" {
+		return nil, apierr.New(400, "custo unitário só é informado em entradas; saídas e ajustes usam o custo médio")
+	}
 	if kind == "out" {
 		qty = -qty
 	}
-	row, err := stockMove(ctx, tx, id, qty, kind, nilEmpty(b["note"]), nil, false)
+	row, err := stockMoveCost(ctx, tx, id, qty, kind, nilEmpty(b["note"]), nil, false, b["unit_cost_cents"])
 	if err != nil {
 		return nil, err
 	}
-	return row, record(ctx, tx, "stock."+kind, "stock_item", id, map[string]any{"qty": b["qty"], "balance": row.Get("balance")})
+	detail := map[string]any{"qty": b["qty"], "balance": row.Get("balance"), "unit_cost_cents": row.Get("unit_cost_cents"), "avg_cost_cents": row.Get("avg_cost_cents")}
+	return row, record(ctx, tx, "stock."+kind, "stock_item", id, detail)
 }
 func (s Service) receiveUnits(ctx context.Context, tx *db.Tx, id string, b map[string]any) (any, error) {
 	const key = "POST /api/stock/items/:id/units"

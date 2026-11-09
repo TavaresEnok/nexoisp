@@ -11,6 +11,14 @@
     },
     {
       "method": "DELETE",
+      "path": "/api/commission-settlements/:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/commission-settlements/:id/lines/:lineId"
+    },
+    {
+      "method": "DELETE",
       "path": "/api/contracts/:id/addons/:addonId"
     },
     {
@@ -179,6 +187,18 @@
     },
     {
       "method": "GET",
+      "path": "/api/commission-settlements"
+    },
+    {
+      "method": "GET",
+      "path": "/api/commission-settlements/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/commission-settlements/:id/export.csv"
+    },
+    {
+      "method": "GET",
       "path": "/api/companies"
     },
     {
@@ -324,6 +344,10 @@
     {
       "method": "GET",
       "path": "/api/finance/monthly"
+    },
+    {
+      "method": "GET",
+      "path": "/api/finance/payables"
     },
     {
       "method": "GET",
@@ -715,6 +739,10 @@
     },
     {
       "method": "GET",
+      "path": "/api/stock/items/:id/costs"
+    },
+    {
+      "method": "GET",
       "path": "/api/stock/items/:id/movements"
     },
     {
@@ -748,6 +776,10 @@
     {
       "method": "GET",
       "path": "/api/stock/units/:id/events"
+    },
+    {
+      "method": "GET",
+      "path": "/api/stock/valuation"
     },
     {
       "method": "GET",
@@ -1139,6 +1171,22 @@
     },
     {
       "method": "POST",
+      "path": "/api/commission-settlements"
+    },
+    {
+      "method": "POST",
+      "path": "/api/commission-settlements/:id/close"
+    },
+    {
+      "method": "POST",
+      "path": "/api/commission-settlements/:id/pay"
+    },
+    {
+      "method": "POST",
+      "path": "/api/commission-settlements/:id/reverse"
+    },
+    {
+      "method": "POST",
       "path": "/api/companies"
     },
     {
@@ -1232,6 +1280,18 @@
     {
       "method": "POST",
       "path": "/api/finance/generate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/finance/payables"
+    },
+    {
+      "method": "POST",
+      "path": "/api/finance/payables/:id/cancel"
+    },
+    {
+      "method": "POST",
+      "path": "/api/finance/payables/:id/pay"
     },
     {
       "method": "POST",

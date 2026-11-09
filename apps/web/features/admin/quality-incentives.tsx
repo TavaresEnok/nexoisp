@@ -20,6 +20,7 @@ import { money } from "@/lib/format";
 import { api } from "@/platform/erp-client";
 import { workKinds } from "./quality-sla";
 import { cents } from "@/features/shared/schema";
+import { CommissionSettlements } from "./commission-settlements";
 const kit = z.object({
   id: z.string(),
   name: z.string(),
@@ -239,6 +240,7 @@ const report = z.object({
       os_helper: z.coerce.number(),
       sales: z.coerce.number(),
       total_cents: cents(),
+      settled_cents: cents(),
     }),
   ),
   total_cents: cents(),
@@ -273,7 +275,7 @@ export function Commissions() {
       >
         <OperationalCatalog
           title="Regras de comissão"
-          description="Uma nova regra substitui a vigente do mesmo tipo. O servidor apura OS concluídas e prospectos ganhos; a apuração não executa pagamentos."
+          description="Uma nova regra substitui a vigente do mesmo tipo. O servidor apura OS concluídas e prospectos ganhos; o pagamento é registrado nas liquidações abaixo."
           columns={["Abrangência", "Responsável ou vendedor", "Cada auxiliar"]}
           actions={
             <Button onClick={() => setCreating(true)}>
@@ -341,6 +343,7 @@ export function Commissions() {
             "OS como responsável",
             "OS como auxiliar",
             "Vendas",
+            "Já liquidado",
             "Total",
           ]}
           rows={(rep.data?.rows ?? []).map((item) => ({
@@ -350,11 +353,16 @@ export function Commissions() {
               item.os_assignee,
               item.os_helper,
               item.sales,
+              money(item.settled_cents / 100),
               money(item.total_cents / 100),
             ],
           }))}
         />
       </QueryBoundary>
+      <CommissionSettlements
+        people={rep.data?.rows ?? []}
+        onChange={() => rep.mutate()}
+      />
       {creating && (
         <RecordEditor
           title="Nova regra de comissão"

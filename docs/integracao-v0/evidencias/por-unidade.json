@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-09T22:24:28.127Z",
+  "generated_at": "2026-11-09T22:24:45.536Z",
   "method": "Chamadas à API feitas pelas páginas entre uma verificação e a anterior, gravadas por e2e/request-trace.mjs durante a fumaça; preparação via context.request não conta.",
   "scenarios": [
     {
@@ -238,8 +238,8 @@
       "checks": 1
     }
   ],
-  "validated_units": 174,
-  "units_with_interface_check": 174,
+  "validated_units": 176,
+  "units_with_interface_check": 175,
   "units": [
     {
       "id": "AC-01",
@@ -10602,6 +10602,40 @@
       ]
     },
     {
+      "id": "OS-17",
+      "functionality": "Custo médio ponderado e valor do estoque",
+      "declared_endpoints": [
+        "POST /api/stock/items/:id/movements",
+        "GET /api/stock/items/:id/costs",
+        "GET /api/stock/valuation",
+        "POST /api/stock/purchases/:id/receive"
+      ],
+      "exercised_by_interface": [
+        "POST /api/stock/items/:id/movements",
+        "POST /api/stock/purchases/:id/receive"
+      ],
+      "not_exercised_by_interface": [
+        "GET /api/stock/items/:id/costs",
+        "GET /api/stock/valuation"
+      ],
+      "checks": [
+        {
+          "scenario": "frontend-v0-evolution.mjs",
+          "check": "Estoque: depósito, fornecedor e pedido de compra pela interface; recebimento gera entrada no depósito e a transferência move o saldo para o principal",
+          "endpoints": [
+            "POST /api/stock/purchases/:id/receive"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-stock.mjs",
+          "check": "Entradas, saídas e ajuste com sinal preservam os três movimentos e saldo calculado pelo Go",
+          "endpoints": [
+            "POST /api/stock/items/:id/movements"
+          ]
+        }
+      ]
+    },
+    {
       "id": "FI-01",
       "functionality": "Listagem, filtros e visão financeira",
       "declared_endpoints": [
@@ -11215,6 +11249,24 @@
           ]
         }
       ]
+    },
+    {
+      "id": "FI-18",
+      "functionality": "Contas a pagar",
+      "declared_endpoints": [
+        "GET /api/finance/payables",
+        "POST /api/finance/payables",
+        "POST /api/finance/payables/:id/pay",
+        "POST /api/finance/payables/:id/cancel"
+      ],
+      "exercised_by_interface": [],
+      "not_exercised_by_interface": [
+        "GET /api/finance/payables",
+        "POST /api/finance/payables",
+        "POST /api/finance/payables/:id/pay",
+        "POST /api/finance/payables/:id/cancel"
+      ],
+      "checks": []
     },
     {
       "id": "RE-01",
@@ -14911,18 +14963,37 @@
     },
     {
       "id": "AD-17",
-      "functionality": "Regras e relatório de comissões",
+      "functionality": "Regras, relatório e liquidação de comissões",
       "declared_endpoints": [
         "GET /api/commission-rules",
         "POST /api/commission-rules",
-        "GET /api/reports/commissions"
+        "GET /api/reports/commissions",
+        "GET /api/commission-settlements",
+        "POST /api/commission-settlements",
+        "GET /api/commission-settlements/:id",
+        "DELETE /api/commission-settlements/:id",
+        "DELETE /api/commission-settlements/:id/lines/:lineId",
+        "POST /api/commission-settlements/:id/close",
+        "POST /api/commission-settlements/:id/pay",
+        "POST /api/commission-settlements/:id/reverse",
+        "GET /api/commission-settlements/:id/export.csv"
       ],
       "exercised_by_interface": [
         "GET /api/commission-rules",
         "GET /api/reports/commissions",
         "POST /api/commission-rules"
       ],
-      "not_exercised_by_interface": [],
+      "not_exercised_by_interface": [
+        "GET /api/commission-settlements",
+        "POST /api/commission-settlements",
+        "GET /api/commission-settlements/:id",
+        "DELETE /api/commission-settlements/:id",
+        "DELETE /api/commission-settlements/:id/lines/:lineId",
+        "POST /api/commission-settlements/:id/close",
+        "POST /api/commission-settlements/:id/pay",
+        "POST /api/commission-settlements/:id/reverse",
+        "GET /api/commission-settlements/:id/export.csv"
+      ],
       "checks": [
         {
           "scenario": "frontend-v0-quality.mjs",

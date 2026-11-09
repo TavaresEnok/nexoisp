@@ -14,7 +14,6 @@ import (
 	"nexoisp/api-go/internal/modules/leitura"
 	"nexoisp/api-go/internal/validate"
 	"regexp"
-	"sort"
 	"strings"
 	"time"
 )
@@ -194,56 +193,30 @@ func (s Service) financeExport(ctx context.Context, tx *db.Tx, _ string, _ map[s
 	return endpoint.Result{CSV: simpleCSV(columns, list, map[string]bool{"valor_fatura": true, "valor_pago": true}), Filename: "nexoisp-" + kind + "-" + from + "_" + to + ".csv"}, nil
 }
 func (s Service) commissions(ctx context.Context, tx *db.Tx, _ string, _ map[string]any) (any, error) {
-	const key = "GET /api/reports/commissions"
 	q := reportQuery(ctx)
 	from, to := q.Date("from", true, "data inválida"), q.Date("to", true, "data inválida")
+	user := q.UUID("user_id", false)
 	if err := q.Err(); err != nil {
 		return nil, err
+	}
+	if !calendarDate(from) || !calendarDate(to) {
+		return nil, apierr.New(400, "data inválida")
 	}
 	if to < from {
 		return nil, apierr.New(400, "o fim do período é anterior ao início")
 	}
-	tz, err := one(ctx, tx, key, 0, auth.From(ctx).TenantID)
+	tz, _, err := tenantClock(ctx, tx)
 	if err != nil {
 		return nil, err
 	}
-	work, err := rows(ctx, tx, key, 1, from, to, tz.Get("tz"))
+	people, total, err := commissionReport(ctx, tx, from, to, tz, textNil(user))
 	if err != nil {
 		return nil, err
 	}
-	sales, err := rows(ctx, tx, key, 2, from, to, tz.Get("tz"))
-	if err != nil {
-		return nil, err
-	}
-	people := []map[string]any{}
-	positions := map[string]int{}
-	for _, r := range append(work, sales...) {
-		id := r.Get("user_id").(string)
-		i, exists := positions[id]
-		if !exists {
-			i = len(people)
-			positions[id] = i
-			people = append(people, map[string]any{"user_id": id, "name": r.Get("name"), "os_assignee": float64(0), "os_assignee_cents": float64(0), "os_helper": float64(0), "os_helper_cents": float64(0), "sales": float64(0), "sales_cents": float64(0), "total_cents": float64(0)})
-		}
-		prefix := "sales"
-		if r.Get("role") == "assignee" {
-			prefix = "os_assignee"
-		} else if r.Get("role") == "helper" {
-			prefix = "os_helper"
-		}
-		people[i][prefix] = num(r.Get("n"))
-		people[i][prefix+"_cents"] = num(r.Get("cents"))
-		people[i]["total_cents"] = num(people[i]["os_assignee_cents"]) + num(people[i]["os_helper_cents"]) + num(people[i]["sales_cents"])
-	}
-	total := float64(0)
-	for _, p := range people {
-		total += num(p["total_cents"])
-	}
-	sort.SliceStable(people, func(i, j int) bool { return num(people[i]["total_cents"]) > num(people[j]["total_cents"]) })
 	if err = record(ctx, tx, "report.commissions", "report", nil, map[string]any{"from": from, "to": to}); err != nil {
 		return nil, err
 	}
-	return map[string]any{"from": from, "to": to, "timezone": tz.Get("tz"), "rows": people, "total_cents": total, "note": "Calculado com as regras vigentes hoje; mudar a regra muda a apuração de períodos passados ainda não pagos."}, nil
+	return map[string]any{"from": from, "to": to, "timezone": tz, "rows": people, "total_cents": total, "note": "Registros de liquidações fechadas ou pagas usam o valor congelado no fechamento; os demais seguem as regras vigentes hoje e mudam se a regra mudar."}, nil
 }
 func queryFragments(key string, index int, fragments map[string]string) string {
 	data, err := sourceFiles.ReadFile("sql/" + specs[key].Queries[index])

@@ -31,7 +31,14 @@ import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StockPurchases, StockSuppliers, StockWarehouses } from "./purchasing";
 import { normalize } from "@/lib/format";
-import { stockItemSchema, useStockRefresh, type StockItem } from "./models";
+import {
+  stockItemSchema,
+  useStockRefresh,
+  useStockValuation,
+  type StockItem,
+} from "./models";
+import { StockValuationReport } from "./valuation";
+import { money } from "@/lib/format";
 import { StockMovements } from "./movements";
 import { StockQuotations } from "./quotations";
 import { StockUnits } from "./units";
@@ -45,11 +52,19 @@ export function StockCatalog() {
   const result = useSWR("erp-stock-items", async () =>
     z.array(stockItemSchema).parse(await api("/stock/items")),
   );
+  const valuation = useStockValuation();
+  const costs = new Map(
+    (valuation.data?.items ?? []).map((cost) => [cost.item_id, cost]),
+  );
   const [query, setQuery] = useState("");
   const [params, setParams] = useSearchParams();
-  const tab = ["depositos", "fornecedores", "compras", "cotacoes"].includes(
-    params.get("aba") ?? "",
-  )
+  const tab = [
+    "depositos",
+    "fornecedores",
+    "compras",
+    "cotacoes",
+    "valor",
+  ].includes(params.get("aba") ?? "")
     ? params.get("aba")!
     : "materiais";
   const [modal, setModal] = useState<{
@@ -99,6 +114,7 @@ export function StockCatalog() {
             <TabsTrigger value="fornecedores">Fornecedores</TabsTrigger>
             <TabsTrigger value="compras">Compras</TabsTrigger>
             <TabsTrigger value="cotacoes">Cotações</TabsTrigger>
+            <TabsTrigger value="valor">Valor do estoque</TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="depositos">
@@ -124,10 +140,17 @@ export function StockCatalog() {
         <TabsContent value="compras">
           <StockPurchases />
         </TabsContent>
+        <TabsContent value="valor">
+          <StockValuationReport />
+        </TabsContent>
         <TabsContent value="materiais">
           <Panel
             title="Catálogo de materiais"
-            description="Saldos calculados pelos movimentos registrados no ERP."
+            description={
+              valuation.data
+                ? `Saldos calculados pelos movimentos registrados no ERP. Valor total do estoque: ${money(valuation.data.total_cents / 100)}.`
+                : "Saldos calculados pelos movimentos registrados no ERP."
+            }
             action={
               <FormField label="Buscar no catálogo de estoque">
                 <Input
@@ -150,6 +173,8 @@ export function StockCatalog() {
                       {[
                         "Item / código",
                         "Saldo",
+                        "Custo médio",
+                        "Valor em estoque",
                         "Mínimo",
                         "Situação",
                         "Ações",
@@ -177,6 +202,16 @@ export function StockCatalog() {
                               {item.with_tech} com técnico
                             </p>
                           )}
+                        </TableCell>
+                        <TableCell>
+                          {costs.has(item.id)
+                            ? money(costs.get(item.id)!.avg_cost_cents / 100)
+                            : "—"}
+                        </TableCell>
+                        <TableCell>
+                          {costs.has(item.id)
+                            ? money(costs.get(item.id)!.value_cents / 100)
+                            : "—"}
                         </TableCell>
                         <TableCell>
                           {item.min_qty} {item.unit}

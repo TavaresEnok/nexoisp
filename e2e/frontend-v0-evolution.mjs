@@ -124,7 +124,9 @@ try {
   const purchase = (await request('/stock/purchases', null, 'GET')).find((row) => row.items.some((line) => line.item_id === item.id));
   assert.equal(purchase.total_cents, 5000);
   await page.getByRole('button', { name: `Receber pedido #${purchase.number}`, exact: true }).click();
-  await confirm();
+  // O recebimento abre o diálogo dos títulos a pagar; os padrões geram uma parcela em 30 dias.
+  await dialog(`Receber pedido #${purchase.number}`).getByRole('button', { name: 'Confirmar recebimento', exact: true }).click();
+  await dialog(`Receber pedido #${purchase.number}`).waitFor({ state: 'hidden' });
   await page.getByText(/^Recebido em/).first().waitFor();
   const balances = await request(`/stock/items/${item.id}/balances`, null, 'GET');
   assert.equal(balances.find((row) => row.name === `Depósito ${token}`).balance, 40);

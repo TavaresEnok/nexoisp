@@ -83,6 +83,11 @@ const FinancePolicy = lazy(() =>
     default: module.FinancePolicy,
   })),
 );
+const Payables = lazy(() =>
+  import("@/features/finance/payables").then((module) => ({
+    default: module.Payables,
+  })),
+);
 const FinanceReconciliation = lazy(() =>
   import("@/features/finance/reconciliation").then((module) => ({
     default: module.FinanceReconciliation,
@@ -384,6 +389,7 @@ export function OperationalApplication() {
     crmReport: <CrmReport />,
     collectionReports: <CollectionReports />,
     financePolicy: <FinancePolicy />,
+    payables: <Payables />,
     reconciliation: <FinanceReconciliation />,
     invoices: <OperationalInvoices />,
     contracts: <OperationalContracts />,
