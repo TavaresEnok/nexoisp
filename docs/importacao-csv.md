@@ -120,7 +120,7 @@ Reversão (preserva o que aconteceu depois da migração)
    (Faturas → pagas no período; Auditoria) e lançá-los no sistema antigo antes de retomar a operação nele.
 8. Registrar o motivo e o que foi relançado.
 
-A compensação contábil de lote está implementada nesta branch de desenvolvimento, somente para `kind=invoices`. O desenho aprovado continua em [docs/LOTE24-B13-DESENHO-COMPENSACAO.md](LOTE24-B13-DESENHO-COMPENSACAO.md). A matriz histórica [docs/LOTE24-B13-ACEITACAO.json](LOTE24-B13-ACEITACAO.json) permanece `planned/not_run`. O que a branch entrega, o que o runner chegou a executar e o que falta publicar estão em [docs/LOTE25-B13-COMPENSACAO.md](LOTE25-B13-COMPENSACAO.md) e [docs/LOTE25-B13-COMPENSACAO-ACEITE.json](LOTE25-B13-COMPENSACAO-ACEITE.json).
+A compensação contábil de lote está implementada nesta branch de desenvolvimento, somente para `kind=invoices`. O desenho aprovado continua em `docs/LOTE24-B13-DESENHO-COMPENSACAO.md` (tag `arquivo/pre-limpeza-2026-11-09`). A matriz histórica `docs/LOTE24-B13-ACEITACAO.json`, na mesma tag, permanece `planned/not_run`. O que a branch entrega, o que o runner chegou a executar e o que falta publicar estão em docs/LOTE25-B13-COMPENSACAO.md e docs/LOTE25-B13-COMPENSACAO-ACEITE.json.
 
 Publicado em `main` (CI verde em 42b8154), sem homologação com dados reais:
 

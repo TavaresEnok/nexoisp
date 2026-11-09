@@ -201,15 +201,6 @@ func SubmitTask(ctx context.Context, id string, payload map[string]any) (TaskRec
 	return TaskReceipt{ID: taskID, Accepted: true}, nil
 }
 
-// Legacy caller cannot bypass the durable-intent requirement or claim applied.
-func Task(ctx context.Context, id string, payload any) (string, error) {
-	values, ok := payload.(map[string]any)
-	if !ok {
-		return "", apierr.New(400, "tarefa inválida")
-	}
-	_, err := SubmitTask(ctx, id, values)
-	return "queued", err
-}
 func TaskEvidence(ctx context.Context, device, key, remote string) (string, bool, error) {
 	raw, _ := json.Marshal(map[string]any{"device": device, "uniqueKey": key})
 	status, body, err := call(ctx, "/tasks/?query="+escape(string(raw))+"&projection=_id,device,uniqueKey", http.MethodGet, nil)

@@ -1,6 +1,6 @@
 # Estado do NexoISP
 
-**Atualizado em 06/11/2026.** Este é o resumo de referência. Os documentos `LOTE*`, `CONCLUSAO-INTEGRAL*`, `RELATORIO-GERAL-*` e `CORRECOES-*` ficam como histórico: os estados que eles descrevem eram válidos na data de cada um e não são repetidos aqui.
+**Atualizado em 06/11/2026.** Este é o resumo de referência. Os relatórios de lotes (`LOTE*`, `CONCLUSAO-INTEGRAL*`, `RELATORIO-GERAL-*`, `CORRECOES-*`) saíram do repositório em 09/11/2026 e continuam acessíveis na tag `arquivo/pre-limpeza-2026-11-09`.
 
 ## Auditoria local atual
 

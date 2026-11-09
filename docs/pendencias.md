@@ -62,18 +62,3 @@ Não bloqueia automaticamente o primeiro piloto; priorizar conforme o uso real:
 - IA assistiva e novos canais: decisão de produto, serviço externo e regras de uso dos dados; sem escrita irrestrita em rede.
 
 Não reabrir como pendência busca global, linha do tempo, avisos de saída, degraus de cobrança, API pública, SLA básico, agenda, campos personalizados, combos ou migração Go: esses recursos já possuem implementação. As pendências acima tratam das lacunas e validações restantes.
-
-
-## Registros históricos de consolidação
-
-Os registros abaixo preservam o estado das suas datas. Referências a CI/SBOM pendentes foram superadas pelas execuções posteriores citadas em ESTADO; não comprovam o candidato desta auditoria.
-
-
-Lote 40 (30/10/2026): anexos privados de OS e cotação com conversão manual em pedido rascunho estão DONE 5/5; HTTP real exit 0 em 8461e61. A execução Go/PostgreSQL da gerência ainda aguarda recibo. A adaptação funcional não constitui homologação. Assinatura, operação offline, fiscal, pagamentos e custo contábil não integram este recorte. Por decisão do usuário, Chatwoot está fora do escopo NexoISP; outro projeto trata do chat.
-
-- C42 (Lote 42): CRUD de inventário passivo por POP (postes, torres e condomínios) validado na matriz funcional (PostgreSQL/race e HTTP em 19eb8bb; rastreio de browser em 5111ce3 incorporado a por-unidade.json); topologia completa, GIS, comandos físicos e homologação externa permanecem abertas.
-- Lote 43: DONE 3/3 revisões, 7 checks finais PASS, browser de inventário passivo PASS; diagnóstico da falha do CI 41078534322 no Go PG geral registrado (reprodução local exit 0, relatórios persistidos por T5); CI e SBOM finais pendentes antes de publicação.
-- C37 (Lote 44): CSV de cotação e locais entregues; sites PG16 REQUIRED/race e cenários Chromium de locais e cotações PASS na prova real 45. Cotação PG44 e HTTP nativo CI44 são reuso de provas anteriores; as falhas 44 permanecem históricas.
-- C34 (Lote 45): preferências locais do workspace DONE 5/5, cinco revisões e dez checks PASS; cenário Chromium real PASS, incluindo isolamento entre contas. UI e fonte 45 com API 44 de fonte de produção idêntica e binários reutilizados; detalhes em [consolidação 46](LOTE46-CONSOLIDACAO.md). Homologação externa permanece pendente.
-
-A triagem [residual 46](LOTE46-BACKLOG-RESIDUAL.md) não identificou tarefa interna coesa pronta sem decisão ou recurso externo. À época, o CI 45 run 41106278702 falhou em Cloud C27 por fixture sem linhas; a correção da fixture foi integrada em 9b2230b, sem comprovação de CI corrigido. CI/SBOM do novo candidato e piloto continuam gates; Chatwoot/Webchat estão fora do escopo.

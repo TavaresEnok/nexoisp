@@ -1287,7 +1287,7 @@
     "functionality": "Cobrança bancária real, Pix/boleto pagável",
     "behavior": "Existe adapter Efí sandbox e gestão de credenciais; emissão e operações dependem de configuração, conta e homologação. Código e testes sintéticos não comprovam cobrança bancária real ou extrato real.",
     "endpoints": "—",
-    "evidence": "apps/api-go/internal/finance/credentials.go (LoadCredentialClient); apps/api-go/internal/finance/providers/efi/; docs/LOTE09-B07-CANCELAMENTO-DEVOLUCAO.md",
+    "evidence": "apps/api-go/internal/finance/credentials.go (LoadCredentialClient); apps/api-go/internal/finance/providers/efi/",
     "integrationState": "backend-preserved",
     "validation": [],
     "validationNotes": [
@@ -2360,7 +2360,7 @@
     "functionality": "Quitar fatura em instituição financeira",
     "behavior": "O portal apresenta meios disponibilizados pelo backend; existe adapter Efí sandbox, mas pagamento bancário real depende de conta, configuração e homologação.",
     "endpoints": "GET /api/portal/overview",
-    "evidence": "apps/api-go/internal/finance/credentials.go (LoadCredentialClient); apps/api-go/internal/finance/providers/efi/; docs/LOTE09-B07-CANCELAMENTO-DEVOLUCAO.md",
+    "evidence": "apps/api-go/internal/finance/credentials.go (LoadCredentialClient); apps/api-go/internal/finance/providers/efi/",
     "integrationState": "backend-preserved",
     "validation": [
       "e2e/frontend-v0-portal.mjs",

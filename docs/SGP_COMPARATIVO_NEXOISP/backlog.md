@@ -18,7 +18,7 @@ Os IDs Cxx apontam para [a matriz](matriz_capacidades.csv); AUD-xx apontam para 
 
 ## Recortes parciais e decisões necessárias
 
-A triagem [residual 46](../LOTE46-BACKLOG-RESIDUAL.md) não identificou tarefa interna coesa pronta sem insumos adicionais. Os itens abaixo exigem as decisões ou recursos indicados; não são próximos lotes aprovados.
+A triagem residual 46 não identificou tarefa interna coesa pronta sem insumos adicionais. Os itens abaixo exigem as decisões ou recursos indicados; não são próximos lotes aprovados.
 
 | Prioridade | Entrega funcional | Dependência/decisão | Aceite mínimo |
 |---|---|---|---|
@@ -54,4 +54,4 @@ A revisão documental dos [101 títulos](revisao_101_menus.csv) e dos [956 contr
 
 Lote 40 (30/10/2026): anexos privados de OS e cotação com conversão manual em pedido rascunho DONE 5/5, HTTP real exit 0; recibo Go/PostgreSQL da gerência não consta neste registro. Prova browser posterior 45 PASS. Assinatura, operação offline, fiscal, pagamentos e custo contábil não integram este recorte. Chatwoot/Webchat estão fora do escopo.
 
-Lote 45: DONE 5/5, cinco revisões e dez checks PASS; sites PG16/race e três cenários Chromium reais PASS com UI/fonte 45 e API 44 de fonte de produção idêntica. CI 41106278702 falhou em Cloud C27 por fixture sem linhas; correção da fixture integrada em 9b2230b, sem CI corrigido comprovado. CI/SBOM do SHA candidato e homologação externa continuam pendentes; veja [consolidação](../LOTE46-CONSOLIDACAO.md).
+Lote 45: DONE 5/5, cinco revisões e dez checks PASS; sites PG16/race e três cenários Chromium reais PASS com UI/fonte 45 e API 44 de fonte de produção idêntica. CI 41106278702 falhou em Cloud C27 por fixture sem linhas; correção da fixture integrada em 9b2230b, sem CI corrigido comprovado. CI/SBOM do SHA candidato e homologação externa continuam pendentes; veja consolidação.
