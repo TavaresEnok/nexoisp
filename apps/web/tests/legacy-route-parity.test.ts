@@ -9,6 +9,7 @@ import {
 } from "../features/operations/navigation";
 import {
   isRecordId,
+  plannedPaths,
   operationalBranch,
   operationalNavigationAreas,
   resolveCatalogueNode,
@@ -98,7 +99,9 @@ test("views do catálogo v0 disponíveis no Go têm destino operacional; catálo
 });
 
 // Recursos do v0 sem suporte no Go; qualquer outro nó deve chegar a uma página real.
-const planned = ["/rede/ftth/acs-template"];
+// A lista está vazia: o template ACS, o assistente e o acompanhamento ganharam
+// páginas operacionais. O mecanismo de destino planejado continua coberto abaixo.
+const planned: string[] = [...plannedPaths];
 const session = (role: Session["role"], perms: string[]): Session => ({
   id: role,
   name: role,
@@ -229,6 +232,26 @@ test("os 420 nós do catálogo chegam a uma página operacional ou constam da li
   }
   assert.ok(canAccessPath(admin, "/rede/ftth/fttx-pon"));
   assert.ok(reached >= 400, `apenas ${reached} nós alcançados`);
+});
+test("nenhum destino do catálogo cai em recurso planejado", () => {
+  assert.deepEqual(planned, []);
+  for (const node of navigationPages)
+    assert.notEqual(resolveCatalogueNode(node.href)?.kind, "planned", node.href);
+  for (const path of ["/rede/ftth/acs-template", "/acompanhamento", "/assistente"]) {
+    assert.equal(integrationStatus(path), "connected", path);
+    assert.equal(navigate(path).kind, "page", path);
+    assert.ok(canAccessPath(admin, path), path);
+  }
+  assert.equal(
+    resolveCatalogueNode("/rede/ftth/acs-template")?.kind,
+    "page",
+    "template ACS aparece no menu como página própria",
+  );
+  const finance = session("finance", ["subscribers:read", "finance:read"]);
+  assert.equal(canAccessPath(finance, "/acompanhamento"), false);
+  assert.equal(canAccessPath(finance, "/assistente"), true);
+  assert.equal(canAccessPath(finance, "/rede/ftth/acs-template"), false);
+  assert.equal(canAccessPath(session("subscriber", ["portal:self"]), "/assistente"), false);
 });
 test("menu e busca operacionais mostram páginas e abas, não subações sem destino próprio", () => {
   const tree = [

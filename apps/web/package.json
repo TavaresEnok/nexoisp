@@ -23,6 +23,7 @@
     "test:network": "node ../../e2e/frontend-v0-network.mjs",
     "test:access": "node ../../e2e/frontend-v0-access.mjs",
     "test:cpe": "node ../../e2e/frontend-v0-cpe.mjs",
+    "test:acs-template": "node ../../e2e/frontend-v0-acs-template-apply.mjs",
     "test:optical": "node ../../e2e/frontend-v0-optical.mjs",
     "test:maintenance": "node ../../e2e/frontend-v0-maintenance.mjs",
     "test:workspace": "node ../../e2e/frontend-v0-workspace.mjs",

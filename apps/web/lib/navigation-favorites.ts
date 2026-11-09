@@ -81,6 +81,15 @@ export function getTeamCataloguePages(
   ) {
     map.set("/estrutura", { href: "/estrutura", label: "Mapa de páginas" });
   }
+  for (const [href, label] of [
+    ["/assistente", "Assistente"],
+    ["/acompanhamento", "Acompanhamento operacional"],
+  ] as const) {
+    const connected = shell
+      ? shell.connected(href)
+      : integrationStatus(href) === "connected";
+    if (!plannedPaths.has(href) && connected) map.set(href, { href, label });
+  }
 
   // Áreas operacionais de equipe
   const areas = shell ? shell.areas() : operationalNavigationAreas();

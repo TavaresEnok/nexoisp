@@ -3,6 +3,10 @@
   "routes": [
     {
       "method": "DELETE",
+      "path": "/api/acs/templates/:id"
+    },
+    {
+      "method": "DELETE",
       "path": "/api/api-tokens/:id"
     },
     {
@@ -103,6 +107,14 @@
     },
     {
       "method": "GET",
+      "path": "/api/acs/templates"
+    },
+    {
+      "method": "GET",
+      "path": "/api/acs/templates/:id"
+    },
+    {
+      "method": "GET",
       "path": "/api/addons"
     },
     {
@@ -200,6 +212,10 @@
     {
       "method": "GET",
       "path": "/api/contracts/:id/cpe/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/contracts/:id/cpe/templates"
     },
     {
       "method": "GET",
@@ -460,6 +476,10 @@
     {
       "method": "GET",
       "path": "/api/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/monitoring/overview"
     },
     {
       "method": "GET",
@@ -831,6 +851,10 @@
     },
     {
       "method": "PATCH",
+      "path": "/api/acs/templates/:id"
+    },
+    {
+      "method": "PATCH",
       "path": "/api/addons/:id"
     },
     {
@@ -1011,6 +1035,10 @@
     },
     {
       "method": "POST",
+      "path": "/api/acs/templates"
+    },
+    {
+      "method": "POST",
       "path": "/api/addons"
     },
     {
@@ -1092,6 +1120,14 @@
     {
       "method": "POST",
       "path": "/api/contracts/:id/cpe/tasks/:taskId/retry-lookup"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/cpe/template"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contracts/:id/cpe/template/preview"
     },
     {
       "method": "POST",

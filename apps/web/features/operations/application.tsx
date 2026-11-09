@@ -52,6 +52,21 @@ const OnuCatalogPage = lazy(() =>
     default: module.OnuCatalogPage,
   })),
 );
+const AcsTemplates = lazy(() =>
+  import("@/features/network/acs-templates").then((module) => ({
+    default: module.AcsTemplates,
+  })),
+);
+const OperationalMonitoring = lazy(() =>
+  import("./monitoring").then((module) => ({
+    default: module.OperationalMonitoring,
+  })),
+);
+const OperationalAssistant = lazy(() =>
+  import("@/features/assistant/assistant").then((module) => ({
+    default: module.OperationalAssistant,
+  })),
+);
 const ReferralReport = lazy(() =>
   import("@/features/finance/referrals").then((module) => ({
     default: module.ReferralReport,
@@ -352,6 +367,9 @@ export function OperationalApplication() {
     onus: <NetworkOnus />,
     noc: <NetworkNoc />,
     onuCatalog: <OnuCatalogPage />,
+    acsTemplates: <AcsTemplates />,
+    monitoring: <OperationalMonitoring />,
+    assistant: <OperationalAssistant />,
     ponPorts: <PonPorts />,
     online: <OnlineConnections />,
     operations: <NetworkOperations />,

@@ -20,7 +20,10 @@ import {
   FavoriteToggleButton,
   useNavigationFavorites,
 } from "../components/navigation-favorites";
-import { operationalNavigationAreas } from "../features/operations/catalogue";
+import {
+  operationalNavigationAreas,
+  plannedPaths,
+} from "../features/operations/catalogue";
 import {
   getFavoritesStorageKey,
   isValidFavoriteCandidate,
@@ -84,7 +87,8 @@ function mockShell(overrides?: Partial<ShellAdapter>): ShellAdapter {
       if (path.startsWith("/financeiro")) return false;
       return true;
     },
-    connected: (path: string) => path !== "/rede/ftth/acs-template",
+    // Destino não conectado simula um recurso pendente.
+    connected: (path: string) => path !== "/rede/ftth/fttx-pon",
     title: () => undefined,
     areas: () => operationalNavigationAreas(),
     findPage: () => undefined,
@@ -136,13 +140,22 @@ test("validação estrita de candidatos a favoritos de equipe", () => {
   assert.equal(isValidFavoriteCandidate("/provedores", shell), false);
   assert.equal(isValidFavoriteCandidate("/conta", shell), false);
 
-  // Invalidação de páginas planejadas
+  // Nenhum destino permanece planejado; destinos não conectados continuam inválidos.
+  assert.equal(plannedPaths.size, 0);
+  assert.equal(isValidFavoriteCandidate("/rede/ftth/fttx-pon", shell), false);
   assert.equal(
     isValidFavoriteCandidate("/rede/ftth/acs-template", shell),
+    true,
+  );
+  assert.equal(isValidFavoriteCandidate("/assistente", shell), true);
+  assert.equal(isValidFavoriteCandidate("/acompanhamento", shell), true);
+  assert.equal(
+    isValidFavoriteCandidate(
+      "/acompanhamento",
+      mockShell({ canAccess: (path) => path !== "/acompanhamento" }),
+    ),
     false,
   );
-  assert.equal(isValidFavoriteCandidate("/assistente", shell), false);
-  assert.equal(isValidFavoriteCandidate("/acompanhamento", shell), false);
 
   // Invalidação de caminhos desconhecidos (não aceita prefixo livre)
   assert.equal(

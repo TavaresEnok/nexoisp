@@ -18,7 +18,7 @@ const schema = z.array(
   z.object({
     id: z.string().uuid(),
     intent_id: z.string().uuid(),
-    kind: z.enum(["wifi", "refresh", "reboot"]),
+    kind: z.enum(["wifi", "refresh", "reboot", "template"]),
     state: z.enum([
       "prepared",
       "uncertain",
@@ -49,6 +49,7 @@ const kinds: Record<string, string> = {
   wifi: "Alterar Wi-Fi",
   refresh: "Atualizar leitura",
   reboot: "Reiniciar roteador",
+  template: "Aplicar template ACS",
 };
 export function useCpeCommands(
   contract: string,

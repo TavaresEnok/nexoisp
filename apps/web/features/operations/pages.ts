@@ -30,6 +30,14 @@ export const operationalPages = {
   },
   settings: { paths: ["/configuracoes"], access: "equipe" },
   directory: { paths: ["/estrutura"], access: "equipe" },
+  // Painel somente leitura da equipe de rede (administração, atendimento e NOC).
+  monitoring: {
+    paths: ["/acompanhamento"],
+    access: ["network:read"],
+    title: "Acompanhamento operacional",
+  },
+  // Cada resposta do assistente ainda exige a permissão da consulta usada.
+  assistant: { paths: ["/assistente"], access: "equipe", title: "Assistente" },
   dataImport: {
     paths: ["/administracao/importacao"],
     access: ["import:run"],
@@ -120,6 +128,11 @@ export const operationalPages = {
   ponPorts: {
     paths: ["/rede/ftth/fttx-pon"],
     access: ["network:read", "olt"],
+  },
+  acsTemplates: {
+    paths: ["/rede/ftth/acs-template"],
+    access: ["network:read"],
+    title: "Templates ACS",
   },
   onuCatalog: {
     paths: ["/rede/ftth/fttx-onu-tipo", "/rede/ftth/fttx-onu-template"],
@@ -216,8 +229,6 @@ export const areaAccess: readonly (readonly [string, PageAccess])[] = [
   ["/financeiro", ["finance:read"]],
   ["/rede", ["network:read"]],
   ["/administracao", ["settings:manage"]],
-  ["/acompanhamento", "equipe"],
-  ["/assistente", "equipe"],
 ];
 
 // Fichas abertas por identificador redirecionam para a lista com o parâmetro.

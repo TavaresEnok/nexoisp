@@ -30,12 +30,9 @@ const extensions: Record<string, NavigationNode[]> = {
 };
 const extensionPages = Object.values(extensions).flat();
 
-// Recursos do desenho v0 sem suporte no backend Go.
-export const plannedPaths: ReadonlySet<string> = new Set([
-  "/rede/ftth/acs-template",
-  "/assistente",
-  "/acompanhamento",
-]);
+// Recursos do desenho v0 sem suporte no backend Go. Todos os destinos do
+// catálogo têm página operacional; o mecanismo permanece para novos recursos.
+export const plannedPaths: ReadonlySet<string> = new Set<string>([]);
 
 const recordId =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -57,6 +54,7 @@ const destinations: Record<string, string | [string, Guard]> = {
   "/rede/equipamentos/equipamentos-e-olts": "/rede/equipamentos",
   "/rede/ftth/fttx-olt": "/rede/equipamentos",
   "/rede/ftth/fttx-cto": "/rede/ftth/fttx-cto",
+  "/rede/ftth/acs-template": "/rede/ftth/acs-template",
   "/rede/enderecos-ip/blocos-de-enderecos":
     "/rede/enderecos-ip/blocos-de-enderecos",
   "/rede/enderecos-ip/planos-de-cgnat": "/rede/enderecos-ip/planos-de-cgnat",

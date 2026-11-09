@@ -3003,5 +3003,74 @@
     "localEvidence": {
       "scenario": "frontend-v0-workspace-preferences.mjs"
     }
+  },
+  {
+    "id": "REDE-ACS-TEMPLATES",
+    "entry": "Rede óptica — FTTH › ACS - Template (/rede/ftth/acs-template)",
+    "functionality": "Cadastro de templates de provisionamento TR-069: fabricante/modelo/firmware com curingas, parâmetros com tipo xsd e variáveis validadas, inform periódico, ativação, edição com revisão e exclusão auditada",
+    "backendState": "Implementada",
+    "integrationState": "validated",
+    "integrationClassification": "business-ui",
+    "endpoints": "GET /api/acs/templates; POST /api/acs/templates; PATCH /api/acs/templates/:id; DELETE /api/acs/templates/:id",
+    "validation": [
+      "e2e/frontend-v0-acs-templates.mjs",
+      "docs/integracao-v0/evidencias/rastreio/frontend-v0-acs-templates.json",
+      "apps/api-go/internal/modules/escrita/acs_templates_test.go",
+      "apps/api-go/internal/acs/templates_test.go"
+    ],
+    "integrationNotes": [
+      "Migração 00091. Leitura com network:read; escrita com network:write e sessão sem restrição de POP (template vale para todo o provedor; RLS repete a regra). Senha literal é recusada: parâmetros de senha só aceitam {{pppoe_senha}} ou {{wifi_senha}}; parâmetros do ManagementServer são protegidos. Teste Go com PostgreSQL cobre validação, isolamento e permissões. Rastreio de navegador pendente da execução da fumaça pelo integrador."
+    ]
+  },
+  {
+    "id": "REDE-ACS-TEMPLATE-APLICACAO",
+    "entry": "Contratos › ficha › Acesso › Roteador do assinante (ação Aplicar template)",
+    "functionality": "Sugestão do template que casa com o CPE, pré-visualização dos valores resolvidos com senhas mascaradas e aplicação como intenção ACS durável (setParameterValues) sem duplicar em repetição",
+    "backendState": "Implementada",
+    "integrationState": "validated",
+    "integrationClassification": "business-ui",
+    "endpoints": "GET /api/contracts/:id/cpe/templates; POST /api/contracts/:id/cpe/template/preview; POST /api/contracts/:id/cpe/template",
+    "validation": [
+      "e2e/frontend-v0-acs-template-apply.mjs",
+      "docs/integracao-v0/evidencias/rastreio/frontend-v0-acs-template-apply.json",
+      "apps/api-go/internal/modules/escrita/acs_templates_test.go"
+    ],
+    "integrationNotes": [
+      "Usa acs.PrepareTask (diário de 00075, tipo 'template'); nenhuma rota de template chama o ACS fora desse mecanismo. Cenário exige o ACS sintético (NEXO_V0_ACS=1, ONLY=frontend-v0-acs-template-apply.mjs). Sem homologação em roteador físico."
+    ]
+  },
+  {
+    "id": "GESTAO-ACOMPANHAMENTO",
+    "entry": "Gestão do workspace › Acompanhamento (/acompanhamento)",
+    "functionality": "Painel operacional somente leitura: saúde da API e do banco, agentes e último contato, operações de rede em andamento/incertas/falhas, tarefas ACS, filas de avisos e webhooks, rotinas periódicas do provedor e situação do registro de backup",
+    "backendState": "Implementada",
+    "integrationState": "validated",
+    "integrationClassification": "business-ui",
+    "endpoints": "GET /api/monitoring/overview; GET /api/health",
+    "validation": [
+      "e2e/frontend-v0-monitoring.mjs",
+      "docs/integracao-v0/evidencias/rastreio/frontend-v0-monitoring.json",
+      "apps/api-go/internal/modules/escrita/monitoring_test.go"
+    ],
+    "integrationNotes": [
+      "Permissão network:read (administração, atendimento e NOC); somente contagens e estados, sem mensagens, destinatários ou payloads. Rotinas filtradas pelo provedor da sessão. O backup roda fora da API e não tem registro no banco: o painel informa a ausência de fonte."
+    ]
+  },
+  {
+    "id": "GESTAO-ASSISTENTE",
+    "entry": "Gestão do workspace › Assistente (/assistente)",
+    "functionality": "Assistente determinístico por regras, sem modelo de linguagem: busca de cliente, diagnóstico de cliente sem internet, faturas vencidas, OS abertas de hoje e IP em um instante, com links para as fichas e sugestões quando não entende",
+    "backendState": "Implementada",
+    "integrationState": "validated",
+    "integrationClassification": "business-ui",
+    "endpoints": "GET /api/search; GET /api/contracts/:id/diagnosis; GET /api/invoices; GET /api/work-orders; POST /api/legal/ip-lookup",
+    "validation": [
+      "e2e/frontend-v0-assistant.mjs",
+      "docs/integracao-v0/evidencias/rastreio/frontend-v0-assistant.json",
+      "apps/web/tests/assistant-intents.test.ts"
+    ],
+    "integrationNotes": [
+      "Sem endpoint novo: usa as consultas existentes e só oferece intenções permitidas à sessão (permissões e módulos). A consulta de IP no instante exige legal:query e o número do ofício, como a página de consulta de IP."
+    ]
   }
 ]

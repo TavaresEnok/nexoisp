@@ -21,6 +21,9 @@ type TaskRequest struct {
 	Index    string  `json:"index,omitempty"`
 	SSID     *string `json:"ssid,omitempty"`
 	Password *string `json:"password,omitempty"`
+	// Template application binds the intention to one template revision.
+	TemplateID       string `json:"template_id,omitempty"`
+	TemplateRevision int    `json:"template_revision,omitempty"`
 }
 type taskEnvelope struct {
 	Tenant, Contract, Device, ID, ServerHash, Salt string
@@ -51,7 +54,7 @@ func readTaskEnvelope(ctx context.Context, tx *db.Tx, id string) (taskEnvelope, 
 // Caller has checked ownership with the ACS and holds only a tenant/contract
 // scope. The payload is encrypted and never appears in API/audit responses.
 func PrepareTask(ctx context.Context, tx *db.Tx, tenant, contract, actor, device string, input TaskRequest, payload, baseline map[string]any) (jsonx.Object, bool, error) {
-	if uuid.Validate(input.IntentID) != nil || (input.Kind != "wifi" && input.Kind != "reboot" && input.Kind != "refresh") {
+	if uuid.Validate(input.IntentID) != nil || (input.Kind != "wifi" && input.Kind != "reboot" && input.Kind != "refresh" && input.Kind != "template") || (input.Kind == "template") != (input.TemplateID != "") {
 		return nil, false, apierr.New(400, "intenção ACS inválida")
 	}
 	input.IntentID = uuid.MustParse(input.IntentID).String()
@@ -108,6 +111,24 @@ func PrepareTask(ctx context.Context, tx *db.Tx, tenant, contract, actor, device
 		return nil, false, err
 	}
 	return rows[0], true, nil
+}
+
+// ExistingTask returns a recorded intention and its decrypted request, so a
+// replay is answered from the journal instead of recomputing values that may
+// have changed since the first attempt.
+func ExistingTask(ctx context.Context, tx *db.Tx, contract, intent string) (jsonx.Object, *TaskRequest, error) {
+	if uuid.Validate(intent) != nil {
+		return nil, nil, apierr.New(400, "intenção ACS inválida")
+	}
+	rows, err := tx.Objects(ctx, `select `+taskColumns+` from acs_task_intents where contract_id=$1 and intent_id=$2`, contract, uuid.MustParse(intent).String())
+	if err != nil || len(rows) == 0 {
+		return nil, nil, err
+	}
+	envelope, err := readTaskEnvelope(ctx, tx, jsonx.String(rows[0].Get("id")))
+	if err != nil {
+		return nil, nil, err
+	}
+	return rows[0], &envelope.Request, nil
 }
 func Tasks(ctx context.Context, tx *db.Tx, contract string) ([]jsonx.Object, error) {
 	return tx.Objects(ctx, `select `+taskColumns+` from acs_task_intents where contract_id=$1 order by created_at desc,id desc limit 30`, contract)
