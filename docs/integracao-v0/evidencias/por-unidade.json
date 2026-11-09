@@ -1,30 +1,30 @@
 {
-  "generated_at": "2026-11-09T21:10:32.144Z",
+  "generated_at": "2026-11-09T21:53:49.865Z",
   "method": "Chamadas à API feitas pelas páginas entre uma verificação e a anterior, gravadas por e2e/request-trace.mjs durante a fumaça; preparação via context.request não conta.",
   "scenarios": [
     {
       "scenario": "frontend-v0-access.mjs",
-      "recorded_at": "2026-10-20T21:08:45.925Z",
+      "recorded_at": "2026-11-09T21:47:31.037Z",
       "checks": 12
     },
     {
       "scenario": "frontend-v0-admin-reports.mjs",
-      "recorded_at": "2026-10-20T21:16:10.123Z",
+      "recorded_at": "2026-11-09T21:49:09.679Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-admin-team.mjs",
-      "recorded_at": "2026-10-20T21:15:52.827Z",
+      "recorded_at": "2026-11-09T21:48:51.736Z",
       "checks": 7
     },
     {
       "scenario": "frontend-v0-cgnat-legal.mjs",
-      "recorded_at": "2026-10-20T21:15:31.517Z",
+      "recorded_at": "2026-11-09T21:48:37.683Z",
       "checks": 6
     },
     {
       "scenario": "frontend-v0-commercial.mjs",
-      "recorded_at": "2026-10-20T21:06:48.954Z",
+      "recorded_at": "2026-11-09T21:45:19.600Z",
       "checks": 1
     },
     {
@@ -34,67 +34,72 @@
     },
     {
       "scenario": "frontend-v0-create-links.mjs",
-      "recorded_at": "2026-10-20T21:17:34.352Z",
+      "recorded_at": "2026-11-09T21:53:26.094Z",
       "checks": 17
     },
     {
       "scenario": "frontend-v0-crm.mjs",
-      "recorded_at": "2026-10-20T21:07:26.716Z",
+      "recorded_at": "2026-11-09T21:46:03.687Z",
       "checks": 1
     },
     {
       "scenario": "frontend-v0-evolution.mjs",
-      "recorded_at": "2026-10-20T21:19:07.773Z",
-      "checks": 5
+      "recorded_at": "2026-11-09T21:53:34.273Z",
+      "checks": 4
     },
     {
       "scenario": "frontend-v0-field.mjs",
-      "recorded_at": "2026-10-20T21:07:53.104Z",
+      "recorded_at": "2026-11-09T21:46:31.455Z",
       "checks": 16
     },
     {
       "scenario": "frontend-v0-finance-access.mjs",
-      "recorded_at": "2026-10-20T21:17:05.578Z",
+      "recorded_at": "2026-11-09T21:50:45.218Z",
       "checks": 4
     },
     {
       "scenario": "frontend-v0-finance.mjs",
-      "recorded_at": "2026-10-20T21:07:11.976Z",
+      "recorded_at": "2026-11-09T21:45:44.094Z",
+      "checks": 1
+    },
+    {
+      "scenario": "frontend-v0-financial-connections.mjs",
+      "recorded_at": "2026-11-09T21:50:08.806Z",
       "checks": 1
     },
     {
       "scenario": "frontend-v0-ftth.mjs",
-      "recorded_at": "2026-10-20T21:09:25.254Z",
+      "recorded_at": "2026-11-09T21:48:20.252Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-import.mjs",
-      "recorded_at": "2026-10-20T21:16:59.767Z",
-      "checks": 6
+      "recorded_at": "2026-11-09T21:50:25.782Z",
+      "checks": 10
     },
     {
       "scenario": "frontend-v0-integrations.mjs",
-      "recorded_at": "2026-10-20T21:16:53.835Z",
+      "recorded_at": "2026-11-09T21:50:02.428Z",
       "checks": 6
     },
     {
       "scenario": "frontend-v0-ipam.mjs",
-      "recorded_at": "2026-10-20T21:09:37.729Z",
+      "recorded_at": "2026-11-09T21:48:32.116Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-maintenance.mjs",
-      "recorded_at": "2026-10-20T21:09:04.671Z",
+      "recorded_at": "2026-11-09T21:47:50.177Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-map.mjs",
-      "recorded_at": "2026-10-20T21:15:44.812Z",
+      "recorded_at": "2026-11-09T21:48:42.650Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-messages.mjs",
-      "recorded_at": "2026-10-20T21:16:45.697Z",
+      "recorded_at": "2026-11-09T21:49:54.641Z",
       "checks": 5
     },
     {
@@ -109,17 +114,17 @@
     },
     {
       "scenario": "frontend-v0-network-sites.mjs",
-      "recorded_at": "2026-10-30T15:08:41.215Z",
+      "recorded_at": "2026-11-09T21:47:12.583Z",
       "checks": 1
     },
     {
       "scenario": "frontend-v0-network.mjs",
-      "recorded_at": "2026-10-20T21:08:28.708Z",
+      "recorded_at": "2026-11-09T21:47:08.312Z",
       "checks": 13
     },
     {
       "scenario": "frontend-v0-optical.mjs",
-      "recorded_at": "2026-10-20T21:08:58.403Z",
+      "recorded_at": "2026-11-09T21:47:43.290Z",
       "checks": 6
     },
     {
@@ -129,12 +134,12 @@
     },
     {
       "scenario": "frontend-v0-os-quotations.mjs",
-      "recorded_at": "2026-10-30T13:58:18.239Z",
+      "recorded_at": "2026-11-09T21:49:44.115Z",
       "checks": 2
     },
     {
       "scenario": "frontend-v0-portal-branding.mjs",
-      "recorded_at": "2026-10-30T13:58:21.602Z",
+      "recorded_at": "2026-11-09T21:49:40.207Z",
       "checks": 1
     },
     {
@@ -144,32 +149,37 @@
     },
     {
       "scenario": "frontend-v0-portal.mjs",
-      "recorded_at": "2026-10-20T21:16:36.283Z",
+      "recorded_at": "2026-11-09T21:49:37.070Z",
       "checks": 9
     },
     {
+      "scenario": "frontend-v0-provider-refunds.mjs",
+      "recorded_at": "2026-11-09T21:45:48.153Z",
+      "checks": 1
+    },
+    {
       "scenario": "frontend-v0-quality.mjs",
-      "recorded_at": "2026-10-20T21:16:03.395Z",
+      "recorded_at": "2026-11-09T21:49:02.668Z",
       "checks": 8
     },
     {
       "scenario": "frontend-v0-remediation.mjs",
-      "recorded_at": "2026-10-20T21:17:27.631Z",
-      "checks": 13
+      "recorded_at": "2026-11-09T21:53:18.829Z",
+      "checks": 19
     },
     {
       "scenario": "frontend-v0-saas.mjs",
-      "recorded_at": "2026-10-20T21:16:14.531Z",
+      "recorded_at": "2026-11-09T21:49:14.237Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-session.mjs",
-      "recorded_at": "2026-10-20T21:06:32.548Z",
+      "recorded_at": "2026-11-09T21:45:02.075Z",
       "checks": 1
     },
     {
       "scenario": "frontend-v0-stock.mjs",
-      "recorded_at": "2026-10-20T21:08:05.318Z",
+      "recorded_at": "2026-11-09T21:46:43.804Z",
       "checks": 11
     },
     {
@@ -178,13 +188,18 @@
       "checks": 3
     },
     {
+      "scenario": "frontend-v0-workspace-preferences.mjs",
+      "recorded_at": "2026-11-09T21:48:11.652Z",
+      "checks": 3
+    },
+    {
       "scenario": "frontend-v0-workspace.mjs",
-      "recorded_at": "2026-10-20T21:09:16.701Z",
+      "recorded_at": "2026-11-09T21:48:04.615Z",
       "checks": 6
     },
     {
       "scenario": "frontend-v0.mjs",
-      "recorded_at": "2026-10-20T21:06:28.159Z",
+      "recorded_at": "2026-11-09T21:44:57.565Z",
       "checks": 1
     }
   ],
@@ -217,6 +232,20 @@
         },
         {
           "scenario": "frontend-v0-access.mjs",
+          "check": "Troca de senha valida tamanho, solicita reaplicação e vínculo MAC é normalizado pelo Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-access.mjs",
+          "check": "Suspensão, reativação, reaplicação e desconexão geram operações no Go sem inventar confirmação do NAS",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-access.mjs",
           "check": "Evidências preservam a ficha e a seção Conexão do titular consulta o mesmo acesso real",
           "endpoints": [
             "GET /api/me"
@@ -239,6 +268,13 @@
         {
           "scenario": "frontend-v0-access.mjs",
           "check": "Consulta de sessão observada permite busca, CSV e desconexão selecionada com motivo registrado no Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-access.mjs",
+          "check": "Desconexão recusada pelo Go permanece explícita e não é apresentada como execução bem-sucedida",
           "endpoints": [
             "GET /api/me"
           ]
@@ -280,6 +316,13 @@
         },
         {
           "scenario": "frontend-v0-admin-reports.mjs",
+          "check": "Prazos vazios retornam aos padrões da instalação, preservando faturas, pagamentos, aceites e auditoria",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-admin-reports.mjs",
           "check": "Coleta DICI usa competência, empresa e contrato reais; correções de IBGE e tecnologia alimentam prévia e CSV sem transmissão externa",
           "endpoints": [
             "GET /api/me"
@@ -315,6 +358,20 @@
         },
         {
           "scenario": "frontend-v0-admin-team.mjs",
+          "check": "Escopo por POP restringe contratos de outro POP e conserva contratos do POP selecionado e sem POP",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-admin-team.mjs",
+          "check": "Bloqueio e desbloqueio afetam login; remoção do próprio acesso de administrador é impedida no Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-admin-team.mjs",
           "check": "Empresas são cadastradas, ativadas e definidas como padrão; o Go conserva uma única padrão e impede inativá-la",
           "endpoints": [
             "GET /api/me"
@@ -336,7 +393,28 @@
         },
         {
           "scenario": "frontend-v0-cgnat-legal.mjs",
+          "check": "Encerramento preserva rastreabilidade histórica e o Go impede apagar blocos usados por planos encerrados",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cgnat-legal.mjs",
           "check": "Consulta legal aplica fuso explícito, IP/porta e referência auditada; CSV e impressão isolada contêm o mesmo resultado",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cgnat-legal.mjs",
+          "check": "Consulta direta de IP usa sessões históricas sem exigir porta CGNAT",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cgnat-legal.mjs",
+          "check": "Consulta IPv6 preserva titularidade após liberação, mostra limites do histórico e não afirma sessão física",
           "endpoints": [
             "GET /api/me"
           ]
@@ -494,7 +572,7 @@
         },
         {
           "scenario": "frontend-v0-evolution.mjs",
-          "check": "Portas PON: 3 porta(s) derivadas das ONUs e descobertas; assinantes da porta abertos pela tela do v0",
+          "check": "Portas PON: 0 porta(s) derivadas das ONUs e descobertas; assinantes da porta abertos pela tela do v0",
           "endpoints": [
             "GET /api/me"
           ]
@@ -524,6 +602,13 @@
         },
         {
           "scenario": "frontend-v0-field.mjs",
+          "check": "Atribuição e agendamento persistem no Go, com conversão correta do horário local",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
           "check": "Agenda em fuso do provedor mostra sobreposição, janela livre real, fila de espera e abre a ficha compartilhada",
           "endpoints": [
             "GET /api/me"
@@ -546,6 +631,34 @@
         {
           "scenario": "frontend-v0-field.mjs",
           "check": "Auxiliar adicionado/removido e checklist concluído com registro do autor",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Go rejeita saída sem saldo e devolução superior ao consumo da OS sem alterar o estoque",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Material lançado, devolvido e kit aplicado com saldos reais e históricos preservados",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Instalação por série vincula equipamento ao contrato em comodato",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Espera, reagendamento, deslocamento, execução e conclusão registram datas; OS finalizada preserva anotações sem reabrir controles",
           "endpoints": [
             "GET /api/me"
           ]
@@ -623,8 +736,22 @@
           ]
         },
         {
+          "scenario": "frontend-v0-financial-connections.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"cadastro pela interface persiste conexão pendente\",\"segredo não retorna nem cifrado na listagem\",\"ativação sandbox, troca de padrão e desativação confirmadas no backend\",\"reload preserva estado; componentes oficiais e API reais\",\"cofre pela UI persiste certificado sintético e versão; segredo não retorna nem fica no armazenamento do navegador\"],\"connection\":\"dd8a22ab-0aba-49eb-a951-90b3140309b6\"}",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
           "scenario": "frontend-v0-ftth.mjs",
           "check": "Cadastro CEO/CTO, coordenadas em conjunto, hierarquia, OLT/PON e edição persistem no Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth.mjs",
+          "check": "Reserva e vínculo a contrato ocupam portas reais; o Go impede ocupação concorrente da mesma porta",
           "endpoints": [
             "GET /api/me"
           ]
@@ -637,8 +764,71 @@
           ]
         },
         {
+          "scenario": "frontend-v0-ftth.mjs",
+          "check": "Go bloqueia ciclos de hierarquia e exclusão de caixa com derivadas",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth.mjs",
+          "check": "Caixas sem dependências podem ser excluídas; consulta preserva isolamento por provedor",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
           "scenario": "frontend-v0-import.mjs",
           "check": "CSV é lido, campos e plano são mapeados; prévia valida erros e senha ausente sem gravar assinantes e exige nova simulação após alterar mapa",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-import.mjs",
+          "check": "Aplicação grava somente linhas válidas e registra lote/avisos; contas importadas ficam sem provisionamento e conta sem senha continua bloqueada",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-import.mjs",
+          "check": "Provisionamento explícito solicita operação somente para conta com senha; reimportação da mesma origem não duplica assinantes nem contas",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-import.mjs",
+          "check": "Títulos importados preservam centavos, pagamento parcial e cancelamento; titular inexistente é erro explícito e título aberto não recebe cobrança automática",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-import.mjs",
+          "check": "Histórico mantém datas originais, importa atendimento/OS/anotação sem abrir SLA nem disparar avisos e não duplica registros na reimportação",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-import.mjs",
+          "check": "Motivo obrigatório, confirmação por teclado e bloqueio real do POST preservam a fatura; a elegibilidade antiga não compensa",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-import.mjs",
+          "check": "Resposta desconhecida reenvia a mesma chave; o POST real grava uma compensação, a repetição não lança outro estorno e o lote committed não oferece nova ação",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-import.mjs",
+          "check": "POST commitado com resposta perdida recupera a compensação pela leitura da ficha, sem segunda reversão nem nova ação",
           "endpoints": [
             "GET /api/me"
           ]
@@ -653,6 +843,34 @@
         {
           "scenario": "frontend-v0-integrations.mjs",
           "check": "Token criado na UI aparece uma vez, autentica a API pública e respeita escopo, validade e limite de chamadas do Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-integrations.mjs",
+          "check": "Revogação confirmada invalida imediatamente o token na API pública",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-integrations.mjs",
+          "check": "Destino criado envia evento assinado real ao receptor local e distingue HTTP 200 de falha HTTP 500",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-integrations.mjs",
+          "check": "Rotação mostra novo segredo uma vez; edição, pausa e ativação conservam a assinatura correta no próximo teste",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-integrations.mjs",
+          "check": "Exclusão confirmada remove destino e histórico; outro provedor não pode excluir o webhook",
           "endpoints": [
             "GET /api/me"
           ]
@@ -686,6 +904,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-ipam.mjs",
+          "check": "Liberação de prefixo e endereços atualiza a ocupação e permite excluir blocos sem vínculos",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
           "scenario": "frontend-v0-maintenance.mjs",
           "check": "Cadastro, edição, normalização de UF e ativação/inativação de POP persistem no Go",
           "endpoints": [
@@ -695,6 +920,20 @@
         {
           "scenario": "frontend-v0-maintenance.mjs",
           "check": "Manutenção valida intervalo, grava público por concentrador e calcula dois assinantes atingidos no Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-maintenance.mjs",
+          "check": "Avisos de início e normalização exigem confirmação e consentimento; somente o contato sintético autorizado entra na fila do canal local",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-maintenance.mjs",
+          "check": "Cancelamento retira o aviso do portal e a consulta mantém a apresentação no celular",
           "endpoints": [
             "GET /api/me"
           ]
@@ -715,7 +954,21 @@
         },
         {
           "scenario": "frontend-v0-map.mjs",
+          "check": "Mapa e lista consultam contratos, POPs e caixas com coordenadas reais; caixa abre a ocupação de portas",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-map.mjs",
           "check": "Clique no mapa move o contrato com coordenadas exatas e confirmação do Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-map.mjs",
+          "check": "Remoção de coordenadas exige confirmação; camadas e situação alteram a consulta sem inventar pontos",
           "endpoints": [
             "GET /api/me"
           ]
@@ -730,6 +983,20 @@
         {
           "scenario": "frontend-v0-messages.mjs",
           "check": "Canal guarda autorização sem expô-la e envia teste com campos corretos; ativação usa o backend",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-messages.mjs",
+          "check": "Modelo com variáveis é criado e a prévia ilustrativa é renderizada pelo Go sem disparar mensagens",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-messages.mjs",
+          "check": "Régua filtra plano e data, respeita consentimento e não repete envio do mesmo título/regra; modelo em uso não é excluído",
           "endpoints": [
             "GET /api/me"
           ]
@@ -766,7 +1033,7 @@
         },
         {
           "scenario": "frontend-v0-network-sites.mjs",
-          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
           "endpoints": [
             "POST /api/auth/login",
             "GET /api/me",
@@ -780,6 +1047,62 @@
             "POST /api/auth/login",
             "GET /api/me",
             "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network.mjs",
+          "check": "Rotação invalida token anterior; revogação bloqueia o agente; hello e sincronização sintéticos registram versão e contato após reativação",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network.mjs",
+          "check": "Equipamento usa agente e referência local reais; ausência de telemetria permanece explícita e sem incidente demonstrativo",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network.mjs",
+          "check": "Parâmetros e manutenção são gravados no Go; mudanças de intenção não são apresentadas como confirmação do NAS",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network.mjs",
+          "check": "Concentrador emite segredo mesmo com falha de atualização do inventário; instruções posteriores não recuperam o segredo",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network.mjs",
+          "check": "Rotação do segredo exige confirmação e emite outro valor apenas na janela de emissão",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network.mjs",
+          "check": "Edição do NAS integrado altera fabricante e destino de CoA pelo PATCH do Go e pede nova aplicação das instruções",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network.mjs",
+          "check": "Go bloqueia conversão com operação em aberto; relato sintético encerra a tentativa sem acessar NAS físico",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network.mjs",
+          "check": "Reaplicação solicita uma conta sem pendência e ignora conta já em operação; conversão preserva a conta e emite configuração integrada sem afirmar conectividade física",
+          "endpoints": [
+            "GET /api/me"
           ]
         },
         {
@@ -819,6 +1142,13 @@
         },
         {
           "scenario": "frontend-v0-optical.mjs",
+          "check": "Relato sintético da tentativa confirma versão e potências; reaplicação solicita nova operação sem alegar homologação física",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-optical.mjs",
           "check": "NOC consulta contadores, alertas e PON reais; limiares são definidos pelo provedor e gravados pelo Go",
           "endpoints": [
             "GET /api/me"
@@ -827,6 +1157,13 @@
         {
           "scenario": "frontend-v0-optical.mjs",
           "check": "Diagnóstico apresenta conclusão, limites e evidências datadas do Go sem executar teste remoto",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-optical.mjs",
+          "check": "Desautorização exige confirmação e só permite substituição após ausência confirmada pela OLT sintética",
           "endpoints": [
             "GET /api/me"
           ]
@@ -861,7 +1198,7 @@
         },
         {
           "scenario": "frontend-v0-os-quotations.mjs",
-          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque.",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque e exportação CSV comparativa concluída.",
           "endpoints": [
             "GET /api/me"
           ]
@@ -945,6 +1282,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-provider-refunds.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"API preserves nominal, net receipt and residual after synthetic partial/full provider refunds\",\"Official UI distinguishes partial refund from full reversal after reload\",\"Provider receipts never expose the manual reversal action\"],\"fixture\":\"synthetic owner data; no real PSP\"}",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
           "scenario": "frontend-v0-quality.mjs",
           "check": "Catálogo criado, renomeado e desativado/reativado; seleções operacionais respeitam itens ativos",
           "endpoints": [
@@ -954,6 +1298,27 @@
         {
           "scenario": "frontend-v0-quality.mjs",
           "check": "SLA com tipo, prioridade e escalonamento aplica prazo real ao atendimento; edição, ativação e relatório preservam política em uso",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-quality.mjs",
+          "check": "SLA de OS aceita filtro por natureza e exclusão confirmada apenas quando não utilizado",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-quality.mjs",
+          "check": "Definições de campo conservam tipo e identificador; opções, ordem, valores e ativação usam o Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-quality.mjs",
+          "check": "Kit criado na UI exclui itens serializados; aplicação em OS baixa quantidades reais do estoque e conserva ativação",
           "endpoints": [
             "GET /api/me"
           ]
@@ -995,6 +1360,55 @@
         },
         {
           "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-desktop-claro",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-desktop-escuro",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-celular",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: ficha-alerta-multiplos-contratos",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-vazio",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-erro",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "R02: arquivamento atualiza também o alerta global da ficha",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
           "check": "R04: indicação cadastrada pela interface, persistida e apresentada no relatório real",
           "endpoints": [
             "GET /api/me"
@@ -1010,6 +1424,13 @@
         {
           "scenario": "frontend-v0-remediation.mjs",
           "check": "R04: remoção da indicação pela interface preserva o contrato",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "R04/BE-27: exclusão global de etiqueta confirmada e persistida",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1053,12 +1474,27 @@
           "scenario": "frontend-v0-remediation.mjs",
           "check": "R03/R05: matriz nenhum módulo / CRM / campo respeita controles e consultas, com habilitação positiva",
           "endpoints": [
-            "GET /api/me"
+            "GET /api/me",
+            "GET /api/health"
           ]
         },
         {
           "scenario": "frontend-v0-saas.mjs",
           "check": "Novo provedor e primeiro administrador criados na UI autenticam no Go com contexto próprio",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-saas.mjs",
+          "check": "Nome e módulos são atualizados na plataforma; o Go libera CRM e campo e conserva NOC bloqueado",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-saas.mjs",
+          "check": "Suspensão confirmada impede acesso e login; reativação restaura autenticação do administrador",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1098,7 +1534,42 @@
         },
         {
           "scenario": "frontend-v0-stock.mjs",
+          "check": "Entradas, saídas e ajuste com sinal preservam os três movimentos e saldo calculado pelo Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-stock.mjs",
+          "check": "Edição, ativação e mínimo persistem; Go bloqueia mudar serialização após movimento",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-stock.mjs",
+          "check": "Lote normaliza séries no Go e duplicidade desfaz toda a entrada, sem unidade ou saldo parcial",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-stock.mjs",
+          "check": "Distribuição ao técnico e retorno ao almoxarifado preservam saldo e atualizam custódia",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-stock.mjs",
           "check": "Contrato mostra série, comodato e OS; retirada confirmada devolve a unidade ao saldo e encerra a pendência de recolhimento",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-stock.mjs",
+          "check": "Defeito e conserto mantêm a unidade rastreável; baixa exige motivo, reduz saldo e não pode ser desfeita",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1122,6 +1593,32 @@
           "check": "Erro na consulta de estoque não introduz catálogo ou saldos demonstrativos",
           "endpoints": [
             "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "POST /api/auth/login",
+            "GET /api/me",
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Seleção pessoal da Visão geral oculta bloco opcional e persiste após recarga sem afetar prioridades nem indicadores; restauração restabelece os blocos autorizados",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Logout e novo login com outra conta no mesmo contexto isola preferências por escopo de sessão e restringe widgets e favoritos sem permissão",
+          "endpoints": [
+            "POST /api/auth/login",
+            "POST /api/auth/logout",
+            "GET /api/me",
+            "GET /api/health"
           ]
         },
         {
@@ -1260,7 +1757,7 @@
         },
         {
           "scenario": "frontend-v0-network-sites.mjs",
-          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
           "endpoints": [
             "GET /api/health",
             "POST /api/auth/login"
@@ -1282,6 +1779,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "R03/R05: matriz nenhum módulo / CRM / campo respeita controles e consultas, com habilitação positiva",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
           "scenario": "frontend-v0-session.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Login do navegador não expõe o token da sessão no corpo; cliente de API recebe Bearer só ao pedir explicitamente\",\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
           "endpoints": [
@@ -1292,6 +1796,22 @@
         {
           "scenario": "frontend-v0-stock.mjs",
           "check": "Catálogo cadastra material com código, unidade e mínimo; alerta usa saldo real",
+          "endpoints": [
+            "GET /api/health",
+            "POST /api/auth/login"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "GET /api/health",
+            "POST /api/auth/login"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Logout e novo login com outra conta no mesmo contexto isola preferências por escopo de sessão e restringe widgets e favoritos sem permissão",
           "endpoints": [
             "GET /api/health",
             "POST /api/auth/login"
@@ -1387,6 +1907,20 @@
         },
         {
           "scenario": "frontend-v0-access.mjs",
+          "check": "Troca de senha valida tamanho, solicita reaplicação e vínculo MAC é normalizado pelo Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-access.mjs",
+          "check": "Suspensão, reativação, reaplicação e desconexão geram operações no Go sem inventar confirmação do NAS",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-access.mjs",
           "check": "Evidências preservam a ficha e a seção Conexão do titular consulta o mesmo acesso real",
           "endpoints": [
             "GET /api/me"
@@ -1409,6 +1943,13 @@
         {
           "scenario": "frontend-v0-access.mjs",
           "check": "Consulta de sessão observada permite busca, CSV e desconexão selecionada com motivo registrado no Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-access.mjs",
+          "check": "Desconexão recusada pelo Go permanece explícita e não é apresentada como execução bem-sucedida",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1450,6 +1991,13 @@
         },
         {
           "scenario": "frontend-v0-admin-reports.mjs",
+          "check": "Prazos vazios retornam aos padrões da instalação, preservando faturas, pagamentos, aceites e auditoria",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-admin-reports.mjs",
           "check": "Coleta DICI usa competência, empresa e contrato reais; correções de IBGE e tecnologia alimentam prévia e CSV sem transmissão externa",
           "endpoints": [
             "GET /api/me"
@@ -1485,6 +2033,20 @@
         },
         {
           "scenario": "frontend-v0-admin-team.mjs",
+          "check": "Escopo por POP restringe contratos de outro POP e conserva contratos do POP selecionado e sem POP",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-admin-team.mjs",
+          "check": "Bloqueio e desbloqueio afetam login; remoção do próprio acesso de administrador é impedida no Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-admin-team.mjs",
           "check": "Empresas são cadastradas, ativadas e definidas como padrão; o Go conserva uma única padrão e impede inativá-la",
           "endpoints": [
             "GET /api/me"
@@ -1506,7 +2068,28 @@
         },
         {
           "scenario": "frontend-v0-cgnat-legal.mjs",
+          "check": "Encerramento preserva rastreabilidade histórica e o Go impede apagar blocos usados por planos encerrados",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cgnat-legal.mjs",
           "check": "Consulta legal aplica fuso explícito, IP/porta e referência auditada; CSV e impressão isolada contêm o mesmo resultado",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cgnat-legal.mjs",
+          "check": "Consulta direta de IP usa sessões históricas sem exigir porta CGNAT",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cgnat-legal.mjs",
+          "check": "Consulta IPv6 preserva titularidade após liberação, mostra limites do histórico e não afirma sessão física",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1660,7 +2243,7 @@
         },
         {
           "scenario": "frontend-v0-evolution.mjs",
-          "check": "Portas PON: 3 porta(s) derivadas das ONUs e descobertas; assinantes da porta abertos pela tela do v0",
+          "check": "Portas PON: 0 porta(s) derivadas das ONUs e descobertas; assinantes da porta abertos pela tela do v0",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1682,6 +2265,13 @@
         {
           "scenario": "frontend-v0-field.mjs",
           "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Atribuição e agendamento persistem no Go, com conversão correta do horário local",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1710,6 +2300,34 @@
         {
           "scenario": "frontend-v0-field.mjs",
           "check": "Auxiliar adicionado/removido e checklist concluído com registro do autor",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Go rejeita saída sem saldo e devolução superior ao consumo da OS sem alterar o estoque",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Material lançado, devolvido e kit aplicado com saldos reais e históricos preservados",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Instalação por série vincula equipamento ao contrato em comodato",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Espera, reagendamento, deslocamento, execução e conclusão registram datas; OS finalizada preserva anotações sem reabrir controles",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1785,8 +2403,22 @@
           ]
         },
         {
+          "scenario": "frontend-v0-financial-connections.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"cadastro pela interface persiste conexão pendente\",\"segredo não retorna nem cifrado na listagem\",\"ativação sandbox, troca de padrão e desativação confirmadas no backend\",\"reload preserva estado; componentes oficiais e API reais\",\"cofre pela UI persiste certificado sintético e versão; segredo não retorna nem fica no armazenamento do navegador\"],\"connection\":\"dd8a22ab-0aba-49eb-a951-90b3140309b6\"}",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
           "scenario": "frontend-v0-ftth.mjs",
           "check": "Cadastro CEO/CTO, coordenadas em conjunto, hierarquia, OLT/PON e edição persistem no Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth.mjs",
+          "check": "Reserva e vínculo a contrato ocupam portas reais; o Go impede ocupação concorrente da mesma porta",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1799,8 +2431,71 @@
           ]
         },
         {
+          "scenario": "frontend-v0-ftth.mjs",
+          "check": "Go bloqueia ciclos de hierarquia e exclusão de caixa com derivadas",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth.mjs",
+          "check": "Caixas sem dependências podem ser excluídas; consulta preserva isolamento por provedor",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
           "scenario": "frontend-v0-import.mjs",
           "check": "CSV é lido, campos e plano são mapeados; prévia valida erros e senha ausente sem gravar assinantes e exige nova simulação após alterar mapa",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-import.mjs",
+          "check": "Aplicação grava somente linhas válidas e registra lote/avisos; contas importadas ficam sem provisionamento e conta sem senha continua bloqueada",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-import.mjs",
+          "check": "Provisionamento explícito solicita operação somente para conta com senha; reimportação da mesma origem não duplica assinantes nem contas",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-import.mjs",
+          "check": "Títulos importados preservam centavos, pagamento parcial e cancelamento; titular inexistente é erro explícito e título aberto não recebe cobrança automática",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-import.mjs",
+          "check": "Histórico mantém datas originais, importa atendimento/OS/anotação sem abrir SLA nem disparar avisos e não duplica registros na reimportação",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-import.mjs",
+          "check": "Motivo obrigatório, confirmação por teclado e bloqueio real do POST preservam a fatura; a elegibilidade antiga não compensa",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-import.mjs",
+          "check": "Resposta desconhecida reenvia a mesma chave; o POST real grava uma compensação, a repetição não lança outro estorno e o lote committed não oferece nova ação",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-import.mjs",
+          "check": "POST commitado com resposta perdida recupera a compensação pela leitura da ficha, sem segunda reversão nem nova ação",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1815,6 +2510,34 @@
         {
           "scenario": "frontend-v0-integrations.mjs",
           "check": "Token criado na UI aparece uma vez, autentica a API pública e respeita escopo, validade e limite de chamadas do Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-integrations.mjs",
+          "check": "Revogação confirmada invalida imediatamente o token na API pública",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-integrations.mjs",
+          "check": "Destino criado envia evento assinado real ao receptor local e distingue HTTP 200 de falha HTTP 500",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-integrations.mjs",
+          "check": "Rotação mostra novo segredo uma vez; edição, pausa e ativação conservam a assinatura correta no próximo teste",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-integrations.mjs",
+          "check": "Exclusão confirmada remove destino e histórico; outro provedor não pode excluir o webhook",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1848,6 +2571,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-ipam.mjs",
+          "check": "Liberação de prefixo e endereços atualiza a ocupação e permite excluir blocos sem vínculos",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
           "scenario": "frontend-v0-maintenance.mjs",
           "check": "Cadastro, edição, normalização de UF e ativação/inativação de POP persistem no Go",
           "endpoints": [
@@ -1857,6 +2587,20 @@
         {
           "scenario": "frontend-v0-maintenance.mjs",
           "check": "Manutenção valida intervalo, grava público por concentrador e calcula dois assinantes atingidos no Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-maintenance.mjs",
+          "check": "Avisos de início e normalização exigem confirmação e consentimento; somente o contato sintético autorizado entra na fila do canal local",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-maintenance.mjs",
+          "check": "Cancelamento retira o aviso do portal e a consulta mantém a apresentação no celular",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1877,7 +2621,21 @@
         },
         {
           "scenario": "frontend-v0-map.mjs",
+          "check": "Mapa e lista consultam contratos, POPs e caixas com coordenadas reais; caixa abre a ocupação de portas",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-map.mjs",
           "check": "Clique no mapa move o contrato com coordenadas exatas e confirmação do Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-map.mjs",
+          "check": "Remoção de coordenadas exige confirmação; camadas e situação alteram a consulta sem inventar pontos",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1892,6 +2650,20 @@
         {
           "scenario": "frontend-v0-messages.mjs",
           "check": "Canal guarda autorização sem expô-la e envia teste com campos corretos; ativação usa o backend",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-messages.mjs",
+          "check": "Modelo com variáveis é criado e a prévia ilustrativa é renderizada pelo Go sem disparar mensagens",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-messages.mjs",
+          "check": "Régua filtra plano e data, respeita consentimento e não repete envio do mesmo título/regra; modelo em uso não é excluído",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1926,7 +2698,7 @@
         },
         {
           "scenario": "frontend-v0-network-sites.mjs",
-          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1934,6 +2706,62 @@
         {
           "scenario": "frontend-v0-network.mjs",
           "check": "Agente criado no Go; token e chave pública exibidos na emissão, sem token na consulta posterior",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network.mjs",
+          "check": "Rotação invalida token anterior; revogação bloqueia o agente; hello e sincronização sintéticos registram versão e contato após reativação",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network.mjs",
+          "check": "Equipamento usa agente e referência local reais; ausência de telemetria permanece explícita e sem incidente demonstrativo",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network.mjs",
+          "check": "Parâmetros e manutenção são gravados no Go; mudanças de intenção não são apresentadas como confirmação do NAS",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network.mjs",
+          "check": "Concentrador emite segredo mesmo com falha de atualização do inventário; instruções posteriores não recuperam o segredo",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network.mjs",
+          "check": "Rotação do segredo exige confirmação e emite outro valor apenas na janela de emissão",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network.mjs",
+          "check": "Edição do NAS integrado altera fabricante e destino de CoA pelo PATCH do Go e pede nova aplicação das instruções",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network.mjs",
+          "check": "Go bloqueia conversão com operação em aberto; relato sintético encerra a tentativa sem acessar NAS físico",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network.mjs",
+          "check": "Reaplicação solicita uma conta sem pendência e ignora conta já em operação; conversão preserva a conta e emite configuração integrada sem afirmar conectividade física",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1975,6 +2803,13 @@
         },
         {
           "scenario": "frontend-v0-optical.mjs",
+          "check": "Relato sintético da tentativa confirma versão e potências; reaplicação solicita nova operação sem alegar homologação física",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-optical.mjs",
           "check": "NOC consulta contadores, alertas e PON reais; limiares são definidos pelo provedor e gravados pelo Go",
           "endpoints": [
             "GET /api/me"
@@ -1983,6 +2818,13 @@
         {
           "scenario": "frontend-v0-optical.mjs",
           "check": "Diagnóstico apresenta conclusão, limites e evidências datadas do Go sem executar teste remoto",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-optical.mjs",
+          "check": "Desautorização exige confirmação e só permite substituição após ausência confirmada pela OLT sintética",
           "endpoints": [
             "GET /api/me"
           ]
@@ -2017,7 +2859,7 @@
         },
         {
           "scenario": "frontend-v0-os-quotations.mjs",
-          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque.",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque e exportação CSV comparativa concluída.",
           "endpoints": [
             "GET /api/me"
           ]
@@ -2093,6 +2935,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-provider-refunds.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"API preserves nominal, net receipt and residual after synthetic partial/full provider refunds\",\"Official UI distinguishes partial refund from full reversal after reload\",\"Provider receipts never expose the manual reversal action\"],\"fixture\":\"synthetic owner data; no real PSP\"}",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
           "scenario": "frontend-v0-quality.mjs",
           "check": "Catálogo criado, renomeado e desativado/reativado; seleções operacionais respeitam itens ativos",
           "endpoints": [
@@ -2102,6 +2951,27 @@
         {
           "scenario": "frontend-v0-quality.mjs",
           "check": "SLA com tipo, prioridade e escalonamento aplica prazo real ao atendimento; edição, ativação e relatório preservam política em uso",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-quality.mjs",
+          "check": "SLA de OS aceita filtro por natureza e exclusão confirmada apenas quando não utilizado",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-quality.mjs",
+          "check": "Definições de campo conservam tipo e identificador; opções, ordem, valores e ativação usam o Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-quality.mjs",
+          "check": "Kit criado na UI exclui itens serializados; aplicação em OS baixa quantidades reais do estoque e conserva ativação",
           "endpoints": [
             "GET /api/me"
           ]
@@ -2143,6 +3013,55 @@
         },
         {
           "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-desktop-claro",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-desktop-escuro",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-celular",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: ficha-alerta-multiplos-contratos",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-vazio",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-erro",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "R02: arquivamento atualiza também o alerta global da ficha",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
           "check": "R04: indicação cadastrada pela interface, persistida e apresentada no relatório real",
           "endpoints": [
             "GET /api/me"
@@ -2158,6 +3077,13 @@
         {
           "scenario": "frontend-v0-remediation.mjs",
           "check": "R04: remoção da indicação pela interface preserva o contrato",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "R04/BE-27: exclusão global de etiqueta confirmada e persistida",
           "endpoints": [
             "GET /api/me"
           ]
@@ -2213,6 +3139,20 @@
         },
         {
           "scenario": "frontend-v0-saas.mjs",
+          "check": "Nome e módulos são atualizados na plataforma; o Go libera CRM e campo e conserva NOC bloqueado",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-saas.mjs",
+          "check": "Suspensão confirmada impede acesso e login; reativação restaura autenticação do administrador",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-saas.mjs",
           "check": "Entrada de suporte exige motivo, identifica o contexto e audita ações; saída restaura a plataforma sem permitir gestão SaaS dentro do provedor",
           "endpoints": [
             "POST /api/support/exit",
@@ -2242,7 +3182,42 @@
         },
         {
           "scenario": "frontend-v0-stock.mjs",
+          "check": "Entradas, saídas e ajuste com sinal preservam os três movimentos e saldo calculado pelo Go",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-stock.mjs",
+          "check": "Edição, ativação e mínimo persistem; Go bloqueia mudar serialização após movimento",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-stock.mjs",
+          "check": "Lote normaliza séries no Go e duplicidade desfaz toda a entrada, sem unidade ou saldo parcial",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-stock.mjs",
+          "check": "Distribuição ao técnico e retorno ao almoxarifado preservam saldo e atualizam custódia",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-stock.mjs",
           "check": "Contrato mostra série, comodato e OS; retirada confirmada devolve a unidade ao saldo e encerra a pendência de recolhimento",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-stock.mjs",
+          "check": "Defeito e conserto mantêm a unidade rastreável; baixa exige motivo, reduz saldo e não pode ser desfeita",
           "endpoints": [
             "GET /api/me"
           ]
@@ -2264,6 +3239,27 @@
         {
           "scenario": "frontend-v0-stock.mjs",
           "check": "Erro na consulta de estoque não introduz catálogo ou saldos demonstrativos",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Seleção pessoal da Visão geral oculta bloco opcional e persiste após recarga sem afetar prioridades nem indicadores; restauração restabelece os blocos autorizados",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Logout e novo login com outra conta no mesmo contexto isola preferências por escopo de sessão e restringe widgets e favoritos sem permissão",
           "endpoints": [
             "GET /api/me"
           ]
@@ -2644,7 +3640,7 @@
         },
         {
           "scenario": "frontend-v0-evolution.mjs",
-          "check": "Portas PON: 3 porta(s) derivadas das ONUs e descobertas; assinantes da porta abertos pela tela do v0",
+          "check": "Portas PON: 0 porta(s) derivadas das ONUs e descobertas; assinantes da porta abertos pela tela do v0",
           "endpoints": [
             "GET /api/today"
           ]
@@ -2767,6 +3763,13 @@
         {
           "scenario": "frontend-v0-finance.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Geração pela UI repetida preserva uma mensalidade por contrato/competência\",\"Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor\",\"Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento\",\"Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI\",\"Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos\",\"Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada\",\"Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido\",\"Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go\",\"Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis\",\"Faturas isoladas entre provedores e ações financeiras restritas pelo perfil\"]}",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-financial-connections.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"cadastro pela interface persiste conexão pendente\",\"segredo não retorna nem cifrado na listagem\",\"ativação sandbox, troca de padrão e desativação confirmadas no backend\",\"reload preserva estado; componentes oficiais e API reais\",\"cofre pela UI persiste certificado sintético e versão; segredo não retorna nem fica no armazenamento do navegador\"],\"connection\":\"dd8a22ab-0aba-49eb-a951-90b3140309b6\"}",
           "endpoints": [
             "GET /api/today"
           ]
@@ -2913,7 +3916,7 @@
         },
         {
           "scenario": "frontend-v0-network-sites.mjs",
-          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
           "endpoints": [
             "GET /api/today"
           ]
@@ -3004,7 +4007,7 @@
         },
         {
           "scenario": "frontend-v0-os-quotations.mjs",
-          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque.",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque e exportação CSV comparativa concluída.",
           "endpoints": [
             "GET /api/today"
           ]
@@ -3019,6 +4022,13 @@
         {
           "scenario": "frontend-v0-portal.mjs",
           "check": "Aceite autenticado registra texto e prova com hashes conferidos; comprovante na ficha imprime somente o documento, sem executar texto informado",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-provider-refunds.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"API preserves nominal, net receipt and residual after synthetic partial/full provider refunds\",\"Official UI distinguishes partial refund from full reversal after reload\",\"Provider receipts never expose the manual reversal action\"],\"fixture\":\"synthetic owner data; no real PSP\"}",
           "endpoints": [
             "GET /api/today"
           ]
@@ -3068,6 +4078,54 @@
         {
           "scenario": "frontend-v0-remediation.mjs",
           "check": "R02: alerta aparece pela lista e URL direta na aba inicial; anotação comum não vira alerta",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-desktop-claro",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-desktop-escuro",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-celular",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: ficha-alerta-multiplos-contratos",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-vazio",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-erro",
           "endpoints": [
             "GET /api/dashboard",
             "GET /api/today"
@@ -3220,6 +4278,30 @@
           ]
         },
         {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Seleção pessoal da Visão geral oculta bloco opcional e persiste após recarga sem afetar prioridades nem indicadores; restauração restabelece os blocos autorizados",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Logout e novo login com outra conta no mesmo contexto isola preferências por escopo de sessão e restringe widgets e favoritos sem permissão",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
           "scenario": "frontend-v0-workspace.mjs",
           "check": "Contas sintéticas só aparecem com health.demo; preencher uma conta não cria sessão nem contorna o login Go",
           "endpoints": [
@@ -3296,6 +4378,20 @@
         {
           "scenario": "frontend-v0-saas.mjs",
           "check": "Entrada de suporte exige motivo, identifica o contexto e audita ações; saída restaura a plataforma sem permitir gestão SaaS dentro do provedor",
+          "endpoints": [
+            "GET /api/dashboard/panels"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "GET /api/dashboard/panels"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Seleção pessoal da Visão geral oculta bloco opcional e persiste após recarga sem afetar prioridades nem indicadores; restauração restabelece os blocos autorizados",
           "endpoints": [
             "GET /api/dashboard/panels"
           ]
@@ -3466,6 +4562,48 @@
         },
         {
           "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-desktop-claro",
+          "endpoints": [
+            "GET /api/subscribers"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-desktop-escuro",
+          "endpoints": [
+            "GET /api/subscribers"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-celular",
+          "endpoints": [
+            "GET /api/subscribers"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: ficha-alerta-multiplos-contratos",
+          "endpoints": [
+            "GET /api/subscribers"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-vazio",
+          "endpoints": [
+            "GET /api/subscribers"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-erro",
+          "endpoints": [
+            "GET /api/subscribers"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
           "check": "R04: indicação cadastrada pela interface, persistida e apresentada no relatório real",
           "endpoints": [
             "GET /api/subscribers"
@@ -3595,6 +4733,13 @@
         },
         {
           "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: ficha-alerta-multiplos-contratos",
+          "endpoints": [
+            "GET /api/subscribers/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
           "check": "R04: indicação cadastrada pela interface, persistida e apresentada no relatório real",
           "endpoints": [
             "GET /api/subscribers/:id"
@@ -3715,6 +4860,13 @@
         {
           "scenario": "frontend-v0-remediation.mjs",
           "check": "R02: alerta aparece pela lista e URL direta na aba inicial; anotação comum não vira alerta",
+          "endpoints": [
+            "GET /api/subscribers/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: ficha-alerta-multiplos-contratos",
           "endpoints": [
             "GET /api/subscribers/:id"
           ]
@@ -3912,6 +5064,13 @@
         },
         {
           "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: ficha-alerta-multiplos-contratos",
+          "endpoints": [
+            "GET /api/subscribers/:id/notes"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
           "check": "R02: arquivamento atualiza também o alerta global da ficha",
           "endpoints": [
             "GET /api/subscribers/:id/notes",
@@ -4028,6 +5187,13 @@
         {
           "scenario": "frontend-v0-remediation.mjs",
           "check": "R02: alerta aparece pela lista e URL direta na aba inicial; anotação comum não vira alerta",
+          "endpoints": [
+            "GET /api/subscribers/:id/timeline"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: ficha-alerta-multiplos-contratos",
           "endpoints": [
             "GET /api/subscribers/:id/timeline"
           ]
@@ -4323,7 +5489,7 @@
         },
         {
           "scenario": "frontend-v0-remediation.mjs",
-          "check": "R04/BE-05: prospecto convertido para assinante existente sem duplicar cadastro",
+          "check": "R04/BE-27: exclusão global de etiqueta confirmada e persistida",
           "endpoints": [
             "GET /api/plans"
           ]
@@ -4352,6 +5518,13 @@
         {
           "scenario": "frontend-v0-stock.mjs",
           "check": "Contrato mostra série, comodato e OS; retirada confirmada devolve a unidade ao saldo e encerra a pendência de recolhimento",
+          "endpoints": [
+            "GET /api/plans"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
           "endpoints": [
             "GET /api/plans"
           ]
@@ -4532,6 +5705,13 @@
         {
           "scenario": "frontend-v0-finance-access.mjs",
           "check": "Confiança concedida pela equipe registra autor, dias e motivo; liberação ativa impede suspensão por cobrança e o Go rejeita repetição",
+          "endpoints": [
+            "GET /api/addons"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-finance-access.mjs",
+          "check": "(sem verificação posterior)",
           "endpoints": [
             "GET /api/addons"
           ]
@@ -4803,7 +5983,7 @@
         },
         {
           "scenario": "frontend-v0-remediation.mjs",
-          "check": "R04/BE-05: prospecto convertido para assinante existente sem duplicar cadastro",
+          "check": "R04/BE-27: exclusão global de etiqueta confirmada e persistida",
           "endpoints": [
             "GET /api/contracts"
           ]
@@ -4825,6 +6005,13 @@
         {
           "scenario": "frontend-v0-stock.mjs",
           "check": "Contrato mostra série, comodato e OS; retirada confirmada devolve a unidade ao saldo e encerra a pendência de recolhimento",
+          "endpoints": [
+            "GET /api/contracts"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
           "endpoints": [
             "GET /api/contracts"
           ]
@@ -5028,7 +6215,7 @@
         },
         {
           "scenario": "frontend-v0-remediation.mjs",
-          "check": "R04/BE-05: prospecto convertido para assinante existente sem duplicar cadastro",
+          "check": "R04/BE-27: exclusão global de etiqueta confirmada e persistida",
           "endpoints": [
             "GET /api/contracts/:id"
           ]
@@ -5230,6 +6417,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-finance-access.mjs",
+          "check": "(sem verificação posterior)",
+          "endpoints": [
+            "GET /api/contracts/:id/states"
+          ]
+        },
+        {
           "scenario": "frontend-v0-finance.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Geração pela UI repetida preserva uma mensalidade por contrato/competência\",\"Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor\",\"Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento\",\"Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI\",\"Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos\",\"Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada\",\"Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido\",\"Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go\",\"Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis\",\"Faturas isoladas entre provedores e ações financeiras restritas pelo perfil\"]}",
           "endpoints": [
@@ -5274,6 +6468,13 @@
         {
           "scenario": "frontend-v0-remediation.mjs",
           "check": "R02: alerta aparece pela lista e URL direta na aba inicial; anotação comum não vira alerta",
+          "endpoints": [
+            "GET /api/contracts/:id/states"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: ficha-alerta-multiplos-contratos",
           "endpoints": [
             "GET /api/contracts/:id/states"
           ]
@@ -5484,7 +6685,7 @@
         },
         {
           "scenario": "frontend-v0-network-sites.mjs",
-          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
           "endpoints": [
             "GET /api/pops"
           ]
@@ -5603,6 +6804,20 @@
         {
           "scenario": "frontend-v0-finance.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Geração pela UI repetida preserva uma mensalidade por contrato/competência\",\"Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor\",\"Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento\",\"Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI\",\"Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos\",\"Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada\",\"Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido\",\"Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go\",\"Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis\",\"Faturas isoladas entre provedores e ações financeiras restritas pelo perfil\"]}",
+          "endpoints": [
+            "GET /api/companies"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-financial-connections.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"cadastro pela interface persiste conexão pendente\",\"segredo não retorna nem cifrado na listagem\",\"ativação sandbox, troca de padrão e desativação confirmadas no backend\",\"reload preserva estado; componentes oficiais e API reais\",\"cofre pela UI persiste certificado sintético e versão; segredo não retorna nem fica no armazenamento do navegador\"],\"connection\":\"dd8a22ab-0aba-49eb-a951-90b3140309b6\"}",
+          "endpoints": [
+            "GET /api/companies"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-provider-refunds.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"API preserves nominal, net receipt and residual after synthetic partial/full provider refunds\",\"Official UI distinguishes partial refund from full reversal after reload\",\"Provider receipts never expose the manual reversal action\"],\"fixture\":\"synthetic owner data; no real PSP\"}",
           "endpoints": [
             "GET /api/companies"
           ]
@@ -5817,7 +7032,7 @@
         },
         {
           "scenario": "frontend-v0-remediation.mjs",
-          "check": "R04/BE-05: prospecto convertido para assinante existente sem duplicar cadastro",
+          "check": "R04/BE-27: exclusão global de etiqueta confirmada e persistida",
           "endpoints": [
             "GET /api/contracts/:id/addons"
           ]
@@ -6243,7 +7458,7 @@
         },
         {
           "scenario": "frontend-v0-remediation.mjs",
-          "check": "R04/BE-05: prospecto convertido para assinante existente sem duplicar cadastro",
+          "check": "R04/BE-27: exclusão global de etiqueta confirmada e persistida",
           "endpoints": [
             "GET /api/contracts/:id"
           ]
@@ -6554,6 +7769,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-admin-reports.mjs",
+          "check": "Coleta respeita isolamento por provedor e configuração de qualidade permanece acessível no celular",
+          "endpoints": [
+            "GET /api/tickets/:id"
+          ]
+        },
+        {
           "scenario": "frontend-v0-create-links.mjs",
           "check": "Diálogo aberto por /atendimentos/novo-atendimento em /atendimentos",
           "endpoints": [
@@ -6598,6 +7820,13 @@
         },
         {
           "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: ficha-alerta-multiplos-contratos",
+          "endpoints": [
+            "GET /api/tickets"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
           "check": "R02: arquivamento atualiza também o alerta global da ficha",
           "endpoints": [
             "GET /api/tickets"
@@ -6614,6 +7843,27 @@
         {
           "scenario": "frontend-v0-saas.mjs",
           "check": "Entrada de suporte exige motivo, identifica o contexto e audita ações; saída restaura a plataforma sem permitir gestão SaaS dentro do provedor",
+          "endpoints": [
+            "GET /api/tickets"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "GET /api/tickets"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Seleção pessoal da Visão geral oculta bloco opcional e persiste após recarga sem afetar prioridades nem indicadores; restauração restabelece os blocos autorizados",
+          "endpoints": [
+            "GET /api/tickets"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Logout e novo login com outra conta no mesmo contexto isola preferências por escopo de sessão e restringe widgets e favoritos sem permissão",
           "endpoints": [
             "GET /api/tickets"
           ]
@@ -6749,6 +7999,13 @@
       ],
       "not_exercised_by_interface": [],
       "checks": [
+        {
+          "scenario": "frontend-v0-admin-reports.mjs",
+          "check": "Coleta respeita isolamento por provedor e configuração de qualidade permanece acessível no celular",
+          "endpoints": [
+            "GET /api/tickets/:id"
+          ]
+        },
         {
           "scenario": "frontend-v0-crm.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Prospecto valida contato obrigatório no Go; cadastro, edição e ficha usam UUID real\",\"Etapas, motivo da perda, retomada e contato persistidos com histórico\",\"Conversão cria assinante relacionado ao prospecto, marca ganho e abre a ficha\",\"Protocolo com titular/contrato/prioridade e mensagem inicial, sem incidente fictício ou SLA presumido\",\"Responsável atribuído; nota interna e resposta pública preservam visibilidade e estado do protocolo\",\"OS real criada pelo atendimento, preservando protocolo, titular, contrato e endereço informado\",\"Encerramento e reabertura persistidos; URL restaura a ficha após recarregar\",\"Fila do titular abre o mesmo protocolo e fecha preservando a ficha do assinante\",\"Busca e exportação reais de atendimentos; relatório CRM por período carrega dados do Go\",\"Prospectos usam paginação do servidor e busca reinicia a página sem navegação tardia\",\"Nota interna permanece ausente no portal; perfil financeiro não oferece ações de equipe técnica\",\"Prospectos e protocolos isolados entre provedores\"]}",
@@ -6974,6 +8231,13 @@
         },
         {
           "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: ficha-alerta-multiplos-contratos",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
           "check": "R02: arquivamento atualiza também o alerta global da ficha",
           "endpoints": [
             "GET /api/work-orders"
@@ -7042,6 +8306,13 @@
       ],
       "not_exercised_by_interface": [],
       "checks": [
+        {
+          "scenario": "frontend-v0-admin-reports.mjs",
+          "check": "Coleta respeita isolamento por provedor e configuração de qualidade permanece acessível no celular",
+          "endpoints": [
+            "GET /api/staff"
+          ]
+        },
         {
           "scenario": "frontend-v0-create-links.mjs",
           "check": "Diálogo aberto por /ordens-de-servico/nova-os em /ordens-de-servico",
@@ -7574,6 +8845,13 @@
         },
         {
           "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: ficha-alerta-multiplos-contratos",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
           "check": "R02: arquivamento atualiza também o alerta global da ficha",
           "endpoints": [
             "GET /api/work-orders"
@@ -7652,6 +8930,20 @@
           ]
         },
         {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "GET /api/agenda"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Seleção pessoal da Visão geral oculta bloco opcional e persiste após recarga sem afetar prioridades nem indicadores; restauração restabelece os blocos autorizados",
+          "endpoints": [
+            "GET /api/agenda"
+          ]
+        },
+        {
           "scenario": "frontend-v0-workspace.mjs",
           "check": "Contas sintéticas só aparecem com health.demo; preencher uma conta não cria sessão nem contorna o login Go",
           "endpoints": [
@@ -7699,13 +8991,6 @@
         {
           "scenario": "frontend-v0-evolution.mjs",
           "check": "Estoque: depósito, fornecedor e pedido de compra pela interface; recebimento gera entrada no depósito e a transferência move o saldo para o principal",
-          "endpoints": [
-            "GET /api/stock/items"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-evolution.mjs",
-          "check": "(sem verificação posterior)",
           "endpoints": [
             "GET /api/stock/items"
           ]
@@ -7810,7 +9095,7 @@
         },
         {
           "scenario": "frontend-v0-os-quotations.mjs",
-          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque.",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque e exportação CSV comparativa concluída.",
           "endpoints": [
             "GET /api/stock/items"
           ]
@@ -7913,13 +9198,6 @@
         {
           "scenario": "frontend-v0-evolution.mjs",
           "check": "Estoque: depósito, fornecedor e pedido de compra pela interface; recebimento gera entrada no depósito e a transferência move o saldo para o principal",
-          "endpoints": [
-            "GET /api/stock/items/:id/movements"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-evolution.mjs",
-          "check": "(sem verificação posterior)",
           "endpoints": [
             "GET /api/stock/items/:id/movements"
           ]
@@ -8055,13 +9333,6 @@
           ]
         },
         {
-          "scenario": "frontend-v0-evolution.mjs",
-          "check": "(sem verificação posterior)",
-          "endpoints": [
-            "GET /api/stock/items/:id/balances"
-          ]
-        },
-        {
           "scenario": "frontend-v0-os-quotations.mjs",
           "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque e exportação CSV comparativa concluída.",
           "endpoints": [
@@ -8070,7 +9341,7 @@
         },
         {
           "scenario": "frontend-v0-os-quotations.mjs",
-          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque.",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque e exportação CSV comparativa concluída.",
           "endpoints": [
             "GET /api/stock/warehouses"
           ]
@@ -8128,7 +9399,7 @@
         },
         {
           "scenario": "frontend-v0-os-quotations.mjs",
-          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque.",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque e exportação CSV comparativa concluída.",
           "endpoints": [
             "GET /api/stock/suppliers"
           ]
@@ -8155,8 +9426,7 @@
           "check": "Empresa do contrato usa cadastro real e filtro de faturas conserva o vínculo na URL",
           "endpoints": [
             "GET /api/invoices",
-            "GET /api/finance/summary",
-            "GET /api/finance/monthly"
+            "GET /api/finance/summary"
           ]
         },
         {
@@ -8172,8 +9442,7 @@
           "check": "Diálogo aberto por /financeiro/faturas/gerar-mensalidades-por-competencia em /financeiro/faturas",
           "endpoints": [
             "GET /api/invoices",
-            "GET /api/finance/summary",
-            "GET /api/finance/monthly"
+            "GET /api/finance/summary"
           ]
         },
         {
@@ -8189,8 +9458,15 @@
           "check": "{\"ok\":true,\"checks\":[\"Geração pela UI repetida preserva uma mensalidade por contrato/competência\",\"Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor\",\"Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento\",\"Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI\",\"Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos\",\"Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada\",\"Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido\",\"Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go\",\"Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis\",\"Faturas isoladas entre provedores e ações financeiras restritas pelo perfil\"]}",
           "endpoints": [
             "GET /api/invoices",
-            "GET /api/finance/summary",
-            "GET /api/finance/monthly"
+            "GET /api/finance/summary"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-provider-refunds.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"API preserves nominal, net receipt and residual after synthetic partial/full provider refunds\",\"Official UI distinguishes partial refund from full reversal after reload\",\"Provider receipts never expose the manual reversal action\"],\"fixture\":\"synthetic owner data; no real PSP\"}",
+          "endpoints": [
+            "GET /api/invoices",
+            "GET /api/finance/summary"
           ]
         },
         {
@@ -8198,13 +9474,36 @@
           "check": "R04/BE-09: filtros de carteira e empresa na exportação contábil chegam ao Go",
           "endpoints": [
             "GET /api/invoices",
-            "GET /api/finance/summary",
-            "GET /api/finance/monthly"
+            "GET /api/finance/summary"
           ]
         },
         {
           "scenario": "frontend-v0-saas.mjs",
           "check": "Entrada de suporte exige motivo, identifica o contexto e audita ações; saída restaura a plataforma sem permitir gestão SaaS dentro do provedor",
+          "endpoints": [
+            "GET /api/finance/summary",
+            "GET /api/finance/monthly"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "GET /api/finance/summary",
+            "GET /api/finance/monthly"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Seleção pessoal da Visão geral oculta bloco opcional e persiste após recarga sem afetar prioridades nem indicadores; restauração restabelece os blocos autorizados",
+          "endpoints": [
+            "GET /api/finance/summary",
+            "GET /api/finance/monthly"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Logout e novo login com outra conta no mesmo contexto isola preferências por escopo de sessão e restringe widgets e favoritos sem permissão",
           "endpoints": [
             "GET /api/finance/summary",
             "GET /api/finance/monthly"
@@ -8296,6 +9595,14 @@
         {
           "scenario": "frontend-v0-finance.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Geração pela UI repetida preserva uma mensalidade por contrato/competência\",\"Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor\",\"Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento\",\"Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI\",\"Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos\",\"Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada\",\"Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido\",\"Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go\",\"Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis\",\"Faturas isoladas entre provedores e ações financeiras restritas pelo perfil\"]}",
+          "endpoints": [
+            "GET /api/invoices/:id",
+            "GET /api/invoices/:id/due"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-provider-refunds.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"API preserves nominal, net receipt and residual after synthetic partial/full provider refunds\",\"Official UI distinguishes partial refund from full reversal after reload\",\"Provider receipts never expose the manual reversal action\"],\"fixture\":\"synthetic owner data; no real PSP\"}",
           "endpoints": [
             "GET /api/invoices/:id",
             "GET /api/invoices/:id/due"
@@ -8453,6 +9760,13 @@
         {
           "scenario": "frontend-v0-remediation.mjs",
           "check": "R02: alerta aparece pela lista e URL direta na aba inicial; anotação comum não vira alerta",
+          "endpoints": [
+            "GET /api/contracts/:id/finance"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: ficha-alerta-multiplos-contratos",
           "endpoints": [
             "GET /api/contracts/:id/finance"
           ]
@@ -9019,6 +10333,20 @@
         {
           "scenario": "frontend-v0-saas.mjs",
           "check": "Entrada de suporte exige motivo, identifica o contexto e audita ações; saída restaura a plataforma sem permitir gestão SaaS dentro do provedor",
+          "endpoints": [
+            "GET /api/network/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "GET /api/network/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Seleção pessoal da Visão geral oculta bloco opcional e persiste após recarga sem afetar prioridades nem indicadores; restauração restabelece os blocos autorizados",
           "endpoints": [
             "GET /api/network/health"
           ]
@@ -9606,6 +10934,13 @@
         },
         {
           "scenario": "frontend-v0-access.mjs",
+          "check": "Relatos sintéticos do agente alimentam sessão, consumo mensal, exportação, séries e disponibilidade sem estimar tráfego ausente",
+          "endpoints": [
+            "GET /api/network/online"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-access.mjs",
           "check": "Consulta de sessão observada permite busca, CSV e desconexão selecionada com motivo registrado no Go",
           "endpoints": [
             "GET /api/network/online",
@@ -9966,7 +11301,7 @@
       "checks": [
         {
           "scenario": "frontend-v0-evolution.mjs",
-          "check": "Portas PON: 3 porta(s) derivadas das ONUs e descobertas; assinantes da porta abertos pela tela do v0",
+          "check": "Portas PON: 0 porta(s) derivadas das ONUs e descobertas; assinantes da porta abertos pela tela do v0",
           "endpoints": [
             "GET /api/olt/pon-ports"
           ]
@@ -10647,7 +11982,7 @@
         },
         {
           "scenario": "frontend-v0-cgnat-legal.mjs",
-          "check": "Consulta IPv6 expõe o prefixo cadastrado e a limitação histórica existente em vez de presumir titulares anteriores",
+          "check": "Consulta IPv6 preserva titularidade após liberação, mostra limites do histórico e não afirma sessão física",
           "endpoints": [
             "POST /api/legal/ip-lookup"
           ]
@@ -10681,7 +12016,7 @@
         },
         {
           "scenario": "frontend-v0-cgnat-legal.mjs",
-          "check": "Consulta IPv6 expõe o prefixo cadastrado e a limitação histórica existente em vez de presumir titulares anteriores",
+          "check": "Consulta IPv6 preserva titularidade após liberação, mostra limites do histórico e não afirma sessão física",
           "endpoints": [
             "POST /api/legal/ip-lookup"
           ]
@@ -11040,6 +12375,20 @@
           ]
         },
         {
+          "scenario": "frontend-v0-financial-connections.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"cadastro pela interface persiste conexão pendente\",\"segredo não retorna nem cifrado na listagem\",\"ativação sandbox, troca de padrão e desativação confirmadas no backend\",\"reload preserva estado; componentes oficiais e API reais\",\"cofre pela UI persiste certificado sintético e versão; segredo não retorna nem fica no armazenamento do navegador\"],\"connection\":\"dd8a22ab-0aba-49eb-a951-90b3140309b6\"}",
+          "endpoints": [
+            "GET /api/companies"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-provider-refunds.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"API preserves nominal, net receipt and residual after synthetic partial/full provider refunds\",\"Official UI distinguishes partial refund from full reversal after reload\",\"Provider receipts never expose the manual reversal action\"],\"fixture\":\"synthetic owner data; no real PSP\"}",
+          "endpoints": [
+            "GET /api/companies"
+          ]
+        },
+        {
           "scenario": "frontend-v0-remediation.mjs",
           "check": "R04: indicação cadastrada pela interface, persistida e apresentada no relatório real",
           "endpoints": [
@@ -11182,7 +12531,7 @@
         },
         {
           "scenario": "frontend-v0-network-sites.mjs",
-          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
           "endpoints": [
             "GET /api/pops"
           ]
@@ -12039,9 +13388,44 @@
         },
         {
           "scenario": "frontend-v0-import.mjs",
+          "check": "Motivo obrigatório, confirmação por teclado e bloqueio real do POST preservam a fatura; a elegibilidade antiga não compensa",
+          "endpoints": [
+            "POST /api/import/preview",
+            "POST /api/import/apply",
+            "GET /api/import/batches",
+            "GET /api/import/batches/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-import.mjs",
+          "check": "Resposta desconhecida reenvia a mesma chave; o POST real grava uma compensação, a repetição não lança outro estorno e o lote committed não oferece nova ação",
+          "endpoints": [
+            "GET /api/import/batches/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-import.mjs",
+          "check": "POST commitado com resposta perdida recupera a compensação pela leitura da ficha, sem segunda reversão nem nova ação",
+          "endpoints": [
+            "POST /api/import/preview",
+            "POST /api/import/apply",
+            "GET /api/import/batches",
+            "GET /api/import/batches/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-import.mjs",
+          "check": "Lote que não é de títulos recusa o POST sem apagar assinantes e a ficha não oferece compensação",
+          "endpoints": [
+            "GET /api/import/batches/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-import.mjs",
           "check": "Lotes e provisionamento respeitam isolamento e permissões; importação preserva layout do v0 no celular",
           "endpoints": [
-            "GET /api/import/batches"
+            "GET /api/import/batches",
+            "GET /api/import/batches/:id"
           ]
         }
       ]
@@ -12215,6 +13599,13 @@
         {
           "scenario": "frontend-v0-session.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Login do navegador não expõe o token da sessão no corpo; cliente de API recebe Bearer só ao pedir explicitamente\",\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
+          "endpoints": [
+            "POST /api/auth/logout"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Logout e novo login com outra conta no mesmo contexto isola preferências por escopo de sessão e restringe widgets e favoritos sem permissão",
           "endpoints": [
             "POST /api/auth/logout"
           ]
@@ -12475,6 +13866,13 @@
         },
         {
           "scenario": "frontend-v0-portal.mjs",
+          "check": "Consumo mensal exibe accounting recebido do agente; séries consultam o contrato escolhido e conservam ausência de dados explícita",
+          "endpoints": [
+            "GET /api/portal/cpe"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-portal.mjs",
           "check": "Titulares do mesmo provedor permanecem isolados em protocolos, consumo e aceite; portal abre cada seção em página própria pelo endereço do menu, recusa seção inexistente, encerra sessão e é utilizável em tela de celular",
           "endpoints": [
             "GET /api/portal/cpe"
@@ -12546,6 +13944,13 @@
         },
         {
           "scenario": "frontend-v0-portal.mjs",
+          "check": "Consumo mensal exibe accounting recebido do agente; séries consultam o contrato escolhido e conservam ausência de dados explícita",
+          "endpoints": [
+            "GET /api/portal/tickets"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-portal.mjs",
           "check": "Titulares do mesmo provedor permanecem isolados em protocolos, consumo e aceite; portal abre cada seção em página própria pelo endereço do menu, recusa seção inexistente, encerra sessão e é utilizável em tela de celular",
           "endpoints": [
             "GET /api/portal/tickets"
@@ -12605,6 +14010,13 @@
         {
           "scenario": "frontend-v0-portal.mjs",
           "check": "Confiança solicitada com confirmação respeita elegibilidade e intervalo no Go; gera intenção de reativação sem alegar execução no NAS",
+          "endpoints": [
+            "GET /api/portal/surveys"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-portal.mjs",
+          "check": "Consumo mensal exibe accounting recebido do agente; séries consultam o contrato escolhido e conservam ausência de dados explícita",
           "endpoints": [
             "GET /api/portal/surveys"
           ]
@@ -13065,6 +14477,83 @@
       "not_exercised_by_interface": [],
       "checks": [
         {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Atribuição e agendamento persistem no Go, com conversão correta do horário local",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Agenda em fuso do provedor mostra sobreposição, janela livre real, fila de espera e abre a ficha compartilhada",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Meu trabalho exibe a fila real do responsável no celular, com telefone, mapa e abertura da OS",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Fichas do titular e do contrato consultam apenas as OS do vínculo e preservam o contexto ao fechar",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Auxiliar adicionado/removido e checklist concluído com registro do autor",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Material lançado, devolvido e kit aplicado com saldos reais e históricos preservados",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Instalação por série vincula equipamento ao contrato em comodato",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Espera, reagendamento, deslocamento, execução e conclusão registram datas; OS finalizada preserva anotações sem reabrir controles",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Cancelamento exige motivo e atribuir somente responsável preserva a situação de espera",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Perfil Técnico/NOC usa sua fila pessoal; Financeiro não acessa OS nem executa comandos",
+          "endpoints": [
+            "GET /api/work-orders/:id/attachments"
+          ]
+        },
+        {
           "scenario": "frontend-v0-os-quotations.mjs",
           "check": "Anexo sintético enviado, baixado e excluído pela OS.",
           "endpoints": [
@@ -13097,7 +14586,7 @@
         },
         {
           "scenario": "frontend-v0-os-quotations.mjs",
-          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque.",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque e exportação CSV comparativa concluída.",
           "endpoints": [
             "GET /api/stock/quotations",
             "GET /api/stock/quotations/:id",
@@ -13131,6 +14620,62 @@
             "GET /api/tenant-branding",
             "GET /api/tenant-branding/logo"
           ]
+        },
+        {
+          "scenario": "frontend-v0-portal.mjs",
+          "check": "Portal consulta somente cadastro, contratos e faturas próprios; plano sem provisionamento e manutenção são apresentados sem supor conexão online",
+          "endpoints": [
+            "GET /api/tenant-branding"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-portal.mjs",
+          "check": "Fatura sem cobrança informa ausência de meio online; gateway demo exibe somente códigos reais retornados pelo Go e indicação de simulação",
+          "endpoints": [
+            "GET /api/tenant-branding"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-portal.mjs",
+          "check": "Aceite autenticado registra texto e prova com hashes conferidos; comprovante na ficha imprime somente o documento, sem executar texto informado",
+          "endpoints": [
+            "GET /api/tenant-branding"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-portal.mjs",
+          "check": "Chamado e mensagens do titular chegam ao Go; respostas públicas aparecem, notas internas permanecem ocultas e protocolo encerrado não permite nova mensagem",
+          "endpoints": [
+            "GET /api/tenant-branding"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-portal.mjs",
+          "check": "Pesquisa de OS é respondida pela UI do portal e registrada uma única vez na administração",
+          "endpoints": [
+            "GET /api/tenant-branding"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-portal.mjs",
+          "check": "Confiança solicitada com confirmação respeita elegibilidade e intervalo no Go; gera intenção de reativação sem alegar execução no NAS",
+          "endpoints": [
+            "GET /api/tenant-branding"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-portal.mjs",
+          "check": "Consumo mensal exibe accounting recebido do agente; séries consultam o contrato escolhido e conservam ausência de dados explícita",
+          "endpoints": [
+            "GET /api/tenant-branding"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-portal.mjs",
+          "check": "Titulares do mesmo provedor permanecem isolados em protocolos, consumo e aceite; portal abre cada seção em página própria pelo endereço do menu, recusa seção inexistente, encerra sessão e é utilizável em tela de celular",
+          "endpoints": [
+            "GET /api/tenant-branding"
+          ]
         }
       ]
     },
@@ -13152,6 +14697,13 @@
       "not_exercised_by_interface": [],
       "checks": [
         {
+          "scenario": "frontend-v0-maintenance.mjs",
+          "check": "Cadastro, edição, normalização de UF e ativação/inativação de POP persistem no Go",
+          "endpoints": [
+            "GET /api/network/sites"
+          ]
+        },
+        {
           "scenario": "frontend-v0-network-sites.mjs",
           "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
           "endpoints": [
@@ -13163,7 +14715,7 @@
         },
         {
           "scenario": "frontend-v0-network-sites.mjs",
-          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
           "endpoints": [
             "GET /api/network/sites",
             "GET /api/network/sites/:id",
@@ -13190,6 +14742,13 @@
           "endpoints": [
             "GET /api/stock/quotations/:id/export.csv"
           ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque e exportação CSV comparativa concluída.",
+          "endpoints": [
+            "GET /api/stock/quotations/:id/export.csv"
+          ]
         }
       ]
     },
@@ -13210,6 +14769,13 @@
           "endpoints": [
             "GET /api/network/sites/export.csv"
           ]
+        },
+        {
+          "scenario": "frontend-v0-network-sites.mjs",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
+          "endpoints": [
+            "GET /api/network/sites/export.csv"
+          ]
         }
       ]
     },
@@ -13220,6 +14786,21 @@
       "exercised_by_interface": [],
       "not_exercised_by_interface": [],
       "checks": [
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": []
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Seleção pessoal da Visão geral oculta bloco opcional e persiste após recarga sem afetar prioridades nem indicadores; restauração restabelece os blocos autorizados",
+          "endpoints": []
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Logout e novo login com outra conta no mesmo contexto isola preferências por escopo de sessão e restringe widgets e favoritos sem permissão",
+          "endpoints": []
+        },
         {
           "scenario": "frontend-v0-workspace-preferences.mjs",
           "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
@@ -13542,7 +15123,7 @@
         },
         {
           "scenario": "frontend-v0-evolution.mjs",
-          "check": "Portas PON: 3 porta(s) derivadas das ONUs e descobertas; assinantes da porta abertos pela tela do v0",
+          "check": "Portas PON: 0 porta(s) derivadas das ONUs e descobertas; assinantes da porta abertos pela tela do v0",
           "endpoints": [
             "GET /api/today"
           ]
@@ -13666,6 +15247,13 @@
         {
           "scenario": "frontend-v0-finance.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Geração pela UI repetida preserva uma mensalidade por contrato/competência\",\"Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor\",\"Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento\",\"Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI\",\"Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos\",\"Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada\",\"Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido\",\"Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go\",\"Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis\",\"Faturas isoladas entre provedores e ações financeiras restritas pelo perfil\"]}",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-financial-connections.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"cadastro pela interface persiste conexão pendente\",\"segredo não retorna nem cifrado na listagem\",\"ativação sandbox, troca de padrão e desativação confirmadas no backend\",\"reload preserva estado; componentes oficiais e API reais\",\"cofre pela UI persiste certificado sintético e versão; segredo não retorna nem fica no armazenamento do navegador\"],\"connection\":\"dd8a22ab-0aba-49eb-a951-90b3140309b6\"}",
           "endpoints": [
             "GET /api/today"
           ]
@@ -13812,7 +15400,7 @@
         },
         {
           "scenario": "frontend-v0-network-sites.mjs",
-          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo e reativação concluídos.",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
           "endpoints": [
             "GET /api/today"
           ]
@@ -13903,7 +15491,7 @@
         },
         {
           "scenario": "frontend-v0-os-quotations.mjs",
-          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque.",
+          "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque e exportação CSV comparativa concluída.",
           "endpoints": [
             "GET /api/today"
           ]
@@ -13918,6 +15506,13 @@
         {
           "scenario": "frontend-v0-portal.mjs",
           "check": "Aceite autenticado registra texto e prova com hashes conferidos; comprovante na ficha imprime somente o documento, sem executar texto informado",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-provider-refunds.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"API preserves nominal, net receipt and residual after synthetic partial/full provider refunds\",\"Official UI distinguishes partial refund from full reversal after reload\",\"Provider receipts never expose the manual reversal action\"],\"fixture\":\"synthetic owner data; no real PSP\"}",
           "endpoints": [
             "GET /api/today"
           ]
@@ -13967,6 +15562,54 @@
         {
           "scenario": "frontend-v0-remediation.mjs",
           "check": "R02: alerta aparece pela lista e URL direta na aba inicial; anotação comum não vira alerta",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-desktop-claro",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-desktop-escuro",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-celular",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: ficha-alerta-multiplos-contratos",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-vazio",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: assinantes-erro",
           "endpoints": [
             "GET /api/dashboard",
             "GET /api/today"
@@ -14092,6 +15735,32 @@
           "scenario": "frontend-v0-stock.mjs",
           "check": "Erro na consulta de estoque não introduz catálogo ou saldos demonstrativos",
           "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/dashboard/panels",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Seleção pessoal da Visão geral oculta bloco opcional e persiste após recarga sem afetar prioridades nem indicadores; restauração restabelece os blocos autorizados",
+          "endpoints": [
+            "GET /api/dashboard",
+            "GET /api/dashboard/panels",
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Logout e novo login com outra conta no mesmo contexto isola preferências por escopo de sessão e restringe widgets e favoritos sem permissão",
+          "endpoints": [
+            "GET /api/dashboard",
             "GET /api/today"
           ]
         },

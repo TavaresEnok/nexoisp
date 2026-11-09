@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "base": "http://127.0.0.1:3006",
-  "verified_at": "2026-10-19T16:42:32.171Z",
+  "base": "http://127.0.0.1:18390",
+  "verified_at": "2026-11-09T21:50:02.319Z",
   "backend": "Go/PostgreSQL isolados; receptor HTTP local; falha prévia de entrega preparada em fixture do banco descartável",
   "checks": [
     "Token criado na UI aparece uma vez, autentica a API pública e respeita escopo, validade e limite de chamadas do Go",

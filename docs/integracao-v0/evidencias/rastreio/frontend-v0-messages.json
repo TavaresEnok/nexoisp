@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-messages.mjs",
-  "recorded_at": "2026-10-20T21:16:45.697Z",
+  "recorded_at": "2026-11-09T21:49:54.641Z",
   "steps": [
     {
       "check": "Webhook da equipe é configurado pela UI, recebe teste e entrega aviso real originado por chamado do portal no receptor local",
@@ -27,6 +27,7 @@
     {
       "check": "Modelo com variáveis é criado e a prévia ilustrativa é renderizada pelo Go sem disparar mensagens",
       "requests": [
+        "GET /api/me",
         "GET /api/notice-templates",
         "POST /api/notice-templates"
       ]
@@ -34,6 +35,7 @@
     {
       "check": "Régua filtra plano e data, respeita consentimento e não repete envio do mesmo título/regra; modelo em uso não é excluído",
       "requests": [
+        "GET /api/me",
         "GET /api/notice-rules",
         "GET /api/plans",
         "GET /api/pops",

@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-network.mjs",
-  "recorded_at": "2026-10-20T21:08:28.708Z",
+  "recorded_at": "2026-11-09T21:47:08.312Z",
   "steps": [
     {
       "check": "Agente criado no Go; token e chave pública exibidos na emissão, sem token na consulta posterior",
@@ -11,6 +11,9 @@
         "GET /api/me",
         "GET /api/network/health",
         "GET /api/network/online",
+        "GET /api/radius/accounting/events",
+        "GET /api/radius/accounting/sessions",
+        "GET /api/radius/accounting/telemetry",
         "GET /api/radius/status",
         "GET /api/today",
         "POST /api/agents",
@@ -22,6 +25,7 @@
       "requests": [
         "GET /api/agents",
         "GET /api/devices",
+        "GET /api/me",
         "GET /api/network/health",
         "GET /api/radius/status",
         "PATCH /api/agents/:id"
@@ -32,6 +36,7 @@
       "requests": [
         "GET /api/agents",
         "GET /api/devices",
+        "GET /api/me",
         "GET /api/network/health",
         "GET /api/radius/status",
         "POST /api/devices"
@@ -42,6 +47,7 @@
       "requests": [
         "GET /api/agents",
         "GET /api/devices",
+        "GET /api/me",
         "GET /api/network/health",
         "GET /api/radius/status",
         "PATCH /api/devices/:id"
@@ -52,6 +58,7 @@
       "requests": [
         "GET /api/agents",
         "GET /api/devices",
+        "GET /api/me",
         "GET /api/network/health",
         "GET /api/radius/devices/:id/setup",
         "GET /api/radius/status",
@@ -63,6 +70,7 @@
       "requests": [
         "GET /api/agents",
         "GET /api/devices",
+        "GET /api/me",
         "GET /api/network/health",
         "GET /api/radius/status",
         "POST /api/radius/devices/:id/secret"
@@ -73,6 +81,7 @@
       "requests": [
         "GET /api/agents",
         "GET /api/devices",
+        "GET /api/me",
         "GET /api/network/health",
         "GET /api/radius/devices/:id/setup",
         "GET /api/radius/status",
@@ -82,6 +91,7 @@
     {
       "check": "Go bloqueia conversão com operação em aberto; relato sintético encerra a tentativa sem acessar NAS físico",
       "requests": [
+        "GET /api/me",
         "POST /api/devices/:id/convert-to-integrated"
       ]
     },
@@ -90,6 +100,7 @@
       "requests": [
         "GET /api/agents",
         "GET /api/devices",
+        "GET /api/me",
         "GET /api/network/health",
         "GET /api/radius/status",
         "POST /api/devices/:id/convert-to-integrated",
@@ -115,6 +126,9 @@
         "GET /api/network/health",
         "GET /api/network/online",
         "GET /api/operations",
+        "GET /api/radius/accounting/events",
+        "GET /api/radius/accounting/sessions",
+        "GET /api/radius/accounting/telemetry",
         "GET /api/radius/status",
         "GET /api/today"
       ]
@@ -139,6 +153,9 @@
         "GET /api/me",
         "GET /api/network/health",
         "GET /api/network/online",
+        "GET /api/radius/accounting/events",
+        "GET /api/radius/accounting/sessions",
+        "GET /api/radius/accounting/telemetry",
         "GET /api/radius/status",
         "GET /api/today"
       ]

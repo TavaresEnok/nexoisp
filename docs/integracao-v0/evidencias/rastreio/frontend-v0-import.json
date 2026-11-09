@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-import.mjs",
-  "recorded_at": "2026-10-20T21:16:59.767Z",
+  "recorded_at": "2026-11-09T21:50:25.782Z",
   "steps": [
     {
       "check": "CSV é lido, campos e plano são mapeados; prévia valida erros e senha ausente sem gravar assinantes e exige nova simulação após alterar mapa",
@@ -18,6 +18,9 @@
       "requests": [
         "GET /api/import/batches",
         "GET /api/import/batches/:id",
+        "GET /api/import/batches/:id/reconciliation",
+        "GET /api/import/batches/:id/revert-eligibility",
+        "GET /api/me",
         "POST /api/import/apply"
       ]
     },
@@ -25,6 +28,7 @@
       "check": "Provisionamento explícito solicita operação somente para conta com senha; reimportação da mesma origem não duplica assinantes nem contas",
       "requests": [
         "GET /api/import/batches",
+        "GET /api/me",
         "POST /api/import/apply",
         "POST /api/import/batches/:id/provision",
         "POST /api/import/preview"
@@ -34,6 +38,7 @@
       "check": "Títulos importados preservam centavos, pagamento parcial e cancelamento; titular inexistente é erro explícito e título aberto não recebe cobrança automática",
       "requests": [
         "GET /api/import/batches",
+        "GET /api/me",
         "POST /api/import/apply",
         "POST /api/import/preview"
       ]
@@ -42,8 +47,53 @@
       "check": "Histórico mantém datas originais, importa atendimento/OS/anotação sem abrir SLA nem disparar avisos e não duplica registros na reimportação",
       "requests": [
         "GET /api/import/batches",
+        "GET /api/me",
         "POST /api/import/apply",
         "POST /api/import/preview"
+      ]
+    },
+    {
+      "check": "Motivo obrigatório, confirmação por teclado e bloqueio real do POST preservam a fatura; a elegibilidade antiga não compensa",
+      "requests": [
+        "GET /api/import/batches",
+        "GET /api/import/batches/:id",
+        "GET /api/import/batches/:id/reconciliation",
+        "GET /api/import/batches/:id/revert-eligibility",
+        "GET /api/me",
+        "POST /api/import/apply",
+        "POST /api/import/batches/:id/compensate",
+        "POST /api/import/preview"
+      ]
+    },
+    {
+      "check": "Resposta desconhecida reenvia a mesma chave; o POST real grava uma compensação, a repetição não lança outro estorno e o lote committed não oferece nova ação",
+      "requests": [
+        "GET /api/import/batches/:id",
+        "GET /api/import/batches/:id/reconciliation",
+        "GET /api/import/batches/:id/revert-eligibility",
+        "GET /api/me",
+        "POST /api/import/batches/:id/compensate"
+      ]
+    },
+    {
+      "check": "POST commitado com resposta perdida recupera a compensação pela leitura da ficha, sem segunda reversão nem nova ação",
+      "requests": [
+        "GET /api/import/batches",
+        "GET /api/import/batches/:id",
+        "GET /api/import/batches/:id/reconciliation",
+        "GET /api/import/batches/:id/revert-eligibility",
+        "GET /api/me",
+        "POST /api/import/apply",
+        "POST /api/import/batches/:id/compensate",
+        "POST /api/import/preview"
+      ]
+    },
+    {
+      "check": "Lote que não é de títulos recusa o POST sem apagar assinantes e a ficha não oferece compensação",
+      "requests": [
+        "GET /api/import/batches/:id",
+        "GET /api/import/batches/:id/reconciliation",
+        "GET /api/import/batches/:id/revert-eligibility"
       ]
     },
     {
@@ -51,6 +101,9 @@
       "requests": [
         "GET /api/devices",
         "GET /api/import/batches",
+        "GET /api/import/batches/:id",
+        "GET /api/import/batches/:id/reconciliation",
+        "GET /api/import/batches/:id/revert-eligibility",
         "GET /api/me",
         "GET /api/plans",
         "GET /api/today"

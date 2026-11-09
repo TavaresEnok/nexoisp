@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-map.mjs",
-  "recorded_at": "2026-10-20T21:15:44.812Z",
+  "recorded_at": "2026-11-09T21:48:42.650Z",
   "steps": [
     {
       "check": "Localização do contrato é gravada pelo endpoint Go, sem geocodificação nem aproximação de endereço",
@@ -21,6 +21,7 @@
         "GET /api/ftth/boxes/:id",
         "GET /api/map/coverage",
         "GET /api/map/points",
+        "GET /api/me",
         "PUT /api/pops/:id/location"
       ]
     },
@@ -40,6 +41,7 @@
       "requests": [
         "GET /api/map/coverage",
         "GET /api/map/points",
+        "GET /api/me",
         "PUT /api/contracts/:id/location"
       ]
     },

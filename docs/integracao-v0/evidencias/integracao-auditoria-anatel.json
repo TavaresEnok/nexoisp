@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "base": "http://127.0.0.1:3006",
-  "verified_at": "2026-10-19T16:41:50.004Z",
+  "base": "http://127.0.0.1:18390",
+  "verified_at": "2026-11-09T21:49:09.583Z",
   "backend": "Go/PostgreSQL isolados; dados inteiramente sintéticos",
   "checks": [
     "Auditoria pagina registros reais e exibe detalhes; retenção salva no Go e rejeita prazo de conexão abaixo do limite",

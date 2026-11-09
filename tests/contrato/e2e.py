@@ -8,13 +8,18 @@ import time
 
 from lib import ROOT,LOCAL,command,sql,go_env,request
 from lib import go, wait
+from nativo import up
 
 # Porta do Caddy descartável; troque quando 18380 estiver ocupada (ex.: painel local).
 WEB_PORT=os.environ.get('NEXO_E2E_WEB_PORT','18380')
 WEB='http://127.0.0.1:'+WEB_PORT
+# Docker antigo (ex.: PNETLab) barra threads sob o seccomp padrão: NEXO_E2E_DOCKER_OPTS='--security-opt seccomp=unconfined'
+# e NEXO_E2E_PREBUILT=1 para reutilizar a imagem nexo-fase1-playwright:local montada fora do docker build.
+DOCKER_OPTS=os.environ.get('NEXO_E2E_DOCKER_OPTS','').split()
 
 
 def main():
+    up()  # sobe o banco descartável quando o script roda sozinho, fora da sequência do CI
     go('build','-o','bin/nexo-db','./cmd/nexo-db')
     go('build','-o','bin/api','./cmd/api')
     sql('drop database if exists nexo_test with (force);create database nexo_test;','postgres')
@@ -54,12 +59,13 @@ def main():
     finally:subprocess.run(['docker','rm','nexo-fase1-web-build'],capture_output=True)
     command(['npm','ci'],cwd=ROOT/'e2e')
     command(['node','--test','visual-compare.test.mjs'],cwd=ROOT/'e2e')
-    command(['docker','build','--network','host','-t','nexo-fase1-playwright:local','e2e'],cwd=ROOT)
+    if os.environ.get('NEXO_E2E_PREBUILT')!='1':
+        command(['docker','build','--network','host','-t','nexo-fase1-playwright:local','e2e'],cwd=ROOT)
     log=open(LOCAL/'e2e-go.log','w')
     api=subprocess.Popen([str(ROOT/'apps/api-go/bin/api')],cwd=ROOT,env=env,stdout=log,stderr=subprocess.STDOUT)
     try:
         wait('http://127.0.0.1:18181','/api/health',api)
-        command(['docker','run','-d','--name','nexo-fase1-caddy-e2e','--network','host',
+        command(['docker','run','-d','--name','nexo-fase1-caddy-e2e','--network','host',*DOCKER_OPTS,
                  '-v',str(ROOT/'infra/prod/caddy/Caddyfile')+':/etc/caddy/Caddyfile:ro','-v',str(web)+':/srv:ro',
                  '-e','NEXO_DOMAIN='+WEB,'-e','NEXO_GO_UPSTREAM=127.0.0.1:18181',
                  'caddy:2-alpine','caddy','run','--config','/etc/caddy/Caddyfile','--adapter','caddyfile'],capture_output=True)
@@ -73,13 +79,15 @@ def main():
         selected = []
         if os.environ.get('NEXO_E2E_ONLY'):
             selected = ['-e', 'ONLY='+os.environ['NEXO_E2E_ONLY']]
-        command(['docker','run','--rm','--network','host','--shm-size','1g',
+        if os.environ.get('UPDATE_V0_OPERATIONAL_VISUAL')=='1':
+            selected += ['-e', 'UPDATE_V0_OPERATIONAL_VISUAL=1']  # regrava referências; revisar as imagens antes do commit
+        command(['docker','run','--rm','--network','host',*DOCKER_OPTS,'--shm-size','1g',
                  '-v',str(ROOT/'e2e')+':/e2e',
                  '-v',str(ROOT/'docs/integracao-v0/evidencias')+':/docs/integracao-v0/evidencias',
                  '-w','/e2e','-e','BASE='+WEB,'-e','V0_AGENT_URL=http://127.0.0.1:18544',
                  '-e','V0_OPERATIONAL_VISUAL=1',
                  *selected,'nexo-fase1-playwright:local','node','smoke.mjs'])
-        command(['docker','run','--rm','--network','host','--shm-size','1g',
+        command(['docker','run','--rm','--network','host',*DOCKER_OPTS,'--shm-size','1g',
                  '-v',str(ROOT/'e2e')+':/e2e',
                  '-v',str(ROOT/'docs/integracao-v0/evidencias')+':/evidence',
                  '-w','/e2e','-e','BASE='+WEB,

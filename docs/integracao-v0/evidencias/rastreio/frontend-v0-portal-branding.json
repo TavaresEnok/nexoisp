@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-portal-branding.mjs",
-  "recorded_at": "2026-10-30T13:58:21.602Z",
+  "recorded_at": "2026-11-09T21:49:40.207Z",
   "steps": [
     {
       "check": "Marca salva, exibida ao assinante e removida.",

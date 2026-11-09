@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "checks": [
+    "cadastro pela interface persiste conexão pendente",
+    "segredo não retorna nem cifrado na listagem",
+    "ativação sandbox, troca de padrão e desativação confirmadas no backend",
+    "reload preserva estado; componentes oficiais e API reais",
+    "cofre pela UI persiste certificado sintético e versão; segredo não retorna nem fica no armazenamento do navegador"
+  ],
+  "connection": "dd8a22ab-0aba-49eb-a951-90b3140309b6"
+}

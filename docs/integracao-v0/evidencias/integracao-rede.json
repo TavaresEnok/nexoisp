@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "base": "http://127.0.0.1:3006",
-  "verified_at": "2026-10-19T16:38:33.742Z",
+  "base": "http://127.0.0.1:18390",
+  "verified_at": "2026-11-09T21:47:08.243Z",
   "backend": "Go/PostgreSQL isolados; sem conexão a NAS físico",
   "checks": [
     "Agente criado no Go; token e chave pública exibidos na emissão, sem token na consulta posterior",
@@ -10,6 +10,7 @@
     "Parâmetros e manutenção são gravados no Go; mudanças de intenção não são apresentadas como confirmação do NAS",
     "Concentrador emite segredo mesmo com falha de atualização do inventário; instruções posteriores não recuperam o segredo",
     "Rotação do segredo exige confirmação e emite outro valor apenas na janela de emissão",
+    "Edição do NAS integrado altera fabricante e destino de CoA pelo PATCH do Go e pede nova aplicação das instruções",
     "Go bloqueia conversão com operação em aberto; relato sintético encerra a tentativa sem acessar NAS físico",
     "Reaplicação solicita uma conta sem pendência e ignora conta já em operação; conversão preserva a conta e emite configuração integrada sem afirmar conectividade física",
     "Fila e ficha de operações exibem intenção, idempotência, tentativa e evidências reais, com filtro e restauração pela URL",

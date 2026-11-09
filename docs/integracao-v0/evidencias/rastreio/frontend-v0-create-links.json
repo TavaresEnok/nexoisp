@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-create-links.mjs",
-  "recorded_at": "2026-10-20T21:17:34.352Z",
+  "recorded_at": "2026-11-09T21:53:26.094Z",
   "steps": [
     {
       "check": "Diálogo aberto por /assinantes/novo-assinante em /assinantes",
@@ -69,7 +69,6 @@
       "check": "Diálogo aberto por /financeiro/faturas/gerar-mensalidades-por-competencia em /financeiro/faturas",
       "requests": [
         "GET /api/companies",
-        "GET /api/finance/monthly",
         "GET /api/finance/summary",
         "GET /api/invoices",
         "GET /api/me",
@@ -96,6 +95,9 @@
         "GET /api/me",
         "GET /api/network/health",
         "GET /api/network/online",
+        "GET /api/radius/accounting/events",
+        "GET /api/radius/accounting/sessions",
+        "GET /api/radius/accounting/telemetry",
         "GET /api/radius/status",
         "GET /api/today"
       ]

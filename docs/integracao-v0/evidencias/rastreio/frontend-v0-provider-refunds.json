@@ -1,0 +1,19 @@
+{
+  "scenario": "frontend-v0-provider-refunds.mjs",
+  "recorded_at": "2026-11-09T21:45:48.153Z",
+  "steps": [
+    {
+      "check": "{\"ok\":true,\"checks\":[\"API preserves nominal, net receipt and residual after synthetic partial/full provider refunds\",\"Official UI distinguishes partial refund from full reversal after reload\",\"Provider receipts never expose the manual reversal action\"],\"fixture\":\"synthetic owner data; no real PSP\"}",
+      "requests": [
+        "GET /api/companies",
+        "GET /api/finance/summary",
+        "GET /api/invoices",
+        "GET /api/invoices/:id",
+        "GET /api/invoices/:id/due",
+        "GET /api/invoices/:id/provider-billing",
+        "GET /api/me",
+        "GET /api/today"
+      ]
+    }
+  ]
+}

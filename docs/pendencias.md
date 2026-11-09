@@ -37,7 +37,7 @@ O código inclui configuração de produção, preflight, backup/restauração e
 | Recuperação do site | Atualização que efetivamente altere o schema local, rollback e falhas de disco no ambiente do provedor |
 | Continuidade | RADIUS e banco em hosts distintos, promoção/retorno, falha de enlace e de servidor; duas instâncias locais cobrem apenas parte das falhas |
 | Capacidade | Medir o volume do piloto; benchmarks sintéticos não estabelecem SLA |
-| Uso e segurança | Sessão de uso com atendentes/técnicos, leitor de tela e revisão de segurança independente; limites de taxa em memória são por réplica |
+| Uso e segurança | Sessão de uso com atendentes/técnicos, leitor de tela e revisão de segurança independente |
 
 ## Migração e integrações por origem
 

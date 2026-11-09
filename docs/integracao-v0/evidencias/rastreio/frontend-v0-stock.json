@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-stock.mjs",
-  "recorded_at": "2026-10-20T21:08:05.318Z",
+  "recorded_at": "2026-11-09T21:46:43.804Z",
   "steps": [
     {
       "check": "Catálogo cadastra material com código, unidade e mínimo; alerta usa saldo real",
@@ -16,6 +16,7 @@
     {
       "check": "Entradas, saídas e ajuste com sinal preservam os três movimentos e saldo calculado pelo Go",
       "requests": [
+        "GET /api/me",
         "GET /api/stock/items",
         "GET /api/stock/items/:id/balances",
         "GET /api/stock/items/:id/movements",
@@ -25,6 +26,7 @@
     {
       "check": "Edição, ativação e mínimo persistem; Go bloqueia mudar serialização após movimento",
       "requests": [
+        "GET /api/me",
         "GET /api/stock/items",
         "PATCH /api/stock/items/:id"
       ]
@@ -32,6 +34,7 @@
     {
       "check": "Lote normaliza séries no Go e duplicidade desfaz toda a entrada, sem unidade ou saldo parcial",
       "requests": [
+        "GET /api/me",
         "GET /api/staff",
         "GET /api/stock/items",
         "GET /api/stock/items/:id/units",
@@ -42,6 +45,7 @@
     {
       "check": "Distribuição ao técnico e retorno ao almoxarifado preservam saldo e atualizam custódia",
       "requests": [
+        "GET /api/me",
         "GET /api/stock/items",
         "GET /api/stock/items/:id/units",
         "POST /api/stock/units/:id/transfer"
@@ -71,6 +75,7 @@
     {
       "check": "Defeito e conserto mantêm a unidade rastreável; baixa exige motivo, reduz saldo e não pode ser desfeita",
       "requests": [
+        "GET /api/me",
         "GET /api/stock/items",
         "GET /api/stock/items/:id/units",
         "POST /api/stock/units/:id/status"

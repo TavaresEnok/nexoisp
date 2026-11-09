@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-saas.mjs",
-  "recorded_at": "2026-10-20T21:16:14.531Z",
+  "recorded_at": "2026-11-09T21:49:14.237Z",
   "steps": [
     {
       "check": "Novo provedor e primeiro administrador criados na UI autenticam no Go com contexto próprio",
@@ -13,6 +13,7 @@
     {
       "check": "Nome e módulos são atualizados na plataforma; o Go libera CRM e campo e conserva NOC bloqueado",
       "requests": [
+        "GET /api/me",
         "GET /api/tenants",
         "PATCH /api/tenants/:id"
       ]
@@ -20,6 +21,7 @@
     {
       "check": "Suspensão confirmada impede acesso e login; reativação restaura autenticação do administrador",
       "requests": [
+        "GET /api/me",
         "GET /api/tenants",
         "PATCH /api/tenants/:id"
       ]

@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-integrations.mjs",
-  "recorded_at": "2026-10-20T21:16:53.835Z",
+  "recorded_at": "2026-11-09T21:50:02.428Z",
   "steps": [
     {
       "check": "Token criado na UI aparece uma vez, autentica a API pública e respeita escopo, validade e limite de chamadas do Go",
@@ -16,12 +16,14 @@
       "check": "Revogação confirmada invalida imediatamente o token na API pública",
       "requests": [
         "DELETE /api/api-tokens/:id",
-        "GET /api/api-tokens"
+        "GET /api/api-tokens",
+        "GET /api/me"
       ]
     },
     {
       "check": "Destino criado envia evento assinado real ao receptor local e distingue HTTP 200 de falha HTTP 500",
       "requests": [
+        "GET /api/me",
         "GET /api/webhook-endpoints",
         "POST /api/webhook-endpoints",
         "POST /api/webhook-endpoints/:id/test"
@@ -31,6 +33,7 @@
       "check": "Rotação mostra novo segredo uma vez; edição, pausa e ativação conservam a assinatura correta no próximo teste",
       "requests": [
         "GET /api/integrations/catalog",
+        "GET /api/me",
         "GET /api/webhook-endpoints",
         "PATCH /api/webhook-endpoints/:id",
         "POST /api/webhook-endpoints/:id/rotate-secret",
@@ -47,6 +50,7 @@
       "check": "Exclusão confirmada remove destino e histórico; outro provedor não pode excluir o webhook",
       "requests": [
         "DELETE /api/webhook-endpoints/:id",
+        "GET /api/me",
         "GET /api/webhook-endpoints"
       ]
     }

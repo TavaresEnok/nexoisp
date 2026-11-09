@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-os-quotations.mjs",
-  "recorded_at": "2026-10-30T13:58:18.239Z",
+  "recorded_at": "2026-11-09T21:49:44.115Z",
   "steps": [
     {
       "check": "Anexo sintético enviado, baixado e excluído pela OS.",
@@ -19,12 +19,13 @@
       ]
     },
     {
-      "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque.",
+      "check": "Cotação e oferta geraram pedido em rascunho sem entrada de estoque e exportação CSV comparativa concluída.",
       "requests": [
         "GET /api/me",
         "GET /api/stock/items",
         "GET /api/stock/quotations",
         "GET /api/stock/quotations/:id",
+        "GET /api/stock/quotations/:id/export.csv",
         "GET /api/stock/suppliers",
         "GET /api/stock/warehouses",
         "GET /api/today",

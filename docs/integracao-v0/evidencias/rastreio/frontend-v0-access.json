@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-access.mjs",
-  "recorded_at": "2026-10-20T21:08:45.925Z",
+  "recorded_at": "2026-11-09T21:47:31.037Z",
   "steps": [
     {
       "check": "Provisionamento pela ficha usa equipamento real, emite senha apenas uma vez e mantém intenção separada da leitura ausente",
@@ -27,6 +27,7 @@
       "check": "Troca de senha valida tamanho, solicita reaplicação e vínculo MAC é normalizado pelo Go",
       "requests": [
         "GET /api/contracts/:id/service",
+        "GET /api/me",
         "PATCH /api/resources/:id/mac",
         "PATCH /api/resources/:id/secret"
       ]
@@ -36,6 +37,7 @@
       "requests": [
         "GET /api/contracts/:id/onu",
         "GET /api/contracts/:id/service",
+        "GET /api/me",
         "POST /api/resources/:id/disconnect",
         "POST /api/resources/:id/provision",
         "POST /api/resources/:id/resume",
@@ -82,6 +84,7 @@
         "GET /api/contracts/:id/usage",
         "GET /api/contracts/:id/usage-series",
         "GET /api/me",
+        "GET /api/network/online",
         "GET /api/plans",
         "GET /api/today"
       ]
@@ -98,6 +101,7 @@
     {
       "check": "Desconexão recusada pelo Go permanece explícita e não é apresentada como execução bem-sucedida",
       "requests": [
+        "GET /api/me",
         "GET /api/network/online",
         "POST /api/network/disconnect"
       ]
@@ -143,6 +147,9 @@
         "GET /api/network/health",
         "GET /api/network/online",
         "GET /api/plans",
+        "GET /api/radius/accounting/events",
+        "GET /api/radius/accounting/sessions",
+        "GET /api/radius/accounting/telemetry",
         "GET /api/radius/status",
         "GET /api/today",
         "POST /api/devices"

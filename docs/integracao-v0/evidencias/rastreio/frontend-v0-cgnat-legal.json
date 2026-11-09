@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-cgnat-legal.mjs",
-  "recorded_at": "2026-10-20T21:15:31.517Z",
+  "recorded_at": "2026-11-09T21:48:37.683Z",
   "steps": [
     {
       "check": "UI consulta capacidade no Go, cria plano imutável, apresenta mapa/lookup e exporta script sem aplicá-lo ao NAS",
@@ -27,6 +27,7 @@
       "requests": [
         "GET /api/cgnat/plans",
         "GET /api/ipam/pools",
+        "GET /api/me",
         "POST /api/cgnat/plans/:id/retire"
       ]
     },
@@ -43,13 +44,15 @@
       "check": "Consulta direta de IP usa sessões históricas sem exigir porta CGNAT",
       "requests": [
         "GET /api/legal/ip-lookup/history",
+        "GET /api/me",
         "POST /api/legal/ip-lookup"
       ]
     },
     {
-      "check": "Consulta IPv6 expõe o prefixo cadastrado e a limitação histórica existente em vez de presumir titulares anteriores",
+      "check": "Consulta IPv6 preserva titularidade após liberação, mostra limites do histórico e não afirma sessão física",
       "requests": [
         "GET /api/legal/ip-lookup/history",
+        "GET /api/me",
         "POST /api/legal/ip-lookup"
       ]
     }

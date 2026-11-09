@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-admin-reports.mjs",
-  "recorded_at": "2026-10-20T21:16:10.123Z",
+  "recorded_at": "2026-11-09T21:49:09.679Z",
   "steps": [
     {
       "check": "Auditoria pagina registros reais e exibe detalhes; retenção salva no Go e rejeita prazo de conexão abaixo do limite",
@@ -15,6 +15,7 @@
     {
       "check": "Prazos vazios retornam aos padrões da instalação, preservando faturas, pagamentos, aceites e auditoria",
       "requests": [
+        "GET /api/me",
         "GET /api/settings/retention",
         "PUT /api/settings/retention"
       ]
@@ -46,6 +47,8 @@
       "requests": [
         "GET /api/custom-fields",
         "GET /api/me",
+        "GET /api/staff",
+        "GET /api/tickets/:id",
         "GET /api/today"
       ]
     }

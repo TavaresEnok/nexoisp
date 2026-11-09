@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "base": "http://127.0.0.1:18390",
+  "verified_at": "2026-11-09T21:48:11.588Z",
+  "backend": "Go/PostgreSQL isolados; preferências no navegador por usuário e escopo de sessão",
+  "checks": [
+    "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+    "Seleção pessoal da Visão geral oculta bloco opcional e persiste após recarga sem afetar prioridades nem indicadores; restauração restabelece os blocos autorizados",
+    "Logout e novo login com outra conta no mesmo contexto isola preferências por escopo de sessão e restringe widgets e favoritos sem permissão"
+  ]
+}

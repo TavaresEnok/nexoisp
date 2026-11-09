@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-ipam.mjs",
-  "recorded_at": "2026-10-20T21:09:37.729Z",
+  "recorded_at": "2026-11-09T21:48:32.116Z",
   "steps": [
     {
       "check": "Cadastro e edição de pool IPv4 preservam CIDR; reserva automática ignora endereço de rede e grava descrição no Go",
@@ -71,7 +71,8 @@
         "DELETE /api/ipam/pools/:id",
         "GET /api/ipam/pools",
         "GET /api/ipam/pools/:id/allocations",
-        "GET /api/ipam/pools/:id/delegations"
+        "GET /api/ipam/pools/:id/delegations",
+        "GET /api/me"
       ]
     }
   ]

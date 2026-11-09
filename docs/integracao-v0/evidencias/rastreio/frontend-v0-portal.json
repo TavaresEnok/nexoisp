@@ -1,13 +1,14 @@
 {
   "scenario": "frontend-v0-portal.mjs",
-  "recorded_at": "2026-10-20T21:16:36.283Z",
+  "recorded_at": "2026-11-09T21:49:37.070Z",
   "steps": [
     {
       "check": "Portal consulta somente cadastro, contratos e faturas próprios; plano sem provisionamento e manutenção são apresentados sem supor conexão online",
       "requests": [
         "GET /api/me",
         "GET /api/portal/acceptances",
-        "GET /api/portal/overview"
+        "GET /api/portal/overview",
+        "GET /api/tenant-branding"
       ]
     },
     {
@@ -18,7 +19,8 @@
         "GET /api/portal/cpe",
         "GET /api/portal/overview",
         "GET /api/portal/surveys",
-        "GET /api/portal/tickets"
+        "GET /api/portal/tickets",
+        "GET /api/tenant-branding"
       ]
     },
     {
@@ -42,6 +44,7 @@
         "GET /api/portal/overview",
         "GET /api/portal/surveys",
         "GET /api/portal/tickets",
+        "GET /api/tenant-branding",
         "GET /api/today",
         "POST /api/portal/acceptances/:id/accept"
       ]
@@ -56,6 +59,7 @@
         "GET /api/portal/surveys",
         "GET /api/portal/tickets",
         "GET /api/portal/tickets/:id",
+        "GET /api/tenant-branding",
         "POST /api/portal/tickets",
         "POST /api/portal/tickets/:id/messages"
       ]
@@ -69,6 +73,7 @@
         "GET /api/portal/overview",
         "GET /api/portal/surveys",
         "GET /api/portal/tickets",
+        "GET /api/tenant-branding",
         "POST /api/portal/surveys/:id"
       ]
     },
@@ -81,6 +86,7 @@
         "GET /api/portal/overview",
         "GET /api/portal/surveys",
         "GET /api/portal/tickets",
+        "GET /api/tenant-branding",
         "POST /api/portal/trust-release"
       ]
     },
@@ -89,8 +95,12 @@
       "requests": [
         "GET /api/me",
         "GET /api/portal/acceptances",
+        "GET /api/portal/cpe",
         "GET /api/portal/overview",
-        "GET /api/portal/usage-series"
+        "GET /api/portal/surveys",
+        "GET /api/portal/tickets",
+        "GET /api/portal/usage-series",
+        "GET /api/tenant-branding"
       ]
     },
     {
@@ -102,6 +112,7 @@
         "GET /api/portal/overview",
         "GET /api/portal/surveys",
         "GET /api/portal/tickets",
+        "GET /api/tenant-branding",
         "POST /api/auth/logout"
       ]
     },
