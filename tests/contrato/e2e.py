@@ -9,6 +9,10 @@ import time
 from lib import ROOT,LOCAL,command,sql,go_env,request
 from lib import go, wait
 
+# Porta do Caddy descartável; troque quando 18380 estiver ocupada (ex.: painel local).
+WEB_PORT=os.environ.get('NEXO_E2E_WEB_PORT','18380')
+WEB='http://127.0.0.1:'+WEB_PORT
+
 
 def main():
     go('build','-o','bin/nexo-db','./cmd/nexo-db')
@@ -57,12 +61,12 @@ def main():
         wait('http://127.0.0.1:18181','/api/health',api)
         command(['docker','run','-d','--name','nexo-fase1-caddy-e2e','--network','host',
                  '-v',str(ROOT/'infra/prod/caddy/Caddyfile')+':/etc/caddy/Caddyfile:ro','-v',str(web)+':/srv:ro',
-                 '-e','NEXO_DOMAIN=http://127.0.0.1:18380','-e','NEXO_GO_UPSTREAM=127.0.0.1:18181',
+                 '-e','NEXO_DOMAIN='+WEB,'-e','NEXO_GO_UPSTREAM=127.0.0.1:18181',
                  'caddy:2-alpine','caddy','run','--config','/etc/caddy/Caddyfile','--adapter','caddyfile'],capture_output=True)
-        wait('http://127.0.0.1:18380','/api/health')
+        wait(WEB,'/api/health')
         keys=['x-content-type-options','x-frame-options','referrer-policy','permissions-policy','content-security-policy','strict-transport-security']
         for path in ['/','/login']:
-            r=request('http://127.0.0.1:18380',path)
+            r=request(WEB,path)
             assert r['status']==200 and r['body']==(web/'index.html').read_bytes()
             assert r['headers']['x-content-type-options']=='nosniff' and r['headers']['x-frame-options']=='DENY'
             assert "frame-ancestors 'none'" in r['headers']['content-security-policy']
@@ -72,13 +76,13 @@ def main():
         command(['docker','run','--rm','--network','host','--shm-size','1g',
                  '-v',str(ROOT/'e2e')+':/e2e',
                  '-v',str(ROOT/'docs/integracao-v0/evidencias')+':/docs/integracao-v0/evidencias',
-                 '-w','/e2e','-e','BASE=http://127.0.0.1:18380','-e','V0_AGENT_URL=http://127.0.0.1:18544',
+                 '-w','/e2e','-e','BASE='+WEB,'-e','V0_AGENT_URL=http://127.0.0.1:18544',
                  '-e','V0_OPERATIONAL_VISUAL=1',
                  *selected,'nexo-fase1-playwright:local','node','smoke.mjs'])
         command(['docker','run','--rm','--network','host','--shm-size','1g',
                  '-v',str(ROOT/'e2e')+':/e2e',
                  '-v',str(ROOT/'docs/integracao-v0/evidencias')+':/evidence',
-                 '-w','/e2e','-e','BASE=http://127.0.0.1:18380',
+                 '-w','/e2e','-e','BASE='+WEB,
                  '-e','NEXO_PAYMENT_LAB=1',
                  '-e','LAB_UI_SCREENSHOT=/evidence/lote01-payment-intent-ci.png',
                  'nexo-fase1-playwright:local','node','lote01-payment-intent.mjs'])

@@ -46,7 +46,16 @@
     "test:remediation": "node ../../e2e/frontend-v0-remediation.mjs",
     "test:visual:operational": "V0_OPERATIONAL_VISUAL=1 node ../../e2e/frontend-v0-remediation.mjs",
     "test:visual:screens": "node ../../e2e/frontend-v0-operational-visual.mjs",
-    "evidence:units": "node ../../e2e/unit-evidence.mjs"
+    "evidence:units": "node ../../e2e/unit-evidence.mjs",
+    "test:acs-journal": "node ../../e2e/frontend-v0-acs-journal.mjs",
+    "test:financial-notices": "node ../../e2e/frontend-v0-financial-notices.mjs",
+    "test:material-intent": "node ../../e2e/frontend-v0-material-intent.mjs",
+    "test:provider-billing": "node ../../e2e/frontend-v0-provider-billing.mjs",
+    "test:provider-resolution": "node ../../e2e/frontend-v0-provider-resolution.mjs",
+    "test:radius-accounting": "node ../../e2e/frontend-v0-radius-accounting.mjs",
+    "test:radius-health": "node ../../e2e/frontend-v0-radius-health.mjs",
+    "test:radius-history": "node ../../e2e/frontend-v0-radius-history.mjs",
+    "test:session-cross-tab": "node ../../e2e/frontend-v0-session-cross-tab.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.5.0",

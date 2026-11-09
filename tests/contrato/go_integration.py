@@ -14,7 +14,7 @@ if str(CONTRATO_DIR) not in sys.path:
 
 # Separate from other contract tests and never reuse an existing container.
 os.environ['NEXO_CONTRATO_DB_CONTAINER'] = 'nexo-go-tests-' + uuid.uuid4().hex[:10]
-os.environ['NEXO_CONTRATO_DB_PORT'] = '15689'
+os.environ.setdefault('NEXO_CONTRATO_DB_PORT', '15689')  # porta própria permite execuções paralelas
 
 from lib import ROOT, DB_CONTAINER, DB_PORT, command, go, go_env, sql
 from nativo import up

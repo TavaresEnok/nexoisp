@@ -1,0 +1,16 @@
+# Decisões técnicas
+
+Registro das decisões tomadas sem consulta ao dono durante a rodada de conclusão iniciada em 09/11/2026. Cada item diz o que foi decidido e por quê, para revisão posterior. Decisões anteriores do piloto continuam em [ESTADO](ESTADO.md).
+
+## Escopo da rodada de conclusão (09/11/2026)
+
+| Tema | Decisão | Motivo |
+|---|---|---|
+| Itens construíveis sem terceiros | Implementar e validar: template ACS, projeto físico FTTH (cabos, fusões, OTDR, importação KML), campo (check-in/check-out, assinatura, fotos, fila offline), liquidação de comissões, custo médio e contas a pagar, viabilidade pública, conformidade do arquivo DICI, troca obrigatória de senha, multa/juros na cobrança Efí, painel de acompanhamento operacional e assistente | São lacunas internas: dependem só de código e testes |
+| Fiscal integrado (NFCom/NFS-e) | **Não implementado** | Exige certificado A1 do provedor, credenciamento na SEFAZ/município e ambiente de homologação fiscal. Um emissor sem homologação não pode ser validado e emitiria documento fiscal inválido. Mantida a decisão da fase 1 (fiscal inativo) |
+| Gateway em produção | Implementar o que falta no adaptador (multa/juros), validado contra servidor simulado | Conta Efí real ou sandbox autenticado não está disponível; o adaptador continua restrito a sandbox até homologação |
+| Transmissão DICI à ANATEL | Gerar o arquivo no leiaute da coleta e manter o envio manual | A ANATEL recebe o DICI pelo sistema de coleta com login gov.br; não há API pública para envio automático |
+| OLT de outros fabricantes | Não escrever drivers sem equipamento | Driver sem equipamento repetiria a situação do Huawei (não homologado); o valor real vem da homologação |
+| Multicélulas | Manter célula única `c1` | Capacidade de 100 mil assinantes já medida em uma célula; distribuir dados aumenta o risco sem demanda |
+| Interface legada (`apps/web-legacy`) | Mantida | Regra do `AGENTS.md`; continua sendo consulta de contratos HTTP |
+| Assistente | Assistente determinístico sobre busca, diagnóstico e pendências existentes, sem modelo de linguagem externo | Uso de IA externa exige decisão sobre envio de dados pessoais a terceiros; a versão determinística resolve a navegação assistida sem esse risco |
