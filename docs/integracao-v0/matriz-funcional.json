@@ -1657,22 +1657,90 @@
   },
   {
     "id": "IN-06",
-    "backendState": "Parcial",
+    "backendState": "Implementada",
     "entry": "/ftth e /mapa",
     "functionality": "Projeto físico completo da rede óptica",
-    "behavior": "Existe mapa esquemático e gestão de caixas/portas, mas não foram identificados cadastro de traçado completo de fibra, fusões, OTDR ou importação de projeto GIS. O desenho não prova conectividade física.",
-    "endpoints": "GET /api/ftth/boxes; GET /api/map/points",
-    "evidence": "P/Field.tsx; P/Mapa.tsx; E/infraestrutura.go",
+    "behavior": "Projeto físico da rede óptica por POP: cabos com traçado de 2 a 500 coordenadas e comprimento calculado no servidor (haversine), pontas em caixa ou local físico, fusões fibra a fibra na caixa, medições OTDR com arquivo bruto privado e importação KML com prévia e aplicação atômica. O mapa operacional desenha os cabos ativos da área consultada. O cadastro descreve o projeto e não prova conectividade física, continuidade óptica nem o trajeto real da fibra.",
+    "endpoints": "GET /api/ftth/boxes; GET /api/map/points; GET /api/ftth/cables/map",
+    "evidence": "P/Field.tsx; P/Mapa.tsx; E/infraestrutura.go; E/ftth_cables.go; E/ftth_fusions.go; E/ftth_otdr.go; E/ftth_kml.go; M/00087_ftth_projeto_fisico.sql",
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-ftth.mjs",
       "docs/integracao-v0/evidencias/integracao-ftth.json",
-      "docs/integracao-v0/evidencias/producao-ftth.json"
+      "docs/integracao-v0/evidencias/producao-ftth.json",
+      "e2e/frontend-v0-ftth-design.mjs",
+      "docs/integracao-v0/evidencias/rastreio/frontend-v0-ftth-design.json",
+      "apps/api-go/internal/modules/escrita/ftth_design_test.go"
     ],
     "validationNotes": [
-      "Capacidades existentes de caixas, portas e esquema por coordenadas integradas. Traçado físico completo, fusões, OTDR e importação GIS não existem no backend e não foram inventados."
+      "Capacidades anteriores de caixas, portas e esquema por coordenadas permanecem integradas.",
+      "Projeto físico (cabos, fusões, OTDR, KML e camada de cabos no mapa) acrescentado em 09/11/2026 com migração 00087; detalhado nas unidades IN-06-CABOS, IN-06-FUSOES, IN-06-OTDR e IN-06-KML. Rastreio de navegador obtido em pilha Go/PostgreSQL/Caddy isolada de desenvolvimento, sem homologação externa."
     ],
     "integrationClassification": "business-ui"
+  },
+  {
+    "id": "IN-06-CABOS",
+    "backendState": "Implementada",
+    "entry": "/rede/ftth/fttx-cto?aba=cabos",
+    "functionality": "Cabos ópticos com traçado",
+    "behavior": "Cadastrar, consultar, editar, filtrar e arquivar cabos por POP (1 a 288 fibras; aéreo, subterrâneo ou drop), com traçado de 2 a 500 pontos, comprimento calculado no servidor, comprimento informado opcional e pontas em caixa do provedor ou local físico do mesmo POP. Permissões network:read/network:write, módulo ftth e RLS por provedor e POP. O cadastro descreve o projeto e não prova conectividade física, continuidade óptica nem o trajeto real da fibra.",
+    "endpoints": "GET /api/ftth/cables; GET /api/ftth/cables/:id; POST /api/ftth/cables; PATCH /api/ftth/cables/:id; GET /api/ftth/cables/map",
+    "evidence": "E/ftth_cables.go; M/00087_ftth_projeto_fisico.sql",
+    "integrationState": "validated",
+    "integrationClassification": "business-ui",
+    "validation": [
+      "e2e/frontend-v0-ftth-design.mjs",
+      "docs/integracao-v0/evidencias/rastreio/frontend-v0-ftth-design.json",
+      "apps/api-go/internal/modules/escrita/ftth_design_test.go"
+    ]
+  },
+  {
+    "id": "IN-06-FUSOES",
+    "backendState": "Implementada",
+    "entry": "Caixa FTTH → Portas → Fusões da caixa",
+    "functionality": "Fusões fibra a fibra na caixa",
+    "behavior": "Registrar fusão entre cabo A/fibra n e cabo B/fibra m ou porta da caixa, com perda medida opcional; o servidor confere faixa de fibras, cabos ativos e do mesmo POP, porta existente e unicidade da fibra na caixa (chave primária); remoção confirmada libera a fibra. O cadastro descreve o projeto e não prova conectividade física, continuidade óptica nem o trajeto real da fibra.",
+    "endpoints": "GET /api/ftth/boxes/:id/fusions; POST /api/ftth/boxes/:id/fusions; DELETE /api/ftth/fusions/:id",
+    "evidence": "E/ftth_fusions.go; M/00087_ftth_projeto_fisico.sql",
+    "integrationState": "validated",
+    "integrationClassification": "business-ui",
+    "validation": [
+      "e2e/frontend-v0-ftth-design.mjs",
+      "docs/integracao-v0/evidencias/rastreio/frontend-v0-ftth-design.json",
+      "apps/api-go/internal/modules/escrita/ftth_design_test.go"
+    ]
+  },
+  {
+    "id": "IN-06-OTDR",
+    "backendState": "Implementada",
+    "entry": "Cabo FTTH → Ficha → Medições OTDR",
+    "functionality": "Medições OTDR por cabo e fibra",
+    "behavior": "Registrar medição por fibra com data, comprimento de onda (1310/1550/1625 nm), distância, perda total, eventos, técnico e observações; arquivo bruto opcional (.sor ou outro, até 5 MB) guardado em bytea e baixado apenas com sessão autenticada. Medições são imutáveis. A medição registrada não é coletada do equipamento pelo NexoISP.",
+    "endpoints": "GET /api/ftth/cables/:id/otdr; POST /api/ftth/cables/:id/otdr; GET /api/ftth/cables/:id/otdr/:measurementId/file",
+    "evidence": "E/ftth_otdr.go; M/00087_ftth_projeto_fisico.sql",
+    "integrationState": "validated",
+    "integrationClassification": "business-ui",
+    "validation": [
+      "e2e/frontend-v0-ftth-design.mjs",
+      "docs/integracao-v0/evidencias/rastreio/frontend-v0-ftth-design.json",
+      "apps/api-go/internal/modules/escrita/ftth_design_test.go"
+    ]
+  },
+  {
+    "id": "IN-06-KML",
+    "backendState": "Implementada",
+    "entry": "/rede/ftth/fttx-cto?aba=kml",
+    "functionality": "Importação de projeto GIS em KML",
+    "behavior": "Enviar KML (UTF-8, até 5 MB) para um POP; a prévia não grava e lista caixas candidatas (pontos), cabos candidatos (linhas) e erros por item; a aplicação reprocessa o arquivo e grava tudo numa transação ou nada. KMZ, DTD e entidades são recusados; outras geometrias são listadas como ignoradas. O cadastro descreve o projeto e não prova conectividade física, continuidade óptica nem o trajeto real da fibra.",
+    "endpoints": "POST /api/ftth/gis/kml/preview; POST /api/ftth/gis/kml/apply",
+    "evidence": "E/ftth_kml.go",
+    "integrationState": "validated",
+    "integrationClassification": "business-ui",
+    "validation": [
+      "e2e/frontend-v0-ftth-design.mjs",
+      "docs/integracao-v0/evidencias/rastreio/frontend-v0-ftth-design.json",
+      "apps/api-go/internal/modules/escrita/ftth_design_test.go"
+    ]
   },
   {
     "id": "IN-07",

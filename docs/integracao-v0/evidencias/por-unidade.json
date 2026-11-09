@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-09T21:10:32.144Z",
+  "generated_at": "2026-11-09T22:08:12.950Z",
   "method": "Chamadas à API feitas pelas páginas entre uma verificação e a anterior, gravadas por e2e/request-trace.mjs durante a fumaça; preparação via context.request não conta.",
   "scenarios": [
     {
@@ -61,6 +61,11 @@
       "scenario": "frontend-v0-finance.mjs",
       "recorded_at": "2026-10-20T21:07:11.976Z",
       "checks": 1
+    },
+    {
+      "scenario": "frontend-v0-ftth-design.mjs",
+      "recorded_at": "2026-11-09T22:08:09.711Z",
+      "checks": 9
     },
     {
       "scenario": "frontend-v0-ftth.mjs",
@@ -188,8 +193,8 @@
       "checks": 1
     }
   ],
-  "validated_units": 161,
-  "units_with_interface_check": 161,
+  "validated_units": 165,
+  "units_with_interface_check": 165,
   "units": [
     {
       "id": "AC-01",
@@ -620,6 +625,71 @@
             "POST /api/auth/login",
             "GET /api/me",
             "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Cabo: cadastro com traçado, ponta em caixa, comprimento calculado pelo Go e filtros da lista.",
+          "endpoints": [
+            "POST /api/auth/login",
+            "GET /api/me",
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "OTDR: medição por fibra com eventos ordenados e download autenticado do arquivo bruto.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Fusões: fibra a fibra na ficha da caixa; o Go recusa a mesma fibra duas vezes na caixa.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Fusões: remoção confirmada libera a fibra na caixa.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "KML: prévia lista caixas e cabos candidatos com pontas e ignora polígonos sem gravar.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "KML: aplicação explícita grava caixas e cabos do POP numa única operação.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "KML: reimportação mostra erro por item e bloqueia a aplicação; DTD/entidades externas são recusados.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Mapa: camada de cabos ópticos desenha os traçados ativos da área consultada.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Cabos: arquivamento preserva o histórico; outro provedor não lê cabo nem arquivo OTDR.",
+          "endpoints": [
+            "GET /api/me"
           ]
         },
         {
@@ -1251,6 +1321,14 @@
           ]
         },
         {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Cabo: cadastro com traçado, ponta em caixa, comprimento calculado pelo Go e filtros da lista.",
+          "endpoints": [
+            "GET /api/health",
+            "POST /api/auth/login"
+          ]
+        },
+        {
           "scenario": "frontend-v0-network-sites.mjs",
           "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
           "endpoints": [
@@ -1780,6 +1858,69 @@
         {
           "scenario": "frontend-v0-finance.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Geração pela UI repetida preserva uma mensalidade por contrato/competência\",\"Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor\",\"Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento\",\"Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI\",\"Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos\",\"Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada\",\"Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido\",\"Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go\",\"Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis\",\"Faturas isoladas entre provedores e ações financeiras restritas pelo perfil\"]}",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Cabo: cadastro com traçado, ponta em caixa, comprimento calculado pelo Go e filtros da lista.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "OTDR: medição por fibra com eventos ordenados e download autenticado do arquivo bruto.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Fusões: fibra a fibra na ficha da caixa; o Go recusa a mesma fibra duas vezes na caixa.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Fusões: remoção confirmada libera a fibra na caixa.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "KML: prévia lista caixas e cabos candidatos com pontas e ignora polígonos sem gravar.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "KML: aplicação explícita grava caixas e cabos do POP numa única operação.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "KML: reimportação mostra erro por item e bloqueia a aplicação; DTD/entidades externas são recusados.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Mapa: camada de cabos ópticos desenha os traçados ativos da área consultada.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Cabos: arquivamento preserva o histórico; outro provedor não lê cabo nem arquivo OTDR.",
           "endpoints": [
             "GET /api/me"
           ]
@@ -2767,6 +2908,27 @@
         {
           "scenario": "frontend-v0-finance.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Geração pela UI repetida preserva uma mensalidade por contrato/competência\",\"Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor\",\"Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento\",\"Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI\",\"Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos\",\"Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada\",\"Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido\",\"Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go\",\"Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis\",\"Faturas isoladas entre provedores e ações financeiras restritas pelo perfil\"]}",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Cabo: cadastro com traçado, ponta em caixa, comprimento calculado pelo Go e filtros da lista.",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Mapa: camada de cabos ópticos desenha os traçados ativos da área consultada.",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Cabos: arquivamento preserva o histórico; outro provedor não lê cabo nem arquivo OTDR.",
           "endpoints": [
             "GET /api/today"
           ]
@@ -5443,6 +5605,34 @@
         {
           "scenario": "frontend-v0-finance.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Geração pela UI repetida preserva uma mensalidade por contrato/competência\",\"Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor\",\"Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento\",\"Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI\",\"Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos\",\"Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada\",\"Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido\",\"Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go\",\"Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis\",\"Faturas isoladas entre provedores e ações financeiras restritas pelo perfil\"]}",
+          "endpoints": [
+            "GET /api/pops"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Cabo: cadastro com traçado, ponta em caixa, comprimento calculado pelo Go e filtros da lista.",
+          "endpoints": [
+            "GET /api/pops"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "KML: prévia lista caixas e cabos candidatos com pontas e ignora polígonos sem gravar.",
+          "endpoints": [
+            "GET /api/pops"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Mapa: camada de cabos ópticos desenha os traçados ativos da área consultada.",
+          "endpoints": [
+            "GET /api/pops"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Cabos: arquivamento preserva o histórico; outro provedor não lê cabo nem arquivo OTDR.",
           "endpoints": [
             "GET /api/pops"
           ]
@@ -10172,6 +10362,27 @@
       "not_exercised_by_interface": [],
       "checks": [
         {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Cabo: cadastro com traçado, ponta em caixa, comprimento calculado pelo Go e filtros da lista.",
+          "endpoints": [
+            "GET /api/ftth/boxes"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "KML: aplicação explícita grava caixas e cabos do POP numa única operação.",
+          "endpoints": [
+            "GET /api/ftth/boxes"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Cabos: arquivamento preserva o histórico; outro provedor não lê cabo nem arquivo OTDR.",
+          "endpoints": [
+            "GET /api/ftth/boxes"
+          ]
+        },
+        {
           "scenario": "frontend-v0-ftth.mjs",
           "check": "Cadastro CEO/CTO, coordenadas em conjunto, hierarquia, OLT/PON e edição persistem no Go",
           "endpoints": [
@@ -10253,14 +10464,45 @@
       "functionality": "Projeto físico completo da rede óptica",
       "declared_endpoints": [
         "GET /api/ftth/boxes",
-        "GET /api/map/points"
+        "GET /api/map/points",
+        "GET /api/ftth/cables/map"
       ],
       "exercised_by_interface": [
         "GET /api/ftth/boxes",
+        "GET /api/ftth/cables/map",
         "GET /api/map/points"
       ],
       "not_exercised_by_interface": [],
       "checks": [
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Cabo: cadastro com traçado, ponta em caixa, comprimento calculado pelo Go e filtros da lista.",
+          "endpoints": [
+            "GET /api/ftth/boxes"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "KML: aplicação explícita grava caixas e cabos do POP numa única operação.",
+          "endpoints": [
+            "GET /api/ftth/boxes"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Mapa: camada de cabos ópticos desenha os traçados ativos da área consultada.",
+          "endpoints": [
+            "GET /api/map/points",
+            "GET /api/ftth/cables/map"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Cabos: arquivamento preserva o histórico; outro provedor não lê cabo nem arquivo OTDR.",
+          "endpoints": [
+            "GET /api/ftth/boxes"
+          ]
+        },
         {
           "scenario": "frontend-v0-ftth.mjs",
           "check": "Cadastro CEO/CTO, coordenadas em conjunto, hierarquia, OLT/PON e edição persistem no Go",
@@ -10323,6 +10565,161 @@
           "check": "Mapa mantém consulta no celular, isolamento por provedor e CSP; blocos OSM foram interceptados apenas no teste",
           "endpoints": [
             "GET /api/map/points"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "IN-06-CABOS",
+      "functionality": "Cabos ópticos com traçado",
+      "declared_endpoints": [
+        "GET /api/ftth/cables",
+        "GET /api/ftth/cables/:id",
+        "POST /api/ftth/cables",
+        "PATCH /api/ftth/cables/:id",
+        "GET /api/ftth/cables/map"
+      ],
+      "exercised_by_interface": [
+        "GET /api/ftth/cables",
+        "GET /api/ftth/cables/:id",
+        "GET /api/ftth/cables/map",
+        "PATCH /api/ftth/cables/:id",
+        "POST /api/ftth/cables"
+      ],
+      "not_exercised_by_interface": [],
+      "checks": [
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Cabo: cadastro com traçado, ponta em caixa, comprimento calculado pelo Go e filtros da lista.",
+          "endpoints": [
+            "GET /api/ftth/cables",
+            "POST /api/ftth/cables"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "OTDR: medição por fibra com eventos ordenados e download autenticado do arquivo bruto.",
+          "endpoints": [
+            "GET /api/ftth/cables",
+            "GET /api/ftth/cables/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Fusões: fibra a fibra na ficha da caixa; o Go recusa a mesma fibra duas vezes na caixa.",
+          "endpoints": [
+            "GET /api/ftth/cables"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Mapa: camada de cabos ópticos desenha os traçados ativos da área consultada.",
+          "endpoints": [
+            "GET /api/ftth/cables/:id",
+            "GET /api/ftth/cables/map"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Cabos: arquivamento preserva o histórico; outro provedor não lê cabo nem arquivo OTDR.",
+          "endpoints": [
+            "GET /api/ftth/cables",
+            "PATCH /api/ftth/cables/:id"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "IN-06-FUSOES",
+      "functionality": "Fusões fibra a fibra na caixa",
+      "declared_endpoints": [
+        "GET /api/ftth/boxes/:id/fusions",
+        "POST /api/ftth/boxes/:id/fusions",
+        "DELETE /api/ftth/fusions/:id"
+      ],
+      "exercised_by_interface": [
+        "DELETE /api/ftth/fusions/:id",
+        "GET /api/ftth/boxes/:id/fusions",
+        "POST /api/ftth/boxes/:id/fusions"
+      ],
+      "not_exercised_by_interface": [],
+      "checks": [
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Fusões: fibra a fibra na ficha da caixa; o Go recusa a mesma fibra duas vezes na caixa.",
+          "endpoints": [
+            "GET /api/ftth/boxes/:id/fusions",
+            "POST /api/ftth/boxes/:id/fusions"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Fusões: remoção confirmada libera a fibra na caixa.",
+          "endpoints": [
+            "GET /api/ftth/boxes/:id/fusions",
+            "DELETE /api/ftth/fusions/:id"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "IN-06-OTDR",
+      "functionality": "Medições OTDR por cabo e fibra",
+      "declared_endpoints": [
+        "GET /api/ftth/cables/:id/otdr",
+        "POST /api/ftth/cables/:id/otdr",
+        "GET /api/ftth/cables/:id/otdr/:measurementId/file"
+      ],
+      "exercised_by_interface": [
+        "GET /api/ftth/cables/:id/otdr",
+        "GET /api/ftth/cables/:id/otdr/:measurementId/file",
+        "POST /api/ftth/cables/:id/otdr"
+      ],
+      "not_exercised_by_interface": [],
+      "checks": [
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "OTDR: medição por fibra com eventos ordenados e download autenticado do arquivo bruto.",
+          "endpoints": [
+            "GET /api/ftth/cables/:id/otdr",
+            "POST /api/ftth/cables/:id/otdr",
+            "GET /api/ftth/cables/:id/otdr/:measurementId/file"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "IN-06-KML",
+      "functionality": "Importação de projeto GIS em KML",
+      "declared_endpoints": [
+        "POST /api/ftth/gis/kml/preview",
+        "POST /api/ftth/gis/kml/apply"
+      ],
+      "exercised_by_interface": [
+        "POST /api/ftth/gis/kml/apply",
+        "POST /api/ftth/gis/kml/preview"
+      ],
+      "not_exercised_by_interface": [],
+      "checks": [
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "KML: prévia lista caixas e cabos candidatos com pontas e ignora polígonos sem gravar.",
+          "endpoints": [
+            "POST /api/ftth/gis/kml/preview"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "KML: aplicação explícita grava caixas e cabos do POP numa única operação.",
+          "endpoints": [
+            "POST /api/ftth/gis/kml/apply"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "KML: reimportação mostra erro por item e bloqueia a aplicação; DTD/entidades externas são recusados.",
+          "endpoints": [
+            "POST /api/ftth/gis/kml/preview"
           ]
         }
       ]
@@ -10399,6 +10796,13 @@
       ],
       "not_exercised_by_interface": [],
       "checks": [
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Mapa: camada de cabos ópticos desenha os traçados ativos da área consultada.",
+          "endpoints": [
+            "GET /api/map/points"
+          ]
+        },
         {
           "scenario": "frontend-v0-map.mjs",
           "check": "Localização do contrato é gravada pelo endpoint Go, sem geocodificação nem aproximação de endereço",
@@ -11139,6 +11543,34 @@
         {
           "scenario": "frontend-v0-finance.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Geração pela UI repetida preserva uma mensalidade por contrato/competência\",\"Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor\",\"Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento\",\"Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI\",\"Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos\",\"Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada\",\"Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido\",\"Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go\",\"Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis\",\"Faturas isoladas entre provedores e ações financeiras restritas pelo perfil\"]}",
+          "endpoints": [
+            "GET /api/pops"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Cabo: cadastro com traçado, ponta em caixa, comprimento calculado pelo Go e filtros da lista.",
+          "endpoints": [
+            "GET /api/pops"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "KML: prévia lista caixas e cabos candidatos com pontas e ignora polígonos sem gravar.",
+          "endpoints": [
+            "GET /api/pops"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Mapa: camada de cabos ópticos desenha os traçados ativos da área consultada.",
+          "endpoints": [
+            "GET /api/pops"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Cabos: arquivamento preserva o histórico; outro provedor não lê cabo nem arquivo OTDR.",
           "endpoints": [
             "GET /api/pops"
           ]
@@ -13152,6 +13584,13 @@
       "not_exercised_by_interface": [],
       "checks": [
         {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Cabo: cadastro com traçado, ponta em caixa, comprimento calculado pelo Go e filtros da lista.",
+          "endpoints": [
+            "GET /api/network/sites"
+          ]
+        },
+        {
           "scenario": "frontend-v0-network-sites.mjs",
           "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
           "endpoints": [
@@ -13666,6 +14105,27 @@
         {
           "scenario": "frontend-v0-finance.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Geração pela UI repetida preserva uma mensalidade por contrato/competência\",\"Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor\",\"Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento\",\"Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI\",\"Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos\",\"Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada\",\"Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido\",\"Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go\",\"Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis\",\"Faturas isoladas entre provedores e ações financeiras restritas pelo perfil\"]}",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Cabo: cadastro com traçado, ponta em caixa, comprimento calculado pelo Go e filtros da lista.",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Mapa: camada de cabos ópticos desenha os traçados ativos da área consultada.",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-ftth-design.mjs",
+          "check": "Cabos: arquivamento preserva o histórico; outro provedor não lê cabo nem arquivo OTDR.",
           "endpoints": [
             "GET /api/today"
           ]
