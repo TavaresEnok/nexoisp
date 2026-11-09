@@ -1,0 +1,32 @@
+{
+  "scenario": "frontend-v0-monitoring.mjs",
+  "recorded_at": "2026-11-09T22:14:25.069Z",
+  "steps": [
+    {
+      "check": "Acompanhamento: saúde da API e do banco, agentes, operações, filas e rotinas sem conteúdo sensível",
+      "requests": [
+        "GET /api/health",
+        "GET /api/me",
+        "GET /api/monitoring/overview",
+        "GET /api/today",
+        "POST /api/auth/login"
+      ]
+    },
+    {
+      "check": "Acompanhamento: atualização manual consulta novamente o agregado do servidor",
+      "requests": [
+        "GET /api/health",
+        "GET /api/monitoring/overview"
+      ]
+    },
+    {
+      "check": "Acompanhamento: financeiro sem permissão de rede é bloqueado e cada provedor vê apenas os próprios agentes",
+      "requests": [
+        "GET /api/health",
+        "GET /api/me",
+        "GET /api/today",
+        "POST /api/auth/login"
+      ]
+    }
+  ]
+}

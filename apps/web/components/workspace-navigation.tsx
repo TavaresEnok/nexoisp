@@ -453,11 +453,12 @@ export function WorkspaceNavigation({
               )}
               onClick={onNavigate}
               aria-current={pathname === "/acompanhamento" ? "page" : undefined}
-              title="Consolidação e evidências"
-              aria-label="Consolidação e evidências"
+              title={shell ? "Acompanhamento operacional" : "Consolidação e evidências"}
+              aria-label={shell ? "Acompanhamento operacional" : "Consolidação e evidências"}
             >
               <ShieldCheck size={17} />
-              <span>Consolidação e evidências</span>
+              {/* A demonstração mantém a tela original de consolidação; o ERP abre o painel operacional. */}
+              <span>{shell ? "Acompanhamento operacional" : "Consolidação e evidências"}</span>
             </Link>
           )}
         </div>

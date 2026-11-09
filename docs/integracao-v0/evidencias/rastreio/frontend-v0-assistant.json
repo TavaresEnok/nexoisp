@@ -1,0 +1,51 @@
+{
+  "scenario": "frontend-v0-assistant.mjs",
+  "recorded_at": "2026-11-09T22:14:29.979Z",
+  "steps": [
+    {
+      "check": "Assistente: busca de cliente pela busca global com link para a ficha",
+      "requests": [
+        "GET /api/health",
+        "GET /api/me",
+        "GET /api/search",
+        "GET /api/today",
+        "POST /api/auth/login"
+      ]
+    },
+    {
+      "check": "Assistente: diagnóstico NOC do contrato encontrado, sem executar comandos na rede",
+      "requests": [
+        "GET /api/contracts/:id/diagnosis"
+      ]
+    },
+    {
+      "check": "Assistente: faturas vencidas do cliente e da carteira pelo financeiro",
+      "requests": [
+        "GET /api/invoices"
+      ]
+    },
+    {
+      "check": "Assistente: ordens de serviço abertas de hoje e do cliente com link para a OS",
+      "requests": [
+        "GET /api/work-orders"
+      ]
+    },
+    {
+      "check": "Assistente: consulta de IP no instante informado, com referência legal e auditoria",
+      "requests": [
+        "GET /api/me",
+        "GET /api/search",
+        "POST /api/legal/ip-lookup"
+      ]
+    },
+    {
+      "check": "Assistente: pergunta não reconhecida mostra sugestões e a sessão sem permissão não consulta ordens de serviço",
+      "requests": [
+        "GET /api/health",
+        "GET /api/me",
+        "GET /api/today",
+        "POST /api/auth/login"
+      ]
+    }
+  ]
+}

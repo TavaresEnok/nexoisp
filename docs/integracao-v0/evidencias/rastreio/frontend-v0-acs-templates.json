@@ -1,0 +1,33 @@
+{
+  "scenario": "frontend-v0-acs-templates.mjs",
+  "recorded_at": "2026-11-09T22:14:22.244Z",
+  "steps": [
+    {
+      "check": "Templates ACS: cadastro recusa variável desconhecida e grava parâmetros TR-098, curingas e inform periódico",
+      "requests": [
+        "GET /api/acs/templates",
+        "GET /api/health",
+        "GET /api/me",
+        "GET /api/today",
+        "POST /api/acs/templates",
+        "POST /api/auth/login"
+      ]
+    },
+    {
+      "check": "Templates ACS: consulta, edição com nova revisão, inativação e reativação pela tela",
+      "requests": [
+        "GET /api/acs/templates",
+        "GET /api/me",
+        "PATCH /api/acs/templates/:id"
+      ]
+    },
+    {
+      "check": "Templates ACS: exclusão auditada, isolamento entre provedores e bloqueio sem permissão de rede",
+      "requests": [
+        "DELETE /api/acs/templates/:id",
+        "GET /api/acs/templates",
+        "GET /api/me"
+      ]
+    }
+  ]
+}

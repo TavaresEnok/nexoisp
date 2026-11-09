@@ -1,0 +1,67 @@
+{
+  "scenario": "frontend-v0-acs-template-apply.mjs",
+  "recorded_at": "2026-11-09T22:15:50.062Z",
+  "steps": [
+    {
+      "check": "Template ACS: a ficha sugere o template mais específico que casa com fabricante, modelo e firmware do CPE",
+      "requests": [
+        "GET /api/acs/status",
+        "GET /api/addons",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/cpe",
+        "GET /api/contracts/:id/cpe/candidates",
+        "GET /api/contracts/:id/cpe/tasks",
+        "GET /api/contracts/:id/cpe/templates",
+        "GET /api/contracts/:id/ftth",
+        "GET /api/contracts/:id/ips",
+        "GET /api/contracts/:id/ipv6",
+        "GET /api/contracts/:id/onu",
+        "GET /api/contracts/:id/service",
+        "GET /api/contracts/:id/states",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/today",
+        "POST /api/contracts/:id/cpe/link"
+      ]
+    },
+    {
+      "check": "Template ACS: pré-visualização resolve variáveis do contrato e mascara a senha do Wi-Fi",
+      "requests": [
+        "GET /api/me",
+        "POST /api/contracts/:id/cpe/template/preview"
+      ]
+    },
+    {
+      "check": "Template ACS: aplicação gera uma única intenção durável, enviada pelo diário ACS e confirmada por leitura",
+      "requests": [
+        "GET /api/addons",
+        "GET /api/contracts",
+        "GET /api/contracts/:id",
+        "GET /api/contracts/:id/addons",
+        "GET /api/contracts/:id/cpe",
+        "GET /api/contracts/:id/cpe/tasks",
+        "GET /api/contracts/:id/ftth",
+        "GET /api/contracts/:id/ips",
+        "GET /api/contracts/:id/ipv6",
+        "GET /api/contracts/:id/onu",
+        "GET /api/contracts/:id/service",
+        "GET /api/contracts/:id/states",
+        "GET /api/me",
+        "GET /api/plans",
+        "GET /api/today",
+        "POST /api/contracts/:id/cpe/template"
+      ]
+    },
+    {
+      "check": "Template ACS: isolamento entre provedores e desvínculo ao final, sem roteador físico",
+      "requests": [
+        "DELETE /api/contracts/:id/cpe/link",
+        "GET /api/acs/status",
+        "GET /api/contracts/:id/cpe",
+        "GET /api/me"
+      ]
+    }
+  ]
+}

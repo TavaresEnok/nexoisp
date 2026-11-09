@@ -1,11 +1,21 @@
 {
-  "generated_at": "2026-11-09T22:09:22.779Z",
+  "generated_at": "2026-11-09T22:16:09.017Z",
   "method": "Chamadas à API feitas pelas páginas entre uma verificação e a anterior, gravadas por e2e/request-trace.mjs durante a fumaça; preparação via context.request não conta.",
   "scenarios": [
     {
       "scenario": "frontend-v0-access.mjs",
       "recorded_at": "2026-11-09T21:47:31.037Z",
       "checks": 12
+    },
+    {
+      "scenario": "frontend-v0-acs-template-apply.mjs",
+      "recorded_at": "2026-11-09T22:15:50.062Z",
+      "checks": 4
+    },
+    {
+      "scenario": "frontend-v0-acs-templates.mjs",
+      "recorded_at": "2026-11-09T22:14:22.244Z",
+      "checks": 3
     },
     {
       "scenario": "frontend-v0-admin-reports.mjs",
@@ -16,6 +26,11 @@
       "scenario": "frontend-v0-admin-team.mjs",
       "recorded_at": "2026-11-09T21:48:51.736Z",
       "checks": 7
+    },
+    {
+      "scenario": "frontend-v0-assistant.mjs",
+      "recorded_at": "2026-11-09T22:14:29.979Z",
+      "checks": 6
     },
     {
       "scenario": "frontend-v0-cgnat-legal.mjs",
@@ -29,7 +44,7 @@
     },
     {
       "scenario": "frontend-v0-cpe.mjs",
-      "recorded_at": "2026-10-20T21:10:02.004Z",
+      "recorded_at": "2026-11-09T22:16:05.399Z",
       "checks": 5
     },
     {
@@ -106,6 +121,11 @@
       "scenario": "frontend-v0-messages.mjs",
       "recorded_at": "2026-11-09T21:49:54.641Z",
       "checks": 5
+    },
+    {
+      "scenario": "frontend-v0-monitoring.mjs",
+      "recorded_at": "2026-11-09T22:14:25.069Z",
+      "checks": 3
     },
     {
       "scenario": "frontend-v0-network-final.mjs",
@@ -199,8 +219,8 @@
     },
     {
       "scenario": "frontend-v0-workspace.mjs",
-      "recorded_at": "2026-11-09T21:48:04.615Z",
-      "checks": 6
+      "recorded_at": "2026-11-09T22:14:38.155Z",
+      "checks": 3
     },
     {
       "scenario": "frontend-v0.mjs",
@@ -208,8 +228,8 @@
       "checks": 1
     }
   ],
-  "validated_units": 165,
-  "units_with_interface_check": 165,
+  "validated_units": 169,
+  "units_with_interface_check": 169,
   "units": [
     {
       "id": "AC-01",
@@ -313,6 +333,57 @@
           ]
         },
         {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: a ficha sugere o template mais específico que casa com fabricante, modelo e firmware do CPE",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: pré-visualização resolve variáveis do contrato e mascara a senha do Wi-Fi",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: aplicação gera uma única intenção durável, enviada pelo diário ACS e confirmada por leitura",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: isolamento entre provedores e desvínculo ao final, sem roteador físico",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-templates.mjs",
+          "check": "Templates ACS: cadastro recusa variável desconhecida e grava parâmetros TR-098, curingas e inform periódico",
+          "endpoints": [
+            "POST /api/auth/login",
+            "GET /api/me",
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-templates.mjs",
+          "check": "Templates ACS: consulta, edição com nova revisão, inativação e reativação pela tela",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-templates.mjs",
+          "check": "Templates ACS: exclusão auditada, isolamento entre provedores e bloqueio sem permissão de rede",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
           "scenario": "frontend-v0-admin-reports.mjs",
           "check": "Auditoria pagina registros reais e exibe detalhes; retenção salva no Go e rejeita prazo de conexão abaixo do limite",
           "endpoints": [
@@ -390,6 +461,31 @@
           ]
         },
         {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: busca de cliente pela busca global com link para a ficha",
+          "endpoints": [
+            "POST /api/auth/login",
+            "GET /api/me",
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: consulta de IP no instante informado, com referência legal e auditoria",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: pergunta não reconhecida mostra sugestões e a sessão sem permissão não consulta ordens de serviço",
+          "endpoints": [
+            "POST /api/auth/login",
+            "GET /api/me",
+            "GET /api/health"
+          ]
+        },
+        {
           "scenario": "frontend-v0-cgnat-legal.mjs",
           "check": "UI consulta capacidade no Go, cria plano imutável, apresenta mapa/lookup e exporta script sem aplicá-lo ao NAS",
           "endpoints": [
@@ -436,6 +532,34 @@
         {
           "scenario": "frontend-v0-cpe.mjs",
           "check": "Pesquisa por série, confirmação e vínculo TR-098 persistem no Go com WAN e Wi-Fi reais do ACS sintético",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Alteração de Wi-Fi valida senha e separa preparação, aceite e leitura fresca; consultas de estado não recuperam a senha",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Releitura e reinício enviam tarefas ao ACS e reinício exige confirmação explícita",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "TR-181 enfileirado mantém o SSID observado e informa que a alteração depende do próximo contato do roteador",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Isolamento por provedor, apresentação no celular e desvínculo são validados sem tocar em roteador físico; após o desvínculo, o endereço público do ACS (GET /api/acs/status) orienta a configuração",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1062,6 +1186,31 @@
           "check": "Histórico conserva envio e recusa por consentimento; regras, modelos e canais podem ser excluídos após remover referências",
           "endpoints": [
             "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-monitoring.mjs",
+          "check": "Acompanhamento: saúde da API e do banco, agentes, operações, filas e rotinas sem conteúdo sensível",
+          "endpoints": [
+            "POST /api/auth/login",
+            "GET /api/me",
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-monitoring.mjs",
+          "check": "Acompanhamento: atualização manual consulta novamente o agregado do servidor",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-monitoring.mjs",
+          "check": "Acompanhamento: financeiro sem permissão de rede é bloqueado e cada provedor vê apenas os próprios agentes",
+          "endpoints": [
+            "POST /api/auth/login",
+            "GET /api/me",
+            "GET /api/health"
           ]
         },
         {
@@ -1721,28 +1870,7 @@
         },
         {
           "scenario": "frontend-v0-workspace.mjs",
-          "check": "Visão inicial usa indicadores, caixa, ativações/encerramentos e prioridades do Go; o alerta abre o NOC correspondente",
-          "endpoints": [
-            "GET /api/me"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Tema persiste após recarga e navegação móvel utiliza o shell oficial",
-          "endpoints": [
-            "GET /api/me"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Resultados respeitam a apresentação por perfil; suporte mantém provedor visível e saída real restaura a conta SaaS",
-          "endpoints": [
-            "GET /api/me"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Falha na busca operacional não seleciona registros demonstrativos",
+          "check": "(sem verificação posterior)",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1771,6 +1899,30 @@
       ],
       "not_exercised_by_interface": [],
       "checks": [
+        {
+          "scenario": "frontend-v0-acs-templates.mjs",
+          "check": "Templates ACS: cadastro recusa variável desconhecida e grava parâmetros TR-098, curingas e inform periódico",
+          "endpoints": [
+            "GET /api/health",
+            "POST /api/auth/login"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: busca de cliente pela busca global com link para a ficha",
+          "endpoints": [
+            "GET /api/health",
+            "POST /api/auth/login"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: pergunta não reconhecida mostra sugestões e a sessão sem permissão não consulta ordens de serviço",
+          "endpoints": [
+            "GET /api/health",
+            "POST /api/auth/login"
+          ]
+        },
         {
           "scenario": "frontend-v0-commercial.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Plano criado pela UI; nova versão mantém o preço e a versão do contrato existente\",\"Políticas de cobrança/fidelidade e parâmetros de rede salvos; reaplicação reporta solicitações reais\",\"Filtros de plano/titular aplicados no Go com contagem correta e UUID inválido rejeitado\",\"Troca para versão atual do plano, vencimento e restrição de crédito persistidos\",\"Área, endereço específico e etiquetas do contrato salvos pelo layout v0\",\"Fidelidade/cotação, desconto e cancelamento, agendamento/cancelamento, aditivo e solicitação/cancelamento de aceite\",\"Adicional criado, contratado com quantidade e preço preservado após alteração do catálogo; encerramento registrado\",\"Encerramento definitivo em duas etapas, com multa dispensada e justificativa registrada pelo Go\",\"Isolamento entre provedores mantido nos detalhes e novos filtros comerciais\",\"Paginação, busca que reinicia a página, filtro de situação e exportação CSV comercial\"]}",
@@ -1806,6 +1958,29 @@
         {
           "scenario": "frontend-v0-finance.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Geração pela UI repetida preserva uma mensalidade por contrato/competência\",\"Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor\",\"Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento\",\"Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI\",\"Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos\",\"Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada\",\"Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido\",\"Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go\",\"Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis\",\"Faturas isoladas entre provedores e ações financeiras restritas pelo perfil\"]}",
+          "endpoints": [
+            "GET /api/health",
+            "POST /api/auth/login"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-monitoring.mjs",
+          "check": "Acompanhamento: saúde da API e do banco, agentes, operações, filas e rotinas sem conteúdo sensível",
+          "endpoints": [
+            "GET /api/health",
+            "POST /api/auth/login"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-monitoring.mjs",
+          "check": "Acompanhamento: atualização manual consulta novamente o agregado do servidor",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-monitoring.mjs",
+          "check": "Acompanhamento: financeiro sem permissão de rede é bloqueado e cada provedor vê apenas os próprios agentes",
           "endpoints": [
             "GET /api/health",
             "POST /api/auth/login"
@@ -1927,22 +2102,22 @@
       "not_exercised_by_interface": [],
       "checks": [
         {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: busca de cliente pela busca global com link para a ficha",
+          "endpoints": [
+            "GET /api/search"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: consulta de IP no instante informado, com referência legal e auditoria",
+          "endpoints": [
+            "GET /api/search"
+          ]
+        },
+        {
           "scenario": "frontend-v0-workspace.mjs",
           "check": "Busca operacional encontra nome, login, IP, MAC, ONU e OS e abre fichas reais de assinante e contrato",
-          "endpoints": [
-            "GET /api/search"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Resultados respeitam a apresentação por perfil; suporte mantém provedor visível e saída real restaura a conta SaaS",
-          "endpoints": [
-            "GET /api/search"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Falha na busca operacional não seleciona registros demonstrativos",
           "endpoints": [
             "GET /api/search"
           ]
@@ -2047,6 +2222,55 @@
           ]
         },
         {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: a ficha sugere o template mais específico que casa com fabricante, modelo e firmware do CPE",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: pré-visualização resolve variáveis do contrato e mascara a senha do Wi-Fi",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: aplicação gera uma única intenção durável, enviada pelo diário ACS e confirmada por leitura",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: isolamento entre provedores e desvínculo ao final, sem roteador físico",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-templates.mjs",
+          "check": "Templates ACS: cadastro recusa variável desconhecida e grava parâmetros TR-098, curingas e inform periódico",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-templates.mjs",
+          "check": "Templates ACS: consulta, edição com nova revisão, inativação e reativação pela tela",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-templates.mjs",
+          "check": "Templates ACS: exclusão auditada, isolamento entre provedores e bloqueio sem permissão de rede",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
           "scenario": "frontend-v0-admin-reports.mjs",
           "check": "Auditoria pagina registros reais e exibe detalhes; retenção salva no Go e rejeita prazo de conexão abaixo do limite",
           "endpoints": [
@@ -2124,6 +2348,27 @@
           ]
         },
         {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: busca de cliente pela busca global com link para a ficha",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: consulta de IP no instante informado, com referência legal e auditoria",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: pergunta não reconhecida mostra sugestões e a sessão sem permissão não consulta ordens de serviço",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
           "scenario": "frontend-v0-cgnat-legal.mjs",
           "check": "UI consulta capacidade no Go, cria plano imutável, apresenta mapa/lookup e exporta script sem aplicá-lo ao NAS",
           "endpoints": [
@@ -2168,6 +2413,34 @@
         {
           "scenario": "frontend-v0-cpe.mjs",
           "check": "Pesquisa por série, confirmação e vínculo TR-098 persistem no Go com WAN e Wi-Fi reais do ACS sintético",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Alteração de Wi-Fi valida senha e separa preparação, aceite e leitura fresca; consultas de estado não recuperam a senha",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Releitura e reinício enviam tarefas ao ACS e reinício exige confirmação explícita",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "TR-181 enfileirado mantém o SSID observado e informa que a alteração depende do próximo contato do roteador",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Isolamento por provedor, apresentação no celular e desvínculo são validados sem tocar em roteador físico; após o desvínculo, o endereço público do ACS (GET /api/acs/status) orienta a configuração",
           "endpoints": [
             "GET /api/me"
           ]
@@ -2784,6 +3057,20 @@
         {
           "scenario": "frontend-v0-messages.mjs",
           "check": "Histórico conserva envio e recusa por consentimento; regras, modelos e canais podem ser excluídos após remover referências",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-monitoring.mjs",
+          "check": "Acompanhamento: saúde da API e do banco, agentes, operações, filas e rotinas sem conteúdo sensível",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-monitoring.mjs",
+          "check": "Acompanhamento: financeiro sem permissão de rede é bloqueado e cada provedor vê apenas os próprios agentes",
           "endpoints": [
             "GET /api/me"
           ]
@@ -3414,29 +3701,7 @@
         },
         {
           "scenario": "frontend-v0-workspace.mjs",
-          "check": "Visão inicial usa indicadores, caixa, ativações/encerramentos e prioridades do Go; o alerta abre o NOC correspondente",
-          "endpoints": [
-            "GET /api/me"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Tema persiste após recarga e navegação móvel utiliza o shell oficial",
-          "endpoints": [
-            "GET /api/me"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Resultados respeitam a apresentação por perfil; suporte mantém provedor visível e saída real restaura a conta SaaS",
-          "endpoints": [
-            "POST /api/support/exit",
-            "GET /api/me"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Falha na busca operacional não seleciona registros demonstrativos",
+          "check": "(sem verificação posterior)",
           "endpoints": [
             "GET /api/me"
           ]
@@ -3530,6 +3795,27 @@
           ]
         },
         {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: a ficha sugere o template mais específico que casa com fabricante, modelo e firmware do CPE",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: aplicação gera uma única intenção durável, enviada pelo diário ACS e confirmada por leitura",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-templates.mjs",
+          "check": "Templates ACS: cadastro recusa variável desconhecida e grava parâmetros TR-098, curingas e inform periódico",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
           "scenario": "frontend-v0-admin-reports.mjs",
           "check": "Auditoria pagina registros reais e exibe detalhes; retenção salva no Go e rejeita prazo de conexão abaixo do limite",
           "endpoints": [
@@ -3586,6 +3872,20 @@
           ]
         },
         {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: busca de cliente pela busca global com link para a ficha",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: pergunta não reconhecida mostra sugestões e a sessão sem permissão não consulta ordens de serviço",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
           "scenario": "frontend-v0-cgnat-legal.mjs",
           "check": "UI consulta capacidade no Go, cria plano imutável, apresenta mapa/lookup e exporta script sem aplicá-lo ao NAS",
           "endpoints": [
@@ -3610,6 +3910,27 @@
         {
           "scenario": "frontend-v0-cpe.mjs",
           "check": "Pesquisa por série, confirmação e vínculo TR-098 persistem no Go com WAN e Wi-Fi reais do ACS sintético",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Alteração de Wi-Fi valida senha e separa preparação, aceite e leitura fresca; consultas de estado não recuperam a senha",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Releitura e reinício enviam tarefas ao ACS e reinício exige confirmação explícita",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Isolamento por provedor, apresentação no celular e desvínculo são validados sem tocar em roteador físico; após o desvínculo, o endereço público do ACS (GET /api/acs/status) orienta a configuração",
           "endpoints": [
             "GET /api/today"
           ]
@@ -4024,6 +4345,20 @@
         {
           "scenario": "frontend-v0-messages.mjs",
           "check": "Histórico conserva envio e recusa por consentimento; regras, modelos e canais podem ser excluídos após remover referências",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-monitoring.mjs",
+          "check": "Acompanhamento: saúde da API e do banco, agentes, operações, filas e rotinas sem conteúdo sensível",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-monitoring.mjs",
+          "check": "Acompanhamento: financeiro sem permissão de rede é bloqueado e cada provedor vê apenas os próprios agentes",
           "endpoints": [
             "GET /api/today"
           ]
@@ -4454,31 +4789,9 @@
         },
         {
           "scenario": "frontend-v0-workspace.mjs",
-          "check": "Visão inicial usa indicadores, caixa, ativações/encerramentos e prioridades do Go; o alerta abre o NOC correspondente",
+          "check": "(sem verificação posterior)",
           "endpoints": [
             "GET /api/dashboard",
-            "GET /api/today"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Tema persiste após recarga e navegação móvel utiliza o shell oficial",
-          "endpoints": [
-            "GET /api/today"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Resultados respeitam a apresentação por perfil; suporte mantém provedor visível e saída real restaura a conta SaaS",
-          "endpoints": [
-            "GET /api/dashboard",
-            "GET /api/today"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Falha na busca operacional não seleciona registros demonstrativos",
-          "endpoints": [
             "GET /api/today"
           ]
         },
@@ -4561,14 +4874,7 @@
         },
         {
           "scenario": "frontend-v0-workspace.mjs",
-          "check": "Visão inicial usa indicadores, caixa, ativações/encerramentos e prioridades do Go; o alerta abre o NOC correspondente",
-          "endpoints": [
-            "GET /api/dashboard/panels"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Resultados respeitam a apresentação por perfil; suporte mantém provedor visível e saída real restaura a conta SaaS",
+          "check": "(sem verificação posterior)",
           "endpoints": [
             "GET /api/dashboard/panels"
           ]
@@ -5458,6 +5764,20 @@
           ]
         },
         {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: a ficha sugere o template mais específico que casa com fabricante, modelo e firmware do CPE",
+          "endpoints": [
+            "GET /api/plans"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: aplicação gera uma única intenção durável, enviada pelo diário ACS e confirmada por leitura",
+          "endpoints": [
+            "GET /api/plans"
+          ]
+        },
+        {
           "scenario": "frontend-v0-admin-team.mjs",
           "check": "Empresa do contrato usa cadastro real e filtro de faturas conserva o vínculo na URL",
           "endpoints": [
@@ -5478,6 +5798,27 @@
         {
           "scenario": "frontend-v0-cpe.mjs",
           "check": "Pesquisa por série, confirmação e vínculo TR-098 persistem no Go com WAN e Wi-Fi reais do ACS sintético",
+          "endpoints": [
+            "GET /api/plans"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Alteração de Wi-Fi valida senha e separa preparação, aceite e leitura fresca; consultas de estado não recuperam a senha",
+          "endpoints": [
+            "GET /api/plans"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Releitura e reinício enviam tarefas ao ACS e reinício exige confirmação explícita",
+          "endpoints": [
+            "GET /api/plans"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Isolamento por provedor, apresentação no celular e desvínculo são validados sem tocar em roteador físico; após o desvínculo, o endereço público do ACS (GET /api/acs/status) orienta a configuração",
           "endpoints": [
             "GET /api/plans"
           ]
@@ -5801,6 +6142,20 @@
           ]
         },
         {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: a ficha sugere o template mais específico que casa com fabricante, modelo e firmware do CPE",
+          "endpoints": [
+            "GET /api/addons"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: aplicação gera uma única intenção durável, enviada pelo diário ACS e confirmada por leitura",
+          "endpoints": [
+            "GET /api/addons"
+          ]
+        },
+        {
           "scenario": "frontend-v0-admin-team.mjs",
           "check": "Empresa do contrato usa cadastro real e filtro de faturas conserva o vínculo na URL",
           "endpoints": [
@@ -5819,6 +6174,27 @@
         {
           "scenario": "frontend-v0-cpe.mjs",
           "check": "Pesquisa por série, confirmação e vínculo TR-098 persistem no Go com WAN e Wi-Fi reais do ACS sintético",
+          "endpoints": [
+            "GET /api/addons"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Alteração de Wi-Fi valida senha e separa preparação, aceite e leitura fresca; consultas de estado não recuperam a senha",
+          "endpoints": [
+            "GET /api/addons"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Releitura e reinício enviam tarefas ao ACS e reinício exige confirmação explícita",
+          "endpoints": [
+            "GET /api/addons"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Isolamento por provedor, apresentação no celular e desvínculo são validados sem tocar em roteador físico; após o desvínculo, o endereço público do ACS (GET /api/acs/status) orienta a configuração",
           "endpoints": [
             "GET /api/addons"
           ]
@@ -5991,6 +6367,20 @@
           ]
         },
         {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: a ficha sugere o template mais específico que casa com fabricante, modelo e firmware do CPE",
+          "endpoints": [
+            "GET /api/contracts"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: aplicação gera uma única intenção durável, enviada pelo diário ACS e confirmada por leitura",
+          "endpoints": [
+            "GET /api/contracts"
+          ]
+        },
+        {
           "scenario": "frontend-v0-admin-team.mjs",
           "check": "Empresa do contrato usa cadastro real e filtro de faturas conserva o vínculo na URL",
           "endpoints": [
@@ -6007,6 +6397,27 @@
         {
           "scenario": "frontend-v0-cpe.mjs",
           "check": "Pesquisa por série, confirmação e vínculo TR-098 persistem no Go com WAN e Wi-Fi reais do ACS sintético",
+          "endpoints": [
+            "GET /api/contracts"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Alteração de Wi-Fi valida senha e separa preparação, aceite e leitura fresca; consultas de estado não recuperam a senha",
+          "endpoints": [
+            "GET /api/contracts"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Releitura e reinício enviam tarefas ao ACS e reinício exige confirmação explícita",
+          "endpoints": [
+            "GET /api/contracts"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Isolamento por provedor, apresentação no celular e desvínculo são validados sem tocar em roteador físico; após o desvínculo, o endereço público do ACS (GET /api/acs/status) orienta a configuração",
           "endpoints": [
             "GET /api/contracts"
           ]
@@ -6243,6 +6654,20 @@
           ]
         },
         {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: a ficha sugere o template mais específico que casa com fabricante, modelo e firmware do CPE",
+          "endpoints": [
+            "GET /api/contracts/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: aplicação gera uma única intenção durável, enviada pelo diário ACS e confirmada por leitura",
+          "endpoints": [
+            "GET /api/contracts/:id"
+          ]
+        },
+        {
           "scenario": "frontend-v0-admin-team.mjs",
           "check": "Empresa do contrato usa cadastro real e filtro de faturas conserva o vínculo na URL",
           "endpoints": [
@@ -6260,6 +6685,27 @@
         {
           "scenario": "frontend-v0-cpe.mjs",
           "check": "Pesquisa por série, confirmação e vínculo TR-098 persistem no Go com WAN e Wi-Fi reais do ACS sintético",
+          "endpoints": [
+            "GET /api/contracts/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Alteração de Wi-Fi valida senha e separa preparação, aceite e leitura fresca; consultas de estado não recuperam a senha",
+          "endpoints": [
+            "GET /api/contracts/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Releitura e reinício enviam tarefas ao ACS e reinício exige confirmação explícita",
+          "endpoints": [
+            "GET /api/contracts/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Isolamento por provedor, apresentação no celular e desvínculo são validados sem tocar em roteador físico; após o desvínculo, o endereço público do ACS (GET /api/acs/status) orienta a configuração",
           "endpoints": [
             "GET /api/contracts/:id"
           ]
@@ -6503,6 +6949,20 @@
           ]
         },
         {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: a ficha sugere o template mais específico que casa com fabricante, modelo e firmware do CPE",
+          "endpoints": [
+            "GET /api/contracts/:id/states"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: aplicação gera uma única intenção durável, enviada pelo diário ACS e confirmada por leitura",
+          "endpoints": [
+            "GET /api/contracts/:id/states"
+          ]
+        },
+        {
           "scenario": "frontend-v0-admin-team.mjs",
           "check": "Empresa do contrato usa cadastro real e filtro de faturas conserva o vínculo na URL",
           "endpoints": [
@@ -6519,6 +6979,27 @@
         {
           "scenario": "frontend-v0-cpe.mjs",
           "check": "Pesquisa por série, confirmação e vínculo TR-098 persistem no Go com WAN e Wi-Fi reais do ACS sintético",
+          "endpoints": [
+            "GET /api/contracts/:id/states"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Alteração de Wi-Fi valida senha e separa preparação, aceite e leitura fresca; consultas de estado não recuperam a senha",
+          "endpoints": [
+            "GET /api/contracts/:id/states"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Releitura e reinício enviam tarefas ao ACS e reinício exige confirmação explícita",
+          "endpoints": [
+            "GET /api/contracts/:id/states"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Isolamento por provedor, apresentação no celular e desvínculo são validados sem tocar em roteador físico; após o desvínculo, o endereço público do ACS (GET /api/acs/status) orienta a configuração",
           "endpoints": [
             "GET /api/contracts/:id/states"
           ]
@@ -7059,6 +7540,20 @@
           ]
         },
         {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: a ficha sugere o template mais específico que casa com fabricante, modelo e firmware do CPE",
+          "endpoints": [
+            "GET /api/contracts/:id/addons"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: aplicação gera uma única intenção durável, enviada pelo diário ACS e confirmada por leitura",
+          "endpoints": [
+            "GET /api/contracts/:id/addons"
+          ]
+        },
+        {
           "scenario": "frontend-v0-admin-team.mjs",
           "check": "Empresa do contrato usa cadastro real e filtro de faturas conserva o vínculo na URL",
           "endpoints": [
@@ -7077,6 +7572,27 @@
         {
           "scenario": "frontend-v0-cpe.mjs",
           "check": "Pesquisa por série, confirmação e vínculo TR-098 persistem no Go com WAN e Wi-Fi reais do ACS sintético",
+          "endpoints": [
+            "GET /api/contracts/:id/addons"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Alteração de Wi-Fi valida senha e separa preparação, aceite e leitura fresca; consultas de estado não recuperam a senha",
+          "endpoints": [
+            "GET /api/contracts/:id/addons"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Releitura e reinício enviam tarefas ao ACS e reinício exige confirmação explícita",
+          "endpoints": [
+            "GET /api/contracts/:id/addons"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Isolamento por provedor, apresentação no celular e desvínculo são validados sem tocar em roteador físico; após o desvínculo, o endereço público do ACS (GET /api/acs/status) orienta a configuração",
           "endpoints": [
             "GET /api/contracts/:id/addons"
           ]
@@ -7487,6 +8003,20 @@
           ]
         },
         {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: a ficha sugere o template mais específico que casa com fabricante, modelo e firmware do CPE",
+          "endpoints": [
+            "GET /api/contracts/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: aplicação gera uma única intenção durável, enviada pelo diário ACS e confirmada por leitura",
+          "endpoints": [
+            "GET /api/contracts/:id"
+          ]
+        },
+        {
           "scenario": "frontend-v0-admin-team.mjs",
           "check": "Empresa do contrato usa cadastro real e filtro de faturas conserva o vínculo na URL",
           "endpoints": [
@@ -7503,6 +8033,27 @@
         {
           "scenario": "frontend-v0-cpe.mjs",
           "check": "Pesquisa por série, confirmação e vínculo TR-098 persistem no Go com WAN e Wi-Fi reais do ACS sintético",
+          "endpoints": [
+            "GET /api/contracts/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Alteração de Wi-Fi valida senha e separa preparação, aceite e leitura fresca; consultas de estado não recuperam a senha",
+          "endpoints": [
+            "GET /api/contracts/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Releitura e reinício enviam tarefas ao ACS e reinício exige confirmação explícita",
+          "endpoints": [
+            "GET /api/contracts/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Isolamento por provedor, apresentação no celular e desvínculo são validados sem tocar em roteador físico; após o desvínculo, o endereço público do ACS (GET /api/acs/status) orienta a configuração",
           "endpoints": [
             "GET /api/contracts/:id"
           ]
@@ -8054,14 +8605,7 @@
         },
         {
           "scenario": "frontend-v0-workspace.mjs",
-          "check": "Visão inicial usa indicadores, caixa, ativações/encerramentos e prioridades do Go; o alerta abre o NOC correspondente",
-          "endpoints": [
-            "GET /api/tickets"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Resultados respeitam a apresentação por perfil; suporte mantém provedor visível e saída real restaura a conta SaaS",
+          "check": "(sem verificação posterior)",
           "endpoints": [
             "GET /api/tickets"
           ]
@@ -8222,6 +8766,13 @@
         {
           "scenario": "frontend-v0-access.mjs",
           "check": "Erro de consulta de serviço exibe falha e não oferece criar um acesso substituto",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: ordens de serviço abertas de hoje e do cliente com link para a OS",
           "endpoints": [
             "GET /api/work-orders"
           ]
@@ -8993,6 +9544,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: ordens de serviço abertas de hoje e do cliente com link para a OS",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
           "scenario": "frontend-v0-create-links.mjs",
           "check": "Diálogo aberto por /ordens-de-servico/nova-os em /ordens-de-servico",
           "endpoints": [
@@ -9283,14 +9841,7 @@
         },
         {
           "scenario": "frontend-v0-workspace.mjs",
-          "check": "Visão inicial usa indicadores, caixa, ativações/encerramentos e prioridades do Go; o alerta abre o NOC correspondente",
-          "endpoints": [
-            "GET /api/agenda"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Resultados respeitam a apresentação por perfil; suporte mantém provedor visível e saída real restaura a conta SaaS",
+          "check": "(sem verificação posterior)",
           "endpoints": [
             "GET /api/agenda"
           ]
@@ -9790,6 +10341,13 @@
           ]
         },
         {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: faturas vencidas do cliente e da carteira pelo financeiro",
+          "endpoints": [
+            "GET /api/invoices"
+          ]
+        },
+        {
           "scenario": "frontend-v0-create-links.mjs",
           "check": "Diálogo aberto por /financeiro/faturas/gerar-mensalidades-por-competencia em /financeiro/faturas",
           "endpoints": [
@@ -9903,15 +10461,7 @@
         },
         {
           "scenario": "frontend-v0-workspace.mjs",
-          "check": "Visão inicial usa indicadores, caixa, ativações/encerramentos e prioridades do Go; o alerta abre o NOC correspondente",
-          "endpoints": [
-            "GET /api/finance/summary",
-            "GET /api/finance/monthly"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Resultados respeitam a apresentação por perfil; suporte mantém provedor visível e saída real restaura a conta SaaS",
+          "check": "(sem verificação posterior)",
           "endpoints": [
             "GET /api/finance/summary",
             "GET /api/finance/monthly"
@@ -10741,14 +11291,7 @@
         },
         {
           "scenario": "frontend-v0-workspace.mjs",
-          "check": "Visão inicial usa indicadores, caixa, ativações/encerramentos e prioridades do Go; o alerta abre o NOC correspondente",
-          "endpoints": [
-            "GET /api/network/health"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Resultados respeitam a apresentação por perfil; suporte mantém provedor visível e saída real restaura a conta SaaS",
+          "check": "(sem verificação posterior)",
           "endpoints": [
             "GET /api/network/health"
           ]
@@ -11149,6 +11692,20 @@
           ]
         },
         {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: a ficha sugere o template mais específico que casa com fabricante, modelo e firmware do CPE",
+          "endpoints": [
+            "GET /api/contracts/:id/service"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: aplicação gera uma única intenção durável, enviada pelo diário ACS e confirmada por leitura",
+          "endpoints": [
+            "GET /api/contracts/:id/service"
+          ]
+        },
+        {
           "scenario": "frontend-v0-cpe.mjs",
           "check": "Pesquisa por série, confirmação e vínculo TR-098 persistem no Go com WAN e Wi-Fi reais do ACS sintético",
           "endpoints": [
@@ -11157,7 +11714,28 @@
         },
         {
           "scenario": "frontend-v0-cpe.mjs",
+          "check": "Alteração de Wi-Fi valida senha e separa preparação, aceite e leitura fresca; consultas de estado não recuperam a senha",
+          "endpoints": [
+            "GET /api/contracts/:id/service"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Releitura e reinício enviam tarefas ao ACS e reinício exige confirmação explícita",
+          "endpoints": [
+            "GET /api/contracts/:id/service"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
           "check": "TR-181 enfileirado mantém o SSID observado e informa que a alteração depende do próximo contato do roteador",
+          "endpoints": [
+            "GET /api/contracts/:id/service"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Isolamento por provedor, apresentação no celular e desvínculo são validados sem tocar em roteador físico; após o desvínculo, o endereço público do ACS (GET /api/acs/status) orienta a configuração",
           "endpoints": [
             "GET /api/contracts/:id/service"
           ]
@@ -11478,6 +12056,32 @@
           ]
         },
         {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: a ficha sugere o template mais específico que casa com fabricante, modelo e firmware do CPE",
+          "endpoints": [
+            "GET /api/acs/status",
+            "GET /api/contracts/:id/cpe",
+            "GET /api/contracts/:id/cpe/candidates",
+            "POST /api/contracts/:id/cpe/link"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: aplicação gera uma única intenção durável, enviada pelo diário ACS e confirmada por leitura",
+          "endpoints": [
+            "GET /api/contracts/:id/cpe"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: isolamento entre provedores e desvínculo ao final, sem roteador físico",
+          "endpoints": [
+            "GET /api/acs/status",
+            "GET /api/contracts/:id/cpe",
+            "DELETE /api/contracts/:id/cpe/link"
+          ]
+        },
+        {
           "scenario": "frontend-v0-cpe.mjs",
           "check": "Pesquisa por série, confirmação e vínculo TR-098 persistem no Go com WAN e Wi-Fi reais do ACS sintético",
           "endpoints": [
@@ -11489,7 +12093,7 @@
         },
         {
           "scenario": "frontend-v0-cpe.mjs",
-          "check": "Alteração de Wi-Fi valida senha e distingue aplicação imediata; consultas de estado não recuperam a senha",
+          "check": "Alteração de Wi-Fi valida senha e separa preparação, aceite e leitura fresca; consultas de estado não recuperam a senha",
           "endpoints": [
             "GET /api/contracts/:id/cpe",
             "POST /api/contracts/:id/cpe/wifi"
@@ -11520,6 +12124,7 @@
           "scenario": "frontend-v0-cpe.mjs",
           "check": "Isolamento por provedor, apresentação no celular e desvínculo são validados sem tocar em roteador físico; após o desvínculo, o endereço público do ACS (GET /api/acs/status) orienta a configuração",
           "endpoints": [
+            "GET /api/acs/status",
             "GET /api/contracts/:id/cpe",
             "DELETE /api/contracts/:id/cpe/link"
           ]
@@ -11717,6 +12322,20 @@
           ]
         },
         {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: a ficha sugere o template mais específico que casa com fabricante, modelo e firmware do CPE",
+          "endpoints": [
+            "GET /api/contracts/:id/onu"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: aplicação gera uma única intenção durável, enviada pelo diário ACS e confirmada por leitura",
+          "endpoints": [
+            "GET /api/contracts/:id/onu"
+          ]
+        },
+        {
           "scenario": "frontend-v0-cpe.mjs",
           "check": "Pesquisa por série, confirmação e vínculo TR-098 persistem no Go com WAN e Wi-Fi reais do ACS sintético",
           "endpoints": [
@@ -11725,7 +12344,28 @@
         },
         {
           "scenario": "frontend-v0-cpe.mjs",
+          "check": "Alteração de Wi-Fi valida senha e separa preparação, aceite e leitura fresca; consultas de estado não recuperam a senha",
+          "endpoints": [
+            "GET /api/contracts/:id/onu"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Releitura e reinício enviam tarefas ao ACS e reinício exige confirmação explícita",
+          "endpoints": [
+            "GET /api/contracts/:id/onu"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
           "check": "TR-181 enfileirado mantém o SSID observado e informa que a alteração depende do próximo contato do roteador",
+          "endpoints": [
+            "GET /api/contracts/:id/onu"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Isolamento por provedor, apresentação no celular e desvínculo são validados sem tocar em roteador físico; após o desvínculo, o endereço público do ACS (GET /api/acs/status) orienta a configuração",
           "endpoints": [
             "GET /api/contracts/:id/onu"
           ]
@@ -12049,20 +12689,6 @@
             "GET /api/noc/overview",
             "PUT /api/noc/settings"
           ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Visão inicial usa indicadores, caixa, ativações/encerramentos e prioridades do Go; o alerta abre o NOC correspondente",
-          "endpoints": [
-            "GET /api/noc/overview"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Tema persiste após recarga e navegação móvel utiliza o shell oficial",
-          "endpoints": [
-            "GET /api/noc/overview"
-          ]
         }
       ]
     },
@@ -12077,6 +12703,13 @@
       ],
       "not_exercised_by_interface": [],
       "checks": [
+        {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: diagnóstico NOC do contrato encontrado, sem executar comandos na rede",
+          "endpoints": [
+            "GET /api/contracts/:id/diagnosis"
+          ]
+        },
         {
           "scenario": "frontend-v0-optical.mjs",
           "check": "Diagnóstico apresenta conclusão, limites e evidências datadas do Go sem executar teste remoto",
@@ -12334,6 +12967,13 @@
       "not_exercised_by_interface": [],
       "checks": [
         {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: consulta de IP no instante informado, com referência legal e auditoria",
+          "endpoints": [
+            "POST /api/legal/ip-lookup"
+          ]
+        },
+        {
           "scenario": "frontend-v0-cgnat-legal.mjs",
           "check": "Consulta legal aplica fuso explícito, IP/porta e referência auditada; CSV e impressão isolada contêm o mesmo resultado",
           "endpoints": [
@@ -12367,6 +13007,13 @@
       ],
       "not_exercised_by_interface": [],
       "checks": [
+        {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: consulta de IP no instante informado, com referência legal e auditoria",
+          "endpoints": [
+            "POST /api/legal/ip-lookup"
+          ]
+        },
         {
           "scenario": "frontend-v0-cgnat-legal.mjs",
           "check": "Consulta legal aplica fuso explícito, IP/porta e referência auditada; CSV e impressão isolada contêm o mesmo resultado",
@@ -12471,8 +13118,62 @@
           ]
         },
         {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: a ficha sugere o template mais específico que casa com fabricante, modelo e firmware do CPE",
+          "endpoints": [
+            "GET /api/contracts/:id/ips",
+            "GET /api/contracts/:id/ipv6",
+            "GET /api/contracts/:id/ftth"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: aplicação gera uma única intenção durável, enviada pelo diário ACS e confirmada por leitura",
+          "endpoints": [
+            "GET /api/contracts/:id/ips",
+            "GET /api/contracts/:id/ipv6",
+            "GET /api/contracts/:id/ftth"
+          ]
+        },
+        {
           "scenario": "frontend-v0-cpe.mjs",
           "check": "Pesquisa por série, confirmação e vínculo TR-098 persistem no Go com WAN e Wi-Fi reais do ACS sintético",
+          "endpoints": [
+            "GET /api/contracts/:id/ips",
+            "GET /api/contracts/:id/ipv6",
+            "GET /api/contracts/:id/ftth"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Alteração de Wi-Fi valida senha e separa preparação, aceite e leitura fresca; consultas de estado não recuperam a senha",
+          "endpoints": [
+            "GET /api/contracts/:id/ips",
+            "GET /api/contracts/:id/ipv6",
+            "GET /api/contracts/:id/ftth"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Releitura e reinício enviam tarefas ao ACS e reinício exige confirmação explícita",
+          "endpoints": [
+            "GET /api/contracts/:id/ips",
+            "GET /api/contracts/:id/ipv6",
+            "GET /api/contracts/:id/ftth"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "TR-181 enfileirado mantém o SSID observado e informa que a alteração depende do próximo contato do roteador",
+          "endpoints": [
+            "GET /api/contracts/:id/ips",
+            "GET /api/contracts/:id/ipv6",
+            "GET /api/contracts/:id/ftth"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Isolamento por provedor, apresentação no celular e desvínculo são validados sem tocar em roteador físico; após o desvínculo, o endereço público do ACS (GET /api/acs/status) orienta a configuração",
           "endpoints": [
             "GET /api/contracts/:id/ips",
             "GET /api/contracts/:id/ipv6",
@@ -12659,13 +13360,6 @@
           "endpoints": [
             "GET /api/tenants",
             "POST /api/support/enter",
-            "POST /api/support/exit"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Resultados respeitam a apresentação por perfil; suporte mantém provedor visível e saída real restaura a conta SaaS",
-          "endpoints": [
             "POST /api/support/exit"
           ]
         }
@@ -15331,6 +16025,27 @@
           ]
         },
         {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: a ficha sugere o template mais específico que casa com fabricante, modelo e firmware do CPE",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: aplicação gera uma única intenção durável, enviada pelo diário ACS e confirmada por leitura",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-templates.mjs",
+          "check": "Templates ACS: cadastro recusa variável desconhecida e grava parâmetros TR-098, curingas e inform periódico",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
           "scenario": "frontend-v0-admin-reports.mjs",
           "check": "Auditoria pagina registros reais e exibe detalhes; retenção salva no Go e rejeita prazo de conexão abaixo do limite",
           "endpoints": [
@@ -15387,6 +16102,20 @@
           ]
         },
         {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: busca de cliente pela busca global com link para a ficha",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: pergunta não reconhecida mostra sugestões e a sessão sem permissão não consulta ordens de serviço",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
           "scenario": "frontend-v0-cgnat-legal.mjs",
           "check": "UI consulta capacidade no Go, cria plano imutável, apresenta mapa/lookup e exporta script sem aplicá-lo ao NAS",
           "endpoints": [
@@ -15411,6 +16140,27 @@
         {
           "scenario": "frontend-v0-cpe.mjs",
           "check": "Pesquisa por série, confirmação e vínculo TR-098 persistem no Go com WAN e Wi-Fi reais do ACS sintético",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Alteração de Wi-Fi valida senha e separa preparação, aceite e leitura fresca; consultas de estado não recuperam a senha",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Releitura e reinício enviam tarefas ao ACS e reinício exige confirmação explícita",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cpe.mjs",
+          "check": "Isolamento por provedor, apresentação no celular e desvínculo são validados sem tocar em roteador físico; após o desvínculo, o endereço público do ACS (GET /api/acs/status) orienta a configuração",
           "endpoints": [
             "GET /api/today"
           ]
@@ -15827,6 +16577,20 @@
         {
           "scenario": "frontend-v0-messages.mjs",
           "check": "Histórico conserva envio e recusa por consentimento; regras, modelos e canais podem ser excluídos após remover referências",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-monitoring.mjs",
+          "check": "Acompanhamento: saúde da API e do banco, agentes, operações, filas e rotinas sem conteúdo sensível",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-monitoring.mjs",
+          "check": "Acompanhamento: financeiro sem permissão de rede é bloqueado e cada provedor vê apenas os próprios agentes",
           "endpoints": [
             "GET /api/today"
           ]
@@ -16263,33 +17027,10 @@
         },
         {
           "scenario": "frontend-v0-workspace.mjs",
-          "check": "Visão inicial usa indicadores, caixa, ativações/encerramentos e prioridades do Go; o alerta abre o NOC correspondente",
+          "check": "(sem verificação posterior)",
           "endpoints": [
             "GET /api/dashboard",
             "GET /api/dashboard/panels",
-            "GET /api/today"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Tema persiste após recarga e navegação móvel utiliza o shell oficial",
-          "endpoints": [
-            "GET /api/today"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Resultados respeitam a apresentação por perfil; suporte mantém provedor visível e saída real restaura a conta SaaS",
-          "endpoints": [
-            "GET /api/dashboard",
-            "GET /api/dashboard/panels",
-            "GET /api/today"
-          ]
-        },
-        {
-          "scenario": "frontend-v0-workspace.mjs",
-          "check": "Falha na busca operacional não seleciona registros demonstrativos",
-          "endpoints": [
             "GET /api/today"
           ]
         },
@@ -16775,6 +17516,624 @@
           "check": "Espera, reagendamento, deslocamento, execução e conclusão registram datas; OS finalizada preserva anotações sem reabrir controles",
           "endpoints": [
             "POST /api/work-orders/:id/notes"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REDE-ACS-TEMPLATES",
+      "functionality": "Cadastro de templates de provisionamento TR-069: fabricante/modelo/firmware com curingas, parâmetros com tipo xsd e variáveis validadas, inform periódico, ativação, edição com revisão e exclusão auditada",
+      "declared_endpoints": [
+        "GET /api/acs/templates",
+        "POST /api/acs/templates",
+        "PATCH /api/acs/templates/:id",
+        "DELETE /api/acs/templates/:id"
+      ],
+      "exercised_by_interface": [
+        "DELETE /api/acs/templates/:id",
+        "GET /api/acs/templates",
+        "PATCH /api/acs/templates/:id",
+        "POST /api/acs/templates"
+      ],
+      "not_exercised_by_interface": [],
+      "checks": [
+        {
+          "scenario": "frontend-v0-acs-templates.mjs",
+          "check": "Templates ACS: cadastro recusa variável desconhecida e grava parâmetros TR-098, curingas e inform periódico",
+          "endpoints": [
+            "GET /api/acs/templates",
+            "POST /api/acs/templates"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-templates.mjs",
+          "check": "Templates ACS: consulta, edição com nova revisão, inativação e reativação pela tela",
+          "endpoints": [
+            "GET /api/acs/templates",
+            "PATCH /api/acs/templates/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-templates.mjs",
+          "check": "Templates ACS: exclusão auditada, isolamento entre provedores e bloqueio sem permissão de rede",
+          "endpoints": [
+            "GET /api/acs/templates",
+            "DELETE /api/acs/templates/:id"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REDE-ACS-TEMPLATE-APLICACAO",
+      "functionality": "Sugestão do template que casa com o CPE, pré-visualização dos valores resolvidos com senhas mascaradas e aplicação como intenção ACS durável (setParameterValues) sem duplicar em repetição",
+      "declared_endpoints": [
+        "GET /api/contracts/:id/cpe/templates",
+        "POST /api/contracts/:id/cpe/template/preview",
+        "POST /api/contracts/:id/cpe/template"
+      ],
+      "exercised_by_interface": [
+        "GET /api/contracts/:id/cpe/templates",
+        "POST /api/contracts/:id/cpe/template",
+        "POST /api/contracts/:id/cpe/template/preview"
+      ],
+      "not_exercised_by_interface": [],
+      "checks": [
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: a ficha sugere o template mais específico que casa com fabricante, modelo e firmware do CPE",
+          "endpoints": [
+            "GET /api/contracts/:id/cpe/templates"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: pré-visualização resolve variáveis do contrato e mascara a senha do Wi-Fi",
+          "endpoints": [
+            "POST /api/contracts/:id/cpe/template/preview"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-acs-template-apply.mjs",
+          "check": "Template ACS: aplicação gera uma única intenção durável, enviada pelo diário ACS e confirmada por leitura",
+          "endpoints": [
+            "POST /api/contracts/:id/cpe/template"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GESTAO-ACOMPANHAMENTO",
+      "functionality": "Painel operacional somente leitura: saúde da API e do banco, agentes e último contato, operações de rede em andamento/incertas/falhas, tarefas ACS, filas de avisos e webhooks, rotinas periódicas do provedor e situação do registro de backup",
+      "declared_endpoints": [
+        "GET /api/monitoring/overview",
+        "GET /api/health"
+      ],
+      "exercised_by_interface": [
+        "GET /api/health",
+        "GET /api/monitoring/overview"
+      ],
+      "not_exercised_by_interface": [],
+      "checks": [
+        {
+          "scenario": "frontend-v0-acs-templates.mjs",
+          "check": "Templates ACS: cadastro recusa variável desconhecida e grava parâmetros TR-098, curingas e inform periódico",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: busca de cliente pela busca global com link para a ficha",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: pergunta não reconhecida mostra sugestões e a sessão sem permissão não consulta ordens de serviço",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-commercial.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"Plano criado pela UI; nova versão mantém o preço e a versão do contrato existente\",\"Políticas de cobrança/fidelidade e parâmetros de rede salvos; reaplicação reporta solicitações reais\",\"Filtros de plano/titular aplicados no Go com contagem correta e UUID inválido rejeitado\",\"Troca para versão atual do plano, vencimento e restrição de crédito persistidos\",\"Área, endereço específico e etiquetas do contrato salvos pelo layout v0\",\"Fidelidade/cotação, desconto e cancelamento, agendamento/cancelamento, aditivo e solicitação/cancelamento de aceite\",\"Adicional criado, contratado com quantidade e preço preservado após alteração do catálogo; encerramento registrado\",\"Encerramento definitivo em duas etapas, com multa dispensada e justificativa registrada pelo Go\",\"Isolamento entre provedores mantido nos detalhes e novos filtros comerciais\",\"Paginação, busca que reinicia a página, filtro de situação e exportação CSV comercial\"]}",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-crm.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"Prospecto valida contato obrigatório no Go; cadastro, edição e ficha usam UUID real\",\"Etapas, motivo da perda, retomada e contato persistidos com histórico\",\"Conversão cria assinante relacionado ao prospecto, marca ganho e abre a ficha\",\"Protocolo com titular/contrato/prioridade e mensagem inicial, sem incidente fictício ou SLA presumido\",\"Responsável atribuído; nota interna e resposta pública preservam visibilidade e estado do protocolo\",\"OS real criada pelo atendimento, preservando protocolo, titular, contrato e endereço informado\",\"Encerramento e reabertura persistidos; URL restaura a ficha após recarregar\",\"Fila do titular abre o mesmo protocolo e fecha preservando a ficha do assinante\",\"Busca e exportação reais de atendimentos; relatório CRM por período carrega dados do Go\",\"Prospectos usam paginação do servidor e busca reinicia a página sem navegação tardia\",\"Nota interna permanece ausente no portal; perfil financeiro não oferece ações de equipe técnica\",\"Prospectos e protocolos isolados entre provedores\"]}",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-finance.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"Geração pela UI repetida preserva uma mensalidade por contrato/competência\",\"Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor\",\"Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento\",\"Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI\",\"Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos\",\"Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada\",\"Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido\",\"Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go\",\"Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis\",\"Faturas isoladas entre provedores e ações financeiras restritas pelo perfil\"]}",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-monitoring.mjs",
+          "check": "Acompanhamento: saúde da API e do banco, agentes, operações, filas e rotinas sem conteúdo sensível",
+          "endpoints": [
+            "GET /api/monitoring/overview",
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-monitoring.mjs",
+          "check": "Acompanhamento: atualização manual consulta novamente o agregado do servidor",
+          "endpoints": [
+            "GET /api/monitoring/overview",
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-monitoring.mjs",
+          "check": "Acompanhamento: financeiro sem permissão de rede é bloqueado e cada provedor vê apenas os próprios agentes",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network-sites.mjs",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network-sites.mjs",
+          "check": "Inventário passivo: criação, consulta, edição, filtro, arquivo, reativação e exportação CSV concluídos.",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-network.mjs",
+          "check": "Agente criado no Go; token e chave pública exibidos na emissão, sem token na consulta posterior",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-portal.mjs",
+          "check": "(sem verificação posterior)",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "R03/R05: matriz nenhum módulo / CRM / campo respeita controles e consultas, com habilitação positiva",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-session.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"Login do navegador não expõe o token da sessão no corpo; cliente de API recebe Bearer só ao pedir explicitamente\",\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-stock.mjs",
+          "check": "Catálogo cadastra material com código, unidade e mínimo; alerta usa saldo real",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Logout e novo login com outra conta no mesmo contexto isola preferências por escopo de sessão e restringe widgets e favoritos sem permissão",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace-preferences.mjs",
+          "check": "Logout e novo login com outra conta no mesmo contexto isola preferências por escopo de sessão e restringe widgets e favoritos sem permissão",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace.mjs",
+          "check": "Contas sintéticas só aparecem com health.demo; preencher uma conta não cria sessão nem contorna o login Go",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"Login por cookie HttpOnly/SameSite; nenhum token em localStorage\",\"Exportação CSV autenticada do cadastro\",\"Cadastro valida CPF no Go e abre a ficha pelo UUID real\",\"Contrato criado pela ficha com versão do plano e evento na linha do tempo\",\"Edição e inativação persistidas no Go; ficha/aba restauradas pela URL\",\"Campo personalizado do assinante salvo e relido do servidor\",\"Contatos/consentimento e criação/arquivamento de anotação persistidos\",\"Acesso ao portal criado no backend existente\",\"Upload, download, exclusão de documento e exportação de dados pessoais\",\"Anonimização efetiva validada pelo Go em titular sem pendências\",\"Paginação no servidor, filtros persistidos e reinício da página ao buscar\",\"Falha operacional exibida sem fallback para seeds\",\"Lista conectada verificada no desktop e celular\",\"Perfil financeiro sem ações de escrita cadastral e sem acesso direto à rede\",\"Isolamento entre provedores aplicado pelo Go\",\"Demonstração e ficha preservadas sob /demonstracao sem qualquer chamada operacional\"]}",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GESTAO-ASSISTENTE",
+      "functionality": "Assistente determinístico por regras, sem modelo de linguagem: busca de cliente, diagnóstico de cliente sem internet, faturas vencidas, OS abertas de hoje e IP em um instante, com links para as fichas e sugestões quando não entende",
+      "declared_endpoints": [
+        "GET /api/search",
+        "GET /api/contracts/:id/diagnosis",
+        "GET /api/invoices",
+        "GET /api/work-orders",
+        "POST /api/legal/ip-lookup"
+      ],
+      "exercised_by_interface": [
+        "GET /api/contracts/:id/diagnosis",
+        "GET /api/invoices",
+        "GET /api/search",
+        "GET /api/work-orders",
+        "POST /api/legal/ip-lookup"
+      ],
+      "not_exercised_by_interface": [],
+      "checks": [
+        {
+          "scenario": "frontend-v0-access.mjs",
+          "check": "Evidências preservam a ficha e a seção Conexão do titular consulta o mesmo acesso real",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-access.mjs",
+          "check": "Erro de consulta de serviço exibe falha e não oferece criar um acesso substituto",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-admin-team.mjs",
+          "check": "Empresa do contrato usa cadastro real e filtro de faturas conserva o vínculo na URL",
+          "endpoints": [
+            "GET /api/invoices"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-admin-team.mjs",
+          "check": "Administração mantém permissões do Go e isolamento de usuários e empresas por provedor",
+          "endpoints": [
+            "GET /api/invoices"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: busca de cliente pela busca global com link para a ficha",
+          "endpoints": [
+            "GET /api/search"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: diagnóstico NOC do contrato encontrado, sem executar comandos na rede",
+          "endpoints": [
+            "GET /api/contracts/:id/diagnosis"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: faturas vencidas do cliente e da carteira pelo financeiro",
+          "endpoints": [
+            "GET /api/invoices"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: ordens de serviço abertas de hoje e do cliente com link para a OS",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-assistant.mjs",
+          "check": "Assistente: consulta de IP no instante informado, com referência legal e auditoria",
+          "endpoints": [
+            "GET /api/search",
+            "POST /api/legal/ip-lookup"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cgnat-legal.mjs",
+          "check": "Consulta legal aplica fuso explícito, IP/porta e referência auditada; CSV e impressão isolada contêm o mesmo resultado",
+          "endpoints": [
+            "POST /api/legal/ip-lookup"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cgnat-legal.mjs",
+          "check": "Consulta direta de IP usa sessões históricas sem exigir porta CGNAT",
+          "endpoints": [
+            "POST /api/legal/ip-lookup"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-cgnat-legal.mjs",
+          "check": "Consulta IPv6 preserva titularidade após liberação, mostra limites do histórico e não afirma sessão física",
+          "endpoints": [
+            "POST /api/legal/ip-lookup"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /ordens-de-servico/nova-os em /ordens-de-servico",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /financeiro/faturas/gerar-mensalidades-por-competencia em /financeiro/faturas",
+          "endpoints": [
+            "GET /api/invoices"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-crm.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"Prospecto valida contato obrigatório no Go; cadastro, edição e ficha usam UUID real\",\"Etapas, motivo da perda, retomada e contato persistidos com histórico\",\"Conversão cria assinante relacionado ao prospecto, marca ganho e abre a ficha\",\"Protocolo com titular/contrato/prioridade e mensagem inicial, sem incidente fictício ou SLA presumido\",\"Responsável atribuído; nota interna e resposta pública preservam visibilidade e estado do protocolo\",\"OS real criada pelo atendimento, preservando protocolo, titular, contrato e endereço informado\",\"Encerramento e reabertura persistidos; URL restaura a ficha após recarregar\",\"Fila do titular abre o mesmo protocolo e fecha preservando a ficha do assinante\",\"Busca e exportação reais de atendimentos; relatório CRM por período carrega dados do Go\",\"Prospectos usam paginação do servidor e busca reinicia a página sem navegação tardia\",\"Nota interna permanece ausente no portal; perfil financeiro não oferece ações de equipe técnica\",\"Prospectos e protocolos isolados entre provedores\"]}",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Check-in pela tela de campo registra horário do servidor, localização do aparelho, distância até a instalação e inicia a execução",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Sem conexão, check-out, anotação e checklist ficam na fila do aparelho como pendentes, com chave e horário local, sem chegar ao servidor",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "Ao reconectar, a fila envia em ordem e mostra Enviado; repetir a mesma chave devolve o mesmo resultado sem duplicar e outro conteúdo é recusado",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field-work.mjs",
+          "check": "OS encerrada mantém a assinatura na ficha, bloqueia nova coleta e imprime assinatura, hash e presenças sem anotações internas",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "OS criada pela interface v0 com titular, contrato e endereço específico reais",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Atribuição e agendamento persistem no Go, com conversão correta do horário local",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Meu trabalho exibe a fila real do responsável no celular, com telefone, mapa e abertura da OS",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Fichas do titular e do contrato consultam apenas as OS do vínculo e preservam o contexto ao fechar",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Auxiliar adicionado/removido e checklist concluído com registro do autor",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Go rejeita saída sem saldo e devolução superior ao consumo da OS sem alterar o estoque",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Material lançado, devolvido e kit aplicado com saldos reais e históricos preservados",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Instalação por série vincula equipamento ao contrato em comodato",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Espera, reagendamento, deslocamento, execução e conclusão registram datas; OS finalizada preserva anotações sem reabrir controles",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Ficha A4 usa os registros do ERP, indica o contrato e exclui descrição/anotações internas",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Filtro por técnico validado no Go e exportação CSV operacional",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Cancelamento exige motivo e atribuir somente responsável preserva a situação de espera",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Listagem pagina oito registros no servidor e reinicia página junto à busca, mantendo o filtro do titular",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Falha operacional exibe erro de consulta sem introduzir ordens demonstrativas",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Perfil Técnico/NOC usa sua fila pessoal; Financeiro não acessa OS nem executa comandos",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-finance-access.mjs",
+          "check": "Ficha do titular conserva cadastro, versão e preço dos contratos; novo contrato é criado na ficha e abre sua consulta operacional",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-finance.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"Geração pela UI repetida preserva uma mensalidade por contrato/competência\",\"Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor\",\"Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento\",\"Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI\",\"Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos\",\"Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada\",\"Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido\",\"Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go\",\"Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis\",\"Faturas isoladas entre provedores e ações financeiras restritas pelo perfil\"]}",
+          "endpoints": [
+            "GET /api/invoices"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-optical.mjs",
+          "check": "Diagnóstico apresenta conclusão, limites e evidências datadas do Go sem executar teste remoto",
+          "endpoints": [
+            "GET /api/contracts/:id/diagnosis"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-os-quotations.mjs",
+          "check": "Anexo sintético enviado, baixado e excluído pela OS.",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-provider-refunds.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"API preserves nominal, net receipt and residual after synthetic partial/full provider refunds\",\"Official UI distinguishes partial refund from full reversal after reload\",\"Provider receipts never expose the manual reversal action\"],\"fixture\":\"synthetic owner data; no real PSP\"}",
+          "endpoints": [
+            "GET /api/invoices"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "R02: alerta aparece pela lista e URL direta na aba inicial; anotação comum não vira alerta",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "Captura aprovada: ficha-alerta-multiplos-contratos",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "R02: arquivamento atualiza também o alerta global da ficha",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "R04/BE-05: causa-raiz e prioridade editadas na interface e relidas no Go",
+          "endpoints": [
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "R04/BE-09: filtros de carteira e empresa na exportação contábil chegam ao Go",
+          "endpoints": [
+            "GET /api/invoices"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-workspace.mjs",
+          "check": "Busca operacional encontra nome, login, IP, MAC, ONU e OS e abre fichas reais de assinante e contrato",
+          "endpoints": [
+            "GET /api/search",
+            "GET /api/work-orders"
+          ]
+        },
+        {
+          "scenario": "frontend-v0.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"Login por cookie HttpOnly/SameSite; nenhum token em localStorage\",\"Exportação CSV autenticada do cadastro\",\"Cadastro valida CPF no Go e abre a ficha pelo UUID real\",\"Contrato criado pela ficha com versão do plano e evento na linha do tempo\",\"Edição e inativação persistidas no Go; ficha/aba restauradas pela URL\",\"Campo personalizado do assinante salvo e relido do servidor\",\"Contatos/consentimento e criação/arquivamento de anotação persistidos\",\"Acesso ao portal criado no backend existente\",\"Upload, download, exclusão de documento e exportação de dados pessoais\",\"Anonimização efetiva validada pelo Go em titular sem pendências\",\"Paginação no servidor, filtros persistidos e reinício da página ao buscar\",\"Falha operacional exibida sem fallback para seeds\",\"Lista conectada verificada no desktop e celular\",\"Perfil financeiro sem ações de escrita cadastral e sem acesso direto à rede\",\"Isolamento entre provedores aplicado pelo Go\",\"Demonstração e ficha preservadas sob /demonstracao sem qualquer chamada operacional\"]}",
+          "endpoints": [
+            "GET /api/work-orders"
           ]
         }
       ]
