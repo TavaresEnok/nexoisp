@@ -28,11 +28,10 @@ type Args = jobargs.Periodic
 
 type worker struct {
 	river.WorkerDefaults[Args]
-	db        *db.DB
-	radius    *radius.Executor
-	mu        sync.Mutex
-	lastAlert string
-	metrics   *metrics
+	db      *db.DB
+	radius  *radius.Executor
+	mu      sync.Mutex
+	metrics *metrics
 }
 type operationWorker struct {
 	river.WorkerDefaults[jobargs.Operation]
@@ -240,13 +239,20 @@ func (w *worker) alerts(ctx context.Context) error {
 	key := string(encoded)
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	if key == w.lastAlert {
+	// O último alerta entregue fica no banco: reinício ou outra réplica não reenvia.
+	var last *string
+	if e = w.db.WithScope(ctx, scope, func(tx *db.Tx) error { return tx.QueryRow(ctx, "select nexo_alert_last()").Scan(&last) }); e != nil {
+		return e
+	}
+	if last != nil && *last == key {
 		return nil
+	}
+	if last == nil && len(alerts) == 0 {
+		return w.recordAlert(ctx, scope, key)
 	}
 	url := os.Getenv("NEXO_ALERT_WEBHOOK_URL")
 	if url == "" {
-		w.lastAlert = key
-		return nil
+		return w.recordAlert(ctx, scope, key)
 	}
 	text := "NexoISP: alertas de rede normalizados"
 	if len(alerts) > 0 {
@@ -265,8 +271,10 @@ func (w *worker) alerts(ctx context.Context) error {
 	if status < 200 || status >= 300 {
 		return fmt.Errorf("o destino respondeu %d", status)
 	}
-	w.lastAlert = key
-	return nil
+	return w.recordAlert(ctx, scope, key)
+}
+func (w *worker) recordAlert(ctx context.Context, scope tenancy.Scope, key string) error {
+	return w.db.WithScope(ctx, scope, func(tx *db.Tx) error { return tx.Exec(ctx, "select nexo_alert_record($1)", key) })
 }
 func Start(ctx context.Context, database *db.DB, registerers ...prometheus.Registerer) (func(context.Context) error, error) {
 	if os.Getenv("NEXO_GO_JOBS") != "1" {
