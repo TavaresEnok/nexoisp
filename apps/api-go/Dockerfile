@@ -5,11 +5,15 @@ RUN go mod download
 COPY apps/api-go/ ./
 RUN CGO_ENABLED=0 go build -trimpath -o /out/api ./cmd/api
 RUN CGO_ENABLED=0 go build -trimpath -o /out/nexo-db ./cmd/nexo-db
+# Migrações legíveis pelo usuário nexo independentemente do modo dos arquivos no checkout
+# (o builder legado do Docker não aceita COPY --chmod).
+COPY db /db
+RUN chmod -R a+rX /db
 FROM alpine:3.22
 RUN apk add --no-cache ca-certificates && addgroup -g 1000 -S nexo && adduser -u 1000 -S -G nexo nexo
 COPY --from=build /out/api /usr/local/bin/nexo-api-go
 COPY --from=build /out/nexo-db /usr/local/bin/nexo-db
-COPY db /app/db
+COPY --from=build /db /app/db
 WORKDIR /app
 USER nexo
 ENV NEXO_GO_ADDR=0.0.0.0:8080 NEXO_GO_INTERNAL_ADDR=0.0.0.0:9090

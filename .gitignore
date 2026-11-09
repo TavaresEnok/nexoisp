@@ -33,3 +33,6 @@ nexo-sgp-saida/
 /bench/nexoisp-benchmark-ia-ampliado-20261015.zip
 /docs/nexoisp-comparativo-corrigido-20261015.zip
 /docs/nexoisp-piloto-real-20261015-completo.zip
+
+# SBOM gerado por scripts/generate-sbom.sh (artefato do CI)
+sbom/
