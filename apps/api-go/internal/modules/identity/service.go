@@ -334,6 +334,9 @@ func (s Service) handle(ctx context.Context, r *http.Request, key, id string, b 
 			if id == c.UserID && (b["active"] == false || b["role"] != nil && b["role"] != "admin") {
 				return apierr.New(400, "você não pode remover o próprio acesso de administrador")
 			}
+			if id == c.UserID && b["password"] != nil {
+				return apierr.New(400, "altere a própria senha em Minha conta")
+			}
 			var hash any
 			if b["password"] != nil {
 				hash, err = cryptox.HashPassword(b["password"].(string))
@@ -354,6 +357,19 @@ func (s Service) handle(ctx context.Context, r *http.Request, key, id string, b 
 				}
 			}
 			detail := map[string]any{"password_changed": b["password"] != nil, "mfa_reset": b["reset_mfa"] == true}
+			if b["password"] != nil {
+				// Senha definida por outra pessoa é provisória: a próxima sessão só troca a
+				// senha, e nenhuma sessão aberta com a credencial anterior continua válida.
+				if err = tx.Exec(ctx, `update users set password_change_required = true where id = $1 and tenant_id = $2`, id, c.TenantID); err != nil {
+					return err
+				}
+				var revoked int
+				if err = tx.QueryRow(ctx, `select user_sessions_revoke($1)`, id).Scan(&revoked); err != nil {
+					return err
+				}
+				detail["password_change_required"] = true
+				detail["sessions_revoked"] = revoked
+			}
 			for _, k := range []string{"name", "role", "active"} {
 				if v, ok := b[k]; ok {
 					detail[k] = v

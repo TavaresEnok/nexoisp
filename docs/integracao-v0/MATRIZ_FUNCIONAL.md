@@ -2,7 +2,7 @@
 
 Nota de 06/11/2026: estados e recibos abaixo preservam a integração validada nas suas versões. A [auditoria operacional](../auditoria-2026-11-06/RELATORIO.md) acrescenta provas com escopo próprio, sem promover unidades ou declarar nova cobertura integral da etapa 7.
 
-Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 189 unidades incluem capacidades parciais, demonstrativas e internas; os estados do backend são preservados. O JSON correspondente mantém endpoints, restrições e evidências. A situação de cada unidade é independente da presença de uma página ou de um menu.
+Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 190 unidades incluem capacidades parciais, demonstrativas e internas; os estados do backend são preservados. O JSON correspondente mantém endpoints, restrições e evidências. A situação de cada unidade é independente da presença de uma página ou de um menu.
 
 | ID | Estado histórico no backend | Funcionalidade | Integração |
 |---|---|---|---|
@@ -56,6 +56,7 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 189 unidades incluem capacidades p
 | CR-07 | Implementada | Responsável, conversa, notas e estado | Integrada e validada |
 | CR-08 | Implementada | Criar OS vinculada ao atendimento | Integrada e validada |
 | CR-09 | Implementada | Relatório CRM por período | Integrada e validada |
+| CR-10 | Implementada | Consulta pública de viabilidade e captação de prospecto | Integrada e validada |
 | OS-01 | Implementada | Listagem de OS | Integrada e validada |
 | OS-02 | Implementada | Cadastrar OS e endereço de atendimento | Integrada e validada |
 | OS-03 | Implementada | Atribuir responsável e agendamento | Integrada e validada |
@@ -123,7 +124,7 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 189 unidades incluem capacidades p
 | IN-16 | Implementada | Comunicar manutenção programada | Integrada e validada |
 | IN-17 | Implementada | Consultar endereços, prefixos e caixa | Integrada e validada |
 | AD-01 | Implementada | Cadastro e gestão da equipe | Integrada e validada |
-| AD-02 | Parcial | Redefinição de senha de outro usuário | Integrada e validada |
+| AD-02 | Implementada | Redefinição de senha de outro usuário | Integrada e validada |
 | AD-03 | Implementada | Provedores e módulos de produto | Integrada e validada |
 | AD-04 | Implementada | Empresas de faturamento | Integrada e validada |
 | AD-05 | Implementada | Cadastrar e administrar POPs | Integrada e validada |
@@ -139,7 +140,7 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 189 unidades incluem capacidades p
 | AD-15 | Implementada | Definir e usar campos de assinante/contrato | Integrada e validada |
 | AD-16 | Implementada | Criar kits de materiais | Integrada e validada |
 | AD-17 | Parcial | Regras e relatório de comissões | Integrada e validada |
-| AD-18 | Parcial | Dados DICI por competência | Integrada e validada |
+| AD-18 | Implementada | Dados DICI por competência | Integrada e validada |
 | AD-19 | Implementada | Importar CSV em lotes e conferir erros | Integrada e validada |
 | AD-20 | Parcial | Migração automatizada de qualquer instalação SGP | Backend preservado / limitação |
 | AD-21 | Implementada | Consultar eventos e retenção | Integrada e validada |
@@ -181,7 +182,7 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 189 unidades incluem capacidades p
 | BE-26 | Somente backend | Criar cobrança avulsa | Integrada e validada |
 | BE-27 | Somente backend | Excluir etiqueta do catálogo | Integrada e validada |
 
-Cobertura de interface: **169 unidades integradas e validadas**, sem unidade operacional pendente ou parcial; 12 delas refletem capacidade demonstrativa (AC-02, FI-15, FI-16, RE-13) ou parcial (IN-03, IN-06, IN-11, IN-13, IN-15, AD-02, AD-17, AD-18) do Go e aparecem identificadas na interface. A evidência de cada unidade está em [por-unidade.json](evidencias/por-unidade.json). As **20 unidades preservadas** são 14 serviços internos, dois contratos de API externa e quatro limitações existentes. A [triagem individual](CAPACIDADES-BACKEND.md) explica a classificação; o JSON mantém os comportamentos históricos e acrescenta notas sobre a apresentação atual, sem alterar o estado original do backend.
+Cobertura de interface: **170 unidades integradas e validadas**, sem unidade operacional pendente ou parcial; 12 delas refletem capacidade demonstrativa (AC-02, FI-15, FI-16, RE-13) ou parcial (IN-03, IN-06, IN-11, IN-13, IN-15, AD-02, AD-17, AD-18) do Go e aparecem identificadas na interface. A evidência de cada unidade está em [por-unidade.json](evidencias/por-unidade.json). As **20 unidades preservadas** são 14 serviços internos, dois contratos de API externa e quatro limitações existentes. A [triagem individual](CAPACIDADES-BACKEND.md) explica a classificação; o JSON mantém os comportamentos históricos e acrescenta notas sobre a apresentação atual, sem alterar o estado original do backend.
 
 Nota de triagem do lote 39: as classificações e evidências de validação acima permanecem históricas. As descrições atuais de AD-02, IN-15, FI-17, PO-09 e BE-23 foram corrigidas no JSON: há controle de reset, histórico IPv6 por período e adapter Efí sandbox; o diretório resolve células por provedor. Essas constatações não homologam PSP, comprovam sessões de rede ou estabelecem arquitetura multicélulas. Consulte a triagem técnica para limites e dependências.
 
@@ -201,3 +202,5 @@ Preferências pessoais do workspace e painel (lote 45): browser real PASS para f
 Trabalho de campo na OS (09/11/2026): unidades `CAMPO-PRESENCA`, `CAMPO-ASSINATURA`, `CAMPO-FOTO` e `CAMPO-OFFLINE` cobrem check-in/check-out com geolocalização opcional e distância até a instalação, assinatura do cliente como PNG privado da OS com SHA-256, foto pela câmera reduzida no navegador e fila offline com chave de idempotência (migração `00088_os_campo.sql`). O Go com PostgreSQL real e -race passou em `TestWorkOrderFieldPG`; o cenário `e2e/frontend-v0-field-work.mjs` entra na fumaça e o rastreio por unidade é gerado na execução do integrador.
 
 Template ACS, acompanhamento e assistente (09/11/2026): os três destinos antes marcados como recurso planejado têm página operacional e nenhum destino do catálogo cai mais em `PlannedFeature`. Quatro unidades novas: `REDE-ACS-TEMPLATES` (cadastro com curingas, variáveis validadas, inform periódico e revisão; migração 00091), `REDE-ACS-TEMPLATE-APLICACAO` (sugestão pelo CPE, pré-visualização com senhas mascaradas e intenção ACS durável pelo mesmo diário das tarefas CPE), `GESTAO-ACOMPANHAMENTO` (painel somente leitura com permissão `network:read`) e `GESTAO-ASSISTENTE` (regras determinísticas, sem modelo de linguagem, sobre consultas existentes e permissões da sessão). Testes Go com PostgreSQL e testes de reconhecimento de intenções passaram; os cenários de navegador `frontend-v0-acs-templates.mjs`, `frontend-v0-monitoring.mjs`, `frontend-v0-assistant.mjs` e `frontend-v0-acs-template-apply.mjs` (ACS sintético) foram escritos e aguardam a execução da fumaça para gerar o rastreio por unidade. Sem homologação em roteador físico.
+
+Viabilidade, DICI, senha provisória e encargos Efí (09/11/2026): `CR-10` publica a consulta de viabilidade sem login (`/viabilidade/:slug`), com resposta idêntica para provedor inexistente ou desativado, limite por IP e prospecto com origem "viabilidade"; `AD-18` gera o CSV no leiaute de acessos SCM por empresa e bloqueia a exportação listando pendências (o envio à ANATEL segue manual); `AD-02` exige troca da senha provisória e encerra as sessões do usuário; a política de cobrança envia multa (até 2%) e juros (até 1% ao mês) ao boleto/Bolix Efí sandbox, sem encargos no Pix imediato. Testes Go com PostgreSQL e com servidor HTTP simulado cobrem o backend; os cenários de navegador `frontend-v0-viability.mjs`, `frontend-v0-admin-team.mjs` e `frontend-v0-admin-reports.mjs` dependem da execução da fumaça e da regeneração de `evidencias/por-unidade.json`.

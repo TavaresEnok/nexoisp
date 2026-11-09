@@ -236,6 +236,9 @@ func (a *Auth) Guard(ctx context.Context, w http.ResponseWriter, r *http.Request
 			return &apierr.Error{Status: 429, Message: "muitas requisições desta sessão; aguarde um instante", Code: "rate_limited"}
 		}
 	}
+	if c.PasswordChangeRequired && !PasswordChangeAllowed(r.Method, r.URL.Path) {
+		return &apierr.Error{Status: 403, Message: "troque a senha provisória para continuar", Code: "password_change_required"}
+	}
 	if !fault.Active("sem_mfa") && a.RequireMFA && (c.Role == "admin" || c.Role == "saas_operator") && !c.MFAEnabled && !allowMFA {
 		return &apierr.Error{Status: 403, Message: "configure a verificação em duas etapas para continuar", Code: "mfa_setup_required"}
 	}
@@ -354,4 +357,14 @@ func (a *Auth) dropLocked(hash string) {
 		}
 	}
 	delete(a.index, hash)
+}
+
+// PasswordChangeAllowed lista o que uma sessão com senha provisória pode fazer:
+// consultar a própria sessão, trocar a senha ou sair. MFA não libera mais nada.
+func PasswordChangeAllowed(method, path string) bool {
+	switch method + " " + path {
+	case "GET /api/me", "HEAD /api/me", "POST /api/me/password", "POST /api/auth/logout":
+		return true
+	}
+	return false
 }

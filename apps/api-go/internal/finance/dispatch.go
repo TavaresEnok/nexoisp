@@ -23,6 +23,10 @@ type IssuanceOptions struct {
 	Customer        efi.BilletCustomer `json:"customer,omitempty"`
 	IssuedOn        string             `json:"issued_on,omitempty"`
 	NotificationURL string             `json:"notification_url,omitempty"`
+	// Multa (centésimos de %) e juros diários (milésimos de %) congelados da política
+	// de cobrança no preparo do boleto; o cliente da API não os escolhe.
+	Fine          int `json:"fine,omitempty"`
+	InterestDaily int `json:"interest_daily,omitempty"`
 }
 type AdapterFactory func(context.Context, providers.Create, string, IssuanceOptions) (ConfiguredAdapter, func(), error)
 
@@ -33,6 +37,12 @@ func StoredAdapterFactory(database *db.DB, scope tenancy.Scope) AdapterFactory {
 			return nil, func() {}, err
 		}
 		var a ConfiguredAdapter
+		if o.Product != "bolix" && (o.Fine != 0 || o.InterestDaily != 0) {
+			// Pix imediato expira sem pagamento após o prazo; Pix com vencimento não
+			// recebe encargos por esta integração. Multa e juros são só do boleto.
+			c.Close()
+			return nil, func() {}, errors.New("late charges apply only to Bolix")
+		}
 		switch o.Product {
 		case "pix_cob":
 			a, err = efi.NewImmediate(c, r, secret.PixKey, o.Expiration)
@@ -43,6 +53,9 @@ func StoredAdapterFactory(database *db.DB, scope tenancy.Scope) AdapterFactory {
 			billet, err = efi.NewBolix(c, r, o.Customer, o.IssuedOn)
 			if err == nil {
 				err = billet.SetNotificationURL(o.NotificationURL)
+				if err == nil {
+					err = billet.SetLateCharges(o.Fine, o.InterestDaily)
+				}
 				a = billet
 			}
 		default:

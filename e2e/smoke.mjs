@@ -23,6 +23,7 @@ const scenarios = [
   'frontend-v0-acs-templates.mjs',
   'frontend-v0-monitoring.mjs',
   'frontend-v0-assistant.mjs',
+  'frontend-v0-viability.mjs',
   'frontend-v0-access.mjs',
   'frontend-v0-optical.mjs',
   'frontend-v0-maintenance.mjs',

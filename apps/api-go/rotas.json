@@ -659,6 +659,10 @@
     },
     {
       "method": "GET",
+      "path": "/api/settings/viability"
+    },
+    {
+      "method": "GET",
       "path": "/api/sla-calendar"
     },
     {
@@ -860,6 +864,14 @@
     {
       "method": "GET",
       "path": "/public/v1/work-orders/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/public/viabilidade/:slug"
+    },
+    {
+      "method": "GET",
+      "path": "/public/viabilidade/:slug/logo"
     },
     {
       "method": "PATCH",
@@ -1666,6 +1678,14 @@
       "path": "/public/v1/work-orders"
     },
     {
+      "method": "POST",
+      "path": "/public/viabilidade/:slug/consulta"
+    },
+    {
+      "method": "POST",
+      "path": "/public/viabilidade/:slug/interesse"
+    },
+    {
       "method": "PUT",
       "path": "/api/anatel/municipalities"
     },
@@ -1752,6 +1772,10 @@
     {
       "method": "PUT",
       "path": "/api/settings/retention"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/settings/viability"
     },
     {
       "method": "PUT",

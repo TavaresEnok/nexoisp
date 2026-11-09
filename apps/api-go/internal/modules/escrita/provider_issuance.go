@@ -12,6 +12,7 @@ import (
 	"nexoisp/api-go/internal/endpoint"
 	"nexoisp/api-go/internal/finance"
 	"nexoisp/api-go/internal/finance/providers"
+	"nexoisp/api-go/internal/finance/providers/efi"
 	"nexoisp/api-go/internal/validate"
 	"strings"
 	"time"
@@ -76,6 +77,9 @@ func registerProviderIssuance(api huma.API, registry *endpoint.Registry, s Servi
 		if body.Options.IssuedOn != "" || body.Options.NotificationURL != "" {
 			return endpoint.Result{}, apierr.New(400, "data de emissão é definida pelo servidor")
 		}
+		if body.Options.Fine != 0 || body.Options.InterestDaily != 0 {
+			return endpoint.Result{}, apierr.New(400, "multa e juros vêm da política de cobrança do provedor")
+		}
 		if body.Options.Product == "pix_cob" && body.Options.Expiration == 0 {
 			body.Options.Expiration = 3600
 		}
@@ -116,6 +120,8 @@ func registerProviderIssuance(api huma.API, registry *endpoint.Registry, s Servi
 					}
 					body.Options.IssuedOn = old.IssuedOn
 					body.Options.NotificationURL = old.NotificationURL
+					body.Options.Fine = old.Fine
+					body.Options.InterestDaily = old.InterestDaily
 				}
 			}
 			if body.Options.Product == "bolix" && body.Options.IssuedOn == "" {
@@ -125,6 +131,13 @@ func registerProviderIssuance(api huma.API, registry *endpoint.Registry, s Servi
 				body.Options.NotificationURL, err = finance.ChargesCallbackURL(connection)
 				if err != nil {
 					return err
+				}
+				var finePercent, interestPercent float64
+				if err = tx.QueryRow(ctx, `select coalesce((select late_fee_percent::float8 from tenant_settings where tenant_id=app_tenant()),0), coalesce((select interest_monthly_percent::float8 from tenant_settings where tenant_id=app_tenant()),0)`).Scan(&finePercent, &interestPercent); err != nil {
+					return err
+				}
+				if body.Options.Fine, body.Options.InterestDaily, err = efi.BilletLateCharges(finePercent, interestPercent); err != nil {
+					return apierr.New(400, "a política de cobrança excede o limite do boleto: multa até 2% e juros até 1% ao mês")
 				}
 			}
 			return nil

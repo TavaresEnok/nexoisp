@@ -125,6 +125,12 @@ export function FinancePolicy() {
                   juros são aplicados na baixa quando selecionados; cobranças já
                   emitidas no gateway preservam seu valor.
                 </p>
+                <p className="profile-footnote">
+                  Boletos emitidos pela Efí levam a multa e os juros desta
+                  política, congelados na emissão, dentro dos limites legais:
+                  multa até 2% e juros até 1% ao mês. Acima disso a emissão do
+                  boleto é recusada. Pix imediato não tem multa nem juros.
+                </p>
                 {writable && current.data.auto_suspend && (
                   <ActionButton
                     confirm="Executar a verificação de inadimplência conforme a política salva?"

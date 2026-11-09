@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { sessionScope, type Session } from "@/features/session/model";
+import { sessionRestricted, sessionScope, type Session } from "@/features/session/model";
 
 export const brandingSchema = z.object({
   display_name: z.string().nullable(),
@@ -20,7 +20,7 @@ export type BrandingUpdate = { display_name: string | null } & (
   | { logo_action: "replace"; logo_content_base64: string }
 );
 export const brandingKey = (me: Session | null) =>
-  me?.tenant && !me.mfa_pending
+  me?.tenant && !sessionRestricted(me)
     ? (["tenant-branding", sessionScope(me), me.tenant.id, me.id] as const)
     : null;
 export const brandingLogoUrl = (hash: string) =>

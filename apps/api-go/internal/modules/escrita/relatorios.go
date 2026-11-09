@@ -193,61 +193,6 @@ func (s Service) financeExport(ctx context.Context, tx *db.Tx, _ string, _ map[s
 	}
 	return endpoint.Result{CSV: simpleCSV(columns, list, map[string]bool{"valor_fatura": true, "valor_pago": true}), Filename: "nexoisp-" + kind + "-" + from + "_" + to + ".csv"}, nil
 }
-func (s Service) dici(ctx context.Context, tx *db.Tx, _ string, _ map[string]any) (any, error) {
-	const key = "GET /api/anatel/dici"
-	q := reportQuery(ctx)
-	competence := q.String("competence", false, true)
-	if len(q.Issues) == 0 && !diciCompetence.MatchString(competence) {
-		q.Issues = append(q.Issues, "competence: competência AAAA-MM")
-	}
-	format := q.Enum("format", "json", "json", "csv")
-	if err := q.Err(); err != nil {
-		return nil, err
-	}
-	list, err := rows(ctx, tx, key, 0, competence+"-01")
-	if err != nil {
-		return nil, err
-	}
-	pending, err := one(ctx, tx, key, 1, competence+"-01")
-	if err != nil {
-		return nil, err
-	}
-	cities, err := rows(ctx, tx, key, 2, competence+"-01")
-	if err != nil {
-		return nil, err
-	}
-	plans, err := rows(ctx, tx, key, 3)
-	if err != nil {
-		return nil, err
-	}
-	pending.Set("cities_without_code", cities)
-	pending.Set("plans_without_technology", plans)
-	accesses := float64(0)
-	for _, r := range list {
-		accesses += num(r.Get("acessos"))
-	}
-	if err = record(ctx, tx, "anatel.dici", "report", nil, map[string]any{"competence": competence, "format": format, "accesses": accesses}); err != nil {
-		return nil, err
-	}
-	if format == "json" {
-		return map[string]any{"competence": competence, "rows": list, "pending": pending}, nil
-	}
-	split := strings.Split(competence, "-")
-	lines := []string{"CNPJ;ANO;MES;COD_IBGE;TIPO_CLIENTE;TIPO_ATENDIMENTO;TIPO_MEIO;TIPO_PRODUTO;TIPO_TECNOLOGIA;VELOCIDADE;ACESSOS"}
-	for _, r := range list {
-		values := []any{r.Get("cnpj"), split[0], split[1], r.Get("ibge_code"), r.Get("tipo_cliente"), r.Get("tipo_atendimento"), r.Get("meio"), "internet", r.Get("tecnologia"), strings.Replace(jsonx.String(r.Get("velocidade_mbps")), ".", ",", 1), r.Get("acessos")}
-		cells := []string{}
-		for _, v := range values {
-			if v == nil {
-				cells = append(cells, "")
-			} else {
-				cells = append(cells, jsonx.String(v))
-			}
-		}
-		lines = append(lines, strings.Join(cells, ";"))
-	}
-	return endpoint.Result{CSV: []byte(strings.Join(lines, "\r\n") + "\r\n"), Filename: "dici-acessos-" + competence + ".csv"}, nil
-}
 func (s Service) commissions(ctx context.Context, tx *db.Tx, _ string, _ map[string]any) (any, error) {
 	const key = "GET /api/reports/commissions"
 	q := reportQuery(ctx)

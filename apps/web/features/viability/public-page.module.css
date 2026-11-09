@@ -1,0 +1,116 @@
+.page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: start center;
+  padding: clamp(16px, 4vw, 48px) 16px;
+  background-color: var(--background);
+  background-image: radial-gradient(var(--border) 1px, transparent 1.2px);
+  background-size: 22px 22px;
+  color: var(--foreground);
+}
+.card {
+  width: min(100%, 620px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: clamp(20px, 4vw, 36px);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: var(--card);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+.brand img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--background);
+}
+.brand strong {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+.eyebrow {
+  margin: 0;
+  font: 500 10px/1 var(--font-mono);
+  letter-spacing: 0.18em;
+  color: var(--muted-foreground);
+}
+.card h1 {
+  margin: 0;
+  font-size: clamp(26px, 5vw, 36px);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+}
+.lead {
+  margin: 0;
+  color: var(--muted-foreground);
+  white-space: pre-line;
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.form fieldset {
+  display: contents;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+}
+.consent input {
+  margin-top: 3px;
+}
+.contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+.footer {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font: 500 11px/1.4 var(--font-mono);
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+}
+@media (max-width: 520px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

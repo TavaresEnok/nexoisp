@@ -24,7 +24,17 @@ export function Account() {
         title="Minha conta"
         description="Credenciais e segurança de acesso."
       />
-      {me?.mfa_pending && (
+      {me?.password_change_required && (
+        <Alert>
+          <AlertTitle>Troque a senha provisória</AlertTitle>
+          <AlertDescription>
+            O administrador redefiniu sua senha. Defina uma nova senha para
+            acessar o restante do sistema; até lá, as demais funções ficam
+            bloqueadas.
+          </AlertDescription>
+        </Alert>
+      )}
+      {me?.mfa_pending && !me.password_change_required && (
         <Alert>
           <AlertTitle>Configure a verificação em duas etapas</AlertTitle>
           <AlertDescription>
@@ -34,6 +44,7 @@ export function Account() {
         </Alert>
       )}
       <div className="erp-stack">
+        {!me?.password_change_required && (
         <Panel
           title="Verificação em duas etapas"
           description="Use um aplicativo autenticador para gerar seus códigos de acesso."
@@ -129,6 +140,7 @@ export function Account() {
             </MutationForm>
           )}
         </Panel>
+        )}
         <Panel
           title="Alterar senha"
           description="A alteração encerra suas outras sessões."
@@ -136,9 +148,15 @@ export function Account() {
           <MutationForm
             submit="Alterar senha"
             onSubmit={async () => {
+              const provisional = Boolean(me?.password_change_required);
+              if (provisional && password.next === password.current)
+                throw new Error(
+                  "A nova senha deve ser diferente da senha provisória.",
+                );
               await api("/me/password", { body: password });
               setPassword({ current: "", next: "" });
               setMessage("Senha alterada. Outras sessões foram encerradas.");
+              if (provisional) await reload();
             }}
           >
             <div className="erp-columns">

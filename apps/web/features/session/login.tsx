@@ -25,6 +25,7 @@ import { Label } from "@/components/ui/label";
 import { api } from "@/platform/erp-client";
 import { readAppearance, saveAppearance } from "@/platform/appearance";
 import { useSession } from "./provider";
+import { sessionRestricted } from "./model";
 import { LoginShowcase } from "./login-showcase";
 import styles from "./login.module.css";
 
@@ -88,7 +89,7 @@ export function Login() {
           "Não foi possível confirmar a sessão. Tente novamente.",
         );
       navigate(
-        me.mfa_pending
+        sessionRestricted(me)
           ? "/conta"
           : (returnPath(me, location.state) ??
               (me.role === "saas_operator" && !me.support
