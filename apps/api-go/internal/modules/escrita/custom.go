@@ -31,6 +31,7 @@ func registerCustom(api huma.API, registry *endpoint.Registry, s Service) {
 	registerSlaCalendar(api, registry, s)
 	registerStockPurchasing(api, registry, s)
 	registerWorkOrderAttachments(api, registry, s)
+	registerWorkOrderField(api, registry, s)
 	registerStockQuotations(api, registry, s)
 	registerTenantBranding(api, registry, s)
 	registerNetworkSites(api, registry, s)

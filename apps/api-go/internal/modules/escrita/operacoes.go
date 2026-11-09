@@ -107,6 +107,11 @@ func (s Service) workStatus(ctx context.Context, tx *db.Tx, id string, b map[str
 			return nil, err
 		}
 	}
+	if finished(status) {
+		if err = closeOpenVisits(ctx, tx, id); err != nil {
+			return nil, err
+		}
+	}
 	detail := map[string]any{"from": cur.Get("status"), "to": status}
 	for _, name := range []string{"resolution", "reason"} {
 		if b[name] != nil {

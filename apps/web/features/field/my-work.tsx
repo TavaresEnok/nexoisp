@@ -9,6 +9,7 @@ import { QueryBoundary, ConnectedNotice } from "@/features/shared/feedback";
 import { useSession } from "@/features/session/provider";
 import { erpClient } from "@/platform/erp-client";
 import { orderSchema, projectOrder } from "./models";
+import { FieldQueuePanel } from "./field-queue-panel";
 
 export function MyWork() {
   const { me } = useSession();
@@ -34,13 +35,20 @@ export function MyWork() {
       <ConnectedNotice demo={me?.demo} />
       <PageHeading
         title="Meu trabalho"
-        description="Suas ordens pendentes, atualizadas a cada 30 segundos. Requer conexão com o provedor."
+        description="Suas ordens pendentes, atualizadas a cada 30 segundos. Sem conexão, check-in, check-out, anotações e checklist ficam numa fila neste aparelho e são enviados ao reconectar."
       />
+      <FieldQueuePanel />
       <QueryBoundary
         loading={result.isLoading}
-        error={result.error}
+        error={result.data ? undefined : result.error}
         retry={() => result.mutate()}
       >
+        {result.data && result.error && (
+          <p className="profile-footnote" role="status">
+            Sem resposta do servidor: exibindo a consulta de{" "}
+            {new Date(result.data.readAt).toLocaleString("pt-BR")}.
+          </p>
+        )}
         {result.data && (
           <p className="profile-footnote">
             {result.data.rows.length} de {result.data.total} OS pendentes

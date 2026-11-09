@@ -16,6 +16,11 @@ import { api } from "@/platform/erp-client";
 import { date } from "@/lib/format";
 import { orderStates } from "./labels";
 import type { OrderDetail } from "./models";
+import { formatDistance } from "./field-model";
+import type { FieldAction } from "./field-queue";
+import { useFieldQueue } from "./use-field-queue";
+
+const queuedNotice = "Sem conexão: registro guardado na fila deste aparelho.";
 export function WorkCollaboration({
   order,
   staff,
@@ -31,6 +36,8 @@ export function WorkCollaboration({
   const [adding, setAdding] = useState(false);
   const [kit, setKit] = useState("");
   const [label, setLabel] = useState("");
+  const queue = useFieldQueue();
+  const target = { id: order.id, number: order.number };
   const kits = useSWR(
     writable && can(me, "stock:read") ? "erp-install-kits" : null,
     () => api<{ id: string; name: string; active: boolean }[]>("/install-kits"),
@@ -77,24 +84,56 @@ export function WorkCollaboration({
           {order.checklist.map((item) => (
             <ChecklistItem
               key={item.id}
-              order={order.id}
               item={item}
               writable={writable}
-              refresh={refresh}
+              queued={queue.items.filter(
+                (action) =>
+                  action.kind === "checklist_done" &&
+                  action.state !== "refused" &&
+                  action.path.endsWith(
+                    `/checklist/${encodeURIComponent(String(item.id))}`,
+                  ),
+              )}
+              onToggle={async (done) => {
+                const outcome = await queue.submit(target, {
+                  kind: "checklist_done",
+                  item_id: String(item.id),
+                  done,
+                });
+                if (outcome === "queued") toast.info(queuedNotice);
+                else await refresh();
+              }}
             />
           ))}
           {!order.checklist.length && (
             <p className="profile-footnote">Nenhum item de checklist.</p>
           )}
+          {queue.items
+            .filter(
+              (action) =>
+                action.order_id === order.id &&
+                action.kind === "checklist_add" &&
+                action.state !== "refused",
+            )
+            .map((action) => (
+              <small className="text-muted-foreground" key={action.key}>
+                {Array.isArray(action.body.items)
+                  ? String(action.body.items[0])
+                  : "Item"}{" "}
+                · aguardando envio
+              </small>
+            ))}
           {writable && (
             <MutationForm
               submit="Adicionar ao checklist"
               onSubmit={async () => {
-                await api(`/work-orders/${order.id}/checklist`, {
-                  body: { items: [label] },
+                const outcome = await queue.submit(target, {
+                  kind: "checklist_add",
+                  label,
                 });
                 setLabel("");
-                await refresh();
+                if (outcome === "queued") toast.info(queuedNotice);
+                else await refresh();
               }}
             >
               <FormField label="Novo item do checklist">
@@ -188,34 +227,33 @@ export function WorkCollaboration({
   );
 }
 function ChecklistItem({
-  order,
   item,
   writable,
-  refresh,
+  queued,
+  onToggle,
 }: {
-  order: string;
   item: OrderDetail["checklist"][number];
   writable: boolean;
-  refresh: () => Promise<void>;
+  queued: FieldAction[];
+  onToggle: (done: boolean) => Promise<void>;
 }) {
   const [busy, setBusy] = useState(false);
   const [pendingDone, setPendingDone] = useState<boolean | null>(null);
+  const last = queued.at(-1);
+  const queuedDone = last ? last.body.done === true : null;
   return (
     <div>
       <Label className="erp-inline-actions">
         <input
           type="checkbox"
-          checked={pendingDone ?? item.done}
+          checked={pendingDone ?? queuedDone ?? item.done}
           disabled={!writable || busy}
           onChange={async (e) => {
             const done = e.target.checked;
             setPendingDone(done);
             setBusy(true);
             try {
-              await api(`/work-orders/${order}/checklist/${item.id}`, {
-                body: { done },
-              });
-              await refresh();
+              await onToggle(done);
             } catch (error) {
               toast.error((error as Error).message);
             } finally {
@@ -226,7 +264,10 @@ function ChecklistItem({
         />
         {item.label}
       </Label>
-      {item.done && (
+      {last && (
+        <small className="text-muted-foreground">Aguardando envio</small>
+      )}
+      {item.done && !last && (
         <small className="text-muted-foreground">
           {item.done_by_name ?? "Equipe"} ·{" "}
           {item.done_at ? date(item.done_at) : ""}
@@ -244,6 +285,13 @@ export function WorkHistory({
 }) {
   const { me } = useSession();
   const [note, setNote] = useState("");
+  const queue = useFieldQueue();
+  const located = (detail: Record<string, unknown>) =>
+    typeof detail.distance_m === "number"
+      ? `A ${formatDistance(detail.distance_m)} da instalação`
+      : detail.located === true
+        ? "Localização registrada"
+        : "Sem localização do aparelho";
   const labels: Record<string, string> = {
     created: "OS aberta",
     status: "Situação alterada",
@@ -257,6 +305,10 @@ export function WorkHistory({
     checklist: "Checklist atualizado",
     checklist_done: "Item concluído",
     checklist_undone: "Item reaberto",
+    check_in: "Check-in no local",
+    check_out: "Check-out",
+    signature: "Assinatura do cliente",
+    visits_closed: "Presenças encerradas com a OS",
   };
   return (
     <ProfileSection title="Histórico da ordem">
@@ -264,9 +316,13 @@ export function WorkHistory({
         <MutationForm
           submit="Anotar na OS"
           onSubmit={async () => {
-            await api(`/work-orders/${order.id}/notes`, { body: { note } });
+            const outcome = await queue.submit(
+              { id: order.id, number: order.number },
+              { kind: "note", note },
+            );
             setNote("");
-            await refresh();
+            if (outcome === "queued") toast.info(queuedNotice);
+            else await refresh();
           }}
         >
           <FormField label="Anotação da OS">
@@ -298,11 +354,20 @@ export function WorkHistory({
                         : "Agendamento removido"
                       : event.event === "note"
                         ? String(event.detail.note ?? "")
-                        : event.event === "material"
-                          ? `${event.detail.item ?? "Material"} × ${event.detail.qty ?? ""}${event.detail.serial ? ` · ${event.detail.serial}` : ""}`
-                          : String(
-                              event.detail.item ?? event.detail.name ?? "",
-                            )}
+                        : event.event === "check_in" ||
+                            event.event === "check_out"
+                          ? located(event.detail)
+                          : event.event === "signature"
+                            ? "Assinatura registrada como documento privado da OS"
+                            : event.event === "visits_closed"
+                              ? `${String(event.detail.count ?? "")} presença(s) em aberto encerrada(s)`
+                              : event.event === "material"
+                                ? `${event.detail.item ?? "Material"} × ${event.detail.qty ?? ""}${event.detail.serial ? ` · ${event.detail.serial}` : ""}`
+                                : String(
+                                    event.detail.item ??
+                                      event.detail.name ??
+                                      "",
+                                  )}
               </p>
               <small>
                 {new Date(event.at).toLocaleString("pt-BR")} ·{" "}

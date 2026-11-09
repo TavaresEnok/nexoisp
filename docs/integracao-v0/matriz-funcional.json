@@ -3003,5 +3003,69 @@
     "localEvidence": {
       "scenario": "frontend-v0-workspace-preferences.mjs"
     }
+  },
+  {
+    "id": "CAMPO-PRESENCA",
+    "entry": "Ficha da OS e Meu trabalho",
+    "functionality": "Check-in e check-out do técnico com horário do servidor, geolocalização opcional, distância até a instalação e tempo em atendimento",
+    "backendState": "Implementada",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-field-work.mjs",
+      "apps/api-go/internal/modules/escrita/work_order_field_test.go"
+    ],
+    "integrationClassification": "business-ui",
+    "endpoints": "GET /api/work-orders/:id/visits; POST /api/work-orders/:id/check-in; POST /api/work-orders/:id/check-out",
+    "integrationNotes": [
+      "Go/PostgreSQL real com -race: TestWorkOrderFieldPG PASS (regras, permissões, isolamento por provedor/POP/portal, idempotência e assinatura). Cenário de navegador escrito e incluído na fumaça; execução e rastreio pendentes do integrador."
+    ]
+  },
+  {
+    "id": "CAMPO-ASSINATURA",
+    "entry": "Ficha da OS",
+    "functionality": "Assinatura do cliente em canvas gravada como PNG privado da OS com SHA-256, exibida na ficha e na impressão",
+    "backendState": "Implementada",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-field-work.mjs",
+      "apps/api-go/internal/modules/escrita/work_order_field_test.go"
+    ],
+    "integrationClassification": "business-ui",
+    "endpoints": "GET /api/work-orders/:id/signature; POST /api/work-orders/:id/signature; GET /api/work-orders/:id/signature/image",
+    "integrationNotes": [
+      "Go/PostgreSQL real com -race: TestWorkOrderFieldPG PASS (regras, permissões, isolamento por provedor/POP/portal, idempotência e assinatura). Cenário de navegador escrito e incluído na fumaça; execução e rastreio pendentes do integrador."
+    ]
+  },
+  {
+    "id": "CAMPO-FOTO",
+    "entry": "Ficha da OS",
+    "functionality": "Foto pela câmera do celular reduzida no navegador (até 1920 px, JPEG) com legenda opcional no anexo da OS",
+    "backendState": "Implementada",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-field-work.mjs",
+      "apps/api-go/internal/modules/escrita/work_order_field_test.go"
+    ],
+    "integrationClassification": "business-ui",
+    "endpoints": "POST /api/work-orders/:id/attachments; GET /api/work-orders/:id/attachments",
+    "integrationNotes": [
+      "Go/PostgreSQL real com -race: TestWorkOrderFieldPG PASS (regras, permissões, isolamento por provedor/POP/portal, idempotência e assinatura). Cenário de navegador escrito e incluído na fumaça; execução e rastreio pendentes do integrador."
+    ]
+  },
+  {
+    "id": "CAMPO-OFFLINE",
+    "entry": "Ficha da OS e Meu trabalho",
+    "functionality": "Fila offline de check-in/check-out, anotações e checklist com chave de idempotência, estados e envio ao reconectar",
+    "backendState": "Implementada",
+    "integrationState": "validated",
+    "validation": [
+      "e2e/frontend-v0-field-work.mjs",
+      "apps/api-go/internal/modules/escrita/work_order_field_test.go"
+    ],
+    "integrationClassification": "business-ui",
+    "endpoints": "POST /api/work-orders/:id/check-out; POST /api/work-orders/:id/notes; POST /api/work-orders/:id/checklist/:itemId",
+    "integrationNotes": [
+      "Go/PostgreSQL real com -race: TestWorkOrderFieldPG PASS (regras, permissões, isolamento por provedor/POP/portal, idempotência e assinatura). Cenário de navegador escrito e incluído na fumaça; execução e rastreio pendentes do integrador."
+    ]
   }
 ]
