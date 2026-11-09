@@ -30,6 +30,19 @@ Tudo o que estava pela metade ou só planejado e dependia apenas de código foi 
 
 Nenhum destino do menu cai mais em "Recurso planejado". A matriz funcional não tem unidade pendente.
 
+Validação executada neste servidor sobre o `main` integrado (09/11/2026):
+
+| Verificação | Resultado |
+|---|---|
+| Go: build, vet, golangci-lint | Sem erros |
+| Suíte Go com PostgreSQL 16 real e `-race` | Aprovada, sem falhas nem testes pulados |
+| Frontend: TypeScript, 228 testes, build de produção | Aprovados |
+| Navegador: 42 cenários da fumaça + intenção de pagamento + cenários com ACS sintético (CPE e template) | Aprovados |
+| Contratos do workflow: instalação nativa com duas réplicas e manifesto de rotas, migrações financeiras, efeitos de pagamento, resiliência, restore em cluster limpo, auditoria SGP, imagem da VPN, SBOM | Aprovados |
+| Matriz funcional | 196 unidades; 176 integradas e validadas, cada uma com verificação de interface; nenhuma pendente |
+
+O painel local de avaliação (`127.0.0.1:18380`, `~/.local/share/nexoisp/painel-20261106`) foi atualizado para esta versão em 09/11/2026 (migrações até 00094), com backup prévio em `backups/pre-atualizacao-20261109.dump`; as imagens `:20261106` e o `compose.yaml.20261106` permitem voltar. O CI do GitHub não foi consultado daqui (sem `gh`); a bateria equivalente rodou localmente.
+
 ## Base
 
 - Evidência histórica: código em `main` e `dev/lote01-consolidado-2026-10-26` no commit `42b8154` à época da validação. A auditoria atual partiu de `9119c57` e gera somente commits locais; não houve push. O workflow `backend Go e painel` passou nesse commit (execuções 41174481523 em `main` e 41174481387 em `dev`), incluindo os contratos com PostgreSQL, o painel real contra o Go e o SBOM.
