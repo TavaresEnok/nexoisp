@@ -1,0 +1,28 @@
+{
+  "scenario": "frontend-v0-viability.mjs",
+  "recorded_at": "2026-11-09T22:20:24.556Z",
+  "steps": [
+    {
+      "check": "Painel publica a consulta com raio de 250 m, mensagem, contatos e criação de prospecto; o Go recusa raio fora da faixa.",
+      "requests": [
+        "GET /api/health",
+        "GET /api/me",
+        "GET /api/settings/viability",
+        "GET /api/tenant-branding",
+        "GET /api/today",
+        "POST /api/auth/login",
+        "PUT /api/settings/viability"
+      ]
+    },
+    {
+      "check": "Desativação no painel deixa a página pública indisponível com a mesma resposta de provedor inexistente.",
+      "requests": [
+        "GET /api/me",
+        "GET /api/settings/viability",
+        "GET /api/tenant-branding",
+        "GET /api/today",
+        "PUT /api/settings/viability"
+      ]
+    }
+  ]
+}

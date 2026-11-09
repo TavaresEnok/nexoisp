@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-09T22:16:09.017Z",
+  "generated_at": "2026-11-09T22:20:53.529Z",
   "method": "Chamadas à API feitas pelas páginas entre uma verificação e a anterior, gravadas por e2e/request-trace.mjs durante a fumaça; preparação via context.request não conta.",
   "scenarios": [
     {
@@ -19,13 +19,13 @@
     },
     {
       "scenario": "frontend-v0-admin-reports.mjs",
-      "recorded_at": "2026-11-09T21:49:09.679Z",
+      "recorded_at": "2026-11-09T22:20:41.231Z",
       "checks": 5
     },
     {
       "scenario": "frontend-v0-admin-team.mjs",
-      "recorded_at": "2026-11-09T21:48:51.736Z",
-      "checks": 7
+      "recorded_at": "2026-11-09T22:20:34.339Z",
+      "checks": 8
     },
     {
       "scenario": "frontend-v0-assistant.mjs",
@@ -208,6 +208,11 @@
       "checks": 11
     },
     {
+      "scenario": "frontend-v0-viability.mjs",
+      "recorded_at": "2026-11-09T22:20:24.556Z",
+      "checks": 2
+    },
+    {
       "scenario": "frontend-v0-workspace-preferences.mjs",
       "recorded_at": "2026-10-30T18:22:30.264Z",
       "checks": 3
@@ -228,8 +233,8 @@
       "checks": 1
     }
   ],
-  "validated_units": 169,
-  "units_with_interface_check": 169,
+  "validated_units": 170,
+  "units_with_interface_check": 170,
   "units": [
     {
       "id": "AC-01",
@@ -399,7 +404,7 @@
         },
         {
           "scenario": "frontend-v0-admin-reports.mjs",
-          "check": "Coleta DICI usa competência, empresa e contrato reais; correções de IBGE e tecnologia alimentam prévia e CSV sem transmissão externa",
+          "check": "Coleta DICI por CNPJ bloqueia o arquivo e lista município sem IBGE e plano sem tecnologia; após as correções o CSV segue o leiaute SCM, sem transmissão externa",
           "endpoints": [
             "GET /api/me"
           ]
@@ -427,7 +432,14 @@
         },
         {
           "scenario": "frontend-v0-admin-team.mjs",
-          "check": "Administrador redefine senha real e remove MFA com confirmação; senha antiga deixa de autenticar",
+          "check": "Redefinição pelo administrador encerra as sessões do usuário e exige troca: senha provisória só acessa a própria conta, inclusive MFA, até a troca na UI",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-admin-team.mjs",
+          "check": "Administrador redefine senha real e remove MFA com confirmação; senha antiga e provisória deixam de autenticar",
           "endpoints": [
             "GET /api/me"
           ]
@@ -1801,6 +1813,22 @@
           ]
         },
         {
+          "scenario": "frontend-v0-viability.mjs",
+          "check": "Painel publica a consulta com raio de 250 m, mensagem, contatos e criação de prospecto; o Go recusa raio fora da faixa.",
+          "endpoints": [
+            "POST /api/auth/login",
+            "GET /api/me",
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-viability.mjs",
+          "check": "Desativação no painel deixa a página pública indisponível com a mesma resposta de provedor inexistente.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
           "scenario": "frontend-v0-workspace-preferences.mjs",
           "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
           "endpoints": [
@@ -2035,6 +2063,14 @@
         {
           "scenario": "frontend-v0-stock.mjs",
           "check": "Catálogo cadastra material com código, unidade e mínimo; alerta usa saldo real",
+          "endpoints": [
+            "GET /api/health",
+            "POST /api/auth/login"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-viability.mjs",
+          "check": "Painel publica a consulta com raio de 250 m, mensagem, contatos e criação de prospecto; o Go recusa raio fora da faixa.",
           "endpoints": [
             "GET /api/health",
             "POST /api/auth/login"
@@ -2286,7 +2322,7 @@
         },
         {
           "scenario": "frontend-v0-admin-reports.mjs",
-          "check": "Coleta DICI usa competência, empresa e contrato reais; correções de IBGE e tecnologia alimentam prévia e CSV sem transmissão externa",
+          "check": "Coleta DICI por CNPJ bloqueia o arquivo e lista município sem IBGE e plano sem tecnologia; após as correções o CSV segue o leiaute SCM, sem transmissão externa",
           "endpoints": [
             "GET /api/me"
           ]
@@ -2314,7 +2350,14 @@
         },
         {
           "scenario": "frontend-v0-admin-team.mjs",
-          "check": "Administrador redefine senha real e remove MFA com confirmação; senha antiga deixa de autenticar",
+          "check": "Redefinição pelo administrador encerra as sessões do usuário e exige troca: senha provisória só acessa a própria conta, inclusive MFA, até a troca na UI",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-admin-team.mjs",
+          "check": "Administrador redefine senha real e remove MFA com confirmação; senha antiga e provisória deixam de autenticar",
           "endpoints": [
             "GET /api/me"
           ]
@@ -3644,6 +3687,20 @@
           ]
         },
         {
+          "scenario": "frontend-v0-viability.mjs",
+          "check": "Painel publica a consulta com raio de 250 m, mensagem, contatos e criação de prospecto; o Go recusa raio fora da faixa.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-viability.mjs",
+          "check": "Desativação no painel deixa a página pública indisponível com a mesma resposta de provedor inexistente.",
+          "endpoints": [
+            "GET /api/me"
+          ]
+        },
+        {
           "scenario": "frontend-v0-workspace-preferences.mjs",
           "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
           "endpoints": [
@@ -3824,7 +3881,7 @@
         },
         {
           "scenario": "frontend-v0-admin-reports.mjs",
-          "check": "Coleta DICI usa competência, empresa e contrato reais; correções de IBGE e tecnologia alimentam prévia e CSV sem transmissão externa",
+          "check": "Coleta DICI por CNPJ bloqueia o arquivo e lista município sem IBGE e plano sem tecnologia; após as correções o CSV segue o leiaute SCM, sem transmissão externa",
           "endpoints": [
             "GET /api/today"
           ]
@@ -3852,7 +3909,14 @@
         },
         {
           "scenario": "frontend-v0-admin-team.mjs",
-          "check": "Administrador redefine senha real e remove MFA com confirmação; senha antiga deixa de autenticar",
+          "check": "Redefinição pelo administrador encerra as sessões do usuário e exige troca: senha provisória só acessa a própria conta, inclusive MFA, até a troca na UI",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-admin-team.mjs",
+          "check": "Administrador redefine senha real e remove MFA com confirmação; senha antiga e provisória deixam de autenticar",
           "endpoints": [
             "GET /api/today"
           ]
@@ -4724,6 +4788,20 @@
           ]
         },
         {
+          "scenario": "frontend-v0-viability.mjs",
+          "check": "Painel publica a consulta com raio de 250 m, mensagem, contatos e criação de prospecto; o Go recusa raio fora da faixa.",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-viability.mjs",
+          "check": "Desativação no painel deixa a página pública indisponível com a mesma resposta de provedor inexistente.",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
           "scenario": "frontend-v0-workspace-preferences.mjs",
           "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
           "endpoints": [
@@ -4892,6 +4970,13 @@
       ],
       "not_exercised_by_interface": [],
       "checks": [
+        {
+          "scenario": "frontend-v0-admin-team.mjs",
+          "check": "Redefinição pelo administrador encerra as sessões do usuário e exige troca: senha provisória só acessa a própria conta, inclusive MFA, até a troca na UI",
+          "endpoints": [
+            "POST /api/me/password"
+          ]
+        },
         {
           "scenario": "frontend-v0-session.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Login do navegador não expõe o token da sessão no corpo; cliente de API recebe Bearer só ao pedir explicitamente\",\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
@@ -7380,6 +7465,13 @@
       "not_exercised_by_interface": [],
       "checks": [
         {
+          "scenario": "frontend-v0-admin-reports.mjs",
+          "check": "Coleta DICI por CNPJ bloqueia o arquivo e lista município sem IBGE e plano sem tecnologia; após as correções o CSV segue o leiaute SCM, sem transmissão externa",
+          "endpoints": [
+            "GET /api/companies"
+          ]
+        },
+        {
           "scenario": "frontend-v0-admin-team.mjs",
           "check": "Empresas são cadastradas, ativadas e definidas como padrão; o Go conserva uma única padrão e impede inativá-la",
           "endpoints": [
@@ -8462,13 +8554,6 @@
           ]
         },
         {
-          "scenario": "frontend-v0-admin-reports.mjs",
-          "check": "Coleta respeita isolamento por provedor e configuração de qualidade permanece acessível no celular",
-          "endpoints": [
-            "GET /api/tickets/:id"
-          ]
-        },
-        {
           "scenario": "frontend-v0-create-links.mjs",
           "check": "Diálogo aberto por /atendimentos/novo-atendimento em /atendimentos",
           "endpoints": [
@@ -8693,13 +8778,6 @@
       "not_exercised_by_interface": [],
       "checks": [
         {
-          "scenario": "frontend-v0-admin-reports.mjs",
-          "check": "Coleta respeita isolamento por provedor e configuração de qualidade permanece acessível no celular",
-          "endpoints": [
-            "GET /api/tickets/:id"
-          ]
-        },
-        {
           "scenario": "frontend-v0-crm.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Prospecto valida contato obrigatório no Go; cadastro, edição e ficha usam UUID real\",\"Etapas, motivo da perda, retomada e contato persistidos com histórico\",\"Conversão cria assinante relacionado ao prospecto, marca ganho e abre a ficha\",\"Protocolo com titular/contrato/prioridade e mensagem inicial, sem incidente fictício ou SLA presumido\",\"Responsável atribuído; nota interna e resposta pública preservam visibilidade e estado do protocolo\",\"OS real criada pelo atendimento, preservando protocolo, titular, contrato e endereço informado\",\"Encerramento e reabertura persistidos; URL restaura a ficha após recarregar\",\"Fila do titular abre o mesmo protocolo e fecha preservando a ficha do assinante\",\"Busca e exportação reais de atendimentos; relatório CRM por período carrega dados do Go\",\"Prospectos usam paginação do servidor e busca reinicia a página sem navegação tardia\",\"Nota interna permanece ausente no portal; perfil financeiro não oferece ações de equipe técnica\",\"Prospectos e protocolos isolados entre provedores\"]}",
           "endpoints": [
@@ -8739,6 +8817,37 @@
           "check": "{\"ok\":true,\"checks\":[\"Prospecto valida contato obrigatório no Go; cadastro, edição e ficha usam UUID real\",\"Etapas, motivo da perda, retomada e contato persistidos com histórico\",\"Conversão cria assinante relacionado ao prospecto, marca ganho e abre a ficha\",\"Protocolo com titular/contrato/prioridade e mensagem inicial, sem incidente fictício ou SLA presumido\",\"Responsável atribuído; nota interna e resposta pública preservam visibilidade e estado do protocolo\",\"OS real criada pelo atendimento, preservando protocolo, titular, contrato e endereço informado\",\"Encerramento e reabertura persistidos; URL restaura a ficha após recarregar\",\"Fila do titular abre o mesmo protocolo e fecha preservando a ficha do assinante\",\"Busca e exportação reais de atendimentos; relatório CRM por período carrega dados do Go\",\"Prospectos usam paginação do servidor e busca reinicia a página sem navegação tardia\",\"Nota interna permanece ausente no portal; perfil financeiro não oferece ações de equipe técnica\",\"Prospectos e protocolos isolados entre provedores\"]}",
           "endpoints": [
             "GET /api/crm/report"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CR-10",
+      "functionality": "Consulta pública de viabilidade e captação de prospecto",
+      "declared_endpoints": [
+        "GET /api/settings/viability",
+        "PUT /api/settings/viability"
+      ],
+      "exercised_by_interface": [
+        "GET /api/settings/viability",
+        "PUT /api/settings/viability"
+      ],
+      "not_exercised_by_interface": [],
+      "checks": [
+        {
+          "scenario": "frontend-v0-viability.mjs",
+          "check": "Painel publica a consulta com raio de 250 m, mensagem, contatos e criação de prospecto; o Go recusa raio fora da faixa.",
+          "endpoints": [
+            "GET /api/settings/viability",
+            "PUT /api/settings/viability"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-viability.mjs",
+          "check": "Desativação no painel deixa a página pública indisponível com a mesma resposta de provedor inexistente.",
+          "endpoints": [
+            "GET /api/settings/viability",
+            "PUT /api/settings/viability"
           ]
         }
       ]
@@ -9061,13 +9170,6 @@
       ],
       "not_exercised_by_interface": [],
       "checks": [
-        {
-          "scenario": "frontend-v0-admin-reports.mjs",
-          "check": "Coleta respeita isolamento por provedor e configuração de qualidade permanece acessível no celular",
-          "endpoints": [
-            "GET /api/staff"
-          ]
-        },
         {
           "scenario": "frontend-v0-create-links.mjs",
           "check": "Diálogo aberto por /ordens-de-servico/nova-os em /ordens-de-servico",
@@ -13246,7 +13348,15 @@
         },
         {
           "scenario": "frontend-v0-admin-team.mjs",
-          "check": "Administrador redefine senha real e remove MFA com confirmação; senha antiga deixa de autenticar",
+          "check": "Redefinição pelo administrador encerra as sessões do usuário e exige troca: senha provisória só acessa a própria conta, inclusive MFA, até a troca na UI",
+          "endpoints": [
+            "GET /api/users",
+            "PATCH /api/users/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-admin-team.mjs",
+          "check": "Administrador redefine senha real e remove MFA com confirmação; senha antiga e provisória deixam de autenticar",
           "endpoints": [
             "GET /api/users",
             "PATCH /api/users/:id"
@@ -13281,10 +13391,12 @@
       "id": "AD-02",
       "functionality": "Redefinição de senha de outro usuário",
       "declared_endpoints": [
-        "PATCH /api/users/:id"
+        "PATCH /api/users/:id",
+        "POST /api/me/password"
       ],
       "exercised_by_interface": [
-        "PATCH /api/users/:id"
+        "PATCH /api/users/:id",
+        "POST /api/me/password"
       ],
       "not_exercised_by_interface": [],
       "checks": [
@@ -13297,7 +13409,15 @@
         },
         {
           "scenario": "frontend-v0-admin-team.mjs",
-          "check": "Administrador redefine senha real e remove MFA com confirmação; senha antiga deixa de autenticar",
+          "check": "Redefinição pelo administrador encerra as sessões do usuário e exige troca: senha provisória só acessa a própria conta, inclusive MFA, até a troca na UI",
+          "endpoints": [
+            "PATCH /api/users/:id",
+            "POST /api/me/password"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-admin-team.mjs",
+          "check": "Administrador redefine senha real e remove MFA com confirmação; senha antiga e provisória deixam de autenticar",
           "endpoints": [
             "PATCH /api/users/:id"
           ]
@@ -13307,6 +13427,13 @@
           "check": "Bloqueio e desbloqueio afetam login; remoção do próprio acesso de administrador é impedida no Go",
           "endpoints": [
             "PATCH /api/users/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-session.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"Login do navegador não expõe o token da sessão no corpo; cliente de API recebe Bearer só ao pedir explicitamente\",\"Troca de senha preserva a sessão atual e revoga outra sessão\",\"Configuração e ativação TOTP pelo frontend e Go reais\",\"Logout e novo login com desafio TOTP\",\"Desativação TOTP exige senha e código reais\",\"Expiração da sessão remove dados e retorna ao login sem fallback\"]}",
+          "endpoints": [
+            "POST /api/me/password"
           ]
         }
       ]
@@ -13382,6 +13509,13 @@
       ],
       "not_exercised_by_interface": [],
       "checks": [
+        {
+          "scenario": "frontend-v0-admin-reports.mjs",
+          "check": "Coleta DICI por CNPJ bloqueia o arquivo e lista município sem IBGE e plano sem tecnologia; após as correções o CSV segue o leiaute SCM, sem transmissão externa",
+          "endpoints": [
+            "GET /api/companies"
+          ]
+        },
         {
           "scenario": "frontend-v0-admin-team.mjs",
           "check": "Empresas são cadastradas, ativadas e definidas como padrão; o Go conserva uma única padrão e impede inativá-la",
@@ -14374,12 +14508,14 @@
       "functionality": "Dados DICI por competência",
       "declared_endpoints": [
         "GET /api/anatel/dici",
+        "GET /api/companies",
         "PUT /api/anatel/municipalities",
         "PUT /api/plans/:id/technology",
         "PUT /api/contracts/:id/service-area"
       ],
       "exercised_by_interface": [
         "GET /api/anatel/dici",
+        "GET /api/companies",
         "PUT /api/anatel/municipalities",
         "PUT /api/contracts/:id/service-area",
         "PUT /api/plans/:id/technology"
@@ -14388,18 +14524,125 @@
       "checks": [
         {
           "scenario": "frontend-v0-admin-reports.mjs",
-          "check": "Coleta DICI usa competência, empresa e contrato reais; correções de IBGE e tecnologia alimentam prévia e CSV sem transmissão externa",
+          "check": "Coleta DICI por CNPJ bloqueia o arquivo e lista município sem IBGE e plano sem tecnologia; após as correções o CSV segue o leiaute SCM, sem transmissão externa",
           "endpoints": [
             "GET /api/anatel/dici",
+            "GET /api/companies",
             "PUT /api/anatel/municipalities",
             "PUT /api/plans/:id/technology"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-admin-team.mjs",
+          "check": "Empresas são cadastradas, ativadas e definidas como padrão; o Go conserva uma única padrão e impede inativá-la",
+          "endpoints": [
+            "GET /api/companies"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-admin-team.mjs",
+          "check": "Empresa do contrato usa cadastro real e filtro de faturas conserva o vínculo na URL",
+          "endpoints": [
+            "GET /api/companies"
           ]
         },
         {
           "scenario": "frontend-v0-commercial.mjs",
           "check": "{\"ok\":true,\"checks\":[\"Plano criado pela UI; nova versão mantém o preço e a versão do contrato existente\",\"Políticas de cobrança/fidelidade e parâmetros de rede salvos; reaplicação reporta solicitações reais\",\"Filtros de plano/titular aplicados no Go com contagem correta e UUID inválido rejeitado\",\"Troca para versão atual do plano, vencimento e restrição de crédito persistidos\",\"Área, endereço específico e etiquetas do contrato salvos pelo layout v0\",\"Fidelidade/cotação, desconto e cancelamento, agendamento/cancelamento, aditivo e solicitação/cancelamento de aceite\",\"Adicional criado, contratado com quantidade e preço preservado após alteração do catálogo; encerramento registrado\",\"Encerramento definitivo em duas etapas, com multa dispensada e justificativa registrada pelo Go\",\"Isolamento entre provedores mantido nos detalhes e novos filtros comerciais\",\"Paginação, busca que reinicia a página, filtro de situação e exportação CSV comercial\"]}",
           "endpoints": [
+            "GET /api/companies",
             "PUT /api/contracts/:id/service-area"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /financeiro/faturas/gerar-mensalidades-por-competencia em /financeiro/faturas",
+          "endpoints": [
+            "GET /api/companies"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-create-links.mjs",
+          "check": "Diálogo aberto por /administracao/empresas/nova-empresa em /administracao/empresas",
+          "endpoints": [
+            "GET /api/companies"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-field.mjs",
+          "check": "Contrato encerrado mostra o equipamento em comodato a recolher",
+          "endpoints": [
+            "GET /api/companies"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-finance.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"Geração pela UI repetida preserva uma mensalidade por contrato/competência\",\"Baixa parcial mantém saldo no Go; estorno registra reversão e reabre o valor\",\"Quitação com desconto e justificativa persistidos; fatura deixa de oferecer baixa/cancelamento\",\"Extrato por contrato, criação de cobrança avulsa e cancelamento com motivo pela UI\",\"Acordo cancela títulos escolhidos e gera duas parcelas com desconto e valor total corretos\",\"Política de gateway/encargos salva; página pública de aviso configurada, servida pelo Go e desativada\",\"Gateway explicitamente demonstrativo: divergência exige decisão; conciliação recupera webhook perdido\",\"Webhooks normal/duplicado geram um recebimento; baixa aplica multa e juros calculados pelo Go\",\"Busca/filtros, CSV de faturas, exportação contábil e quatro relatórios do Go disponíveis\",\"Faturas isoladas entre provedores e ações financeiras restritas pelo perfil\"]}",
+          "endpoints": [
+            "GET /api/companies"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-financial-connections.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"cadastro pela interface persiste conexão pendente\",\"segredo não retorna nem cifrado na listagem\",\"ativação sandbox, troca de padrão e desativação confirmadas no backend\",\"reload preserva estado; componentes oficiais e API reais\",\"cofre pela UI persiste certificado sintético e versão; segredo não retorna nem fica no armazenamento do navegador\"],\"connection\":\"dd8a22ab-0aba-49eb-a951-90b3140309b6\"}",
+          "endpoints": [
+            "GET /api/companies"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-provider-refunds.mjs",
+          "check": "{\"ok\":true,\"checks\":[\"API preserves nominal, net receipt and residual after synthetic partial/full provider refunds\",\"Official UI distinguishes partial refund from full reversal after reload\",\"Provider receipts never expose the manual reversal action\"],\"fixture\":\"synthetic owner data; no real PSP\"}",
+          "endpoints": [
+            "GET /api/companies"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "R04: indicação cadastrada pela interface, persistida e apresentada no relatório real",
+          "endpoints": [
+            "GET /api/companies"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "R04: financeiro consulta sem poder alterar; outro provedor não altera indicação",
+          "endpoints": [
+            "GET /api/companies"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "R04: remoção da indicação pela interface preserva o contrato",
+          "endpoints": [
+            "GET /api/companies"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "R04/BE-09: filtros de carteira e empresa na exportação contábil chegam ao Go",
+          "endpoints": [
+            "GET /api/companies"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "R05: perfis atendimento e NOC respeitam escrita de indicação e leitura financeira",
+          "endpoints": [
+            "GET /api/companies"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-remediation.mjs",
+          "check": "R03/R05: matriz nenhum módulo / CRM / campo respeita controles e consultas, com habilitação positiva",
+          "endpoints": [
+            "GET /api/companies"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-stock.mjs",
+          "check": "Contrato mostra série, comodato e OS; retirada confirmada devolve a unidade ao saldo e encerra a pendência de recolhimento",
+          "endpoints": [
+            "GET /api/companies"
           ]
         }
       ]
@@ -15312,7 +15555,14 @@
         },
         {
           "scenario": "frontend-v0-admin-team.mjs",
-          "check": "Administrador redefine senha real e remove MFA com confirmação; senha antiga deixa de autenticar",
+          "check": "Redefinição pelo administrador encerra as sessões do usuário e exige troca: senha provisória só acessa a própria conta, inclusive MFA, até a troca na UI",
+          "endpoints": [
+            "PATCH /api/users/:id"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-admin-team.mjs",
+          "check": "Administrador redefine senha real e remove MFA com confirmação; senha antiga e provisória deixam de autenticar",
           "endpoints": [
             "PATCH /api/users/:id"
           ]
@@ -15801,6 +16051,20 @@
           "endpoints": [
             "GET /api/tenant-branding"
           ]
+        },
+        {
+          "scenario": "frontend-v0-viability.mjs",
+          "check": "Painel publica a consulta com raio de 250 m, mensagem, contatos e criação de prospecto; o Go recusa raio fora da faixa.",
+          "endpoints": [
+            "GET /api/tenant-branding"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-viability.mjs",
+          "check": "Desativação no painel deixa a página pública indisponível com a mesma resposta de provedor inexistente.",
+          "endpoints": [
+            "GET /api/tenant-branding"
+          ]
         }
       ]
     },
@@ -16054,7 +16318,7 @@
         },
         {
           "scenario": "frontend-v0-admin-reports.mjs",
-          "check": "Coleta DICI usa competência, empresa e contrato reais; correções de IBGE e tecnologia alimentam prévia e CSV sem transmissão externa",
+          "check": "Coleta DICI por CNPJ bloqueia o arquivo e lista município sem IBGE e plano sem tecnologia; após as correções o CSV segue o leiaute SCM, sem transmissão externa",
           "endpoints": [
             "GET /api/today"
           ]
@@ -16082,7 +16346,14 @@
         },
         {
           "scenario": "frontend-v0-admin-team.mjs",
-          "check": "Administrador redefine senha real e remove MFA com confirmação; senha antiga deixa de autenticar",
+          "check": "Redefinição pelo administrador encerra as sessões do usuário e exige troca: senha provisória só acessa a própria conta, inclusive MFA, até a troca na UI",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-admin-team.mjs",
+          "check": "Administrador redefine senha real e remove MFA com confirmação; senha antiga e provisória deixam de autenticar",
           "endpoints": [
             "GET /api/today"
           ]
@@ -16957,6 +17228,20 @@
           ]
         },
         {
+          "scenario": "frontend-v0-viability.mjs",
+          "check": "Painel publica a consulta com raio de 250 m, mensagem, contatos e criação de prospecto; o Go recusa raio fora da faixa.",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-viability.mjs",
+          "check": "Desativação no painel deixa a página pública indisponível com a mesma resposta de provedor inexistente.",
+          "endpoints": [
+            "GET /api/today"
+          ]
+        },
+        {
           "scenario": "frontend-v0-workspace-preferences.mjs",
           "check": "Favorito do catálogo operacional permitido pode ser adicionado, navega ao destino, persiste na recarga e é removido da barra lateral",
           "endpoints": [
@@ -17738,6 +18023,13 @@
         {
           "scenario": "frontend-v0-stock.mjs",
           "check": "Catálogo cadastra material com código, unidade e mínimo; alerta usa saldo real",
+          "endpoints": [
+            "GET /api/health"
+          ]
+        },
+        {
+          "scenario": "frontend-v0-viability.mjs",
+          "check": "Painel publica a consulta com raio de 250 m, mensagem, contatos e criação de prospecto; o Go recusa raio fora da faixa.",
           "endpoints": [
             "GET /api/health"
           ]

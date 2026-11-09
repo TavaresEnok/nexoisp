@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-admin-reports.mjs",
-  "recorded_at": "2026-11-09T21:49:09.679Z",
+  "recorded_at": "2026-11-09T22:20:41.231Z",
   "steps": [
     {
       "check": "Auditoria pagina registros reais e exibe detalhes; retenção salva no Go e rejeita prazo de conexão abaixo do limite",
@@ -21,9 +21,10 @@
       ]
     },
     {
-      "check": "Coleta DICI usa competência, empresa e contrato reais; correções de IBGE e tecnologia alimentam prévia e CSV sem transmissão externa",
+      "check": "Coleta DICI por CNPJ bloqueia o arquivo e lista município sem IBGE e plano sem tecnologia; após as correções o CSV segue o leiaute SCM, sem transmissão externa",
       "requests": [
         "GET /api/anatel/dici",
+        "GET /api/companies",
         "GET /api/me",
         "GET /api/today",
         "PUT /api/anatel/municipalities",
@@ -47,8 +48,6 @@
       "requests": [
         "GET /api/custom-fields",
         "GET /api/me",
-        "GET /api/staff",
-        "GET /api/tickets/:id",
         "GET /api/today"
       ]
     }

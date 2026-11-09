@@ -1,6 +1,6 @@
 {
   "scenario": "frontend-v0-admin-team.mjs",
-  "recorded_at": "2026-11-09T21:48:51.736Z",
+  "recorded_at": "2026-11-09T22:20:34.339Z",
   "steps": [
     {
       "check": "Usuário criado pela UI autentica no Go; perfil é atualizado sem expor senha na listagem",
@@ -13,7 +13,17 @@
       ]
     },
     {
-      "check": "Administrador redefine senha real e remove MFA com confirmação; senha antiga deixa de autenticar",
+      "check": "Redefinição pelo administrador encerra as sessões do usuário e exige troca: senha provisória só acessa a própria conta, inclusive MFA, até a troca na UI",
+      "requests": [
+        "GET /api/me",
+        "GET /api/today",
+        "GET /api/users",
+        "PATCH /api/users/:id",
+        "POST /api/me/password"
+      ]
+    },
+    {
+      "check": "Administrador redefine senha real e remove MFA com confirmação; senha antiga e provisória deixam de autenticar",
       "requests": [
         "GET /api/me",
         "GET /api/today",
