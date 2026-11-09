@@ -22,7 +22,10 @@ function extension(area: string, href: string, label: string): NavigationNode {
   };
 }
 const extensions: Record<string, NavigationNode[]> = {
-  financeiro: [extension("Financeiro", "/relatorios/indicacoes", "Indicações")],
+  financeiro: [
+    extension("Financeiro", "/relatorios/indicacoes", "Indicações"),
+    extension("Financeiro", "/financeiro/contas-a-pagar", "Contas a pagar"),
+  ],
   rede: [
     extension("Rede / FTTx", "/noc", "NOC"),
     extension("Rede / FTTx", "/pops", "Pontos de presença"),

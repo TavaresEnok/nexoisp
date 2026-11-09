@@ -17,7 +17,10 @@ import { QueryBoundary } from "@/features/shared/feedback";
 import { useSession } from "@/features/session/provider";
 import { can } from "@/features/session/model";
 import { api } from "@/platform/erp-client";
+import { money } from "@/lib/format";
+import { decimalToCents } from "@/features/contracts/models";
 import {
+  itemCostsSchema,
   movementSchema,
   movementLabels,
   useStockRefresh,
@@ -31,7 +34,13 @@ export function StockMovements({ item }: { item: StockItem }) {
   const result = useSWR(["erp-stock-moves", item.id], async ([, id]) =>
     z.array(movementSchema).parse(await api(`/stock/items/${id}/movements`)),
   );
-  const [form, setForm] = useState({ kind: "in", qty: "", note: "" });
+  const costs = useSWR(["erp-stock-costs", item.id], async ([, id]) =>
+    itemCostsSchema.parse(await api(`/stock/items/${id}/costs`)),
+  );
+  const costById = new Map(
+    (costs.data?.movements ?? []).map((row) => [String(row.id), row]),
+  );
+  const [form, setForm] = useState({ kind: "in", qty: "", note: "", cost: "" });
   const balances = useSWR(["erp-stock-balances", item.id], async ([, id]) =>
     z
       .array(
@@ -158,10 +167,13 @@ export function StockMovements({ item }: { item: StockItem }) {
                   kind: form.kind,
                   qty: Number(form.qty),
                   note: form.note || null,
+                  ...(form.kind === "in" && form.cost.trim()
+                    ? { unit_cost_cents: decimalToCents(form.cost) }
+                    : {}),
                 },
               });
-              setForm({ ...form, qty: "", note: "" });
-              await refresh();
+              setForm({ ...form, qty: "", note: "", cost: "" });
+              await Promise.all([refresh(), costs.mutate()]);
             }}
           >
             <div className="erp-columns">
@@ -202,6 +214,21 @@ export function StockMovements({ item }: { item: StockItem }) {
                   }
                 />
               </FormField>
+              {form.kind === "in" && (
+                <FormField
+                  label="Custo unitário da entrada (R$)"
+                  hint="Opcional. Com custo, a entrada recalcula o custo médio; sem custo, entra pelo custo médio vigente."
+                >
+                  <Input
+                    inputMode="decimal"
+                    pattern="[0-9]+([,.][0-9]{1,2})?"
+                    value={form.cost}
+                    onChange={(event) =>
+                      setForm({ ...form, cost: event.target.value })
+                    }
+                  />
+                </FormField>
+              )}
               <FormField
                 label={
                   form.kind === "adjust"
@@ -222,6 +249,12 @@ export function StockMovements({ item }: { item: StockItem }) {
           </MutationForm>
         )
       )}
+      {costs.data && (
+        <p className="profile-footnote">
+          Custo médio vigente {money(costs.data.avg_cost_cents / 100)} · valor
+          em estoque {money(costs.data.value_cents / 100)}.
+        </p>
+      )}
       <p className="profile-footnote">
         Movimentos não são editados ou apagados. Corrija um lançamento com um
         novo ajuste. Até 200 movimentos mais recentes.
@@ -239,6 +272,7 @@ export function StockMovements({ item }: { item: StockItem }) {
                   "Quando",
                   "Movimento",
                   "Quantidade",
+                  "Custo unitário",
                   "Depósito",
                   "Observação / OS",
                   "Autor",
@@ -257,6 +291,22 @@ export function StockMovements({ item }: { item: StockItem }) {
                   <TableCell>
                     {row.qty > 0 ? "+" : ""}
                     {row.qty} {item.unit}
+                  </TableCell>
+                  <TableCell>
+                    {costById.has(String(row.id)) ? (
+                      <>
+                        {money(
+                          costById.get(String(row.id))!.unit_cost_cents / 100,
+                        )}
+                        <p className="profile-footnote">
+                          {costById.get(String(row.id))!.cost_source === "entry"
+                            ? "Custo da entrada"
+                            : "Custo médio"}
+                        </p>
+                      </>
+                    ) : (
+                      "—"
+                    )}
                   </TableCell>
                   <TableCell>
                     {row.warehouse_name ?? "Depósito principal"}

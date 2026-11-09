@@ -72,6 +72,7 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 181 unidades incluem capacidades p
 | OS-14 | Implementada | Retirada, defeito, conserto, baixa e histórico | Integrada e validada |
 | OS-15 | Implementada | Depósitos e transferência de saldo | Integrada e validada |
 | OS-16 | Implementada | Fornecedores e pedidos de compra | Integrada e validada |
+| OS-17 | Implementada | Custo médio ponderado e valor do estoque | Integrada e validada |
 | FI-01 | Implementada | Listagem, filtros e visão financeira | Integrada e validada |
 | FI-02 | Implementada | Geração idempotente por competência | Integrada e validada |
 | FI-03 | Implementada | Consulta detalhada e saldo devido | Integrada e validada |
@@ -89,6 +90,7 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 181 unidades incluem capacidades p
 | FI-15 | Demonstrativa | Conciliação automática com gateway demo | Integrada e validada |
 | FI-16 | Demonstrativa | Simulação de pagamento e cobrança | Integrada e validada |
 | FI-17 | Não confirmado | Cobrança bancária real, Pix/boleto pagável | Backend preservado / limitação |
+| FI-18 | Implementada | Contas a pagar | Integrada e validada |
 | RE-01 | Implementada | Indicadores e inventário de agentes/equipamentos | Integrada e validada |
 | RE-02 | Implementada | Cadastrar e administrar agente | Integrada e validada |
 | RE-03 | Implementada | Cadastrar equipamento conectado a agente | Integrada e validada |
@@ -138,7 +140,7 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 181 unidades incluem capacidades p
 | AD-14 | Implementada | Consultar pesquisas de OS | Integrada e validada |
 | AD-15 | Implementada | Definir e usar campos de assinante/contrato | Integrada e validada |
 | AD-16 | Implementada | Criar kits de materiais | Integrada e validada |
-| AD-17 | Parcial | Regras e relatório de comissões | Integrada e validada |
+| AD-17 | Implementada | Regras, relatório e liquidação de comissões | Integrada e validada |
 | AD-18 | Parcial | Dados DICI por competência | Integrada e validada |
 | AD-19 | Implementada | Importar CSV em lotes e conferir erros | Integrada e validada |
 | AD-20 | Parcial | Migração automatizada de qualquer instalação SGP | Backend preservado / limitação |
@@ -181,7 +183,7 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 181 unidades incluem capacidades p
 | BE-26 | Somente backend | Criar cobrança avulsa | Integrada e validada |
 | BE-27 | Somente backend | Excluir etiqueta do catálogo | Integrada e validada |
 
-Cobertura de interface: **161 unidades integradas e validadas**, sem unidade operacional pendente ou parcial; 12 delas refletem capacidade demonstrativa (AC-02, FI-15, FI-16, RE-13) ou parcial (IN-03, IN-06, IN-11, IN-13, IN-15, AD-02, AD-17, AD-18) do Go e aparecem identificadas na interface. A evidência de cada unidade está em [por-unidade.json](evidencias/por-unidade.json). As **20 unidades preservadas** são 14 serviços internos, dois contratos de API externa e quatro limitações existentes. A [triagem individual](CAPACIDADES-BACKEND.md) explica a classificação; o JSON mantém os comportamentos históricos e acrescenta notas sobre a apresentação atual, sem alterar o estado original do backend.
+Cobertura de interface: **163 unidades integradas e validadas**, sem unidade operacional pendente ou parcial; 11 delas refletem capacidade demonstrativa (AC-02, FI-15, FI-16, RE-13) ou parcial (IN-03, IN-06, IN-11, IN-13, IN-15, AD-02, AD-18) do Go e aparecem identificadas na interface. A evidência de cada unidade está em [por-unidade.json](evidencias/por-unidade.json). As **20 unidades preservadas** são 14 serviços internos, dois contratos de API externa e quatro limitações existentes. A [triagem individual](CAPACIDADES-BACKEND.md) explica a classificação; o JSON mantém os comportamentos históricos e acrescenta notas sobre a apresentação atual, sem alterar o estado original do backend.
 
 Nota de triagem do lote 39: as classificações e evidências de validação acima permanecem históricas. As descrições atuais de AD-02, IN-15, FI-17, PO-09 e BE-23 foram corrigidas no JSON: há controle de reset, histórico IPv6 por período e adapter Efí sandbox; o diretório resolve células por provedor. Essas constatações não homologam PSP, comprovam sessões de rede ou estabelecem arquitetura multicélulas. Consulte a triagem técnica para limites e dependências.
 
@@ -197,3 +199,5 @@ Lote 43: DONE 3/3 revisões, sete checks finais PASS e browser de inventário pa
 Exportações CSV operacionais (lote 44): unidades próprias `LOTE44-CSV-COTACAO` e `LOTE44-CSV-LOCAIS` registram os GETs exatos comprovados em browser 45; sites PostgreSQL real com race passou no lote 45, cotação PG 44 é reuso. A falha anterior de sites PG permanece registrada. Ver lote 44.
 
 Preferências pessoais do workspace e painel (lote 45): browser real PASS para favoritos e seleção pessoal, incluindo persistência local e isolamento. As unidades `LOTE45-FAVORITOS` e `LOTE45-PAINEL` estão validadas pelo cenário de navegador indicado em `localEvidence`, pois a persistência é local; GET `/api/me` é contexto de autenticação, sem CRUD de preferências no servidor. A prova usou UI 45 e API 44 com fontes de produção inalteradas; não constitui CI ou homologação. Ver lote 45 e [proveniência](evidencias/lote45-proveniencia.json).
+
+Liquidação de comissões, custo médio e contas a pagar (09/11/2026): AD-17 passou a Implementada com liquidação que congela origem, regra e valor (aberta → fechada → paga, estorno preservando histórico, CSV); OS-17 registra o custo médio ponderado global por material e o valor do estoque por depósito; FI-18 registra títulos a pagar gerados no recebimento de compra ou lançados à mão. Testes Go com PostgreSQL real cobrem congelamento, não duplicidade, transições, estorno, custo médio com arredondamento, geração e baixa de títulos, permissões e isolamento. Os cenários `e2e/frontend-v0-commission-settlements.mjs` e `e2e/frontend-v0-stock-cost-payables.mjs` integram a fumaça; o rastreio por unidade em por-unidade.json é gerado na execução da fumaça.

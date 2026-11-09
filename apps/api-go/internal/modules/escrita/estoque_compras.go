@@ -293,8 +293,15 @@ func registerStockPurchasing(api huma.API, registry *endpoint.Registry, s Servic
 		}
 		return purchaseByID(ctx, tx, id)
 	})
-	write(http.MethodPost, "/api/stock/purchases/{id}/receive", nil, func(ctx context.Context, tx *db.Tx, id string, _ map[string]any) (any, error) {
-		order, err := first(tx.Objects(ctx, "select number, status, warehouse_id from purchase_orders where id = $1 for update", id))
+	// Recebimento: entradas com o custo do pedido (recalculam o custo médio) e
+	// títulos a pagar ao fornecedor. Corpo opcional: vencimento da primeira
+	// parcela (padrão: hoje + 30 dias no fuso do provedor) e número de parcelas.
+	receive := o(f("due_date", dateRule().Opt()), f("installments", n().Int().Min(1).Max(24).Def(float64(1))))
+	routeScoped(api, registry, s, http.MethodPost, "/api/stock/purchases/{id}/receive", "stock:write", &receive, true, func(ctx context.Context, tx *db.Tx, _ *http.Request, p map[string]string, b map[string]any) (any, error) {
+		id := p["id"]
+		order, err := first(tx.Objects(ctx, `select number, status, warehouse_id, supplier_id,
+			coalesce((select sum(x.qty::bigint * x.unit_cost_cents::bigint) from purchase_order_items x where x.order_id = p.id), 0)::bigint as total_cents
+			from purchase_orders p where id = $1 for update`, id))
 		if err != nil {
 			return nil, apierr.New(404, "pedido de compra não encontrado")
 		}
@@ -304,18 +311,44 @@ func registerStockPurchasing(api huma.API, registry *endpoint.Registry, s Servic
 		if err = activeWarehouse(ctx, tx, order.Get("warehouse_id")); err != nil {
 			return nil, err
 		}
+		due := b["due_date"]
+		if due == nil {
+			_, today, err := tenantClock(ctx, tx)
+			if err != nil {
+				return nil, err
+			}
+			rows, err := tx.Objects(ctx, "select ($1::date + 30)::text as due", today)
+			if err != nil {
+				return nil, err
+			}
+			due = rows[0].Get("due")
+		}
 		note := fmt.Sprintf("Compra #%v", order.Get("number"))
-		if err = tx.Exec(ctx, `insert into stock_movements (tenant_id, item_id, qty, kind, note, created_by, warehouse_id, purchase_order_id)
-			select app_tenant(), x.item_id, x.qty, 'in', $2, $3, $4, $1 from purchase_order_items x where x.order_id = $1`,
+		if err = tx.Exec(ctx, `insert into stock_movements (tenant_id, item_id, qty, kind, note, created_by, warehouse_id, purchase_order_id, unit_cost_cents)
+			select app_tenant(), x.item_id, x.qty, 'in', $2, $3, $4, $1, x.unit_cost_cents from purchase_order_items x where x.order_id = $1 order by x.item_id`,
 			id, note, user(ctx), order.Get("warehouse_id")); err != nil {
 			return nil, err
 		}
 		if err = tx.Exec(ctx, "update purchase_orders set status = 'received', received_at = now(), received_by = $2 where id = $1", id, user(ctx)); err != nil {
 			return nil, err
 		}
-		if err = record(ctx, tx, "stock.purchase_receive", "purchase_order", id, map[string]any{"number": order.Get("number")}); err != nil {
+		payables := []jsonx.Object{}
+		total := int64(num(order.Get("total_cents")))
+		if total > 0 {
+			payables, err = createPayables(ctx, tx, order.Get("supplier_id"), id, fmt.Sprintf("Pedido de compra #%v", order.Get("number")), total, due.(string), int(num(b["installments"])))
+			if err != nil {
+				return nil, err
+			}
+		}
+		detail := map[string]any{"number": order.Get("number"), "total_cents": total, "payables": len(payables)}
+		if err = record(ctx, tx, "stock.purchase_receive", "purchase_order", id, detail); err != nil {
 			return nil, err
 		}
-		return purchaseByID(ctx, tx, id)
+		row, err := purchaseByID(ctx, tx, id)
+		if err != nil {
+			return nil, err
+		}
+		row.Set("payables", payables)
+		return row, nil
 	})
 }

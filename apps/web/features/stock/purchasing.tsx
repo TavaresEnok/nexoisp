@@ -70,6 +70,11 @@ const day = (value: string | null) =>
   value
     ? new Date(`${value.slice(0, 10)}T12:00:00`).toLocaleDateString("pt-BR")
     : "—";
+function inThirtyDays() {
+  const date = new Date();
+  date.setDate(date.getDate() + 30);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
 export const useWarehouses = () =>
   useSWR("erp-stock-warehouses", async () =>
     z.array(warehouseSchema).parse(await api("/stock/warehouses")),
@@ -292,6 +297,9 @@ export function StockPurchases() {
     z.array(purchaseSchema).parse(await api("/stock/purchases")),
   );
   const [creating, setCreating] = useState(false);
+  const [receiving, setReceiving] = useState<z.infer<
+    typeof purchaseSchema
+  > | null>(null);
   const act = async (id: string, action: string, body?: unknown) => {
     await api(`/stock/purchases/${id}/${action}`, { method: "POST", body });
     await Promise.all([list.mutate(), refresh()]);
@@ -304,7 +312,7 @@ export function StockPurchases() {
     >
       <OperationalCatalog
         title="Pedidos de compra"
-        description="Ao receber o pedido, as quantidades entram no depósito escolhido. Itens por número de série entram pelas unidades."
+        description="Ao receber o pedido, as quantidades entram no depósito escolhido com o custo do pedido, o custo médio é recalculado e os títulos a pagar ao fornecedor são gerados. Itens por número de série entram pelas unidades."
         columns={[
           "Pedido",
           "Fornecedor",
@@ -348,12 +356,13 @@ export function StockPurchases() {
                     Marcar #{order.number} como enviado
                   </ActionButton>
                 )}
-                <ActionButton
-                  confirm={`Receber o pedido #${order.number}? As quantidades entram em ${order.warehouse_name}.`}
-                  onClick={() => act(order.id, "receive")}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setReceiving(order)}
                 >
                   Receber pedido #{order.number}
-                </ActionButton>
+                </Button>
                 <ActionButton
                   confirm={`Cancelar o pedido #${order.number}?`}
                   onClick={() =>
@@ -367,6 +376,53 @@ export function StockPurchases() {
         }))}
         empty="Nenhum pedido de compra registrado."
       />
+      {receiving && (
+        <RecordEditor
+          title={`Receber pedido #${receiving.number}`}
+          description={`As quantidades entram em ${receiving.warehouse_name} pelo custo do pedido. ${
+            receiving.total_cents > 0
+              ? `Serão gerados títulos a pagar de ${money(receiving.total_cents / 100)} para ${receiving.supplier_name}.`
+              : "O pedido não tem custo e não gera título a pagar."
+          }`}
+          initial={{ due_date: inThirtyDays(), installments: "1" }}
+          fields={
+            receiving.total_cents > 0
+              ? [
+                  {
+                    key: "due_date",
+                    label: "Vencimento da primeira parcela",
+                    type: "date",
+                    required: true,
+                  },
+                  {
+                    key: "installments",
+                    label: "Número de parcelas",
+                    type: "number",
+                    required: true,
+                    min: 1,
+                    max: 24,
+                    hint: "Vencimentos mês a mês; centavos restantes vão para as primeiras parcelas.",
+                  },
+                ]
+              : []
+          }
+          submit="Confirmar recebimento"
+          onClose={() => setReceiving(null)}
+          onSubmit={async (values) => {
+            await act(
+              receiving.id,
+              "receive",
+              receiving.total_cents > 0
+                ? {
+                    due_date: values.due_date,
+                    installments: Number(values.installments),
+                  }
+                : {},
+            );
+            setReceiving(null);
+          }}
+        />
+      )}
       {creating && (
         <PurchaseEditor
           onClose={() => setCreating(false)}

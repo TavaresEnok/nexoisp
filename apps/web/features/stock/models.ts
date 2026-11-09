@@ -1,5 +1,7 @@
 import { z } from "zod";
-import { useSWRConfig } from "swr";
+import useSWR, { useSWRConfig } from "swr";
+import { cents } from "@/features/shared/schema";
+import { api } from "@/platform/erp-client";
 
 export const stockItemSchema = z.object({
   id: z.string().uuid(),
@@ -58,6 +60,60 @@ export const unitEventSchema = z.object({
   actor_name: z.string().nullable(),
   detail: z.record(z.string(), z.unknown()),
 });
+// Custo médio global por material; valor por depósito = saldo × custo médio.
+export const valuationSchema = z.object({
+  total_cents: cents(),
+  warehouses: z.array(
+    z.object({
+      warehouse_id: z.string().nullable(),
+      name: z.string(),
+      items: z.number(),
+      value_cents: cents(),
+    }),
+  ),
+  lines: z.array(
+    z.object({
+      warehouse_id: z.string().nullable(),
+      warehouse_name: z.string(),
+      item_id: z.string(),
+      item_name: z.string(),
+      unit: z.string(),
+      qty: z.number(),
+      avg_cost_cents: cents(),
+      value_cents: cents(),
+    }),
+  ),
+  items: z.array(
+    z.object({
+      item_id: z.string(),
+      name: z.string(),
+      unit: z.string(),
+      active: z.boolean(),
+      avg_cost_cents: cents(),
+      balance: z.number(),
+      value_cents: cents(),
+    }),
+  ),
+});
+export type StockValuation = z.infer<typeof valuationSchema>;
+export const useStockValuation = () =>
+  useSWR("erp-stock-valuation", async () =>
+    valuationSchema.parse(await api("/stock/valuation")),
+  );
+export const itemCostsSchema = z.object({
+  avg_cost_cents: cents(),
+  balance: z.number(),
+  value_cents: cents(),
+  movements: z.array(
+    z.object({
+      id: z.union([z.string(), z.number()]),
+      unit_cost_cents: cents(),
+      avg_cost_cents: cents(),
+      cost_source: z.enum(["entry", "average"]),
+      value_cents: cents(),
+    }),
+  ),
+});
 export const movementLabels: Record<string, string> = {
   in: "Entrada",
   out: "Saída",
@@ -77,11 +133,13 @@ export function useStockRefresh() {
     await mutate(
       (key) =>
         key === "erp-stock-items" ||
+        key === "erp-stock-valuation" ||
         (Array.isArray(key) &&
           typeof key[0] === "string" &&
           [
             "erp-stock-units",
             "erp-stock-moves",
+            "erp-stock-costs",
             "erp-stock-events",
             "erp-unit-search",
             "erp-contract-equipment",
