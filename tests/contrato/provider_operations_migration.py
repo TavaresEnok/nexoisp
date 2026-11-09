@@ -4,6 +4,7 @@ Only a new, uniquely named loopback container is used. No product env is loaded.
 The TLS client certificate and all account details are synthetic; dispatch is off.
 """
 import base64
+import sys
 import json
 import os
 from pathlib import Path
@@ -58,6 +59,8 @@ def login():
 
 def api(token, path, body=None, method=None):
     r=call(path, body, token, method)
+    if r['status']!=200:
+        log.seek(0); sys.stderr.write(log.read().decode(errors='replace')[-4000:])  # diagnóstico da API isolada
     assert r['status']==200, (path, r['status'], r['json'])
     return r['json']
 
@@ -89,6 +92,9 @@ with tempfile.TemporaryDirectory(prefix='nexo-b07-operations-migration-') as tmp
         assert sql(financial,'nexo_test')==before
         assert sql("select count(*) from provider_issuance where state='uncertain' and credential_version_id is null and product='pix_cob'",'nexo_test')=='1'
         assert sql('select max(version_id) from goose_db_version','nexo_test')=='74'
+        # A API atual exige o schema atual (ex.: sessão com troca obrigatória de senha, 00093), como no
+        # deploy real, em que prepare sempre precede a API. A migração 72→74 já foi conferida acima.
+        command(cli+['prepare'],cwd=ROOT,env=env,capture_output=True)
         cert=stage/'client.pem'; key=stage/'client.key'
         command(['openssl','req','-x509','-newkey','ec','-pkeyopt','ec_paramgen_curve:P-256','-nodes','-days','1','-subj','/CN=synthetic-pipeline','-keyout',str(key),'-out',str(cert)],capture_output=True)
         secret={'client_id':'SYNTHETIC-PIPELINE-CLIENT','client_secret':'SYNTHETIC-PIPELINE-SECRET',

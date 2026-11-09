@@ -96,7 +96,7 @@ def main():
             # Altered manifest must be refused before restore.
             manifest=Path(str(dump)+'.manifest.json');manifest.write_text(manifest.read_text()+' ')
             result=subprocess.run(['bash','scripts/backup.sh','restore-check',str(dump)],cwd=ROOT,env=backup_env,capture_output=True)
-            assert result.returncode!=0 and b'soma de verifica' in result.stdout
+            assert result.returncode!=0 and b'soma inv\xc3\xa1lida do dump ou manifesto' in result.stderr, result.stderr
     finally:
         command(['docker','exec',DB_CONTAINER,'psql','-p',str(DB_PORT),'-U','nexo_owner','-d','postgres','-c',
                  'alter database nexo rename to nexo_test'],capture_output=True)
