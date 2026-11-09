@@ -11,7 +11,7 @@ Depois de uma auditoria independente, as telas de maior destaque (painel inicial
 
 As sete etapas estão concluídas no código e na validação da integração. A aplicação oficial em `apps/web` utiliza o frontend do v0 e cobre as funcionalidades disponíveis no NexoISP Go, respeitando suas limitações existentes.
 
-O fechamento registra **154 unidades integradas e validadas** (cinco acrescentadas em 20/10/2026: catálogo de ONU, portas PON, calendário do SLA, depósitos e compras) (12 delas refletem capacidade demonstrativa ou parcial do Go: AC-02, FI-15, FI-16, RE-13, IN-03, IN-06, IN-11, IN-13, IN-15, AD-02, AD-17 e AD-18), **20 serviços internos, contratos externos ou limitações de backend preservados**, **zero pendentes** e **zero parciais de integração**. Esses estados descrevem a adaptação da interface; não transformam uma capacidade parcial do backend em capacidade completa. A matriz mantém separadamente o estado original do Go.
+A matriz registra **161 unidades integradas e validadas** (149 no fechamento original; cinco acrescentadas em 20/10/2026: catálogo de ONU, portas PON, calendário do SLA, depósitos e compras; sete pelos lotes 40 a 45) (12 delas refletem capacidade demonstrativa ou parcial do Go: AC-02, FI-15, FI-16, RE-13, IN-03, IN-06, IN-11, IN-13, IN-15, AD-02, AD-17 e AD-18), **20 serviços internos, contratos externos ou limitações de backend preservados**, **zero pendentes** e **zero parciais de integração**. Esses estados descrevem a adaptação da interface; não transformam uma capacidade parcial do backend em capacidade completa. A matriz mantém separadamente o estado original do Go.
 
 Evidências: [fechamento das sete etapas](evidencias/fechamento-sete-etapas.json), [matriz funcional](MATRIZ_FUNCIONAL.md), [validações por incremento](VALIDACAO.md) e [execução e operação](OPERACAO.md).
 
@@ -42,7 +42,7 @@ Componentes v0 → consultas e comandos tipados por funcionalidade → adaptador
 ## Verificações finais
 
 - TypeScript e build Vite aprovados.
-- **153 testes locais aprovados**, incluindo preservação visual e paridade das rotas estáticas anteriores.
+- **153 testes locais aprovados no fechamento** (202 em 09/11/2026), incluindo preservação visual e paridade das rotas estáticas anteriores.
 - **26 cenários operacionais aprovados** na base descartável, em dois segmentos: 14 iniciais e 12 restantes, após corrigir o preenchimento de segundos zero no teste CGNAT; CPE, Wi-Fi do portal e túnel/certificado têm cenários dirigidos adicionais.
 - Mutações, consultas e permissões conferidas com Go/PostgreSQL reais e registros sintéticos. Incrementos também validados em imagens locais Node 22/Caddy com a CSP existente.
 - Seis referências visuais operacionais conferem lista clara/escura/celular, ficha com alerta e contratos múltiplos, vazio e erro de API. Três novas comparações demonstrativas são idênticas à referência original.

@@ -16,6 +16,7 @@ e2e/node_modules
 docs/sgp_mirror.zip
 docs/sgp_mirror/
 docs/SGP/
+docs/API-SGP-completa.txt
 
 # saída das ferramentas de migração (dados pessoais): o padrão já é fora do repositório; isto é só proteção
 saida-sgp/

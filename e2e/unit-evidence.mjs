@@ -32,7 +32,9 @@ const result = units
         const matched = endpoints
           .filter(({ test }) => step.requests.some(test))
           .map(({ endpoint }) => endpoint);
-        if (matched.length) checks.push({ scenario: trace.scenario, check: step.check, endpoints: matched });
+        // Preferências só locais não têm endpoint próprio: a unidade aponta o cenário que as prova.
+        if (matched.length || unit.localEvidence?.scenario === trace.scenario)
+          checks.push({ scenario: trace.scenario, check: step.check, endpoints: matched });
       }
     const exercised = new Set(checks.flatMap((check) => check.endpoints));
     return {

@@ -2,7 +2,7 @@
 
 Nota de 06/11/2026: estados e recibos abaixo preservam a integração validada nas suas versões. A [auditoria operacional](../auditoria-2026-11-06/RELATORIO.md) acrescenta provas com escopo próprio, sem promover unidades ou declarar nova cobertura integral da etapa 7.
 
-Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 174 unidades incluem capacidades parciais, demonstrativas e internas; os estados do backend são preservados. O JSON correspondente mantém endpoints, restrições e evidências. A situação de cada unidade é independente da presença de uma página ou de um menu.
+Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 181 unidades incluem capacidades parciais, demonstrativas e internas; os estados do backend são preservados. O JSON correspondente mantém endpoints, restrições e evidências. A situação de cada unidade é independente da presença de uma página ou de um menu.
 
 | ID | Estado histórico no backend | Funcionalidade | Integração |
 |---|---|---|---|
@@ -181,7 +181,7 @@ Origem: `docs/INVENTARIO_FUNCIONAL_GO.md`. As 174 unidades incluem capacidades p
 | BE-26 | Somente backend | Criar cobrança avulsa | Integrada e validada |
 | BE-27 | Somente backend | Excluir etiqueta do catálogo | Integrada e validada |
 
-Cobertura de interface: **157 unidades integradas e validadas**, sem unidade operacional pendente ou parcial; 12 delas refletem capacidade demonstrativa (AC-02, FI-15, FI-16, RE-13) ou parcial (IN-03, IN-06, IN-11, IN-13, IN-15, AD-02, AD-17, AD-18) do Go e aparecem identificadas na interface. A evidência de cada unidade está em [por-unidade.json](evidencias/por-unidade.json). As **20 unidades preservadas** são 14 serviços internos, dois contratos de API externa e quatro limitações existentes. A [triagem individual](CAPACIDADES-BACKEND.md) explica a classificação; o JSON mantém os comportamentos históricos e acrescenta notas sobre a apresentação atual, sem alterar o estado original do backend.
+Cobertura de interface: **161 unidades integradas e validadas**, sem unidade operacional pendente ou parcial; 12 delas refletem capacidade demonstrativa (AC-02, FI-15, FI-16, RE-13) ou parcial (IN-03, IN-06, IN-11, IN-13, IN-15, AD-02, AD-17, AD-18) do Go e aparecem identificadas na interface. A evidência de cada unidade está em [por-unidade.json](evidencias/por-unidade.json). As **20 unidades preservadas** são 14 serviços internos, dois contratos de API externa e quatro limitações existentes. A [triagem individual](CAPACIDADES-BACKEND.md) explica a classificação; o JSON mantém os comportamentos históricos e acrescenta notas sobre a apresentação atual, sem alterar o estado original do backend.
 
 Nota de triagem do lote 39: as classificações e evidências de validação acima permanecem históricas. As descrições atuais de AD-02, IN-15, FI-17, PO-09 e BE-23 foram corrigidas no JSON: há controle de reset, histórico IPv6 por período e adapter Efí sandbox; o diretório resolve células por provedor. Essas constatações não homologam PSP, comprovam sessões de rede ou estabelecem arquitetura multicélulas. Consulte [a triagem técnica](../LOTE39-TRIAGEM-TECNICA.md) para limites e dependências.
 
@@ -196,4 +196,4 @@ Lote 43: DONE 3/3 revisões, sete checks finais PASS e browser de inventário pa
 
 Exportações CSV operacionais (lote 44): unidades próprias `LOTE44-CSV-COTACAO` e `LOTE44-CSV-LOCAIS` registram os GETs exatos comprovados em browser 45; sites PostgreSQL real com race passou no lote 45, cotação PG 44 é reuso. A falha anterior de sites PG permanece registrada. Ver [lote 44](../LOTE44-EXPORTACOES-CSV.md).
 
-Preferências pessoais do workspace e painel (lote 45): browser real PASS para favoritos e seleção pessoal, incluindo persistência local e isolamento. As unidades `LOTE45-FAVORITOS` e `LOTE45-PAINEL` permanecem pending devido à limitação do gerador baseado em endpoints, que não representa persistência local; GET `/api/me` é contexto de autenticação, sem CRUD de preferências no servidor. A prova usou UI 45 e API 44 com fontes de produção inalteradas; não constitui CI ou homologação. Ver [lote 45](../LOTE45-PREFERENCIAS-WORKSPACE.md) e [proveniência](evidencias/lote45-proveniencia.json).
+Preferências pessoais do workspace e painel (lote 45): browser real PASS para favoritos e seleção pessoal, incluindo persistência local e isolamento. As unidades `LOTE45-FAVORITOS` e `LOTE45-PAINEL` estão validadas pelo cenário de navegador indicado em `localEvidence`, pois a persistência é local; GET `/api/me` é contexto de autenticação, sem CRUD de preferências no servidor. A prova usou UI 45 e API 44 com fontes de produção inalteradas; não constitui CI ou homologação. Ver [lote 45](../LOTE45-PREFERENCIAS-WORKSPACE.md) e [proveniência](evidencias/lote45-proveniencia.json).

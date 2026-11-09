@@ -3,15 +3,15 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 NODE_IMG=node:22-alpine
-GO_IMG=golang:1.27.2-alpine
 # Ajustes só deste servidor (não versionados): ver .nexo.local.example. Ex.: Docker antigo/sem iptables, como o do PNETLab.
 NEXO_COMPOSE_OVERRIDE=""; NEXO_BUILD_OPTS=""; NEXO_RUN_OPTS=""; NEXO_TOOL_NET=""
 [ -f .nexo.local ] && . ./.nexo.local
+GO_IMG="golang:$(sed -n 's/^go //p' apps/api-go/go.mod)-alpine"  # fonte única da versão: go.mod
 COMPOSE="docker compose -p nexoisp -f infra/compose/docker-compose.yml ${NEXO_COMPOSE_OVERRIDE:+-f $NEXO_COMPOSE_OVERRIDE} --env-file .env"
 nodebox() { docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp -e npm_config_cache=/tmp/.npm \
-  --network nexoisp_default -e DATABASE_URL_OWNER -e DATABASE_URL_APP -e NEXO_AGENT_MTLS -e NEXO_DEMO_MODE -e NEXO_GATEWAY_WEBHOOK_SECRET \
+  --network "${NEXO_TOOL_NET:-nexoisp_default}" -e DATABASE_URL_OWNER -e DATABASE_URL_APP -e NEXO_AGENT_MTLS -e NEXO_DEMO_MODE -e NEXO_GATEWAY_WEBHOOK_SECRET \
   -v "$PWD":/app -w /app "$@"; }
-gobox() { docker run --rm -e HOME=/tmp -e GOCACHE=/tmp/go-cache -e GOFLAGS=-mod=readonly \
+gobox() { docker run --rm ${NEXO_TOOL_NET:+--network "$NEXO_TOOL_NET"} -e HOME=/tmp -e GOCACHE=/tmp/go-cache -e GOFLAGS=-mod=readonly \
   -v "$PWD":/app -v nexo-go-mod:/go/pkg/mod -v nexo-go-cache:/tmp/go-cache -w /app/apps/api-go "$GO_IMG" "$@"; }
 DEMO_AGENT_ID=00000000-0000-4000-8000-0000000000a1
 init_env() {  # segredos e certificados de DESENVOLVIMENTO, gerados localmente (nunca versionados)
@@ -39,6 +39,7 @@ case "${1:-help}" in
                *) echo "uso: ./nexo contrato {nativo|e2e|vpn}"; exit 2 ;;
              esac ;;
   init)      init_env ;;
+  doctor)    python3 scripts/doctor.py ;;
   agent-cert) scripts/dev-certs.sh agent "$2" "${3:-infra/certs/agent-$2}" ;;
   e2e)  # fumaça da interface num navegador de verdade (imagem oficial do Playwright); BASE padrão: o painel local
     docker run --rm --network host --ipc=host ${NEXO_E2E_DOCKER_OPTS:-} -v "$PWD/e2e:/e2e" -w /e2e mcr.microsoft.com/playwright:v1.55.1-jammy \
@@ -72,5 +73,5 @@ case "${1:-help}" in
   ps)        $COMPOSE ps ;;
   compose)   shift; $COMPOSE "$@" ;;
   test)      gobox go test ./... ;;
-  *) echo "uso: ./nexo {homolog up|preflight|down|backup|restore-check <arq>|restore <arq> --yes|lab-radius|lab-up|lab-down|lab client ...|trio up|down|status|...|init|agent-cert <id>|agent-test|demo-tool ...|install|typecheck|build|up|down|logs|ps|test|contrato {nativo|e2e|vpn}|npm ...|compose ...}" ;;
+  *) echo "uso: ./nexo {doctor|homolog up|preflight|down|backup|restore-check <arq>|restore <arq> --yes|lab-radius|lab-up|lab-down|lab client ...|trio up|down|status|...|init|agent-cert <id>|agent-test|demo-tool ...|install|typecheck|build|up|down|logs|ps|test|contrato {nativo|e2e|vpn}|npm ...|compose ...}" ;;
 esac

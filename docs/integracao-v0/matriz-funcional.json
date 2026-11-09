@@ -2945,8 +2945,12 @@
     "integrationState": "validated",
     "integrationClassification": "business-ui",
     "endpoints": "GET /api/stock/quotations/:id/export.csv",
-    "validation": ["docs/integracao-v0/evidencias/rastreio/frontend-v0-os-quotations-lote45.json"],
-    "integrationNotes": ["Browser 45 PASS; PostgreSQL de cotação PASS reutilizado do lote 44, sem nova execução PG de cotação."]
+    "validation": [
+      "docs/integracao-v0/evidencias/rastreio/frontend-v0-os-quotations-lote45.json"
+    ],
+    "integrationNotes": [
+      "Browser 45 PASS; PostgreSQL de cotação PASS reutilizado do lote 44, sem nova execução PG de cotação."
+    ]
   },
   {
     "id": "LOTE44-CSV-LOCAIS",
@@ -2955,15 +2959,19 @@
     "integrationState": "validated",
     "integrationClassification": "business-ui",
     "endpoints": "GET /api/network/sites/export.csv",
-    "validation": ["docs/integracao-v0/evidencias/rastreio/frontend-v0-network-sites-lote45.json"],
-    "integrationNotes": ["Browser 45 e PostgreSQL real de sites com race PASS; sem homologação externa."]
+    "validation": [
+      "docs/integracao-v0/evidencias/rastreio/frontend-v0-network-sites-lote45.json"
+    ],
+    "integrationNotes": [
+      "Browser 45 e PostgreSQL real de sites com race PASS; sem homologação externa."
+    ]
   },
   {
     "id": "LOTE45-FAVORITOS",
     "entry": "Navegação lateral do workspace",
     "functionality": "Favoritos pessoais de navegação por usuário/navegador (C34)",
     "backendState": "Implementada",
-    "integrationState": "pending",
+    "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-workspace-preferences.mjs",
       "docs/integracao-v0/evidencias/rastreio/frontend-v0-workspace-preferences-lote45.json"
@@ -2971,15 +2979,18 @@
     "integrationClassification": "business-ui",
     "endpoints": "Nenhum endpoint adicional; preferências locais em localStorage por sessão",
     "integrationNotes": [
-      "Browser 45 PASS para adição, navegação, persistência local, remoção e isolamento; o verificador exige endpoint declarado e não representa prova exclusivamente local, por isso pending não significa ausência da prova. GET /api/me consta do rastreio como contexto de autenticação, não é CRUD de preferências no servidor."
-    ]
+      "Browser 45 PASS: persistência local em localStorage e isolamento por sessão. A prova é o próprio cenário (campo localEvidence), pois não há CRUD de preferências no servidor; GET /api/me e chamadas de dados são contexto. Não constitui CI ou homologação."
+    ],
+    "localEvidence": {
+      "scenario": "frontend-v0-workspace-preferences.mjs"
+    }
   },
   {
     "id": "LOTE45-PAINEL",
     "entry": "Visão geral (/)",
     "functionality": "Seleção pessoal de 3 widgets existentes na Visão geral por usuário/navegador (C34)",
     "backendState": "Implementada",
-    "integrationState": "pending",
+    "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-workspace-preferences.mjs",
       "docs/integracao-v0/evidencias/rastreio/frontend-v0-workspace-preferences-lote45.json"
@@ -2987,7 +2998,10 @@
     "integrationClassification": "business-ui",
     "endpoints": "GET /api/dashboard; GET /api/dashboard/panels; GET /api/today",
     "integrationNotes": [
-      "Browser 45 PASS para ocultação, persistência local, restauração e isolamento. As chamadas de dados são contexto do cenário, não CRUD de preferências no servidor; o verificador não representa diretamente a persistência local e a unidade permanece pending."
-    ]
+      "Browser 45 PASS: persistência local em localStorage e isolamento por sessão. A prova é o próprio cenário (campo localEvidence), pois não há CRUD de preferências no servidor; GET /api/me e chamadas de dados são contexto. Não constitui CI ou homologação."
+    ],
+    "localEvidence": {
+      "scenario": "frontend-v0-workspace-preferences.mjs"
+    }
   }
 ]

@@ -23,7 +23,7 @@ Documentação de referência e de operação. Planos já executados, prompts de
 | [Relatório financeiro consolidado v2](NexoISP_Relatorio_Financeiro_Consolidado_v2_2026-10-24.md) | Planejamento financeiro recebido em 24/10/2026; propostas A01–A20, sem comprovação de implementação |
 | [Arquitetura financeira original](NexoISP_Relatorio_Arquitetura_Financeira_Open_Source_2026-10-23%281%29.md) | Versão financeira de 23/10/2026 preservada como histórico; consultar a v2 para o planejamento atualizado |
 | [Dossiê de equipamentos v1.2](NexoISP_Dossie_Completo_Integracoes_Equipamentos_OpenSource_2026-10-24_v1.2.md) | Pesquisa de integrações e comandos candidatos por família; não representa homologação física |
-| [Referência da API do SGP](API-SGP-completa.txt) | Material de terceiro utilizado pelas ferramentas em `tools/sgp-migracao`; descreve entradas, sem garantir formatos de resposta |
+| Referência da API do SGP (`docs/API-SGP-completa.txt`, cópia local não versionada) | Material de terceiro utilizado pelas ferramentas em `tools/sgp-migracao`; descreve entradas, sem garantir formatos de resposta |
 
 O backend da aplicação usa Go. Agente Python, FreeRADIUS e GenieACS são componentes separados; React/Vite continua sendo a ferramenta de frontend. Instruções específicas do backend ficam em [apps/api-go/README.md](../apps/api-go/README.md).
 

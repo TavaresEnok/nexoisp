@@ -344,3 +344,7 @@ O volume do piloto ainda precisa ser definido. Medições anteriores usaram dado
 ## Robustez operacional e novos backups
 
 Os backups agora incluem um manifesto do mesmo snapshot e a prova de restauração confere políticas, isolamento e chaves. O host exige Python 3; `NEXO_BACKUP_COPY` deve copiar os três argumentos (`.dump`, `.sha256`, `.manifest.json`). Para atualização coordenada de workers, monitoramento, capacidade e conferência de migração, consulte [Robustez operacional](ROBUSTEZ-OPERACIONAL.md). A homologação externa e os critérios de produção permanecem pendentes até execução no destino.
+
+## Saúde dos containers
+
+`./nexo doctor` confere, somente leitura, os containers do NexoISP no host: falha se algum estiver em loop de reinício e avisa quando um container segue ativo com dependência do próprio projeto parada. Ao abandonar uma stack, use `./nexo down` ou pare todos os serviços dela, inclusive os que têm `restart: unless-stopped`.
