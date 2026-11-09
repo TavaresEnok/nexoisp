@@ -776,6 +776,24 @@
     "integrationClassification": "business-ui"
   },
   {
+    "id": "CR-10",
+    "backendState": "Implementada",
+    "entry": "/configuracoes; /viabilidade/:slug",
+    "functionality": "Consulta pública de viabilidade e captação de prospecto",
+    "behavior": "Página pública por provedor, sem login, com a marca opcional do portal: o interessado informa coordenadas (geolocalização ou digitadas) e recebe só \"atendemos/não atendemos\", calculado no Go sobre CTOs com coordenadas e porta livre dentro do raio configurado (padrão 250 m). Provedor inexistente, suspenso, sem FTTH ou com a consulta desativada recebe a mesma resposta 404. Limite por IP antes de qualquer validação. Com a opção ativa e o módulo CRM, o interessado autoriza o contato e o Go cria prospecto com origem \"viabilidade\" após reconferir a cobertura.",
+    "endpoints": "GET /api/settings/viability; PUT /api/settings/viability; GET /public/viabilidade/:slug; GET /public/viabilidade/:slug/logo; POST /public/viabilidade/:slug/consulta; POST /public/viabilidade/:slug/interesse",
+    "evidence": "apps/web/features/viability/settings.tsx; apps/web/features/viability/public-page.tsx; apps/api-go/internal/modules/escrita/viability.go; db/migrations/00092_viabilidade_publica.sql",
+    "integrationState": "validated",
+    "integrationClassification": "business-ui",
+    "validation": [
+      "e2e/frontend-v0-viability.mjs",
+      "apps/api-go/internal/modules/escrita/viability_test.go"
+    ],
+    "integrationNotes": [
+      "Raio, porta livre, CTO x CEO, isolamento entre provedores, desativação sem enumeração, limite por IP e criação de prospecto cobertos por teste Go com PostgreSQL; o cenário de navegador cobre painel e página pública. As rotas públicas não passam pelo rastreio /api/ da fumaça."
+    ]
+  },
+  {
     "id": "OS-01",
     "backendState": "Implementada",
     "entry": "/ordens-servico e fichas",
@@ -1203,7 +1221,10 @@
       "docs/integracao-v0/evidencias/producao-cobranca-acesso.json"
     ],
     "integrationNote": "Configurações e verificação explícita de inadimplência validadas com o Go. Pagamento retoma suspensão automática e preserva suspensão manual; rotinas periódicas continuam dependentes dos jobs habilitados.",
-    "integrationClassification": "business-ui"
+    "integrationClassification": "business-ui",
+    "integrationNotes": [
+      "Boleto/Bolix Efí sandbox: multa (configurations.fine, centésimos de %) e juros diários (configurations.interest) vêm desta política, congelados na preparação, com recusa acima de 2% de multa ou 1% ao mês de juros; Pix imediato não recebe encargos. Coberto por teste com servidor HTTP simulado (bolix_late_charges_test.go)."
+    ]
   },
   {
     "id": "FI-12",
@@ -1884,19 +1905,18 @@
   },
   {
     "id": "AD-02",
-    "backendState": "Parcial",
+    "backendState": "Implementada",
     "entry": "/usuarios",
     "functionality": "Redefinição de senha de outro usuário",
-    "behavior": "A tela permite redefinir a senha de outro usuário por PATCH administrativo; a senha anterior não é exibida.",
-    "endpoints": "PATCH /api/users/:id",
-    "evidence": "apps/web/features/admin/users.tsx (Users, editor password); endpoint /api/users/:id",
+    "behavior": "O administrador define uma senha provisória para outro usuário da equipe por PATCH administrativo; a senha anterior não é exibida. A redefinição encerra todas as sessões ativas do usuário afetado, marca troca obrigatória e registra auditoria (user.update com sessions_revoked e password_change_required). No próximo login, inclusive com MFA, a sessão só consulta GET /api/me, troca a senha em POST /api/me/password ou sai; as demais rotas respondem 403 password_change_required. O administrador não redefine a própria senha por esta rota.",
+    "endpoints": "PATCH /api/users/:id; POST /api/me/password",
+    "evidence": "apps/web/features/admin/users.tsx; apps/web/features/session/account.tsx; apps/api-go/internal/modules/identity/service.go; apps/api-go/internal/auth/auth.go; db/migrations/00093_senha_troca_obrigatoria.sql",
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-admin-team.mjs",
-      "docs/integracao-v0/evidencias/integracao-equipe-empresas.json",
-      "docs/integracao-v0/evidencias/producao-equipe-empresas.json"
+      "apps/api-go/internal/modules/identity/password_reset_test.go"
     ],
-    "integrationNote": "A interface oficial oferece redefinição de senha de outro usuário; senha antiga e nova foram verificadas por autenticação real, sem recuperar a senha atual.",
+    "integrationNote": "A redefinição exige troca no próximo acesso: a interface leva a sessão provisória a Minha conta e libera o restante após a troca. Sessões encerradas, bloqueio de rotas com e sem MFA e auditoria têm teste Go com PostgreSQL; o cenário de navegador cobre o fluxo pela UI.",
     "integrationClassification": "business-ui"
   },
   {
@@ -2142,19 +2162,19 @@
   },
   {
     "id": "AD-18",
-    "backendState": "Parcial",
+    "backendState": "Implementada",
     "entry": "/anatel",
     "functionality": "Dados DICI por competência",
-    "behavior": "Consulta agregada por empresa/CNPJ, município, tecnologia, área e velocidade; configuração de tecnologia e código municipal e exportação CSV. Não foi identificada transmissão automática nem comprovada adequação do arquivo a leiaute oficial vigente.",
-    "endpoints": "GET /api/anatel/dici; PUT /api/anatel/municipalities; PUT /api/plans/:id/technology; PUT /api/contracts/:id/service-area",
-    "evidence": "P/Anatel.tsx; E/relatorios.go; E/condicoes.go; M/00049_anatel_dici.sql",
+    "behavior": "Consulta agregada por empresa/CNPJ, município, tecnologia, área e velocidade; configuração de tecnologia e código municipal. A exportação segue o leiaute de coleta de acessos SCM (CNPJ;ANO;MES;COD_IBGE;TIPO_CLIENTE;TIPO_ATENDIMENTO;TIPO_MEIO;TIPO_PRODUTO;TIPO_TECNOLOGIA;VELOCIDADE;ACESSOS, UTF-8 com BOM, CRLF, CNPJ só dígitos, velocidade contratada em Mbps) por empresa da declaração e é recusada (409 dici_blocked) com a lista de pendências: município sem código IBGE, plano sem tecnologia ou com tecnologia sem código e CNPJ ausente ou inválido. O envio é manual no sistema Coleta de Dados da ANATEL; não há API pública de transmissão.",
+    "endpoints": "GET /api/anatel/dici; GET /api/companies; PUT /api/anatel/municipalities; PUT /api/plans/:id/technology; PUT /api/contracts/:id/service-area",
+    "evidence": "apps/web/features/admin/anatel.tsx; apps/api-go/internal/modules/escrita/dici.go; E/condicoes.go; M/00049_anatel_dici.sql",
     "integrationState": "validated",
     "validation": [
       "e2e/frontend-v0-admin-reports.mjs",
-      "docs/integracao-v0/evidencias/integracao-auditoria-anatel.json",
-      "docs/integracao-v0/evidencias/producao-auditoria-anatel.json"
+      "apps/api-go/internal/modules/escrita/dici_test.go",
+      "apps/api-go/internal/modules/escrita/dici_pg_test.go"
     ],
-    "integrationNote": "Prévia, correções IBGE/tecnologia e CSV integrados. Não transmite declaração à ANATEL; conferir leiaute continua responsabilidade operacional do provedor.",
+    "integrationNote": "Prévia, pendências bloqueantes, correções IBGE/tecnologia e CSV no leiaute integrados por empresa. A aplicação não transmite a declaração. Mapeamento de domínio centralizado em dici.go: rádio vira TIPO_TECNOLOGIA Wi-Fi e satélite vira VSAT; conferir com o manual vigente antes do primeiro envio.",
     "integrationClassification": "business-ui"
   },
   {

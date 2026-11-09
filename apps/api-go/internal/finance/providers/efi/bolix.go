@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"math"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -52,6 +53,8 @@ type Bolix struct {
 	customer        BilletCustomer
 	issuedOn        string
 	notificationURL string
+	fine            int
+	interest        int
 }
 
 var _ providers.Adapter = (*Bolix)(nil)
@@ -71,7 +74,9 @@ func (a *Bolix) ConfigurationHash() string {
 		Customer        BilletCustomer
 		IssuedOn        string
 		NotificationURL string `json:",omitempty"`
-	}{"bolix", a.customer, a.issuedOn, a.notificationURL})
+		Fine            int    `json:",omitempty"`
+		Interest        int    `json:",omitempty"`
+	}{"bolix", a.customer, a.issuedOn, a.notificationURL, a.fine, a.interest})
 	h := sha256.Sum256(raw)
 	return hex.EncodeToString(h[:])
 }
@@ -84,6 +89,43 @@ func (a *Bolix) SetNotificationURL(raw string) error {
 		}
 	}
 	a.notificationURL = raw
+	return nil
+}
+
+// Limites legais aplicados ao boleto ao consumidor: multa de até 2% (CDC, art. 52,
+// § 1º) e juros de mora de até 1% ao mês. Na API de cobranças da Efí, "fine" é
+// expresso em centésimos de percentual (200 = 2%) e "interest" é a taxa diária em
+// milésimos de percentual (33 = 0,033% ao dia, cerca de 1% ao mês).
+const (
+	MaxBilletFine     = 200
+	MaxBilletInterest = 33
+)
+
+// BilletLateCharges converte a política do provedor (percentuais) para os campos
+// configurations.fine e configurations.interest da Efí. Juros mensais viram taxa
+// diária por arredondamento para baixo, para nunca ultrapassar o percentual mensal.
+func BilletLateCharges(finePercent, interestMonthlyPercent float64) (int, int, error) {
+	if math.IsNaN(finePercent) || math.IsNaN(interestMonthlyPercent) || finePercent < 0 || interestMonthlyPercent < 0 {
+		return 0, 0, errors.New("multa e juros não podem ser negativos")
+	}
+	if finePercent > 2 {
+		return 0, 0, errors.New("multa acima de 2% não é permitida no boleto")
+	}
+	if interestMonthlyPercent > 1 {
+		return 0, 0, errors.New("juros acima de 1% ao mês não são permitidos no boleto")
+	}
+	fine := int(math.Round(finePercent * 100))
+	interest := int(math.Floor(interestMonthlyPercent*1000/30 + 1e-9))
+	return fine, interest, nil
+}
+
+// SetLateCharges congela multa e juros na intenção. Pix imediato (cob) não tem
+// multa nem juros: a cobrança expira e não há pagamento após o vencimento.
+func (a *Bolix) SetLateCharges(fine, interest int) error {
+	if fine < 0 || fine > MaxBilletFine || interest < 0 || interest > MaxBilletInterest {
+		return errors.New("late charges outside legal limits")
+	}
+	a.fine, a.interest = fine, interest
 	return nil
 }
 
@@ -183,7 +225,11 @@ func (a *Bolix) CreateCharge(ctx context.Context, r providers.Create) (providers
 	if r != a.request {
 		return providers.Charge{}, failure(providers.Conflict, "Bolix intention changed")
 	}
-	body := map[string]any{"items": []any{map[string]any{"name": "NexoISP " + r.InvoiceID, "value": r.Money.Cents, "amount": 1}}, "metadata": map[string]string{"custom_id": TxID(r)}, "payment": map[string]any{"banking_billet": map[string]any{"expire_at": r.DueDate, "customer": a.customer}}}
+	billet := map[string]any{"expire_at": r.DueDate, "customer": a.customer}
+	if a.fine > 0 || a.interest > 0 {
+		billet["configurations"] = map[string]int{"fine": a.fine, "interest": a.interest}
+	}
+	body := map[string]any{"items": []any{map[string]any{"name": "NexoISP " + r.InvoiceID, "value": r.Money.Cents, "amount": 1}}, "metadata": map[string]string{"custom_id": TxID(r)}, "payment": map[string]any{"banking_billet": billet}}
 	if a.notificationURL != "" {
 		body["metadata"].(map[string]string)["notification_url"] = a.notificationURL
 	}

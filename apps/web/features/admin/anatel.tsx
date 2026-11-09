@@ -25,6 +25,8 @@ const report = z.object({
       tipo_atendimento: z.string(),
       meio: z.string(),
       tecnologia: z.string(),
+      tipo_tecnologia: z.string(),
+      tipo_produto: z.string(),
       velocidade_mbps: z.coerce.number(),
       acessos: z.coerce.number(),
     }),
@@ -36,6 +38,15 @@ const report = z.object({
     cities_without_code: z.array(city),
     plans_without_technology: z.array(plan),
   }),
+  issues: z.array(z.string()),
+  ready: z.boolean(),
+});
+const company = z.object({
+  id: z.string(),
+  name: z.string(),
+  document: z.string().nullable(),
+  is_default: z.boolean(),
+  active: z.boolean(),
 });
 const technologies: Record<string, string> = {
   FTTH: "FTTH · fibra até a casa",
@@ -43,10 +54,10 @@ const technologies: Record<string, string> = {
   HFC: "HFC · cabo coaxial",
   XDSL: "xDSL · par metálico",
   ETHERNET: "Ethernet",
-  RADIO: "Rádio",
+  RADIO: "Rádio · Wi-Fi no leiaute",
   LTE: "LTE/4G",
-  SATELITE: "Satélite",
-  OUTRA: "Outra",
+  SATELITE: "Satélite · VSAT no leiaute",
+  OUTRA: "Outra · sem código no leiaute (bloqueia o arquivo)",
 };
 export function AnatelCollection() {
   const [competence, setCompetence] = useState(() => {
@@ -56,9 +67,19 @@ export function AnatelCollection() {
     return date.toISOString().slice(0, 7);
   });
   const [draft, setDraft] = useState(competence);
-  const path = `/anatel/dici?competence=${competence}`;
-  const result = useSWR(["erp-anatel", competence], async () =>
-    report.parse(await api(path)),
+  const companies = useSWR("erp-anatel-companies", async () =>
+    z.array(company).parse(await api("/companies")),
+  );
+  const [chosen, setChosen] = useState("");
+  const selected =
+    chosen ||
+    companies.data?.find((item) => item.is_default)?.id ||
+    companies.data?.[0]?.id ||
+    "";
+  const path = `/anatel/dici?competence=${competence}${selected ? `&company_id=${selected}` : ""}`;
+  const result = useSWR(
+    companies.data ? ["erp-anatel", competence, selected] : null,
+    async () => report.parse(await api(path)),
   );
   const { mutate } = useSWRConfig();
   const [editing, setEditing] = useState<
@@ -72,9 +93,22 @@ export function AnatelCollection() {
     <>
       <PageHeading
         title="Coleta ANATEL · DICI"
-        description="Acessos em serviço no último dia do mês. Gere e confira o arquivo; o envio à ANATEL é feito pelo provedor."
+        description="Acessos em serviço no último dia do mês, por CNPJ. Gere e confira o arquivo; o envio à ANATEL é feito pelo provedor."
         actions={
           <>
+            <select
+              aria-label="Empresa da declaração"
+              className="commercial-select"
+              value={selected}
+              onChange={(event) => setChosen(event.target.value)}
+            >
+              {(companies.data ?? []).map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                  {item.document ? ` · ${item.document}` : " · sem CNPJ"}
+                </option>
+              ))}
+            </select>
             <form
               className="erp-inline-actions"
               onSubmit={(event) => {
@@ -94,7 +128,7 @@ export function AnatelCollection() {
               </Button>
             </form>
             <ActionButton
-              disabled={!result.data}
+              disabled={!result.data?.ready}
               onClick={() =>
                 download(`${path}&format=csv`, `dici-acessos-${competence}.csv`)
               }
@@ -105,12 +139,24 @@ export function AnatelCollection() {
         }
       />
       <QueryBoundary
-        loading={result.isLoading}
-        error={result.error}
-        retry={() => result.mutate()}
+        loading={companies.isLoading || result.isLoading}
+        error={companies.error ?? result.error}
+        retry={() => Promise.all([companies.mutate(), result.mutate()])}
       >
         {result.data && (
           <div className="erp-stack">
+            {!result.data.ready && (
+              <Panel
+                title="Pendências que bloqueiam o arquivo"
+                description="O arquivo só é gerado quando todos os acessos em serviço da empresa têm CNPJ válido, município com código IBGE e plano com tecnologia do leiaute."
+              >
+                <ul className="erp-stack" aria-label="Pendências da coleta DICI">
+                  {result.data.issues.map((issue) => (
+                    <li key={issue}>{issue}</li>
+                  ))}
+                </ul>
+              </Panel>
+            )}
             <Panel
               title="Conferência da coleta"
               description="A coleta agrupa por CNPJ, município, tipo de cliente, área, meio, tecnologia e velocidade."
@@ -118,6 +164,12 @@ export function AnatelCollection() {
               <p>
                 {total} acessos no arquivo · {result.data.pending.total - total}{" "}
                 contratos fora do arquivo por falta de dados
+              </p>
+              <p className="profile-footnote">
+                Leiaute da coleta de acessos SCM: CSV em UTF-8 com BOM,
+                separador ponto e vírgula e colunas CNPJ; ANO; MES; COD_IBGE;
+                TIPO_CLIENTE; TIPO_ATENDIMENTO; TIPO_MEIO; TIPO_PRODUTO;
+                TIPO_TECNOLOGIA; VELOCIDADE (Mbps); ACESSOS.
               </p>
               {result.data.pending.sem_cnpj > 0 && (
                 <p className="profile-footnote">
@@ -133,8 +185,10 @@ export function AnatelCollection() {
                 </p>
               )}
               <p className="profile-footnote">
-                Confira o leiaute e os dados antes de enviar no sistema de
-                coleta da ANATEL. Esta aplicação não transmite a declaração.
+                O envio é manual: a ANATEL não oferece API pública para esta
+                declaração. Baixe o arquivo, confira os dados e importe-o no
+                sistema Coleta de Dados da ANATEL com o usuário do provedor.
+                Esta aplicação não transmite a declaração.
               </p>
             </Panel>
             {result.data.pending.cities_without_code.length > 0 && (
@@ -185,13 +239,14 @@ export function AnatelCollection() {
             )}
             <OperationalCatalog
               title="Prévia do arquivo DICI"
-              description={`Competência ${competence}. Somente acessos com dados completos entram no arquivo.`}
+              description={`Competência ${competence}. Códigos conforme o leiaute; o arquivo é recusado enquanto houver pendências.`}
               columns={[
                 "CNPJ",
                 "Código IBGE",
                 "Cliente",
                 "Área",
                 "Meio",
+                "Produto",
                 "Tecnologia",
                 "Velocidade (Mbps)",
                 "Acessos",
@@ -204,7 +259,8 @@ export function AnatelCollection() {
                   item.tipo_cliente,
                   item.tipo_atendimento,
                   item.meio,
-                  item.tecnologia,
+                  item.tipo_produto,
+                  item.tipo_tecnologia || `${item.tecnologia} · sem código`,
                   item.velocidade_mbps,
                   item.acessos,
                 ],

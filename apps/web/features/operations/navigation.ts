@@ -1,4 +1,4 @@
-import { can, hasModule, type Session } from "@/features/session/model";
+import { can, hasModule, sessionRestricted, type Session } from "@/features/session/model";
 import { catalogueAllows, catalogueTarget } from "./catalogue";
 import { pageAccess, pageAliases } from "./pages";
 export const erpAliases = pageAliases;
@@ -12,7 +12,7 @@ export function canAccessPath(me: Session | null, pathname: string): boolean {
   if (!catalogueAllows(me, pathname)) return false;
   const access = pageAccess(canonicalErpPath(pathname));
   if (access === "conta") return true;
-  if (me.mfa_pending) return false;
+  if (sessionRestricted(me)) return false;
   if (access === "saas") return can(me, "tenants:manage") && !me.support;
   if (access === "portal") return can(me, "portal:self");
   if (!me.tenant || me.role === "subscriber") return false;

@@ -12,6 +12,7 @@ import {
 import {
   can,
   hasModule,
+  sessionRestricted,
   sessionScope,
   type Session,
 } from "@/features/session/model";
@@ -113,7 +114,7 @@ export function isWidgetAuthorized(
 
 export function isTeamSession(me: Session | null): boolean {
   if (!me) return false;
-  if (me.mfa_pending) return false;
+  if (sessionRestricted(me)) return false;
   if (me.role === "subscriber") return false;
   if (!me.tenant) return false;
   return true;

@@ -17,11 +17,15 @@ export const sessionSchema = z.object({
   demo: z.boolean(),
   mfa_enabled: z.boolean(),
   mfa_pending: z.boolean(),
+  password_change_required: z.boolean().optional(),
   tenant: z
     .object({ id: z.string().min(1), name: z.string(), slug: z.string() })
     .nullable(),
 });
 export type Session = z.infer<typeof sessionSchema>;
+/** Sessão que só pode cuidar da própria conta: MFA pendente ou senha provisória. */
+export const sessionRestricted = (me: Session) =>
+  me.mfa_pending || Boolean(me.password_change_required);
 export const can = (me: Session | null, permission: string) =>
   Boolean(me?.perms.includes(permission));
 export const hasModule = (me: Session | null, module: string) =>

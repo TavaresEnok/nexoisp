@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { FormField } from "@/features/shared/form";
 import { useSession } from "@/features/session/provider";
 import { PortalBrandingSettings } from "@/features/admin/portal-branding";
+import { ViabilitySettings } from "@/features/viability/settings";
 import { can, sessionScope } from "@/features/session/model";
 import { roleLabels } from "@/features/session/model";
 import { canAccessPath } from "./navigation";
@@ -76,6 +77,9 @@ export function OperationalSettings() {
       </div>
       {me?.tenant && can(me, "settings:manage") && (
         <PortalBrandingSettings key={sessionScope(me)} />
+      )}
+      {me?.tenant && can(me, "settings:manage") && (
+        <ViabilitySettings key={`viabilidade:${sessionScope(me)}`} />
       )}
     </>
   );

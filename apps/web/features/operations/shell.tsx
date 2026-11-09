@@ -7,6 +7,7 @@ import type {
 } from "@/components/shell-context";
 import {
   roleLabels,
+  sessionRestricted,
   sessionScope,
   type Session,
 } from "@/features/session/model";
@@ -32,14 +33,14 @@ type SearchResult = {
 
 function searchable(me: Session | null) {
   return Boolean(
-    me && !me.mfa_pending && me.tenant && me.role !== "subscriber",
+    me && !sessionRestricted(me) && me.tenant && me.role !== "subscriber",
   );
 }
 
 function operationalPreferenceScope(me: Session | null): string | null {
   if (
     !me ||
-    me.mfa_pending ||
+    sessionRestricted(me) ||
     me.role === "subscriber" ||
     (me.role === "saas_operator" && !me.tenant)
   ) {

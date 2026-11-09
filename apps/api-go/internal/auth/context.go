@@ -13,7 +13,7 @@ import (
 
 type Ctx struct {
 	UserID, Name, Email, Role, TenantID, SubscriberID, TokenHash string
-	Support, MFAEnabled                                          bool
+	Support, MFAEnabled, PasswordChangeRequired                  bool
 	PopIDs, Modules, Permissions                                 []string
 	ExpiresAt                                                    time.Time
 	SessionCell                                                  string
@@ -62,7 +62,7 @@ func (l DBLoader) Load(ctx context.Context, hash string) (*Ctx, error) {
 	c := &Ctx{TokenHash: hash, SessionCell: sessionCell}
 	var tenant, subscriber, support *string
 	err := l.DB.WithScope(ctx, tenancy.Scope{}, func(tx *db.Tx) error {
-		err := tx.QueryRow(ctx, "select * from nexo_go_session_get($1)", hash).Scan(&c.UserID, &tenant, &c.Role, &c.Name, &c.Email, &subscriber, &support, &c.MFAEnabled, &c.ExpiresAt)
+		err := tx.QueryRow(ctx, "select * from nexo_go_session_get($1)", hash).Scan(&c.UserID, &tenant, &c.Role, &c.Name, &c.Email, &subscriber, &support, &c.MFAEnabled, &c.ExpiresAt, &c.PasswordChangeRequired)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return apierr.New(401, "sessão inválida ou expirada")
 		}

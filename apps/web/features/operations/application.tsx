@@ -26,6 +26,7 @@ import { readAppearance } from "@/platform/appearance";
 import { Login } from "@/features/session/login";
 import { Account } from "@/features/session/account";
 import { useSession } from "@/features/session/provider";
+import { sessionRestricted } from "@/features/session/model";
 import { QueryBoundary } from "@/features/shared/feedback";
 import { SubscriberDirectory } from "@/features/subscribers/directory";
 import { OperationalSubscriberSheet } from "@/features/subscribers/sheet";
@@ -312,7 +313,7 @@ export function OperationalApplication() {
       </Routes>
     );
   const me = session.me;
-  const home = me.mfa_pending
+  const home = sessionRestricted(me)
     ? "/conta"
     : me.role === "subscriber"
       ? "/portal"
@@ -380,7 +381,7 @@ export function OperationalApplication() {
         <AppShell initialAppearance={readAppearance()}>
           {location.pathname === "/login" ? (
             <Navigate to={returnPath(me, location.state) ?? home} replace />
-          ) : me.mfa_pending && !location.pathname.startsWith("/conta") ? (
+          ) : sessionRestricted(me) && !location.pathname.startsWith("/conta") ? (
             <Navigate to="/conta" replace />
           ) : !allowed ? (
             <AccessDenied />
@@ -419,11 +420,11 @@ export function OperationalApplication() {
           {allowed &&
             me.tenant &&
             me.role !== "subscriber" &&
-            !me.mfa_pending && <OperationalSubscriberSheet />}
+            !sessionRestricted(me) && <OperationalSubscriberSheet />}
           {allowed &&
             me.tenant &&
             me.role !== "subscriber" &&
-            !me.mfa_pending &&
+            !sessionRestricted(me) &&
             new URLSearchParams(location.search).has("protocolo") && (
               <Suspense
                 fallback={<QueryBoundary loading>{null}</QueryBoundary>}
@@ -434,7 +435,7 @@ export function OperationalApplication() {
           {allowed &&
             me.tenant &&
             me.role !== "subscriber" &&
-            !me.mfa_pending &&
+            !sessionRestricted(me) &&
             new URLSearchParams(location.search).has("ordem") && (
               <Suspense
                 fallback={<QueryBoundary loading>{null}</QueryBoundary>}
@@ -445,7 +446,7 @@ export function OperationalApplication() {
           {allowed &&
             me.tenant &&
             me.role !== "subscriber" &&
-            !me.mfa_pending &&
+            !sessionRestricted(me) &&
             new URLSearchParams(location.search).has("operacao") && (
               <Suspense
                 fallback={<QueryBoundary loading>{null}</QueryBoundary>}

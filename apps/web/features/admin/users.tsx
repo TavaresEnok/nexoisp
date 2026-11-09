@@ -262,7 +262,7 @@ export function TeamDirectory() {
       {editor && editor !== "create" && editor.kind === "password" && (
         <RecordEditor
           title="Redefinir senha da equipe"
-          description={`Defina uma nova senha para ${editor.user.name}. A senha atual não é recuperada nem exibida.`}
+          description={`Defina uma senha provisória para ${editor.user.name}. As sessões abertas são encerradas agora e, no próximo acesso, a pessoa precisa trocar a senha antes de usar o sistema. A senha atual não é recuperada nem exibida.`}
           initial={{ password: "" }}
           fields={[
             {
@@ -271,7 +271,7 @@ export function TeamDirectory() {
               type: "password",
               required: true,
               maxLength: 128,
-              hint: "Pelo menos oito caracteres.",
+              hint: "Pelo menos oito caracteres. Entregue a senha provisória por um canal seguro.",
             },
           ]}
           submit="Redefinir senha"

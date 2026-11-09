@@ -36,6 +36,9 @@ func (s Service) self(ctx context.Context, key string, b map[string]any) (endpoi
 			if !cryptox.VerifyPassword(b["current"].(string), u.Get("password_hash").(string)) {
 				return apierr.New(400, "senha atual incorreta")
 			}
+			if c.PasswordChangeRequired && b["next"] == b["current"] {
+				return apierr.New(400, "a nova senha deve ser diferente da senha provisória")
+			}
 			hash, err := cryptox.HashPassword(b["next"].(string))
 			if err != nil {
 				return err
@@ -96,7 +99,11 @@ func (s Service) self(ctx context.Context, key string, b map[string]any) (endpoi
 	} else if strings.HasSuffix(key, "/disable") {
 		action = "user.mfa_disable"
 	}
-	return endpoint.Result{Value: map[string]any{"ok": true}}, s.Audit.Write(ctx, c, action, "user", c.UserID, nil, "ok")
+	var detail map[string]any
+	if key == "POST /api/me/password" && c.PasswordChangeRequired {
+		detail = map[string]any{"provisional_replaced": true}
+	}
+	return endpoint.Result{Value: map[string]any{"ok": true}}, s.Audit.Write(ctx, c, action, "user", c.UserID, detail, "ok")
 }
 func (s Service) support(ctx context.Context, key string, b map[string]any) (endpoint.Result, error) {
 	c := auth.From(ctx)
