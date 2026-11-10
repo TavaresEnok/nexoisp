@@ -23,6 +23,7 @@ import { stamp, type Device } from "./models";
 // Equipamentos cujo backup o agente sabe fazer (o RADIUS integrado não tem equipamento a consultar).
 export const configBackupDrivers = [
   "olt_huawei",
+  "olt_zte",
   "mikrotik_radius",
   "olt_demo",
   "demo",

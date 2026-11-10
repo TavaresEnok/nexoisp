@@ -51,6 +51,9 @@ class Agent:
         if dev["driver"] == "olt_huawei":
             from .drivers.olt_huawei import HuaweiOltDriver
             return HuaweiOltDriver.from_device(dev, self.credentials)
+        if dev["driver"] == "olt_zte":
+            from .drivers.olt_zte import ZteOltDriver
+            return ZteOltDriver.from_device(dev, self.credentials)
         if dev["driver"] == "mikrotik_radius":
             from .drivers.mikrotik_radius import MikrotikRadiusDriver
             return MikrotikRadiusDriver.from_device(dev, self.credentials, self.data_dir)

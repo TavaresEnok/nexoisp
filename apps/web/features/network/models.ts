@@ -59,6 +59,7 @@ export const drivers: Record<string, string> = {
   mikrotik_radius: "MikroTik RouterOS v7 + RADIUS local",
   olt_demo: "OLT · simulada",
   olt_huawei: "OLT Huawei SmartAX · não homologada",
+  olt_zte: "OLT ZTE ZXA10 · leitura e backup",
   radius: "RADIUS integrado",
 };
 export function projectDevice(device: Device): InventoryNode {
