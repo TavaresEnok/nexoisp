@@ -48,7 +48,9 @@ export function parseCoordinate(raw: string, kind: "latitude" | "longitude") {
 /** Link do WhatsApp apenas com dígitos (DDI, DDD e número). */
 export function whatsappLink(digits: string | null) {
   const clean = (digits ?? "").replace(/\D/g, "");
-  return clean.length >= 10 && clean.length <= 15 ? `https://wa.me/${clean}` : null;
+  return clean.length >= 10 && clean.length <= 15
+    ? `https://wa.me/${clean}`
+    : null;
 }
 
 export const publicViabilityPath = (slug: string) =>

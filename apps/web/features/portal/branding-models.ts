@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { sessionRestricted, sessionScope, type Session } from "@/features/session/model";
+import {
+  sessionRestricted,
+  sessionScope,
+  type Session,
+} from "@/features/session/model";
 
 export const brandingSchema = z.object({
   display_name: z.string().nullable(),

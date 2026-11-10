@@ -405,7 +405,8 @@ export function OperationalApplication() {
         <AppShell initialAppearance={readAppearance()}>
           {location.pathname === "/login" ? (
             <Navigate to={returnPath(me, location.state) ?? home} replace />
-          ) : sessionRestricted(me) && !location.pathname.startsWith("/conta") ? (
+          ) : sessionRestricted(me) &&
+            !location.pathname.startsWith("/conta") ? (
             <Navigate to="/conta" replace />
           ) : !allowed ? (
             <AccessDenied />

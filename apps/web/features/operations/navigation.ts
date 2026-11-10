@@ -1,4 +1,9 @@
-import { can, hasModule, sessionRestricted, type Session } from "@/features/session/model";
+import {
+  can,
+  hasModule,
+  sessionRestricted,
+  type Session,
+} from "@/features/session/model";
 import { catalogueAllows, catalogueTarget } from "./catalogue";
 import { pageAccess, pageAliases } from "./pages";
 export const erpAliases = pageAliases;

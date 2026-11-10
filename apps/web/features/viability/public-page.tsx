@@ -99,7 +99,10 @@ export function PublicViability() {
     publicRequest(base)
       .then((data) => {
         if (active)
-          setLoad({ state: "ready", provider: publicViabilitySchema.parse(data) });
+          setLoad({
+            state: "ready",
+            provider: publicViabilitySchema.parse(data),
+          });
       })
       .catch((reason: unknown) => {
         if (!active) return;
@@ -128,7 +131,9 @@ export function PublicViability() {
   const locate = () => {
     setError(null);
     if (!("geolocation" in navigator)) {
-      setError("Este navegador não oferece localização. Informe as coordenadas.");
+      setError(
+        "Este navegador não oferece localização. Informe as coordenadas.",
+      );
       return;
     }
     setLocating(true);
@@ -155,7 +160,11 @@ export function PublicViability() {
         "Informe latitude entre -90 e 90 e longitude entre -180 e 180.",
       );
     const text = address.trim();
-    return { latitude: lat, longitude: lng, ...(text ? { address: text } : {}) };
+    return {
+      latitude: lat,
+      longitude: lng,
+      ...(text ? { address: text } : {}),
+    };
   };
   const check = async (event: FormEvent) => {
     event.preventDefault();
@@ -237,7 +246,10 @@ export function PublicViability() {
               <AlertDescription>{load.message}</AlertDescription>
             </Alert>
             <div className={styles.actions}>
-              <Button variant="outline" onClick={() => setAttempt((n) => n + 1)}>
+              <Button
+                variant="outline"
+                onClick={() => setAttempt((n) => n + 1)}
+              >
                 Tentar novamente
               </Button>
             </div>
@@ -314,7 +326,11 @@ export function PublicViability() {
                     Usar minha localização
                   </Button>
                   <Button type="submit">
-                    {busy ? <LoaderCircle className="animate-spin" /> : <MapPin />}
+                    {busy ? (
+                      <LoaderCircle className="animate-spin" />
+                    ) : (
+                      <MapPin />
+                    )}
                     Consultar viabilidade
                   </Button>
                 </div>

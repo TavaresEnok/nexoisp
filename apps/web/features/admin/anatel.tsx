@@ -150,7 +150,10 @@ export function AnatelCollection() {
                 title="Pendências que bloqueiam o arquivo"
                 description="O arquivo só é gerado quando todos os acessos em serviço da empresa têm CNPJ válido, município com código IBGE e plano com tecnologia do leiaute."
               >
-                <ul className="erp-stack" aria-label="Pendências da coleta DICI">
+                <ul
+                  className="erp-stack"
+                  aria-label="Pendências da coleta DICI"
+                >
                   {result.data.issues.map((issue) => (
                     <li key={issue}>{issue}</li>
                   ))}
