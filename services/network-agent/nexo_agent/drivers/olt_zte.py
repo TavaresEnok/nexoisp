@@ -264,7 +264,9 @@ class ZteCli:
             pass
 
     def run(self, command: str) -> str:
-        return self._c.send_command(command, expect_string=r"[>#]\s*$", read_timeout=60, cmd_verify=False,
+        # cmd_verify=True: sincroniza pelo eco do comando; sem isso o netmiko casa o prompt que sobrou do comando
+        # anterior e devolve vazio (ex.: `show card` voltando 0 placas).
+        return self._c.send_command(command, expect_string=r"[>#]\s*$", read_timeout=60, cmd_verify=True,
                                     strip_prompt=False, strip_command=True)
 
     def dump(self, command: str) -> str:
