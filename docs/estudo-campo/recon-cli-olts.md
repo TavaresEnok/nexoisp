@@ -117,3 +117,19 @@ Dois grupos, confirmados em campo:
 | **Por arquivo (TFTP/FTP)** | Intelbras (cmd `backup`), FiberHome (`upload ftp config`), VSOL, Parks | O equipamento ENVIA o arquivo a um servidor TFTP/FTP; não há `show` que despeje a config | **Pendente**: exige um subsistema de recebimento (o agente sobe um TFTP/FTP efêmero, manda o equipamento enviar e guarda o arquivo) |
 
 No Intelbras OLT8820 confirmado: `show running-config` volta vazio e `show configuration` só devolve o banner — a config sai pelo comando `backup` para TFTP. O backup center implementa esses fluxos por arquivo. Para o NexoISP cobrir essas marcas no backup semanal, o próximo passo é um **coletor TFTP/FTP no agente**, reaproveitando o transporte OS já pronto para disparar o comando de envio no equipamento.
+
+## Cobertura de LEITURA de ONU (além do backup)
+
+Validado AO VIVO em equipamento real, só leitura:
+
+| Marca | Lista/estado de ONU | Comando | Status |
+|---|---|---|---|
+| Huawei | sim (estado + sinal) | display ont info/optical | driver completo |
+| ZTE | sim (estado + sinal) | show gpon onu state/detail-info + pon power | driver completo |
+| Datacom | sim (estado + sinal) | show interface gpon f/s/p onu (+ optical-info) | validado ao vivo |
+| Intelbras | sim (presença/porta) | onu inventory (+ onu show p/ autofind) | validado ao vivo; online/óptico por-ONU (`onu status <id>`) ainda não mapeado |
+| FiberHome | pendente | `cd onu` + comando a confirmar | precisa de `enable` COM senha antes; **cuidado: 5 falhas de senha bloqueiam o login por alguns minutos** |
+| VSOL / Parks | pendente | — | não validável pelo meu túnel (VSOL mudo por túnel TCP; o Parks testado tem shell quebrado). Transporte OS pronto; confirmar por acesso igual ao de produção |
+
+Provisionamento de ONU (autorizar/remover) só é homologável em laboratório; nos drivers novos fica recusado. EPON antigo
+pende de uma OLT EPON ativa para reconhecimento.
