@@ -89,3 +89,20 @@ e sim o **binário real `ssh`/`telnet` do sistema**, dirigido por `pexpect`. Iss
 
 > Reconhecimento ao vivo concluído para Huawei, ZTE, FiberHome, Datacom e Intelbras. VSOL e Parks têm o método de conexão
 > mapeado (acima), faltando só a captura ao vivo com o transporte OS-ssh/telnet. EPON antigo pende de uma OLT EPON ativa.
+
+## Transporte OS-ssh/telnet (implementado)
+
+`services/network-agent/nexo_agent/os_cli.py` dá ao agente o transporte pelo **cliente real do sistema** (só biblioteca
+padrão): SSH pelo binário `ssh` atrás de um pty (com os algoritmos legados acima), e telnet em Python puro com resposta à
+negociação IAC. O `openssh-client` foi adicionado ao Dockerfile do agente. 8 testes de unidade (montagem do comando,
+IAC, limpeza ANSI/backspace, paginação, login). **Provado em campo:** o `ssh` real conecta e autentica num Parks
+(dropbear/BusyBox) **sem o "Aiee, segfault!"** que o paramiko provocava.
+
+Limites do que dá para validar pelo meu caminho de acesso (túnel pelo jump):
+- **Parks (UltraNet):** conecta e loga, mas o shell daquele equipamento **ecoa e não responde** a nenhum comando
+  (device quebrado para uso interativo). Precisa de outro Parks ou do método exato do backup center para a coleta.
+- **VSOL:** o telnet fica **mudo por túnel TCP**; o backup center roda o `telnet` **dentro do jump host**. Em produção o
+  agente fala direto com a OLT (sem túnel), então isso deve se comportar diferente — confirmar com uma VSOL alcançável.
+
+Ou seja: o transporte está pronto e provado na conexão; os drivers VSOL/Parks por cima dependem de confirmar a CLI de
+cada um por um caminho de acesso representativo da produção.
