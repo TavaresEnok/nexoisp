@@ -50,3 +50,8 @@ class CloudClient:
 
     def sessions_report(self, device_id: str, items: list) -> dict:
         return self._post("/agent/v1/sessions-report", {"device_id": device_id, "items": items})
+
+    def config_backup(self, body: dict) -> dict:
+        r = self._http.post("/agent/v1/config-backup", json=body, timeout=120.0)
+        r.raise_for_status()
+        return r.json()

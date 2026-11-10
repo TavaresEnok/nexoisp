@@ -53,6 +53,13 @@ class DemoDriver:
     def check(self) -> dict:
         return {"ok": True, "detail": "driver de demonstração (simulado) — nenhum equipamento real consultado"}
 
+    def export_config(self) -> str:
+        """Configuração FICTÍCIA do concentrador de demonstração (nenhum equipamento real)."""
+        rows = self._db.execute("select username, profile, policy from accounts where device_id = ? order by username", (self.device_id,)).fetchall()
+        lines = ["# concentrador de DEMONSTRAÇÃO (simulado) - configuração fictícia", "/system identity", "set name=NAS-DEMO", "/ppp secret"]
+        lines += [f'add name={r["username"]} profile={r["profile"]}{" disabled=yes" if r["policy"] != "active" else ""}' for r in rows]
+        return "\n".join(lines)
+
     def read(self, username: str) -> AccountState:
         a = self._db.execute("select * from accounts where device_id = ? and username = ?", (self.device_id, username)).fetchone()
         if not a:

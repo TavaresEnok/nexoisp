@@ -167,8 +167,12 @@ class NetmikoCli:
             self.close()
             raise
 
-    def _send(self, command: str) -> str:
-        return self._c.send_command(command, expect_string=self._END, strip_prompt=False, strip_command=True, read_timeout=30, cmd_verify=False)
+    def _send(self, command: str, read_timeout: float = 30) -> str:
+        return self._c.send_command(command, expect_string=self._END, strip_prompt=False, strip_command=True, read_timeout=read_timeout, cmd_verify=False)
+
+    def run_long(self, command: str) -> str:
+        """Saída longa e somente leitura (configuração completa): muito mais páginas e espera maior por página."""
+        return self._run_command(command, max_pages=5000, read_timeout=120)
 
     def run(self, command: str) -> str:
         try:
@@ -178,14 +182,14 @@ class NetmikoCli:
                 raise AckLost("confirmação SSH ausente após comando mutante; consultar estado") from None
             raise
 
-    def _run_command(self, command: str) -> str:
-        out = self._send(command)
-        for _ in range(50):
+    def _run_command(self, command: str, max_pages: int = 50, read_timeout: float = 30) -> str:
+        out = self._send(command, read_timeout)
+        for _ in range(max_pages):
             tail = out.rstrip().splitlines()[-1] if out.strip() else ""
             if re.search(r"\}\s*:$", tail):
-                out += "\n" + self._send("")
+                out += "\n" + self._send("", read_timeout)
             elif "---- More" in tail:
-                out += "\n" + self._send(" ")
+                out += "\n" + self._send(" ", read_timeout)
             else:
                 break
         else:
@@ -282,6 +286,20 @@ class HuaweiOltDriver:
         if hygiene:
             result["hygiene"] = hygiene
         return result
+
+    def export_config(self) -> str:
+        """Configuração em execução, para o backup semanal. Sessão própria (não disputa a sessão das operações) e somente leitura."""
+        from ..config_backup import clean_cli_output
+        cli = self._connect()
+        try:
+            out = cli.run_long("display current-configuration") if hasattr(cli, "run_long") else cli.run("display current-configuration")
+        finally:
+            cli.close()
+        check_failure(out)
+        text = clean_cli_output(out)
+        if "#" not in text:
+            raise OltCommandError("resposta sem configuração reconhecível; backup não registrado")
+        return text
 
     def _require_write_capability(self):
         if not self.allow_writes:

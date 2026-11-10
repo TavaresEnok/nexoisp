@@ -1667,7 +1667,8 @@
     "queries": [
       "04acb5aa_0.sql",
       "04acb5aa_1.sql",
-      "04acb5aa_2.sql"
+      "04acb5aa_2.sql",
+      "04acb5aa_3.sql"
     ],
     "sha256": "401d36ab0ec8fe2818477ff423c19b97ca78b3c4040d4bc6a4d9b161fa65f88c"
   },
@@ -1805,7 +1806,8 @@
       "e8850a32_5.sql",
       "e8850a32_6.sql",
       "e8850a32_7.sql",
-      "e8850a32_8.sql"
+      "e8850a32_8.sql",
+      "e8850a32_9.sql"
     ],
     "sha256": "993e35d969c3dcb78e8ef21d10f8644d08fd83234fcb1cc6a8839ab0dd9cc680"
   },

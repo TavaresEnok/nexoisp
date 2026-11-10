@@ -300,6 +300,24 @@ class MikrotikSessions:
         finally:
             api.close()
 
+    def export_config(self) -> str:
+        """`/export` por SSH (a API do RouterOS não exporta). Usa o mesmo usuário, a porta `ssh_port` (padrão 22) e a chave
+        do equipamento fixada em `known_hosts_file`, como nas OLTs. `hide-sensitive` no RouterOS 6; no 7 o padrão já oculta."""
+        from ..cli_transport import connect
+        from ..config_backup import clean_cli_output
+        c = connect("mikrotik_routeros", self.host, int(self.cred.get("ssh_port") or 22), self.cred["username"], self.cred["password"], self.cred,
+                    conn_timeout=15, auth_timeout=15, banner_timeout=15)
+        try:
+            out = c.send_command("/export hide-sensitive", read_timeout=180, cmd_verify=False)
+            if re.search(r"expected end of command|syntax error|bad command", out, re.I):
+                out = c.send_command("/export", read_timeout=180, cmd_verify=False)
+        finally:
+            c.disconnect()
+        text = clean_cli_output(out)
+        if not re.search(r"^/", text, re.M):
+            raise RuntimeError("resposta do /export sem configuração reconhecível; backup não registrado")
+        return text
+
     def find(self, username: str) -> list[dict]:
         from librouteros.query import Key
         api = self._connect()
@@ -361,6 +379,9 @@ class MikrotikRadiusDriver:
 
     def check(self) -> dict:
         return self.sessions.check()
+
+    def export_config(self) -> str:
+        return self.sessions.export_config()
 
     def read_many(self, usernames: list[str]) -> dict[str, AccountState]:
         """Leitura em lote: uma única consulta de sessões ao NAS para todas as contas."""

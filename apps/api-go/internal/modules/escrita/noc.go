@@ -169,6 +169,29 @@ func (s Service) nocOverview(ctx context.Context, tx *db.Tx, _ string, _ map[str
 		}
 		add("info", "hygiene_"+h.code, fmt.Sprintf("%d equipamento(s) %s", len(names), h.title), "/rede", h.detail+" Equipamentos: "+listed+".", nil)
 	}
+	backups, err := rows(ctx, tx, key, 9, network.ConfigBackupDrivers)
+	if err != nil {
+		return nil, err
+	}
+	if len(backups) > 0 {
+		parts := []string{}
+		for _, d := range backups[:min(len(backups), 10)] {
+			part := fmt.Sprint(d.Get("name"))
+			if d.Get("error") != nil {
+				part += " (" + fmt.Sprint(d.Get("error")) + ")"
+			} else if d.Get("taken_at") != nil {
+				part += " (último em " + nocTime(d.Get("taken_at")) + ")"
+			} else {
+				part += " (nenhum backup ainda)"
+			}
+			parts = append(parts, part)
+		}
+		detail := "O backup semanal da configuração falhou ou está atrasado: " + strings.Join(parts, "; ")
+		if len(backups) > 10 {
+			detail += fmt.Sprintf("; e mais %d", len(backups)-10)
+		}
+		add("warning", "config_backup", fmt.Sprintf("%d equipamento(s) sem backup de configuração em dia", len(backups)), "/rede", detail+".", nil)
+	}
 	for _, d := range maintenance {
 		add("info", "maintenance", fmt.Sprintf("%v em modo manutenção", d.Get("name")), "/rede", "O ERP não envia escritas a este equipamento.", nil)
 	}

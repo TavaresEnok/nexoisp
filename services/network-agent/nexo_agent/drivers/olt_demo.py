@@ -66,6 +66,14 @@ class DemoOltDriver:
     def check(self) -> dict:
         return {"ok": True, "detail": "OLT de demonstração (simulada) — nenhum equipamento real consultado"}
 
+    def export_config(self) -> str:
+        """Configuração FICTÍCIA da OLT de demonstração (nenhum equipamento real)."""
+        rows = self._db.execute("select serial, pon_port, line_profile, service_vlan from pon_onus where device_id = ? and authorized = 1 order by pon_port, serial",
+                                (self.device_id,)).fetchall()
+        lines = ["# OLT de DEMONSTRAÇÃO (simulada) - configuração fictícia", "#", " sysname OLT-DEMO"]
+        lines += [f' ont add {r["pon_port"]} sn-auth "{r["serial"]}" ont-lineprofile-name "{r["line_profile"]}" vlan {r["service_vlan"]}' for r in rows]
+        return "\n".join(lines + ["#", "return"])
+
     def discover(self) -> list[dict]:
         return [{"serial": r["serial"], "pon_port": r["pon_port"], "vendor": r["vendor"], "model": r["model"]}
                 for r in self._db.execute("select * from pon_onus where device_id = ? and authorized = 0 and plugged_at is not null", (self.device_id,))]

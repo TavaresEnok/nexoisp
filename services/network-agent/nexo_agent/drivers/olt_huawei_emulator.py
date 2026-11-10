@@ -62,6 +62,8 @@ class HuaweiCliEmulator:
         if c == "display ntp-service status":
             status = "synchronized" if d.get("ntp", True) else "unsynchronized"
             return f" clock status: {status}\n clock stratum: 3\n reference clock ID: 192.0.2.123"
+        if c == "display current-configuration":
+            return self._current_configuration()
         if c == "display version":
             return "\n  VERSION : MA5800V100R019C10 (emulador NexoISP)\n  PATCH   : -\n  PRODUCT : MA5800-X7 (emulado)\n"
         if c == "display ont autofind all":
@@ -170,6 +172,27 @@ class HuaweiCliEmulator:
             n = len(d["sports"]); d["sports"] = [x for x in d["sports"] if x["index"] != int(m.group(1))]
             return "" if len(d["sports"]) < n else "  Failure: Service virtual port does not exist"
         return "                    ^\n  % Unknown command, the error locates at '^'"
+
+    def _current_configuration(self) -> str:
+        """Configuração em execução, no formato da MA5800, montada do estado emulado (backup de configuração)."""
+        d = self.s.d
+        out = ["[MA5800V100R019: 8211]", "#", "[global-config]", " <global-config>", f" sysname {self.host}",
+               " ntp-service unicast-server 192.0.2.123" if d.get("ntp", True) else " undo ntp-service enable", "#", "[vlan-config]", " <vlan-config>"]
+        out += [f" vlan {v} smart" for v in d["vlans"]]
+        out += ["#", "[gpon]", " <gpon>"]
+        for i, name in enumerate(d["line_profiles"], 1):
+            out += [f' ont-lineprofile gpon profile-id {i} profile-name "{name}"', "  commit", "  quit"]
+        for i, name in enumerate(d["srv_profiles"], 1):
+            out += [f' ont-srvprofile gpon profile-id {i} profile-name "{name}"', "  commit", "  quit"]
+        for fsp in sorted({o["fsp"] for o in d["onts"]}):
+            frame, slot, port = fsp.split("/")
+            out += ["#", f"[gpon-{frame}/{slot}]", f" interface gpon {frame}/{slot}"]
+            for o in sorted((x for x in d["onts"] if x["fsp"] == fsp), key=lambda x: x["id"]):
+                out.append(f'  ont add {port} {o["id"]} sn-auth "{o["sn"]}" omci ont-lineprofile-name "{o["line"]}" ont-srvprofile-name "{o["srv"]}" desc "{o["desc"]}"')
+        out += ["#", "[service-port]", " <service-port>"]
+        for sp in sorted(d["sports"], key=lambda x: x["index"]):
+            out.append(f' service-port {sp["index"]} vlan {sp["vlan"]} gpon {sp["fsp"]} ont {sp["ont"]} gemport {sp["gem"]} multi-service user-vlan {sp["user_vlan"]} tag-transform translate')
+        return "\n".join(out + ["#", "return"])
 
 
 BANNER = "\r\n  Huawei Integrated Access Software (EMULADOR NexoISP - nao e equipamento real).\r\n\r\n"

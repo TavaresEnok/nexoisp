@@ -110,5 +110,14 @@
     "file": "agent-api.ts",
     "queries": [],
     "sha256": "7b4bd0d21f23fb307d6fab6a6edc6005716609b506aa38fc079c4938b1c6abc9"
+  },
+  {
+    "path": "/agent/v1/config-backup",
+    "permission": "",
+    "file": "agent-api.ts",
+    "queries": [
+      "c0f1b4c2_0.sql"
+    ],
+    "sha256": ""
   }
 ]

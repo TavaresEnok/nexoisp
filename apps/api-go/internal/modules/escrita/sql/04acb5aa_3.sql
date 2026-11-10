@@ -1,0 +1,1 @@
+update devices set config_backup = $2, config_backup_requested_at = case when $2 then config_backup_requested_at end where id = $1 returning config_backup

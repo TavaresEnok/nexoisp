@@ -21,6 +21,7 @@ import { can, hasModule } from "@/features/session/model";
 import { api } from "@/platform/erp-client";
 import { useAgents, useNetworkRefresh } from "./queries";
 import { drivers, vendors, stamp, type Device } from "./models";
+import { DeviceConfigBackups, configBackupDrivers } from "./config-backups";
 export function DeviceCreator({ onClose }: { onClose: () => void }) {
   const { me } = useSession();
   const agents = useAgents();
@@ -216,6 +217,9 @@ export function DeviceDetails({
             chegou ao equipamento.
           </p>
           {extra}
+          {configBackupDrivers.includes(device.driver) && (
+            <DeviceConfigBackups device={device} writable={writable} />
+          )}
           {writable && (
             <Button variant="outline" onClick={() => setIdentityEditing(true)}>
               Editar equipamento

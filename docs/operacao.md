@@ -215,6 +215,14 @@ Ver `docs/lab-pppoe.md` (passos 1 e 2). Resumo: `infra/site/` com `.env`, `certs
 - **Práticas de gerência no NOC (agente 0.6.5+):** a verificação periódica informa equipamento sem NTP, sem syslog remoto, com telnet/FTP/web sem TLS
   ligados (MikroTik, lidos pela API no máximo uma vez por hora), OLT sem NTP sincronizado (`display ntp-service status`) e acesso do agente por
   telnet ou SSH antigo. Aparecem como avisos informativos no NOC; o NexoISP não altera a configuração.
+- **Backup de configuração (agente 0.6.6+):** o agente guarda a configuração das OLTs e dos concentradores que ele acessa, uma vez por semana.
+  Na OLT Huawei é o `display current-configuration`, numa sessão própria que não disputa a das operações. No MikroTik é o `/export`
+  (`hide-sensitive` no RouterOS 6) **por SSH**, porque a API não exporta. Usa o mesmo usuário da credencial, a porta `ssh_port` (padrão 22) e a chave do
+  equipamento fixada em `known_hosts_file` (instale com `python -m nexo_agent.ssh_trust`). A nuvem decide quando: 7 dias depois do último
+  backup, ou no ciclo seguinte quando alguém usa "Fazer backup agora" na ficha do equipamento. Depois de uma falha, a nova tentativa vem em 6 horas.
+  Vários vencidos ao mesmo tempo são feitos um a cada 5 minutos. Ficam só as **4 cópias mais recentes** de cada equipamento, comprimidas e cifradas com a chave
+  de segredos (entram na rotação de chaves). Abrir e comparar cópias exige escrita de rede no provedor inteiro e fica na auditoria. O NOC avisa
+  quando o backup falha ou passa de 8 dias. O backup pode ser desligado por equipamento. Nada mais roda entre um backup e outro.
 - **Relógio do concentrador:** o accounting usa o horário enviado pelo NAS. 44% dos concentradores estudados estavam sem NTP; configure
   `/system ntp client set enabled=yes` (v6: `primary-ntp=`; v7: `servers=`) antes de usar a consulta de ofício.
 

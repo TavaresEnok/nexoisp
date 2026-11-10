@@ -35,7 +35,7 @@ func (s Service) networkOperations(ops map[string]operation) {
 		rule.TransformMissing = false
 		partial = append(partial, f(field.Name, rule))
 	}
-	partial = append(partial, f("maintenance", b().Opt()), f("rate_mode", e("attributes", "qos_profile").Opt()))
+	partial = append(partial, f("maintenance", b().Opt()), f("rate_mode", e("attributes", "qos_profile").Opt()), f("config_backup", b().Opt()))
 	ops["PATCH /api/devices/:id"] = operation{s.updateDevice, obj(o(partial...))}
 	ops["POST /api/devices/:id/reapply"] = operation{s.reapplyDevice, nil}
 	ops["GET /api/contracts/:id/service"] = operation{s.contractService, nil}
@@ -146,6 +146,8 @@ func (s Service) updateDevice(ctx context.Context, tx *db.Tx, id string, b map[s
 		}
 		delete(b, "rate_mode")
 	}
+	backup, setBackup := b["config_backup"]
+	delete(b, "config_backup")
 	for k, v := range b {
 		cur.Set(k, v)
 	}
@@ -163,6 +165,14 @@ func (s Service) updateDevice(ctx context.Context, tx *db.Tx, id string, b map[s
 		}
 		row.Set("rate_mode", saved.Get("rate_mode"))
 		b["rate_mode"] = mode
+	}
+	if setBackup {
+		saved, err := one(ctx, tx, key, 3, id, backup)
+		if err != nil {
+			return nil, err
+		}
+		row.Set("config_backup", saved.Get("config_backup"))
+		b["config_backup"] = backup
 	}
 	return row, record(ctx, tx, "device.update", "device", id, b)
 }

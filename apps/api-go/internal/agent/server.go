@@ -227,6 +227,9 @@ func schemaFor(key string) *validate.Rule {
 		rule = o(f("device_id", uuid), f("complete", validate.Boolean()), f("unauthorized", arr(o(f("serial", str().Pattern(`^[A-Za-z0-9]{8,20}$`, "Invalid")), f("pon_port", str().Pattern(`^[0-9]{1,3}(/[0-9]{1,3}){0,3}$`, "Invalid")), f("vendor", str().Max(40).Nullish()), f("model", str().Max(60).Nullish()))).Max(5000)), f("states", arr(observation(true, true)).Max(20000)))
 	case "/agent/v1/usage-report":
 		rule = o(f("device_id", uuid), f("items", arr(o(f("resource_id", uuid), f("month", str().Pattern(`^\d{4}-(0[1-9]|1[0-2])$`, "Invalid")), f("bytes_in", n().Int().Min(0)), f("bytes_out", n().Int().Min(0)), f("session_seconds", n().Int().Min(0)), f("sessions", n().Int().Min(0)))).Max(20000)))
+	case "/agent/v1/config-backup":
+		// agente 0.6.6+: backup semanal da configuração (texto completo em ok=true; motivo da falha em ok=false).
+		rule = o(f("device_id", uuid), f("ok", validate.Boolean()), f("content", str().Max(15<<20).Opt()), f("error", str().Max(500).Opt()), f("seconds", n().Min(0).Max(86400).Opt()))
 	case "/agent/v1/sessions-report":
 		rule = o(f("device_id", uuid), f("items", arr(o(f("resource_id", uuid), f("session_key", str().Min(1).Max(80)), f("started_at", str().Refine(agentDate, "Invalid datetime")), f("stopped_at", str().Refine(agentDate, "Invalid datetime").Nullish()), f("ip", str().Max(45).Nullish()), f("mac", str().Max(40).Nullish()), f("nas_ip", str().Max(45).Nullish()), f("bytes_in", n().Int().Min(0)), f("bytes_out", n().Int().Min(0)), f("seconds", n().Int().Min(0)), f("terminate_cause", str().Max(60).Nullish()))).Max(5000)))
 	}
@@ -283,7 +286,11 @@ func (s Service) run(ctx context.Context, tx *db.Tx, key string, a jsonx.Object,
 		if e != nil {
 			return nil, e
 		}
-		return map[string]any{"agent_id": agent, "tenant_id": tenant, "signing_public_key": pub, "devices": devices, "snapshot": map[string]any{"complete": true, "generated_at": time.Now().UTC().Format("2006-01-02T15:04:05.000Z"), "resources": resources, "onus": onus}}, nil
+		backups, e := network.ConfigBackupSchedule(ctx, tx, agent)
+		if e != nil {
+			return nil, e
+		}
+		return map[string]any{"agent_id": agent, "tenant_id": tenant, "signing_public_key": pub, "devices": devices, "config_backup": backups, "snapshot": map[string]any{"complete": true, "generated_at": time.Now().UTC().Format("2006-01-02T15:04:05.000Z"), "resources": resources, "onus": onus}}, nil
 	case "/agent/v1/poll":
 		a, e := one(ctx, tx, key, 0, agent)
 		if e != nil {
@@ -330,8 +337,14 @@ func (s Service) run(ctx context.Context, tx *db.Tx, key string, a jsonx.Object,
 			if e := tx.Exec(ctx, query(key, 0), agent, b["session_id"]); e != nil {
 				return nil, e
 			}
+			return map[string]any{"ok": true}, nil
 		}
-		return map[string]any{"ok": true}, nil
+		// agenda de backup de configuração: o agente executa quando vence (semanal ou pedido pelo painel)
+		backups, e := network.ConfigBackupSchedule(ctx, tx, agent)
+		if e != nil {
+			return nil, e
+		}
+		return map[string]any{"ok": true, "config_backup": backups}, nil
 	}
 	dev, e := one(ctx, tx, key, 0, b["device_id"], agent)
 	if e != nil {
@@ -339,6 +352,9 @@ func (s Service) run(ctx context.Context, tx *db.Tx, key string, a jsonx.Object,
 	}
 	if dev == nil {
 		return nil, apierr.New(404, "equipamento não pertence a este agente")
+	}
+	if strings.HasSuffix(key, "config-backup") {
+		return network.SaveConfigBackup(ctx, tx, tenant, b["device_id"].(string), b)
 	}
 	if strings.HasSuffix(key, "olt-report") {
 		serials := []string{}

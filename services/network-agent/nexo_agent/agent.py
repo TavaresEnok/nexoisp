@@ -9,6 +9,7 @@ from datetime import datetime, timedelta, timezone
 
 from . import __version__
 from .client import CloudClient
+from .config_backup import ConfigBackups
 from .drivers.demo import DemoDriver
 from .executor import Executor, observation, onu_observation
 from .store import Store
@@ -39,6 +40,7 @@ class Agent:
         self._olt_last: dict = {}
         self._usage_last = 0.0
         self._sess_last = 0.0
+        self.backups = ConfigBackups(client, lambda: self.drivers)
 
     def _build_driver(self, dev: dict):
         if dev["driver"] == "demo":
@@ -192,6 +194,7 @@ class Agent:
                 self.drivers[d["id"]] = self._build_driver(d)
             except Exception as e:
                 log.error("driver de %s indisponível: %s", d["name"], e)
+        self.backups.update(h.get("config_backup"))
         self.ident = {"agent_id": h["agent_id"], "tenant_id": h["tenant_id"], "public_key": h["signing_public_key"], "device_ids": set(self.devices)}
         snap = h["snapshot"]
         if snap.get("complete"):  # snapshot parcial nunca gera exclusões nem substitui o mapa local
@@ -220,7 +223,9 @@ class Agent:
             self.executor.handle(r["operation"])
         if time.time() - self._last_observe >= self.observe_s:
             full = time.time() - self._last_full >= 300
-            self.client.observations(self._observe_all(full), self._checks())
+            r = self.client.observations(self._observe_all(full), self._checks())
+            self.backups.update((r or {}).get("config_backup"))
+            self.backups.tick()
             self._olt_reports()
             self._usage_reports()
             self._session_reports()
