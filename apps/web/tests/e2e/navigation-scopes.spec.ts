@@ -27,7 +27,7 @@ test.describe("escopos previstos: navegação sem falsa implementação", () => 
           expect(response?.ok(), node.href).toBe(true);
           const main = page.locator("main");
           await expect(main.getByRole("heading", { name: node.label, exact: true })).toBeVisible();
-          await expect(main.getByText("Implementação funcional pendente", { exact: true })).toBeVisible();
+          await expect(main.getByText("Tela não reproduzida na demonstração", { exact: true })).toBeVisible();
           await expect(main.getByRole("link", { name: "Ver cobertura e evidências" })).toHaveAttribute("href", "/acompanhamento");
           await expect(main.locator("form")).toHaveCount(0);
           results.push({ href: node.href, label: node.label, status: response?.status() });
