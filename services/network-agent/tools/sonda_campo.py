@@ -121,13 +121,21 @@ def _cred(entry, known_hosts_path):
 
 
 def _run_raw(entry, cred, commands, raw_dir):
-    """Fabricante sem driver: conecta e roda os comandos de leitura, salvando a saída crua."""
-    device_type = entry.get("device_type") or _DEVICE_TYPE.get(entry["vendor"], "generic")
-    conn = cli_transport.connect(
-        device_type, entry["host"], int(entry.get("port") or cli_transport.default_port(cred)),
-        entry["username"], entry.get("password", ""), cred,
-        conn_timeout=20, auth_timeout=20, banner_timeout=20,
-    )
+    """Fabricante SEM driver: modo RECONHECIMENTO. Conecta direto pelo netmiko (telnet ou SSH) e roda só comandos de
+    leitura, salvando a saída crua para a gente estudar o formato e construir o driver depois. Sem fixar chave de host
+    (é descoberta); a trava de comando mutante continua valendo."""
+    from netmiko import ConnectHandler
+    base = entry.get("device_type") or _DEVICE_TYPE.get(entry["vendor"], "generic")
+    telnet = (entry.get("transport") or "ssh") == "telnet"
+    dtype = base + "_telnet" if telnet and not base.endswith("_telnet") else base
+    port = int(entry.get("port") or (23 if telnet else 22))
+    kw = dict(device_type=dtype, host=entry["host"], port=port, username=entry["username"],
+              password=entry.get("password", ""), fast_cli=False, conn_timeout=25, auth_timeout=25, banner_timeout=25)
+    if entry.get("enable_password"):
+        kw["secret"] = entry["enable_password"]
+    if not telnet and entry.get("ssh_profile") == "legacy":
+        kw["disabled_algorithms"] = {}  # aceita algoritmos antigos no reconhecimento
+    conn = ConnectHandler(**kw)
     captured = {}
     try:
         try:
@@ -223,7 +231,7 @@ def sondar(entry, out_dir):
     try:
         known_hosts = os.path.join(out_dir, "known_hosts")
         cred = _cred(entry, known_hosts)
-        if cred["transport"] == "ssh":
+        if cred["transport"] == "ssh" and entry["vendor"] == "huawei":
             info["host_key_fingerprint"] = _pin_host_key(entry, known_hosts)
         commands = _read_only(entry.get("commands") or _PADRAO.get(entry["vendor"], []))
         if entry["vendor"] == "huawei":
