@@ -27,7 +27,7 @@ func (s Service) networkOperations(ops map[string]operation) {
 	uuid := str().UUID()
 	ops["POST /api/agents"] = operation{s.createAgent, obj(o(f("name", str().Trimmed().Min(2).Max(80))))}
 	ops["PATCH /api/agents/:id"] = operation{s.updateAgent, obj(o(f("status", e("active", "revoked").Opt()), f("rotate_token", b().Opt()), f("reset_certificate", b().Opt())))}
-	device := []validate.Field{f("name", str().Trimmed().Min(2).Max(80)), f("driver", e("demo", "mikrotik_radius", "olt_demo", "olt_huawei", "olt_zte", "radius")), f("host", text(200).Nullish().Then(nilEmpty, true)), f("api_port", n().Int().Min(1).Max(65535).Nullish()), f("credential_ref", str().Trimmed().Pattern(`^[A-Za-z0-9_.-]{0,60}$`, "").Nullish().Then(nilEmpty, true)), f("agent_id", uuid.Nullish()), f("simultaneous_use", n().Int().Min(1).Max(10).Nullish()), f("acct_interim_seconds", n().Int().Min(60).Max(3600).Nullish())}
+	device := []validate.Field{f("name", str().Trimmed().Min(2).Max(80)), f("driver", e("demo", "mikrotik_radius", "olt_demo", "olt_huawei", "olt_zte", "olt_datacom", "radius")), f("host", text(200).Nullish().Then(nilEmpty, true)), f("api_port", n().Int().Min(1).Max(65535).Nullish()), f("credential_ref", str().Trimmed().Pattern(`^[A-Za-z0-9_.-]{0,60}$`, "").Nullish().Then(nilEmpty, true)), f("agent_id", uuid.Nullish()), f("simultaneous_use", n().Int().Min(1).Max(10).Nullish()), f("acct_interim_seconds", n().Int().Min(60).Max(3600).Nullish())}
 	ops["POST /api/devices"] = operation{s.createDevice, obj(o(device...))}
 	partial := []validate.Field{}
 	for _, field := range device {

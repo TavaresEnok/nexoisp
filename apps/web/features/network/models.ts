@@ -60,6 +60,7 @@ export const drivers: Record<string, string> = {
   olt_demo: "OLT · simulada",
   olt_huawei: "OLT Huawei SmartAX · não homologada",
   olt_zte: "OLT ZTE ZXA10 · leitura e backup",
+  olt_datacom: "OLT Datacom DmOS · identidade e backup",
   radius: "RADIUS integrado",
 };
 export function projectDevice(device: Device): InventoryNode {

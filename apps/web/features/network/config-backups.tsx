@@ -24,6 +24,7 @@ import { stamp, type Device } from "./models";
 export const configBackupDrivers = [
   "olt_huawei",
   "olt_zte",
+  "olt_datacom",
   "mikrotik_radius",
   "olt_demo",
   "demo",
