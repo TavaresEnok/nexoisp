@@ -1,0 +1,1 @@
+select nas_port, called_station, host(nas_ip) as nas_ip, started_at, stopped_at from radius_acct where username = $1 order by started_at desc nulls last, id desc limit 1

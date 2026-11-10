@@ -1666,7 +1666,8 @@
     "file": "network.ts",
     "queries": [
       "04acb5aa_0.sql",
-      "04acb5aa_1.sql"
+      "04acb5aa_1.sql",
+      "04acb5aa_2.sql"
     ],
     "sha256": "401d36ab0ec8fe2818477ff423c19b97ca78b3c4040d4bc6a4d9b161fa65f88c"
   },
@@ -1803,7 +1804,8 @@
       "e8850a32_4.sql",
       "e8850a32_5.sql",
       "e8850a32_6.sql",
-      "e8850a32_7.sql"
+      "e8850a32_7.sql",
+      "e8850a32_8.sql"
     ],
     "sha256": "993e35d969c3dcb78e8ef21d10f8644d08fd83234fcb1cc6a8839ab0dd9cc680"
   },
@@ -1819,7 +1821,8 @@
       "1de19c94_4.sql",
       "1de19c94_5.sql",
       "1de19c94_6.sql",
-      "1de19c94_7.sql"
+      "1de19c94_7.sql",
+      "1de19c94_8.sql"
     ],
     "sha256": "d15cf12aef38f2651228866f5fb49b81925052c6e04496706ab9f258edb71d55"
   },

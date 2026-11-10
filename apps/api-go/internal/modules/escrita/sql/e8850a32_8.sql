@@ -1,0 +1,1 @@
+select id, name, last_check->'hygiene' as hygiene from devices where jsonb_typeof(last_check->'hygiene') = 'array' and jsonb_array_length(last_check->'hygiene') > 0 order by name

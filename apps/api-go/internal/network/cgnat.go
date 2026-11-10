@@ -52,6 +52,60 @@ func CGNATLayout(plan jsonx.Object) string {
 	return "sequential"
 }
 
+// cgnatPublic: primeiro IP público e quantidade usada. Por padrão o bloco inteiro; public_first/public_last restringem a uma
+// faixa que não é CIDR (migração 00098). Faixa fora do bloco devolve quantidade 0 (nada é calculado).
+func cgnatPublic(plan jsonx.Object) (uint64, uint64) {
+	base, size := CIDR4(plan.Get("public_cidr"))
+	first, last := base, base+size-1
+	if v, ok := ipv4Of(plan.Get("public_first")); ok {
+		first = v
+	}
+	if v, ok := ipv4Of(plan.Get("public_last")); ok {
+		last = v
+	}
+	if first < base || last >= base+size || last < first {
+		return base, 0
+	}
+	return first, last - first + 1
+}
+func ipv4Of(v any) (uint64, bool) {
+	if v == nil || v == "" {
+		return 0, false
+	}
+	return IPv4Number(strings.SplitN(fmt.Sprint(v), "/", 2)[0])
+}
+
+// CGNATPublicRange: a faixa pública declarada é válida dentro do bloco.
+func CGNATPublicRange(plan jsonx.Object) bool { _, n := cgnatPublic(plan); return n > 0 }
+
+// CGNATCovers: o IP público pertence à faixa usada pelo plano (o bloco pode ser maior que a faixa).
+func CGNATCovers(plan jsonx.Object, ip string) bool {
+	base, size := cgnatPublic(plan)
+	address, valid := IPv4Number(ip)
+	return valid && address >= base && address-base < size
+}
+
+// CGNATNatLog: onde está o registro de NAT de um plano de equipamento externo (migração 00098), em texto para o ofício.
+func CGNATNatLog(plan jsonx.Object) string {
+	detail := strings.TrimSpace(fmt.Sprint(plan.Get("nat_log_detail")))
+	if plan.Get("nat_log_detail") == nil {
+		detail = ""
+	}
+	where := ""
+	if detail != "" {
+		where = " (" + detail + ")"
+	}
+	switch plan.Get("nat_log") {
+	case "syslog":
+		return "O registro de NAT deste CGNAT é enviado a um servidor de logs" + where + ": procure a alocação de bloco para o IP, a porta e o horário consultados."
+	case "equipment":
+		return "O registro de NAT deste CGNAT fica no próprio equipamento" + where + ": consulte-o para o IP, a porta e o horário; confira se o período ainda está guardado."
+	case "none":
+		return "O provedor declarou que este CGNAT não guarda registro de NAT: sem ele, o IP público e a porta não identificam o assinante. O Marco Civil exige guardar os registros de conexão por 1 ano."
+	}
+	return "A origem do registro de NAT deste CGNAT não foi informada no plano."
+}
+
 // CGNATTraceable: o NexoISP só calcula o titular quando conhece a regra do equipamento.
 func CGNATTraceable(plan jsonx.Object) bool { return CGNATLayout(plan) != "external" }
 
@@ -68,7 +122,7 @@ func cgnatBlocks(plan jsonx.Object) (per, start, ports float64) {
 	return math.Floor((end + 1 - start) / ports), start, ports
 }
 func CGNATCapacity(plan jsonx.Object) map[string]any {
-	_, public := CIDR4(plan.Get("public_cidr"))
+	_, public := cgnatPublic(plan)
 	_, private := CIDR4(plan.Get("private_cidr"))
 	per, _, _ := cgnatBlocks(plan)
 	max := float64(public) * per
@@ -88,7 +142,7 @@ func cgnatPlace(plan jsonx.Object, i, publicSize uint64, per float64) (uint64, f
 }
 func CGNATForward(plan jsonx.Object, ip string) map[string]any {
 	base, size := CIDR4(plan.Get("private_cidr"))
-	pubBase, pubSize := CIDR4(plan.Get("public_cidr"))
+	pubBase, pubSize := cgnatPublic(plan)
 	address, valid := IPv4Number(ip)
 	if !valid || address < base || address-base >= size {
 		return nil
@@ -107,7 +161,7 @@ func CGNATForward(plan jsonx.Object, ip string) map[string]any {
 
 // CGNATSharers: índices (no bloco privado) dos assinantes que saem pelo IP público informado.
 func CGNATSharers(plan jsonx.Object, ip string) []uint64 {
-	publicBase, publicSize := CIDR4(plan.Get("public_cidr"))
+	publicBase, publicSize := cgnatPublic(plan)
 	_, privateSize := CIDR4(plan.Get("private_cidr"))
 	address, valid := IPv4Number(ip)
 	per, _, _ := cgnatBlocks(plan)
@@ -132,7 +186,7 @@ func CGNATSharers(plan jsonx.Object, ip string) []uint64 {
 	return out
 }
 func CGNATReverse(plan jsonx.Object, ip string, port float64) map[string]any {
-	publicBase, publicSize := CIDR4(plan.Get("public_cidr"))
+	publicBase, publicSize := cgnatPublic(plan)
 	privateBase, privateSize := CIDR4(plan.Get("private_cidr"))
 	address, valid := IPv4Number(ip)
 	per, start, ports := cgnatBlocks(plan)

@@ -165,7 +165,7 @@ func (s Service) createRadius(ctx context.Context, tx *db.Tx, _ string, b map[st
 	if err = record(ctx, tx, "radius.device_create", "device", d.Get("id"), map[string]any{"vendor": b["vendor"], "connection": b["connection"], "nas_ip": nasIP}); err != nil {
 		return nil, err
 	}
-	setup, err := leitura.RadiusSetupData(b["vendor"].(string), b["coa_port"], secret, tunnel)
+	setup, err := leitura.RadiusSetupData(b["vendor"].(string), b["coa_port"], secret, tunnel, nasIP)
 	if err != nil {
 		return nil, err
 	}
@@ -222,7 +222,7 @@ func (s Service) radiusSecret(ctx context.Context, tx *db.Tx, id string, _ map[s
 	if err != nil {
 		return nil, err
 	}
-	setup, err := leitura.RadiusSetupData(current.Get("vendor").(string), current.Get("coa_port"), secret, tunnel)
+	setup, err := leitura.RadiusSetupData(current.Get("vendor").(string), current.Get("coa_port"), secret, tunnel, current.Get("nas_ip"))
 	if err != nil {
 		return nil, err
 	}
@@ -317,7 +317,7 @@ func (s Service) convertRadius(ctx context.Context, tx *db.Tx, id string, b map[
 	if err = record(ctx, tx, "radius.device_convert", "device", id, map[string]any{"vendor": b["vendor"], "connection": b["connection"], "nas_ip": nasIP, "accounts": len(resources)}); err != nil {
 		return nil, err
 	}
-	setup, err := leitura.RadiusSetupData(b["vendor"].(string), b["coa_port"], secret, tunnel)
+	setup, err := leitura.RadiusSetupData(b["vendor"].(string), b["coa_port"], secret, tunnel, nasIP)
 	if err != nil {
 		return nil, err
 	}

@@ -121,6 +121,14 @@ def parse_ont_add(output: str) -> int:
     return int(m.group(1))
 
 
+def parse_ntp_status(output: str) -> Optional[bool]:
+    """'display ntp-service status': True sincronizado, False não sincronizado, None quando a saída não é reconhecida."""
+    m = re.search(r"clock status\s*:\s*(\w+)", output or "", re.I)
+    if not m:
+        return None
+    return m.group(1).lower() == "synchronized"
+
+
 def split_port(pon_port: str) -> tuple[str, str]:
     """'0/1/3' -> ('0/1', '3')."""
     parts = pon_port.split("/")
@@ -201,8 +209,8 @@ class HuaweiOltDriver:
 
     def __init__(self, connect, gemport: int = 1, *, user_vlan: Optional[int] = None, line_profiles: Optional[dict] = None,
                  native_vlan_eth=(1,), tr069_profile_id: Optional[int] = None, allow_writes=True, expected_product=None, expected_firmware=None,
-                 transport_note: str = ""):
-        self.transport_note = transport_note
+                 transport_note: str = "", transport_hygiene=()):
+        self.transport_note, self.transport_hygiene = transport_note, tuple(transport_hygiene)
         self.tr069_profile_id = int(tr069_profile_id) if tr069_profile_id is not None else None
         self._connect, self.gemport, self.user_vlan = connect, gemport, user_vlan
         self.line_profiles = {str(k): dict(v) for k, v in (line_profiles or {}).items()}
@@ -220,12 +228,12 @@ class HuaweiOltDriver:
             raise RuntimeError(f"credencial '{dev.get('credential_ref')}' não encontrada no arquivo local do agente")
         if not dev.get("host"):
             raise RuntimeError("OLT sem endereço configurado")
-        from ..cli_transport import default_port, note
+        from ..cli_transport import default_port, hygiene, note
         host, port = dev["host"], int(dev.get("api_port") or default_port(cred))
         if cred.get("allow_writes") is True and (not cred.get("expected_product") or not cred.get("expected_firmware")):
             raise ValueError("escrita OLT exige modelo e firmware esperados explícitos na configuração local")
         return cls(lambda: NetmikoCli(host, port, cred["username"], cred["password"], cred.get("known_hosts_file", ""), options=cred), int(cred.get("gemport", 1)),
-                   transport_note=note(cred),
+                   transport_note=note(cred), transport_hygiene=hygiene(cred),
                    user_vlan=int(cred["user_vlan"]) if cred.get("user_vlan") is not None else None,
                    line_profiles=cred.get("line_profiles") or {}, native_vlan_eth=cred.get("native_vlan_eth", [1]),
                    tr069_profile_id=cred.get("tr069_profile_id"),
@@ -261,11 +269,19 @@ class HuaweiOltDriver:
     def _check(self) -> dict:
         with self._session() as s:
             out = s.run("display version")
+            try:
+                ntp = parse_ntp_status(s.run("display ntp-service status", tolerate=True))
+            except OltCommandError:
+                ntp = None
         product, firmware = _field(out, "PRODUCT"), _field(out, "VERSION")
         if not product or not firmware:
             raise OltCommandError("modelo/firmware não reconhecido; capacidade não confirmada")
-        return {"ok": True, "product": product, "firmware": firmware, "homologated": False, "detail": f"{product} {firmware}"
-                + " — driver não homologado em equipamento real" + (f"; {self.transport_note}" if self.transport_note else "")}
+        hygiene = list(self.transport_hygiene) + (["no_ntp"] if ntp is False else [])
+        result = {"ok": True, "product": product, "firmware": firmware, "homologated": False, "detail": f"{product} {firmware}"
+                  + " — driver não homologado em equipamento real" + (f"; {self.transport_note}" if self.transport_note else "")}
+        if hygiene:
+            result["hygiene"] = hygiene
+        return result
 
     def _require_write_capability(self):
         if not self.allow_writes:

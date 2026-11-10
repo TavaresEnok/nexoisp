@@ -13,7 +13,7 @@ import (
 )
 
 const Read6349e7c2 = `-- name: Read6349e7c2 :many
-select d.id, d.tenant_id, d.name, d.driver, d.host, d.api_port, d.credential_ref, d.agent_id, d.maintenance, d.last_check_at, d.last_check, d.created_at, d.simultaneous_use, d.acct_interim_seconds, d.vendor, a.name as agent_name, (a.last_seen_at is not null and a.last_seen_at > now() - interval '30 seconds') as agent_online,
+select d.id, d.tenant_id, d.name, d.driver, d.host, d.api_port, d.credential_ref, d.agent_id, d.maintenance, d.last_check_at, d.last_check, d.created_at, d.simultaneous_use, d.acct_interim_seconds, d.vendor, d.rate_mode, a.name as agent_name, (a.last_seen_at is not null and a.last_seen_at > now() - interval '30 seconds') as agent_online,
                 (select host(n.nas_ip) from radius_nas n where n.device_id = d.id) as nas_ip,
                 coalesce((select json_build_object('kind', 'wireguard', 'ip', host(p.tunnel_ip), 'handshake_at', p.last_handshake_at, 'endpoint', p.endpoint) from vpn_peers p where p.device_id = d.id),
                          (select json_build_object('kind', 'l2tp', 'ip', host(l.tunnel_ip), 'handshake_at', case when l.connected then now() else l.last_seen_at end, 'endpoint', null) from l2tp_peers l where l.device_id = d.id)) as tunnel,
@@ -38,6 +38,7 @@ type Read6349e7c2Row struct {
 	SimultaneousUse    pgtype.Int4        `json:"simultaneous_use"`
 	AcctInterimSeconds pgtype.Int4        `json:"acct_interim_seconds"`
 	Vendor             pgtype.Text        `json:"vendor"`
+	RateMode           string             `json:"rate_mode"`
 	AgentName          pgtype.Text        `json:"agent_name"`
 	AgentOnline        pgtype.Bool        `json:"agent_online"`
 	NasIp              string             `json:"nas_ip"`
@@ -71,6 +72,7 @@ func (q *Queries) Read6349e7c2(ctx context.Context) ([]Read6349e7c2Row, error) {
 			&i.SimultaneousUse,
 			&i.AcctInterimSeconds,
 			&i.Vendor,
+			&i.RateMode,
 			&i.AgentName,
 			&i.AgentOnline,
 			&i.NasIp,

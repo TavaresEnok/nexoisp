@@ -82,7 +82,7 @@ func (s Service) radiusSetup(ctx context.Context, tx *db.Tx, _ *http.Request, v 
 	if err != nil {
 		return endpoint.Result{}, err
 	}
-	setup, err := RadiusSetupData(fmt.Sprint(nas.Get("vendor")), nas.Get("coa_port"), "<SEGREDO>", tunnel)
+	setup, err := RadiusSetupData(fmt.Sprint(nas.Get("vendor")), nas.Get("coa_port"), "<SEGREDO>", tunnel, nas.Get("nas_ip"))
 	if err != nil {
 		return endpoint.Result{}, err
 	}
@@ -112,7 +112,14 @@ func RadiusTunnel(ctx context.Context, tx *db.Tx, id any) (map[string]any, error
 	}
 	return tunnel, nil
 }
-func RadiusSetupData(vendor string, coaPort any, secret string, tunnel map[string]any) (map[string]any, error) {
+
+// nasIP (opcional): IP cadastrado do concentrador. Em modo direto vira src-address, para o NAS com vários IPs falar
+// com o RADIUS pelo endereço que o NexoISP reconhece (57% dos MikroTik estudados já definem src-address).
+func RadiusSetupData(vendor string, coaPort any, secret string, tunnel map[string]any, nasIP ...any) (map[string]any, error) {
+	source := ""
+	if len(nasIP) > 0 && nasIP[0] != nil {
+		source = strings.SplitN(fmt.Sprint(nasIP[0]), "/", 2)[0]
+	}
 	host := radiusHost()
 	port := envNullishNumber("NEXO_RADIUS_PORT", 1812)
 	connection := "direct"
@@ -141,7 +148,7 @@ func RadiusSetupData(vendor string, coaPort any, secret string, tunnel map[strin
 		secondary = map[string]any{"host": secondaryHost, "authPort": wireNumber(secondaryPort), "acctPort": wireNumber(secondaryPort + 1)}
 		commandSecondary = map[string]any{"host": secondaryHost, "authPort": jsCommandNumber(secondaryPort), "acctPort": jsCommandNumber(secondaryPort + 1)}
 	}
-	commands, err := renderRadiusCommands(vendor, map[string]any{"host": host, "authPort": jsCommandNumber(port), "acctPort": jsCommandNumber(port + 1), "coaPort": coaPort, "secret": secret, "tunnel": tunnel, "secondary": commandSecondary})
+	commands, err := renderRadiusCommands(vendor, map[string]any{"host": host, "authPort": jsCommandNumber(port), "acctPort": jsCommandNumber(port + 1), "coaPort": coaPort, "secret": secret, "tunnel": tunnel, "secondary": commandSecondary, "nasIp": source})
 	if err != nil {
 		return nil, err
 	}

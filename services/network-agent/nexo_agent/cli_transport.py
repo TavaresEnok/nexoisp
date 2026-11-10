@@ -53,6 +53,14 @@ def note(cred: dict) -> str:
     return ""
 
 
+def hygiene(cred: dict) -> list[str]:
+    """Códigos de prática de gerência ligados ao acesso, informados ao NOC."""
+    s = settings(cred)
+    if s["transport"] == "telnet":
+        return ["telnet_transport"]
+    return ["legacy_ssh"] if s["ssh_profile"] == "legacy" else []
+
+
 def connect(device_type: str, host: str, port: int, username: str, password: str, cred: dict, **timeouts):
     """Abre a sessão netmiko conforme a credencial. A chave fixada vale para os dois perfis SSH."""
     from netmiko import ConnectHandler

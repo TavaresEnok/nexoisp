@@ -13,6 +13,7 @@ import (
 	"nexoisp/api-go/internal/csvx"
 	"nexoisp/api-go/internal/endpoint"
 	"nexoisp/api-go/internal/jsonx"
+	"nexoisp/api-go/internal/network"
 	"nexoisp/api-go/internal/validate"
 )
 
@@ -23,14 +24,14 @@ const radiusHistorySQL = `select id::text as id,nas_device_id,host(nas_ip) as na
  case when stopped_at is null then 'open' else 'closed' end as state,
  session_seconds::text as session_seconds,bytes_in::text as bytes_in,bytes_out::text as bytes_out,
  framed_ip,host(framed_ipv6_address) as ipv6_address,framed_ipv6_prefix::text as ipv6_prefix,
- delegated_ipv6_prefix::text as delegated_ipv6_prefix,terminate_cause
+ delegated_ipv6_prefix::text as delegated_ipv6_prefix,terminate_cause,nas_port,called_station
  from radius_acct where id<$1
  and ($2='' or (stopped_at is null)=($2='open'))
  and ($3='' or username=$3)
  and ($4::uuid is null or nas_device_id=$4::uuid)
  order by radius_acct.id desc limit 101`
 
-const radiusHistoryColumns = "id;nas_device_id;nas_ip;username;session_id;started_at;updated_at;stopped_at;seen_at;state;session_seconds;bytes_in;bytes_out;framed_ip;ipv6_address;ipv6_prefix;delegated_ipv6_prefix;terminate_cause"
+const radiusHistoryColumns = "id;nas_device_id;nas_ip;username;session_id;started_at;updated_at;stopped_at;seen_at;state;session_seconds;bytes_in;bytes_out;framed_ip;ipv6_address;ipv6_prefix;delegated_ipv6_prefix;terminate_cause;nas_port;called_station;port_interface;port_vlan;port_inner_vlan"
 
 type historyFilter struct {
 	Before                       int64
@@ -108,6 +109,14 @@ func registerRadiusHistory(api huma.API, r *endpoint.Registry, s Service) {
 		if e != nil {
 			return endpoint.Result{}, e
 		}
+		for i, row := range rows {
+			// VLAN e interface interpretadas do NAS-Port-Id (o texto original segue em nas_port).
+			raw, _ := row.Get("nas_port").(string)
+			port := network.ParseNasPort(raw)
+			rows[i].Set("port_interface", nullable(port.Interface))
+			rows[i].Set("port_vlan", nullableInt(port.VLAN))
+			rows[i].Set("port_inner_vlan", nullableInt(port.InnerVLAN))
+		}
 		var next any
 		if len(rows) > 100 {
 			rows = rows[:100]
@@ -122,4 +131,17 @@ func registerRadiusHistory(api huma.API, r *endpoint.Registry, s Service) {
 		}
 		return endpoint.Result{Value: map[string]any{"items": rows, "next_before": next, "limit": 100, "source": "radius_acct", "live_connection_proof": false}, CacheControl: "no-store"}, nil
 	})
+}
+
+func nullable(v string) any {
+	if v == "" {
+		return nil
+	}
+	return v
+}
+func nullableInt(v int) any {
+	if v == 0 {
+		return nil
+	}
+	return v
 }

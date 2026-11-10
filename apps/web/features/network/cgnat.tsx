@@ -46,6 +46,10 @@ const planSchema = z.object({
   port_start: n,
   port_end: n.nullable().optional(),
   layout: z.enum(["sequential", "netmap", "external"]).default("sequential"),
+  nat_log: z.enum(["syslog", "equipment", "none"]).nullable().optional(),
+  nat_log_detail: z.string().nullable().optional(),
+  public_first: z.string().nullable().optional(),
+  public_last: z.string().nullable().optional(),
   created_at: z.string(),
   created_by_name: z.string().nullable(),
   retired_at: z.string().nullable(),
@@ -57,6 +61,13 @@ const layoutLabels: Record<Plan["layout"], string> = {
   netmap: "Netmap MikroTik (blocos contíguos)",
   external: "Equipamento externo (Hillstone, A10…)",
 };
+const natLogLabels: Record<NonNullable<Plan["nat_log"]>, string> = {
+  syslog: "Enviado a um servidor de logs",
+  equipment: "Guardado no próprio equipamento",
+  none: "Não há registro de NAT",
+};
+const host = (value: string | null | undefined) =>
+  value ? value.replace(/\/32$/, "") : "";
 const blockSchema = z.object({
   private_ip: z.string(),
   public_ip: z.string(),
@@ -115,14 +126,36 @@ export function CgnatDirectory() {
             id: plan.id,
             cells: [
               plan.name,
-              `${plan.private_cidr} → ${plan.public_cidr}`,
+              <>
+                {`${plan.private_cidr} → ${plan.public_cidr}`}
+                {(plan.public_first || plan.public_last) && (
+                  <small className="table-subline">
+                    {`Faixa ${host(plan.public_first) || "início do bloco"} a ${host(plan.public_last) || "fim do bloco"}`}
+                  </small>
+                )}
+              </>,
               <>
                 {plan.ports_per_subscriber}
                 <small className="table-subline">
                   {layoutLabels[plan.layout]}
                 </small>
               </>,
-              plan.layout === "external" ? "Sem cálculo" : plan.capacity.ratio,
+              plan.layout === "external" ? (
+                <>
+                  Sem cálculo
+                  <small className="table-subline">
+                    {plan.nat_log
+                      ? `Registro de NAT: ${natLogLabels[plan.nat_log].toLowerCase()}`
+                      : "Registro de NAT não informado"}
+                  </small>
+                  {(!plan.nat_log || plan.nat_log === "none") &&
+                    !plan.retired_at && (
+                      <Badge variant="destructive">Ofícios sem resposta</Badge>
+                    )}
+                </>
+              ) : (
+                plan.capacity.ratio
+              ),
               <>
                 {stamp(plan.created_at)}
                 <small className="table-subline">
@@ -221,6 +254,10 @@ function PlanEditor({
     port_start: "1024",
     port_end: "",
     layout: "sequential",
+    nat_log: "",
+    nat_log_detail: "",
+    public_first: "",
+    public_last: "",
   });
   const [capacity, setCapacity] = useState<z.infer<
     typeof capacitySchema
@@ -230,6 +267,13 @@ function PlanEditor({
     ports_per_subscriber: Number(values.ports_per_subscriber),
     port_start: Number(values.port_start),
     port_end: values.port_end ? Number(values.port_end) : null,
+    nat_log:
+      values.layout === "external" && values.nat_log ? values.nat_log : null,
+    nat_log_detail:
+      values.layout === "external" ? values.nat_log_detail || null : null,
+    public_first:
+      values.layout !== "netmap" ? values.public_first || null : null,
+    public_last: values.layout !== "netmap" ? values.public_last || null : null,
   });
   const set = (key: keyof typeof values, value: string) => {
     setValues((previous) => ({ ...previous, [key]: value }));
@@ -318,6 +362,65 @@ function PlanEditor({
               aleatória de portas, o titular vem do registro de NAT do próprio
               equipamento e o NexoISP não faz o cálculo.
             </p>
+            {values.layout === "external" && (
+              <div className="erp-columns">
+                <FormField label="Onde fica o registro de NAT">
+                  <select
+                    className="commercial-select"
+                    required
+                    value={values.nat_log}
+                    onChange={(event) => set("nat_log", event.target.value)}
+                  >
+                    <option value="">Selecione</option>
+                    {Object.entries(natLogLabels).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </FormField>
+                <FormField label="Servidor ou observação (opcional)">
+                  <Input
+                    maxLength={200}
+                    placeholder="Ex.: syslog do NOC, guarda de 12 meses"
+                    value={values.nat_log_detail}
+                    onChange={(event) =>
+                      set("nat_log_detail", event.target.value)
+                    }
+                  />
+                </FormField>
+              </div>
+            )}
+            {values.layout === "external" && values.nat_log === "none" && (
+              <p className="profile-footnote">
+                Sem registro de NAT, um IP público com porta não leva a nenhum
+                assinante e ofícios sobre esse CGNAT não podem ser respondidos.
+                O Marco Civil exige guardar os registros de conexão por 1 ano:
+                ligue o log de alocação de blocos no equipamento (no Hillstone,
+                log na regra de NAT e envio ao syslog; no A10, arquivo de
+                mapeamento de portas ou syslog).
+              </p>
+            )}
+            {values.layout !== "netmap" && (
+              <div className="erp-columns">
+                <FormField label="Primeiro IP público usado (opcional)">
+                  <Input
+                    placeholder="Início do bloco"
+                    value={values.public_first}
+                    onChange={(event) =>
+                      set("public_first", event.target.value)
+                    }
+                  />
+                </FormField>
+                <FormField label="Último IP público usado (opcional)">
+                  <Input
+                    placeholder="Fim do bloco"
+                    value={values.public_last}
+                    onChange={(event) => set("public_last", event.target.value)}
+                  />
+                </FormField>
+              </div>
+            )}
             <div className="erp-columns">
               <FormField label="Portas por assinante">
                 <Input
@@ -356,7 +459,8 @@ function PlanEditor({
               disabled={
                 !values.name ||
                 !values.private_pool_id ||
-                !values.public_pool_id
+                !values.public_pool_id ||
+                (values.layout === "external" && !values.nat_log)
               }
               onClick={async () => {
                 setCapacity(null);

@@ -35,7 +35,7 @@ func (s Service) networkOperations(ops map[string]operation) {
 		rule.TransformMissing = false
 		partial = append(partial, f(field.Name, rule))
 	}
-	partial = append(partial, f("maintenance", b().Opt()))
+	partial = append(partial, f("maintenance", b().Opt()), f("rate_mode", e("attributes", "qos_profile").Opt()))
 	ops["PATCH /api/devices/:id"] = operation{s.updateDevice, obj(o(partial...))}
 	ops["POST /api/devices/:id/reapply"] = operation{s.reapplyDevice, nil}
 	ops["GET /api/contracts/:id/service"] = operation{s.contractService, nil}
@@ -139,6 +139,13 @@ func (s Service) updateDevice(ctx context.Context, tx *db.Tx, id string, b map[s
 	if cur.Get("driver") == "radius" && has(b, "agent_id") && b["agent_id"] != cur.Get("agent_id") {
 		return nil, apierr.New(400, "o RADIUS integrado não usa agente local")
 	}
+	mode, setMode := b["rate_mode"]
+	if setMode {
+		if mode == "qos_profile" && cur.Get("vendor") != "huawei" {
+			return nil, apierr.New(400, "perfil de QoS por plano só se aplica a concentrador Huawei")
+		}
+		delete(b, "rate_mode")
+	}
 	for k, v := range b {
 		cur.Set(k, v)
 	}
@@ -148,6 +155,14 @@ func (s Service) updateDevice(ctx context.Context, tx *db.Tx, id string, b map[s
 	row, err := one(ctx, tx, key, 1, id, cur.Get("name"), cur.Get("driver"), cur.Get("host"), cur.Get("api_port"), cur.Get("credential_ref"), cur.Get("agent_id"), cur.Get("maintenance"), cur.Get("simultaneous_use"), cur.Get("acct_interim_seconds"))
 	if err != nil {
 		return nil, err
+	}
+	if setMode {
+		saved, err := one(ctx, tx, key, 2, id, mode)
+		if err != nil {
+			return nil, err
+		}
+		row.Set("rate_mode", saved.Get("rate_mode"))
+		b["rate_mode"] = mode
 	}
 	return row, record(ctx, tx, "device.update", "device", id, b)
 }

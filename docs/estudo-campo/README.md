@@ -50,6 +50,10 @@ Grupo A feito, exceto a descrição legível e a adoção de ONUs existentes, qu
 
 Grupos B e C feitos em seguida (suspensão por lista e por pool, api-ssl com certificado fixado, modelo de bloqueio, interim padrão, velocidade em giga, EPON por MAC, TR-069 por OLT, VLAN sugerida, alerta de relógio). Telnet e SSH antigo nas OLTs feitos no agente 0.6.4 (opt-in por OLT). Ficaram para quando houver equipamento: adoção de ONUs existentes, drivers de outros fabricantes, catálogo de perfis lido da OLT e CoA; e, por tamanho, a etapa de aviso na navegação. Detalhes em `docs/DECISOES.md`.
 
+Depois (10/11/2026, segunda rodada): registro de NAT e faixa pública não-CIDR no CGNAT, VLAN e interface da sessão pelo NAS-Port-Id,
+qos-profile por plano no Huawei, `src-address` no modelo RADIUS direto, práticas de gerência no NOC, teste de reuso de ONT-ID e gerador de OLTs
+fictícias para o emulador.
+
 ## Prioridades propostas
 
 **A. Corrigir o que daria resultado errado**

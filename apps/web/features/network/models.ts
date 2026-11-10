@@ -28,6 +28,7 @@ export const deviceSchema = z.object({
   maintenance: z.boolean(),
   simultaneous_use: z.number().nullable(),
   acct_interim_seconds: z.number().nullable(),
+  rate_mode: z.enum(["attributes", "qos_profile"]).optional(),
   last_check: z
     .object({ ok: z.boolean(), detail: z.string().optional() })
     .nullable(),

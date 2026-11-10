@@ -12,6 +12,7 @@ import (
 	"nexoisp/api-go/internal/jsonx"
 	"nexoisp/api-go/internal/network"
 	"nexoisp/api-go/internal/validate"
+	"strings"
 	"time"
 )
 
@@ -238,9 +239,14 @@ func (s Service) cgnatTrace(ctx context.Context, tx *db.Tx, _ string, _ map[stri
 		return nil, err
 	}
 	external := []string{}
+	logs := []string{}
 	for _, plan := range plans {
+		if !network.CGNATCovers(plan, ip) {
+			continue
+		}
 		if !network.CGNATTraceable(plan) {
 			external = append(external, fmt.Sprint(plan.Get("name")))
+			logs = append(logs, network.CGNATNatLog(plan))
 			continue
 		}
 		block := network.CGNATReverse(plan, ip, float64(port))
@@ -273,7 +279,7 @@ func (s Service) cgnatTrace(ctx context.Context, tx *db.Tx, _ string, _ map[stri
 	}
 	note := "Nenhum plano de CGNAT do provedor cobria esse IP público na data informada."
 	if len(external) > 0 {
-		note = "Plano de CGNAT de equipamento externo (" + fmt.Sprint(external) + "): o titular só pode ser apontado pelo registro de NAT do próprio equipamento."
+		note = "Plano de CGNAT de equipamento externo (" + strings.Join(external, ", ") + "): o titular só pode ser apontado pelo registro de NAT do próprio equipamento. " + strings.Join(logs, " ")
 	} else if len(plans) > 0 {
 		note = "A porta não pertence a nenhum bloco do plano vigente na data."
 	}
@@ -336,8 +342,12 @@ func (s Service) legalIP(ctx context.Context, tx *db.Tx, _ string, b map[string]
 		}
 		if len(plans) > 0 {
 			for _, plan := range plans {
+				if !network.CGNATCovers(plan, ip) {
+					notes = append(notes, fmt.Sprintf("O IP está no bloco do plano de CGNAT \"%v\", mas fora da faixa de IPs públicos que o plano usa.", plan.Get("name")))
+					continue
+				}
 				if !network.CGNATTraceable(plan) {
-					notes = append(notes, fmt.Sprintf("O plano de CGNAT \"%v\" é de equipamento externo (alocação dinâmica ou aleatória de portas): o NexoISP não calcula o titular. Consulte o registro de NAT (log de alocação de blocos) do equipamento de CGNAT para este IP, porta e horário; nenhum assinante é indicado por cálculo.", plan.Get("name")))
+					notes = append(notes, fmt.Sprintf("O plano de CGNAT \"%v\" é de equipamento externo (alocação dinâmica ou aleatória de portas): o NexoISP não calcula o titular. Consulte o registro de NAT (log de alocação de blocos) do equipamento de CGNAT para este IP, porta e horário; nenhum assinante é indicado por cálculo. %s", plan.Get("name"), network.CGNATNatLog(plan)))
 					continue
 				}
 				notes = append(notes, fmt.Sprintf("Cálculo pelo layout \"%v\" declarado no plano \"%v\": só vale se o equipamento aplica exatamente essas regras (sequencial = script gerado pelo NexoISP; netmap = regras netmap com blocos privados contíguos). Confirme a configuração do CGNAT na data consultada.", network.CGNATLayout(plan), plan.Get("name")))

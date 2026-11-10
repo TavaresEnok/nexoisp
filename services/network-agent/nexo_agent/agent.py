@@ -16,6 +16,10 @@ from .store import Store
 log = logging.getLogger("nexo.agent")
 
 
+
+# Práticas de gerência ausentes no equipamento, informadas ao NOC (lista fechada; a nuvem recusa outros códigos).
+HYGIENE_CODES = ("no_ntp", "no_syslog", "telnet_enabled", "ftp_enabled", "www_enabled", "telnet_transport", "legacy_ssh")
+
 class Agent:
     def __init__(self, client, store: Store, data_dir: str, credentials: dict | None = None, poll_s: float = 2.0, observe_s: float = 15.0):
         self.client, self.store, self.data_dir = client, store, data_dir
@@ -57,7 +61,10 @@ class Agent:
                 r = drv.check()
             except Exception as e:
                 r = {"ok": False, "detail": str(e)[:300]}
-            out.append({"device_id": dev_id, "ok": bool(r.get("ok")), "detail": str(r.get("detail", ""))[:500], "at": datetime.now(timezone.utc).isoformat()})
+            item = {"device_id": dev_id, "ok": bool(r.get("ok")), "detail": str(r.get("detail", ""))[:500], "at": datetime.now(timezone.utc).isoformat()}
+            if r.get("hygiene"):
+                item["hygiene"] = [c for c in r["hygiene"] if c in HYGIENE_CODES][:10]
+            out.append(item)
         return out
 
     def _observe_all(self, full: bool = True) -> list:

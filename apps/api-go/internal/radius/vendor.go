@@ -74,6 +74,9 @@ func attributes(vendor string, p jsonx.Object, down, up any) ([]Attribute, []Att
 	case "huawei":
 		if blocked {
 			set("Huawei-Qos-Profile-Name", profile)
+		} else if p.Get("rate_mode") == "qos_profile" && jsonx.Truthy(p.Get("profile")) {
+			// Concentrador com qos-profile por plano (cir/pir no BNG): o nome do perfil do plano define a velocidade.
+			set("Huawei-Qos-Profile-Name", profile)
 		} else {
 			set("Huawei-Input-Average-Rate", number(up)*1000)
 			set("Huawei-Output-Average-Rate", number(down)*1000)

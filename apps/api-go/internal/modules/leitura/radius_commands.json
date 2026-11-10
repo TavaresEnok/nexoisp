@@ -16,14 +16,14 @@
         },
         {
           "lines": [
-            "/radius add service=ppp,hotspot,dhcp address={{.o.host}} secret=\"{{.o.secret}}\" authentication-port={{.o.authPort}} accounting-port={{.o.acctPort}} timeout=3s{{if .tn}} src-address={{.tn.tunnelIp}}{{else}}{{end}} comment=nexoisp"
+            "/radius add service=ppp,hotspot,dhcp address={{.o.host}} secret=\"{{.o.secret}}\" authentication-port={{.o.authPort}} accounting-port={{.o.acctPort}} timeout=3s{{if .tn}} src-address={{.tn.tunnelIp}}{{else if .o.nasIp}} src-address={{.o.nasIp}}{{end}} comment=nexoisp"
           ]
         },
         {
           "condition": "o.secondary",
           "lines": [
             "# servidor secundário: o equipamento tenta este se o primeiro não responder",
-            "/radius add service=ppp,hotspot,dhcp address={{.o.secondary.host}} secret=\"{{.o.secret}}\" authentication-port={{.o.secondary.authPort}} accounting-port={{.o.secondary.acctPort}} timeout=3s{{if .tn}} src-address={{.tn.tunnelIp}}{{else}}{{end}} comment=nexoisp-2"
+            "/radius add service=ppp,hotspot,dhcp address={{.o.secondary.host}} secret=\"{{.o.secret}}\" authentication-port={{.o.secondary.authPort}} accounting-port={{.o.secondary.acctPort}} timeout=3s{{if .tn}} src-address={{.tn.tunnelIp}}{{else if .o.nasIp}} src-address={{.o.nasIp}}{{end}} comment=nexoisp-2"
           ]
         },
         {

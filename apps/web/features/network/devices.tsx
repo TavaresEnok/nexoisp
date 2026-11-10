@@ -298,6 +298,7 @@ export function DeviceParameters({
           device.acct_interim_seconds == null
             ? ""
             : String(device.acct_interim_seconds),
+        rate_mode: device.rate_mode ?? "attributes",
       }}
       fields={[
         {
@@ -315,6 +316,27 @@ export function DeviceParameters({
           min: 60,
           max: 3600,
         },
+        ...(device.vendor === "huawei"
+          ? [
+              {
+                key: "rate_mode",
+                label: "Velocidade do plano",
+                type: "select" as const,
+                options: [
+                  {
+                    value: "attributes",
+                    label: "Taxa enviada pelo RADIUS",
+                  },
+                  {
+                    value: "qos_profile",
+                    label:
+                      "qos-profile do concentrador com o nome do perfil do plano",
+                  },
+                ],
+                hint: "Use qos-profile quando o BNG já tem um perfil (cir/pir) por plano. O nome precisa ser igual ao perfil do plano no NexoISP.",
+              },
+            ]
+          : []),
       ]}
       onClose={onClose}
       onSubmit={async (values) => {
@@ -329,6 +351,9 @@ export function DeviceParameters({
               values.acct_interim_seconds === ""
                 ? null
                 : Number(values.acct_interim_seconds),
+            ...(device.vendor === "huawei"
+              ? { rate_mode: values.rate_mode }
+              : {}),
           },
         });
         await refresh();

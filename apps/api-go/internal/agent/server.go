@@ -204,7 +204,9 @@ func agentDate(v any) bool { _, e := time.Parse(time.RFC3339Nano, v.(string)); r
 func schemaFor(key string) *validate.Rule {
 	f, o, str, n, arr := validate.F, validate.Object, validate.String, validate.Number, validate.Array
 	uuid := str().UUID()
-	checks := arr(o(f("device_id", uuid), f("ok", validate.Boolean()), f("detail", str().Max(500).Opt()), f("at", str()))).Opt()
+	// hygiene (agente 0.6.5+): práticas de gerência ausentes no equipamento, por código (lista fechada; o texto fica na nuvem).
+	hygiene := arr(validate.Enum("no_ntp", "no_syslog", "telnet_enabled", "ftp_enabled", "www_enabled", "telnet_transport", "legacy_ssh")).Max(10).Opt()
+	checks := arr(o(f("device_id", uuid), f("ok", validate.Boolean()), f("detail", str().Max(500).Opt()), f("at", str()), f("hygiene", hygiene))).Opt()
 	var rule validate.Rule
 	switch key {
 	case "/agent/v1/hello":
@@ -234,7 +236,11 @@ func checks(ctx context.Context, tx *db.Tx, a jsonx.Object, b map[string]any) er
 	if values, ok := b["device_checks"].([]any); ok {
 		for _, v := range values {
 			k := v.(map[string]any)
-			encoded, e := jsonx.Encode(map[string]any{"ok": k["ok"], "detail": k["detail"]})
+			check := map[string]any{"ok": k["ok"], "detail": k["detail"]}
+			if k["hygiene"] != nil {
+				check["hygiene"] = k["hygiene"]
+			}
+			encoded, e := jsonx.Encode(check)
 			if e != nil {
 				return e
 			}

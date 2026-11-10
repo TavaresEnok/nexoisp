@@ -79,3 +79,23 @@ func TestSuspensaoPorListaEPool(t *testing.T) {
 		}
 	}
 }
+
+// Concentrador Huawei com qos-profile por plano: manda o nome do perfil, não a taxa.
+func TestHuaweiQosProfilePorPlano(t *testing.T) {
+	p := jsonx.Object{{Name: "profile", Value: "PLANO-300M"}, {Name: "policy", Value: "active"}, {Name: "rate_mode", Value: "qos_profile"}}
+	_, reply, _, _ := attributes("huawei", p, 300000, 150000)
+	if v, ok := replyValue(reply, "Huawei-Qos-Profile-Name"); !ok || v != "PLANO-300M" {
+		t.Fatalf("perfil de QoS ausente: %+v", reply)
+	}
+	if _, ok := replyValue(reply, "Huawei-Input-Average-Rate"); ok {
+		t.Fatalf("taxa não deveria ir junto do perfil: %+v", reply)
+	}
+	plain := jsonx.Object{{Name: "profile", Value: "PLANO-300M"}, {Name: "policy", Value: "active"}}
+	_, reply, _, _ = attributes("huawei", plain, 300000, 150000)
+	if v, _ := replyValue(reply, "Huawei-Output-Average-Rate"); v != "300000000" {
+		t.Fatalf("modo padrão continua por taxa: %+v", reply)
+	}
+	if _, ok := replyValue(reply, "Huawei-Qos-Profile-Name"); ok {
+		t.Fatalf("modo padrão não manda perfil: %+v", reply)
+	}
+}

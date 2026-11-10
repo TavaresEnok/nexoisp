@@ -10,6 +10,7 @@ import (
 	"nexoisp/api-go/internal/validate"
 	"slices"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -145,6 +146,28 @@ func (s Service) nocOverview(ctx context.Context, tx *db.Tx, _ string, _ map[str
 	}
 	if num(n.Get("stale")) > 0 {
 		add("info", "stale", fmt.Sprintf("%v ONU(s) sem leitura há mais de 10 min com o agente online", n.Get("stale")), "", nil, nil)
+	}
+	hygiene, err := rows(ctx, tx, key, 8)
+	if err != nil {
+		return nil, err
+	}
+	byCode := map[string][]string{}
+	for _, d := range hygiene {
+		codes, _ := d.Get("hygiene").([]any)
+		for _, c := range codes {
+			byCode[fmt.Sprint(c)] = append(byCode[fmt.Sprint(c)], fmt.Sprint(d.Get("name")))
+		}
+	}
+	for _, h := range hygieneChecks {
+		names := byCode[h.code]
+		if len(names) == 0 {
+			continue
+		}
+		listed := strings.Join(names[:min(len(names), 10)], ", ")
+		if len(names) > 10 {
+			listed += fmt.Sprintf(" e mais %d", len(names)-10)
+		}
+		add("info", "hygiene_"+h.code, fmt.Sprintf("%d equipamento(s) %s", len(names), h.title), "/rede", h.detail+" Equipamentos: "+listed+".", nil)
 	}
 	for _, d := range maintenance {
 		add("info", "maintenance", fmt.Sprintf("%v em modo manutenção", d.Get("name")), "/rede", "O ERP não envia escritas a este equipamento.", nil)
@@ -295,6 +318,34 @@ func (s Service) diagnosis(ctx context.Context, tx *db.Tx, id string, _ map[stri
 			}
 		}
 	}
+	if r != nil && jsonx.Truthy(r.Get("pppoe_username")) {
+		// Porta lógica da última sessão no accounting: interface, VLAN e service-name vistos pelo concentrador.
+		ses, err := one(ctx, tx, key, 8, r.Get("pppoe_username"))
+		if err != nil {
+			return nil, err
+		}
+		if ses != nil && (jsonx.Truthy(ses.Get("nas_port")) || jsonx.Truthy(ses.Get("called_station"))) {
+			port := network.ParseNasPort(nilString(ses.Get("nas_port")))
+			evs := []map[string]any{}
+			if port.Interface != "" {
+				evs = append(evs, ev("Interface", port.Interface, ses.Get("started_at")))
+			}
+			if port.VLAN > 0 {
+				vlan := fmt.Sprint(port.VLAN)
+				if port.InnerVLAN > 0 {
+					vlan += fmt.Sprintf(" (cliente %d)", port.InnerVLAN)
+				}
+				evs = append(evs, map[string]any{"label": "VLAN", "value": vlan})
+			}
+			if jsonx.Truthy(ses.Get("called_station")) {
+				evs = append(evs, map[string]any{"label": "Serviço PPPoE / Called-Station", "value": jsonx.String(ses.Get("called_station"))})
+			}
+			if port.Raw != "" {
+				evs = append(evs, map[string]any{"label": "NAS-Port-Id recebido", "value": port.Raw})
+			}
+			add("info", "session_port", "Porta lógica da última sessão", evs, "")
+		}
+	}
 	if onu != nil && onu.Get("desired_state") == "authorized" {
 		evidence := []map[string]any{ev("ONU", fmt.Sprintf("%v · %v · PON %v", onu.Get("serial"), onu.Get("device_name"), onu.Get("pon_port")), onu.Get("observed_at"))}
 		if drop != nil {
@@ -360,4 +411,23 @@ func nocTime(v any) string {
 		return t.UTC().Format("2006-01-02T15:04:05.000Z")
 	}
 	return fmt.Sprint(v)
+}
+
+func nilString(v any) string {
+	if v == nil {
+		return ""
+	}
+	return jsonx.String(v)
+}
+
+// Práticas de gerência informadas pelo agente na verificação do equipamento (estudo de campo: NTP em só 15% das OLTs,
+// telnet ligado em 30%, syslog em 56%). Só leitura: o NexoISP aponta, não altera a configuração.
+var hygieneChecks = []struct{ code, title, detail string }{
+	{"no_ntp", "sem NTP", "Sem relógio sincronizado, os horários do equipamento (accounting, quedas, descoberta de ONU) não servem como evidência."},
+	{"no_syslog", "sem syslog remoto", "Os registros do equipamento ficam só nele e se perdem em reinício ou troca."},
+	{"telnet_enabled", "com telnet ligado", "O telnet envia login e senha em claro. Desligue-o ou restrinja-o à rede de gerência."},
+	{"ftp_enabled", "com FTP ligado", "O FTP envia login e senha em claro. Desligue-o se não for usado."},
+	{"www_enabled", "com a interface web sem TLS ligada", "A interface web sem TLS envia a senha em claro."},
+	{"telnet_transport", "acessados pelo NexoISP por telnet", "A credencial do agente usa telnet: login e senha trafegam em claro na rede de gerência."},
+	{"legacy_ssh", "acessados por SSH com algoritmos antigos", "O equipamento só negocia SHA-1/CBC. Atualize o firmware quando possível."},
 }

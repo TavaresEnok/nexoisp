@@ -84,3 +84,44 @@ func TestCGNATExternoNaoCalcula(t *testing.T) {
 		t.Fatal("plano externo não pode indicar assinante")
 	}
 }
+
+// Pool público que não é CIDR (224 IPs dentro de um /24): só a faixa declarada entra no cálculo.
+func TestCGNATFaixaPublica(t *testing.T) {
+	plan := cgnatPlan(map[string]any{"public_cidr": "198.51.100.0/24", "private_cidr": "100.64.0.0/20", "ports_per_subscriber": float64(4000), "port_start": float64(1024),
+		"public_first": "198.51.100.16/32", "public_last": "198.51.100.239"})
+	c := CGNATCapacity(plan)
+	if c["public_ips"] != uint64(224) {
+		t.Fatalf("capacidade deveria usar 224 IPs: %v", c)
+	}
+	f := CGNATForward(plan, "100.64.0.0")
+	if f["public_ip"] != "198.51.100.16" {
+		t.Fatalf("primeiro assinante deveria sair pelo primeiro IP da faixa: %v", f)
+	}
+	if CGNATCovers(plan, "198.51.100.5") || CGNATCovers(plan, "198.51.100.240") || !CGNATCovers(plan, "198.51.100.239") {
+		t.Fatal("cobertura da faixa errada")
+	}
+	if CGNATReverse(plan, "198.51.100.5", 2000) != nil {
+		t.Fatal("IP fora da faixa não pode apontar assinante")
+	}
+	r := CGNATReverse(plan, f["public_ip"].(string), f["port_start"].(float64))
+	if r == nil || r["private_ip"] != "100.64.0.0" {
+		t.Fatalf("reverso na faixa: %v", r)
+	}
+	bad := cgnatPlan(map[string]any{"public_cidr": "198.51.100.0/24", "public_first": "198.51.101.1"})
+	if CGNATPublicRange(bad) {
+		t.Fatal("faixa fora do bloco deveria ser inválida")
+	}
+}
+
+func TestCGNATRegistroDeNAT(t *testing.T) {
+	cases := map[string]string{"syslog": "servidor de logs (graylog-noc)", "equipment": "próprio equipamento", "none": "não guarda registro", "": "não foi informada"}
+	for mode, want := range cases {
+		fields := map[string]any{"nat_log_detail": "graylog-noc"}
+		if mode != "" {
+			fields["nat_log"] = mode
+		}
+		if got := CGNATNatLog(cgnatPlan(fields)); !strings.Contains(got, want) {
+			t.Fatalf("%q: %q", mode, got)
+		}
+	}
+}

@@ -215,6 +215,35 @@ def check_pin(der: Optional[bytes], pin: str) -> None:
         raise ssl.SSLError("certificado da api-ssl não corresponde à impressão digital fixada (cert_sha256)")
 
 
+def _on(value) -> bool:
+    return value is True or str(value).lower() in ("true", "yes")
+
+
+def mikrotik_hygiene(api) -> list[str]:
+    """Práticas de gerência do RouterOS (só leitura). Item que não pôde ser lido (permissão, versão) fica de fora."""
+    found = []
+    try:
+        for svc in api.path("ip", "service"):
+            if svc.get("name") in ("telnet", "ftp", "www") and not _on(svc.get("disabled")):
+                found.append(f"{svc['name']}_enabled")
+    except Exception:
+        pass
+    try:
+        ntp = next(iter(api.path("system", "ntp", "client")), None)
+        if ntp is not None and not _on(ntp.get("enabled")):
+            found.append("no_ntp")
+    except Exception:
+        pass
+    try:
+        remote = [a for a in api.path("system", "logging", "action")
+                  if a.get("target") == "remote" and str(a.get("remote") or "") not in ("", "0.0.0.0", "::")]
+        if not remote:
+            found.append("no_syslog")
+    except Exception:
+        pass
+    return sorted(set(found))
+
+
 class MikrotikSessions:
     """Sessões PPP ativas via API do RouterOS (api-ssl por padrão). Só duas chamadas: listar e remover."""
 
@@ -255,11 +284,19 @@ class MikrotikSessions:
                 kw["ssl_wrapper"] = lambda sock: ctx.wrap_socket(sock, server_hostname=self.host)
         return connect(host=self.host, port=self.port, username=self.cred["username"], password=self.cred["password"], timeout=10, **kw)
 
+    _hygiene, _hygiene_at = None, 0.0
+
     def check(self) -> dict:
+        import time
         api = self._connect()
         try:
             r = next(iter(api.path("system", "resource")), {})
-            return {"ok": True, "detail": f"RouterOS {r.get('version', '?')} ({r.get('board-name', '?')})"}
+            out = {"ok": True, "detail": f"RouterOS {r.get('version', '?')} ({r.get('board-name', '?')})"}
+            if self._hygiene is None or time.time() - self._hygiene_at > 3600:  # configuração muda pouco: no máximo 1 leitura/hora
+                self._hygiene, self._hygiene_at = mikrotik_hygiene(api), time.time()
+            if self._hygiene:
+                out["hygiene"] = list(self._hygiene)
+            return out
         finally:
             api.close()
 

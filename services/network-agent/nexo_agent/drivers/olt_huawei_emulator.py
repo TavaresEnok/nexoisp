@@ -59,6 +59,9 @@ class HuaweiCliEmulator:
             self.mode = "config"; return ""
         if c == "quit":
             self.mode = {"if": "config", "config": "enable", "enable": "user"}.get(self.mode, "user"); return ""
+        if c == "display ntp-service status":
+            status = "synchronized" if d.get("ntp", True) else "unsynchronized"
+            return f" clock status: {status}\n clock stratum: 3\n reference clock ID: 192.0.2.123"
         if c == "display version":
             return "\n  VERSION : MA5800V100R019C10 (emulador NexoISP)\n  PATCH   : -\n  PRODUCT : MA5800-X7 (emulado)\n"
         if c == "display ont autofind all":

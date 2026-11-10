@@ -138,6 +138,13 @@ o **fuso** em que o ofício informa o horário (muitos vêm em UTC/GMT). Sem por
 minutos cobre divergência de relógio. O relatório pode ser impresso ou exportado em CSV; cada consulta fica na auditoria com o número do ofício.
 A resposta depende do registro de sessões: mantenha o accounting ligado nos concentradores e a guarda de sessões (`NEXO_SESSION_KEEP_DAYS`) em pelo menos 1 ano.
 
+**CGNAT de equipamento externo (Hillstone, A10 e afins):** o plano declara onde fica o registro de NAT (servidor de logs, no próprio equipamento ou sem registro).
+A consulta repete essa informação no resultado; com "sem registro", o NexoISP avisa que o ofício não pode ser respondido e a lista de planos marca
+"Ofícios sem resposta". No estudo de campo só 1 de 9 Hillstone exportava o registro. Para ligar: no Hillstone, `log` na regra de NAT e
+`logging traffic nat to syslog`; no A10, arquivo de mapeamento de portas ou syslog. Guarde por pelo menos 1 ano (Marco Civil).
+**Faixa pública que não é CIDR:** quando o pool público do equipamento usa só parte do bloco (ex.: 224 dos 256 IPs), informe o primeiro e o último IP no
+plano. Vale para regras do NexoISP e equipamento externo; o netmap usa sempre o bloco inteiro.
+
 ### Conferência antes de entrar em produção
 
 ```bash
@@ -198,6 +205,16 @@ Ver `docs/lab-pppoe.md` (passos 1 e 2). Resumo: `infra/site/` com `.env`, `certs
     certo: use só em rede de gerência isolada, com usuário próprio do NexoISP.
   - `"enable_password"` quando o firmware pedir senha no `enable`.
   O estado do equipamento no painel avisa quando o acesso é por SSH antigo ou telnet. SSH versão 1 não é suportado.
+- **Concentrador Huawei com qos-profile por plano:** em Rede → equipamento → Parâmetros RADIUS, "Velocidade do plano" = qos-profile faz o RADIUS mandar
+  `Huawei-Qos-Profile-Name` com o nome do perfil do plano, em vez da taxa. O perfil (cir/pir) precisa existir no BNG com o mesmo nome
+  (`case-sensitive qos-profile-name` é o padrão de campo). O padrão continua sendo a taxa (`Huawei-Input/Output-Average-Rate`).
+- **`src-address` no modo direto:** os comandos gerados para o MikroTik incluem `src-address=<IP cadastrado do concentrador>`, para um NAS com vários IPs
+  falar com o RADIUS pelo endereço que o NexoISP reconhece. Mantenha o IP cadastrado igual ao endereço de saída do NAS.
+- **VLAN e interface da sessão:** o accounting já grava o NAS-Port-Id. O diagnóstico do contrato e o histórico do RADIUS mostram a interface e a VLAN
+  interpretadas (formatos Huawei `vlanid=`/redback-simple e nome da interface do MikroTik) junto do texto original.
+- **Práticas de gerência no NOC (agente 0.6.5+):** a verificação periódica informa equipamento sem NTP, sem syslog remoto, com telnet/FTP/web sem TLS
+  ligados (MikroTik, lidos pela API no máximo uma vez por hora), OLT sem NTP sincronizado (`display ntp-service status`) e acesso do agente por
+  telnet ou SSH antigo. Aparecem como avisos informativos no NOC; o NexoISP não altera a configuração.
 - **Relógio do concentrador:** o accounting usa o horário enviado pelo NAS. 44% dos concentradores estudados estavam sem NTP; configure
   `/system ntp client set enabled=yes` (v6: `primary-ntp=`; v7: `servers=`) antes de usar a consulta de ofício.
 

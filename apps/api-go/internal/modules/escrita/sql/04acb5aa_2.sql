@@ -1,0 +1,1 @@
+update devices set rate_mode = $2 where id = $1 returning rate_mode

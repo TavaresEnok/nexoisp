@@ -157,6 +157,10 @@ func account(ctx context.Context, tx *db.Tx, tenant string, p jsonx.Object, vers
 	if e != nil {
 		return nil, nil, e
 	}
+	if dev.Get("rate_mode") == "qos_profile" {
+		p = append(jsonx.Object(nil), p...)
+		p.Set("rate_mode", "qos_profile")
+	}
 	checks, reply, profile, blocked := attributes(fmt.Sprint(dev.Get("vendor")), p, dev.Get("down_kbps"), dev.Get("up_kbps"))
 	if cur == nil && secret == nil {
 		return nil, nil, fmt.Errorf("conta sem credencial no RADIUS e senha não fornecida")

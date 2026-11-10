@@ -31,6 +31,11 @@ const sessionSchema = z.object({
   ipv6_prefix: z.string().nullable(),
   delegated_ipv6_prefix: z.string().nullable(),
   terminate_cause: z.string().nullable(),
+  nas_port: z.string().nullable().optional(),
+  called_station: z.string().nullable().optional(),
+  port_interface: z.string().nullable().optional(),
+  port_vlan: z.number().nullable().optional(),
+  port_inner_vlan: z.number().nullable().optional(),
 });
 const historySchema = z.object({
   items: z.array(sessionSchema),
@@ -166,6 +171,13 @@ export function RadiusAccountingHistory() {
                 ["Duração informada (segundos)", item.session_seconds],
                 ["Enviado pelo assinante (bytes)", item.bytes_in],
                 ["Recebido pelo assinante (bytes)", item.bytes_out],
+                [
+                  "Interface / VLAN",
+                  item.port_interface || item.port_vlan
+                    ? `${item.port_interface ?? "—"}${item.port_vlan ? ` · VLAN ${item.port_vlan}${item.port_inner_vlan ? ` (cliente ${item.port_inner_vlan})` : ""}` : ""}`
+                    : "Não informado",
+                ],
+                ["Serviço PPPoE", item.called_station || "Não informado"],
                 ["IPv4", item.framed_ip ?? "Não informado"],
                 ["Endereço IPv6", item.ipv6_address ?? "Não informado"],
                 ["Prefixo IPv6", item.ipv6_prefix ?? "Não informado"],

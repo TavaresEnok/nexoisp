@@ -61,6 +61,21 @@ class Huawei(unittest.TestCase):
         cmds = self.commands()
         self.assertLess(cmds.index("undo service-port 10"), cmds.index("ont delete 0 0"))
 
+    def test_ont_id_reusado_nao_deixa_remocao_atrasada_atingir_outra_onu(self):
+        """Estudo de campo: 23% das adições reusam um ONT-ID liberado no mesmo dia. A identidade é sempre o serial:
+        a desautorização atrasada da ONU A não pode remover a ONU B que herdou o mesmo ID na mesma PON."""
+        a, b = SN, "485754430000BEEF"
+        self.assertEqual(self.olt.authorize(a, **KW)["ont_id"], 0)
+        self.assertEqual(self.olt.deauthorize(a)["ont_id"], 0)
+        self.assertEqual(self.olt.authorize(b, **{**KW, "description": "nexo:0b0b0b0b:v1"})["ont_id"], 0)  # B herda o ID 0
+        before = list(self.state.d["sports"])
+        self.assertEqual(self.olt.deauthorize(a), {"removed": 0})  # repetição atrasada da remoção de A
+        st = self.olt.read_onu(b)
+        self.assertTrue(st.authorized)
+        self.assertEqual(st.service_vlan, 100)
+        self.assertEqual(self.state.d["sports"], before)
+        self.assertFalse(any(c.startswith("ont delete") or c.startswith("undo service-port") for c in self.commands()[-6:]))
+
     def test_vlan_do_cliente_diferente_da_vlan_de_saida(self):
         # Padrão das OLTs reais: VLAN de saída por PON e VLAN do cliente fixa na OLT (user_vlan na credencial)
         self.olt = HuaweiOltDriver(self.olt._connect, user_vlan=10)
