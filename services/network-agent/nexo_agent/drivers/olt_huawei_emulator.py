@@ -83,7 +83,7 @@ class HuaweiCliEmulator:
             online = o["sn"] not in d["offline"]
             return (f"{LINE}\n  F/S/P                   : {o['fsp']}\n  ONT-ID                  : {o['id']}\n  Control flag            : active\n"
                     f"  Run state               : {'online' if online else 'offline'}\n  Config state            : {'normal' if online else 'initial'}\n  Match state             : {'match' if online else 'initial'}\n"
-                    f"  DBA type                : SR\n  ONT distance(m)         : {1200 + o['id'] * 37 if online else '-'}\n  Authentic type          : SN-auth\n  SN                      : {o['sn']}\n"
+                    f"  DBA type                : SR\n  ONT distance(m)         : {1200 + o['id'] * 37 if online else '-'}\n  Authentic type          : SN-auth\n  SN                      : {o['sn']} ({bytes.fromhex(o['sn'][:8]).decode('ascii', 'ignore')}-{o['sn'][8:]})\n"
                     f"  Management mode         : OMCI\n  Description             : {o['desc']}\n  Last down cause         : {'-' if online else 'dying-gasp'}\n"
                     f"  Last up time            : 2026-10-10 05:00:10-03:00\n{LINE}\n  Line profile ID      : 10\n  Line profile name    : {o['line']}\n{LINE}\n"
                     f"  Service profile ID   : 10\n  Service profile name : {o['srv']}\n{LINE}\n")

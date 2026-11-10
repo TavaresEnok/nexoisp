@@ -51,6 +51,12 @@ def _field(text: str, label: str) -> Optional[str]:
     return m.group(1) if m else None
 
 
+def _readback_sn(raw: str) -> Optional[str]:
+    """SN do 'display ont info by-sn'. No equipamento real vem como '<16hex> (VEND-xxxx)'; devolve só os 16 dígitos."""
+    m = re.match(r"\s*([0-9A-Fa-f]{16})", _field(raw, "SN") or "")
+    return m.group(1).upper() if m else None
+
+
 def check_failure(output: str):
     m = re.search(r"^\s*(Failure\s*:.*|Error\s*:.*|%\s*\S.*)$", output, re.M | re.I)
     if m:
@@ -174,6 +180,25 @@ class NetmikoCli:
         """Saída longa e somente leitura (configuração completa): muito mais páginas e espera maior por página."""
         return self._run_command(command, max_pages=5000, read_timeout=120)
 
+    def dump(self, command: str) -> str:
+        """Lê uma saída longa de leitura (ex.: `display current-configuration`) usando o PROMPT REAL do equipamento como
+        terminador. A configuração tem linhas `#` separando seções; o padrão genérico `_END` as confunde com o prompt e
+        encerra na primeira (caso real do MA5600). Garante a paginação desligada e espera generosa."""
+        try:
+            self._c.disable_paging()
+        except Exception:
+            pass
+        prompt = ""
+        try:
+            prompt = (self._c.find_prompt() or "").strip()
+        except Exception:
+            prompt = ""
+        expect = re.escape(prompt) if prompt else self._END
+        # cmd_verify=True: a OLT ecoa `prompt+comando`; sem sincronizar pelo eco, o netmiko casaria o prompt no próprio
+        # eco e devolveria vazio. Com verificação, ele passa do eco e só encerra no prompt final, após toda a config.
+        return self._c.send_command(command, expect_string=expect, read_timeout=240, cmd_verify=True,
+                                    strip_prompt=True, strip_command=True)
+
     def run(self, command: str) -> str:
         try:
             return self._run_command(command)
@@ -292,7 +317,7 @@ class HuaweiOltDriver:
         from ..config_backup import clean_cli_output
         cli = self._connect()
         try:
-            out = cli.run_long("display current-configuration") if hasattr(cli, "run_long") else cli.run("display current-configuration")
+            out = cli.dump("display current-configuration") if hasattr(cli, "dump") else cli.run("display current-configuration")
         finally:
             cli.close()
         check_failure(out)
@@ -349,7 +374,7 @@ class HuaweiOltDriver:
             info = parse_ont_info(raw)
             if not info:
                 raise OltCommandError("resposta ONT incompleta; estado desconhecido")
-            if _field(raw, "SN") != sn:
+            if _readback_sn(raw) != sn:
                 raise OltCommandError("serial do readback não corresponde à ONU consultada")
             split_port(info["pon_port"])
             raw_ports = s.run(f"display service-port port {info['pon_port']} ont {info['ont_id']}", tolerate=True)
@@ -404,7 +429,7 @@ class HuaweiOltDriver:
             if re.search(r"Failure\s*:\s*The required ONT does not exist", raw, re.I):
                 return {"removed": 0}
             check_failure(raw); info = parse_ont_info(raw)
-            if not info or _field(raw, "SN") != sn:
+            if not info or _readback_sn(raw) != sn:
                 raise OltCommandError("identidade/estado ONT desconhecido; remoção recusada")
             split_port(info["pon_port"])
             raw_ports = s.run(f"display service-port port {info['pon_port']} ont {info['ont_id']}", tolerate=True)

@@ -40,6 +40,23 @@ class Huawei(unittest.TestCase):
         self.assertEqual(parse_optical("  Rx optical power(dBm)                  : -19.23\n  Tx optical power(dBm)   : 2.31"), (-19.23, 2.31))
         self.assertEqual(parse_optical("  Failure: The ONT is not online"), (None, None))
 
+    def test_parse_formato_real_ma5600(self):
+        # Formato do equipamento real (MA5600 R017): SN com sufixo de fabricante e rótulos de optical-info.
+        info = parse_ont_info(
+            "  -----------------------------------------------------------------------------\n"
+            "  F/S/P                   : 0/5/2\n  ONT-ID                  : 12\n  Control flag            : active\n"
+            "  Run state               : online\n  Config state            : failed\n  Match state             : match\n"
+            "  ONT distance(m)         : 4242\n  Authentic type          : SN-auth\n"
+            "  SN                      : 48575443AABBCCDD (HWTC-AABBCCDD)\n"
+            "  Management mode         : OMCI\n  Description             : 00000 - cliente ficticio\n"
+            "  -----------------------------------------------------------------------------\n")
+        self.assertEqual((info["pon_port"], info["ont_id"], info["run_state"]), ("0/5/2", 12, "online"))
+        self.assertEqual(
+            parse_optical("  Rx optical power(dBm)                  : -25.37\n"
+                          "  Tx optical power(dBm)                  : 2.86\n"
+                          "  OLT Rx ONT optical power(dBm)          : -26.39\n"),
+            (-25.37, 2.86))
+
     def test_descobre_autoriza_le_e_desautoriza(self):
         self.assertIn(SN, [x["serial"] for x in self.olt.discover()])
         self.assertFalse(self.olt.read_onu(SN).authorized)
