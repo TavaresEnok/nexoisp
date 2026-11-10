@@ -9,6 +9,7 @@ import paramiko
 
 from nexo_agent import cli_transport
 from nexo_agent.drivers import olt_huawei_emulator as emu
+from nexo_agent.drivers.fixtures_ficticias import gerar_olt
 from nexo_agent.drivers.olt_huawei import HuaweiOltDriver
 from nexo_agent.ssh_trust import fingerprint, install_key, ssh_parameters
 
@@ -88,6 +89,26 @@ class LoopbackTransports(unittest.TestCase):
                 driver._drop()
         finally:
             sock.close()
+
+    def test_export_config_grande_volta_inteiro_por_ssh(self):
+        # Regressão: Channel.send pode enviar só parte de uma saída grande; o emulador precisa usar sendall,
+        # senão o export de uma OLT cheia chega truncado e o cliente espera um prompt que não vem.
+        estado = gerar_olt(seed=3, pons=8)
+        state = emu.OltState()
+        state.d = estado
+        key = paramiko.RSAKey.generate(2048)
+        sock, port = _listen(lambda conn: emu.ssh_client(conn, state, key))
+        try:
+            with tempfile.TemporaryDirectory() as tmp:
+                file = str(Path(tmp) / "known_hosts")
+                install_key(file, "127.0.0.1", port, f"ssh-rsa {key.get_base64()}", fingerprint(key), "Synthetic loopback emulator key")
+                cfg = _driver(port, {"known_hosts_file": file}).export_config()
+        finally:
+            sock.close()
+        self.assertGreater(len(cfg.encode()), 20000, "config grande chegou truncado")
+        self.assertEqual(cfg.count("ont add "), len(estado["onts"]), "faltaram linhas de ONT no export")
+        self.assertIn("service-port", cfg)
+        self.assertTrue(cfg.rstrip().endswith("return"))
 
     def test_telnet_login_and_reads(self):
         state = emu.OltState()

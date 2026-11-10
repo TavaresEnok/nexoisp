@@ -249,7 +249,9 @@ def ssh_client(conn, state: "OltState", key, legacy_only: bool = False):  # prag
         t.start_server(server=Srv())
         ch = t.accept(20)
         if ch is not None:
-            shell(state, lambda x: ch.send(x), ch.recv)
+            # sendall (não send): Channel.send pode enviar só parte de uma saída grande e o resto se perderia
+            # (ex.: display current-configuration de uma OLT cheia), fazendo o cliente esperar um prompt que não vem.
+            shell(state, lambda x: ch.sendall(x.encode() if isinstance(x, str) else x), ch.recv)
     except Exception:
         pass
     finally:
