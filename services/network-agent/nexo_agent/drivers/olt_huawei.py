@@ -7,7 +7,10 @@ varia com a versão do firmware e precisa ser validado na OLT do provedor antes 
 Conjunto fechado de comandos (nenhum texto livre vindo da nuvem é executado):
   display version | display ont autofind all | display ont info by-sn <SN> | display service-port port <F/S/P> ont <ID>
   interface gpon <F/S> ; ont add ... ; ont delete <P> <ID> ; display ont optical-info <P> <ID>
-  service-port vlan <V> gpon <F/S/P> ont <ID> gemport <G> multi-service user-vlan <V> tag-transform translate ; undo service-port <INDEX>
+  service-port vlan <V> gpon <F/S/P> ont <ID> gemport <G> multi-service user-vlan <U> tag-transform translate ; undo service-port <INDEX>
+
+<U> é a VLAN em que a ONU entrega o tráfego (`user_vlan` na credencial da OLT). Nas OLTs Huawei reais observadas ela é fixa
+por OLT (em geral 100) e diferente da VLAN de saída <V>, que varia por porta PON; sem `user_vlan`, <U> = <V>.
 
 Fora do escopo: criação de VLAN, perfis de linha/serviço e DBA (devem existir na OLT), ONU em modo roteador, TR-069, VoIP."""
 import re
@@ -192,8 +195,8 @@ class NetmikoCli:
 class HuaweiOltDriver:
     simulated = False
 
-    def __init__(self, connect, gemport: int = 1, *, allow_writes=True, expected_product=None, expected_firmware=None):
-        self._connect, self.gemport = connect, gemport
+    def __init__(self, connect, gemport: int = 1, *, user_vlan: Optional[int] = None, allow_writes=True, expected_product=None, expected_firmware=None):
+        self._connect, self.gemport, self.user_vlan = connect, gemport, user_vlan
         self.allow_writes, self.expected_product, self.expected_firmware = allow_writes, expected_product, expected_firmware
         self._check_cache = None
         self._cli, self._cli_used = None, 0.0
@@ -209,6 +212,7 @@ class HuaweiOltDriver:
         if cred.get("allow_writes") is True and (not cred.get("expected_product") or not cred.get("expected_firmware")):
             raise ValueError("escrita OLT exige modelo e firmware esperados explícitos na configuração local")
         return cls(lambda: NetmikoCli(host, port, cred["username"], cred["password"], cred.get("known_hosts_file", "")), int(cred.get("gemport", 1)),
+                   user_vlan=int(cred["user_vlan"]) if cred.get("user_vlan") is not None else None,
                    allow_writes=cred.get("allow_writes") is True, expected_product=cred.get("expected_product"), expected_firmware=cred.get("expected_firmware"))
 
     def _session(self):
@@ -313,7 +317,8 @@ class HuaweiOltDriver:
         if not service_profile:
             raise ValueError("OLT Huawei exige o perfil de serviço (ont-srvprofile-name)")
         vlan = int(service_vlan)
-        if not 1 <= vlan <= 4094 or not 1 <= self.gemport <= 4095:
+        user_vlan = vlan if self.user_vlan is None else int(self.user_vlan)
+        if not 1 <= vlan <= 4094 or not 1 <= user_vlan <= 4094 or not 1 <= self.gemport <= 4095:
             raise ValueError("VLAN ou GEM port fora da capacidade suportada")
         _safe(line_profile, "perfil de linha"); _safe(service_profile, "perfil de serviço"); _safe(description, "descrição")
         self._require_write_capability()
@@ -323,8 +328,8 @@ class HuaweiOltDriver:
                 f'ont add {p} sn-auth "{sn}" omci ont-lineprofile-name "{_safe(line_profile, "perfil de linha")}" '
                 f'ont-srvprofile-name "{_safe(service_profile, "perfil de serviço")}" desc "{_safe(description, "descrição")}"'))
             s.run("quit")
-            s.run(f"service-port vlan {vlan} gpon {fs}/{p} ont {ont_id} gemport {self.gemport} multi-service user-vlan {vlan} tag-transform translate")
-        return {"ont_id": ont_id, "pon_port": pon_port, "service_vlan": vlan, "gemport": self.gemport}
+            s.run(f"service-port vlan {vlan} gpon {fs}/{p} ont {ont_id} gemport {self.gemport} multi-service user-vlan {user_vlan} tag-transform translate")
+        return {"ont_id": ont_id, "pon_port": pon_port, "service_vlan": vlan, "user_vlan": user_vlan, "gemport": self.gemport}
 
     def deauthorize(self, serial: str) -> dict:
         sn = normalize_serial(serial)

@@ -135,14 +135,14 @@ class HuaweiCliEmulator:
                     f"  OLT Rx ONT optical power(dBm)          : {-18 - k:.2f}\n{LINE}\n")
         m = re.fullmatch(r"service-port vlan (\d+) gpon (\d+/\d+/\d+) ont (\d+) gemport (\d+) multi-service user-vlan (\d+) tag-transform translate", c)
         if m and self.mode == "config":
-            vlan, fsp, oid, gem = int(m.group(1)), m.group(2), int(m.group(3)), int(m.group(4))
+            vlan, fsp, oid, gem, uvlan = int(m.group(1)), m.group(2), int(m.group(3)), int(m.group(4)), int(m.group(5))
             if vlan not in d["vlans"]:
                 return "  Failure: VLAN does not exist"
             if not any(x["fsp"] == fsp and x["id"] == oid for x in d["onts"]):
                 return "  Failure: The ONT does not exist"
             if any(x["fsp"] == fsp and x["ont"] == oid and x["vlan"] == vlan for x in d["sports"]):
                 return "  Failure: Service virtual port has existed already"
-            d["sports"].append({"index": d["next_sp"], "vlan": vlan, "fsp": fsp, "ont": oid, "gem": gem}); d["next_sp"] += 1
+            d["sports"].append({"index": d["next_sp"], "vlan": vlan, "fsp": fsp, "ont": oid, "gem": gem, "user_vlan": uvlan}); d["next_sp"] += 1
             return ""
         m = re.fullmatch(r"undo service-port (\d+)", c)
         if m and self.mode == "config":

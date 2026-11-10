@@ -61,6 +61,20 @@ class Huawei(unittest.TestCase):
         cmds = self.commands()
         self.assertLess(cmds.index("undo service-port 10"), cmds.index("ont delete 0 0"))
 
+    def test_vlan_do_cliente_diferente_da_vlan_de_saida(self):
+        # Padrão das OLTs reais: VLAN de saída por PON e VLAN do cliente fixa na OLT (user_vlan na credencial)
+        self.olt = HuaweiOltDriver(self.olt._connect, user_vlan=10)
+        r = self.olt.authorize("HWTCA1B2C3D4", **KW)
+        self.assertEqual((r["service_vlan"], r["user_vlan"]), (KW["service_vlan"], 10))
+        self.assertIn(f"service-port vlan {KW['service_vlan']} gpon 0/1/0 ont 0 gemport 1 multi-service user-vlan 10 tag-transform translate", self.commands())
+        self.assertEqual(self.state.d["sports"][-1]["user_vlan"], 10)
+        self.assertEqual(self.olt.read_onu(SN).service_vlan, KW["service_vlan"])
+        with self.assertRaises(ValueError):
+            HuaweiOltDriver(self.olt._connect, user_vlan=5000).authorize("HWTCA1B2C3D4", **KW)
+        cred = {"c": {"username": "u", "password": "p", "user_vlan": "100"}}
+        self.assertEqual(HuaweiOltDriver.from_device({"credential_ref": "c", "host": "h"}, cred).user_vlan, 100)
+        self.assertIsNone(HuaweiOltDriver.from_device({"credential_ref": "c", "host": "h"}, {"c": {"username": "u", "password": "p"}}).user_vlan)
+
     def test_sessao_e_reaproveitada_e_descartada_apos_erro(self):
         self.olt.discover(); self.olt.read_onu(SN); self.olt.discover()
         self.assertEqual(len(self.sessions), 1)                               # uma conexão para três chamadas
