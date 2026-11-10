@@ -22,7 +22,7 @@ import (
 const ConfigBackupKeep = 4
 
 // Drivers que sabem exportar a configuração (o RADIUS integrado não tem equipamento a consultar).
-var ConfigBackupDrivers = []string{"olt_huawei", "olt_zte", "olt_datacom", "mikrotik_radius", "olt_demo", "demo"}
+var ConfigBackupDrivers = []string{"olt_huawei", "olt_zte", "olt_datacom", "olt_intelbras", "olt_fiberhome", "olt_vsol", "olt_parks", "mikrotik_radius", "olt_demo", "demo"}
 
 const configBackupDue = `case when d.config_backup_requested_at is not null then d.config_backup_requested_at
 	else greatest(coalesce((select max(b.taken_at) from config_backups b where b.tenant_id = d.tenant_id and b.device_id = d.id) + interval '7 days', now()),

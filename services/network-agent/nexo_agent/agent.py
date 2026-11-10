@@ -57,6 +57,9 @@ class Agent:
         if dev["driver"] == "olt_datacom":
             from .drivers.olt_datacom import DatacomOltDriver
             return DatacomOltDriver.from_device(dev, self.credentials)
+        if dev["driver"] in ("olt_intelbras", "olt_fiberhome", "olt_vsol", "olt_parks"):
+            from .drivers.olt_cli_backup import CliBackupDriver, PROFILES
+            return CliBackupDriver.from_device(dev, self.credentials, PROFILES[dev["driver"]])
         if dev["driver"] == "mikrotik_radius":
             from .drivers.mikrotik_radius import MikrotikRadiusDriver
             return MikrotikRadiusDriver.from_device(dev, self.credentials, self.data_dir)

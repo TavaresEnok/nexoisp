@@ -19,6 +19,9 @@ LEGACY_SSH_OPTS = [
     "-o", "Ciphers=+aes128-cbc,3des-cbc,aes256-cbc",
 ]
 _PAGE = re.compile(r"--\s*more\s*--|more:|press any key|more \(|press 'q'|---- more|continue\?", re.I)
+# O equipamento avisou que ainda vai responder (ex.: Intelbras "processing, waiting to execute command"); não encerrar
+# a leitura na ociosidade enquanto esse aviso for a última coisa recebida.
+_KEEPWAIT = re.compile(r"processing|waiting to execute|starting configuration dump|please wait|aguarde", re.I)
 _PWD = re.compile(r"(?i)(pass\s*word|senha)\s*:")
 _LOGIN = re.compile(r"(?i)(login|user ?name|user)\s*:")
 
@@ -149,6 +152,9 @@ class OsCliSession:
                 if page and _PAGE.search(_strip(buf[-160:])):
                     self.chan.write(" ")
             elif time.time() - last > idle:
+                if _KEEPWAIT.search(buf[-200:]):  # o equipamento disse que ainda está processando: espera mais
+                    last = time.time()
+                    continue
                 break
         return _strip(buf)
 
