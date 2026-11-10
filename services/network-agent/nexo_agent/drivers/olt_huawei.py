@@ -9,8 +9,12 @@ Conjunto fechado de comandos (nenhum texto livre vindo da nuvem é executado):
   interface gpon <F/S> ; ont add ... ; ont delete <P> <ID> ; display ont optical-info <P> <ID>
   service-port vlan <V> gpon <F/S/P> ont <ID> gemport <G> multi-service user-vlan <U> tag-transform translate ; undo service-port <INDEX>
 
-<U> é a VLAN em que a ONU entrega o tráfego (`user_vlan` na credencial da OLT). Nas OLTs Huawei reais observadas ela é fixa
-por OLT (em geral 100) e diferente da VLAN de saída <V>, que varia por porta PON; sem `user_vlan`, <U> = <V>.
+  ont port native-vlan <P> <ID> eth <N> vlan <U> priority 0
+
+<U> é a VLAN em que a ONU entrega o tráfego e <G> o gemport. Nas OLTs Huawei reais estudadas (docs/estudo-campo) os dois vêm
+do perfil de linha (gem mapping) em 99,3% dos casos, e só 9,4% usam gemport 1. Configuração local, do mais específico ao geral:
+`line_profiles: {"<perfil>": {"gemport": G, "user_vlan": U}}`, depois `gemport`/`user_vlan` da OLT; sem nada, G = 1 e U = <V>.
+`native_vlan_eth` (padrão [1]) lista as portas Ethernet que recebem `native-vlan`, presente em 90% das ONUs reais; [] desliga.
 
 Fora do escopo: criação de VLAN, perfis de linha/serviço e DBA (devem existir na OLT), ONU em modo roteador, TR-069, VoIP."""
 import re
@@ -162,7 +166,7 @@ class NetmikoCli:
         try:
             return self._run_command(command)
         except Exception:
-            if re.match(r"^(ont (add|delete)\b|service-port\b|undo service-port\b)", command):
+            if re.match(r"^(ont (add|delete)\b|ont port native-vlan\b|service-port\b|undo service-port\b)", command):
                 raise AckLost("confirmação SSH ausente após comando mutante; consultar estado") from None
             raise
 
@@ -195,8 +199,13 @@ class NetmikoCli:
 class HuaweiOltDriver:
     simulated = False
 
-    def __init__(self, connect, gemport: int = 1, *, user_vlan: Optional[int] = None, allow_writes=True, expected_product=None, expected_firmware=None):
+    def __init__(self, connect, gemport: int = 1, *, user_vlan: Optional[int] = None, line_profiles: Optional[dict] = None,
+                 native_vlan_eth=(1,), allow_writes=True, expected_product=None, expected_firmware=None):
         self._connect, self.gemport, self.user_vlan = connect, gemport, user_vlan
+        self.line_profiles = {str(k): dict(v) for k, v in (line_profiles or {}).items()}
+        self.native_vlan_eth = [int(x) for x in native_vlan_eth]
+        if any(not 1 <= x <= 24 for x in self.native_vlan_eth):
+            raise ValueError("native_vlan_eth fora da faixa de portas Ethernet da ONU")
         self.allow_writes, self.expected_product, self.expected_firmware = allow_writes, expected_product, expected_firmware
         self._check_cache = None
         self._cli, self._cli_used = None, 0.0
@@ -213,6 +222,7 @@ class HuaweiOltDriver:
             raise ValueError("escrita OLT exige modelo e firmware esperados explícitos na configuração local")
         return cls(lambda: NetmikoCli(host, port, cred["username"], cred["password"], cred.get("known_hosts_file", "")), int(cred.get("gemport", 1)),
                    user_vlan=int(cred["user_vlan"]) if cred.get("user_vlan") is not None else None,
+                   line_profiles=cred.get("line_profiles") or {}, native_vlan_eth=cred.get("native_vlan_eth", [1]),
                    allow_writes=cred.get("allow_writes") is True, expected_product=cred.get("expected_product"), expected_firmware=cred.get("expected_firmware"))
 
     def _session(self):
@@ -278,9 +288,16 @@ class HuaweiOltDriver:
             return self._read(s, serial)
 
     def read_onus(self, serials: list[str]) -> dict[str, OnuState]:
-        """Estado de várias ONUs em UMA sessão (leitura periódica)."""
+        """Estado de várias ONUs em UMA sessão (leitura periódica). Resposta inesperada de uma ONU não descarta as demais:
+        ela fica fora do resultado (estado desconhecido). Falha de transporte continua interrompendo a leitura."""
+        out = {}
         with self._session() as s:
-            return {sn: self._read(s, sn) for sn in serials}
+            for sn in serials:
+                try:
+                    out[sn] = self._read(s, sn)
+                except OltCommandError:
+                    continue
+        return out
 
     def _read(self, s, serial: str) -> OnuState:
         sn = normalize_serial(serial)
@@ -307,8 +324,9 @@ class HuaweiOltDriver:
                 s.run(f"interface gpon {fs}")
                 rx, tx = parse_optical(s.run(f"display ont optical-info {p} {info['ont_id']}", tolerate=True))
                 s.run("quit")
-        return OnuState(True, info["pon_port"], info["line_profile"], ports[0]["vlan"] if len(ports) == 1 else None, info["description"], online, rx, tx,
-                        {"ont_id": info["ont_id"], "service_ports": len(ports), "last_down_cause": info["last_down_cause"], "distance_m": info["distance_m"]},
+        vlans = sorted({sp["vlan"] for sp in ports})
+        return OnuState(True, info["pon_port"], info["line_profile"], vlans[0] if len(vlans) == 1 else None, info["description"], online, rx, tx,
+                        {"ont_id": info["ont_id"], "service_ports": len(ports), "service_vlans": vlans, "last_down_cause": info["last_down_cause"], "distance_m": info["distance_m"]},
                         service_profile=info["service_profile"])
 
     def authorize(self, serial: str, *, pon_port: str, line_profile: str, service_vlan: int, description: str, service_profile: Optional[str] = None) -> dict:
@@ -317,8 +335,10 @@ class HuaweiOltDriver:
         if not service_profile:
             raise ValueError("OLT Huawei exige o perfil de serviço (ont-srvprofile-name)")
         vlan = int(service_vlan)
-        user_vlan = vlan if self.user_vlan is None else int(self.user_vlan)
-        if not 1 <= vlan <= 4094 or not 1 <= user_vlan <= 4094 or not 1 <= self.gemport <= 4095:
+        profile = self.line_profiles.get(line_profile, {})
+        gemport = int(profile.get("gemport", self.gemport))
+        user_vlan = int(profile.get("user_vlan", vlan if self.user_vlan is None else self.user_vlan))
+        if not 1 <= vlan <= 4094 or not 1 <= user_vlan <= 4094 or not 1 <= gemport <= 4095:
             raise ValueError("VLAN ou GEM port fora da capacidade suportada")
         _safe(line_profile, "perfil de linha"); _safe(service_profile, "perfil de serviço"); _safe(description, "descrição")
         self._require_write_capability()
@@ -327,9 +347,11 @@ class HuaweiOltDriver:
             ont_id = parse_ont_add(s.run(
                 f'ont add {p} sn-auth "{sn}" omci ont-lineprofile-name "{_safe(line_profile, "perfil de linha")}" '
                 f'ont-srvprofile-name "{_safe(service_profile, "perfil de serviço")}" desc "{_safe(description, "descrição")}"'))
+            for eth in self.native_vlan_eth:
+                s.run(f"ont port native-vlan {p} {ont_id} eth {eth} vlan {user_vlan} priority 0")
             s.run("quit")
-            s.run(f"service-port vlan {vlan} gpon {fs}/{p} ont {ont_id} gemport {self.gemport} multi-service user-vlan {user_vlan} tag-transform translate")
-        return {"ont_id": ont_id, "pon_port": pon_port, "service_vlan": vlan, "user_vlan": user_vlan, "gemport": self.gemport}
+            s.run(f"service-port vlan {vlan} gpon {fs}/{p} ont {ont_id} gemport {gemport} multi-service user-vlan {user_vlan} tag-transform translate")
+        return {"ont_id": ont_id, "pon_port": pon_port, "service_vlan": vlan, "user_vlan": user_vlan, "gemport": gemport, "native_vlan_eth": self.native_vlan_eth}
 
     def deauthorize(self, serial: str) -> dict:
         sn = normalize_serial(serial)

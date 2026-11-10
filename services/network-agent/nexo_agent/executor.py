@@ -153,7 +153,7 @@ def onu_applied(st: OnuState, env: Envelope) -> bool:
     if p.state == "removed":
         return not st.authorized
     return (st.authorized and st.description == p.description and st.applied_version == env.desired_version and st.pon_port == p.pon_port
-            and st.line_profile == p.line_profile and st.service_vlan == p.service_vlan
+            and st.line_profile == p.line_profile and (st.service_vlan == p.service_vlan or p.service_vlan in (st.extra or {}).get("service_vlans", []))
             and (p.service_profile is None or st.service_profile == p.service_profile))
 
 

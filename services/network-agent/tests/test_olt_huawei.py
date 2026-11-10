@@ -75,6 +75,58 @@ class Huawei(unittest.TestCase):
         self.assertEqual(HuaweiOltDriver.from_device({"credential_ref": "c", "host": "h"}, cred).user_vlan, 100)
         self.assertIsNone(HuaweiOltDriver.from_device({"credential_ref": "c", "host": "h"}, {"c": {"username": "u", "password": "p"}}).user_vlan)
 
+    def test_perfil_de_linha_define_gemport_e_vlan_do_cliente_e_native_vlan(self):
+        # Padrão real: gemport e VLAN do cliente vêm do gem mapping do perfil de linha; native-vlan na eth da ONU
+        self.olt = HuaweiOltDriver(self.olt._connect, gemport=1, line_profiles={"residencial": {"gemport": 100, "user_vlan": 100}})
+        r = self.olt.authorize("HWTCA1B2C3D4", **{**KW, "service_vlan": 200})
+        self.assertEqual((r["gemport"], r["user_vlan"], r["service_vlan"]), (100, 100, 200))
+        cmds = self.commands()
+        nat = "ont port native-vlan 0 0 eth 1 vlan 100 priority 0"
+        sp = "service-port vlan 200 gpon 0/1/0 ont 0 gemport 100 multi-service user-vlan 100 tag-transform translate"
+        self.assertIn(nat, cmds)
+        self.assertLess(cmds.index(nat), cmds.index(sp))
+        self.assertEqual(self.state.d["onts"][-1]["native"], {1: 100})
+        # perfil sem mapeamento cai no padrão da OLT; [] desliga o native-vlan
+        self.olt.deauthorize(SN)
+        self.olt = HuaweiOltDriver(self.olt._connect, native_vlan_eth=[])
+        self.olt.authorize("HWTCA1B2C3D4", **KW)
+        self.assertNotIn("native", self.state.d["onts"][-1])
+
+    def test_pon_cheia_responde_falha_e_nao_quebra(self):
+        fs = "0/1/0"
+        for i in range(128):
+            self.state.d["onts"].append({"fsp": fs, "id": i, "sn": f"{i:016X}", "line": "residencial", "srv": "bridge-1ge", "desc": "x", "at": 0})
+        with self.assertRaises(Exception) as ctx:
+            self.olt.authorize("HWTCA1B2C3D4", **KW)
+        self.assertIn("upper limit", str(ctx.exception))
+
+    def test_leitura_em_lote_isola_onu_com_resposta_inesperada(self):
+        self.olt.authorize("HWTCA1B2C3D4", **KW)
+        import nexo_agent.drivers.olt_huawei as mod
+        original = mod.parse_ont_info
+        def quebrado(raw):
+            info = original(raw)
+            if info and "ruim" in self.__dict__.get("_flag", ""):
+                return None
+            return info
+        self._flag = "ruim"
+        mod.parse_ont_info = quebrado
+        try:
+            self.assertEqual(self.olt.read_onus([SN, SN]), {})          # resposta incompleta: ONU fica fora, sem exceção
+        finally:
+            mod.parse_ont_info = original
+        self.assertTrue(self.olt.read_onus([SN])[SN].authorized)
+
+    def test_varias_service_ports_com_a_vlan_desejada_contam_como_aplicadas(self):
+        from nexo_agent.drivers.olt_base import OnuState
+        from types import SimpleNamespace
+        from nexo_agent.executor import onu_applied
+        p = SimpleNamespace(state="authorized", description="nexo:abcdef01:v3", pon_port="0/1/0", line_profile="residencial", service_vlan=200, service_profile=None)
+        st = OnuState(True, "0/1/0", "residencial", None, "nexo:abcdef01:v3", True, extra={"service_vlans": [200, 300]})
+        self.assertTrue(onu_applied(st, SimpleNamespace(parameters=p, desired_version=3)))
+        st.extra["service_vlans"] = [300, 400]
+        self.assertFalse(onu_applied(st, SimpleNamespace(parameters=p, desired_version=3)))
+
     def test_sessao_e_reaproveitada_e_descartada_apos_erro(self):
         self.olt.discover(); self.olt.read_onu(SN); self.olt.discover()
         self.assertEqual(len(self.sessions), 1)                               # uma conexão para três chamadas

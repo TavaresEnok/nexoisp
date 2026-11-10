@@ -42,12 +42,49 @@ func CIDR4(cidr any) (uint64, uint64) {
 	}
 	return base, uint64(1) << uint(32-mask)
 }
+
+// CGNATLayout: como o equipamento distribui assinantes em IPs e portas públicos (migração 00095).
+func CGNATLayout(plan jsonx.Object) string {
+	switch plan.Get("layout") {
+	case "netmap", "external":
+		return plan.Get("layout").(string)
+	}
+	return "sequential"
+}
+
+// CGNATTraceable: o NexoISP só calcula o titular quando conhece a regra do equipamento.
+func CGNATTraceable(plan jsonx.Object) bool { return CGNATLayout(plan) != "external" }
+
+// cgnatBlocks: blocos de portas por IP público, respeitando a última porta usada pelo equipamento.
+func cgnatBlocks(plan jsonx.Object) (per, start, ports float64) {
+	start, ports = number(plan.Get("port_start")), number(plan.Get("ports_per_subscriber"))
+	end := float64(65535)
+	if v := plan.Get("port_end"); v != nil {
+		end = number(v)
+	}
+	if ports <= 0 || end < start {
+		return 0, start, ports
+	}
+	return math.Floor((end + 1 - start) / ports), start, ports
+}
 func CGNATCapacity(plan jsonx.Object) map[string]any {
 	_, public := CIDR4(plan.Get("public_cidr"))
 	_, private := CIDR4(plan.Get("private_cidr"))
-	per := math.Floor((65536 - number(plan.Get("port_start"))) / number(plan.Get("ports_per_subscriber")))
+	per, _, _ := cgnatBlocks(plan)
 	max := float64(public) * per
-	return map[string]any{"public_ips": public, "private_ips": private, "blocks_per_public": per, "max_private_ips": max, "fits": float64(private) <= max, "ratio": math.Min(per, math.Ceil(float64(private)/float64(public)))}
+	return map[string]any{"public_ips": public, "private_ips": private, "blocks_per_public": per, "max_private_ips": max, "fits": float64(private) <= max, "ratio": math.Min(per, math.Ceil(float64(private)/float64(public))), "layout": CGNATLayout(plan), "traceable": CGNATTraceable(plan)}
+}
+
+// cgnatPlace devolve, para o assinante de índice i no bloco privado, o índice do IP público e o bloco de portas.
+// sequential: i -> (i / blocos, i % blocos); netmap: i -> (i % públicos, i / públicos).
+func cgnatPlace(plan jsonx.Object, i, publicSize uint64, per float64) (uint64, float64, bool) {
+	switch CGNATLayout(plan) {
+	case "sequential":
+		return uint64(math.Floor(float64(i) / per)), math.Mod(float64(i), per), true
+	case "netmap":
+		return i % publicSize, float64(i / publicSize), true
+	}
+	return 0, 0, false
 }
 func CGNATForward(plan jsonx.Object, ip string) map[string]any {
 	base, size := CIDR4(plan.Get("private_cidr"))
@@ -56,30 +93,67 @@ func CGNATForward(plan jsonx.Object, ip string) map[string]any {
 	if !valid || address < base || address-base >= size {
 		return nil
 	}
-	ports, start := number(plan.Get("ports_per_subscriber")), number(plan.Get("port_start"))
-	per := math.Floor((65536 - start) / ports)
+	per, start, ports := cgnatBlocks(plan)
 	if per <= 0 {
 		return nil
 	}
-	index := address - base
-	publicIndex := uint64(math.Floor(float64(index) / per))
-	if publicIndex >= pubSize {
+	publicIndex, block, ok := cgnatPlace(plan, address-base, pubSize, per)
+	if !ok || publicIndex >= pubSize || block >= per {
 		return nil
 	}
-	first := start + math.Mod(float64(index), per)*ports
-	return map[string]any{"private_ip": ip, "public_ip": IPv4String(pubBase + publicIndex), "port_start": first, "port_end": first + ports - 1}
+	first := start + block*ports
+	return map[string]any{"private_ip": ip, "public_ip": IPv4String(pubBase + publicIndex), "port_start": first, "port_end": first + ports - 1, "layout": CGNATLayout(plan)}
+}
+
+// CGNATSharers: índices (no bloco privado) dos assinantes que saem pelo IP público informado.
+func CGNATSharers(plan jsonx.Object, ip string) []uint64 {
+	publicBase, publicSize := CIDR4(plan.Get("public_cidr"))
+	_, privateSize := CIDR4(plan.Get("private_cidr"))
+	address, valid := IPv4Number(ip)
+	per, _, _ := cgnatBlocks(plan)
+	if !valid || address < publicBase || address-publicBase >= publicSize || per <= 0 {
+		return nil
+	}
+	offset, out := address-publicBase, []uint64{}
+	for block := uint64(0); block < uint64(per); block++ {
+		var i uint64
+		switch CGNATLayout(plan) {
+		case "sequential":
+			i = offset*uint64(per) + block
+		case "netmap":
+			i = block*publicSize + offset
+		default:
+			return nil
+		}
+		if i < privateSize {
+			out = append(out, i)
+		}
+	}
+	return out
 }
 func CGNATReverse(plan jsonx.Object, ip string, port float64) map[string]any {
 	publicBase, publicSize := CIDR4(plan.Get("public_cidr"))
 	privateBase, privateSize := CIDR4(plan.Get("private_cidr"))
 	address, valid := IPv4Number(ip)
-	if !valid || address < publicBase || address-publicBase >= publicSize || port < number(plan.Get("port_start")) {
+	per, start, ports := cgnatBlocks(plan)
+	if !valid || address < publicBase || address-publicBase >= publicSize || port < start || per <= 0 {
 		return nil
 	}
-	per := math.Floor((65536 - number(plan.Get("port_start"))) / number(plan.Get("ports_per_subscriber")))
-	block := math.Floor((port - number(plan.Get("port_start"))) / number(plan.Get("ports_per_subscriber")))
-	index := float64(address-publicBase)*per + block
-	if block >= per || index >= float64(privateSize) {
+	block := math.Floor((port - start) / ports)
+	if block >= per {
+		return nil
+	}
+	offset := address - publicBase
+	var index float64
+	switch CGNATLayout(plan) {
+	case "sequential":
+		index = float64(offset)*per + block
+	case "netmap":
+		index = block*float64(publicSize) + float64(offset)
+	default:
+		return nil
+	}
+	if index >= float64(privateSize) {
 		return nil
 	}
 	return CGNATForward(plan, IPv4String(privateBase+uint64(index)))
@@ -88,7 +162,24 @@ func CGNATScript(plan jsonx.Object) string {
 	id := plan.Get("id").(string)
 	tag, chain := "nexo-cgnat:"+id[:8], "nexo-cgnat-"+id[:8]
 	capacity := CGNATCapacity(plan)
-	out := []string{fmt.Sprintf("# NexoISP — CGNAT determinístico \"%v\"", plan.Get("name")), fmt.Sprintf("# privado %v -> público %v · %v portas por assinante a partir da %v · até %v assinante(s) por IP público", plan.Get("private_cidr"), plan.Get("public_cidr"), plan.Get("ports_per_subscriber"), plan.Get("port_start"), capacity["ratio"]), "# GERADO PARA REVISÃO: o NexoISP não aplica este script. Confira em laboratório, ajuste a interface de saída e", "# importe em janela de manutenção. Para remover: /ip firewall nat remove [find comment~\"" + tag + "\"]", "/ip firewall nat", fmt.Sprintf("add chain=srcnat src-address=%v action=jump jump-target=%s comment=\"%s\"", plan.Get("private_cidr"), chain, tag)}
+	out := []string{fmt.Sprintf("# NexoISP — CGNAT determinístico \"%v\" (layout %s)", plan.Get("name"), CGNATLayout(plan)), fmt.Sprintf("# privado %v -> público %v · %v portas por assinante a partir da %v · até %v assinante(s) por IP público", plan.Get("private_cidr"), plan.Get("public_cidr"), plan.Get("ports_per_subscriber"), plan.Get("port_start"), capacity["ratio"]), "# GERADO PARA REVISÃO: o NexoISP não aplica este script. Confira em laboratório, ajuste a interface de saída e", "# importe em janela de manutenção. Para remover: /ip firewall nat remove [find comment~\"" + tag + "\"]", "/ip firewall nat", fmt.Sprintf("add chain=srcnat src-address=%v action=jump jump-target=%s comment=\"%s\"", plan.Get("private_cidr"), chain, tag)}
+	base, size := CIDR4(plan.Get("private_cidr"))
+	if CGNATLayout(plan) == "netmap" {
+		// Um bloco privado do tamanho do público por faixa de portas, na ordem dos endereços (padrão do mercado).
+		_, publicSize := CIDR4(plan.Get("public_cidr"))
+		mask := 32 - bitsOf(publicSize)
+		for chunk := uint64(0); chunk*publicSize < size; chunk++ {
+			first := CGNATForward(plan, IPv4String(base+chunk*publicSize))
+			if first == nil {
+				break
+			}
+			for _, proto := range []string{"tcp", "udp"} {
+				out = append(out, fmt.Sprintf("add chain=%s src-address=%s/%d protocol=%s action=netmap to-addresses=%v to-ports=%v-%v comment=\"%s\"", chain, IPv4String(base+chunk*publicSize), mask, proto, plan.Get("public_cidr"), first["port_start"], first["port_end"], tag))
+			}
+		}
+		out = append(out, fmt.Sprintf("add chain=%s action=netmap to-addresses=%v comment=\"%s\"", chain, plan.Get("public_cidr"), tag))
+		return strings.Join(out, "\n") + "\n"
+	}
 	current, first, last := "", "", ""
 	other := func() {
 		if current != "" {
@@ -99,7 +190,6 @@ func CGNATScript(plan jsonx.Object) string {
 			out = append(out, fmt.Sprintf("add chain=%s src-address=%s action=src-nat to-addresses=%s comment=\"%s\"", chain, source, current, tag))
 		}
 	}
-	base, size := CIDR4(plan.Get("private_cidr"))
 	for i := uint64(0); i < size; i++ {
 		block := CGNATForward(plan, IPv4String(base+i))
 		if block == nil {
@@ -117,6 +207,14 @@ func CGNATScript(plan jsonx.Object) string {
 	}
 	other()
 	return strings.Join(out, "\n") + "\n"
+}
+func bitsOf(size uint64) int {
+	n := 0
+	for size > 1 {
+		size >>= 1
+		n++
+	}
+	return n
 }
 func IPv6Subnet(pool string, length int, index int) (string, error) {
 	prefix, err := netip.ParsePrefix(pool)

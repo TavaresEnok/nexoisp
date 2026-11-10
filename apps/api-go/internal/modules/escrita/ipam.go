@@ -197,6 +197,9 @@ func (s Service) cgnatScript(ctx context.Context, tx *db.Tx, id string, _ map[st
 	if err != nil {
 		return nil, err
 	}
+	if !network.CGNATTraceable(plan) {
+		return nil, apierr.New(409, "plano de CGNAT externo: as regras ficam no equipamento dedicado, o NexoISP não gera script")
+	}
 	if err = record(ctx, tx, "cgnat.script_export", "cgnat_plan", id, nil); err != nil {
 		return nil, err
 	}
@@ -234,7 +237,12 @@ func (s Service) cgnatTrace(ctx context.Context, tx *db.Tx, _ string, _ map[stri
 	if err = record(ctx, tx, "cgnat.trace", "cgnat", nil, map[string]any{"ip": ip, "port": port, "at": at}); err != nil {
 		return nil, err
 	}
+	external := []string{}
 	for _, plan := range plans {
+		if !network.CGNATTraceable(plan) {
+			external = append(external, fmt.Sprint(plan.Get("name")))
+			continue
+		}
 		block := network.CGNATReverse(plan, ip, float64(port))
 		if block == nil {
 			continue
@@ -264,7 +272,9 @@ func (s Service) cgnatTrace(ctx context.Context, tx *db.Tx, _ string, _ map[stri
 		return out, nil
 	}
 	note := "Nenhum plano de CGNAT do provedor cobria esse IP público na data informada."
-	if len(plans) > 0 {
+	if len(external) > 0 {
+		note = "Plano de CGNAT de equipamento externo (" + fmt.Sprint(external) + "): o titular só pode ser apontado pelo registro de NAT do próprio equipamento."
+	} else if len(plans) > 0 {
 		note = "A porta não pertence a nenhum bloco do plano vigente na data."
 	}
 	return map[string]any{"found": false, "at": at, "note": note}, nil
@@ -293,6 +303,7 @@ func (s Service) legalIP(ctx context.Context, tx *db.Tx, _ string, b map[string]
 	targets := []map[string]any{}
 	mode := "direct"
 	ipv6 := []jsonx.Object{}
+	ipv6Sessions := []jsonx.Object{}
 	ip := b["ip"].(string)
 	address, _ := netip.ParseAddr(ip)
 	if address.Is6() {
@@ -302,6 +313,15 @@ func (s Service) legalIP(ctx context.Context, tx *db.Tx, _ string, b map[string]
 		if err != nil {
 			return nil, err
 		}
+		accounted, err := rows(ctx, tx, key, 5, ip, lo, hi)
+		if err != nil {
+			return nil, err
+		}
+		if len(accounted) > 1000 {
+			accounted = accounted[:1000]
+		}
+		ipv6Sessions = accounted
+		notes = append(notes, "IPv6 dinâmico: sessões do RADIUS integrado cujo prefixo (delegado ou da WAN) contém o endereço consultado, inclusive prefixos entregues pelo pool do próprio concentrador. Concentradores que não relatam o prefixo no accounting não aparecem aqui.")
 		notes = append(notes, "IPv6: delegações cujo período de titularidade intersecta o intervalo consultado. A liberação encerra o período sem apagar o histórico. Delegações removidas antes da implantação deste histórico não são recuperadas; o registro cadastral não comprova uma sessão de rede.")
 		if b["port"] != nil {
 			notes = append(notes, "A porta não se aplica a IPv6 (não há CGNAT).")
@@ -316,6 +336,11 @@ func (s Service) legalIP(ctx context.Context, tx *db.Tx, _ string, b map[string]
 		}
 		if len(plans) > 0 {
 			for _, plan := range plans {
+				if !network.CGNATTraceable(plan) {
+					notes = append(notes, fmt.Sprintf("O plano de CGNAT \"%v\" é de equipamento externo (alocação dinâmica ou aleatória de portas): o NexoISP não calcula o titular. Consulte o registro de NAT (log de alocação de blocos) do equipamento de CGNAT para este IP, porta e horário; nenhum assinante é indicado por cálculo.", plan.Get("name")))
+					continue
+				}
+				notes = append(notes, fmt.Sprintf("Cálculo pelo layout \"%v\" declarado no plano \"%v\": só vale se o equipamento aplica exatamente essas regras (sequencial = script gerado pelo NexoISP; netmap = regras netmap com blocos privados contíguos). Confirme a configuração do CGNAT na data consultada.", network.CGNATLayout(plan), plan.Get("name")))
 				if b["port"] != nil {
 					block := network.CGNATReverse(plan, ip, num(b["port"]))
 					if block != nil {
@@ -324,12 +349,8 @@ func (s Service) legalIP(ctx context.Context, tx *db.Tx, _ string, b map[string]
 						notes = append(notes, fmt.Sprintf("A porta %v não pertence a nenhum bloco do plano de CGNAT \"%v\".", b["port"], plan.Get("name")))
 					}
 				} else {
-					public, _ := network.CIDR4(plan.Get("public_cidr"))
-					private, size := network.CIDR4(plan.Get("private_cidr"))
-					per := uint64(math.Floor((65536 - num(plan.Get("port_start"))) / num(plan.Get("ports_per_subscriber"))))
-					number, _ := network.IPv4Number(ip)
-					pi := number - public
-					for i := pi * per; i < min((pi+1)*per, size); i++ {
+					private, _ := network.CIDR4(plan.Get("private_cidr"))
+					for _, i := range network.CGNATSharers(plan, ip) {
 						block := network.CGNATForward(plan, network.IPv4String(private+i))
 						if block != nil {
 							add(plan, block)
@@ -394,6 +415,10 @@ func (s Service) legalIP(ctx context.Context, tx *db.Tx, _ string, b map[string]
 			display = earliest.(jsonx.Time).UTC().Format("2006-01-02T15:04:05.000Z")
 		}
 		notes = append(notes, "O registro de sessões deste provedor começa em "+display+": períodos anteriores não podem ser respondidos por este sistema.")
+	}
+	sessions = append(sessions, ipv6Sessions...)
+	if mode == "ipv6" && len(ipv6) == 0 && len(ipv6Sessions) == 0 {
+		notes = append(notes, "Nenhuma delegação nem sessão com este prefixo IPv6 no período informado.")
 	}
 	if mode != "ipv6" && len(sessions) == 0 {
 		notes = append(notes, "Nenhuma sessão encontrada com este endereço no período informado.")

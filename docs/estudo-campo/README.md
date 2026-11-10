@@ -44,6 +44,10 @@ Limite: os backups só têm configuração. O formato das saídas de `display`/`
 - Autenticação por serial (100% nas Huawei).
 - Tolerância a RouterOS 6 pela API.
 
+## Situação (10/11/2026)
+
+Grupo A feito, exceto a descrição legível e a adoção de ONUs existentes, que dependem de comando validado em OLT real (ver `docs/DECISOES.md`). Feito: layout e última porta do CGNAT, aviso e recusa de cálculo para CGNAT externo, IPv6 pelo accounting, gemport e VLAN do cliente por perfil, native-vlan, leitura com várias service-ports e leitura em lote que isola a ONU com resposta inesperada.
+
 ## Prioridades propostas
 
 **A. Corrigir o que daria resultado errado**

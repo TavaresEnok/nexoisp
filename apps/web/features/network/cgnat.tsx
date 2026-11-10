@@ -44,12 +44,19 @@ const planSchema = z.object({
   public_cidr: z.string(),
   ports_per_subscriber: n,
   port_start: n,
+  port_end: n.nullable().optional(),
+  layout: z.enum(["sequential", "netmap", "external"]).default("sequential"),
   created_at: z.string(),
   created_by_name: z.string().nullable(),
   retired_at: z.string().nullable(),
   capacity: capacitySchema,
 });
 type Plan = z.infer<typeof planSchema>;
+const layoutLabels: Record<Plan["layout"], string> = {
+  sequential: "Regras geradas pelo NexoISP",
+  netmap: "Netmap MikroTik (blocos contíguos)",
+  external: "Equipamento externo (Hillstone, A10…)",
+};
 const blockSchema = z.object({
   private_ip: z.string(),
   public_ip: z.string(),
@@ -109,8 +116,13 @@ export function CgnatDirectory() {
             cells: [
               plan.name,
               `${plan.private_cidr} → ${plan.public_cidr}`,
-              plan.ports_per_subscriber,
-              plan.capacity.ratio,
+              <>
+                {plan.ports_per_subscriber}
+                <small className="table-subline">
+                  {layoutLabels[plan.layout]}
+                </small>
+              </>,
+              plan.layout === "external" ? "Sem cálculo" : plan.capacity.ratio,
               <>
                 {stamp(plan.created_at)}
                 <small className="table-subline">
@@ -125,15 +137,17 @@ export function CgnatDirectory() {
             ],
             actions: (
               <div className="erp-inline-actions">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  aria-label={`Mapa de ${plan.name}`}
-                  onClick={() => setMapped(plan)}
-                >
-                  Mapa
-                </Button>
-                {write && (
+                {plan.layout !== "external" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    aria-label={`Mapa de ${plan.name}`}
+                    onClick={() => setMapped(plan)}
+                  >
+                    Mapa
+                  </Button>
+                )}
+                {write && plan.layout !== "external" && (
                   <>
                     <ActionButton
                       onClick={() =>
@@ -203,8 +217,10 @@ function PlanEditor({
     name: "",
     private_pool_id: "",
     public_pool_id: "",
-    ports_per_subscriber: "2000",
+    ports_per_subscriber: "2016",
     port_start: "1024",
+    port_end: "",
+    layout: "sequential",
   });
   const [capacity, setCapacity] = useState<z.infer<
     typeof capacitySchema
@@ -213,6 +229,7 @@ function PlanEditor({
     ...values,
     ports_per_subscriber: Number(values.ports_per_subscriber),
     port_start: Number(values.port_start),
+    port_end: values.port_end ? Number(values.port_end) : null,
   });
   const set = (key: keyof typeof values, value: string) => {
     setValues((previous) => ({ ...previous, [key]: value }));
@@ -282,6 +299,25 @@ function PlanEditor({
                 </select>
               </FormField>
             ))}
+            <FormField label="Como o equipamento faz o CGNAT">
+              <select
+                className="commercial-select"
+                value={values.layout}
+                onChange={(event) => set("layout", event.target.value)}
+              >
+                {Object.entries(layoutLabels).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+            <p className="profile-footnote">
+              A consulta de IP para ofício só aponta um assinante quando conhece
+              a regra do equipamento. Em CGNAT dedicado com alocação dinâmica ou
+              aleatória de portas, o titular vem do registro de NAT do próprio
+              equipamento e o NexoISP não faz o cálculo.
+            </p>
             <div className="erp-columns">
               <FormField label="Portas por assinante">
                 <Input
@@ -303,6 +339,16 @@ function PlanEditor({
                   max={65000}
                   value={values.port_start}
                   onChange={(event) => set("port_start", event.target.value)}
+                />
+              </FormField>
+              <FormField label="Última porta usada (opcional)">
+                <Input
+                  type="number"
+                  min={1087}
+                  max={65535}
+                  placeholder="65535"
+                  value={values.port_end}
+                  onChange={(event) => set("port_end", event.target.value)}
                 />
               </FormField>
             </div>

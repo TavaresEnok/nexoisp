@@ -105,10 +105,21 @@ class HuaweiCliEmulator:
             if srv not in d["srv_profiles"]:
                 return "  Failure: The service profile does not exist"
             used = {x["id"] for x in d["onts"] if x["fsp"] == fsp}
-            oid = next(i for i in range(128) if i not in used)
+            free = [i for i in range(128) if i not in used]
+            if not free:  # PON cheia: há PONs reais com 128 ONTs
+                return "  Failure: The number of ONTs on the port has reached the upper limit"
+            oid = free[0]
             d["onts"].append({"fsp": fsp, "id": oid, "sn": sn, "line": line, "srv": srv, "desc": desc, "at": time.time()})
             d["autofind"] = [x for x in d["autofind"] if x[1] != sn]
             return f"  Number of ONTs that can be added: 1, success: 1\n  PortID :{port}, ONTID :{oid}\n"
+        m = re.fullmatch(r"ont port native-vlan (\d+) (\d+) eth (\d+) vlan (\d+) priority 0", c)
+        if m and self.mode == "if":
+            fsp, oid = f"{self.fs}/{m.group(1)}", int(m.group(2))
+            o = next((x for x in d["onts"] if x["fsp"] == fsp and x["id"] == oid), None)
+            if o is None:
+                return "  Failure: The ONT does not exist"
+            o.setdefault("native", {})[int(m.group(3))] = int(m.group(4))
+            return ""
         m = re.fullmatch(r"ont delete (\d+) (\d+)", c)
         if m and self.mode == "if":
             fsp, oid = f"{self.fs}/{m.group(1)}", int(m.group(2))

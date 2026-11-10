@@ -33,7 +33,7 @@ func (s Service) infrastructureOperations(ops map[string]operation) {
 	ops["PATCH /api/ipam/pools/:id"] = operation{s.updatePool, obj(o(f("name", name.Opt()), f("notes", text(500).Nullish()), f("device_id", uuid.Nullish())))}
 	ops["DELETE /api/ipam/allocations/:id"] = operation{s.releaseIPv4, nil}
 	ops["DELETE /api/ipam/pools/:id"] = operation{s.deletePool, nil}
-	plan := o(f("name", name), f("public_pool_id", uuid), f("private_pool_id", uuid), f("ports_per_subscriber", n().Int().Min(64).Max(32768)), f("port_start", n().Int().Min(1024).Max(65000).Def(float64(1024))))
+	plan := o(f("name", name), f("public_pool_id", uuid), f("private_pool_id", uuid), f("ports_per_subscriber", n().Int().Min(64).Max(32768)), f("port_start", n().Int().Min(1024).Max(65000).Def(float64(1024))), f("layout", e("sequential", "netmap", "external").Def("sequential")), f("port_end", n().Int().Min(1087).Max(65535).Nullish()))
 	ops["POST /api/cgnat/plans/check"] = operation{s.checkCGNAT, obj(plan)}
 	ops["POST /api/cgnat/plans"] = operation{s.createCGNAT, obj(plan)}
 	ops["POST /api/cgnat/plans/:id/retire"] = operation{s.retireCGNAT, nil}
@@ -277,6 +277,9 @@ func checkedPlan(ctx context.Context, tx *db.Tx, b map[string]any) (jsonx.Object
 	if num(public.Get("family")) != 4 || num(private.Get("family")) != 4 {
 		return nil, nil, apierr.New(400, "CGNAT é calculado apenas para IPv4")
 	}
+	if b["port_end"] != nil && num(b["port_end"]) < num(b["port_start"])+63 {
+		return nil, nil, apierr.New(400, "a última porta precisa ficar ao menos 64 portas acima da porta inicial")
+	}
 	plan := jsonx.Object{}
 	for k, v := range b {
 		plan.Set(k, v)
@@ -310,11 +313,11 @@ func (s Service) createCGNAT(ctx context.Context, tx *db.Tx, _ string, b map[str
 		return nil, apierr.New(409, "este bloco de assinantes já tem um plano de CGNAT vigente; encerre-o antes de criar outro")
 	}
 	c := auth.From(ctx)
-	row, err := one(ctx, tx, key, 1, c.TenantID, b["name"], b["public_pool_id"], b["private_pool_id"], plan.Get("public_cidr"), plan.Get("private_cidr"), b["ports_per_subscriber"], b["port_start"], c.UserID)
+	row, err := one(ctx, tx, key, 1, c.TenantID, b["name"], b["public_pool_id"], b["private_pool_id"], plan.Get("public_cidr"), plan.Get("private_cidr"), b["ports_per_subscriber"], b["port_start"], c.UserID, b["layout"], b["port_end"])
 	if err != nil {
 		return nil, err
 	}
-	if err = record(ctx, tx, "cgnat.plan_create", "cgnat_plan", row.Get("id"), map[string]any{"public": row.Get("public_cidr"), "private": row.Get("private_cidr"), "ports": b["ports_per_subscriber"]}); err != nil {
+	if err = record(ctx, tx, "cgnat.plan_create", "cgnat_plan", row.Get("id"), map[string]any{"public": row.Get("public_cidr"), "private": row.Get("private_cidr"), "ports": b["ports_per_subscriber"], "layout": b["layout"], "port_end": b["port_end"]}); err != nil {
 		return nil, err
 	}
 	row.Set("capacity", capacity)
