@@ -106,3 +106,14 @@ Limites do que dá para validar pelo meu caminho de acesso (túnel pelo jump):
 
 Ou seja: o transporte está pronto e provado na conexão; os drivers VSOL/Parks por cima dependem de confirmar a CLI de
 cada um por um caminho de acesso representativo da produção.
+
+## Como cada marca entrega o backup de configuração (achado que define o próximo passo)
+
+Dois grupos, confirmados em campo:
+
+| Grupo | Marcas | Como o backup é feito | Status no NexoISP |
+|---|---|---|---|
+| **Despeja na tela** (`show running-config`/`display current-configuration`) | Huawei, ZTE, Datacom, MikroTik | O driver lê a saída e guarda | **Pronto** (drivers Huawei, ZTE, Datacom; MikroTik já existia) |
+| **Por arquivo (TFTP/FTP)** | Intelbras (cmd `backup`), FiberHome (`upload ftp config`), VSOL, Parks | O equipamento ENVIA o arquivo a um servidor TFTP/FTP; não há `show` que despeje a config | **Pendente**: exige um subsistema de recebimento (o agente sobe um TFTP/FTP efêmero, manda o equipamento enviar e guarda o arquivo) |
+
+No Intelbras OLT8820 confirmado: `show running-config` volta vazio e `show configuration` só devolve o banner — a config sai pelo comando `backup` para TFTP. O backup center implementa esses fluxos por arquivo. Para o NexoISP cobrir essas marcas no backup semanal, o próximo passo é um **coletor TFTP/FTP no agente**, reaproveitando o transporte OS já pronto para disparar o comando de envio no equipamento.
