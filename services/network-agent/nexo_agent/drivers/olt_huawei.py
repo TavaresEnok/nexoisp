@@ -139,20 +139,19 @@ def _safe(value: str, what: str) -> str:
     return value
 
 
-# ------------------------------------------------------------------ transporte real (SSH)
+# ------------------------------------------------------------------ transporte real (SSH ou telnet)
 
 class NetmikoCli:
-    """Sessão SSH via netmiko (device_type huawei_smartax). Lê até o prompt aparecer (sem esperas fixas) e responde
-    às confirmações "{ <cr>|... }:" e à paginação "---- More ----"."""
+    """Sessão CLI via netmiko (huawei_smartax por SSH moderno, SSH legado ou telnet; ver cli_transport). Lê até o prompt
+    aparecer (sem esperas fixas) e responde às confirmações "{ <cr>|... }:" e à paginação "---- More ----"."""
 
     _END = r"(?:[>#]|\}\s*:|More[^\n]*----)\s*$"
 
-    def __init__(self, host: str, port: int, username: str, password: str, known_hosts_file: str):
-        from netmiko import ConnectHandler
-        from ..ssh_trust import ssh_parameters
-        security = ssh_parameters(host, port, known_hosts_file)
-        self._c = ConnectHandler(device_type="huawei_smartax", host=host, port=port, username=username, password=password,
-                                 conn_timeout=15, auth_timeout=15, banner_timeout=15, fast_cli=True, global_delay_factor=0.1, **security)
+    def __init__(self, host: str, port: int, username: str, password: str, known_hosts_file: str = "", options: Optional[dict] = None):
+        from ..cli_transport import connect
+        cred = {**(options or {}), "known_hosts_file": known_hosts_file or (options or {}).get("known_hosts_file", "")}
+        self._c = connect("huawei_smartax", host, port, username, password, cred,
+                          conn_timeout=15, auth_timeout=15, banner_timeout=15, fast_cli=True, global_delay_factor=0.1)
         try:
             for cmd in ("enable", "undo smart", "undo interactive", "scroll 512", "config"):
                 check_failure(self._send(cmd))
@@ -201,7 +200,9 @@ class HuaweiOltDriver:
     simulated = False
 
     def __init__(self, connect, gemport: int = 1, *, user_vlan: Optional[int] = None, line_profiles: Optional[dict] = None,
-                 native_vlan_eth=(1,), tr069_profile_id: Optional[int] = None, allow_writes=True, expected_product=None, expected_firmware=None):
+                 native_vlan_eth=(1,), tr069_profile_id: Optional[int] = None, allow_writes=True, expected_product=None, expected_firmware=None,
+                 transport_note: str = ""):
+        self.transport_note = transport_note
         self.tr069_profile_id = int(tr069_profile_id) if tr069_profile_id is not None else None
         self._connect, self.gemport, self.user_vlan = connect, gemport, user_vlan
         self.line_profiles = {str(k): dict(v) for k, v in (line_profiles or {}).items()}
@@ -219,10 +220,12 @@ class HuaweiOltDriver:
             raise RuntimeError(f"credencial '{dev.get('credential_ref')}' não encontrada no arquivo local do agente")
         if not dev.get("host"):
             raise RuntimeError("OLT sem endereço configurado")
-        host, port = dev["host"], int(dev.get("api_port") or 22)
+        from ..cli_transport import default_port, note
+        host, port = dev["host"], int(dev.get("api_port") or default_port(cred))
         if cred.get("allow_writes") is True and (not cred.get("expected_product") or not cred.get("expected_firmware")):
             raise ValueError("escrita OLT exige modelo e firmware esperados explícitos na configuração local")
-        return cls(lambda: NetmikoCli(host, port, cred["username"], cred["password"], cred.get("known_hosts_file", "")), int(cred.get("gemport", 1)),
+        return cls(lambda: NetmikoCli(host, port, cred["username"], cred["password"], cred.get("known_hosts_file", ""), options=cred), int(cred.get("gemport", 1)),
+                   transport_note=note(cred),
                    user_vlan=int(cred["user_vlan"]) if cred.get("user_vlan") is not None else None,
                    line_profiles=cred.get("line_profiles") or {}, native_vlan_eth=cred.get("native_vlan_eth", [1]),
                    tr069_profile_id=cred.get("tr069_profile_id"),
@@ -262,7 +265,7 @@ class HuaweiOltDriver:
         if not product or not firmware:
             raise OltCommandError("modelo/firmware não reconhecido; capacidade não confirmada")
         return {"ok": True, "product": product, "firmware": firmware, "homologated": False, "detail": f"{product} {firmware}"
-                + " — driver não homologado em equipamento real"}
+                + " — driver não homologado em equipamento real" + (f"; {self.transport_note}" if self.transport_note else "")}
 
     def _require_write_capability(self):
         if not self.allow_writes:

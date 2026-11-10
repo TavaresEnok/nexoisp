@@ -19,3 +19,9 @@ A atualização de cryptography para uma versão corrigida, como a linha 50, é 
 ## Restrição do transporte SSH — 27/10/2026
 
 A frente B10 passou a exigir known_hosts explícito/strict e a desabilitar `ssh-rsa` em `keys`/`pubkeys`, KEX SHA-1 e cifras/MACs legados no `NetmikoCli`. Handshake loopback com servidor exclusivamente RSA/SHA-1 foi recusado antes da senha, assim como chave divergente. Isso restringe o caminho alcançável do advisory Paramiko no agente; não atualiza a biblioteca nem elimina os demais advisories. Ver `docs/LOTE12-B10-TRANSPORTE.md` (tag `arquivo/pre-limpeza-2026-11-09`) na raiz do repositório. Equipamentos que só suportam algoritmos negados não recebem fallback; firmware real continua dependente de H. Lock/versões preservados.
+
+## SSH antigo e telnet opt-in — 10/11/2026
+
+A pedido do dono, o agente 0.6.4 passou a aceitar, por OLT e só quando a credencial local pede, o perfil `ssh_profile: legacy` (sem os bloqueios de algoritmo
+descritos acima) e `transport: telnet`. **Com o perfil legado, o GHSA-r374-rxx8-8654 volta a ser alcançável para aquela OLT.** A chave do equipamento continua
+fixada e verificada antes da senha. Telnet não tem verificação de identidade nem sigilo. O padrão continua o perfil restrito. Ver `nexo_agent/cli_transport.py`.

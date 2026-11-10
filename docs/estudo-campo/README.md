@@ -48,7 +48,7 @@ Limite: os backups só têm configuração. O formato das saídas de `display`/`
 
 Grupo A feito, exceto a descrição legível e a adoção de ONUs existentes, que dependem de comando validado em OLT real (ver `docs/DECISOES.md`). Feito: layout e última porta do CGNAT, aviso e recusa de cálculo para CGNAT externo, IPv6 pelo accounting, gemport e VLAN do cliente por perfil, native-vlan, leitura com várias service-ports e leitura em lote que isola a ONU com resposta inesperada.
 
-Grupos B e C feitos em seguida (suspensão por lista e por pool, api-ssl com certificado fixado, modelo de bloqueio, interim padrão, velocidade em giga, EPON por MAC, TR-069 por OLT, VLAN sugerida, alerta de relógio). Ficaram para quando houver equipamento: adoção de ONUs existentes, telnet/SSH legado, drivers de outros fabricantes, catálogo de perfis lido da OLT e CoA; e, por tamanho, a etapa de aviso na navegação. Detalhes em `docs/DECISOES.md`.
+Grupos B e C feitos em seguida (suspensão por lista e por pool, api-ssl com certificado fixado, modelo de bloqueio, interim padrão, velocidade em giga, EPON por MAC, TR-069 por OLT, VLAN sugerida, alerta de relógio). Telnet e SSH antigo nas OLTs feitos no agente 0.6.4 (opt-in por OLT). Ficaram para quando houver equipamento: adoção de ONUs existentes, drivers de outros fabricantes, catálogo de perfis lido da OLT e CoA; e, por tamanho, a etapa de aviso na navegação. Detalhes em `docs/DECISOES.md`.
 
 ## Prioridades propostas
 
@@ -86,6 +86,6 @@ Grupos B e C feitos em seguida (suspensão por lista e por pool, api-ssl com cer
 **D. Depois, com equipamento**
 
 - Drivers ZTE, VSOL, FiberHome, Intelbras e Datacom, nessa ordem de base instalada.
-- Transporte CLI com telnet e SSH legado.
+- ~~Transporte CLI com telnet e SSH legado~~ (feito no agente 0.6.4).
 - CoA para troca de plano.
 - Switches passivos no NOC.

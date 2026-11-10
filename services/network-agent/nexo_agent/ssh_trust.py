@@ -39,8 +39,19 @@ def _private_file(path: Path, *, existing=True):
         raise ValueError("SSH trust file exceeds limit")
 
 
-def ssh_parameters(host: str, port: int, known_hosts: str) -> dict:
-    """Paramiko performs the actual host-key comparison BEFORE authentication."""
+# Algoritmos negados no perfil moderno. O perfil legado (opt-in por OLT na credencial local) os aceita, mas só depois
+# dos modernos: o paramiko sempre negocia o mais forte que os dois lados têm em comum.
+LEGACY_ALGORITHMS = {"keys": ["ssh-rsa"], "pubkeys": ["ssh-rsa"],
+                     "kex": ["diffie-hellman-group1-sha1", "diffie-hellman-group14-sha1", "diffie-hellman-group-exchange-sha1"],
+                     "macs": ["hmac-md5", "hmac-md5-96", "hmac-sha1", "hmac-sha1-96"],
+                     "ciphers": ["3des-cbc", "blowfish-cbc", "aes128-cbc", "aes192-cbc", "aes256-cbc", "arcfour", "arcfour128", "arcfour256"]}
+
+
+def ssh_parameters(host: str, port: int, known_hosts: str, legacy: bool = False) -> dict:
+    """Paramiko performs the actual host-key comparison BEFORE authentication, in both profiles.
+
+    legacy=True keeps the pinned host key but accepts SHA-1 KEX/MACs, CBC/3DES ciphers and ssh-rsa/ssh-dss
+    signatures, which older OLT firmware still requires."""
     from paramiko import HostKeys
     label = host_label(host, port)
     if not known_hosts or not Path(known_hosts).is_absolute():
@@ -50,11 +61,8 @@ def ssh_parameters(host: str, port: int, known_hosts: str) -> dict:
     keys = HostKeys(str(path))
     if not keys.lookup(label):
         raise ValueError("SSH host key is absent from the configured trust file")
-    return {"ssh_strict": True, "system_host_keys": False, "alt_host_keys": True, "alt_key_file": str(path),
-            "disabled_algorithms": {"keys": ["ssh-rsa"], "pubkeys": ["ssh-rsa"],
-                                    "kex": ["diffie-hellman-group1-sha1", "diffie-hellman-group14-sha1", "diffie-hellman-group-exchange-sha1"],
-                                    "macs": ["hmac-md5", "hmac-md5-96", "hmac-sha1", "hmac-sha1-96"],
-                                    "ciphers": ["3des-cbc", "blowfish-cbc", "aes128-cbc", "aes192-cbc", "aes256-cbc", "arcfour", "arcfour128", "arcfour256"]}}
+    disabled = {} if legacy else {k: list(v) for k, v in LEGACY_ALGORITHMS.items()}
+    return {"ssh_strict": True, "system_host_keys": False, "alt_host_keys": True, "alt_key_file": str(path), "disabled_algorithms": disabled}
 
 
 def fingerprint(key) -> str:
@@ -70,7 +78,7 @@ def _audit(path: Path, record: dict):
         os.fsync(stream.fileno())
 
 
-def install_key(path: str, host: str, port: int, public_key: str, expected: str, reason: str, previous: str = "") -> dict:
+def install_key(path: str, host: str, port: int, public_key: str, expected: str, reason: str, previous: str = "", legacy: bool = False) -> dict:
     """Atomic local update with compare-and-swap and a fsynced attempt journal.
 
     An interrupted update is recoverable from known_hosts + its .audit.jsonl;
@@ -89,10 +97,11 @@ def install_key(path: str, host: str, port: int, public_key: str, expected: str,
     entry = HostKeyEntry.from_line(f"{label} {parts[0]} {parts[1]}")
     if entry is None or entry.key is None or fingerprint(entry.key) != expected:
         raise ValueError("public key does not match the independently verified fingerprint")
-    if entry.key.get_name() not in ("ssh-ed25519", "ecdsa-sha2-nistp256", "ecdsa-sha2-nistp384", "ecdsa-sha2-nistp521", "ssh-rsa"):
-        raise ValueError("unsupported host key type")
-    if entry.key.get_name() == "ssh-rsa" and entry.key.get_bits() < 2048:
-        raise ValueError("RSA host key must have at least 2048 bits and negotiate RSA/SHA2")
+    allowed = ("ssh-ed25519", "ecdsa-sha2-nistp256", "ecdsa-sha2-nistp384", "ecdsa-sha2-nistp521", "ssh-rsa") + (("ssh-dss",) if legacy else ())
+    if entry.key.get_name() not in allowed:
+        raise ValueError("unsupported host key type (ssh-dss only with --legacy)")
+    if entry.key.get_name() == "ssh-rsa" and entry.key.get_bits() < (1024 if legacy else 2048):
+        raise ValueError("RSA host key must have at least 2048 bits (1024 with --legacy)")
     _private_file(target, existing=False)
     lock = target.with_name(target.name + ".lock")
     _private_file(lock, existing=False)
@@ -159,8 +168,9 @@ def main():
     parser.add_argument("--fingerprint", required=True)
     parser.add_argument("--previous", default="")
     parser.add_argument("--reason", required=True)
+    parser.add_argument("--legacy", action="store_true", help="accept ssh-dss and 1024-bit RSA host keys of old firmware")
     args = parser.parse_args()
-    print(json.dumps(install_key(args.known_hosts, args.host, args.port, args.public_key, args.fingerprint, args.reason, args.previous)))
+    print(json.dumps(install_key(args.known_hosts, args.host, args.port, args.public_key, args.fingerprint, args.reason, args.previous, args.legacy)))
 
 
 if __name__ == "__main__":

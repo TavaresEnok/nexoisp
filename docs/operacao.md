@@ -190,6 +190,14 @@ Ver `docs/lab-pppoe.md` (passos 1 e 2). Resumo: `infra/site/` com `.env`, `certs
   ```
   A impressão digital aparece como `fingerprint=` no último comando. Restrinja a `api-ssl` ao IP do agente. Com o **RADIUS integrado** a API não é necessária para
   desconectar: a desconexão usa DM (porta 3799, `/radius incoming set accept=yes`), já ligada em 87% dos concentradores estudados.
+- **Acesso às OLTs: SSH antigo e telnet (agente 0.6.4+):** o padrão é SSH moderno com a chave do equipamento fixada. Muitas OLTs em campo só aceitam SSH com
+  algoritmos antigos (SHA-1, CBC/3DES, chave `ssh-rsa`/`ssh-dss`) ou só telnet. Liga-se por OLT, na credencial em `credentials.json`; não há recuo automático:
+  - SSH antigo: `"ssh_profile": "legacy"`. A chave do equipamento continua obrigatória e fixada; os algoritmos modernos seguem preferidos quando o equipamento os
+    tiver. Para fixar uma chave `ssh-dss` ou RSA de 1024 bits: `python -m nexo_agent.ssh_trust ... --legacy`.
+  - Telnet: `"transport": "telnet", "allow_telnet": true` (porta padrão 23). Login e senha trafegam em claro e não há como confirmar que o equipamento é o
+    certo: use só em rede de gerência isolada, com usuário próprio do NexoISP.
+  - `"enable_password"` quando o firmware pedir senha no `enable`.
+  O estado do equipamento no painel avisa quando o acesso é por SSH antigo ou telnet. SSH versão 1 não é suportado.
 - **Relógio do concentrador:** o accounting usa o horário enviado pelo NAS. 44% dos concentradores estudados estavam sem NTP; configure
   `/system ntp client set enabled=yes` (v6: `primary-ntp=`; v7: `servers=`) antes de usar a consulta de ofício.
 

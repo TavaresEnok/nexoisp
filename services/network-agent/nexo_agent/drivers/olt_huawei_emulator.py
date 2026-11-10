@@ -1,7 +1,7 @@
 """EMULADOR da CLI Huawei SmartAX — escrito por nós a partir de guias públicos, SOMENTE para desenvolvimento e testes.
 Não é software da Huawei e não reproduz o firmware: serve para exercitar o driver sem equipamento. Passar aqui NÃO é homologação.
 
-Uso como servidor SSH de laboratório:  python -m nexo_agent.drivers.olt_huawei_emulator <porta> <arquivo_de_estado.json>"""
+Uso como servidor de laboratório:  python -m nexo_agent.drivers.olt_huawei_emulator <porta> <arquivo_de_estado.json> [ssh|ssh-legacy|telnet]"""
 import json
 import os
 import re
@@ -169,17 +169,40 @@ class HuaweiCliEmulator:
         return "                    ^\n  % Unknown command, the error locates at '^'"
 
 
-def serve(port: int, state_path: str):  # pragma: no cover - servidor de laboratório
-    """Servidor SSH mínimo (paramiko) expondo o emulador. Usuário/senha do laboratório: emu / emu-lab."""
-    import socket
-    import paramiko
+BANNER = "\r\n  Huawei Integrated Access Software (EMULADOR NexoISP - nao e equipamento real).\r\n\r\n"
+LAB_USER = ("emu", "emu-lab")
+# Só algoritmos antigos, como o firmware das OLTs mais velhas: obriga o cliente a usar o perfil legado.
+LEGACY_ONLY = {"kex": ("diffie-hellman-group1-sha1", "diffie-hellman-group14-sha1"), "ciphers": ("aes128-cbc", "3des-cbc"),
+               "digests": ("hmac-sha1", "hmac-md5"), "key_types": ("ssh-rsa",)}
 
-    key = paramiko.RSAKey.generate(2048)
-    state = OltState(state_path)
+
+def shell(state: "OltState", send, recv, banner: bool = True):  # pragma: no cover - exercitado pelos testes de transporte
+    """Laço da CLI emulada sobre qualquer canal (send/recv de bytes ou str)."""
+    cli = HuaweiCliEmulator(state)
+    cli.mode = "user"
+    send((BANNER if banner else "") + cli.prompt())
+    buf = ""
+    while True:
+        data = recv(1024)
+        if not data:
+            return
+        for chr_ in data.decode("utf-8", "ignore") if isinstance(data, bytes) else data:
+            if chr_ in "\r\n":
+                send("\r\n")
+                out = cli.run(buf) if buf.strip() else ""
+                buf = ""
+                send((out.replace("\n", "\r\n") + "\r\n" if out else "") + "\r\n" + cli.prompt())
+            elif chr_ != "\x00":
+                buf += chr_
+                send(chr_)
+
+
+def ssh_client(conn, state: "OltState", key, legacy_only: bool = False):  # pragma: no cover
+    import paramiko
 
     class Srv(paramiko.ServerInterface):
         def check_auth_password(self, u, p):
-            return paramiko.AUTH_SUCCESSFUL if (u, p) == ("emu", "emu-lab") else paramiko.AUTH_FAILED
+            return paramiko.AUTH_SUCCESSFUL if (u, p) == LAB_USER else paramiko.AUTH_FAILED
 
         def check_channel_request(self, kind, chanid):
             return paramiko.OPEN_SUCCEEDED if kind == "session" else paramiko.OPEN_FAILED_ADMINISTRATIVELY_PROHIBITED
@@ -190,46 +213,98 @@ def serve(port: int, state_path: str):  # pragma: no cover - servidor de laborat
         def check_channel_shell_request(self, channel):
             return True
 
-    def client(conn):
-        t = paramiko.Transport(conn)
-        t.add_server_key(key)
-        try:
-            t.start_server(server=Srv())
-            ch = t.accept(20)
-            if ch is None:
-                return
-            cli = HuaweiCliEmulator(state)
-            cli.mode = "user"
-            ch.send(f"\r\n  Huawei Integrated Access Software (EMULADOR NexoISP - nao e equipamento real).\r\n\r\n{cli.prompt()}")
-            buf = ""
-            while True:
-                data = ch.recv(1024)
-                if not data:
-                    break
-                for chr_ in data.decode("utf-8", "ignore"):
-                    if chr_ in "\r\n":
-                        ch.send("\r\n")
-                        out = cli.run(buf) if buf.strip() else ""
-                        buf = ""
-                        ch.send((out.replace("\n", "\r\n") + "\r\n" if out else "") + "\r\n" + cli.prompt())
-                    else:
-                        buf += chr_
-                        ch.send(chr_)
-        except Exception:
-            pass
-        finally:
-            t.close()
+    t = paramiko.Transport(conn)
+    t.add_server_key(key)
+    if legacy_only:
+        opts = t.get_security_options()
+        for name, values in LEGACY_ONLY.items():
+            setattr(opts, name, values)
+    try:
+        t.start_server(server=Srv())
+        ch = t.accept(20)
+        if ch is not None:
+            shell(state, lambda x: ch.send(x), ch.recv)
+    except Exception:
+        pass
+    finally:
+        t.close()
 
+
+def _strip_iac(data: bytes) -> bytes:
+    """Descarta a negociação de opções do telnet (IAC ...); o emulador não negocia nada."""
+    out, i = bytearray(), 0
+    while i < len(data):
+        if data[i] == 255 and i + 1 < len(data):
+            i += 3 if data[i + 1] in (251, 252, 253, 254) else 2
+            continue
+        out.append(data[i]); i += 1
+    return bytes(out)
+
+
+def telnet_client(conn, state: "OltState"):  # pragma: no cover
+    """Login no formato das OLTs Huawei por telnet (">>User name:" / ">>User password:")."""
+    def send(x):
+        conn.sendall(x.encode() if isinstance(x, str) else x)
+
+    def recv(n):
+        return _strip_iac(conn.recv(n))
+
+    def line(echo: bool) -> str:
+        buf = ""
+        while True:
+            data = recv(1)
+            if not data:
+                raise EOFError
+            c = data.decode("utf-8", "ignore")
+            if c in "\r\n":
+                if buf:
+                    send("\r\n")
+                    return buf
+                continue
+            if c != "\x00":
+                buf += c
+                if echo:
+                    send(c)
+    try:
+        send(BANNER)
+        for _ in range(3):
+            send(">>User name:")
+            user = line(True)
+            send(">>User password:")
+            password = line(False)
+            if (user, password) == LAB_USER:
+                shell(state, send, recv, banner=False)
+                return
+            send("\r\n  Username or password invalid.\r\n\r\n")
+    except (OSError, EOFError):
+        pass
+    finally:
+        conn.close()
+
+
+def serve(port: int, state_path: str, mode: str = "ssh"):  # pragma: no cover - servidor de laboratório
+    """Servidor de laboratório. mode: ssh (moderno), ssh-legacy (só algoritmos antigos) ou telnet. Usuário/senha: emu / emu-lab."""
+    import socket
+    import paramiko
+
+    key = paramiko.RSAKey.generate(2048)
+    state = OltState(state_path)
+    if mode == "telnet":
+        handler = lambda conn: telnet_client(conn, state)  # noqa: E731
+    elif mode in ("ssh", "ssh-legacy"):
+        handler = lambda conn: ssh_client(conn, state, key, legacy_only=mode == "ssh-legacy")  # noqa: E731
+    else:
+        raise SystemExit("modo deve ser ssh, ssh-legacy ou telnet")
     sock = socket.socket()
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(("0.0.0.0", port))
     sock.listen(20)
-    print(f"emulador Huawei (NÃO é equipamento real) em :{port}", flush=True)
+    print(f"emulador Huawei (NÃO é equipamento real) em :{port} ({mode})", flush=True)
     while True:
         conn, _ = sock.accept()
-        threading.Thread(target=client, args=(conn,), daemon=True).start()
+        threading.Thread(target=handler, args=(conn,), daemon=True).start()
 
 
 if __name__ == "__main__":  # pragma: no cover
     import sys
-    serve(int(sys.argv[1]), sys.argv[2])
+    serve(int(sys.argv[1]), sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else "ssh")
