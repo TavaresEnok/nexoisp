@@ -112,6 +112,13 @@ class HuaweiCliEmulator:
             d["onts"].append({"fsp": fsp, "id": oid, "sn": sn, "line": line, "srv": srv, "desc": desc, "at": time.time()})
             d["autofind"] = [x for x in d["autofind"] if x[1] != sn]
             return f"  Number of ONTs that can be added: 1, success: 1\n  PortID :{port}, ONTID :{oid}\n"
+        m = re.fullmatch(r"ont tr069-server-config (\d+) (\d+) profile-id (\d+)", c)
+        if m and self.mode == "if":
+            o = next((x for x in d["onts"] if x["fsp"] == f"{self.fs}/{m.group(1)}" and x["id"] == int(m.group(2))), None)
+            if o is None:
+                return "  Failure: The ONT does not exist"
+            o["tr069"] = int(m.group(3))
+            return ""
         m = re.fullmatch(r"ont port native-vlan (\d+) (\d+) eth (\d+) vlan (\d+) priority 0", c)
         if m and self.mode == "if":
             fsp, oid = f"{self.fs}/{m.group(1)}", int(m.group(2))

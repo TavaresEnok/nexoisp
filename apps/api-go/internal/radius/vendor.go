@@ -25,7 +25,11 @@ func leaseSeconds() float64 {
 }
 func attributes(vendor string, p jsonx.Object, down, up any) ([]Attribute, []Attribute, string, bool) {
 	suspension := object(p.Get("suspension"))
-	blocked := p.Get("policy") == "suspended" && suspension.Get("mode") == "profile" && jsonx.Truthy(suspension.Get("profile"))
+	suspended := p.Get("policy") == "suspended"
+	blocked := suspended && suspension.Get("mode") == "profile" && jsonx.Truthy(suspension.Get("profile"))
+	// Lista de endereços: só o MikroTik a aplica; nos demais fabricantes a suspensão cai para a rejeição.
+	listed := suspended && suspension.Get("mode") == "address_list" && jsonx.Truthy(suspension.Get("list")) && vendor == "mikrotik"
+	pooled := suspended && suspension.Get("mode") == "pool" && jsonx.Truthy(suspension.Get("pool"))
 	profile := fmt.Sprint(p.Get("profile"))
 	if blocked {
 		profile = fmt.Sprint(suspension.Get("profile"))
@@ -34,7 +38,7 @@ func attributes(vendor string, p jsonx.Object, down, up any) ([]Attribute, []Att
 	check := func(name, op string, value any) { checks = append(checks, Attribute{name, op, jsonx.String(value)}) }
 	set := func(name string, value any) { reply = append(reply, Attribute{name, ":=", jsonx.String(value)}) }
 	plus := func(value string) { reply = append(reply, Attribute{"Cisco-AVPair", "+=", value}) }
-	if p.Get("policy") == "suspended" && !blocked {
+	if suspended && !blocked && !listed && !pooled {
 		check("Auth-Type", ":=", "Reject")
 	} else if p.Get("access_type") == "ipoe" {
 		check("Auth-Type", ":=", "Accept")
@@ -47,7 +51,16 @@ func attributes(vendor string, p jsonx.Object, down, up any) ([]Attribute, []Att
 	}
 	switch vendor {
 	case "mikrotik":
-		if p.Get("access_type") == "ipoe" || p.Get("access_type") == "hotspot" {
+		if listed {
+			// O concentrador redireciona/bloqueia quem está na lista (regras de bloqueio em docs/operacao.md).
+			set("Mikrotik-Address-List", suspension.Get("list"))
+			if p.Get("access_type") != "ipoe" && p.Get("access_type") != "hotspot" {
+				set("Mikrotik-Group", profile)
+			}
+			if p.Get("access_type") == "ipoe" {
+				set("Session-Timeout", leaseSeconds())
+			}
+		} else if p.Get("access_type") == "ipoe" || p.Get("access_type") == "hotspot" {
 			set("Mikrotik-Address-List", profile)
 			if p.Get("access_type") == "ipoe" {
 				set("Session-Timeout", leaseSeconds())
@@ -71,18 +84,22 @@ func attributes(vendor string, p jsonx.Object, down, up any) ([]Attribute, []Att
 	default:
 		set("Filter-Id", profile)
 	}
-	if !blocked && jsonx.Truthy(p.Get("address_pool")) {
+	pool := p.Get("address_pool")
+	if pooled {
+		pool = suspension.Get("pool")
+	}
+	if (pooled || !blocked) && jsonx.Truthy(pool) {
 		if vendor == "cisco" {
-			plus("ip:addr-pool=" + fmt.Sprint(p.Get("address_pool")))
+			plus("ip:addr-pool=" + fmt.Sprint(pool))
 		} else {
-			set("Framed-Pool", p.Get("address_pool"))
+			set("Framed-Pool", pool)
 		}
 	}
-	if jsonx.Truthy(p.Get("framed_ip")) {
+	if !pooled && jsonx.Truthy(p.Get("framed_ip")) {
 		set("Framed-IP-Address", p.Get("framed_ip"))
 	}
 	// RFC 4818: prefixo delegado ao roteador do assinante (DHCPv6-PD), reservado no IPAM.
-	if !blocked && jsonx.Truthy(p.Get("delegated_ipv6_prefix")) {
+	if !blocked && !suspended && jsonx.Truthy(p.Get("delegated_ipv6_prefix")) {
 		set("Delegated-IPv6-Prefix", p.Get("delegated_ipv6_prefix"))
 	}
 	if jsonx.Truthy(p.Get("acct_interim")) {

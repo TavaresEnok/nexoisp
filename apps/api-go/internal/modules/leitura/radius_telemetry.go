@@ -24,7 +24,7 @@ const radiusTelemetrySQL = `select nas.device_id, nas.name, nas.nas_ip,
  nas.last_accounting_at,
  nas.open_sessions, nas.overdue_sessions,
  nas.oldest_open_seen_at,
- nas.events_24h, nas.max_reported_delay_seconds_24h,
+ nas.events_24h, nas.max_reported_delay_seconds_24h, nas.clock_skew_seconds_24h,
  nas.quarantined_events, nas.pending_usage_sessions,
  meta.generated_at, meta.last_usage_applied_at
 from (
@@ -45,6 +45,7 @@ left join lateral (
   acct.oldest_open_seen_at,
   coalesce(ev.events_24h, 0)::int as events_24h,
   ev.max_reported_delay_seconds_24h,
+  ev.clock_skew_seconds_24h,
   coalesce(ev.quarantined_events, 0)::int as quarantined_events,
   coalesce(pend.pending_usage_sessions, 0)::int as pending_usage_sessions
  from devices d
@@ -60,6 +61,10 @@ left join lateral (
  left join lateral (
    select count(*) filter (where e.received_at > now() - interval '24 hours')::int as events_24h,
           max(case when e.received_at > now() - interval '24 hours' and e.data->>'delay' ~ '^[0-9]{1,9}$' then (e.data->>'delay')::bigint end) as max_reported_delay_seconds_24h,
+          -- Relógio do NAS: mediana de (recebido - Event-Timestamp - Acct-Delay-Time). Positivo = NAS atrasado.
+          round(percentile_cont(0.5) within group (order by extract(epoch from e.received_at - e.event_at)
+                 - case when e.data->>'delay' ~ '^[0-9]{1,9}$' then (e.data->>'delay')::bigint else 0 end)
+                 filter (where e.received_at > now() - interval '24 hours' and e.event_at is not null))::bigint as clock_skew_seconds_24h,
           count(*) filter (where e.status = 'quarantine')::int as quarantined_events
    from radius_accounting_events e
    where e.nas_device_id = d.id

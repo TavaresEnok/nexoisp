@@ -213,6 +213,10 @@ func mustDrop(p, acc, s jsonx.Object) bool {
 		if susp.Get("mode") == "profile" && jsonx.Truthy(susp.Get("profile")) {
 			return profile != susp.Get("profile")
 		}
+		if susp.Get("mode") == "address_list" || susp.Get("mode") == "pool" {
+			// a conta continua autenticando: só cai a sessão anterior à suspensão; a que reconectou já está na lista/pool
+			return predates
+		}
 		return true
 	}
 	if jsonx.Truthy(p.Get("framed_ip")) && jsonx.Truthy(s.Get("framed_ip")) && s.Get("framed_ip") != p.Get("framed_ip") {

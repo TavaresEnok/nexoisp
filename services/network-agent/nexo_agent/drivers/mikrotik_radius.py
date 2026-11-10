@@ -47,6 +47,11 @@ class RadiusStore:
         if password_storage not in ("cleartext", "nt_hash"):
             raise ValueError("password_storage deve ser 'cleartext' ou 'nt_hash'")
         self.password_storage = password_storage
+        if password_storage == "nt_hash":
+            import logging
+            logging.getLogger("nexo.agent").warning(
+                "password_storage=nt_hash: só autentica PPPoE em MS-CHAPv2; concentradores com PAP ou CHAP (91%% dos estudados aceitam PAP) "
+                "recusarão os assinantes")
         self._db = sqlite3.connect(path, isolation_level=None, timeout=10, check_same_thread=False)
         self._db.row_factory = sqlite3.Row
         self._db.execute("pragma busy_timeout=10000")
@@ -194,6 +199,22 @@ class RadiusStore:
         return n
 
 
+def pinned_fingerprint(value) -> Optional[str]:
+    """Impressão digital SHA-256 do certificado (com ou sem ':'); None quando não configurada."""
+    if not value:
+        return None
+    hexa = str(value).replace(":", "").strip().lower()
+    if not re.fullmatch(r"[0-9a-f]{64}", hexa):
+        raise ValueError("cert_sha256 deve ter 64 dígitos hexadecimais (SHA-256 do certificado da api-ssl)")
+    return hexa
+
+
+def check_pin(der: Optional[bytes], pin: str) -> None:
+    import hashlib
+    if not der or hashlib.sha256(der).hexdigest() != pin:
+        raise ssl.SSLError("certificado da api-ssl não corresponde à impressão digital fixada (cert_sha256)")
+
+
 class MikrotikSessions:
     """Sessões PPP ativas via API do RouterOS (api-ssl por padrão). Só duas chamadas: listar e remover."""
 
@@ -213,11 +234,25 @@ class MikrotikSessions:
         from librouteros import connect
         kw = {}
         if not self.plaintext:
-            ctx = ssl.create_default_context(cafile=self.cred.get("ca_file"))
-            ctx.minimum_version = ssl.TLSVersion.TLSv1_2
-            if self.cred.get("insecure_skip_verify"):  # somente laboratório; nunca padrão
+            pin = pinned_fingerprint(self.cred.get("cert_sha256"))
+            if pin:
+                # Certificado autoassinado do próprio MikroTik, fixado pela impressão digital SHA-256 (nenhum dos
+                # 197 MikroTik estudados tem certificado de CA na api-ssl). A conferência ocorre antes do login.
+                ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
                 ctx.check_hostname, ctx.verify_mode = False, ssl.CERT_NONE
-            kw["ssl_wrapper"] = lambda sock: ctx.wrap_socket(sock, server_hostname=self.host)
+                ctx.minimum_version = ssl.TLSVersion.TLSv1_2
+
+                def wrap(sock):
+                    tls = ctx.wrap_socket(sock, server_hostname=self.host)
+                    check_pin(tls.getpeercert(binary_form=True), pin)
+                    return tls
+                kw["ssl_wrapper"] = wrap
+            else:
+                ctx = ssl.create_default_context(cafile=self.cred.get("ca_file"))
+                ctx.minimum_version = ssl.TLSVersion.TLSv1_2
+                if self.cred.get("insecure_skip_verify"):  # somente laboratório; nunca padrão
+                    ctx.check_hostname, ctx.verify_mode = False, ssl.CERT_NONE
+                kw["ssl_wrapper"] = lambda sock: ctx.wrap_socket(sock, server_hostname=self.host)
         return connect(host=self.host, port=self.port, username=self.cred["username"], password=self.cred["password"], timeout=10, **kw)
 
     def check(self) -> dict:

@@ -86,11 +86,18 @@ class Huawei(unittest.TestCase):
         self.assertIn(nat, cmds)
         self.assertLess(cmds.index(nat), cmds.index(sp))
         self.assertEqual(self.state.d["onts"][-1]["native"], {1: 100})
+        self.assertNotIn("tr069", self.state.d["onts"][-1])
         # perfil sem mapeamento cai no padrão da OLT; [] desliga o native-vlan
         self.olt.deauthorize(SN)
         self.olt = HuaweiOltDriver(self.olt._connect, native_vlan_eth=[])
         self.olt.authorize("HWTCA1B2C3D4", **KW)
         self.assertNotIn("native", self.state.d["onts"][-1])
+
+    def test_perfil_tr069_por_olt_e_por_perfil(self):
+        self.olt = HuaweiOltDriver(self.olt._connect, tr069_profile_id=2, line_profiles={"residencial-200": {"tr069_profile_id": 5}})
+        self.olt.authorize("HWTCA1B2C3D4", **KW)
+        self.assertIn("ont tr069-server-config 0 0 profile-id 2", self.commands())
+        self.assertEqual(self.state.d["onts"][-1]["tr069"], 2)
 
     def test_pon_cheia_responde_falha_e_nao_quebra(self):
         fs = "0/1/0"

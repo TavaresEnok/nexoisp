@@ -40,3 +40,42 @@ func TestDelegatedIPv6Prefix(t *testing.T) {
 		t.Fatal("sem delegação no IPAM não há prefixo na resposta")
 	}
 }
+
+func checkValue(checks []Attribute, name string) (string, bool) { return replyValue(checks, name) }
+
+// Modalidades do mercado (docs/estudo-campo): lista de endereços no MikroTik e pool de bloqueio.
+func TestSuspensaoPorListaEPool(t *testing.T) {
+	susp := func(mode, key, value string) jsonx.Object {
+		return jsonx.Object{{Name: "profile", Value: "plano200"}, {Name: "policy", Value: "suspended"}, {Name: "rate_limit", Value: "100M/200M"},
+			{Name: "address_pool", Value: "clientes"}, {Name: "framed_ip", Value: "100.64.0.10"},
+			{Name: "suspension", Value: jsonx.Object{{Name: "mode", Value: mode}, {Name: key, Value: value}}}}
+	}
+	checks, reply, _, _ := attributes("mikrotik", susp("address_list", "list", "bloqueados"), 200000, 100000)
+	if _, rejected := checkValue(checks, "Auth-Type"); rejected {
+		t.Fatal("suspensão por lista não rejeita a autenticação")
+	}
+	if v, _ := replyValue(reply, "Mikrotik-Address-List"); v != "bloqueados" {
+		t.Fatalf("lista ausente: %+v", reply)
+	}
+	if v, _ := replyValue(reply, "Mikrotik-Group"); v != "plano200" {
+		t.Fatalf("perfil do plano mantido: %+v", reply)
+	}
+	// lista de endereços não existe fora do MikroTik: cai para a rejeição
+	if checks, _, _, _ := attributes("huawei", susp("address_list", "list", "bloqueados"), 200000, 100000); len(checks) == 0 {
+		t.Fatal("huawei com lista deveria rejeitar")
+	} else if v, _ := checkValue(checks, "Auth-Type"); v != "Reject" {
+		t.Fatalf("huawei com lista: %+v", checks)
+	}
+	for _, vendor := range []string{"huawei", "mikrotik", "generic"} {
+		checks, reply, _, _ := attributes(vendor, susp("pool", "pool", "bloqueio"), 200000, 100000)
+		if _, rejected := checkValue(checks, "Auth-Type"); rejected {
+			t.Fatalf("%s: suspensão por pool não rejeita", vendor)
+		}
+		if v, _ := replyValue(reply, "Framed-Pool"); v != "bloqueio" {
+			t.Fatalf("%s: pool de bloqueio ausente: %+v", vendor, reply)
+		}
+		if _, fixed := replyValue(reply, "Framed-IP-Address"); fixed {
+			t.Fatalf("%s: IP fixo impediria o pool de bloqueio: %+v", vendor, reply)
+		}
+	}
+}

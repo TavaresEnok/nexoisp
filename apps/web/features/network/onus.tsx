@@ -518,6 +518,23 @@ function AuthorizeOnu({
   const huawei =
     devices.data?.find((d) => d.id === values.device_id)?.driver ===
     "olt_huawei";
+  // Na maioria das OLTs reais a VLAN de serviço segue a porta PON: sugere a mais usada pelas ONUs da mesma PON.
+  const neighbours = useSWR(
+    values.device_id && values.pon_port ? "erp-onus" : null,
+    async () => z.array(onuSchema).parse(await api("/onus")),
+  );
+  const suggestedVlan = (() => {
+    const counts = new Map<number, number>();
+    for (const onu of neighbours.data ?? []) {
+      if (
+        onu.device_id === values.device_id &&
+        onu.pon_port === values.pon_port.trim() &&
+        onu.desired_state !== "removed"
+      )
+        counts.set(onu.service_vlan, (counts.get(onu.service_vlan) ?? 0) + 1);
+    }
+    return [...counts.entries()].sort((a, b) => b[1] - a[1])[0];
+  })();
   const set = (key: keyof typeof values, value: string) =>
     setValues((previous) => ({ ...previous, [key]: value }));
   return (
@@ -651,8 +668,18 @@ function AuthorizeOnu({
                   }
                 />
               </FormField>
-              <FormField label="VLAN de serviço">
+              <FormField
+                label="VLAN de serviço"
+                hint={
+                  suggestedVlan
+                    ? `Usada por ${suggestedVlan[1]} ONU(s) desta PON: ${suggestedVlan[0]}`
+                    : undefined
+                }
+              >
                 <Input
+                  placeholder={
+                    suggestedVlan ? String(suggestedVlan[0]) : undefined
+                  }
                   type="number"
                   required
                   min={1}

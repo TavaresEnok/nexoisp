@@ -112,74 +112,24 @@ Na OS, o botão **Aplicar kit** baixa o estoque inteiro ou nada. A **disponibili
 - **POPs por usuário:** Administração → Usuários → POPs → definir. Sem POP marcado a pessoa vê tudo. Administrador nunca é restrito.
 - **Documentos:** na ficha do assinante. Baixar fica na auditoria.
 - **Página de aviso:** Financeiro → Política de cobrança → Página de aviso. Endereço `/aviso/<provedor>`. Para o assinante bloqueado chegar nela, o concentrador precisa
-  redirecionar o HTTP dele (exemplo RouterOS, **não validado em equipamento**; HTTPS não é redirecionável sem erro de certificado):
+  redirecionar o HTTP dele. O modelo abaixo segue o padrão encontrado em 57 concentradores MikroTik reais (docs/estudo-campo/mikrotik.md): lista `bloqueados`,
+  lista `sites-liberados` (portal, meios de pagamento, DNS), redirecionamento só do HTTP e masquerade do pool de bloqueio (sem ele, o assinante bloqueado com IP
+  privado não recebe resposta do portal). **Não validado em equipamento**; HTTPS não é redirecionável sem erro de certificado.
 
 ```
-/ip firewall address-list add list=nexo-portal address=<IP do NexoISP>
-/ip firewall nat add chain=dstnat src-address-list=nexo-bloqueados protocol=tcp dst-port=80 dst-address-list=!nexo-portal action=dst-nat to-addresses=<IP do NexoISP> to-ports=80
-/ip firewall filter add chain=forward src-address-list=nexo-bloqueados dst-address-list=nexo-portal action=accept
-/ip firewall filter add chain=forward src-address-list=nexo-bloqueados protocol=udp dst-port=53 action=accept
-/ip firewall filter add chain=forward src-address-list=nexo-bloqueados action=drop
+/ip firewall address-list add list=sites-liberados address=<IP do NexoISP> comment="portal de aviso"
+/ip firewall address-list add list=sites-liberados address=<IP do gateway de pagamento>
+/ip firewall nat add chain=dstnat src-address-list=bloqueados dst-address-list=!sites-liberados protocol=tcp dst-port=80 action=dst-nat to-addresses=<IP do NexoISP> to-ports=80 comment="nexo: aviso"
+/ip firewall nat add chain=srcnat src-address-list=bloqueados dst-address-list=sites-liberados action=masquerade comment="nexo: aviso"
+/ip firewall filter add chain=forward src-address-list=bloqueados dst-address-list=sites-liberados action=accept comment="nexo: aviso"
+/ip firewall filter add chain=forward src-address-list=bloqueados protocol=udp dst-port=53 action=accept comment="nexo: aviso"
+/ip firewall filter add chain=forward src-address-list=bloqueados action=drop comment="nexo: aviso"
 ```
-  O perfil PPP de bloqueio deve colocar o assinante na lista `nexo-bloqueados` (campo address-list do perfil).
-
-### Autenticação dos assinantes (RADIUS integrado)
-
-O servidor de autenticação sobe junto com o sistema (`radius` no compose). O provedor não instala nada.
-
-- **Na instalação:** defina `NEXO_RADIUS_KEY` e `NEXO_RADIUS_DB_PASSWORD` (o `./nexo init` gera) e `NEXO_VPN_PUBLIC_HOST` com o endereço pelo qual os concentradores
-  alcançam o servidor. Libere no firewall a **UDP 51820** (túnel). O host precisa do módulo `wireguard` (`modprobe wireguard`).
-- **Túnel (recomendado):** o concentrador disca para o sistema e autentica por dentro do túnel; não precisa de IP público nem de porta de entrada no provedor.
-  Disponível para MikroTik com RouterOS 7 e equipamentos com WireGuard. Reiniciar o serviço `vpn` derruba os túneis por ~25 s (quem está conectado continua). O RADIUS compartilha a rede do túnel: ao recriar o `vpn`, recrie também `radius` (e `radius2`) — `up -d` sem nomear serviços faz isso; nomear só `api vpn` deixa o RADIUS preso a uma rede morta.
-- **Acesso direto (sem túnel):** para RouterOS 6, Huawei e Cisco. Defina `NEXO_RADIUS_PUBLIC_HOST` e libere **UDP 1812 e 1813 só para os endereços dos concentradores**;
-  a saída UDP 3799 até eles é usada para desconectar sessões.
-- **Cadastrar um concentrador:** Rede → Concentradores → Novo. Informe fabricante e o endereço de origem (o IP com que os pacotes dele chegam). O painel mostra o segredo
-  **uma vez** e os comandos para colar no equipamento.
-- **Trocar o segredo:** o servidor passa a aceitar o novo em até 2 minutos; troque no concentrador em seguida. Enquanto diferirem, ninguém autentica.
-- **Trazer um equipamento que usava agente local:** Rede → Concentradores → "Passar para cá". As contas são reenviadas; quem está conectado continua.
-- **Se o sistema cair:** quem está conectado continua navegando; reconexões e conexões novas falham até voltar. Configure um RADIUS secundário quando houver.
-- **Fabricantes:** MikroTik validado em laboratório. Huawei e Cisco ainda não foram testados em equipamento.
-- **Chave:** perder `NEXO_RADIUS_KEY` não perde as senhas (elas continuam no cadastro), mas obriga a "Reaplicar contas" em todos os concentradores.
-
-### Túnel L2TP/IPsec (concentradores sem WireGuard)
-
-- Ligado quando `NEXO_L2TP_PSK` está definido (o `./nexo init` gera). O serviço `vpn` precisa também de `NEXO_RADIUS_KEY` (lê as senhas dos concentradores),
-  de `NET_ADMIN` e do dispositivo `/dev/ppp` (regra `c 108:0` no compose; o serviço cria o nó se faltar). Liberar UDP 500 e 4500 de entrada (`NEXO_L2TP_BIND`).
-- No servidor ficam carregados sob demanda os módulos `esp4`, `ppp_generic` e `ppp_async` (o kernel carrega sozinho quando o serviço usa).
-- A chave IPsec é da instalação; trocá-la exige reconfigurar todos os concentradores L2TP. Usuário e senha são por concentrador ("Refazer túnel" gera outros).
-
-### Gerência de roteadores do cliente — TR-069 (perfil `acs`)
-
-- O perfil exige certificado e chave para CWMP. Instale-os em `infra/prod/certs/acs.crt` e `infra/prod/certs/acs.key` ou configure `NEXO_ACS_TLS_CERT` e `NEXO_ACS_TLS_KEY` com caminhos dentro de `/certs`.
-- Defina `NEXO_ACS_URL=http://acs:7557` (API interna, não publicada) e `NEXO_ACS_PUBLIC_URL=https://<endereço público>:7547/` (URL configurada nos roteadores). A publicação local da porta 7547 usa `127.0.0.1` por padrão; para CPEs externos, defina explicitamente `NEXO_ACS_BIND` para o IP de entrada apropriado e libere a porta no firewall.
-- Antes de expor a porta aos CPEs, configure `cwmp.auth` no GenieACS com credenciais por dispositivo e confirme que conexões sem credenciais são recusadas ([autenticação CPE](https://docs.genieacs.com/en/stable/cpe-authentication.html)). A autenticação CWMP não é automatizada pelo painel. Depois da verificação, configure `NEXO_ACS_CWMP_AUTH_CONFIRMED=1`; o preflight também exige um `NEXO_ACS_UI_SECRET` próprio com pelo menos 32 caracteres.
-- Execute `./nexo prod db preflight` antes de habilitar o perfil. Ele valida a URL pública HTTPS, o certificado, a chave correspondente, o segredo da interface GenieACS e a confirmação da autenticação CWMP.
-- No contrato (aba Acesso): procurar o roteador (pela conta PPPoE que ele informa ou pelo número de série da etiqueta), vincular, ver estado, trocar nome/senha
-  do Wi-Fi, reiniciar e reler. O assinante troca o próprio Wi-Fi no portal. Um roteador só pode estar vinculado a um contrato em toda a plataforma.
-- Respostas: "aplicado agora", "na fila" (o roteador não atendeu; vale no próximo contato) ou "o roteador recusou: <motivo>" (a tarefa é removida).
-- A interface própria do servidor de gerência não é publicada pelo Compose. Mantenha o acesso administrativo restrito durante a configuração de `cwmp.auth`.
-
-### Réplica do banco (perfil `ha`)
-
-- Defina `NEXO_REPLICA_PASSWORD` e suba com `--profile ha`: o serviço `db-replica` copia o primário na primeira vez (com slot de replicação próprio, para não
-  perder o que ainda não recebeu) e segue recebendo tudo em tempo real. Só leitura. O primário passa a usar `infra/compose/db/pg_hba.conf` (acesso de replicação
-  só para o papel `nexo_replica`, com senha). `./nexo prod db preflight` avisa se a réplica não está conectada ou está atrasada mais de 1 minuto.
-- **Promover (o primário morreu):** 1) pare o que escreve no banco (`api`, `vpn`, `radius`, `radius2`); 2) `docker compose exec db-replica pg_ctl promote -D /var/lib/postgresql/data`;
-  3) aponte `DATABASE_URL_*` e `RADIUS_DB_HOST` para `db-replica` (ou troque os volumes e suba `db` com os dados promovidos); 4) suba de novo e rode o preflight.
-  Depois, recrie uma réplica nova a partir do novo primário (a antiga não volta sozinha). A promoção é manual: não há eleição automática.
-- Mesma máquina não protege contra perder a máquina: em produção, a réplica deve ficar em outro servidor (mesmo `replica.sh`, com `PRIMARY_HOST` apontando para o
-  primário e a porta 5432 liberada só para ela).
-
-### IPoE (DHCP) e hotspot
-
-- Tipo de acesso escolhido ao provisionar: PPPoE, IPoE (usuário = MAC do equipamento do assinante, sem senha) ou hotspot (usuário e senha na página de acesso).
-  Só para concentrador no RADIUS integrado.
-- MikroTik: o RADIUS precisa estar cadastrado com `service=ppp,hotspot,dhcp` (os comandos gerados já fazem isso). Para IPoE, no servidor DHCP: `use-radius=yes`
-  (atenção: `accounting` é só accounting). Para hotspot, no perfil: `use-radius=yes radius-accounting=yes`.
-- O perfil do plano chega como **lista de endereços** (`Mikrotik-Address-List`), não como grupo: o provedor usa as listas no firewall (inclusive a de bloqueio).
-  A velocidade vem do `rate_limit` do plano, se definido.
-- IPoE: o concentrador não derruba concessão pelo protocolo; suspensão e troca de plano valem na renovação. O prazo da concessão vem do RADIUS:
-  `NEXO_IPOE_LEASE_SECONDS` (padrão 600). Hotspot: a suspensão derruba a sessão na hora.
+  Como o assinante entra em `bloqueados`, conforme a modalidade de Política de cobrança:
+  - **Lista de endereços (MikroTik, RADIUS integrado):** o RADIUS devolve `Mikrotik-Address-List=bloqueados`, mantendo perfil e velocidade. Use o mesmo nome no campo.
+  - **Perfil de bloqueio:** o perfil PPP de bloqueio no concentrador preenche a lista (campo address-list do perfil).
+  - **Pool de bloqueio (Huawei e outros):** o RADIUS devolve `Framed-Pool=<pool>`; o concentrador aplica o redirecionamento a esse pool (no Huawei, por domínio/ACL de
+    redirecionamento, padrão em 41 de 41 concentradores estudados).
 
 ### Consulta de IP para ofício
 
@@ -217,7 +167,7 @@ Ver `docs/lab-pppoe.md` (passos 1 e 2). Resumo: `infra/site/` com `.env`, `certs
 - **Emissão:** `./nexo agent-cert <agent_id> <dir>` (validade 398 dias). **Rotação:** emitir novo certificado, substituir os arquivos em `certs/`, `docker compose restart agent`. Token: Painel → Rotacionar token, atualizar `.env`, reiniciar.
 - **Certificado fixado:** o primeiro certificado apresentado por um agente passa a ser o único aceito (impressão digital no painel). Ao rotacionar: Painel → Rede → "Aceitar novo certificado" e só então reiniciar o agente com o novo. Um certificado antigo ou copiado é recusado e a tentativa fica na auditoria (`agent.certificate_rejected`).
 - **Revogação:** Painel → Rede → Revogar (bloqueia token e identidade imediatamente).
-- **Senha PPPoE no site:** em `config/credentials.json`, `"password_storage": "nt_hash"` grava só o hash NT no RADIUS local (sem senha em claro no disco). Exige o PPPoE server do NAS apenas com `authentication=mschap2`. Sem a opção, o padrão é texto claro (necessário para CHAP).
+- **Senha PPPoE no site:** em `config/credentials.json`, `"password_storage": "nt_hash"` grava só o hash NT no RADIUS local (sem senha em claro no disco). Exige o PPPoE server do NAS apenas com `authentication=mschap2`. Sem a opção, o padrão é texto claro (necessário para CHAP). **Atenção:** 91% dos concentradores estudados aceitam PAP e 21 aceitam só PAP; com `nt_hash` esses assinantes deixam de autenticar. Use só se todos os PPPoE servers do NAS estiverem em `mschap2`.
 - **IP fixo:** o endereço alocado ao contrato em Endereços IP é entregue pelo RADIUS local (`Framed-IP-Address`). Exige agente **0.3.0 ou superior**: um agente anterior recusa a operação (“envelope fora do schema”) em vez de ignorar o endereço. Use endereços fora da faixa dinâmica do NAS.
 - **Suspensão por perfil de bloqueio (agente 0.4.0+):** em Política de cobrança, a modalidade "Manter conectado com o perfil de bloqueio" faz a suspensão entregar ao
   assinante o perfil PPP informado (`Mikrotik-Group`), em vez de negar a autenticação. **O perfil e o que ele faz (velocidade mínima, pool de endereços de aviso,
@@ -229,6 +179,19 @@ Ver `docs/lab-pppoe.md` (passos 1 e 2). Resumo: `infra/site/` com `.env`, `certs
   (`/ppp aaa set accounting=yes`) e o NAS apontando para este RADIUS. Aparece no contrato e no portal do assinante.
 - **Limpeza automática:** o agente remove accounting encerrado e registros de autenticação com mais de `NEXO_RADIUS_KEEP_DAYS` (padrão 90) a cada 6 h.
 - O agente só abre conexões de saída (8443). O NAS fala com o RADIUS local (UDP 1812/1813); restrinja por firewall ao IP do NAS.
+- **API do MikroTik com certificado próprio (agente 0.6.2+):** o agente fala com o RouterOS pela `api-ssl` (8729). Sem CA, gere um certificado no próprio
+  equipamento e fixe a impressão digital SHA-256 em `credentials.json` (`"cert_sha256": "<64 hex>"`); o agente recusa outro certificado antes de enviar a senha.
+  RouterOS 6 e 7:
+  ```
+  /certificate add name=nexo-api common-name=nexo-api days-valid=3650 key-size=2048
+  /certificate sign nexo-api
+  /ip service set api-ssl certificate=nexo-api disabled=no address=<IP do agente>/32
+  /certificate print detail where name=nexo-api
+  ```
+  A impressão digital aparece como `fingerprint=` no último comando. Restrinja a `api-ssl` ao IP do agente. Com o **RADIUS integrado** a API não é necessária para
+  desconectar: a desconexão usa DM (porta 3799, `/radius incoming set accept=yes`), já ligada em 87% dos concentradores estudados.
+- **Relógio do concentrador:** o accounting usa o horário enviado pelo NAS. 44% dos concentradores estudados estavam sem NTP; configure
+  `/system ntp client set enabled=yes` (v6: `primary-ntp=`; v7: `servers=`) antes de usar a consulta de ofício.
 
 ### Atualização autenticada do agente
 

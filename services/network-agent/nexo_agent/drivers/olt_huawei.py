@@ -9,12 +9,13 @@ Conjunto fechado de comandos (nenhum texto livre vindo da nuvem é executado):
   interface gpon <F/S> ; ont add ... ; ont delete <P> <ID> ; display ont optical-info <P> <ID>
   service-port vlan <V> gpon <F/S/P> ont <ID> gemport <G> multi-service user-vlan <U> tag-transform translate ; undo service-port <INDEX>
 
-  ont port native-vlan <P> <ID> eth <N> vlan <U> priority 0
+  ont port native-vlan <P> <ID> eth <N> vlan <U> priority 0 ; ont tr069-server-config <P> <ID> profile-id <T>
 
 <U> é a VLAN em que a ONU entrega o tráfego e <G> o gemport. Nas OLTs Huawei reais estudadas (docs/estudo-campo) os dois vêm
 do perfil de linha (gem mapping) em 99,3% dos casos, e só 9,4% usam gemport 1. Configuração local, do mais específico ao geral:
 `line_profiles: {"<perfil>": {"gemport": G, "user_vlan": U}}`, depois `gemport`/`user_vlan` da OLT; sem nada, G = 1 e U = <V>.
 `native_vlan_eth` (padrão [1]) lista as portas Ethernet que recebem `native-vlan`, presente em 90% das ONUs reais; [] desliga.
+`tr069_profile_id` (na OLT ou no perfil de linha) vincula a ONU ao perfil TR-069 já existente na OLT (forma real, 19.646 ONUs).
 
 Fora do escopo: criação de VLAN, perfis de linha/serviço e DBA (devem existir na OLT), ONU em modo roteador, TR-069, VoIP."""
 import re
@@ -166,7 +167,7 @@ class NetmikoCli:
         try:
             return self._run_command(command)
         except Exception:
-            if re.match(r"^(ont (add|delete)\b|ont port native-vlan\b|service-port\b|undo service-port\b)", command):
+            if re.match(r"^(ont (add|delete)\b|ont port native-vlan\b|ont tr069-server-config\b|service-port\b|undo service-port\b)", command):
                 raise AckLost("confirmação SSH ausente após comando mutante; consultar estado") from None
             raise
 
@@ -200,7 +201,8 @@ class HuaweiOltDriver:
     simulated = False
 
     def __init__(self, connect, gemport: int = 1, *, user_vlan: Optional[int] = None, line_profiles: Optional[dict] = None,
-                 native_vlan_eth=(1,), allow_writes=True, expected_product=None, expected_firmware=None):
+                 native_vlan_eth=(1,), tr069_profile_id: Optional[int] = None, allow_writes=True, expected_product=None, expected_firmware=None):
+        self.tr069_profile_id = int(tr069_profile_id) if tr069_profile_id is not None else None
         self._connect, self.gemport, self.user_vlan = connect, gemport, user_vlan
         self.line_profiles = {str(k): dict(v) for k, v in (line_profiles or {}).items()}
         self.native_vlan_eth = [int(x) for x in native_vlan_eth]
@@ -223,6 +225,7 @@ class HuaweiOltDriver:
         return cls(lambda: NetmikoCli(host, port, cred["username"], cred["password"], cred.get("known_hosts_file", "")), int(cred.get("gemport", 1)),
                    user_vlan=int(cred["user_vlan"]) if cred.get("user_vlan") is not None else None,
                    line_profiles=cred.get("line_profiles") or {}, native_vlan_eth=cred.get("native_vlan_eth", [1]),
+                   tr069_profile_id=cred.get("tr069_profile_id"),
                    allow_writes=cred.get("allow_writes") is True, expected_product=cred.get("expected_product"), expected_firmware=cred.get("expected_firmware"))
 
     def _session(self):
@@ -349,6 +352,9 @@ class HuaweiOltDriver:
                 f'ont-srvprofile-name "{_safe(service_profile, "perfil de serviço")}" desc "{_safe(description, "descrição")}"'))
             for eth in self.native_vlan_eth:
                 s.run(f"ont port native-vlan {p} {ont_id} eth {eth} vlan {user_vlan} priority 0")
+            tr069 = profile.get("tr069_profile_id", self.tr069_profile_id)
+            if tr069 is not None:
+                s.run(f"ont tr069-server-config {p} {ont_id} profile-id {int(tr069)}")
             s.run("quit")
             s.run(f"service-port vlan {vlan} gpon {fs}/{p} ont {ont_id} gemport {gemport} multi-service user-vlan {user_vlan} tag-transform translate")
         return {"ont_id": ont_id, "pon_port": pon_port, "service_vlan": vlan, "user_vlan": user_vlan, "gemport": gemport, "native_vlan_eth": self.native_vlan_eth}

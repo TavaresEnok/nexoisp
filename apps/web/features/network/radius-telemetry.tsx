@@ -30,6 +30,7 @@ const nasSchema = z.object({
   oldest_open_seen_at: instant,
   events_24h: count,
   max_reported_delay_seconds_24h: count.nullable(),
+  clock_skew_seconds_24h: z.coerce.number().nullable().optional(),
   quarantined_events: count,
   pending_usage_sessions: count,
 });
@@ -148,6 +149,21 @@ export function RadiusAccountingTelemetry() {
                               <small className="table-subline">
                                 Eventos em 24 h: {item.events_24h}
                               </small>
+                              {item.clock_skew_seconds_24h != null &&
+                                Math.abs(item.clock_skew_seconds_24h) > 120 && (
+                                  <small className="table-subline text-danger">
+                                    Relógio do concentrador{" "}
+                                    {item.clock_skew_seconds_24h > 0
+                                      ? "atrasado"
+                                      : "adiantado"}{" "}
+                                    {Math.round(
+                                      Math.abs(item.clock_skew_seconds_24h) /
+                                        60,
+                                    )}{" "}
+                                    min: configure NTP (consulta de ofício usa
+                                    esse horário)
+                                  </small>
+                                )}
                             </TableCell>
                             <TableCell>{item.quarantined_events}</TableCell>
                             <TableCell>{item.pending_usage_sessions}</TableCell>

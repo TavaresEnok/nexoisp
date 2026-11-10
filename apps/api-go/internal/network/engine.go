@@ -201,6 +201,16 @@ func Request(ctx context.Context, tx *db.Tx, tenant, resource, action string, au
 				return nil, apierr.New(409, fmt.Sprintf("o agente do equipamento \"%v\" (versão %v) não suporta suspensão por perfil; atualize para 0.4.0 ou use a modalidade de rejeição", r.Get("device_name"), displayVersion))
 			}
 			suspension = jsonx.Object{{Name: "mode", Value: "profile"}, {Name: "profile", Value: settings.Get("suspension_profile")}, {Name: "session", Value: "disconnect"}}
+		} else if mode := settings.Get("suspension_mode"); (mode == "address_list" || mode == "pool") && r.Get("contract_status") == "active" {
+			// Lista de endereços (MikroTik) e pool de bloqueio: atributos montados pelo RADIUS integrado.
+			if r.Get("agent_internal") != true {
+				return nil, apierr.New(409, fmt.Sprintf("a suspensão por %s exige o RADIUS integrado; o equipamento \"%v\" usa o RADIUS local do agente. Use rejeição ou perfil de bloqueio", map[any]string{"address_list": "lista de endereços", "pool": "pool de bloqueio"}[mode], r.Get("device_name")))
+			}
+			key := "list"
+			if mode == "pool" {
+				key = "pool"
+			}
+			suspension = jsonx.Object{{Name: "mode", Value: mode}, {Name: key, Value: settings.Get("suspension_profile")}, {Name: "session", Value: "disconnect"}}
 		}
 	}
 	var secretRef any
@@ -212,7 +222,12 @@ func Request(ctx context.Context, tx *db.Tx, tenant, resource, action string, au
 	if v, ok := suspension.(jsonx.Object); ok {
 		profileSuspension = v.Get("mode") == "profile"
 	}
-	if fixed != nil && !profileSuspension {
+	poolSuspension := false
+	if v, ok := suspension.(jsonx.Object); ok {
+		poolSuspension = v.Get("mode") == "pool"
+	}
+	// IP fixo prevalece sobre o pool: na suspensão por pool o endereço vem do pool de bloqueio.
+	if fixed != nil && !profileSuspension && !poolSuspension {
 		params.Set("framed_ip", fixed.Get("ip"))
 	}
 	if r.Get("mac") != nil && r.Get("mac") != "" {
@@ -244,6 +259,11 @@ func Request(ctx context.Context, tx *db.Tx, tenant, resource, action string, au
 			}
 			params.Set(name, v)
 		}
+	}
+	// Interim de 5 minutos é o padrão de 71% dos concentradores estudados; 16% não tinham interim e o
+	// accounting (consumo, ofício) ficaria só com início e fim. O RADIUS integrado envia o padrão quando o NAS não define.
+	if r.Get("agent_internal") == true && params.Get("acct_interim") == nil {
+		params.Set("acct_interim", 300)
 	}
 	if r.Get("access_type") != "pppoe" {
 		params.Set("access_type", r.Get("access_type"))

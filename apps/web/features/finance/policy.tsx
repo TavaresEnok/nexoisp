@@ -110,12 +110,12 @@ export function FinancePolicy() {
                     ),
                     [
                       "Modalidade da suspensão",
-                      current.data.suspension_mode === "profile"
-                        ? "Perfil de bloqueio do concentrador"
-                        : "Negar autenticação",
+                      suspensionModes[current.data.suspension_mode]?.label ??
+                        current.data.suspension_mode,
                     ],
                     [
-                      "Perfil de bloqueio",
+                      suspensionModes[current.data.suspension_mode]?.target ||
+                        "Alvo da suspensão",
                       current.data.suspension_profile ?? "—",
                     ],
                   ]}
@@ -207,7 +207,7 @@ function PolicyEditor({
                 gateway: form.gateway,
                 suspension_mode: form.suspension_mode,
                 suspension_profile:
-                  form.suspension_mode === "profile"
+                  form.suspension_mode !== "reject"
                     ? form.suspension_profile
                     : null,
                 ...Object.fromEntries(
@@ -281,18 +281,17 @@ function PolicyEditor({
                 setForm({ ...form, suspension_mode: e.target.value })
               }
             >
-              <option value="reject">
-                Negar autenticação e encerrar sessão
-              </option>
-              <option value="profile">
-                Manter conectado com perfil de bloqueio
-              </option>
+              {Object.entries(suspensionModes).map(([value, mode]) => (
+                <option key={value} value={value}>
+                  {mode.label}
+                </option>
+              ))}
             </select>
           </FormField>
-          {form.suspension_mode === "profile" && (
+          {form.suspension_mode !== "reject" && (
             <FormField
-              label="Perfil de bloqueio"
-              hint="Nome do perfil PPP existente no concentrador; exige suporte do agente."
+              label={suspensionModes[form.suspension_mode]?.target ?? ""}
+              hint={suspensionModes[form.suspension_mode]?.hint}
             >
               <Input
                 required
@@ -309,6 +308,31 @@ function PolicyEditor({
     </Dialog>
   );
 }
+const suspensionModes: Record<
+  string,
+  { label: string; target: string; hint: string }
+> = {
+  reject: {
+    label: "Negar autenticação e encerrar sessão",
+    target: "",
+    hint: "",
+  },
+  profile: {
+    label: "Manter conectado com perfil de bloqueio",
+    target: "Perfil de bloqueio",
+    hint: "Nome do perfil PPP existente no concentrador; exige suporte do agente.",
+  },
+  address_list: {
+    label: "Manter conectado e incluir na lista de bloqueio (MikroTik)",
+    target: "Lista de endereços de bloqueio",
+    hint: "Nome da address-list que o concentrador redireciona ao aviso (o mais comum é bloqueados). Exige o RADIUS integrado; em outros fabricantes a suspensão nega a autenticação.",
+  },
+  pool: {
+    label: "Manter conectado com IP do pool de bloqueio",
+    target: "Pool de bloqueio",
+    hint: "Nome do pool de endereços de bloqueio no concentrador (padrão Huawei). Exige o RADIUS integrado.",
+  },
+};
 type Notice = {
   title: string;
   blocked_text: string;

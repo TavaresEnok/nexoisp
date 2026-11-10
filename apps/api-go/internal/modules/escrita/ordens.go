@@ -20,7 +20,7 @@ func (s Service) workOperations(ops map[string]operation) {
 	description := str().Trimmed().Min(1).Max(2000)
 	ops["POST /api/work-orders"] = operation{s.createWork, obj(o(f("kind", e("install", "repair", "address_change", "removal", "other")), f("subscriber_id", uuid), f("contract_id", uuid.Nullish()), f("description", description), f("assignee_id", uuid.Nullish()), f("scheduled_for", when.Nullish()), f("ticket_id", uuid.Nullish()), f("reason_id", uuid.Nullish()), f("estimated_minutes", n().Int().Min(5).Max(1440).Def(float64(60))), f("address_origin", e("subscriber", "contract", "manual").Def("subscriber")), f("address_text", str().Trimmed().Min(5).Max(300).Nullish())))}
 	ops["PATCH /api/work-orders/:id"] = operation{s.updateWork, obj(o(f("assignee_id", uuid.Nullish()), f("scheduled_for", when.Nullish()), f("description", description.Opt()), f("estimated_minutes", n().Int().Min(5).Max(1440).Opt())))}
-	ops["PUT /api/finance/settings"] = operation{s.financeSettings, obj(o(f("gateway", e("none", "demo")), f("billing_auto", b()), f("auto_suspend", b()), f("suspend_after_days", n().Int().Min(0).Max(365).Null()), f("auto_resume_on_payment", b()), f("suspension_mode", e("reject", "profile").Opt()), f("trust_release_enabled", b().Opt()), f("trust_release_days", n().Int().Min(1).Max(30).Opt()), f("trust_release_gap_days", n().Int().Min(0).Max(365).Opt()), f("late_fee_percent", n().Min(0).Max(20).Opt()), f("interest_monthly_percent", n().Min(0).Max(20).Opt()), f("prorate_first_month", b().Opt()), f("suspension_profile", str().Trimmed().Pattern(`^[A-Za-z0-9_.-]{1,60}$`, "perfil: letras, números, _ . - (até 60)").Nullish())))}
+	ops["PUT /api/finance/settings"] = operation{s.financeSettings, obj(o(f("gateway", e("none", "demo")), f("billing_auto", b()), f("auto_suspend", b()), f("suspend_after_days", n().Int().Min(0).Max(365).Null()), f("auto_resume_on_payment", b()), f("suspension_mode", e("reject", "profile", "address_list", "pool").Opt()), f("trust_release_enabled", b().Opt()), f("trust_release_days", n().Int().Min(1).Max(30).Opt()), f("trust_release_gap_days", n().Int().Min(0).Max(365).Opt()), f("late_fee_percent", n().Min(0).Max(20).Opt()), f("interest_monthly_percent", n().Min(0).Max(20).Opt()), f("prorate_first_month", b().Opt()), f("suspension_profile", str().Trimmed().Pattern(`^[A-Za-z0-9_.-]{1,60}$`, "perfil: letras, números, _ . - (até 60)").Nullish())))}
 	ops["DELETE /api/ipam/delegations/:id"] = operation{s.releaseIPv6, nil}
 }
 func createWork(ctx context.Context, tx *db.Tx, b map[string]any) (jsonx.Object, error) {
@@ -207,10 +207,11 @@ func (s Service) financeSettings(ctx context.Context, tx *db.Tx, _ string, b map
 	if has(b, "suspension_profile") {
 		profile = nilEmpty(b["suspension_profile"])
 	}
-	if mode == "profile" && (profile == nil || profile == "") {
-		return nil, apierr.New(400, "informe o nome do perfil de bloqueio que existe no NAS")
+	if mode != "reject" && (profile == nil || profile == "") {
+		what := map[any]string{"profile": "do perfil de bloqueio", "address_list": "da lista de endereços de bloqueio", "pool": "do pool de bloqueio"}[mode]
+		return nil, apierr.New(400, "informe o nome "+what+" que existe no NAS")
 	}
-	if mode != "profile" {
+	if mode == "reject" {
 		profile = nil
 	}
 	args := []any{c.TenantID, b["gateway"], b["billing_auto"], b["auto_suspend"], b["suspend_after_days"], b["auto_resume_on_payment"], mode, profile, c.UserID}
