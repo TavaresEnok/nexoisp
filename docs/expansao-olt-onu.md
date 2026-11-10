@@ -70,7 +70,7 @@ a sessão SSH é reaproveitada entre chamadas próximas e descartada após qualq
 - O **formato exato das saídas** em cada versão de firmware (os interpretadores toleram variação de espaçamento, mas foram escritos sem uma saída real em mãos).
 - A sintaxe aceita pelo firmware do provedor (`-name` x `-id` nos perfis; parâmetros de `service-port` como `tag-transform` e tabelas de tráfego).
 - O comportamento do login/paginação/prompts interativos numa OLT real (hoje exercitado via netmiko `huawei_smartax` contra o emulador).
-- Modo de operação diferente de ONU em bridge com uma VLAN de serviço e um `gemport` (padrão `gemport 1`, ajustável em `credentials.json`). A VLAN em que a ONU entrega o tráfego é `user_vlan` na mesma credencial: nas 134 OLTs Huawei reais conferidas em 10/11/2026 (164.816 ONUs), 84% dos service-ports usam VLAN do cliente diferente da de saída, em geral fixa por OLT (100 na maioria).
+- Modo de operação diferente de ONU em bridge com uma VLAN de serviço e um `gemport` (padrão `gemport 1`, ajustável em `credentials.json`). A VLAN em que a ONU entrega o tráfego é `user_vlan` na mesma credencial: nas 124 OLTs Huawei reais conferidas em 10/11/2026 (129.938 ONUs, sem duplicatas), 84% dos service-ports usam VLAN do cliente diferente da de saída, em geral fixa por OLT (100 na maioria).
 
 O emulador (`olt_huawei_emulator.py`, serviço `olt-huawei-emu` no ambiente de demonstração) imita a CLI a partir das mesmas fontes: **passar nele não é homologação**.
 A interface mostra "não homologado em equipamento real" no equipamento e na autorização.
