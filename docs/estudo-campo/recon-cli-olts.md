@@ -68,3 +68,24 @@ Já no driver `services/network-agent/nexo_agent/drivers/olt_huawei.py`. Confirm
   de shell interativo.
 - **EPON antigo**: confirmar comandos numa OLT EPON real (não localizada ativa entre os alvos testados).
 - Próximos drivers sugeridos por base instalada: **ZTE** e **Datacom/Intelbras** (CLIs já mapeadas), depois FiberHome (árvore).
+
+## Lição de transporte (como o backup center fala com os equipamentos difíceis)
+
+Descoberto lendo o próprio backup center: para OLTs antigas ele **não usa biblioteca Python de SSH** (paramiko/netmiko),
+e sim o **binário real `ssh`/`telnet` do sistema**, dirigido por `pexpect`. Isso importa para o nosso agente, porque o
+`cli_transport` atual (paramiko) esbarra nos mesmos casos:
+
+- **SSH legado** (firmwares antigos): precisa de opções que o OpenSSH novo só liga sob demanda —
+  `-o HostKeyAlgorithms=+ssh-rsa -o PubkeyAcceptedKeyTypes=+ssh-rsa`
+  `-o KexAlgorithms=+diffie-hellman-group1-sha1,diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1`
+  `-o Ciphers=+aes128-cbc,3des-cbc,aes256-cbc`. (ssh-dss foi removido do OpenSSH 9/10 — não incluir.)
+- **Parks**: o SSH é um BusyBox/dropbear que **quebra ("Aiee, segfault!")** com paramiko (shell e exec). Com o `ssh`
+  real + PTY funciona. → driver Parks deve usar o `ssh` do SO, não paramiko. Backup via `show running-config` e afins.
+- **VSOL**: via telnet **rodado dentro do jump host** (`ssh -T jump` e `telnet <ip> <porta>` por stdio), não por túnel TCP;
+  pelo socket local o equipamento fica mudo. O login usa um `_login` tolerante; backup por comandos do perfil VSOL.
+- **Conclusão para o NexoISP**: além do transporte paramiko (moderno + legado já existentes), prever um transporte
+  "OS `ssh`/`telnet`" (subprocess/pexpect) com as opções legadas acima, para OLTs antigas e BusyBox. É o que torna
+  VSOL/Parks/ONTs EPON antigas alcançáveis de forma confiável.
+
+> Reconhecimento ao vivo concluído para Huawei, ZTE, FiberHome, Datacom e Intelbras. VSOL e Parks têm o método de conexão
+> mapeado (acima), faltando só a captura ao vivo com o transporte OS-ssh/telnet. EPON antigo pende de uma OLT EPON ativa.
