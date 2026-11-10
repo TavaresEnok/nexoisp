@@ -23,7 +23,7 @@ var diciHeader = []string{"CNPJ", "ANO", "MES", "COD_IBGE", "TIPO_CLIENTE", "TIP
 // pelo ERP). Atendimento: URBANO/RURAL. Produto: internet (banda larga fixa).
 // O meio e a tecnologia derivam da tecnologia cadastrada no plano.
 var diciMedium = map[string]string{"FTTH": "fibra", "FTTB": "fibra", "HFC": "cabo_coaxial", "XDSL": "cabo_metalico", "ETHERNET": "cabo_metalico", "RADIO": "radio", "LTE": "radio", "SATELITE": "satelite"}
-var diciTechnology = map[string]string{"FTTH": "FTTH", "FTTB": "FTTB", "HFC": "HFC", "XDSL": "xDSL", "ETHERNET": "ETHERNET", "RADIO": "Wi-Fi", "LTE": "LTE", "SATELITE": "VSAT"}
+var diciTechnology = map[string]string{"FTTH": "FTTH", "FTTB": "FTTB", "HFC": "HFC", "XDSL": "ADSL2", "ETHERNET": "ETHERNET", "RADIO": "Wi-Fi", "LTE": "LTE", "SATELITE": "VSAT"}
 
 const diciProduct = "internet"
 

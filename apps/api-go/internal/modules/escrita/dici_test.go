@@ -35,7 +35,7 @@ func TestDICILayoutHeaderOrderSeparatorsAndDomains(t *testing.T) {
 	lines := strings.Split(strings.TrimSuffix(strings.TrimPrefix(raw, "\ufeff"), "\r\n"), "\r\n")
 	want := []string{
 		"CNPJ;ANO;MES;COD_IBGE;TIPO_CLIENTE;TIPO_ATENDIMENTO;TIPO_MEIO;TIPO_PRODUTO;TIPO_TECNOLOGIA;VELOCIDADE;ACESSOS",
-		"11222333000181;2026;3;2303709;PF;URBANO;cabo_metalico;internet;xDSL;15,75;7",
+		"11222333000181;2026;3;2303709;PF;URBANO;cabo_metalico;internet;ADSL2;15,75;7",
 		"11222333000181;2026;3;2304400;PF;RURAL;radio;internet;Wi-Fi;0,5;1",
 		"11222333000181;2026;3;2304400;PJ;URBANO;fibra;internet;FTTH;300;2",
 	}

@@ -52,7 +52,7 @@ const technologies: Record<string, string> = {
   FTTH: "FTTH · fibra até a casa",
   FTTB: "FTTB · fibra até o prédio",
   HFC: "HFC · cabo coaxial",
-  XDSL: "xDSL · par metálico",
+  XDSL: "ADSL · par metálico",
   ETHERNET: "Ethernet",
   RADIO: "Rádio · Wi-Fi no leiaute",
   LTE: "LTE/4G",

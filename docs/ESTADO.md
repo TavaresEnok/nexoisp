@@ -22,7 +22,7 @@ Tudo o que estava pela metade ou só planejado e dependia apenas de código foi 
 | Acompanhamento operacional (`/acompanhamento`) e assistente determinístico (`/assistente`) | Pronto | — |
 | Consulta pública de viabilidade (`/viabilidade/<slug>`) com captação de prospecto | Pronto | 00092 |
 | Senha provisória com troca obrigatória e encerramento de sessões na redefinição | Pronto | 00093 |
-| Arquivo DICI no leiaute do Manual de Coleta SCM, com bloqueio por pendências | Pronto (tabela de tecnologias a conferir) | — |
+| Arquivo DICI no leiaute do Manual de Coleta SCM, com bloqueio por pendências | Pronto (tabela de tecnologias conferida em 2026-11-10) | — |
 | Multa e juros da política na emissão de boleto Efí | Pronto em código; homologação Efí pendente | — |
 | Deduplicação de alertas persistida no banco | Pronto | 00094 |
 | IP real do cliente atrás de Nginx → Apache → Caddy (`NEXO_TRUSTED_PROXIES`) | Pronto em código; conferir na publicação | — |
