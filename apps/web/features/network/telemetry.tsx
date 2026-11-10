@@ -19,6 +19,7 @@ import { QueryBoundary } from "@/features/shared/feedback";
 import { FormField } from "@/features/shared/form";
 import { ActionButton } from "@/features/shared/action";
 import { api, download } from "@/platform/erp-client";
+import { exportCsv } from "@/platform/browser";
 import { stamp } from "./models";
 const amount = z.coerce.number().nonnegative();
 export const sessionSchema = z.object({
@@ -261,6 +262,39 @@ export function ContractUsage({ id }: { id: string }) {
     <ProfileSection
       title="Consumo do acesso"
       caption="Download corresponde aos bytes enviados ao assinante; upload, aos bytes recebidos dele."
+      action={
+        <ActionButton
+          disabled={!data?.length}
+          onClick={async () =>
+            data &&
+            exportCsv(
+              `consumo-${view}`,
+              view === "month"
+                ? [
+                    "Período",
+                    "Download (bytes)",
+                    "Upload (bytes)",
+                    "Sessões",
+                    "Tempo conectado (s)",
+                  ]
+                : ["Período", "Download (bytes)", "Upload (bytes)"],
+              data.map((row) =>
+                "month" in row
+                  ? [
+                      row.month,
+                      row.bytes_out,
+                      row.bytes_in,
+                      row.sessions,
+                      row.session_seconds ?? "",
+                    ]
+                  : [row.period, row.bytes_out, row.bytes_in],
+              ),
+            )
+          }
+        >
+          Exportar consumo
+        </ActionButton>
+      }
     >
       <FormField label="Período do consumo">
         <select

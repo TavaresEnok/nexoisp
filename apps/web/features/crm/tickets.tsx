@@ -519,13 +519,24 @@ function LiveTicket({ id, onClose }: { id: string; onClose: () => void }) {
                   Reabrir atendimento
                 </ActionButton>
               ) : (
-                <ActionButton
-                  danger
-                  confirm="Encerrar este atendimento?"
-                  onClick={() => status("closed")}
-                >
-                  Encerrar atendimento
-                </ActionButton>
+                <>
+                  {ticket.status === "waiting" ? (
+                    <ActionButton onClick={() => status("open")}>
+                      Voltar a aguardar o provedor
+                    </ActionButton>
+                  ) : (
+                    <ActionButton onClick={() => status("waiting")}>
+                      Marcar como aguardando o assinante
+                    </ActionButton>
+                  )}
+                  <ActionButton
+                    danger
+                    confirm="Encerrar este atendimento?"
+                    onClick={() => status("closed")}
+                  >
+                    Encerrar atendimento
+                  </ActionButton>
+                </>
               ))}
             {writable &&
               can(me, "os:write") &&

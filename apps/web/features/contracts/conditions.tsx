@@ -25,6 +25,7 @@ import { can } from "@/features/session/model";
 import { printDocument } from "@/platform/browser";
 import { api } from "@/platform/erp-client";
 import { money, date } from "@/lib/format";
+import { shortCode } from "@/features/shared/format";
 import { decimalToCents, type ContractDetail, type ErpPlan } from "./models";
 import type { TerminationQuote } from "./actions";
 type Discount = {
@@ -568,6 +569,7 @@ export function ContractConditions({
                 Vigência {date(amendment.effective_date)} ·{" "}
                 {amendment.created_by_name ?? "Sistema"}
               </small>
+              <AmendmentPrint contract={contract} amendment={amendment} />
             </div>
           ))}
         </QueryBoundary>
@@ -810,6 +812,80 @@ function Acceptances({
   );
 }
 
+function AmendmentPrint({
+  contract,
+  amendment,
+}: {
+  contract: ContractDetail;
+  amendment: Amendment;
+}) {
+  const [open, setOpen] = useState(false);
+  const [ready, setReady] = useState(false);
+  const frame = useRef<HTMLIFrameElement>(null);
+  return (
+    <>
+      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+        Imprimir aditivo
+      </Button>
+      {open && (
+        <Dialog
+          open
+          onOpenChange={(value) => {
+            if (!value) {
+              setOpen(false);
+              setReady(false);
+            }
+          }}
+        >
+          <DialogContent className="erp-editor">
+            <DialogHeader>
+              <DialogTitle>Imprimir aditivo</DialogTitle>
+              <DialogDescription>{amendment.title}</DialogDescription>
+            </DialogHeader>
+            <iframe
+              ref={frame}
+              className="erp-print-frame"
+              title="Aditivo para impressão"
+              sandbox="allow-same-origin allow-modals"
+              srcDoc={amendmentPrintHtml(contract, amendment)}
+              onLoad={() => setReady(true)}
+            />
+            <Button
+              variant="outline"
+              disabled={!ready}
+              onClick={() => printDocument(frame.current?.contentWindow)}
+            >
+              Imprimir
+            </Button>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
+  );
+}
+function escapeHtml(value: string) {
+  return String(value).replace(
+    /[&<>"']/g,
+    (char) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      })[char]!,
+  );
+}
+function amendmentPrintHtml(contract: ContractDetail, amendment: Amendment) {
+  const pairs = [
+    ["Contrato", shortCode(contract.id)],
+    ["Assinante", contract.subscriber_name],
+    ["Tipo", amendmentLabels[amendment.kind] ?? amendment.kind],
+    ["Vigência", date(amendment.effective_date)],
+    ["Registrado por", amendment.created_by_name ?? "Sistema"],
+  ];
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Aditivo contratual</title><style>body{font:14px system-ui;margin:32px;color:#111}p,dd{white-space:pre-wrap;overflow-wrap:anywhere}dt{font-weight:bold;margin-top:12px}dd{margin-left:0}.sign{margin-top:64px;display:flex;gap:48px}.sign div{flex:1;border-top:1px solid #111;padding-top:4px;text-align:center}</style></head><body><h1>Aditivo contratual</h1><h2>${escapeHtml(amendment.title)}</h2><dl>${pairs.map(([label, value]) => `<dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd>`).join("")}</dl><p>${escapeHtml(amendment.body)}</p><div class="sign"><div>Assinante</div><div>Provedor</div></div></body></html>`;
+}
 function acceptancePrintHtml(evidence: Evidence) {
   const escape = (value: string) =>
     String(value).replace(
