@@ -1,8 +1,26 @@
 """Driver Datacom DmOS: identidade e backup de configuração, com saídas sintéticas no formato do equipamento real
 (docs/estudo-campo/recon-cli-olts.md). Nenhum dado de cliente."""
+import re
 import unittest
 
-from nexo_agent.drivers.olt_datacom import (DatacomCommandError, DatacomOltDriver, clean_running_config, parse_firmware)
+from nexo_agent.drivers.olt_datacom import (DatacomCommandError, DatacomOltDriver, clean_running_config, parse_firmware,
+                                            parse_onu_list, parse_optical, parse_ports)
+
+PHYS = """Physical interface   :  gpon 1/1/1, Enabled, Physical link is Up
+Link-level type      :  GPON
+Physical interface   :  gpon 1/1/2, Enabled, Physical link is Up
+OLT-LAB#"""
+
+ONU_LIST = """  Itf     ONU ID   Serial Number   Oper State   Software Download State      Name
+--------  ------   -------------   ----------   --------------------------   --------
+1/1/1     0        ITBS8B93E41A    Up           None
+1/1/1     1        CMSZ00AABBCC    Down         None
+OLT-LAB#"""
+
+OPTICAL = """ ID                    : 0
+ Rx Optical Power [dBm]: -19.39
+ Tx Optical Power [dBm]: 2.35
+OLT-LAB#"""
 
 FW = """show firmware
 Status: Idle
@@ -36,7 +54,15 @@ class FakeCli:
         self.closed = 0
 
     def run(self, cmd):
-        return FW if cmd.startswith("show firmware") else "OLT-LAB#"
+        if cmd.startswith("show firmware"):
+            return FW
+        if cmd == "show interface gpon 1/1/1 onu 1":
+            return PHYS
+        if re.match(r"show interface gpon \S+ onu$", cmd):
+            return ONU_LIST
+        if "optical-info" in cmd:
+            return OPTICAL
+        return "OLT-LAB#"
 
     def dump(self, cmd):
         return RUN
@@ -87,6 +113,30 @@ class Datacom(unittest.TestCase):
     def test_autorizacao_recusada(self):
         with self.assertRaises(DatacomCommandError):
             self.olt.authorize("x", pon_port="1/1/1", line_profile="y", service_vlan=100, description="z")
+
+    def test_read_onu(self):
+        st = self.olt.read_onu("ITBS8B93E41A")
+        self.assertTrue(st.authorized and st.online)
+        self.assertEqual((st.rx_dbm, st.tx_dbm), (-19.39, 2.35))
+        self.assertEqual(st.pon_port, "1/1/1")
+        self.assertEqual(st.extra["onu_id"], 0)
+        # ONU "Down" na lista fica offline
+        self.assertFalse(self.olt.read_onu("CMSZ00AABBCC").online)
+        # desconhecida -> não autorizada
+        self.assertFalse(self.olt.read_onu("AUSENTE000000").authorized)
+
+
+class DatacomParsers(unittest.TestCase):
+    def test_parse_ports(self):
+        self.assertEqual(parse_ports(PHYS), ["1/1/1", "1/1/2"])
+
+    def test_parse_onu_list(self):
+        rows = parse_onu_list(ONU_LIST)
+        self.assertEqual(len(rows), 2)
+        self.assertEqual((rows[0]["serial"], rows[0]["onu_id"], rows[0]["oper"]), ("ITBS8B93E41A", 0, "up"))
+
+    def test_parse_optical(self):
+        self.assertEqual(parse_optical(OPTICAL), (-19.39, 2.35))
 
 
 if __name__ == "__main__":

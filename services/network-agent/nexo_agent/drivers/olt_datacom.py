@@ -9,6 +9,7 @@ import re
 from typing import Optional
 
 from .base import AckLost  # noqa: F401 (contrato comum)
+from .olt_base import OnuState
 
 
 class DatacomCommandError(Exception):
@@ -36,6 +37,29 @@ _VOLATILE = re.compile(r"(?mi)^\s*!\s*(Last (commit|configuration)|Generated)\b.
 
 def clean_running_config(text: str) -> str:
     return _VOLATILE.sub("", text)
+
+
+def parse_ports(output: str) -> list[str]:
+    """Portas GPON do dump físico ('Physical interface : gpon f/s/p, ...')."""
+    return sorted(set(re.findall(r"gpon\s+(\d+/\d+/\d+)", output)))
+
+
+def parse_onu_list(output: str) -> list[dict]:
+    """'show interface gpon f/s/p onu': Itf, ONU ID, Serial Number, Oper State, ..."""
+    rows = []
+    for line in output.splitlines():
+        m = re.match(r"^\s*(\d+/\d+/\d+)\s+(\d+)\s+([0-9A-Za-z]{8,20})\s+(\S+)", line)
+        if m:
+            rows.append({"pon_port": m.group(1), "onu_id": int(m.group(2)), "serial": m.group(3).upper(),
+                         "oper": m.group(4).lower()})
+    return rows
+
+
+def parse_optical(output: str) -> tuple[Optional[float], Optional[float]]:
+    def num(label):
+        m = re.search(rf"{re.escape(label)}\s*:\s*(-?\d+\.\d+)", output, re.I)
+        return float(m.group(1)) if m else None
+    return num("Rx Optical Power [dBm]"), num("Tx Optical Power [dBm]")
 
 
 class DatacomOltDriver:
@@ -109,8 +133,52 @@ class DatacomOltDriver:
             raise DatacomCommandError("resposta sem configuração reconhecível; backup não registrado")
         return text
 
+    def _ports(self, s) -> list[str]:
+        if getattr(self, "_ports_cache", None):
+            return self._ports_cache
+        # 'show interface gpon <p> onu 1' devolve o dump físico de TODAS as portas GPON; daí extraio a lista.
+        out = s.run("show interface gpon 1/1/1 onu 1")
+        ports = parse_ports(out) or [f"1/1/{p}" for p in range(1, 17)]
+        self._ports_cache = ports
+        return ports
+
+    def _onu_index(self, s) -> dict:
+        """Mapa serial -> (porta, onu_id, oper) varrendo as portas (uma listagem por porta)."""
+        index = {}
+        for port in self._ports(s):
+            raw = s.run(f"show interface gpon {port} onu")
+            for row in parse_onu_list(raw):
+                index[row["serial"]] = row
+        return index
+
+    def discover(self) -> list[dict]:
+        # O DmOS não tem um comando simples de ONUs não autorizadas mapeado; não se reporta lista de autofind.
+        return []
+
+    def read_onu(self, serial: str) -> OnuState:
+        return self.read_onus([serial]).get(serial, OnuState(authorized=False))
+
+    def read_onus(self, serials: list[str]) -> dict[str, OnuState]:
+        want = {s.upper() for s in serials}
+        s = self._session()
+        index = self._onu_index(s)
+        out = {}
+        for sn in serials:
+            row = index.get(sn.upper())
+            if not row:
+                out[sn] = OnuState(authorized=False)
+                continue
+            rx = tx = None
+            try:
+                rx, tx = parse_optical(s.run(f"show interface gpon {row['pon_port']} onu {row['onu_id']} optical-info"))
+            except DatacomCommandError:
+                pass
+            out[sn] = OnuState(authorized=True, pon_port=row["pon_port"], online=row["oper"] in ("up", "online"),
+                               rx_dbm=rx, tx_dbm=tx, extra={"onu_id": row["onu_id"], "oper": row["oper"]})
+        return out
+
     def _no_writes(self, *_a, **_k):
-        raise DatacomCommandError("provisionamento de ONU Datacom não homologado neste agente (apenas identidade e backup)")
+        raise DatacomCommandError("provisionamento de ONU Datacom não homologado neste agente (apenas leitura e backup)")
 
     authorize = deauthorize = _no_writes
 
