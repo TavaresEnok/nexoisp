@@ -60,7 +60,10 @@ class Agent:
         if dev["driver"] == "olt_intelbras":
             from .drivers.olt_intelbras import IntelbrasOltDriver
             return IntelbrasOltDriver.from_device(dev, self.credentials)
-        if dev["driver"] in ("olt_fiberhome", "olt_vsol", "olt_parks"):
+        if dev["driver"] == "olt_fiberhome":
+            from .drivers.olt_fiberhome import FiberHomeOltDriver
+            return FiberHomeOltDriver.from_device(dev, self.credentials)
+        if dev["driver"] in ("olt_vsol", "olt_parks"):
             from .drivers.olt_cli_backup import CliBackupDriver, PROFILES
             return CliBackupDriver.from_device(dev, self.credentials, PROFILES[dev["driver"]])
         if dev["driver"] == "mikrotik_radius":
