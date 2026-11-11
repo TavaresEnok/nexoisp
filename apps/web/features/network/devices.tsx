@@ -55,7 +55,15 @@ export function DeviceCreator({ onClose }: { onClose: () => void }) {
           options: [
             { value: "mikrotik_radius", label: drivers.mikrotik_radius },
             ...(hasModule(me, "olt")
-              ? [{ value: "olt_huawei", label: drivers.olt_huawei }]
+              ? [
+                  "olt_huawei",
+                  "olt_zte",
+                  "olt_datacom",
+                  "olt_intelbras",
+                  "olt_fiberhome",
+                  "olt_vsol",
+                  "olt_parks",
+                ].map((d) => ({ value: d, label: drivers[d] }))
               : []),
             ...(me?.demo
               ? [
