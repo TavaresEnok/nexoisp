@@ -129,7 +129,8 @@ Validado AO VIVO em equipamento real, só leitura:
 | Datacom | sim (estado + sinal) | show interface gpon f/s/p onu (+ optical-info) | validado ao vivo |
 | Intelbras | sim (estado + sinal) | onu status (+ onu show p/ autofind) | validado ao vivo |
 | FiberHome | sim (estado + sinal) | cd onu; show authorization + show onu optical-info | validado ao vivo (enable com senha) |
-| VSOL / Parks | pendente | — | não validável pelo meu túnel (VSOL mudo por túnel TCP; o Parks testado tem shell quebrado). Transporte OS e backup prontos; leitura de ONU falta confirmar por acesso igual ao de produção |
+| VSOL (EPON) | sim (lista autorizada) | show running-config (parse de `confirm onu mac <MAC> onuid N`) | **backup validado ao vivo** (hostname epon-olt, 26 KB, 261 ONUs). CLI estilo switch não expõe estado/sinal por ONU (exigiria SNMP). Cobre EPON antigo. |
+| Parks | pendente | — | no inventário do BC os Parks com sucesso usam **coletor on-site**; não alcançáveis por jump host de fora. Backup genérico pronto, falta acesso dentro da rede do provedor |
 
 Provisionamento de ONU (autorizar/remover) só é homologável em laboratório; nos drivers novos fica recusado. EPON antigo
 pende de uma OLT EPON ativa para reconhecimento.

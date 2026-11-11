@@ -119,5 +119,5 @@ Itens deliberadamente não implementados, com motivo em [Decisões](DECISOES.md)
 
 ## Solidificação OLT (2026-11-11)
 - Seletor de driver no painel passou a oferecer os drivers reais de OLT (ZTE/Datacom/Intelbras/FiberHome/VSOL/Parks) sob o módulo OLT, além de Huawei; inventário mostra o fabricante por driver.
-- Leitura de ONU validada em campo: Huawei, ZTE, Datacom, Intelbras, FiberHome (estado + sinal). VSOL/Parks: só backup (acesso pendente). EPON: sem equipamento.
+- Leitura de ONU validada em campo: Huawei, ZTE, Datacom, Intelbras, FiberHome (estado + sinal). VSOL (EPON): backup + lista de ONUs autorizadas validados ao vivo (sem estado/sinal na CLI — exigiria SNMP); cobre EPON antigo. Parks: backup via coletor on-site (não alcançável de fora).
 - Autorizar/desautorizar ONU seguem PENDENTES e recusadas nos drivers; plano de homologação em lab em `docs/estudo-campo/plano-provisionamento-lab.md`.

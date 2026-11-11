@@ -63,7 +63,7 @@ export const drivers: Record<string, string> = {
   olt_datacom: "OLT Datacom DmOS · leitura e backup",
   olt_intelbras: "OLT Intelbras · leitura e backup",
   olt_fiberhome: "OLT FiberHome · leitura e backup",
-  olt_vsol: "OLT VSOL · backup de config",
+  olt_vsol: "OLT VSOL (EPON) · leitura e backup",
   olt_parks: "OLT Parks · backup de config",
   radius: "RADIUS integrado",
 };
