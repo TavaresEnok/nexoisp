@@ -116,3 +116,8 @@ PPPoE/RADIUS no NAS físico (o laboratório de 02/11/2026 exercitou o RADIUS int
 ## Backlog fora do piloto
 
 Itens deliberadamente não implementados, com motivo em [Decisões](DECISOES.md): fiscal integrado (NFCom/NFS-e), segundo gateway, OLT de outros fabricantes sem equipamento, CoA (mudança de perfil sem derrubar a sessão; hoje a troca de plano reautentica a sessão), IA com modelo externo, multicélulas e transmissão automática do DICI (a ANATEL não oferece API). Trabalho offline, assinatura na OS, liquidação de comissões e arquivo DICI foram entregues em 09/11/2026. Chatwoot/Webchat estão fora do escopo.
+
+## Solidificação OLT (2026-11-11)
+- Seletor de driver no painel passou a oferecer os drivers reais de OLT (ZTE/Datacom/Intelbras/FiberHome/VSOL/Parks) sob o módulo OLT, além de Huawei; inventário mostra o fabricante por driver.
+- Leitura de ONU validada em campo: Huawei, ZTE, Datacom, Intelbras, FiberHome (estado + sinal). VSOL/Parks: só backup (acesso pendente). EPON: sem equipamento.
+- Autorizar/desautorizar ONU seguem PENDENTES e recusadas nos drivers; plano de homologação em lab em `docs/estudo-campo/plano-provisionamento-lab.md`.

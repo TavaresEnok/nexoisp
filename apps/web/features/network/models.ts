@@ -60,12 +60,21 @@ export const drivers: Record<string, string> = {
   olt_demo: "OLT · simulada",
   olt_huawei: "OLT Huawei SmartAX · não homologada",
   olt_zte: "OLT ZTE ZXA10 · leitura e backup",
-  olt_datacom: "OLT Datacom DmOS · identidade e backup",
-  olt_intelbras: "OLT Intelbras · backup de config",
-  olt_fiberhome: "OLT FiberHome · backup de config",
+  olt_datacom: "OLT Datacom DmOS · leitura e backup",
+  olt_intelbras: "OLT Intelbras · leitura e backup",
+  olt_fiberhome: "OLT FiberHome · leitura e backup",
   olt_vsol: "OLT VSOL · backup de config",
   olt_parks: "OLT Parks · backup de config",
   radius: "RADIUS integrado",
+};
+const oltVendorByDriver: Record<string, string> = {
+  olt_huawei: "Huawei",
+  olt_zte: "ZTE",
+  olt_datacom: "Datacom",
+  olt_intelbras: "Intelbras",
+  olt_fiberhome: "FiberHome",
+  olt_vsol: "VSOL",
+  olt_parks: "Parks",
 };
 export function projectDevice(device: Device): InventoryNode {
   return {
@@ -74,13 +83,12 @@ export function projectDevice(device: Device): InventoryNode {
     ip: device.nas_ip || device.host || "Endereço não informado",
     type: drivers[device.driver] ?? device.driver,
     vendor:
-      device.driver === "olt_huawei"
-        ? "Huawei"
-        : device.driver === "mikrotik_radius"
-          ? "MikroTik"
-          : device.driver === "radius" && device.vendor
-            ? (vendors[device.vendor] ?? device.vendor)
-            : "Fabricante não informado",
+      oltVendorByDriver[device.driver] ??
+      (device.driver === "mikrotik_radius"
+        ? "MikroTik"
+        : device.driver === "radius" && device.vendor
+          ? (vendors[device.vendor] ?? device.vendor)
+          : "Fabricante não informado"),
     pop: "Não informado",
     status: device.maintenance
       ? "Manutenção"

@@ -16,12 +16,21 @@ export function DeviceIdentityEditor({
   const agents = useAgents();
   const refresh = useNetworkRefresh();
   const integrated = device.driver === "radius";
+  const realOltDrivers = [
+    "olt_huawei",
+    "olt_zte",
+    "olt_datacom",
+    "olt_intelbras",
+    "olt_fiberhome",
+    "olt_vsol",
+    "olt_parks",
+  ];
   const allowedDrivers = Object.entries(drivers).filter(
     ([driver]) =>
       driver === device.driver ||
       (driver !== "radius" &&
         (driver === "mikrotik_radius" ||
-          (driver === "olt_huawei" && hasModule(me, "olt")) ||
+          (realOltDrivers.includes(driver) && hasModule(me, "olt")) ||
           (me?.demo &&
             (driver === "demo" ||
               (driver === "olt_demo" && hasModule(me, "olt")))))),
