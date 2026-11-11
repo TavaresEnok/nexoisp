@@ -127,9 +127,9 @@ Validado AO VIVO em equipamento real, só leitura:
 | Huawei | sim (estado + sinal) | display ont info/optical | driver completo |
 | ZTE | sim (estado + sinal) | show gpon onu state/detail-info + pon power | driver completo |
 | Datacom | sim (estado + sinal) | show interface gpon f/s/p onu (+ optical-info) | validado ao vivo |
-| Intelbras | sim (presença/porta) | onu inventory (+ onu show p/ autofind) | validado ao vivo; online/óptico por-ONU (`onu status <id>`) ainda não mapeado |
-| FiberHome | pendente | `cd onu` + comando a confirmar | precisa de `enable` COM senha antes; **cuidado: 5 falhas de senha bloqueiam o login por alguns minutos** |
-| VSOL / Parks | pendente | — | não validável pelo meu túnel (VSOL mudo por túnel TCP; o Parks testado tem shell quebrado). Transporte OS pronto; confirmar por acesso igual ao de produção |
+| Intelbras | sim (estado + sinal) | onu status (+ onu show p/ autofind) | validado ao vivo |
+| FiberHome | sim (estado + sinal) | cd onu; show authorization + show onu optical-info | validado ao vivo (enable com senha) |
+| VSOL / Parks | pendente | — | não validável pelo meu túnel (VSOL mudo por túnel TCP; o Parks testado tem shell quebrado). Transporte OS e backup prontos; leitura de ONU falta confirmar por acesso igual ao de produção |
 
 Provisionamento de ONU (autorizar/remover) só é homologável em laboratório; nos drivers novos fica recusado. EPON antigo
 pende de uma OLT EPON ativa para reconhecimento.

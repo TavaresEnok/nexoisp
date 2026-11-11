@@ -1,7 +1,7 @@
 """Driver Intelbras OLT8820: leitura de ONU (inventory) e autofind (onu show), com saídas sintéticas no formato real."""
 import unittest
 
-from nexo_agent.drivers.olt_intelbras import INTELBRAS_PROFILE, IntelbrasOltDriver, parse_discovered, parse_inventory
+from nexo_agent.drivers.olt_intelbras import INTELBRAS_PROFILE, IntelbrasOltDriver, parse_discovered, parse_inventory, parse_status
 
 INVENTORY = """onu inventory
 gpon 1 onu 9    8B6A9709  ITBS    R1      PONR1_v2.0      1.0-200813
@@ -26,6 +26,13 @@ Free slots in GPON Link 2:
  60   64   65
 intelbras-olt>"""
 
+STATUS = """onu status
+     Serial    OperStatus  Config   OLT Rx     ONU Rx     Distance
+ONU  Number
+18  2CED4534  Active      OK       -25.85 dBm  -21.08 dBm  0.593   0:16:13:48  no
+20  8B6AE5E1  Inactive    -        -           -           -
+intelbras-olt>"""
+
 
 class FakeChan:
     def __init__(self):
@@ -47,6 +54,8 @@ class FakeSession:
         return ONU_SHOW if cmd == "onu show" else "intelbras-olt>"
 
     def dump(self, cmd, **k):
+        if cmd == "onu status":
+            return STATUS
         return INVENTORY if cmd == "onu inventory" else "intelbras-olt>"
 
     def close(self):
@@ -64,18 +73,26 @@ class Parsers(unittest.TestCase):
         d = parse_discovered(ONU_SHOW)
         self.assertEqual({x["serial"] for x in d}, {"CMSZ0A1B2C3D", "ITBS99887766"})
 
+    def test_status(self):
+        rows = parse_status(STATUS)
+        r = {x["serial"]: x for x in rows}
+        self.assertTrue(r["2CED4534"]["online"])
+        self.assertEqual((r["2CED4534"]["rx_dbm"], r["2CED4534"]["tx_dbm"]), (-21.08, -25.85))
+        self.assertFalse(r["8B6AE5E1"]["online"])
+
 
 class Driver(unittest.TestCase):
     def setUp(self):
         self.olt = IntelbrasOltDriver(lambda: FakeSession(), INTELBRAS_PROFILE, enable_secrets=("x",))
 
-    def test_read_onu_autorizada(self):
+    def test_read_onu_online_com_sinal(self):
         st = self.olt.read_onu("2CED4534")
-        self.assertTrue(st.authorized)
-        self.assertEqual(st.pon_port, "gpon1")
-        self.assertEqual((st.extra["onu_id"], st.extra["vendor"]), (12, "ITBS"))
+        self.assertTrue(st.authorized and st.online)
+        self.assertEqual((st.rx_dbm, st.tx_dbm), (-21.08, -25.85))
+        self.assertEqual(st.extra["onu_id"], 18)
 
-    def test_read_onu_ausente(self):
+    def test_read_onu_offline_e_ausente(self):
+        self.assertFalse(self.olt.read_onu("8B6AE5E1").online)
         self.assertFalse(self.olt.read_onu("DEADBEEF").authorized)
 
     def test_discover(self):

@@ -21,6 +21,23 @@ def parse_inventory(output: str) -> list[dict]:
     return rows
 
 
+def parse_status(output: str) -> list[dict]:
+    """'onu status' (tabela): ONU Serial OperStatus ConfigStatus OLT-Rx ONU-Rx Distance ...
+    rx_dbm = ONU Rx Power (downstream); tx_dbm ~ OLT Rx Power (nível recebido no OLT, upstream)."""
+    rows = []
+    for line in output.splitlines():
+        m = re.match(r"^\s*(\d+)\s+([0-9A-Fa-f]{6,16})\s+(Active|Inactive)\s+(\S+)\s+(-?\d+\.\d+)\s*dBm\s+(-?\d+\.\d+)\s*dBm", line)
+        if m:
+            rows.append({"onu_id": int(m.group(1)), "serial": m.group(2).upper(), "online": m.group(3) == "Active",
+                         "tx_dbm": float(m.group(5)), "rx_dbm": float(m.group(6))})
+        else:
+            m2 = re.match(r"^\s*(\d+)\s+([0-9A-Fa-f]{6,16})\s+(Active|Inactive)\b", line)
+            if m2:
+                rows.append({"onu_id": int(m2.group(1)), "serial": m2.group(2).upper(),
+                             "online": m2.group(3) == "Active", "tx_dbm": None, "rx_dbm": None})
+    return rows
+
+
 def parse_discovered(output: str) -> list[dict]:
     """'onu show' → tabela 'Discovered serial numbers': sernoID Vendor Serial Model Time."""
     found, in_block = [], False
@@ -59,18 +76,17 @@ class IntelbrasOltDriver(CliBackupDriver):
     def read_onus(self, serials: list[str]) -> dict[str, OnuState]:
         s = self._open()
         try:
-            inv = {r["serial"]: r for r in parse_inventory(s.dump("onu inventory", idle=3.0, maxt=150))}
+            st = {r["serial"]: r for r in parse_status(s.dump("onu status", idle=3.0, maxt=180))}
         finally:
             s.close()
         out = {}
         for sn in serials:
-            r = inv.get(sn.upper())
+            r = st.get(sn.upper())
             if not r:
                 out[sn] = OnuState(authorized=False)
             else:
-                # online/óptico do Intelbras é por-ONU ('onu status <id>'), ainda não mapeado; aqui fica a presença/porta.
-                out[sn] = OnuState(authorized=True, online=None, pon_port=f"gpon{r['link']}",
-                                   extra={"onu_id": r["onu_id"], "vendor": r["vendor"], "model": r["model"]})
+                out[sn] = OnuState(authorized=True, online=r["online"], rx_dbm=r["rx_dbm"], tx_dbm=r["tx_dbm"],
+                                   extra={"onu_id": r["onu_id"]})
         return out
 
     def read_onu(self, serial: str) -> OnuState:
