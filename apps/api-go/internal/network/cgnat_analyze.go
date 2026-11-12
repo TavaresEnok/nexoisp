@@ -104,6 +104,10 @@ func analyzeMikrotikNAT(text string, a *CGNATAnalysis) {
 	sec := exportSections(text)
 	seen := map[CGNATRule]bool{}
 	dynamic := false
+	// netmap sem faixa de portas: no padrão CGNAT_n é só a regra de ICMP/outros do mesmo bloco; sozinho (ou com
+	// origem negada, "!rede-pública") é netmap só de endereço — vários assinantes por IP sem bloco de portas.
+	type addrRule struct{ src, dst string }
+	addressOnly := []addrRule{}
 	for _, line := range sec["/ip firewall nat"] {
 		if !strings.HasPrefix(line, "add ") {
 			continue
@@ -113,6 +117,12 @@ func analyzeMikrotikNAT(text string, a *CGNATAnalysis) {
 			continue
 		}
 		src, okSrc := prefixOf(at["src-address"])
+		if at["action"] == "netmap" && at["to-ports"] == "" && at["chain"] != "dstnat" {
+			if v := at["src-address"]; v == "" || strings.HasPrefix(v, "!") || (okSrc && isCGNATPrivate(src)) {
+				addressOnly = append(addressOnly, addrRule{v, at["to-addresses"]})
+			}
+			continue
+		}
 		if at["action"] == "masquerade" || (at["action"] == "src-nat" && at["to-ports"] == "") {
 			if okSrc && isCGNATPrivate(src) && at["chain"] != "dstnat" {
 				dynamic = true
@@ -142,12 +152,45 @@ func analyzeMikrotikNAT(text string, a *CGNATAnalysis) {
 			a.Rules = append(a.Rules, r)
 		}
 	}
+	ported, sharedPublic := map[string]bool{}, map[string]bool{}
+	for _, r := range a.Rules {
+		ported[r.Private], sharedPublic[r.Public] = true, true
+	}
+	loose := 0
+	for _, v := range addressOnly {
+		p, okP := prefixOf(v.src)
+		d, okD := prefixOf(v.dst)
+		switch {
+		case okP && ported[p.String()]:
+			// ICMP/outros do mesmo bloco CGNAT_n: já coberto pelas regras com portas.
+		case okP && okD && p.Bits() == d.Bits() && !sharedPublic[d.String()]:
+			// NAT 1:1 (mesmo tamanho, IP público exclusivo): o titular é o mesmo deslocamento, qualquer porta.
+			r := CGNATRule{Private: p.String(), Public: d.String(), PortStart: 1, PortEnd: 65535}
+			if !seen[r] {
+				seen[r] = true
+				a.Rules = append(a.Rules, r)
+			}
+		default:
+			loose++
+		}
+	}
+	addrWarning := "netmap só de endereço (sem faixa de portas): cada IP público é dividido entre vários assinantes sem bloco de portas definido, então IP+porta não apontam um titular — só o registro de NAT identifica"
 	switch {
 	case len(a.Rules) > 0:
 		a.Kind, a.Traceable = "deterministic", true
+		if loose > 0 {
+			a.Warnings = append(a.Warnings, fmt.Sprintf("%d regra(s) de %s", loose, addrWarning))
+		}
 		a.Suggestions = suggestNetmapPlans(a.Rules, &a.Warnings)
 		if dynamic {
 			a.Warnings = append(a.Warnings, "há também NAT dinâmico (masquerade/src-nat sem portas) para endereços privados: quem sair por ele só é rastreável por registro de NAT")
+		}
+	case loose > 0:
+		a.Kind = "address_netmap"
+		a.Suggestions = append(a.Suggestions, CGNATSuggestion{Layout: "external", NatLog: "none", NatLogDetail: "netmap só de endereço, sem registro de NAT"})
+		a.Warnings = append(a.Warnings, addrWarning+". Ative o log de NAT ou migre para o netmap com faixa de portas (CGNAT_n)")
+		if dynamic {
+			a.Warnings = append(a.Warnings, "há também masquerade/src-nat sem portas para endereços privados")
 		}
 	case dynamic:
 		a.Kind = "dynamic"
@@ -165,6 +208,9 @@ func suggestNetmapPlans(rules []CGNATRule, warnings *[]string) []CGNATSuggestion
 	groups := map[string][]CGNATRule{}
 	order := []string{}
 	for _, r := range rules {
+		if r.PortStart == 1 && r.PortEnd == 65535 {
+			continue // NAT 1:1: importado como regra exata
+		}
 		if _, ok := groups[r.Public]; !ok {
 			order = append(order, r.Public)
 		}

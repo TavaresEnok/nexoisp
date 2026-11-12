@@ -83,6 +83,26 @@ func TestAnalyzeMikrotikForaDeOrdemEMasquerade(t *testing.T) {
 	}
 }
 
+// Padrão visto ao vivo (RouterOS 7.21): netmap de toda a rede de clientes, exceto o bloco público, sem faixa de portas.
+func TestAnalyzeMikrotikNetmapSoEndereco(t *testing.T) {
+	a := AnalyzeCGNATConfig("/ip firewall nat add action=netmap chain=srcnat comment=NAT-CLIENTES src-address=!203.0.113.0/24 to-addresses=203.0.113.0/24\n")
+	if a.Kind != "address_netmap" || a.Traceable || a.Suggestions[0].Layout != "external" || !strings.Contains(strings.Join(a.Warnings, " "), "netmap só de endereço") {
+		t.Fatalf("%+v", a)
+	}
+	// NAT 1:1 de servidor (/32 -> /32, IP público exclusivo) é rastreável: vira regra exata de todas as portas.
+	one := AnalyzeCGNATConfig(netmapExport() + "/ip firewall nat add action=netmap chain=srcnat src-address=10.9.9.9 to-addresses=198.51.100.77\n")
+	if one.Kind != "deterministic" || len(one.Rules) != 5 || len(one.Suggestions) != 1 || strings.Contains(strings.Join(one.Warnings, " "), "só de endereço") {
+		t.Fatalf("1:1: %+v", one)
+	}
+	if priv, ok := CGNATMappingPrivate(one.Rules[4].Private, one.Rules[4].Public, "198.51.100.77"); !ok || priv != "10.9.9.9" || one.Rules[4].PortStart != 1 {
+		t.Fatalf("1:1 regra: %+v", one.Rules[4])
+	}
+	// A regra sem portas do próprio bloco CGNAT_n (ICMP/outros) NÃO conta como netmap só de endereço.
+	if b := AnalyzeCGNATConfig(netmapExport()); strings.Contains(strings.Join(b.Warnings, " "), "só de endereço") {
+		t.Fatalf("falso positivo no padrão CGNAT_n: %v", b.Warnings)
+	}
+}
+
 func TestAnalyzeHillstoneEA10(t *testing.T) {
 	hs := `logging traffic nat on
 logging syslog 192.0.2.50 vrouter "trust-vr" udp 514 type traffic nat
@@ -107,7 +127,7 @@ func TestParseCGNATLog(t *testing.T) {
 	log := `2026-11-01T10:00:00-03:00 hs01 NAT444: port-block allocated src 100.64.1.2 trans 203.0.113.9 ports 3040-5055
 2026-11-01T12:30:00-03:00 hs01 NAT444: port-block released src 100.64.1.2 trans 203.0.113.9 ports 3040-5055
 Nov  1 13:00:00 hs01 NAT444: port-block allocated src 100.64.1.7 trans 203.0.113.9 ports 3040-5055
-linha sem nada útil 2026-11-01T10:00:00Z
+linha sem nada útil 100.64.0.1 2026-11-01T10:00:00Z
 2026-11-01T17:00:00Z port-block allocated src 100.64.1.9 trans 203.0.113.9 ports 3040-5055`
 	loc, _ := time.LoadLocation("America/Sao_Paulo")
 	r := ParseCGNATLog(log, 2026, loc, nil)
@@ -132,5 +152,41 @@ linha sem nada útil 2026-11-01T10:00:00Z
 	c, err := ParseCGNATCSV("public_ip,private_ip,port_start,port_end,start,end\n203.0.113.1,100.64.0.9,1024,2047,2026-11-01T00:00:00Z,\n10.0.0.1,100.64.0.9,1,2,x,\n")
 	if err != nil || c.Accepted != 1 || c.Rejected != 1 || c.Mappings[0].ValidTo != nil {
 		t.Fatalf("csv: %+v %v", c, err)
+	}
+}
+
+// Formatos REAIS (12/11/2026), com endereços de documentação no lugar dos reais. O "show logging" do Hillstone vem do
+// mais novo para o mais antigo.
+func TestParseCGNATLogFormatosReais(t *testing.T) {
+	loc, _ := time.LoadLocation("America/Sao_Paulo")
+	hs := `Total: 3
+2026-11-12 17:18:05, INFO@FLOW(1174943279): NAT: in-if aggregate1.91, out-if aggregate1.90, src-zone trust, dst-zone untrust, 100.64.3.9:40000->192.0.2.80:443(TCP), snat to 203.0.113.20:10050, vr trust-vr, user -@UNKNOWN, host -, rule 15, user-mac 0000.0000.0000
+2026-11-12 17:18:00, INFO@FLOW(1174943279): NAT: in-if aggregate1.91, out-if aggregate1.90, src-zone trust, dst-zone untrust, 100.64.3.7:39262->192.0.2.80:443(TCP), snat to 203.0.113.20:10050, vr trust-vr, user -@UNKNOWN, host -, rule 15, user-mac 0000.0000.0000
+2026-11-12 17:17:00, INFO@FLOW(1174943279): NAT: in-if aggregate1.91, out-if aggregate1.90, src-zone trust, dst-zone untrust, 100.64.3.7:53862->198.51.100.1:443(UDP), snat to 203.0.113.20:10050, vr trust-vr, user -@UNKNOWN, host -, rule 15, user-mac 0000.0000.0000`
+	r := ParseCGNATLog(hs, 0, loc, nil)
+	if r.Accepted != 3 || r.Rejected != 1 || len(r.Mappings) != 2 {
+		t.Fatalf("Hillstone por sessão: %+v", r)
+	}
+	m0, m1 := r.Mappings[0], r.Mappings[1]
+	if m0.Private != "100.64.3.7/32" || m0.Public != "203.0.113.20/32" || m0.PortStart != 10050 || m0.ValidTo == nil || !m0.ValidTo.Equal(*m1.ValidFrom) || m1.Private != "100.64.3.9/32" {
+		t.Fatalf("o IP traduzido é o do 'snat to', não o destino; a mesma porta reatribuída fecha a anterior: %+v %+v", m0, m1)
+	}
+	if !m0.ValidFrom.Equal(time.Date(2026, 11, 12, 20, 17, 0, 0, time.UTC)) {
+		t.Fatalf("fuso do equipamento: %v", m0.ValidFrom)
+	}
+	wrapped := "2026-11-12 17:18:00, INFO@FLOW(1): NAT: in-if a, out-if b, src-zone trust, dst-zone untrust, 100.64.3.7:39262->192.0.2.80:443(TCP), snat to 203.0.113.20:10050, vr t\nrust-vr, user -@UNKNOWN, host -, rule 15, user-mac 0000.0000.0000\n"
+	if w := ParseCGNATLog(wrapped, 0, loc, nil); w.Lines != 1 || w.Accepted != 1 || w.Rejected != 0 {
+		t.Fatalf("linha quebrada pela CLI: %+v", w)
+	}
+	nat444 := "2026-11-12 18:11:22, WARNING@FLOW(1143223312): [NAT444 user exhausted port 17 100.64.8.1 - 203.0.113.30 - 24832 26815]\n" +
+		"2026-11-12 18:10:48, WARNING@FLOW(1143223312): [NAT444 user exhausted port 17 100.64.8.1 - 203.0.113.30 - 24832 26815]\n"
+	b := ParseCGNATLog(nat444, 0, loc, nil)
+	if b.Accepted != 2 || len(b.Mappings) != 1 || b.Mappings[0].PortStart != 24832 || b.Mappings[0].PortEnd != 26815 || b.Mappings[0].Private != "100.64.8.1/32" {
+		t.Fatalf("Hillstone NAT444 (aviso repetido não duplica): %+v", b)
+	}
+	mk := "Nov 12 10:00:00 cgnat srcnat: in:<pppoe-x> out:sfp1, connection-state:new proto TCP (SYN), 100.64.0.9:51234->192.0.2.10:443, NAT (100.64.0.9:51234->203.0.113.5:3050)->192.0.2.10:443, len 60"
+	k := ParseCGNATLog(mk, 2026, loc, nil)
+	if k.Accepted != 1 || k.Mappings[0].Public != "203.0.113.5/32" || k.Mappings[0].PortStart != 3050 || k.Mappings[0].Private != "100.64.0.9/32" {
+		t.Fatalf("MikroTik log=yes: %+v", k)
 	}
 }

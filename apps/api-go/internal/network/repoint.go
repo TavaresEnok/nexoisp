@@ -23,6 +23,8 @@ type RepointEntry struct {
 	Comment string `json:"comment,omitempty"`
 	ERP     string `json:"erp,omitempty"`
 	Enabled bool   `json:"enabled"`
+	// Services: serviços do /radius (ppp, login, hotspot, wireless, dhcp...). Só os de assinante passam para cá.
+	Services []string `json:"services,omitempty"`
 }
 
 // RepointPlan é o resultado: o que existe hoje, o script de migração e o script de volta.
@@ -114,6 +116,11 @@ func quoteRos(v string) string {
 	return `"` + strings.NewReplacer(`\`, `\\`, `"`, `\"`, "$", `\$`).Replace(v) + `"`
 }
 
+// Padrões do RouterOS: o export omite o que está no padrão, então a volta usa estes valores.
+var rosDefaults = map[string]string{"/radius incoming accept": "no", "/radius incoming port": "3799", "/ppp aaa use-radius": "no", "/ppp aaa accounting": "yes", "/ppp aaa interim-update": "0s"}
+
+var subscriberService = map[string]bool{"ppp": true, "hotspot": true, "dhcp": true}
+
 var safeRosValue = regexp.MustCompile(`^[A-Za-z0-9_.:/@\-]{1,128}$`)
 
 // MikrotikRepoint lê o export do concentrador e monta a troca do RADIUS do ERP anterior pelo nosso.
@@ -131,6 +138,9 @@ func MikrotikRepoint(export, ours string) RepointPlan {
 			continue
 		}
 		e := RepointEntry{Section: "/radius", Address: a["address"], Comment: a["comment"], ERP: erpOf(a["comment"]), Enabled: a["disabled"] != "yes"}
+		if v := a["service"]; v != "" {
+			e.Services = strings.Split(v, ",")
+		}
 		plan.Radius = append(plan.Radius, e)
 		if e.ERP != "" {
 			votes[e.ERP]++
@@ -196,8 +206,28 @@ func MikrotikRepoint(export, ours string) RepointPlan {
 			plan.Warnings = append(plan.Warnings, "RADIUS anterior com endereço não reconhecido: desative manualmente em /radius")
 			continue
 		}
-		apply = append(apply, "/radius set [find where address="+r.Address+" and !(comment~\"^nexoisp\")] disabled=yes")
-		rollback = append(rollback, "/radius set [find where address="+r.Address+" and !(comment~\"^nexoisp\")] disabled=no")
+		find := "/radius set [find where address=" + r.Address + " and !(comment~\"^nexoisp\")]"
+		subscriber, other := []string{}, []string{}
+		for _, sv := range r.Services {
+			if subscriberService[sv] {
+				subscriber = append(subscriber, sv)
+			} else if safeRosValue.MatchString(sv) {
+				other = append(other, sv)
+			}
+		}
+		switch {
+		case len(r.Services) > 0 && len(subscriber) == 0:
+			// Ex.: RADIUS só de login de administrador ou de wireless: não é autenticação de assinante, fica como está.
+			continue
+		case len(other) > 0:
+			// Atende assinante E outra coisa (login, wireless...): tira só os serviços de assinante, o resto continua.
+			apply = append(apply, find+" service="+strings.Join(other, ","))
+			rollback = append(rollback, find+" service="+strings.Join(r.Services, ","))
+			plan.Warnings = append(plan.Warnings, "um RADIUS anterior também atende "+strings.Join(other, ",")+": só "+strings.Join(subscriber, ",")+" passa para o RADIUS integrado, o restante continua nele")
+		default:
+			apply = append(apply, find+" disabled=yes")
+			rollback = append(rollback, find+" disabled=no")
+		}
 		disabled++
 	}
 	if len(plan.Radius) == 0 {
@@ -237,9 +267,35 @@ func MikrotikRepoint(export, ours string) RepointPlan {
 	for i := len(created) - 1; i >= 0; i-- {
 		back = append(back, created[i]+" remove [find where comment~\"^nexoisp\"]")
 	}
-	if !plan.CoA {
-		back = append(back, "/radius incoming set accept=no")
+	// Restaura o que o script de migração muda por "set" (interim-update, porta/aceite de CoA), com os valores de antes.
+	restore := func(section string, keys ...string) {
+		if !strings.Contains(ours, section+" set ") {
+			return
+		}
+		cur := map[string]string{}
+		for _, l := range sec[section] {
+			if strings.HasPrefix(l, "set ") || !strings.HasPrefix(l, "add ") {
+				for k, v := range exportAttrs(l) {
+					cur[k] = v
+				}
+			}
+		}
+		parts := []string{}
+		for _, k := range keys {
+			v, ok := cur[k]
+			if !ok {
+				v = rosDefaults[section+" "+k]
+			}
+			if v != "" && safeRosValue.MatchString(v) {
+				parts = append(parts, k+"="+v)
+			}
+		}
+		if len(parts) > 0 {
+			back = append(back, section+" set "+strings.Join(parts, " "))
+		}
 	}
+	restore("/radius incoming", "accept", "port")
+	restore("/ppp aaa", "use-radius", "accounting", "interim-update")
 	plan.Apply = strings.Join(apply, "\n") + "\n"
 	plan.Rollback = strings.Join(back, "\n") + "\n"
 	if disabled == 0 && len(plan.Radius) > 0 {

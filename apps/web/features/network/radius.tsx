@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Panel } from "@/components/workspace-ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -231,7 +232,9 @@ export function RadiusActions({ device }: { device: Device }) {
   const [shown, setShown] = useState<Setup | null>(null);
   const [converting, setConverting] = useState(false);
   const [editing, setEditing] = useState<Nas | null>(null);
+  const [repointing, setRepointing] = useState(false);
   const integrated = device.driver === "radius";
+  const { me } = useSession();
   return (
     <ProfileSection
       title={
@@ -301,6 +304,18 @@ export function RadiusActions({ device }: { device: Device }) {
               >
                 Trocar segredo
               </ActionButton>
+              {can(me, "network:write") &&
+                ["mikrotik", "huawei", "cisco"].includes(
+                  device.vendor ?? "",
+                ) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setRepointing(true)}
+                  >
+                    Trocar o RADIUS do sistema anterior
+                  </Button>
+                )}
               {connections(result.data, device.vendor ?? "generic")
                 .filter((item) => item.value !== "direct")
                 .map((item) => (
@@ -366,6 +381,9 @@ export function RadiusActions({ device }: { device: Device }) {
         />
       )}
       {shown && <RadiusSetup value={shown} onClose={() => setShown(null)} />}
+      {repointing && (
+        <RepointPlan device={device} onClose={() => setRepointing(false)} />
+      )}
     </ProfileSection>
   );
 }
@@ -640,6 +658,148 @@ function RadiusSetup({
           <Button onClick={onClose}>
             {value.secret ? "Já guardei o segredo" : "Fechar instruções"}
           </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+const repointSchema = z.object({
+  erp: z.string(),
+  radius: z.array(
+    z
+      .object({
+        name: z.string().optional(),
+        address: z.string().optional(),
+        erp: z.string().optional(),
+        enabled: z.boolean(),
+      })
+      .passthrough(),
+  ),
+  vpn: z.array(
+    z
+      .object({
+        section: z.string(),
+        name: z.string().optional(),
+        erp: z.string().optional(),
+      })
+      .passthrough(),
+  ),
+  coa_enabled: z.boolean(),
+  apply: z.string(),
+  rollback: z.string(),
+  warnings: z.array(z.string()),
+});
+const erpLabels: Record<string, string> = {
+  sgp: "SGP",
+  ixc: "IXC",
+  mkauth: "MK-Auth",
+  voalle: "Voalle",
+  hubsoft: "Hubsoft",
+  desconhecido: "Não identificado",
+};
+
+/** Migração: lê a configuração atual do concentrador e gera a troca do RADIUS do sistema anterior pelo integrado. */
+function RepointPlan({
+  device,
+  onClose,
+}: {
+  device: Device;
+  onClose: () => void;
+}) {
+  const [config, setConfig] = useState("");
+  const [plan, setPlan] = useState<z.infer<typeof repointSchema> | null>(null);
+  const source =
+    device.vendor === "huawei"
+      ? "display current-configuration"
+      : device.vendor === "cisco"
+        ? "show running-config"
+        : "/export (RouterOS 7: /export; 6: /export hide-sensitive)";
+  return (
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <DialogContent className="erp-editor">
+        <DialogHeader>
+          <DialogTitle>Trocar o RADIUS do sistema anterior</DialogTitle>
+          <DialogDescription>
+            Cole a saída de {source}. O NexoISP gera os comandos para revisão:
+            acrescenta o RADIUS integrado, desativa (sem apagar) o do sistema
+            anterior e entrega o script de volta. Nada é enviado ao equipamento.
+          </DialogDescription>
+        </DialogHeader>
+        <FormField label="Configuração atual do concentrador">
+          <Textarea
+            rows={8}
+            spellCheck={false}
+            value={config}
+            onChange={(event) => setConfig(event.target.value)}
+          />
+        </FormField>
+        <div className="erp-inline-actions">
+          <ActionButton
+            disabled={config.trim().length < 20}
+            onClick={async () =>
+              setPlan(
+                repointSchema.parse(
+                  await api(`/radius/devices/${device.id}/repoint-plan`, {
+                    body: { export: config },
+                  }),
+                ),
+              )
+            }
+          >
+            Gerar plano de troca
+          </ActionButton>
+        </div>
+        {plan && (
+          <>
+            <ProfileFacts
+              items={[
+                ["Sistema anterior", erpLabels[plan.erp] ?? plan.erp],
+                ["RADIUS do sistema anterior", String(plan.radius.length)],
+                [
+                  "VPN até o sistema anterior",
+                  plan.vpn.length
+                    ? plan.vpn
+                        .map((v) => v.section.replace("/interface ", ""))
+                        .join(", ")
+                    : "Nenhuma",
+                ],
+                [
+                  "Desconexão por CoA antes da troca",
+                  plan.coa_enabled ? "Sim" : "Não",
+                ],
+              ]}
+            />
+            {plan.warnings.map((warning) => (
+              <p key={warning} className="profile-footnote">
+                {warning}
+              </p>
+            ))}
+            <CodePreview
+              title="Troca (aplicar em janela)"
+              code={plan.apply}
+              filename="troca-radius.txt"
+            />
+            <CodePreview
+              title="Volta ao sistema anterior"
+              code={plan.rollback}
+              filename="volta-radius.txt"
+            />
+            <p className="profile-footnote">
+              Validado em laboratório com MikroTik real: a troca não derrubou
+              nenhuma das sessões conectadas e a volta restaurou a configuração
+              anterior. Huawei e Cisco foram conferidos contra configurações
+              reais, sem aplicar.
+            </p>
+          </>
+        )}
+        <div className="erp-inline-actions">
+          <Button onClick={onClose}>Fechar</Button>
         </div>
       </DialogContent>
     </Dialog>

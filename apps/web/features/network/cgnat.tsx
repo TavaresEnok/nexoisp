@@ -788,9 +788,13 @@ const importKinds: Record<z.infer<typeof batchSchema>["kind"], string> = {
 };
 const analysisKinds: Record<string, string> = {
   deterministic: "Determinístico: o titular sai das regras",
-  dynamic_block: "Bloco fixo atribuído dinamicamente: depende do registro de NAT",
-  deterministic_offset: "Determinístico com deslocamento aleatório: depende do arquivo de mapeamento",
+  dynamic_block:
+    "Bloco fixo atribuído dinamicamente: depende do registro de NAT",
+  deterministic_offset:
+    "Determinístico com deslocamento aleatório: depende do arquivo de mapeamento",
   dynamic: "Dinâmico: depende do registro de NAT",
+  address_netmap:
+    "Netmap só de endereço (sem faixa de portas): depende do registro de NAT",
   none: "Nenhuma regra de CGNAT reconhecida",
 };
 
@@ -922,7 +926,12 @@ function CgnatImport() {
             <OperationalCatalog
               title="Planos sugeridos"
               description="Confira e cadastre como plano de CGNAT; blocos fora de ordem ficam só como regras importadas."
-              columns={["Privado → público", "Portas", "Formato", "Registro de NAT"]}
+              columns={[
+                "Privado → público",
+                "Portas",
+                "Formato",
+                "Registro de NAT",
+              ]}
               rows={analysis.suggestions.map((item, index) => ({
                 id: String(index),
                 cells: [
@@ -955,7 +964,13 @@ function CgnatImport() {
         <OperationalCatalog
           title="Mapeamentos importados"
           description="Usados pelo rastreio quando nenhum plano calcula o titular. Apagar um lote tira esses mapeamentos das consultas."
-          columns={["Lote", "Origem", "Mapeamentos", "Período coberto", "Importado em"]}
+          columns={[
+            "Lote",
+            "Origem",
+            "Mapeamentos",
+            "Período coberto",
+            "Importado em",
+          ]}
           rows={(batches.data ?? []).map((batch) => ({
             id: batch.id,
             cells: [

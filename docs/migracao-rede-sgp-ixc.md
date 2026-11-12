@@ -124,15 +124,41 @@ Nosso modelo (`internal/network/cgnat.go`) já separa:
 - **OLT Huawei:** marca SGP em 109; ONUs `importacao_sgp` em 15.
 - **CGNAT dedicado:** Hillstone `fixed-block` dinâmico (13 configs), A10 `fixed-nat offset random` (3 configs).
 
+## 5b. Validação AO VIVO, só leitura (12/11/2026)
+
+Com autorização da Ajust, o código de migração foi conferido contra equipamentos reais de provedores (só comandos
+`print`/`show`/`display`, com trava que recusa qualquer outro; processamento dentro do backup center; só contagens
+saíram). Ferramenta: `apps/api-go/cmd/sonda-rede` (usa o próprio pacote `internal/network`).
+
+| Equipamento | O que se provou |
+|---|---|
+| CGNAT MikroTik (RouterOS 7.11, ~150 mil conexões) | 96 regras netmap `CGNAT_n` lidas, 2 planos sugeridos. Em **5.995 conexões reais traduzidas, o titular calculado bateu 100%** — pela regra exata e pela fórmula do plano `netmap` |
+| CGNAT MikroTik (RouterOS 7.21) | Netmap **só de endereço** (sem faixa de portas, origem negada) — passou a ser reconhecido como não rastreável sem registro de NAT. O 7.2x também mudou a tabela de conexões (`src-port=` separado) |
+| Autenticador MikroTik com IXC (RouterOS 6.49) | Plano de troca correto; um RADIUS do ERP atendia `ppp,hotspot,wireless` → agora só `ppp,hotspot` mudam e o wireless fica. 298 usuários locais em `/ppp secret` avisados |
+| Autenticador MikroTik com SGP (RouterOS 6.48) | ERP SGP, sem CoA, 2 VPN cliente (L2TP + PPTP) do SGP; plano e volta sem nenhum segredo |
+| Hillstone com registro por sessão | Formato real `PRIV:porta->DEST:porta(TCP), snat to PUB:porta`: **1.551/1.551** registros lidos (antes: 0%, o leitor pegava o destino como IP público) |
+| Hillstone NAT444 | Formato real `[NAT444 user exhausted port N PRIV - PUB - início fim]`: **1.656/1.656** lidos |
+| Huawei NE20E/NE8000 (VRP 8) | Leitura ao vivo ok (o login pede troca de senha inicial; responder "N"). Plano Huawei conferido em **49 configurações reais**: 47 redirecionam só domínios de grupos do ERP, 2 ficam com aviso; nenhum segredo nos scripts |
+| Cisco ASR1000 (IOS-XE 16.6 e 16.9) | Leitura ao vivo ok (servidores RADIUS do ERP `UP`). Plano Cisco redefine as listas nomeadas (`aaa ... <lista> group NEXOISP`) sem tocar bba-group/virtual-template |
+
+**Escrita só no laboratório próprio** (CHR 7.17 real em QEMU, 34 clientes PPPoE reais, `radius-lab-pnetlab`): o
+script gerado pelo NexoISP foi aplicado — 3 s, sem erro do RouterOS, **34 sessões: 0 quedas, 0 reconexões**; os
+logins seguintes autenticaram **só** no RADIUS novo (contador do antigo parado); o script de volta restaurou RADIUS,
+CoA e `interim-update` originais, também sem queda. A volta agora restaura `/ppp aaa` e `/radius incoming`.
+
+Limites: nenhum script foi aplicado em equipamento de provedor; Huawei/Cisco não foram exercitados (só conferidos
+contra configurações reais); registro de NAT do Hillstone por syslog (formato do servidor de logs) não foi visto —
+o que se viu é o buffer do próprio equipamento.
+
 ## 6. Tarefas concretas de preparação
 
 | # | Tarefa | Situação |
 |---|---|---|
-| 1 | Plano de troca do RADIUS MikroTik (`repoint-plan`) com script de volta | **feito** — testes Go + PostgreSQL |
+| 1 | Plano de troca do RADIUS (`repoint-plan`) com script de volta — MikroTik, Huawei NE e Cisco ASR | **feito** — MikroTik provado em CHR real (0 quedas); Huawei/Cisco conferidos em configurações reais |
 | 2 | Usuários locais `/ppp secret` → CSV do importador | **feito** — `POST /api/import/mikrotik-secrets` |
 | 3 | Adoção de ONU Huawei do SGP sem derrubar (`ont modify desc`) | **feito** — driver + laboratório SSH |
 | 4 | Leitura de configuração de CGNAT com planos sugeridos | **feito** — `POST /api/cgnat/analyze` |
-| 5 | Importação de mapeamentos (regras, log de NAT, arquivo A10, CSV) + rastreio | **feito** — migração 00104, painel CGNAT |
+| 5 | Importação de mapeamentos (regras, log de NAT, arquivo A10, CSV) + rastreio | **feito** — migração 00104, painel CGNAT; leitor validado em registros reais de Hillstone (100%) |
 | 6 | Preset de colunas do export do SGP/IXC | **pendente de amostra real**: sem um export real, adivinhar nomes de coluna gravaria errado (mesma regra de `10-migracao-sgp.md`). O importador já aceita mapeamento coluna→campo |
 | 7 | Receber syslog de NAT em tempo real (hoje é importação de arquivo) | pendente |
 | 8 | Adoção em lote na tela (hoje: driver/agente) e homologação em ONU de teste real | pendente |

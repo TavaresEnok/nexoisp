@@ -27,24 +27,33 @@ import (
 func registerNetworkMigration(api huma.API, registry *endpoint.Registry, s Service) {
 	f, o, str := validate.F, validate.Object, validate.String
 	routeScoped(api, registry, s, http.MethodPost, "/api/radius/devices/{id}/repoint-plan", "network:write",
-		ruleRef(o(f("export", str().Min(20, "cole o /export do concentrador").Max(5_000_000)))), false,
+		ruleRef(o(f("export", str().Min(20, "cole a configuração do concentrador (/export, display current-configuration ou show running-config)").Max(5_000_000)))), false,
 		func(ctx context.Context, tx *db.Tx, _ *http.Request, p map[string]string, b map[string]any) (any, error) {
 			current, err := nas(ctx, tx, p["id"])
 			if err != nil {
 				return nil, err
 			}
-			if current.Get("vendor") != "mikrotik" {
-				return nil, apierr.New(400, "o plano de troca é gerado só para concentrador MikroTik")
+			vendor, _ := current.Get("vendor").(string)
+			if vendor != "mikrotik" && vendor != "huawei" && vendor != "cisco" {
+				return nil, apierr.New(400, "o plano de troca é gerado para concentrador MikroTik, Huawei (NE) ou Cisco (ASR)")
 			}
 			tunnel, err := leitura.RadiusTunnel(ctx, tx, p["id"])
 			if err != nil {
 				return nil, err
 			}
-			setup, err := leitura.RadiusSetupData("mikrotik", current.Get("coa_port"), "<SEGREDO>", tunnel, current.Get("nas_ip"))
+			setup, err := leitura.RadiusSetupData(vendor, current.Get("coa_port"), "<SEGREDO>", tunnel, current.Get("nas_ip"))
 			if err != nil {
 				return nil, err
 			}
-			plan := network.MikrotikRepoint(b["export"].(string), setup["commands"].(string))
+			var plan network.RepointPlan
+			switch vendor {
+			case "huawei":
+				plan = network.HuaweiRepoint(b["export"].(string), setup["commands"].(string))
+			case "cisco":
+				plan = network.CiscoRepoint(b["export"].(string), setup["commands"].(string))
+			default:
+				plan = network.MikrotikRepoint(b["export"].(string), setup["commands"].(string))
+			}
 			if err = record(ctx, tx, "radius.repoint_plan", "device", p["id"], map[string]any{"erp": plan.ERP, "radius": len(plan.Radius), "vpn": len(plan.VPN)}); err != nil {
 				return nil, err
 			}

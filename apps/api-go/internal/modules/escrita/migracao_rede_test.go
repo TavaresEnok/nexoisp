@@ -65,6 +65,21 @@ func TestNetworkMigrationPG(t *testing.T) {
 		t.Fatalf("plano: %v", plan["_raw"])
 	}
 	h.call("b", "POST", "/api/radius/devices/"+a.nas+"/repoint-plan", map[string]any{"export": export}, 404)
+	// Huawei NE: o domínio de assinante passa para o nosso grupo; o grupo do ERP fica para a volta.
+	if err := d.WithScope(ctx, tenancy.Scope{TenantID: a.id}, func(tx *db.Tx) error {
+		return tx.Exec(ctx, `update devices set vendor='huawei' where id=$1`, a.nas)
+	}); err != nil {
+		t.Fatal(err)
+	}
+	hw := h.call("a", "POST", "/api/radius/devices/"+a.nas+"/repoint-plan", map[string]any{"export": "radius-server group sgp\n radius-server shared-key-cipher %^%#x%^%#\naaa\n domain default1\n  radius-server group sgp\n#\nreturn"}, 200)
+	if hw["erp"] != "sgp" || !strings.Contains(hw["apply"].(string), " domain default1\n  authentication-scheme nexoisp") || !strings.Contains(hw["rollback"].(string), "  radius-server group sgp") {
+		t.Fatalf("huawei: %v", hw["_raw"])
+	}
+	if err := d.WithScope(ctx, tenancy.Scope{TenantID: a.id}, func(tx *db.Tx) error {
+		return tx.Exec(ctx, `update devices set vendor='mikrotik' where id=$1`, a.nas)
+	}); err != nil {
+		t.Fatal(err)
+	}
 	h.call("finance", "POST", "/api/radius/devices/"+a.nas+"/repoint-plan", map[string]any{"export": export}, 403)
 
 	// 1b. Usuários PPPoE locais do concentrador viram o CSV do importador.
@@ -98,7 +113,7 @@ func TestNetworkMigrationPG(t *testing.T) {
 	log := "2026-11-01T10:00:00-03:00 hs NAT444 allocated src 100.64.9.2 trans 198.51.100.7 ports 3040-5055\n" +
 		"2026-11-01T12:00:00-03:00 hs NAT444 released src 100.64.9.2 trans 198.51.100.7 ports 3040-5055\n" +
 		"2026-11-01T12:05:00-03:00 hs NAT444 allocated src 100.64.9.3 trans 198.51.100.7 ports 3040-5055\n" +
-		"linha que não serve\n"
+		"linha que não serve 100.64.9.9\n"
 	li := h.call("a", "POST", "/api/cgnat/mappings", map[string]any{"kind": "log", "label": "Hillstone 01/11", "text": log}, 201)
 	lb := li["batch"].(map[string]any)
 	if lb["accepted"] != float64(3) || lb["rejected"] != float64(1) {
@@ -126,7 +141,7 @@ func TestNetworkMigrationPG(t *testing.T) {
 	var audits int
 	if err := d.WithScope(ctx, tenancy.Scope{TenantID: a.id}, func(tx *db.Tx) error {
 		return tx.QueryRow(ctx, `select count(*) from audit_events where action in ('radius.repoint_plan','cgnat.mappings_import','cgnat.mappings_delete')`).Scan(&audits)
-	}); err != nil || audits != 4 {
+	}); err != nil || audits != 5 {
 		t.Fatalf("auditoria: %d %v", audits, err)
 	}
 }

@@ -49,7 +49,7 @@ func TestMikrotikRepointSGP(t *testing.T) {
 	if !strings.Contains(p.Apply, `# /interface l2tp-client disable [find where name="SGP-VPN"]`) {
 		t.Fatalf("túnel do ERP só sai na fase 2, comentado:\n%s", p.Apply)
 	}
-	for _, want := range []string{`/radius set [find where address=10.200.0.1 and !(comment~"^nexoisp")] disabled=no`, `/radius remove [find where comment~"^nexoisp"]`, `/interface l2tp-client enable [find where name="SGP-VPN"]`} {
+	for _, want := range []string{"/ppp aaa set use-radius=yes accounting=yes interim-update=20m", "/radius incoming set accept=yes port=3799", `/radius set [find where address=10.200.0.1 and !(comment~"^nexoisp")] disabled=no`, `/radius remove [find where comment~"^nexoisp"]`, `/interface l2tp-client enable [find where name="SGP-VPN"]`} {
 		if !strings.Contains(p.Rollback, want) {
 			t.Fatalf("volta sem %q:\n%s", want, p.Rollback)
 		}
@@ -67,7 +67,7 @@ func TestMikrotikRepointSemCoAETunelNosso(t *testing.T) {
 		t.Fatalf("formato com cabeçalho / ignora o nosso já presente: %+v", p)
 	}
 	back := p.Rollback
-	order := []string{"/radius remove", "/ip address remove", "/interface wireguard peers remove", "/interface wireguard remove", "/radius incoming set accept=no"}
+	order := []string{"/radius remove", "/ip address remove", "/interface wireguard peers remove", "/interface wireguard remove", "/radius incoming set accept=no port=3799"}
 	last := -1
 	for _, o := range order {
 		i := strings.Index(back, o)
@@ -75,6 +75,19 @@ func TestMikrotikRepointSemCoAETunelNosso(t *testing.T) {
 			t.Fatalf("volta fora de ordem (%q):\n%s", o, back)
 		}
 		last = i
+	}
+}
+
+// RADIUS anterior que também serve login de administrador: só o PPP muda; RADIUS só de login fica intocado.
+func TestMikrotikRepointPreservaOutrosServicos(t *testing.T) {
+	export := "/radius add address=10.1.1.1 comment=IXC secret=x service=ppp,login\n/radius add address=10.1.1.2 secret=y service=login\n"
+	p := MikrotikRepoint(export, "/radius add address=198.51.100.5 secret=\"s\" service=ppp comment=nexoisp")
+	if !strings.Contains(p.Apply, `/radius set [find where address=10.1.1.1 and !(comment~"^nexoisp")] service=login`) ||
+		!strings.Contains(p.Rollback, `/radius set [find where address=10.1.1.1 and !(comment~"^nexoisp")] service=ppp,login`) {
+		t.Fatalf("serviço misto:\n%s\n%s", p.Apply, p.Rollback)
+	}
+	if strings.Contains(p.Apply, "address=10.1.1.2") || strings.Contains(p.Apply, "disabled=yes") {
+		t.Fatalf("RADIUS só de login não pode ser tocado:\n%s", p.Apply)
 	}
 }
 
