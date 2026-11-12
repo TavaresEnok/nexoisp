@@ -24,6 +24,31 @@ CARD_XGSPON = """Shelf Slot CfgType CardName     Port HardVer Status
 1     18   PRVR    PRVR         0    V1.0.0  INSERVICE
 ZXAN-OLT-XGSPON-NOBRE-VIBE#"""
 
+# Leitura de ONU no firmware XGSPON (NOBRE, 2026-11-12): a interface é 'gpon_onu-' (não 'gpon-onu_'),
+# e a potência vem de onu-rx + attenuation. Dados sintéticos, formato real.
+DETAIL_XGSPON = """
+ONU interface:          gpon_onu-1/1/1:3
+  Name:                 ONU-sintetica
+  Type:                 ZTE-ONT
+  Phase state:          working
+  Config state:         warning
+  Admin state:          enable
+  Serial number:        ZTEGSYNT0003
+  Description:          cliente.sintetico
+  ONU Distance:         1062m
+ZXAN-OLT-XGSPON-NOBRE#"""
+
+ONU_RX_XGSPON = """Onu                  Rx power
+------------------------------------
+gpon_onu-1/1/1:3     -31.550(dbm)
+ZXAN-OLT-XGSPON-NOBRE#"""
+
+ATTEN_XGSPON = """           OLT                  ONU              Attenuation
+--------------------------------------------------------------------------
+ up      Rx :-32.012(dbm)      Tx:2.875(dbm)        34.887(dB)
+ down    Tx :5.612(dbm)        Rx:-31.550(dbm)      37.162(dB)
+ZXAN-OLT-XGSPON-NOBRE#"""
+
 STATE = """
 OnuIndex   Admin State  OMCC State  Phase State  Channel
 --------------------------------------------------------------
@@ -110,6 +135,29 @@ class FakeCli:
         self.closed += 1
 
 
+class FakeCliTokenPicky:
+    """Firmware que só aceita a interface 'gpon-onu_' (C300); 'gpon_onu-' devolve erro de sintaxe.
+    Exercita o fallback de token do _read_index (tenta um formato, cai para o outro)."""
+    def __init__(self):
+        self.closed = 0
+        self.detail_cmds = []
+
+    def run(self, cmd):
+        if cmd.startswith("show gpon onu detail-info"):
+            self.detail_cmds.append(cmd)
+            if "gpon_onu-" in cmd:
+                return "                    ^\n%Error 140303: Invalid input detected at '^' marker.\nOLT_LAB#"
+            return DETAIL
+        if cmd.startswith("show pon power onu-rx"):
+            return ONU_RX
+        if cmd.startswith("show pon power attenuation"):
+            return ATTEN
+        return "OLT_LAB#"
+
+    def close(self):
+        self.closed += 1
+
+
 class Parsers(unittest.TestCase):
     def test_card(self):
         cards = parse_card(CARD)
@@ -140,6 +188,14 @@ class Parsers(unittest.TestCase):
                          ("1/2/1:1", "ZTEGFC000001", "ZTE-F601", "working"))
         self.assertEqual(info["config_state"], "success")
         self.assertIsNone(parse_onu_detail("\n%Error: nope\n"))
+
+    def test_detail_xgspon(self):
+        info = parse_onu_detail(DETAIL_XGSPON)
+        self.assertEqual((info["index"], info["type"], info["phase_state"]), ("1/1/1:3", "ZTE-ONT", "working"))
+
+    def test_power_xgspon(self):
+        # rx de onu-rx (interface gpon_onu-), tx do bloco 'up ... Tx:' da atenuação
+        self.assertEqual(parse_power(ONU_RX_XGSPON, ATTEN_XGSPON), (-31.550, 2.875))
 
     def test_power(self):
         self.assertEqual(parse_power(ONU_RX, ATTEN), (-23.660, 2.740))
@@ -199,6 +255,16 @@ class Driver(unittest.TestCase):
         st = self.olt.read_onu("ZTEGFC000001")
         self.assertTrue(st.authorized)
         self.assertEqual(st.extra["index"], "1/2/1:1")
+
+    def test_read_fallback_de_token_de_interface(self):
+        # Firmware que recusa 'gpon_onu-': a leitura deve tentar os dois formatos e ler pelo aceito.
+        cli = FakeCliTokenPicky()
+        olt = ZteOltDriver(lambda: cli)
+        st = olt.read_onu("1/2/1:1")
+        self.assertTrue(st.authorized and st.online)
+        self.assertEqual((st.rx_dbm, st.tx_dbm), (-23.660, 2.740))
+        self.assertTrue(any("gpon_onu-" in c for c in cli.detail_cmds), "deve ter tentado gpon_onu-")
+        self.assertTrue(any("gpon-onu_" in c for c in cli.detail_cmds), "deve ter caído para gpon-onu_")
 
     def test_autorizacao_recusada(self):
         with self.assertRaises(ZteCommandError):

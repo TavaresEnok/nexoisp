@@ -44,6 +44,11 @@ def normalize_index(index: str) -> str:
     return m.group(1)
 
 
+# O token de interface da ONU varia por firmware: XGSPON (ex.: NOBRE) usa 'gpon_onu-f/s/p:id',
+# o C300 clássico usa 'gpon-onu_f/s/p:id'. A leitura tenta os dois e fica no que o equipamento aceitar.
+_IFACE_PREFIXES = ("gpon_onu-", "gpon-onu_")
+
+
 def onu_interface(index: str) -> str:
     return "gpon-onu_" + normalize_index(index)
 
@@ -122,7 +127,7 @@ def _dbm(text: str, pattern: str) -> Optional[float]:
 
 def parse_power(onu_rx_output: str, attenuation_output: str) -> tuple[Optional[float], Optional[float]]:
     """Sinal da ONU: Rx de 'show pon power onu-rx' (ou do bloco 'down Rx:'), Tx do bloco 'up ... Tx:' da atenuação."""
-    rx = _dbm(onu_rx_output, r"gpon-onu_\S+\s+(-?\d+\.\d+)\(dbm\)")
+    rx = _dbm(onu_rx_output, r"gpon[-_]onu[-_]\S+\s+(-?\d+\.\d+)\(dbm\)")
     if rx is None:
         rx = _dbm(attenuation_output, r"down\b.*?Rx\s*:\s*(-?\d+\.\d+)\(dbm\)")
     tx = _dbm(attenuation_output, r"up\b.*?Tx\s*:\s*(-?\d+\.\d+)\(dbm\)")
@@ -227,13 +232,20 @@ class ZteOltDriver:
         return m.group(1) if m else None
 
     def _read_index(self, s, index: str) -> OnuState:
-        iface = onu_interface(index)
-        raw = s.run(f"show gpon onu detail-info {iface}")
-        if re.search(r"No related information|does not exist|%Error", raw, re.I):
+        norm = normalize_index(index)
+        raw = prefix = None
+        for pfx in _IFACE_PREFIXES:
+            out = s.run(f"show gpon onu detail-info {pfx}{norm}")
+            if re.search(r"Invalid input|Incomplete command", out, re.I):
+                continue  # este firmware não aceita esse formato de interface; tenta o outro
+            raw, prefix = out, pfx
+            break
+        if raw is None or re.search(r"No related information|does not exist|%Error", raw, re.I):
             return OnuState(authorized=False)
         info = parse_onu_detail(raw)
         if not info:
             raise ZteCommandError("resposta ONT incompleta; estado desconhecido")
+        iface = prefix + norm
         rx_raw = s.run(f"show pon power onu-rx {iface}")
         att_raw = s.run(f"show pon power attenuation {iface}")
         rx, tx = parse_power(rx_raw, att_raw)
