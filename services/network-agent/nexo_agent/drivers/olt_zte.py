@@ -1,15 +1,18 @@
 """Driver de OLT ZTE ZXA10 (C300/C320/C6xx), GPON. Construído a partir de reconhecimento em equipamento real
 (docs/estudo-campo/recon-cli-olts.md). SUPERFÍCIE VALIDADA: identidade (`show card`), backup de configuração
-(`show running-config`) e leitura de ONU (`show gpon onu detail-info` + `show pon power ...`). A autorização/remoção de
-ONU NÃO está homologada para ZTE e é recusada explicitamente (a sintaxe varia por firmware e não foi testada em campo).
+(`show running-config`) e leitura de ONU (`show gpon onu detail-info` + `show pon power ...`), validadas em OLT real.
 
-Transporte: o mesmo `cli_transport` do agente (netmiko `zte_zxros`/`zte_zxros_telnet`). Só leitura aqui.
+Autorização/remoção de ONU: implementadas e PROVADAS NO LABORATÓRIO (emulador por telnet real, tests/test_olt_lab_*),
+NÃO homologadas em firmware ZTE real (a sintaxe de escrita varia por firmware). Travadas por padrão: só com
+"allow_writes": true + modelo/firmware lidos do 'show version' iguais aos aprovados na credencial local.
+
+Transporte: o mesmo `cli_transport` do agente (netmiko `zte_zxros`/`zte_zxros_telnet`).
 """
 import re
 from typing import Optional, Protocol
 
 from .base import AckLost  # noqa: F401  (contrato comum dos drivers)
-from .olt_base import OnuState
+from .olt_base import OnuState, WriteRefused, free_id, parse_identity, require_write, safe
 
 
 class ZteCommandError(Exception):
@@ -148,9 +151,12 @@ class ZteOltDriver:
     session_idle_s = 45
     poll_interval_s = 60
 
-    def __init__(self, connect, *, allow_writes: bool = False, transport_note: str = "", transport_hygiene=()):
+    def __init__(self, connect, *, allow_writes: bool = False, expected_product=None, expected_firmware=None,
+                 transport_note: str = "", transport_hygiene=()):
         self._connect = connect
         self.allow_writes = allow_writes
+        self.expected_product = expected_product
+        self.expected_firmware = expected_firmware
         self.transport_note = transport_note
         self.transport_hygiene = tuple(transport_hygiene)
         self._cli = None
@@ -164,11 +170,14 @@ class ZteOltDriver:
             raise RuntimeError(f"credencial '{dev.get('credential_ref')}' não encontrada no arquivo local do agente")
         if not dev.get("host"):
             raise RuntimeError("OLT sem endereço configurado")
+        if cred.get("allow_writes") is True and (not cred.get("expected_product") or not cred.get("expected_firmware")):
+            raise ValueError("escrita OLT exige modelo e firmware esperados explícitos na configuração local")
         from ..cli_transport import default_port, hygiene, note
         host = dev["host"]
         port = int(dev.get("api_port") or default_port(cred))
         connect = lambda: ZteCli(host, port, cred["username"], cred["password"], cred)  # noqa: E731
-        return cls(connect, allow_writes=False, transport_note=note(cred), transport_hygiene=hygiene(cred))
+        return cls(connect, allow_writes=cred.get("allow_writes") is True, expected_product=cred.get("expected_product"),
+                   expected_firmware=cred.get("expected_firmware"), transport_note=note(cred), transport_hygiene=hygiene(cred))
 
     def _session(self):
         import time
@@ -271,10 +280,94 @@ class ZteOltDriver:
                 continue
         return out
 
-    def _no_writes(self, *_a, **_k):
-        raise ZteCommandError("provisionamento de ONU ZTE não homologado neste agente (apenas leitura e backup)")
+    # --- escrita (autorizar/desautorizar) --------------------------------------------------------------------------
+    # Provado no laboratório (emulador por telnet real); NÃO homologado em firmware ZTE real. Travado por padrão:
+    # exige allow_writes + modelo/firmware lidos do 'show version' iguais aos aprovados na credencial local.
+    _CFG_ERROR = re.compile(r"%Error|Invalid input|Incomplete command|%Code\s+\d+.*(invalid|exist|fail|error)", re.I)
 
-    authorize = deauthorize = _no_writes
+    def _require_write_capability(self, s):
+        product, firmware = parse_identity(s.run("show version"))
+        try:
+            require_write(self.allow_writes, self.expected_product, self.expected_firmware, product, firmware)
+        except WriteRefused as e:
+            raise ZteCommandError(str(e)) from e
+
+    def _cfg(self, s, command: str) -> str:
+        out = s.run(command)
+        if self._CFG_ERROR.search(out):
+            raise ZteCommandError(f"OLT recusou {command!r}: {out.strip()[-200:]}")
+        return out
+
+    def _enter_pon(self, s, port: str) -> str:
+        """Entra na interface da PON. O token varia por firmware (XGSPON 'gpon_olt-', C300 'gpon-olt_'): tenta os dois
+        e devolve o prefixo de ONU correspondente. Um 'interface' recusado não altera nada."""
+        for olt_pfx, onu_pfx in (("gpon_olt-", "gpon_onu-"), ("gpon-olt_", "gpon-onu_")):
+            out = s.run(f"interface {olt_pfx}{port}")
+            if not re.search(r"Invalid input|Incomplete command", out, re.I):
+                return onu_pfx
+        raise ZteCommandError(f"a OLT não aceitou a interface da PON {port} em nenhum formato conhecido")
+
+    def authorize(self, serial: str, *, pon_port: str, line_profile: str, service_vlan: int, description: str,
+                  service_profile: Optional[str] = None) -> dict:
+        """line_profile = perfil de T-CONT; service_profile = TIPO da ONU (o ZTE exige o tipo no 'onu ... type')."""
+        if not self.allow_writes:
+            raise ZteCommandError("escrita OLT desabilitada na configuração local (provisionamento ZTE não homologado)")
+        sn = safe(serial, "serial").upper()
+        m = re.search(r"(\d+/\d+/\d+)", pon_port or "")
+        if not m:
+            raise ValueError(f"porta PON ZTE inválida: {pon_port!r}")
+        port = m.group(1)
+        if not service_profile:
+            raise ValueError("ZTE exige o tipo da ONU (service_profile)")
+        onu_type, tcont, desc = safe(service_profile, "tipo de ONU"), safe(line_profile, "perfil T-CONT"), safe(description, "descrição")
+        vlan = int(service_vlan)
+        if not 1 <= vlan <= 4094:
+            raise ValueError("VLAN fora da faixa 1-4094")
+        s = self._session()
+        self._require_write_capability(s)
+        used = [int(r["index"].split(":")[1]) for r in parse_onu_state(s.run("show gpon onu state")) if r["index"].split(":")[0] == port]
+        oid = free_id(used, 1, 128)
+        self._cfg(s, "configure terminal")
+        try:
+            onu_pfx = self._enter_pon(s, port)
+            self._cfg(s, f"onu {oid} type {onu_type} sn {sn}")
+            self._cfg(s, "exit")
+            iface = f"{onu_pfx}{port}:{oid}"
+            self._cfg(s, f"interface {iface}")
+            self._cfg(s, f"description {desc}")
+            self._cfg(s, f"tcont 1 profile {tcont}")
+            self._cfg(s, "gemport 1 tcont 1")
+            self._cfg(s, f"service-port 1 vport 1 user-vlan {vlan} vlan {vlan}")
+            self._cfg(s, "exit")
+            self._cfg(s, f"pon-onu-mng {iface}")
+            self._cfg(s, f"service internet gemport 1 vlan {vlan}")
+            self._cfg(s, f"vlan port eth_0/1 mode tag vlan {vlan}")
+            self._cfg(s, "exit")
+        finally:
+            s.run("end")
+        return {"onu_id": oid, "pon_port": port, "index": f"{port}:{oid}", "service_vlan": vlan}
+
+    def deauthorize(self, serial: str) -> dict:
+        if not self.allow_writes:
+            raise ZteCommandError("escrita OLT desabilitada na configuração local (provisionamento ZTE não homologado)")
+        sn = safe(serial, "serial").upper()
+        s = self._session()
+        index = self._index_by_sn(s, sn)
+        if not index:
+            return {"removed": 0}  # idempotente: já não existe
+        st = self._read_index(s, index)
+        if not st.authorized or (st.extra.get("serial") or "").upper() != sn:
+            raise ZteCommandError("a ONU no índice não corresponde ao serial pedido; nada foi removido")
+        self._require_write_capability(s)
+        port, oid = index.split(":")
+        self._cfg(s, "configure terminal")
+        try:
+            self._enter_pon(s, port)
+            self._cfg(s, f"no onu {oid}")
+            self._cfg(s, "exit")
+        finally:
+            s.run("end")
+        return {"removed": 1, "onu_id": int(oid), "index": index}
 
 
 class ZteCli:

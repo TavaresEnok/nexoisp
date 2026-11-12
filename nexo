@@ -45,8 +45,10 @@ case "${1:-help}" in
     docker run --rm --network host --ipc=host ${NEXO_E2E_DOCKER_OPTS:-} -v "$PWD/e2e:/e2e" -w /e2e mcr.microsoft.com/playwright:v1.55.1-jammy \
       sh -c "npm ci --no-audit --no-fund --silent >/dev/null && BASE=${BASE:-http://localhost:18080} node smoke.mjs" ;;
   agent-test) docker build -q $NEXO_BUILD_OPTS -t nexoisp-agent services/network-agent >/dev/null && docker run --rm $NEXO_RUN_OPTS nexoisp-agent python -m unittest discover -s tests -t . ;;
-  lab-olt)    # laboratório de provisionamento Huawei: ciclo autorizar->ler->desautorizar->re-autorizar por SSH real (emulador)
-    docker build -q $NEXO_BUILD_OPTS -t nexoisp-agent services/network-agent >/dev/null && docker run --rm $NEXO_RUN_OPTS nexoisp-agent python tools/lab_olt.py ;;
+  lab-olt)    # laboratório de provisionamento: ciclo autorizar->ler->desautorizar->re-autorizar contra emuladores por transporte
+              # real (Huawei por SSH; ZTE, Datacom, VSOL e FiberHome por telnet). Prova lógica e transporte, NÃO firmware real.
+    docker build -q $NEXO_BUILD_OPTS -t nexoisp-agent services/network-agent >/dev/null && docker run --rm $NEXO_RUN_OPTS nexoisp-agent sh -c \
+      "python tools/lab_olt.py && python -m unittest -v tests.test_olt_huawei_lab tests.test_olt_lab_zte tests.test_olt_lab_datacom tests.test_olt_lab_vsol tests.test_olt_lab_fiberhome" ;;
   backup)    scripts/backup.sh backup "${2:-backups}" ;;
   restore-check) NEXO_RESTORE_VERIFY="bash scripts/restore-verify-dev.sh" scripts/backup.sh restore-check "$2" ;;
   restore)   running_output="$($COMPOSE ps --services --filter status=running)"

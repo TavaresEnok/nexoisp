@@ -115,10 +115,40 @@ comando mutante que chega ao equipamento (para não ser "um laboratório falho")
   / `service-port ...`; e `undo service-port` SEMPRE antes de `ont delete`), a restauração do estado e a trava de
   escrita (`allow_writes` + `expected_product/firmware`).
 - **Demo:** `./nexo lab-olt` (ou `python tools/lab_olt.py`) imprime o ciclo com cada `OLT <- comando`.
-- Só **Huawei** tem escrita implementada e emulador fiel; ZTE/VSOL/FiberHome/Datacom recusam escrita por design.
 - O emulador replica o conjunto de comandos e as falhas do MA5600 (valida perfis/VLAN, unicidade de SN, cap de PON,
   ordem undo→delete) — **prova a lógica e o transporte, não a compatibilidade de firmware real**. Teste ao vivo:
   só numa ONU de TESTE que o provedor separe, em janela, com rollback — nunca em cliente pagante.
+
+### Ampliação para ZTE, Datacom, VSOL e FiberHome (2026-11-12)
+
+Os quatro ganharam escrita (`authorize`/`deauthorize`) + emulador + laboratório por **telnet real** (o acesso que
+essas OLTs usam em campo), no mesmo padrão do Huawei. Âncora contra "laboratório que confere a si mesmo": cada
+emulador responde às LEITURAS no **formato capturado nas OLTs reais**, e a ONU criada pela escrita tem que ser
+reconhecida pelos **parsers validados em campo**.
+
+| Fabricante | Escrita (comandos) | Lab | O que o lab prova a mais |
+|---|---|---|---|
+| ZTE | `configure terminal` / `interface gpon_olt-` (ou `gpon-olt_`) / `onu N type T sn SN` / `interface gpon_onu-...` / `description` / `tcont` / `gemport` / `service-port` / `pon-onu-mng` / `service` / `vlan port`; remoção `no onu N` | `tests/test_olt_lab_zte.py` (XGSPON e C300) | fallback de token de interface; ID livre sem tocar ONU de outro cliente |
+| Datacom | `config` / `interface gpon` / `onu N` / `serial-number` / `line-profile` / `name` / `service-port ... match vlan ... replace` / `commit` (remoção: `no service-port`, `no onu`) | `tests/test_olt_lab_datacom.py` | **atomicidade**: `commit` recusado -> `abort`, nada aplicado |
+| VSOL GPON | as próprias linhas do running-config real (`onu add`, `onu N tcont/gemport/service/service-port/portvlan`) + `onu N desc`; remoção `onu delete N` | `tests/test_olt_lab_vsol.py` | ONU criada lida pelo parser de running-config validado; EPON recusado |
+| FiberHome | `set whitelist phy_addr ... action add/delete` + `lan`: `set epon ... service`, `apply onu ... vlan` | `tests/test_olt_lab_fiberhome.py` | **efeito parcial visível** (não transacional): whitelist entra e VLAN falha |
+
+Comum a todos: trava de escrita (`allow_writes` + modelo/firmware lidos do equipamento iguais aos aprovados — formato
+de `show version` desconhecido mantém a escrita travada), identidade antes de remover, idempotência e a sequência
+exata de comandos conferida (o `exit` de logout de sessão aparece como `<logout>`).
+
+**O que NÃO está provado (validar no laboratório real, por firmware):** sintaxe de escrita de ZTE/Datacom/VSOL/
+FiberHome (só a leitura foi vista em campo; `onu N desc`/`onu delete` do VSOL e a árvore `lan` do FiberHome são os
+pontos de menor confiança); formato real do `show version` de ZTE/VSOL/FiberHome (sem ele a escrita fica travada —
+ajustar o parser ao primeiro contato); nomes reais de perfis/VLANs de cada provedor; tráfego do cliente após restaurar.
+Limites conhecidos: FiberHome sem marcador de versão (whitelist sem descrição); VSOL sem online/sinal por CLI;
+VSOL EPON sem escrita.
+
+**Roteiro para o laboratório real:** (1) servidor de emulador opcional para ensaio: `python -m nexo_agent.drivers.lab_cli_server <zte|zte-c300|datacom|vsol|fiberhome> <porta>`;
+(2) na OLT de laboratório real, ler `show version` e cadastrar `expected_product`/`expected_firmware` na credencial
+com `allow_writes: true`; (3) capturar a config atual da ONU de teste; (4) rodar o ciclo numa ONU de TESTE, conferir
+tráfego e restaurar; (5) registrar aqui as diferenças de sintaxe encontradas e corrigir o driver antes de qualquer
+uso em provedor.
 
 ## Índice de commits desta rodada
 
@@ -129,4 +159,5 @@ comando mutante que chega ao equipamento (para não ser "um laboratório falho")
 | `c3faf2c` | ZTE | leitura de ONU/sinal (token de interface `gpon_onu-`) |
 | `2bd5a79` | VSOL | lista de autorizadas GPON (`onu add ... sn`) + busca por SN |
 | `483b08f` | Datacom | leitura de ONU + sinal (paginação `\| nomore`, enumeração de portas) |
-| (este) | Huawei (lab) | prova de laboratório do ciclo autorizar/desautorizar/re-autorizar por SSH real |
+| `74532e6` | Huawei (lab) | prova de laboratório do ciclo autorizar/desautorizar/re-autorizar por SSH real |
+| (este) | ZTE/Datacom/VSOL/FiberHome (lab) | escrita + emuladores + laboratório por telnet real |

@@ -3,8 +3,9 @@ não atende (Intelbras, FiberHome, VSOL, Parks). Usa o transporte OS (nexo_agent
 puro. Entra em modo privilegiado (`enable`), desliga paginação e tenta uma lista de comandos de dump até sair config
 reconhecível. Mesma lógica do backup center (OltCliProfile/run_olt_cli_backup).
 
-SÓ LEITURA: faz identidade e backup; provisionamento de ONU não é implementado (recusado). A enumeração/gerência de ONU
-de cada marca fica para um driver dedicado depois (como o ZTE).
+Aqui: identidade e backup; provisionamento de ONU recusado (Intelbras, Parks). Os drivers dedicados (VSOL, FiberHome)
+implementam autorizar/desautorizar sobre esta base, com a trava comum de escrita (allow_writes + modelo/firmware do
+'show version' iguais aos aprovados na credencial local; formato desconhecido -> escrita travada).
 """
 import re
 from dataclasses import dataclass, field
@@ -74,12 +75,16 @@ class CliBackupDriver:
     session_idle_s = 45
     poll_interval_s = 60
 
-    def __init__(self, connect, profile: CliBackupProfile, *, enable_secrets=(), transport_note="", transport_hygiene=()):
+    def __init__(self, connect, profile: CliBackupProfile, *, enable_secrets=(), transport_note="", transport_hygiene=(),
+                 allow_writes: bool = False, expected_product=None, expected_firmware=None):
         self._connect = connect
         self.profile = profile
         self.enable_secrets = tuple(s for s in enable_secrets if s)
         self.transport_note = transport_note
         self.transport_hygiene = tuple(transport_hygiene)
+        self.allow_writes = allow_writes
+        self.expected_product = expected_product
+        self.expected_firmware = expected_firmware
         self._check_cache = None
 
     @classmethod
@@ -92,13 +97,17 @@ class CliBackupDriver:
         from .. import os_cli
         from ..cli_transport import hygiene, note, settings
         settings(cred)  # valida transport/ssh_profile/allow_telnet (telnet exige allow_telnet)
+        if cred.get("allow_writes") is True and (not cred.get("expected_product") or not cred.get("expected_firmware")):
+            raise ValueError("escrita OLT exige modelo e firmware esperados explícitos na configuração local")
         transport = cred.get("transport") or profile.transport_default
         host = dev["host"]
         port = int(dev.get("api_port") or (23 if transport == "telnet" else 22))
         user, pw = cred["username"], cred["password"]
         connect = lambda: os_cli.connect(transport, host, port, user, pw, cred)  # noqa: E731
         secrets = (cred.get("enable_password"), pw, user)
-        return cls(connect, profile, enable_secrets=secrets, transport_note=note(cred), transport_hygiene=hygiene(cred))
+        return cls(connect, profile, enable_secrets=secrets, transport_note=note(cred), transport_hygiene=hygiene(cred),
+                   allow_writes=cred.get("allow_writes") is True, expected_product=cred.get("expected_product"),
+                   expected_firmware=cred.get("expected_firmware"))
 
     def _enable(self, s):
         if not self.profile.needs_enable:
@@ -162,3 +171,24 @@ class CliBackupDriver:
         raise CliBackupError(f"provisionamento de ONU {self.profile.name} não homologado neste agente (apenas backup)")
 
     authorize = deauthorize = _no_writes
+
+    # --- apoio à escrita dos drivers dedicados (VSOL, FiberHome) -----------------------------------------------------
+    def _writes_enabled(self):
+        if not self.allow_writes:
+            raise CliBackupError(f"escrita OLT desabilitada na configuração local (provisionamento {self.profile.name} não homologado)")
+
+    def _require_write_capability(self, s):
+        """Modelo/firmware lidos do 'show version' (rótulo: valor) têm que ser os aprovados. Formato desconhecido ->
+        escrita travada (fail-closed)."""
+        from .olt_base import WriteRefused, parse_identity, require_write
+        product, firmware = parse_identity(s.run("show version", idle=1.2, maxt=20))
+        try:
+            require_write(self.allow_writes, self.expected_product, self.expected_firmware, product, firmware)
+        except WriteRefused as e:
+            raise CliBackupError(str(e)) from e
+
+    def _cfg(self, s, command: str) -> str:
+        out = s.run(command, idle=1.2, maxt=30)
+        if looks_error(out):
+            raise CliBackupError(f"OLT recusou {command!r}: {out.strip()[-200:]}")
+        return out
