@@ -13,6 +13,17 @@ Rack Shelf Slot CfgType RealType Port  HardVer SoftVer         Status
 1    1     11   SCXNT   SCXNT00  5     V1.0.0  V2.1.0          INSERVICE
 OLT_LAB#"""
 
+# Layout real do firmware XGSPON (NOBRE/Vibe, 2026-11-12): sem coluna Rack, CardName no lugar de RealType,
+# linhas OFFLINE sem CardName/HardVer.
+CARD_XGSPON = """Shelf Slot CfgType CardName     Port HardVer Status
+---------------------------------------------------
+1     1    GFGH    GFGH         16   V1.0.0  INSERVICE
+1     3    GFCH    GFCH         16   V1.0.0  INSERVICE
+1     10   SFUB    C01SFUB      4    V1.0.0  INSERVICE
+1     11   SFUB                 4            OFFLINE
+1     18   PRVR    PRVR         0    V1.0.0  INSERVICE
+ZXAN-OLT-XGSPON-NOBRE-VIBE#"""
+
 STATE = """
 OnuIndex   Admin State  OMCC State  Phase State  Channel
 --------------------------------------------------------------
@@ -106,6 +117,18 @@ class Parsers(unittest.TestCase):
         self.assertTrue(any(c["cfg_type"] == "GTGH" and c["real_type"] == "GTGHK" for c in cards))
         self.assertEqual(cards[0]["status"], "INSERVICE")
 
+    def test_card_xgspon(self):
+        # Firmware XGSPON: 2 inteiros no início (sem Rack); deve parsear mesmo assim.
+        cards = parse_card(CARD_XGSPON)
+        self.assertEqual(len(cards), 5)
+        by_slot = {c["slot"]: c for c in cards}
+        self.assertEqual((by_slot[1]["cfg_type"], by_slot[1]["ports"], by_slot[1]["status"]), ("GFGH", 16, "INSERVICE"))
+        self.assertIsNone(by_slot[1]["rack"])
+        # Linha OFFLINE sem CardName: real_type None, porta ainda lida, status OFFLINE.
+        self.assertEqual((by_slot[11]["real_type"], by_slot[11]["ports"], by_slot[11]["status"]), (None, 4, "OFFLINE"))
+        pon = [c for c in cards if (c["cfg_type"] or "").upper().startswith("G")]
+        self.assertEqual({c["slot"] for c in pon}, {1, 3})
+
     def test_state(self):
         st = parse_onu_state(STATE)
         self.assertEqual([r["index"] for r in st], ["1/2/1:1", "1/2/1:2"])
@@ -156,7 +179,8 @@ class Driver(unittest.TestCase):
         r = self.olt.check()
         self.assertTrue(r["ok"])
         self.assertFalse(r["homologated"])
-        self.assertIn("GPON", r["detail"])
+        self.assertIn("PON", r["detail"])
+        self.assertIn("1 PON", r["detail"])  # CARD de teste tem 1 placa de acesso PON (GTGH)
 
     def test_export_config(self):
         cfg = self.olt.export_config()

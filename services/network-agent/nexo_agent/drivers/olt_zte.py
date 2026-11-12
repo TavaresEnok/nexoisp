@@ -49,14 +49,27 @@ def onu_interface(index: str) -> str:
 
 
 def parse_card(output: str) -> list[dict]:
-    """'show card': Rack Shelf Slot CfgType RealType Port HardVer SoftVer Status."""
+    """'show card' (ZXA10) — dois layouts reais, conforme o firmware:
+       C300:    Rack Shelf Slot CfgType RealType Port HardVer [SoftVer] Status  (3 inteiros no início)
+       XGSPON:  Shelf Slot CfgType CardName Port HardVer Status                 (sem Rack; 2 inteiros)
+    Linhas OFFLINE podem omitir CardName/HardVer. 'real_type' guarda RealType (C300) ou CardName (XGSPON, ou None)."""
     rows = []
     for line in output.splitlines():
-        m = re.match(r"^\s*(\d+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S+)\s+(\d+)\s+(\S+)", line)
-        if m:
-            rows.append({"rack": int(m.group(1)), "shelf": int(m.group(2)), "slot": int(m.group(3)),
-                         "cfg_type": m.group(4), "real_type": m.group(5), "ports": int(m.group(6)),
-                         "status": line.split()[-1]})
+        m3 = re.match(r"^\s*(\d+)\s+(\d+)\s+(\d+)\s+([A-Za-z]\w*)\s+(\S+)\s+(.*\S)\s*$", line)
+        m2 = None if m3 else re.match(r"^\s*(\d+)\s+(\d+)\s+([A-Za-z]\w*)\s+(.*\S)\s*$", line)
+        if m3:
+            toks = m3.group(6).split()
+            rows.append({"rack": int(m3.group(1)), "shelf": int(m3.group(2)), "slot": int(m3.group(3)),
+                         "cfg_type": m3.group(4), "real_type": m3.group(5),
+                         "ports": next((int(t) for t in toks if t.isdigit()), None),
+                         "status": toks[-1] if toks else ""})
+        elif m2:
+            toks = m2.group(4).split()
+            name = toks[0] if toks and not toks[0].isdigit() else None
+            rows.append({"rack": None, "shelf": int(m2.group(1)), "slot": int(m2.group(2)),
+                         "cfg_type": m2.group(3), "real_type": name,
+                         "ports": next((int(t) for t in toks if t.isdigit()), None),
+                         "status": toks[-1] if toks else ""})
     return rows
 
 
@@ -176,8 +189,10 @@ class ZteOltDriver:
         out = self._session().run("show card")
         check_failure(out)
         cards = parse_card(out)
-        gpon = [c for c in cards if c["cfg_type"].startswith(("GTG", "GFG", "GPB", "GPON"))]
-        detail = f"ZTE ZXA10 — {len(cards)} placa(s), {len(gpon)} GPON — driver não homologado em equipamento real"
+        # Placas de acesso PON (G)PON/XGSPON começam por "G" (GTGx/GFGx/GFCx...); controle/força/ventilação usam
+        # outros prefixos (PR, SC, SF, FC). Heurística validada no NOBRE (XGSPON) e no laboratório C300.
+        pon = [c for c in cards if (c["cfg_type"] or "").upper().startswith("G")]
+        detail = f"ZTE ZXA10 — {len(cards)} placa(s), {len(pon)} PON — driver não homologado em equipamento real"
         if self.transport_note:
             detail += f"; {self.transport_note}"
         result = {"ok": True, "product": "ZTE ZXA10", "firmware": None, "homologated": False, "detail": detail}
