@@ -277,6 +277,14 @@ func (s Service) cgnatTrace(ctx context.Context, tx *db.Tx, _ string, _ map[stri
 		}
 		return out, nil
 	}
+	// Sem fórmula aplicável: os mapeamentos importados do equipamento (regras exatas, registro de NAT, arquivo do A10).
+	hit, err := traceMappings(ctx, tx, key, ip, float64(port), at)
+	if err != nil {
+		return nil, err
+	}
+	if hit != nil {
+		return hit, nil
+	}
 	note := "Nenhum plano de CGNAT do provedor cobria esse IP público na data informada."
 	if len(external) > 0 {
 		note = "Plano de CGNAT de equipamento externo (" + strings.Join(external, ", ") + "): o titular só pode ser apontado pelo registro de NAT do próprio equipamento. " + strings.Join(logs, " ")

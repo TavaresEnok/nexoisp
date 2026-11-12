@@ -117,6 +117,13 @@ class HuaweiCliEmulator:
             d["onts"].append({"fsp": fsp, "id": oid, "sn": sn, "line": line, "srv": srv, "desc": desc, "at": time.time()})
             d["autofind"] = [x for x in d["autofind"] if x[1] != sn]
             return f"  Number of ONTs that can be added: 1, success: 1\n  PortID :{port}, ONTID :{oid}\n"
+        m = re.fullmatch(r'ont modify (\d+) (\d+) desc "?([^"]*)"?', c)
+        if m and self.mode == "if":
+            o = next((x for x in d["onts"] if x["fsp"] == f"{self.fs}/{m.group(1)}" and x["id"] == int(m.group(2))), None)
+            if o is None:
+                return "  Failure: The ONT does not exist"
+            o["desc"] = m.group(3)
+            return ""
         m = re.fullmatch(r"ont tr069-server-config (\d+) (\d+) profile-id (\d+)", c)
         if m and self.mode == "if":
             o = next((x for x in d["onts"] if x["fsp"] == f"{self.fs}/{m.group(1)}" and x["id"] == int(m.group(2))), None)
@@ -188,7 +195,10 @@ class HuaweiCliEmulator:
             frame, slot, port = fsp.split("/")
             out += ["#", f"[gpon-{frame}/{slot}]", f" interface gpon {frame}/{slot}"]
             for o in sorted((x for x in d["onts"] if x["fsp"] == fsp), key=lambda x: x["id"]):
-                out.append(f'  ont add {port} {o["id"]} sn-auth "{o["sn"]}" omci ont-lineprofile-name "{o["line"]}" ont-srvprofile-name "{o["srv"]}" desc "{o["desc"]}"')
+                # ONUs provisionadas pelo SGP aparecem por ID de perfil ('ont-lineprofile-id 100 ont-srvprofile-id 100').
+                prof = (f'ont-lineprofile-id {o["line_id"]} ont-srvprofile-id {o["srv_id"]}' if "line_id" in o
+                        else f'ont-lineprofile-name "{o["line"]}" ont-srvprofile-name "{o["srv"]}"')
+                out.append(f'  ont add {port} {o["id"]} sn-auth "{o["sn"]}" omci {prof} desc "{o["desc"]}"')
         out += ["#", "[service-port]", " <service-port>"]
         for sp in sorted(d["sports"], key=lambda x: x["index"]):
             out.append(f' service-port {sp["index"]} vlan {sp["vlan"]} gpon {sp["fsp"]} ont {sp["ont"]} gemport {sp["gem"]} multi-service user-vlan {sp["user_vlan"]} tag-transform translate')

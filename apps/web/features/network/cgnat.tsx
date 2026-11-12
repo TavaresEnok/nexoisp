@@ -12,6 +12,7 @@ import {
 } from "@/components/subscriber-profile-sections";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -214,6 +215,7 @@ export function CgnatDirectory() {
         />
       </QueryBoundary>
       <CgnatTrace />
+      {write && <CgnatImport />}
       {creating && (
         <PlanEditor
           pools={pools.data ?? []}
@@ -602,6 +604,10 @@ const traceSchema = z.object({
     .nullable()
     .optional(),
   holders_at: z.array(holderSchema).optional(),
+  mapping: z
+    .object({ label: z.string(), kind: z.string() })
+    .passthrough()
+    .optional(),
 });
 export function CgnatTrace() {
   const navigate = useNavigate();
@@ -684,7 +690,9 @@ export function CgnatTrace() {
                 items={[
                   [
                     "Plano",
-                    `${result.plan?.name ?? "Não informado"}${result.plan?.retired_at ? " · encerrado" : ""}`,
+                    result.mapping
+                      ? `Mapeamento importado · ${result.mapping.label}`
+                      : `${result.plan?.name ?? "Não informado"}${result.plan?.retired_at ? " · encerrado" : ""}`,
                   ],
                   ["IP privado", result.private_ip ?? "Não informado"],
                   [
@@ -735,6 +743,253 @@ export function CgnatTrace() {
           )}
         </ProfileSection>
       )}
+    </Panel>
+  );
+}
+
+const analysisSchema = z.object({
+  vendor: z.string(),
+  kind: z.string(),
+  rules: z.array(z.unknown()),
+  suggestions: z.array(
+    z
+      .object({
+        private_cidr: z.string().optional(),
+        public_cidr: z.string().optional(),
+        port_start: n.optional(),
+        port_end: n.optional(),
+        ports_per_subscriber: n.optional(),
+        layout: z.string(),
+        nat_log: z.string().optional(),
+        nat_log_detail: z.string().optional(),
+        rules: n,
+      })
+      .passthrough(),
+  ),
+  traceable_by_config: z.boolean(),
+  warnings: z.array(z.string()),
+});
+const batchSchema = z.object({
+  id: z.string().uuid(),
+  kind: z.enum(["config", "log", "mapping_file", "csv"]),
+  label: z.string(),
+  lines: n,
+  accepted: n,
+  rejected: n,
+  created_at: z.string(),
+  first_at: z.string().nullable(),
+  last_at: z.string().nullable(),
+});
+const importKinds: Record<z.infer<typeof batchSchema>["kind"], string> = {
+  config: "Regras da configuração (MikroTik netmap)",
+  log: "Registro de NAT (alocação de bloco)",
+  mapping_file: "Arquivo de mapeamento do A10",
+  csv: "Planilha (private_ip, public_ip, port_start, port_end, start, end)",
+};
+const analysisKinds: Record<string, string> = {
+  deterministic: "Determinístico: o titular sai das regras",
+  dynamic_block: "Bloco fixo atribuído dinamicamente: depende do registro de NAT",
+  deterministic_offset: "Determinístico com deslocamento aleatório: depende do arquivo de mapeamento",
+  dynamic: "Dinâmico: depende do registro de NAT",
+  none: "Nenhuma regra de CGNAT reconhecida",
+};
+
+/** Migração de CGNAT: lê a configuração do equipamento atual e importa regras exatas ou registros de NAT para os ofícios. */
+function CgnatImport() {
+  const batches = useSWR("erp-cgnat-mapping-batches", async () =>
+    z.array(batchSchema).parse(await api("/cgnat/mappings/batches")),
+  );
+  const [values, setValues] = useState({
+    kind: "config" as z.infer<typeof batchSchema>["kind"],
+    label: "",
+    text: "",
+    valid_from: "",
+  });
+  const [analysis, setAnalysis] = useState<z.infer<
+    typeof analysisSchema
+  > | null>(null);
+  const [imported, setImported] = useState<string | null>(null);
+  return (
+    <Panel
+      title="Importar do equipamento de CGNAT"
+      description="Para migrar de outro sistema: cole a configuração (MikroTik, Hillstone ou A10) para ver como o titular é identificado, e importe as regras exatas ou o registro de NAT para responder ofícios."
+    >
+      <MutationForm
+        submit="Importar mapeamentos"
+        onSubmit={async () => {
+          setImported(null);
+          const result = z
+            .object({ batch: batchSchema.partial() })
+            .passthrough()
+            .parse(
+              await api("/cgnat/mappings", {
+                body: {
+                  kind: values.kind,
+                  label: values.label.trim(),
+                  text: values.text,
+                  ...(values.valid_from
+                    ? { valid_from: new Date(values.valid_from).toISOString() }
+                    : {}),
+                },
+              }),
+            );
+          setImported(
+            `${result.batch.accepted ?? 0} mapeamento(s) importado(s), ${result.batch.rejected ?? 0} linha(s) rejeitada(s).`,
+          );
+          await batches.mutate();
+        }}
+      >
+        <div className="erp-columns">
+          <FormField label="Origem">
+            <select
+              aria-label="Origem dos mapeamentos"
+              value={values.kind}
+              onChange={(event) =>
+                setValues({
+                  ...values,
+                  kind: event.target.value as typeof values.kind,
+                })
+              }
+            >
+              {Object.entries(importKinds).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </FormField>
+          <FormField label="Identificação do lote">
+            <Input
+              required
+              maxLength={120}
+              placeholder="Ex.: CGNAT do POP Centro · novembro"
+              value={values.label}
+              onChange={(event) =>
+                setValues({ ...values, label: event.target.value })
+              }
+            />
+          </FormField>
+          {values.kind === "mapping_file" && (
+            <FormField label="Vale a partir de">
+              <Input
+                type="datetime-local"
+                required
+                value={values.valid_from}
+                onChange={(event) =>
+                  setValues({ ...values, valid_from: event.target.value })
+                }
+              />
+            </FormField>
+          )}
+        </div>
+        <FormField label="Conteúdo (configuração, registro ou planilha)">
+          <Textarea
+            required
+            rows={8}
+            spellCheck={false}
+            value={values.text}
+            onChange={(event) =>
+              setValues({ ...values, text: event.target.value })
+            }
+          />
+        </FormField>
+      </MutationForm>
+      <div className="erp-inline-actions">
+        <ActionButton
+          disabled={values.text.trim().length < 10}
+          onClick={async () => {
+            setAnalysis(
+              analysisSchema.parse(
+                await api("/cgnat/analyze", { body: { config: values.text } }),
+              ),
+            );
+          }}
+        >
+          Analisar configuração
+        </ActionButton>
+      </div>
+      {imported && <p role="status">{imported}</p>}
+      {analysis && (
+        <ProfileSection title="Como este CGNAT identifica o titular">
+          <ProfileFacts
+            items={[
+              ["Equipamento", analysis.vendor],
+              ["Tipo", analysisKinds[analysis.kind] ?? analysis.kind],
+              ["Regras exatas lidas", String(analysis.rules.length)],
+            ]}
+          />
+          {analysis.suggestions.length > 0 && (
+            <OperationalCatalog
+              title="Planos sugeridos"
+              description="Confira e cadastre como plano de CGNAT; blocos fora de ordem ficam só como regras importadas."
+              columns={["Privado → público", "Portas", "Formato", "Registro de NAT"]}
+              rows={analysis.suggestions.map((item, index) => ({
+                id: String(index),
+                cells: [
+                  item.private_cidr && item.public_cidr
+                    ? `${item.private_cidr} → ${item.public_cidr}`
+                    : "Pool do equipamento",
+                  item.ports_per_subscriber
+                    ? `${item.ports_per_subscriber} por assinante · ${item.port_start ?? "?"}–${item.port_end ?? "?"}`
+                    : "Não informado",
+                  layoutLabels[item.layout as Plan["layout"]] ?? item.layout,
+                  item.nat_log
+                    ? `${natLogLabels[item.nat_log as NonNullable<Plan["nat_log"]>] ?? item.nat_log}${item.nat_log_detail ? ` · ${item.nat_log_detail}` : ""}`
+                    : "Não se aplica",
+                ],
+              }))}
+            />
+          )}
+          {analysis.warnings.map((warning) => (
+            <p key={warning} className="profile-footnote">
+              {warning}
+            </p>
+          ))}
+        </ProfileSection>
+      )}
+      <QueryBoundary
+        loading={batches.isLoading}
+        error={batches.error}
+        retry={() => batches.mutate()}
+      >
+        <OperationalCatalog
+          title="Mapeamentos importados"
+          description="Usados pelo rastreio quando nenhum plano calcula o titular. Apagar um lote tira esses mapeamentos das consultas."
+          columns={["Lote", "Origem", "Mapeamentos", "Período coberto", "Importado em"]}
+          rows={(batches.data ?? []).map((batch) => ({
+            id: batch.id,
+            cells: [
+              batch.label,
+              importKinds[batch.kind],
+              <>
+                {batch.accepted}
+                {batch.rejected > 0 && (
+                  <small className="table-subline">{`${batch.rejected} linha(s) rejeitada(s)`}</small>
+                )}
+              </>,
+              batch.first_at
+                ? `${stamp(batch.first_at)} → ${stamp(batch.last_at)}`
+                : "Enquanto a configuração valer",
+              stamp(batch.created_at),
+            ],
+            actions: (
+              <ActionButton
+                danger
+                label={`Apagar o lote ${batch.label}`}
+                confirm="Apagar o lote? Os ofícios deixam de usar esses mapeamentos."
+                onClick={async () => {
+                  await api(`/cgnat/mappings/batches/${batch.id}`, {
+                    method: "DELETE",
+                  });
+                  await batches.mutate();
+                }}
+              >
+                Apagar
+              </ActionButton>
+            ),
+          }))}
+        />
+      </QueryBoundary>
     </Panel>
   );
 }

@@ -21,7 +21,7 @@ Fora do escopo: criação de VLAN, perfis de linha/serviço e DBA (devem existir
 import re
 from typing import Optional, Protocol
 
-from .olt_base import OnuState
+from .olt_base import OnuState, version_from_description
 from .base import AckLost
 
 
@@ -120,6 +120,23 @@ def _scoped_service_ports(output: str, ont_id: int) -> list[dict]:
     return rows
 
 
+def parse_config_onts(config: str) -> list[dict]:
+    """ONTs do running-config: seções 'interface gpon F/S' com 'ont add <P> <ID> sn-auth "<SN>" ... desc "<D>"'.
+    Aceita perfis por nome ou por ID (o SGP usa 'ont-lineprofile-id 100 ont-srvprofile-id 100')."""
+    rows, fs = [], None
+    for line in config.splitlines():
+        m = re.match(r"^\s*interface gpon (\d+/\d+)\s*$", line)
+        if m:
+            fs = m.group(1)
+            continue
+        m = re.match(r'^\s*ont add (\d+) (\d+) sn-auth "?([0-9A-Fa-f]{16})"?(.*)$', line)
+        if m and fs:
+            d = re.search(r'desc "([^"]*)"', m.group(4)) or re.search(r"desc (\S+)", m.group(4))
+            rows.append({"pon_port": f"{fs}/{m.group(1)}", "ont_id": int(m.group(2)), "serial": m.group(3).upper(),
+                         "description": d.group(1) if d else ""})
+    return rows
+
+
 def parse_ont_add(output: str) -> int:
     m = re.search(r"ONTID\s*:\s*(\d+)", output)
     if not m:
@@ -203,7 +220,7 @@ class NetmikoCli:
         try:
             return self._run_command(command)
         except Exception:
-            if re.match(r"^(ont (add|delete)\b|ont port native-vlan\b|ont tr069-server-config\b|service-port\b|undo service-port\b)", command):
+            if re.match(r"^(ont (add|delete|modify)\b|ont port native-vlan\b|ont tr069-server-config\b|service-port\b|undo service-port\b)", command):
                 raise AckLost("confirmação SSH ausente após comando mutante; consultar estado") from None
             raise
 
@@ -443,6 +460,40 @@ class HuaweiOltDriver:
             s.run(f"ont delete {p} {info['ont_id']}")
             s.run("quit")
         return {"removed": 1, "service_ports_removed": len(ports), "ont_id": info["ont_id"]}
+
+    # --- migração: adotar ONUs provisionadas por outro sistema (SGP/IXC) sem derrubar o serviço ------------------------
+    def foreign_onus(self) -> list[dict]:
+        """ONUs autorizadas cuja descrição NÃO é um marcador nosso (ex.: 'importacao_sgp'), lidas do running-config.
+        Só leitura."""
+        return [o for o in parse_config_onts(self.export_config()) if version_from_description(o["description"]) is None]
+
+    def adopt(self, serial: str, description: str) -> dict:
+        """Troca só a descrição da ONU para o nosso marcador (`ont modify ... desc`): a ONU, os perfis e os service-ports
+        ficam como estão — o cliente não cai. Depois disso o executor reconhece a ONU como deste recurso.
+        Recusa ONU que já pertence a OUTRO recurso nosso (marcador com outra base)."""
+        sn = normalize_serial(serial)
+        desc = _safe(description, "descrição")
+        if version_from_description(desc) is None:
+            raise ValueError("adoção exige o marcador de versão do sistema (nexo:<recurso>:v<n>)")
+        self._require_write_capability()
+        with self._session() as s:
+            raw = s.run(f"display ont info by-sn {sn}", tolerate=True)
+            if re.search(r"Failure\s*:\s*The required ONT does not exist", raw, re.I):
+                raise OltCommandError("ONT não autorizada nesta OLT; nada para adotar")
+            check_failure(raw)
+            info = parse_ont_info(raw)
+            if not info or _readback_sn(raw) != sn:
+                raise OltCommandError("identidade/estado ONT desconhecido; adoção recusada")
+            current = info.get("description") or ""
+            if current == desc:
+                return {"adopted": 0, "pon_port": info["pon_port"], "ont_id": info["ont_id"]}
+            if version_from_description(current) is not None and current.rsplit(":v", 1)[0] != desc.rsplit(":v", 1)[0]:
+                raise OltCommandError("ONT já pertence a outro recurso do sistema; adoção recusada")
+            fs, p = split_port(info["pon_port"])
+            s.run(f"interface gpon {fs}")
+            s.run(f'ont modify {p} {info["ont_id"]} desc "{desc}"')
+            s.run("quit")
+        return {"adopted": 1, "pon_port": info["pon_port"], "ont_id": info["ont_id"], "previous_description": current}
 
 
 class _Session:

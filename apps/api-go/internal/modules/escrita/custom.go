@@ -43,6 +43,7 @@ func registerCustom(api huma.API, registry *endpoint.Registry, s Service) {
 	registerPayables(api, registry, s)
 	registerCommissionSettlements(api, registry, s)
 	registerConfigBackups(api, registry, s)
+	registerNetworkMigration(api, registry, s)
 	for _, entity := range []struct{ singular, table, permission string }{{"subscriber", "subscribers", "subscribers:write"}, {"contract", "contracts", "contracts:write"}} {
 		registry.Handle(api, "PUT", "/api/"+entity.table+"/{id}/custom", entity.permission, func(ctx context.Context, r *http.Request) (endpoint.Result, error) {
 			id := chi.URLParam(r, "id")

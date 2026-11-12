@@ -20,7 +20,7 @@ serial, IP, usuário ou senha de cliente saiu; só padrões estruturais.
 | **CGNat A10** | **5** | 3 |
 | Router/Switch Cisco (ex.: HomeNet) | 2 / 6 | — |
 
-> Proporção SGP × IXC por provedor: _(medida pelo classificador; ver §5)._
+> Proporção SGP × IXC por provedor: **61 de 91 provedores só SGP**; IXC em ~8 (ver §5).
 
 ## 2. Como o SGP/IXC integram (camada de rede)
 
@@ -32,8 +32,13 @@ serial, IP, usuário ou senha de cliente saiu; só padrões estruturais.
 - O ERP **etiqueta os objetos que cria com `comment`** (o SGP marca ~todos; o IXC também) e provavelmente usa a
   **API do RouterOS** para ler estado e empurrar firewall/queue.
 - **Não instala scheduler/script próprio de rotina** no MikroTik (os agendadores vistos são de backup): age em
-  tempo real (CoA + API), não por cron no equipamento. **Não instala VPN por equipamento** (nenhum
-  l2tp/ovpn/sstp/wireguard-client): alcança o MikroTik pela rede/IP do provedor.
+  tempo real (CoA + API), não por cron no equipamento.
+- **VPN: é o MikroTik que disca até o ERP.** Em 76 de 199 MikroTik classificados há um **cliente** de VPN
+  (`l2tp-client` 60, `pptp-client` 47, `ovpn-client` 18, `sstp-client` 14, `wireguard` com endpoint 8; vários têm
+  mais de um), 51 deles rotulados "SGP", quase todos discando para um **IP público** do servidor de VPN que o ERP
+  fornece. O RADIUS do ERP costuma ser um IP **privado** alcançado por esse túnel (41 casos). Ou seja: o ERP
+  fornece o servidor e as credenciais; a interface cliente é criada **no MikroTik** (pelo técnico do provedor ou pela
+  API do ERP). Na migração o túnel antigo fica de pé até o fim da transição e só então é desativado.
 
 ### Huawei (OLT e roteador de borda) — SSH/CLI direto
 - Cria **usuários de serviço próprios** (SGP: `sgpacesso`, `sgpolt`, `sgpsgp`, por senha).
@@ -51,13 +56,22 @@ trocar o destino, não reescrever o equipamento:
 3. Importar os assinantes/planos/senhas pelo CSV (`/api/import/apply`, campos em `importFields`: `pppoe_usuario`,
    `pppoe_senha`, `plano`, `ip_fixo`…) — a fonte é o export do SGP/IXC (a base, não o equipamento).
 4. Replicar a suspensão: nosso CoA/disconnect + a address-list/queue equivalente.
-> Risco baixo: é o mesmo paradigma. O ponto de atenção é a **janela de corte** (repontar o `/radius` desconecta as
-> sessões; refazer com os assinantes já importados).
+> Risco baixo: é o mesmo paradigma. **O painel gera o plano de troca** a partir do `/export` do concentrador
+> (`POST /api/radius/devices/:id/repoint-plan`): acrescenta o nosso RADIUS (e túnel), **desativa — não apaga** — o
+> RADIUS do ERP, deixa o túnel antigo para a fase 2 (comentado) e entrega o **script de volta**. Segredos do ERP
+> nunca voltam na resposta. Sessões PPPoE já conectadas continuam; só os logins novos passam a autenticar aqui
+> (comportamento do RouterOS a reconfirmar no CHR do laboratório antes da primeira janela real).
+> Usuários locais em `/ppp secret` (autenticam antes do RADIUS) viram CSV do importador:
+> `POST /api/import/mikrotik-secrets` (exporte com `show-sensitive` para trazer as senhas).
 
 ### Huawei — readotar as ONUs que o SGP deixou
 1. Ler as ONUs com nosso driver (já validado em campo); as do SGP estão marcadas `desc "importacao_sgp"`.
-2. Readotar cada uma com o nosso marcador `nexo:<id>:v1` (reautorizar na mesma config, como o laboratório prova),
-   trocando a descrição — em janela, numa ONU de teste primeiro.
+2. **Adotar sem derrubar**: `HuaweiOltDriver.foreign_onus()` lista as ONUs sem marcador nosso (lidas do
+   running-config, aceitando perfil por ID como o SGP grava) e `adopt(serial, "nexo:<id>:v1")` troca **só a
+   descrição** (`ont modify <P> <ID> desc ...`): ONU, perfis e service-ports intactos, cliente navegando. Recusa ONU
+   que já é de outro recurso nosso; idempotente; exige `allow_writes` + modelo/firmware aprovados. Provado por SSH real
+   no emulador (`tests/test_olt_huawei_adocao_lab.py`: nenhum `ont delete`/`undo service-port`/`ont add` chega à OLT).
+   Em equipamento real: primeiro numa ONU de teste do provedor, em janela.
 3. Perfis: o SGP usa IDs fixos (100). Mapear os IDs reais do equipamento para os nossos perfis antes.
 
 ## 4. Rastreabilidade de CGNAT para ofício (Hillstone / A10 / RouterBoard)
@@ -77,35 +91,51 @@ Nosso modelo (`internal/network/cgnat.go`) já separa:
   preferência `syslog`) → rastreável **só pelo log do box**; idealmente **ingerir o syslog de NAT** para virar
   rastreável no painel (tarefa nova — ver §6).
 
-**Realidade de campo (amostra de 160 configs MikroTik com NAT):** `netmap` = **0**, PAT por faixa fixa = **0**,
-`masquerade` em todas — ou seja, **não se usa CGNAT determinístico** no campo (o `masquerade` ubíquo é o NAT básico de
-WAN, não prova CGNAT, mas a ausência de `netmap`/faixa-fixa indica que o CGNAT real é **PAT dinâmico**). As 160 têm
-logging ligado. **Conclusão para o ofício:** no provedor migrado, a rastreabilidade sai do **log de NAT**, não do
-cálculo — o cálculo determinístico vale para o CGNAT que o *próprio NexoISP* gerar. Por isso a **ingestão de log de
-NAT (§6, tarefa 4) é a prioridade** para atender ofício em base migrada.
+**Realidade de campo (corrigida em 12/11/2026, leitura do último backup de cada equipamento):**
+- **MikroTik: CGNAT determinístico é comum.** 48 de 95 MikroTik com `100.64/10` usam o padrão de mercado: um salto
+  por bloco privado para uma cadeia `CGNAT_n` e, dentro dela, `netmap` do bloco privado (`/29` na maioria; também
+  `/30`, `/27`, `/26`, `/28`, `/25`) para um bloco público **do mesmo tamanho** numa faixa de portas (1008 ou 2016
+  portas por assinante na maioria; 504, 4032 e 8064 também aparecem), `tcp` e `udp`, mais uma regra sem portas.
+  A primeira medição ("netmap = 0") estava errada — o filtro do classificador não casava as cadeias `CGNAT_n`.
+- **Hillstone (13 configs):** `snatrule ... mode dynamicport fixed-block start/end/size` — bloco **fixo** de portas
+  atribuído **dinamicamente**: só o registro de NAT identifica o titular. Várias regras sem `log`; `logging traffic nat
+  on` em 4 de 13.
+- **A10 (3 configs):** `cgnv6 fixed-nat ... ports-per-user N offset random` com `create-port-mapping-file`: é
+  determinístico para o A10, mas o deslocamento aleatório impede o cálculo — o titular sai do **arquivo de
+  mapeamento** do próprio A10.
 
-## 5. Medições
+**O que o NexoISP faz com isso:**
+- `POST /api/cgnat/analyze` lê a configuração (MikroTik, Hillstone ou A10), diz como o titular é identificado e
+  **sugere os planos** (`layout=netmap` quando os blocos são contíguos e cada um usa a faixa de portas seguinte,
+  conferido regra a regra; `external` + `nat_log` para Hillstone/A10).
+- `POST /api/cgnat/mappings` importa **regras exatas** (netmap fora de ordem), **registro de NAT** (alocação/liberação
+  de bloco, com hora; syslog sem ano usa o ano/fuso informados), **arquivo de mapeamento do A10** (vigente a partir de
+  uma data) ou **CSV neutro**. O rastreio (`GET /api/cgnat/trace`) usa esses mapeamentos quando nenhum plano calcula
+  o titular, respeitando o horário. Lotes listados e apagáveis; tudo auditado e isolado por provedor (migração 00104).
+- O leitor de log é tolerante (procura IP privado, IP público, faixa de portas e hora; "release/free/withdraw" fecha o
+  período) e **rejeita** o que não tem tudo isso. Ainda **não foi visto um log real** de Hillstone/A10: antes da
+  primeira migração, importar uma amostra real e conferir as linhas rejeitadas.
 
-- **CGNAT (amostra 160 MikroTik):** netmap 0 · src-nat por faixa 0 · masquerade/dinâmico predominante; todas com
-  logging. Hillstone 23 e A10 5 (boxes dedicados) usam PAT dinâmico → rastreáveis por log. _Classificação por box
-  dedicado (não por amostra genérica) fica como refino._
-- **Proporção SGP × IXC:** qualitativa por ora — **SGP é claramente dominante** (assinatura forte e ampla no Huawei:
-  usuários `sgp*`, `importacao_sgp`; e comentários em ~todos os MikroTik da amostra), **IXC presente** (scripts
-  `IXCProvedor-*`). A contagem exata por provedor precisa de um scan mais rápido (grep só nos arquivos certos, ou pela
-  tabela `backups` do banco) — o grep recursivo em 134 provedores é lento demais.
+## 5. Medições (último backup de cada equipamento, tabela `backups`, 12/11/2026)
+
+- **ERP por provedor (91 com MikroTik/Huawei/CGNat classificados):** 61 só SGP; IXC em ~8; o resto sem marca de ERP.
+- **MikroTik (199 classificados):** `erp_sgp` 90 · CoA ligado 73 · CGNAT `100.64/10` 86 (48 em netmap determinístico)
+  · cliente de VPN 76 (51 rotulados SGP) · RADIUS privado provavelmente via túnel 41.
+- **OLT Huawei:** marca SGP em 109; ONUs `importacao_sgp` em 15.
+- **CGNAT dedicado:** Hillstone `fixed-block` dinâmico (13 configs), A10 `fixed-nat offset random` (3 configs).
 
 ## 6. Tarefas concretas de preparação
 
-1. **Preset de importação SGP e IXC**: mapear os cabeçalhos do export de cada um para os `importFields` (hoje o CSV é
-   genérico; um preset por ERP evita mapear à mão). Precisa de um export real de cada para fixar os nomes.
-2. **Gerador de repoint MikroTik**: a partir do `radius_setup`, emitir o `.rsc` que troca o `/radius` do SGP/IXC pelo
-   nosso, preservando CoA e service, para colar em janela.
-3. **Readoção de ONU Huawei em lote**: ler ONUs `importacao_sgp` e reautorizar com marcador nosso (usa o fluxo do
-   laboratório; homologar antes em lab real).
-4. **Ingestão de log de NAT (CGNAT dinâmico)**: receber o syslog de NAT de Hillstone/A10/RB-masquerade e indexar
-   (IP+porta+hora → IP privado), para o ofício ficar rastreável mesmo sem cálculo determinístico.
-5. **Cadastro de plano de CGNAT por box**: assistente que lê a config do box (netmap/src-nat/masquerade) e já sugere
-   `layout`/`nat_log`.
+| # | Tarefa | Situação |
+|---|---|---|
+| 1 | Plano de troca do RADIUS MikroTik (`repoint-plan`) com script de volta | **feito** — testes Go + PostgreSQL |
+| 2 | Usuários locais `/ppp secret` → CSV do importador | **feito** — `POST /api/import/mikrotik-secrets` |
+| 3 | Adoção de ONU Huawei do SGP sem derrubar (`ont modify desc`) | **feito** — driver + laboratório SSH |
+| 4 | Leitura de configuração de CGNAT com planos sugeridos | **feito** — `POST /api/cgnat/analyze` |
+| 5 | Importação de mapeamentos (regras, log de NAT, arquivo A10, CSV) + rastreio | **feito** — migração 00104, painel CGNAT |
+| 6 | Preset de colunas do export do SGP/IXC | **pendente de amostra real**: sem um export real, adivinhar nomes de coluna gravaria errado (mesma regra de `10-migracao-sgp.md`). O importador já aceita mapeamento coluna→campo |
+| 7 | Receber syslog de NAT em tempo real (hoje é importação de arquivo) | pendente |
+| 8 | Adoção em lote na tela (hoje: driver/agente) e homologação em ONU de teste real | pendente |
 
 **Nada disso toca equipamento de terceiro**: importação e repoint rodam na instância do provedor, em janela; a
 análise do backup center é só leitura e anonimizada.
