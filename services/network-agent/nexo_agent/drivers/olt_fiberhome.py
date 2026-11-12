@@ -1,10 +1,12 @@
 """Driver FiberHome AN5516 (GPON): backup de config (herdado do genérico) + LEITURA de ONU.
-Reconhecido em equipamento real (docs/estudo-campo/recon-cli-olts.md): após `enable` e `cd onu`,
-`show authorization slot all pon all` lista as ONUs (PhyId=serial, ST=autorizada, OST=up/dn=online) e
-`show onu optical-info slot all pon all onu all` traz rx/tx. Transporte OS (telnet). Provisionamento não homologado.
+Validado em equipamento real (2026-11-12): após `enable` e `cd onu`, `show authorization slot all pon all`
+lista as ONUs (ST=A autorizada, OST=up/dn online, PhyId=serial). A potência óptica é consultada POR ONU com
+`show onu opticalpower-info phy-id <serial>` — o comando em massa `show onu optical-info ... all` NÃO existe
+neste firmware (devolve "% Unknown command"; `show onu opticalpower-info` sem argumento volta vazio). A saída por
+ONU traz "SEND POWER : <tx> (Dbm)" e "RECV POWER : <rx> (Dbm)". Transporte OS (telnet). Provisionamento não homologado.
 """
 import re
-from typing import Optional
+from typing import Optional, Tuple
 
 from .olt_base import OnuState
 from .olt_cli_backup import PROFILES, CliBackupDriver, CliBackupProfile
@@ -28,14 +30,17 @@ def parse_auth_table(output: str) -> list[dict]:
     return rows
 
 
-def parse_optical_table(output: str) -> dict:
-    """'show onu optical-info slot all pon all onu all': (slot,pon,onu) -> (rx_dbm, tx_dbm)."""
-    out = {}
+def parse_optical_power(output: str) -> Tuple[Optional[float], Optional[float]]:
+    """'show onu opticalpower-info phy-id <serial>': devolve (rx_dbm, tx_dbm) de 'RECV POWER'/'SEND POWER'."""
+    rx = tx = None
     for line in output.splitlines():
-        m = re.match(r"^\s*(\d+)\s+(\d+)\s+(\d+)\s+(\w+)\s+(-?\d+\.\d+|-)\s+(-?\d+\.\d+|-)", line)
+        m = re.search(r"RECV\s*POWER\s*:\s*(-?\d+(?:\.\d+)?)", line, re.I)
         if m:
-            out[(int(m.group(1)), int(m.group(2)), int(m.group(3)))] = (_num(m.group(5)), _num(m.group(6)))
-    return out
+            rx = float(m.group(1))
+        m = re.search(r"SEND\s*POWER\s*:\s*(-?\d+(?:\.\d+)?)", line, re.I)
+        if m:
+            tx = float(m.group(1))
+    return rx, tx
 
 
 class FiberHomeOltDriver(CliBackupDriver):
@@ -61,18 +66,19 @@ class FiberHomeOltDriver(CliBackupDriver):
         s = self._open_onu()
         try:
             auth = {r["serial"]: r for r in parse_auth_table(s.dump("show authorization slot all pon all", idle=3.0, maxt=180))}
-            optical = parse_optical_table(s.dump("show onu optical-info slot all pon all onu all", idle=3.0, maxt=180))
+            out = {}
+            for sn in serials:
+                r = auth.get(sn.upper())
+                if not r:
+                    out[sn] = OnuState(authorized=False)
+                    continue
+                rx = tx = None
+                if r["online"]:  # a potência só existe para ONU online; consulta por ONU (phy-id)
+                    rx, tx = parse_optical_power(s.dump(f"show onu opticalpower-info phy-id {sn.upper()}", idle=2.5, maxt=30))
+                out[sn] = OnuState(authorized=r["authorized"], online=r["online"], rx_dbm=rx, tx_dbm=tx,
+                                   pon_port=f"{r['slot']}/{r['pon']}", extra={"onu": r["onu"], "type": r["type"]})
         finally:
             s.close()
-        out = {}
-        for sn in serials:
-            r = auth.get(sn.upper())
-            if not r:
-                out[sn] = OnuState(authorized=False)
-                continue
-            rx, tx = optical.get((r["slot"], r["pon"], r["onu"]), (None, None))
-            out[sn] = OnuState(authorized=r["authorized"], online=r["online"], rx_dbm=rx, tx_dbm=tx,
-                               pon_port=f"{r['slot']}/{r['pon']}", extra={"onu": r["onu"], "type": r["type"]})
         return out
 
     def read_onu(self, serial: str) -> OnuState:
