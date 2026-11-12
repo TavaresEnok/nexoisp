@@ -79,16 +79,29 @@ que autorizaram o teste (via acesso do backup center). Serve para as próximas r
   autorizada. **online/sinal continuam indisponíveis via CLI** (limitação do modelo; exigiria SNMP).
 - Observação: VSOL Ponto Net (23023) deu `connection refused` no momento (porta/transporte, não é código).
 
-### Datacom — sem como validar
-- **Nenhum provedor autorizado tem OLT Datacom.** O driver existe (lista + sinal, DmOS via SSH), mas não há
-  equipamento liberado para validar em campo. **Pendente** até um provedor autorizado com Datacom.
+### Datacom (DmOS) — CORRIGIDO (commit a seguir, 2026-11-12)
+- **Erro:** `check` identificava (DmOS 10.8.0) mas a leitura de ONU estourava `Pattern not detected '[>#]'`.
+- **Diagnóstico:** o DmOS pagina a saída (`--More--`) e o prompt nunca retornava. O modificador correto para
+  suprimir a paginação é **`| nomore`** (sem hífen; `| no-more` é inválido e dispara o help de modificadores).
+  Os parsers (`parse_onu_list`, `parse_optical` com `Rx/Tx Optical Power [dBm]`) já estavam corretos; e `_ports`
+  dependia de um comando que neste firmware devolve o detalhe da ONU, não a lista de portas.
+- **Correção:** `DatacomCli.run` anexa `| nomore`; `_ports` enumera a faixa do DM4615 (1/1/1..1/1/16) e o
+  `_onu_index` pula portas que dão erro. `optical-info` dá o sinal da ONU; há ainda `rssi` (potência no OLT).
+- **Validação ao vivo (AtivaTec):** 767 ONUs em 13 portas GPON, 644 online, sinal real (ex. rx −15,33 / tx 2,50 dBm).
+
+## Huawei por SSH (Ponto Net) — RESOLVIDO (operacional, 2026-11-12)
+Não era bug: o `ssh_trust.py` nunca auto-aceita a chave do host — exige a chave fixada num known_hosts, verificada
+fora de banda. "SSH trust file is not configured" = trust file ausente. Com a chave fixada, a leitura por SSH
+funcionou (MA5800-X7 R018). Produção: conferir o fingerprint por canal independente e usar
+`python -m nexo_agent.ssh_trust --known-hosts ... --host ... --public-key ... --fingerprint ... --reason ...`.
 
 ## Itens abertos para a próxima rodada
 
-1. **Huawei por SSH (Ponto Net):** configurar/ajustar o `SSH trust file` para o caminho SSH (só telnet foi validado).
-2. **Datacom:** validar quando houver provedor autorizado com Datacom.
-3. **VSOL GPON — sinal:** investigar se o BDCOM GPON expõe potência óptica por CLI (hoje online/sinal = indisponível).
-4. **Autorização/escrita de ONU:** segue **não homologada** em todos os fabricantes; só em laboratório.
+1. **VSOL GPON — sinal:** investigar se o BDCOM GPON expõe potência óptica por CLI (hoje online/sinal = indisponível).
+2. **Autorização/escrita de ONU (autorizar/desautorizar):** NÃO fazer em cliente real. Os drivers recusam escrita de
+   propósito (sintaxe por firmware não testada); desautorizar corta internet de cliente e um re-auth não testado
+   pode deixá-lo offline. Homologar no laboratório (radius-lab-pnetlab / OLT de lab) com rollback e, para teste ao
+   vivo, só numa ONU de TESTE que o provedor separe (não cliente pagante), em janela.
 
 ## Índice de commits desta rodada
 
@@ -97,4 +110,5 @@ que autorizaram o teste (via acesso do backup center). Serve para as próximas r
 | `84a5c10` | FiberHome | leitura óptica por ONU (`opticalpower-info phy-id`) |
 | `8eca244` | ZTE | parser de placas (layout XGSPON sem Rack) |
 | `c3faf2c` | ZTE | leitura de ONU/sinal (token de interface `gpon_onu-`) |
-| (este) | VSOL | lista de autorizadas GPON (`onu add ... sn`) + busca por SN |
+| `2bd5a79` | VSOL | lista de autorizadas GPON (`onu add ... sn`) + busca por SN |
+| (este) | Datacom | leitura de ONU + sinal (paginação `\| nomore`, enumeração de portas) |

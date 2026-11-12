@@ -1,9 +1,11 @@
 """Driver de OLT Datacom (DmOS — DM4615 e afins), GPON. Construído a partir de reconhecimento em equipamento real
-(docs/estudo-campo/recon-cli-olts.md). SUPERFÍCIE VALIDADA: identidade (`show firmware`/`show system`) e backup de
-configuração (`show running-config | nomore`). Leitura/provisionamento de ONU ainda não implementados para Datacom
-(a enumeração de ONU no DmOS precisa de mais reconhecimento); autorização é recusada explicitamente.
+(docs/estudo-campo/recon-cli-olts.md). SUPERFÍCIE VALIDADA EM CAMPO (AtivaTec, 2026-11-12): identidade
+(`show firmware`), backup (`show running-config | nomore`) e LEITURA de ONU — lista por porta
+(`show interface gpon f/s/p onu`) e sinal óptico (`show interface gpon f/s/p onu <id> optical-info`:
+`Rx Optical Power [dBm]` / `Tx Optical Power [dBm]`). O DmOS pagina a saída; o modificador `| nomore` a suprime
+(o `run` o anexa). Provisionamento de ONU é recusado explicitamente (não homologado).
 
-Transporte: SSH pelo `cli_transport` do agente (netmiko `datacom_dmos`), com a chave do equipamento fixada. Só leitura.
+Transporte: `cli_transport` do agente (netmiko cisco_ios/_telnet — DmOS tem CLI estilo Cisco). Só leitura.
 """
 import re
 from typing import Optional
@@ -134,19 +136,17 @@ class DatacomOltDriver:
         return text
 
     def _ports(self, s) -> list[str]:
-        if getattr(self, "_ports_cache", None):
-            return self._ports_cache
-        # 'show interface gpon <p> onu 1' devolve o dump físico de TODAS as portas GPON; daí extraio a lista.
-        out = s.run("show interface gpon 1/1/1 onu 1")
-        ports = parse_ports(out) or [f"1/1/{p}" for p in range(1, 17)]
-        self._ports_cache = ports
-        return ports
+        # Faixa de portas GPON do DM4615 (1/1/1..1/1/16). Portas inexistentes devolvem erro e são puladas no
+        # _onu_index; portas sem ONU devolvem só o cabeçalho.
+        return [f"1/1/{p}" for p in range(1, 17)]
 
     def _onu_index(self, s) -> dict:
-        """Mapa serial -> (porta, onu_id, oper) varrendo as portas (uma listagem por porta)."""
+        """Mapa serial -> (porta, onu_id, oper) varrendo as portas GPON (uma listagem por porta)."""
         index = {}
         for port in self._ports(s):
             raw = s.run(f"show interface gpon {port} onu")
+            if re.search(r"syntax error|invalid input|not found|does not exist", raw, re.I):
+                continue  # porta ausente neste modelo
             for row in parse_onu_list(raw):
                 index[row["serial"]] = row
         return index
@@ -195,7 +195,10 @@ class DatacomCli:
                           conn_timeout=20, auth_timeout=20, banner_timeout=20)
 
     def run(self, command: str) -> str:
-        return self._c.send_command(command, expect_string=r"[>#]\s*$", read_timeout=60, cmd_verify=True,
+        # O DmOS pagina a saída ('--More--') e o prompt não retorna; '| nomore' suprime a paginação (validado em
+        # campo). Anexa só quando o comando ainda não tem um modificador de pipe.
+        cmd = command if "|" in command else command + " | nomore"
+        return self._c.send_command(cmd, expect_string=r"[>#]\s*$", read_timeout=60, cmd_verify=True,
                                     strip_prompt=False, strip_command=True)
 
     def dump(self, command: str) -> str:

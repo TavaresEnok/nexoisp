@@ -54,14 +54,15 @@ class FakeCli:
         self.closed = 0
 
     def run(self, cmd):
-        if cmd.startswith("show firmware"):
+        base = cmd.split("|")[0].strip()  # o driver anexa '| nomore'
+        if base.startswith("show firmware"):
             return FW
-        if cmd == "show interface gpon 1/1/1 onu 1":
-            return PHYS
-        if re.match(r"show interface gpon \S+ onu$", cmd):
-            return ONU_LIST
-        if "optical-info" in cmd:
+        if "optical-info" in base:
             return OPTICAL
+        m = re.match(r"show interface gpon (\S+) onu$", base)
+        if m:
+            # só a porta 1/1/1 tem ONUs; as outras devolvem só o cabeçalho (varredura de portas).
+            return ONU_LIST if m.group(1) == "1/1/1" else "  Itf  ONU ID  Serial  Oper State\n------  ------\nOLT-LAB#"
         return "OLT-LAB#"
 
     def dump(self, cmd):
