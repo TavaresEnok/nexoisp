@@ -103,6 +103,23 @@ funcionou (MA5800-X7 R018). Produção: conferir o fingerprint por canal indepen
    pode deixá-lo offline. Homologar no laboratório (radius-lab-pnetlab / OLT de lab) com rollback e, para teste ao
    vivo, só numa ONU de TESTE que o provedor separe (não cliente pagante), em janela.
 
+## Laboratório de provisionamento (autorizar/desautorizar ONU) — 2026-11-12
+
+Para homologar a escrita (autorizar/desautorizar) **sem tocar em cliente real**, há agora uma prova de laboratório
+que roda o ciclo completo contra o emulador de OLT Huawei **por SSH de verdade**, gravando e conferindo cada
+comando mutante que chega ao equipamento (para não ser "um laboratório falho"):
+
+- **Teste:** `services/network-agent/tests/test_olt_huawei_lab.py` — `autorizar(v1) -> ler(online+sinal) ->
+  desautorizar -> ler(não autorizada, volta ao autofind) -> re-autorizar(v2) restaurando a MESMA config -> ler`.
+  Confere a sequência exata de comandos (`interface gpon` / `ont add ... desc "nexo:...:vN"` / `ont port native-vlan`
+  / `service-port ...`; e `undo service-port` SEMPRE antes de `ont delete`), a restauração do estado e a trava de
+  escrita (`allow_writes` + `expected_product/firmware`).
+- **Demo:** `./nexo lab-olt` (ou `python tools/lab_olt.py`) imprime o ciclo com cada `OLT <- comando`.
+- Só **Huawei** tem escrita implementada e emulador fiel; ZTE/VSOL/FiberHome/Datacom recusam escrita por design.
+- O emulador replica o conjunto de comandos e as falhas do MA5600 (valida perfis/VLAN, unicidade de SN, cap de PON,
+  ordem undo→delete) — **prova a lógica e o transporte, não a compatibilidade de firmware real**. Teste ao vivo:
+  só numa ONU de TESTE que o provedor separe, em janela, com rollback — nunca em cliente pagante.
+
 ## Índice de commits desta rodada
 
 | Commit | Fabricante | Correção |
@@ -111,4 +128,5 @@ funcionou (MA5800-X7 R018). Produção: conferir o fingerprint por canal indepen
 | `8eca244` | ZTE | parser de placas (layout XGSPON sem Rack) |
 | `c3faf2c` | ZTE | leitura de ONU/sinal (token de interface `gpon_onu-`) |
 | `2bd5a79` | VSOL | lista de autorizadas GPON (`onu add ... sn`) + busca por SN |
-| (este) | Datacom | leitura de ONU + sinal (paginação `\| nomore`, enumeração de portas) |
+| `483b08f` | Datacom | leitura de ONU + sinal (paginação `\| nomore`, enumeração de portas) |
+| (este) | Huawei (lab) | prova de laboratório do ciclo autorizar/desautorizar/re-autorizar por SSH real |

@@ -202,8 +202,11 @@ LEGACY_ONLY = {"kex": ("diffie-hellman-group1-sha1", "diffie-hellman-group14-sha
                "digests": ("hmac-sha1", "hmac-md5"), "key_types": ("ssh-rsa",)}
 
 
-def shell(state: "OltState", send, recv, banner: bool = True):  # pragma: no cover - exercitado pelos testes de transporte
-    """Laço da CLI emulada sobre qualquer canal (send/recv de bytes ou str)."""
+def shell(state: "OltState", send, recv, banner: bool = True, on_command=None):  # pragma: no cover - exercitado pelos testes de transporte
+    """Laço da CLI emulada sobre qualquer canal (send/recv de bytes ou str).
+
+    on_command(cmd): gancho de laboratório, chamado com cada comando executado — permite ao lab provar que os
+    comandos reais chegaram ao equipamento (emulado) pelo transporte de verdade."""
     cli = HuaweiCliEmulator(state)
     cli.mode = "user"
     send((BANNER if banner else "") + cli.prompt())
@@ -216,6 +219,8 @@ def shell(state: "OltState", send, recv, banner: bool = True):  # pragma: no cov
             if chr_ in "\r\n":
                 send("\r\n")
                 out = cli.run(buf) if buf.strip() else ""
+                if on_command and buf.strip():
+                    on_command(buf)
                 buf = ""
                 send((out.replace("\n", "\r\n") + "\r\n" if out else "") + "\r\n" + cli.prompt())
             elif chr_ != "\x00":
@@ -223,7 +228,7 @@ def shell(state: "OltState", send, recv, banner: bool = True):  # pragma: no cov
                 send(chr_)
 
 
-def ssh_client(conn, state: "OltState", key, legacy_only: bool = False):  # pragma: no cover
+def ssh_client(conn, state: "OltState", key, legacy_only: bool = False, on_command=None):  # pragma: no cover
     import paramiko
 
     class Srv(paramiko.ServerInterface):
@@ -251,7 +256,7 @@ def ssh_client(conn, state: "OltState", key, legacy_only: bool = False):  # prag
         if ch is not None:
             # sendall (não send): Channel.send pode enviar só parte de uma saída grande e o resto se perderia
             # (ex.: display current-configuration de uma OLT cheia), fazendo o cliente esperar um prompt que não vem.
-            shell(state, lambda x: ch.sendall(x.encode() if isinstance(x, str) else x), ch.recv)
+            shell(state, lambda x: ch.sendall(x.encode() if isinstance(x, str) else x), ch.recv, on_command=on_command)
     except Exception:
         pass
     finally:
