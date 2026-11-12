@@ -8,7 +8,8 @@ Roteiro completo, limites e cuidados de LGPD: `docs/10-migracao-sgp.md`.
 | `sgp_client.py` | Cliente da API do SGP. **Só consulta**: rotas de escrita são recusadas antes de sair da máquina. HTTPS obrigatório, sem seguir redirecionamento para outro servidor |
 | `amostrar_formato.py` | Descobre as **chaves e tipos** das respostas (sem guardar valores) para preencher o mapeamento |
 | `exportar_csv.py` | Gera `assinantes.csv` e `titulos.csv` a partir do mapeamento |
-| `mapeamento.exemplo.json` | Modelo. Os campos "?" **não foram confirmados** contra o SGP real |
+| `mapeamento.exemplo.json` | Modelo com campos "?" (não confirmados) |
+| `mapeamento.sgp.json` | **Preset confirmado** contra o SGP real (rota `/api/ura/clientes/`, que já traz contrato/serviço/títulos aninhados) |
 | `tests/` | Testes contra um servidor falso local com dados sintéticos |
 
 ## Uso
@@ -20,7 +21,7 @@ export SGP_TOKEN=...                                 # token com permissão apen
 cd tools/sgp-migracao
 python3 amostrar_formato.py                          # grava ~/nexo-sgp-saida/formato.json (sem valores)
 cp mapeamento.exemplo.json meu-mapeamento.json       # preencha os "?" com os caminhos do formato.json
-python3 exportar_csv.py meu-mapeamento.json          # grava ~/nexo-sgp-saida/assinantes.csv e titulos.csv
+python3 exportar_csv.py mapeamento.sgp.json          # preset confirmado; grava ~/nexo-sgp-saida/*.csv (use --max N para testar)
 ```
 
 ## Regras

@@ -13,7 +13,18 @@
 | Exportador para o CSV intermediário | pronto, testado | **depende do mapeamento, que depende do amostrador** |
 | Importação no NexoISP (prévia, aplicar, lote, provisionar) | pronta (`docs/importacao-csv.md`) | testada só com dados sintéticos |
 | Camada de compatibilidade (o NexoISP atender rotas do SGP) | **não escrita**, de propósito (seção 4) | |
-| Mapeamento real | **não existe** | a documentação da API do SGP não traz o formato das respostas |
+| Mapeamento real | **confirmado (2026-11-12)** | SGP: `tools/sgp-migracao/mapeamento.sgp.json`; IXC: `tools/ixc-migracao/` (exportador com junção). Amostrados contra as APIs reais da Vibe (SGP) e da Up Connect (IXC) |
+
+> **Atualização 2026-11-12 — mapeamento confirmado contra as APIs reais.** Com token de leitura do dono, as estruturas
+> foram amostradas (só nomes de campo, sem valores) e os presets escritos e testados:
+> - **SGP (Vibe):** `/api/ura/clientes/` já devolve cliente + contrato + serviço (login/senha/ip/mac/plano) + títulos
+>   aninhados. Preset `tools/sgp-migracao/mapeamento.sgp.json`. Amostra real: obrigatórios (id, nome, cpf) 100%;
+>   ~30% dos clientes sem contrato ativo (prospecto/cancelado) ficam sem plano/pppoe, como esperado.
+> - **IXC (Up Connect):** relacional — o exportador junta `cliente` + `cliente_contrato` + `radusuarios` e resolve o
+>   plano em `vd_contratos`; faturas de `fn_areceber` ligadas pelo id do contrato. Limites: `cidade`/`uf` são id (FK)
+>   e o contrato não tem dia de vencimento fixo (ambos opcionais no importador).
+> Regras mantidas: token só em variável de ambiente (nunca no repo), saída com dados pessoais fora do repositório
+> (600), e revogar o token ao terminar.
 
 **Por que o mapeamento não foi escrito já:** `docs/API-SGP-completa.txt` descreve os **parâmetros de entrada** de cada rota, mas não o formato das respostas.
 Adivinhar nomes de campo geraria um importador que parece funcionar e grava errado. Por isso o exportador **se recusa a rodar** enquanto houver campo "?".

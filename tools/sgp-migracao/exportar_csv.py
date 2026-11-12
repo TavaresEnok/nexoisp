@@ -18,8 +18,9 @@ from sgp_client import SgpClient, SgpError, dig
 
 COLUNAS = {
     "assinantes": ["id_externo", "nome", "cpf_cnpj", "email", "telefone", "logradouro", "numero", "bairro", "cidade", "uf", "cep",
-                   "observacoes", "situacao", "plano", "vencimento_dia", "pppoe_usuario", "pppoe_senha"],
-    "titulos": ["id_externo", "id_externo_assinante", "vencimento", "valor", "competencia", "descricao"],
+                   "observacoes", "situacao", "plano", "vencimento_dia", "pppoe_usuario", "pppoe_senha", "mac", "ip_fixo", "inicio_contrato"],
+    "titulos": ["id_externo", "id_externo_assinante", "id_externo_contrato", "vencimento", "valor", "competencia", "descricao",
+                "situacao", "pago_em", "valor_pago", "forma_pagamento"],
 }
 OBRIGATORIAS = {"assinantes": {"id_externo", "nome"}, "titulos": {"id_externo", "id_externo_assinante", "vencimento", "valor"}}
 
@@ -56,34 +57,42 @@ def _valor(reg: dict, caminho: str, transforms: dict, coluna: str):
     return v
 
 
-def linhas(cliente: SgpClient, mapa: dict, tipo: str, avisos: dict):
+def linhas(cliente: SgpClient, mapa: dict, tipo: str, avisos: dict, maximo_linhas: int = 0):
     sec = mapa[tipo]
     cols, consts, transforms = sec["colunas"], sec.get("constantes", {}), sec.get("transformacoes", {})
     pag = sec.get("paginacao", {})
     # a mesma rota pode devolver o mesmo registro em páginas vizinhas se o cadastro mudar durante a leitura: deduplica pela chave
+    aninhado = sec.get("aninhado", "")   # quando cada linha vem de uma lista DENTRO do registro pai (ex.: títulos dentro do cliente)
     vistos: set[str] = set()
-    for reg in cliente.pages(sec["endpoint"], sec.get("parametros", {}), sec.get("lista", ""), pag.get("tamanho", 100),
+    for pai in cliente.pages(sec["endpoint"], sec.get("parametros", {}), sec.get("lista", ""), pag.get("tamanho", 100),
                              pag.get("parametro_offset", "offset"), pag.get("parametro_limite", "limit")):
-        row = {c: consts.get(c, "") for c in COLUNAS[tipo]}
-        for c, caminho in cols.items():
-            row[c] = _valor(reg, caminho, transforms, c)
-        chave = str(row["id_externo"])
-        if not chave:
-            avisos["sem_id"] = avisos.get("sem_id", 0) + 1
-            continue
-        if chave in vistos:
-            avisos["repetidos"] = avisos.get("repetidos", 0) + 1
-            continue
-        vistos.add(chave)
-        lim = sec.get("avisar_se_lista_maior", {})
-        for caminho, maximo in lim.items():
-            lst = dig(reg, caminho)
-            if isinstance(lst, list) and len(lst) > maximo:
-                avisos["varios_" + caminho] = avisos.get("varios_" + caminho, 0) + 1
-        yield row
+        registros = (dig(pai, aninhado) or []) if aninhado else [pai]
+        if aninhado and not isinstance(registros, list):
+            registros = []
+        for reg in registros:
+          if True:
+            row = {c: consts.get(c, "") for c in COLUNAS[tipo]}
+            for c, caminho in cols.items():
+                row[c] = _valor(reg, caminho, transforms, c)
+            chave = str(row["id_externo"])
+            if not chave:
+                avisos["sem_id"] = avisos.get("sem_id", 0) + 1
+                continue
+            if chave in vistos:
+                avisos["repetidos"] = avisos.get("repetidos", 0) + 1
+                continue
+            vistos.add(chave)
+            if maximo_linhas and len(vistos) > maximo_linhas:
+                return
+            lim = sec.get("avisar_se_lista_maior", {})
+            for caminho, maximo in lim.items():
+                lst = dig(pai, caminho)
+                if isinstance(lst, list) and len(lst) > maximo:
+                    avisos["varios_" + caminho] = avisos.get("varios_" + caminho, 0) + 1
+            yield row
 
 
-def exportar(cliente: SgpClient, mapa: dict, saida: str, so: str | None = None) -> dict:
+def exportar(cliente: SgpClient, mapa: dict, saida: str, so: str | None = None, maximo_linhas: int = 0) -> dict:
     os.makedirs(saida, mode=0o700, exist_ok=True)
     resumo: dict = {}
     for tipo in ("assinantes", "titulos"):
@@ -98,7 +107,7 @@ def exportar(cliente: SgpClient, mapa: dict, saida: str, so: str | None = None) 
         with open(caminho, "w", newline="", encoding="utf-8") as f:
             w = csv.DictWriter(f, fieldnames=COLUNAS[tipo], delimiter=";")
             w.writeheader()
-            for row in linhas(cliente, mapa, tipo, avisos):
+            for row in linhas(cliente, mapa, tipo, avisos, maximo_linhas):
                 w.writerow(row)
                 n += 1
         os.chmod(caminho, 0o600)
@@ -111,10 +120,11 @@ def main(argv=None) -> int:
     ap.add_argument("mapeamento")
     ap.add_argument("--saida", default=os.path.expanduser("~/nexo-sgp-saida"))
     ap.add_argument("--so", choices=["assinantes", "titulos"])
+    ap.add_argument("--max", type=int, default=0, help="para após N linhas por tipo (teste); 0 = tudo")
     a = ap.parse_args(argv)
     mapa = json.load(open(a.mapeamento, encoding="utf-8"))
     try:
-        resumo = exportar(SgpClient(), mapa, a.saida, a.so)
+        resumo = exportar(SgpClient(), mapa, a.saida, a.so, a.max)
     except (MapeamentoInvalido, SgpError) as e:
         print(f"erro: {e}", file=sys.stderr)
         return 2

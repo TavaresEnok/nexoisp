@@ -1,0 +1,56 @@
+{
+  "_leia_me": "Preset SGP → NexoISP confirmado contra a API real do SGP (rota /api/ura/clientes/, que traz cliente+contrato+servico+titulos aninhados). Caminhos com ponto; índice de lista como número (contratos.0). Assinantes: 1 linha por cliente (1º contrato/serviço); 'avisar_se_lista_maior' conta quem tem mais de um. Títulos: 1 linha por título aninhado no cliente (liga pelo cliente_id). Nenhum valor de cliente mora aqui, só nomes de campo.",
+  "assinantes": {
+    "endpoint": "/api/ura/clientes/",
+    "parametros": {},
+    "lista": "clientes",
+    "paginacao": {"tamanho": 100, "parametro_offset": "offset", "parametro_limite": "limit"},
+    "colunas": {
+      "id_externo": "id",
+      "nome": "nome",
+      "cpf_cnpj": "cpfcnpj",
+      "email": "contatos.emails.0",
+      "telefone": "contatos.celulares.0",
+      "logradouro": "endereco.logradouro",
+      "numero": "endereco.numero",
+      "bairro": "endereco.bairro",
+      "cidade": "endereco.cidade",
+      "uf": "endereco.uf",
+      "cep": "endereco.cep",
+      "situacao": "contratos.0.status",
+      "plano": "contratos.0.servicos.0.plano.descricao",
+      "vencimento_dia": "contratos.0.vencimento",
+      "pppoe_usuario": "contratos.0.servicos.0.login",
+      "pppoe_senha": "contratos.0.servicos.0.senha",
+      "mac": "contratos.0.servicos.0.mac",
+      "ip_fixo": "contratos.0.servicos.0.ip",
+      "inicio_contrato": "contratos.0.dataCadastro"
+    },
+    "transformacoes": {
+      "situacao": {"Ativo": "ativo", "*": "inativo"}
+    },
+    "avisar_se_lista_maior": {"contratos": 1}
+  },
+  "titulos": {
+    "endpoint": "/api/ura/clientes/",
+    "parametros": {},
+    "lista": "clientes",
+    "aninhado": "titulos",
+    "paginacao": {"tamanho": 100, "parametro_offset": "offset", "parametro_limite": "limit"},
+    "colunas": {
+      "id_externo": "id",
+      "id_externo_assinante": "cliente_id",
+      "id_externo_contrato": "clientecontrato_id",
+      "vencimento": "dataVencimento",
+      "valor": "valor",
+      "descricao": "demonstrativo",
+      "situacao": "status",
+      "pago_em": "dataPagamento",
+      "valor_pago": "valorPago",
+      "forma_pagamento": "formaPagamento"
+    },
+    "transformacoes": {
+      "situacao": {"aberto": "aberto", "pago": "pago", "cancelado": "cancelado", "*": "aberto"}
+    }
+  }
+}

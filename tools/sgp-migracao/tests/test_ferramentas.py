@@ -160,5 +160,34 @@ class Exportador(Base):
             self.assertTrue(ex.OBRIGATORIAS[tipo] <= set(mapa[tipo]["colunas"]))
 
 
+
+class Aninhado(unittest.TestCase):
+    """Títulos vêm de uma lista DENTRO de cada cliente (campo 'aninhado'): uma linha por título, ligada pelo cliente."""
+    class _Stub:
+        def pages(self, endpoint, params, lista, *a, **k):
+            yield from [
+                {"id": 1, "titulos": [{"id": "A", "cli": 1, "v": "10,00"}, {"id": "B", "cli": 1, "v": "20,00"}]},
+                {"id": 2, "titulos": []},
+                {"id": 3, "titulos": [{"id": "C", "cli": 3, "v": "30,00"}]},
+            ]
+
+    def test_uma_linha_por_titulo_aninhado(self):
+        mapa = {"titulos": {"endpoint": "/api/ura/clientes/", "lista": "lista", "aninhado": "titulos",
+                            "colunas": {"id_externo": "id", "id_externo_assinante": "cli", "vencimento": "v", "valor": "v"}}}
+        rows = list(ex.linhas(self._Stub(), mapa, "titulos", {}))
+        self.assertEqual([r["id_externo"] for r in rows], ["A", "B", "C"])
+        self.assertEqual([str(r["id_externo_assinante"]) for r in rows], ["1", "1", "3"])
+
+
+class PresetReal(unittest.TestCase):
+    def test_mapeamento_sgp_confirmado_valida(self):
+        caminho = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "mapeamento.sgp.json")
+        mapa = json.load(open(caminho, encoding="utf-8"))
+        ex.validar(mapa, "assinantes")   # não levanta: sem '?', obrigatórias presentes, endpoint definido
+        ex.validar(mapa, "titulos")
+        self.assertEqual(mapa["titulos"].get("aninhado"), "titulos")
+        self.assertTrue(set(mapa["assinantes"]["colunas"]) <= set(ex.COLUNAS["assinantes"]))
+
+
 if __name__ == "__main__":
     unittest.main()
