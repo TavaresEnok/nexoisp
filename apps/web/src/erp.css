@@ -76,3 +76,7 @@ input[type="checkbox"] { accent-color: var(--primary); width: 16px; height: 16px
   .erp-daily .list-panel [data-slot="table-cell"]:nth-child(2) { max-width: 190px; }
   .erp-daily .table-person { min-width: 0; }
 }
+
+/* Mapa operacional: fundo dessaturado para os marcadores (cor = situação) se destacarem. */
+.nexo-mapa-base { filter: grayscale(1) contrast(0.92) brightness(1.04); }
+.dark .nexo-mapa-base { filter: grayscale(1) invert(0.92) hue-rotate(180deg) brightness(0.95) contrast(0.9); }

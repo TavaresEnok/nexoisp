@@ -1,4 +1,5 @@
 import { useState, lazy, Suspense } from "react";
+import { MAP_COLORS, contractMarkerHtml, infraMarkerHtml } from "./map-markers";
 import useSWR from "swr";
 import { z } from "zod";
 import { Check, Layers, ListFilter, MapPin, Radio, X } from "lucide-react";
@@ -92,41 +93,34 @@ function MapLegend({
     cables?: boolean;
   };
 }) {
-  const sq = (size: number) => (
+  const html = (h: string) => (
     <i
-      style={{
-        display: "inline-block",
-        width: size,
-        height: size,
-        borderRadius: 2,
-        background: "var(--foreground)",
-      }}
+      dangerouslySetInnerHTML={{ __html: h }}
+      style={{ display: "inline-flex" }}
     />
   );
   return (
     <div className={styles.legend}>
       {layers.contracts && (
         <>
-          <span>
-            <i className={styles.onlineDot} />
-            Online
-          </span>
-          <span>
-            <i className={styles.offlineDot} />
-            Offline
-          </span>
+          <span>{html(contractMarkerHtml("online", 12))}Online</span>
+          <span>{html(contractMarkerHtml("offline", 12))}Offline</span>
+          <span>{html(contractMarkerHtml("suspended", 12))}Suspenso</span>
         </>
       )}
-      {layers.boxes && <span>{sq(8)}Caixa óptica</span>}
-      {layers.pops && <span>{sq(11)}POP</span>}
+      {layers.boxes && (
+        <span>{html(infraMarkerHtml("boxes", 18))}Caixa óptica</span>
+      )}
+      {layers.pops && <span>{html(infraMarkerHtml("pops", 20))}POP</span>}
       {layers.cables && (
         <span>
           <i
             style={{
               display: "inline-block",
-              width: 16,
-              height: 3,
-              background: "var(--muted-foreground)",
+              width: 18,
+              height: 4,
+              borderRadius: 2,
+              background: MAP_COLORS.cable,
             }}
           />
           Cabo

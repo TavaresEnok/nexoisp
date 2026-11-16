@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   MapContainer,
   TileLayer,
-  CircleMarker,
   Marker,
   Polyline,
   Popup,
@@ -11,6 +10,12 @@ import {
   ZoomControl,
 } from "react-leaflet";
 import { divIcon, latLngBounds } from "leaflet";
+import {
+  MAP_COLORS,
+  contractMarkerHtml,
+  infraMarkerHtml,
+  type ContractState,
+} from "./map-markers";
 import { LocateFixed } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -115,19 +120,41 @@ function MapControls({
     </div>
   );
 }
-// Caixa óptica e POP: quadrados neutros (preto no tema claro, branco no escuro). Cliente: círculo verde/cinza (v0).
-function squareIcon(size: number, selected: boolean) {
-  const s = selected ? size + 4 : size;
+function contractState(point: OperationalMapPoint): ContractState {
+  if (point.state === "Encerrado") return "ended";
+  if (point.state === "Suspenso") return "suspended";
+  return point.online ? "online" : "offline";
+}
+function pointIcon(point: OperationalMapPoint, selected: boolean) {
+  const size =
+    point.kind === "pops"
+      ? selected
+        ? 40
+        : 34
+      : point.kind === "boxes"
+        ? selected
+          ? 30
+          : 24
+        : selected
+          ? 22
+          : 16;
   return divIcon({
     className: "",
-    iconSize: [s, s],
-    iconAnchor: [s / 2, s / 2],
-    popupAnchor: [0, -s / 2],
-    html: `<span style="display:block;width:${s}px;height:${s}px;border-radius:2px;background:var(--foreground);border:2px solid var(--background);box-shadow:0 0 0 1px var(--foreground)"></span>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+    popupAnchor: [0, -size / 2],
+    html:
+      point.kind === "contracts"
+        ? contractMarkerHtml(contractState(point), size)
+        : infraMarkerHtml(point.kind, size),
   });
 }
-const contractColor = (point: OperationalMapPoint) =>
-  point.online ? "var(--success, #22c55e)" : "var(--map-offline, #94a3b8)";
+const STATE_LABEL: Record<ContractState, string> = {
+  online: "Online",
+  offline: "Offline",
+  suspended: "Suspenso",
+  ended: "Encerrado",
+};
 
 export default function MapCanvas(props: Props) {
   const [failed, setFailed] = useState(false);
@@ -146,6 +173,7 @@ export default function MapCanvas(props: Props) {
           // A política de uso do OSM exige o Referer; o painel usa Referrer-Policy same-origin,
           // então só os blocos do mapa enviam a origem do site (sem caminho nem parâmetros).
           referrerPolicy="strict-origin-when-cross-origin"
+          className="nexo-mapa-base"
           attribution="&copy; OpenStreetMap contributors"
           eventHandlers={{ tileerror: () => setFailed(true) }}
         />
@@ -153,15 +181,21 @@ export default function MapCanvas(props: Props) {
         <MapControls {...props} />
         {(props.lines ?? []).map((cable) => (
           <Polyline
+            key={`cable-casing/${cable.id}`}
+            positions={cable.path.map(
+              (p) => [p.lat, p.lng] as [number, number],
+            )}
+            pathOptions={{ color: "#ffffff", weight: 7, opacity: 0.9 }}
+            interactive={false}
+          />
+        ))}
+        {(props.lines ?? []).map((cable) => (
+          <Polyline
             key={`cable/${cable.id}`}
             positions={cable.path.map(
               (p) => [p.lat, p.lng] as [number, number],
             )}
-            pathOptions={{
-              color: "var(--muted-foreground)",
-              weight: 3,
-              opacity: 0.9,
-            }}
+            pathOptions={{ color: MAP_COLORS.cable, weight: 3.5, opacity: 1 }}
           >
             <Popup>
               <div className={styles.popup}>
@@ -177,62 +211,32 @@ export default function MapCanvas(props: Props) {
             </Popup>
           </Polyline>
         ))}
-        {props.rows.map((point) =>
-          point.kind === "contracts" ? (
-            <CircleMarker
-              key={`${point.kind}/${point.id}`}
-              center={[point.lat, point.lng]}
-              radius={point.id === props.selectedId ? 9 : 6}
-              pathOptions={{
-                fillColor: contractColor(point),
-                fillOpacity: point.state === "Encerrado" ? 0 : 1,
-                color:
-                  point.state === "Encerrado"
-                    ? "var(--map-offline, #94a3b8)"
-                    : "#ffffff",
-                weight: 2,
-              }}
-              eventHandlers={{ click: () => props.onSelect(point) }}
-            >
-              <Popup>
-                <div className={styles.popup}>
-                  <span className={styles.overline}>
-                    {point.kind === "contracts"
-                      ? `${point.online ? "Online" : "Offline"} · ${point.state}`
-                      : point.state}
-                  </span>
-                  <strong>{point.name}</strong>
-                  <p>{point.address}</p>
-                  <Button size="sm" onClick={() => props.onSelect(point)}>
-                    Detalhar ponto
-                  </Button>
-                </div>
-              </Popup>
-            </CircleMarker>
-          ) : (
-            <Marker
-              key={`${point.kind}/${point.id}`}
-              position={[point.lat, point.lng]}
-              icon={squareIcon(
-                point.kind === "pops" ? 14 : 10,
-                point.id === props.selectedId,
-              )}
-              zIndexOffset={point.kind === "pops" ? 1000 : 500}
-              eventHandlers={{ click: () => props.onSelect(point) }}
-            >
-              <Popup>
-                <div className={styles.popup}>
-                  <span className={styles.overline}>{point.state}</span>
-                  <strong>{point.name}</strong>
-                  <p>{point.address}</p>
-                  <Button size="sm" onClick={() => props.onSelect(point)}>
-                    Detalhar ponto
-                  </Button>
-                </div>
-              </Popup>
-            </Marker>
-          ),
-        )}
+        {props.rows.map((point) => (
+          <Marker
+            key={`${point.kind}/${point.id}`}
+            position={[point.lat, point.lng]}
+            icon={pointIcon(point, point.id === props.selectedId)}
+            zIndexOffset={
+              point.kind === "pops" ? 1000 : point.kind === "boxes" ? 500 : 0
+            }
+            eventHandlers={{ click: () => props.onSelect(point) }}
+          >
+            <Popup>
+              <div className={styles.popup}>
+                <span className={styles.overline}>
+                  {point.kind === "contracts"
+                    ? `${STATE_LABEL[contractState(point)]} · Cliente`
+                    : point.state}
+                </span>
+                <strong>{point.name}</strong>
+                <p>{point.address}</p>
+                <Button size="sm" onClick={() => props.onSelect(point)}>
+                  Detalhar ponto
+                </Button>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
       </MapContainer>
       {failed && (
         <div role="status" className={styles.tileError}>
