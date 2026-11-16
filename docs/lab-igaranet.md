@@ -46,6 +46,30 @@ nos volumes `igaranet-olt-state` e `igaranet-agente-data` e sobrevivem a `./igar
 Segredos e progresso ficam fora do git, em `~/.local/share/nexoisp/igaranet/` (`estado.json`, `acesso.txt`, `build/`).
 O acesso do dono ao provedor está em `acesso.txt` (`gestor@igaranet.lab`; MFA configurado no primeiro acesso).
 
+## Dados de provedor em operação (`povoar.py`)
+
+Depois da subida, `python3 infra/lab-igaranet/povoar.py` completa o IgaraNet para o painel parecer o de um provedor real
+(tudo fictício, tudo pela API do painel, etapas retomáveis):
+
+| Etapa | O que cria |
+|---|---|
+| `assinantes` | nascimento, RG, nome da mãe, WhatsApp/e-mail de cobrança/telefone fixo, observações, endereço de instalação com referência |
+| `configuracao` | equipe (NOC, atendimento, financeiro, 2 técnicos; senha `Igara#Lab2026`), etiquetas, catálogos de atendimento/OS, blocos de IP (CGNAT, público de documentação, gerência), município ANATEL (IBGE 2606804), régua de bloqueio e aviso de manutenção |
+| `comercial` | empresa (razão social e CNPJ fictícios), planos FTTH com fidelidade de 12 meses, multa 2% + juros 1%, vencimentos variados e fidelidade nos contratos |
+| `rede` | modelos e template de ONU, CEO no POP, 12 CTOs 1:8 (uma por bairro e PON), cabos com traçado e fusão, drop de cada cliente na CTO |
+| `estoque` | depósitos, fornecedores, itens, compras (uma recebida, com contas a pagar), 40 ONUs com série (30 em comodato) |
+| `operacao` | SLAs, kit de instalação, 30 OS de instalação concluídas (checklist, materiais, ONU em comodato), contrato em PDF e anotação por cliente |
+| `atendimento` / `crm` | chamados abertos, aguardando e encerrados; OS de reparo agendada, em rota e concluída; 6 prospectos no funil |
+| `financeiro` | mensalidades de 12/2025 a 11/2026 geradas pelo faturamento (gateway `none`), baixas manuais com PIX/boleto/loja, alguns pagamentos atrasados e 4 clientes inadimplentes |
+| `extras` | produtos adicionais (alguns contratados), modelos de aviso, token de API e duas OS na agenda do dia |
+
+Datas históricas: a API não permite cadastrar no passado. Só para este provedor de laboratório, `povoar.py` e os
+comandos registrados aqui ajustam direto no banco `start_date`/`created_at` de contratos e assinantes (cliente desde
+2023–2026), datas das OS de instalação e `created_at` das mensalidades. Nada disso é feito em provedor real.
+
+Ficam vazios por dependerem de serviço externo: cobrança emitida (boleto/PIX: sem gateway), envio de avisos ao
+assinante (sem canal WhatsApp/SMS/e-mail), TR-069 do roteador e respostas de pesquisa de satisfação (portal do assinante).
+
 ## O que foi validado ao vivo (16/11/2026)
 
 | Funcionalidade | Resultado |

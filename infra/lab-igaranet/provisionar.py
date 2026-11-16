@@ -124,7 +124,7 @@ def base(st: dict):
                 raise
             st["tenant_id"] = next(x["id"] for x in lista(call("GET", "/tenants", token=op)) if x.get("slug") == "igaranet")
         salvar(st)
-    call("PATCH", f"/tenants/{st['tenant_id']}", {"modules": ["olt", "ipam", "field", "ftth", "noc", "notices"]}, op)
+    call("PATCH", f"/tenants/{st['tenant_id']}", {"modules": ["olt", "ipam", "field", "ftth", "crm", "noc", "notices", "messages", "api"]}, op)
     adm = login(ADMIN, st["senha_automacao"], st, "mfa_automacao")
 
     if not st.get("gestor"):

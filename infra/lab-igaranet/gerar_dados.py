@@ -36,6 +36,31 @@ def cpf(rng: random.Random) -> str:
     return "".join(map(str, n))
 
 
+MAES = ["Maria", "Josefa", "Antônia", "Francisca", "Severina", "Luzia", "Rita", "Edna", "Socorro", "Lúcia", "Graça", "Fátima"]
+REFERENCIAS = ["Próximo à igreja", "Em frente à padaria", "Casa de muro azul", "Ao lado do mercadinho", "Portão de ferro preto",
+               "Primeiro andar", "Vila com portão verde", "Perto da escola municipal", "Esquina com farmácia", "Fundos, entrar pelo beco"]
+
+
+def completar(out):
+    """Campos adicionais (semente própria, para não alterar os dados já cadastrados): nascimento, RG, mãe, contatos,
+    referência do endereço, cliente desde e preferência de vencimento."""
+    r = random.Random(1611)
+    for c in out:
+        sob = c["nome"].split()[-1]
+        c["nascimento"] = f"{r.randint(1958, 2003)}-{r.randint(1, 12):02d}-{r.randint(1, 28):02d}"
+        c["rg"] = f"{r.randint(1, 9)}.{r.randint(100, 999)}.{r.randint(100, 999)}"
+        c["rg_orgao"] = "SDS/PE"
+        c["mae"] = f"{r.choice(MAES)} {r.choice(SOBRENOMES)} {sob}"
+        c["whatsapp"] = c["telefone"]
+        c["telefone_fixo"] = f"81 3543-{r.randint(1000, 9999)}" if r.random() < 0.3 else None
+        c["referencia"] = r.choice(REFERENCIAS)
+        # cliente desde: base instalada crescendo de 2023 a 2026 (os mais antigos primeiro)
+        ano = 2023 + (c["n"] - 1) * 4 // 30
+        c["cliente_desde"] = f"{ano}-{r.randint(1, 12 if ano < 2026 else 10):02d}-{r.randint(1, 28):02d}"
+        c["vencimento"] = r.choice([5, 10, 10, 15, 20, 25])
+        c["fidelidade"] = r.random() < 0.7
+
+
 def main():
     out = []
     for i in range(1, 31):
@@ -64,6 +89,7 @@ def main():
             "pon": "0/1/0" if i <= 16 else "0/1/1",
             "rx_dbm": rx,
         })
+    completar(out)
     Path(__file__).with_name("clientes.json").write_text(json.dumps(out, ensure_ascii=False, indent=1))
     print(f"{len(out)} clientes fictícios gerados")
 

@@ -19,7 +19,17 @@
   "serial": "485754431A2B0001",
   "mac": "02:1a:2b:00:00:01",
   "pon": "0/1/0",
-  "rx_dbm": -19.19
+  "rx_dbm": -19.19,
+  "nascimento": "1976-10-19",
+  "rg": "5.830.709",
+  "rg_orgao": "SDS/PE",
+  "mae": "Graça Maranhão Wanderley",
+  "whatsapp": "81 99028-6965",
+  "telefone_fixo": null,
+  "referencia": "Em frente à padaria",
+  "cliente_desde": "2023-10-23",
+  "vencimento": 25,
+  "fidelidade": true
  },
  {
   "n": 2,
@@ -41,7 +51,17 @@
   "serial": "485754431A2B0002",
   "mac": "02:1a:2b:00:00:02",
   "pon": "0/1/0",
-  "rx_dbm": -18.01
+  "rx_dbm": -18.01,
+  "nascimento": "1962-01-09",
+  "rg": "4.214.199",
+  "rg_orgao": "SDS/PE",
+  "mae": "Edna Lacerda Maranhão",
+  "whatsapp": "81 98376-4732",
+  "telefone_fixo": null,
+  "referencia": "Casa de muro azul",
+  "cliente_desde": "2023-02-04",
+  "vencimento": 25,
+  "fidelidade": true
  },
  {
   "n": 3,
@@ -63,7 +83,17 @@
   "serial": "485754431A2B0003",
   "mac": "02:1a:2b:00:00:03",
   "pon": "0/1/0",
-  "rx_dbm": -18.65
+  "rx_dbm": -18.65,
+  "nascimento": "1987-10-18",
+  "rg": "1.288.454",
+  "rg_orgao": "SDS/PE",
+  "mae": "Rita Gouveia Holanda",
+  "whatsapp": "81 98417-8378",
+  "telefone_fixo": null,
+  "referencia": "Próximo à igreja",
+  "cliente_desde": "2023-06-20",
+  "vencimento": 10,
+  "fidelidade": false
  },
  {
   "n": 4,
@@ -85,7 +115,17 @@
   "serial": "485754431A2B0004",
   "mac": "02:1a:2b:00:00:04",
   "pon": "0/1/0",
-  "rx_dbm": -19.24
+  "rx_dbm": -19.24,
+  "nascimento": "1980-02-02",
+  "rg": "5.905.502",
+  "rg_orgao": "SDS/PE",
+  "mae": "Lúcia Siqueira Nóbrega",
+  "whatsapp": "81 98821-9580",
+  "telefone_fixo": null,
+  "referencia": "Esquina com farmácia",
+  "cliente_desde": "2023-04-12",
+  "vencimento": 10,
+  "fidelidade": false
  },
  {
   "n": 5,
@@ -107,7 +147,17 @@
   "serial": "485754431A2B0005",
   "mac": "02:1a:2b:00:00:05",
   "pon": "0/1/0",
-  "rx_dbm": -18.54
+  "rx_dbm": -18.54,
+  "nascimento": "1992-10-05",
+  "rg": "6.388.118",
+  "rg_orgao": "SDS/PE",
+  "mae": "Maria Ferraz Rego",
+  "whatsapp": "81 99301-1919",
+  "telefone_fixo": null,
+  "referencia": "Esquina com farmácia",
+  "cliente_desde": "2023-10-18",
+  "vencimento": 15,
+  "fidelidade": true
  },
  {
   "n": 6,
@@ -129,7 +179,17 @@
   "serial": "485754431A2B0006",
   "mac": "02:1a:2b:00:00:06",
   "pon": "0/1/0",
-  "rx_dbm": -19.68
+  "rx_dbm": -19.68,
+  "nascimento": "1961-11-01",
+  "rg": "8.370.795",
+  "rg_orgao": "SDS/PE",
+  "mae": "Antônia Ferraz Albuquerque",
+  "whatsapp": "81 98867-1042",
+  "telefone_fixo": null,
+  "referencia": "Primeiro andar",
+  "cliente_desde": "2023-01-03",
+  "vencimento": 25,
+  "fidelidade": true
  },
  {
   "n": 7,
@@ -151,7 +211,17 @@
   "serial": "485754431A2B0007",
   "mac": "02:1a:2b:00:00:07",
   "pon": "0/1/0",
-  "rx_dbm": -27.4
+  "rx_dbm": -27.4,
+  "nascimento": "1988-05-04",
+  "rg": "6.291.304",
+  "rg_orgao": "SDS/PE",
+  "mae": "Maria Siqueira Vasconcelos",
+  "whatsapp": "81 99985-2610",
+  "telefone_fixo": null,
+  "referencia": "Ao lado do mercadinho",
+  "cliente_desde": "2023-03-25",
+  "vencimento": 25,
+  "fidelidade": true
  },
  {
   "n": 8,
@@ -173,7 +243,17 @@
   "serial": "485754431A2B0008",
   "mac": "02:1a:2b:00:00:08",
   "pon": "0/1/0",
-  "rx_dbm": -20.05
+  "rx_dbm": -20.05,
+  "nascimento": "1997-02-27",
+  "rg": "1.198.278",
+  "rg_orgao": "SDS/PE",
+  "mae": "Edna Pessoa Holanda",
+  "whatsapp": "81 98920-2756",
+  "telefone_fixo": null,
+  "referencia": "Portão de ferro preto",
+  "cliente_desde": "2023-12-11",
+  "vencimento": 10,
+  "fidelidade": true
  },
  {
   "n": 9,
@@ -195,7 +275,17 @@
   "serial": "485754431A2B0009",
   "mac": "02:1a:2b:00:00:09",
   "pon": "0/1/0",
-  "rx_dbm": -17.75
+  "rx_dbm": -17.75,
+  "nascimento": "1975-08-06",
+  "rg": "3.925.794",
+  "rg_orgao": "SDS/PE",
+  "mae": "Antônia Nóbrega Nóbrega",
+  "whatsapp": "81 99135-7178",
+  "telefone_fixo": null,
+  "referencia": "Ao lado do mercadinho",
+  "cliente_desde": "2024-05-03",
+  "vencimento": 25,
+  "fidelidade": false
  },
  {
   "n": 10,
@@ -217,7 +307,17 @@
   "serial": "485754431A2B000A",
   "mac": "02:1a:2b:00:00:0a",
   "pon": "0/1/0",
-  "rx_dbm": -20.88
+  "rx_dbm": -20.88,
+  "nascimento": "1999-10-08",
+  "rg": "8.339.988",
+  "rg_orgao": "SDS/PE",
+  "mae": "Edna Barbosa Lacerda",
+  "whatsapp": "81 98905-6831",
+  "telefone_fixo": "81 3543-3962",
+  "referencia": "Vila com portão verde",
+  "cliente_desde": "2024-11-22",
+  "vencimento": 25,
+  "fidelidade": false
  },
  {
   "n": 11,
@@ -239,7 +339,17 @@
   "serial": "485754431A2B000B",
   "mac": "02:1a:2b:00:00:0b",
   "pon": "0/1/0",
-  "rx_dbm": -17.51
+  "rx_dbm": -17.51,
+  "nascimento": "1974-08-21",
+  "rg": "6.983.600",
+  "rg_orgao": "SDS/PE",
+  "mae": "Francisca Duarte Albuquerque",
+  "whatsapp": "81 98926-6617",
+  "telefone_fixo": null,
+  "referencia": "Esquina com farmácia",
+  "cliente_desde": "2024-06-05",
+  "vencimento": 25,
+  "fidelidade": true
  },
  {
   "n": 12,
@@ -261,7 +371,17 @@
   "serial": "485754431A2B000C",
   "mac": "02:1a:2b:00:00:0c",
   "pon": "0/1/0",
-  "rx_dbm": -21.64
+  "rx_dbm": -21.64,
+  "nascimento": "1972-10-06",
+  "rg": "1.794.662",
+  "rg_orgao": "SDS/PE",
+  "mae": "Antônia Gouveia Gouveia",
+  "whatsapp": "81 98265-7616",
+  "telefone_fixo": "81 3543-2205",
+  "referencia": "Perto da escola municipal",
+  "cliente_desde": "2024-10-01",
+  "vencimento": 25,
+  "fidelidade": true
  },
  {
   "n": 13,
@@ -283,7 +403,17 @@
   "serial": "485754431A2B000D",
   "mac": "02:1a:2b:00:00:0d",
   "pon": "0/1/0",
-  "rx_dbm": -18.13
+  "rx_dbm": -18.13,
+  "nascimento": "1970-02-26",
+  "rg": "1.852.401",
+  "rg_orgao": "SDS/PE",
+  "mae": "Fátima Tavares Queiroga",
+  "whatsapp": "81 99376-4429",
+  "telefone_fixo": null,
+  "referencia": "Ao lado do mercadinho",
+  "cliente_desde": "2024-12-02",
+  "vencimento": 10,
+  "fidelidade": false
  },
  {
   "n": 14,
@@ -305,7 +435,17 @@
   "serial": "485754431A2B000E",
   "mac": "02:1a:2b:00:00:0e",
   "pon": "0/1/0",
-  "rx_dbm": -21.0
+  "rx_dbm": -21.0,
+  "nascimento": "1973-11-01",
+  "rg": "2.866.737",
+  "rg_orgao": "SDS/PE",
+  "mae": "Lúcia Maranhão Maranhão",
+  "whatsapp": "81 98709-3921",
+  "telefone_fixo": null,
+  "referencia": "Perto da escola municipal",
+  "cliente_desde": "2024-09-26",
+  "vencimento": 25,
+  "fidelidade": true
  },
  {
   "n": 15,
@@ -327,7 +467,17 @@
   "serial": "485754431A2B000F",
   "mac": "02:1a:2b:00:00:0f",
   "pon": "0/1/0",
-  "rx_dbm": -18.13
+  "rx_dbm": -18.13,
+  "nascimento": "1960-10-24",
+  "rg": "2.873.287",
+  "rg_orgao": "SDS/PE",
+  "mae": "Fátima Uchôa Barbosa",
+  "whatsapp": "81 98567-7844",
+  "telefone_fixo": null,
+  "referencia": "Portão de ferro preto",
+  "cliente_desde": "2024-05-11",
+  "vencimento": 25,
+  "fidelidade": true
  },
  {
   "n": 16,
@@ -349,7 +499,17 @@
   "serial": "485754431A2B0010",
   "mac": "02:1a:2b:00:00:10",
   "pon": "0/1/0",
-  "rx_dbm": -21.79
+  "rx_dbm": -21.79,
+  "nascimento": "1991-05-24",
+  "rg": "6.961.976",
+  "rg_orgao": "SDS/PE",
+  "mae": "Lúcia Ferraz Siqueira",
+  "whatsapp": "81 98104-3759",
+  "telefone_fixo": null,
+  "referencia": "Primeiro andar",
+  "cliente_desde": "2025-02-17",
+  "vencimento": 25,
+  "fidelidade": true
  },
  {
   "n": 17,
@@ -371,7 +531,17 @@
   "serial": "485754431A2B0011",
   "mac": "02:1a:2b:00:00:11",
   "pon": "0/1/1",
-  "rx_dbm": -17.52
+  "rx_dbm": -17.52,
+  "nascimento": "1997-04-06",
+  "rg": "2.592.868",
+  "rg_orgao": "SDS/PE",
+  "mae": "Francisca Siqueira Rego",
+  "whatsapp": "81 99515-2529",
+  "telefone_fixo": "81 3543-8758",
+  "referencia": "Vila com portão verde",
+  "cliente_desde": "2025-02-21",
+  "vencimento": 10,
+  "fidelidade": true
  },
  {
   "n": 18,
@@ -393,7 +563,17 @@
   "serial": "485754431A2B0012",
   "mac": "02:1a:2b:00:00:12",
   "pon": "0/1/1",
-  "rx_dbm": -28.9
+  "rx_dbm": -28.9,
+  "nascimento": "1986-06-24",
+  "rg": "1.786.657",
+  "rg_orgao": "SDS/PE",
+  "mae": "Francisca Nóbrega Barbosa",
+  "whatsapp": "81 99807-7248",
+  "telefone_fixo": null,
+  "referencia": "Perto da escola municipal",
+  "cliente_desde": "2025-04-10",
+  "vencimento": 20,
+  "fidelidade": false
  },
  {
   "n": 19,
@@ -415,7 +595,17 @@
   "serial": "485754431A2B0013",
   "mac": "02:1a:2b:00:00:13",
   "pon": "0/1/1",
-  "rx_dbm": -22.43
+  "rx_dbm": -22.43,
+  "nascimento": "2000-09-12",
+  "rg": "8.351.584",
+  "rg_orgao": "SDS/PE",
+  "mae": "Luzia Pessoa Gouveia",
+  "whatsapp": "81 99482-7176",
+  "telefone_fixo": null,
+  "referencia": "Fundos, entrar pelo beco",
+  "cliente_desde": "2025-07-07",
+  "vencimento": 25,
+  "fidelidade": true
  },
  {
   "n": 20,
@@ -437,7 +627,17 @@
   "serial": "485754431A2B0014",
   "mac": "02:1a:2b:00:00:14",
   "pon": "0/1/1",
-  "rx_dbm": -21.76
+  "rx_dbm": -21.76,
+  "nascimento": "1978-07-10",
+  "rg": "6.715.837",
+  "rg_orgao": "SDS/PE",
+  "mae": "Severina Duarte Wanderley",
+  "whatsapp": "81 99524-5344",
+  "telefone_fixo": null,
+  "referencia": "Em frente à padaria",
+  "cliente_desde": "2025-07-18",
+  "vencimento": 20,
+  "fidelidade": false
  },
  {
   "n": 21,
@@ -459,7 +659,17 @@
   "serial": "485754431A2B0015",
   "mac": "02:1a:2b:00:00:15",
   "pon": "0/1/1",
-  "rx_dbm": -20.68
+  "rx_dbm": -20.68,
+  "nascimento": "1978-02-23",
+  "rg": "1.150.587",
+  "rg_orgao": "SDS/PE",
+  "mae": "Antônia Vasconcelos Albuquerque",
+  "whatsapp": "81 99218-8370",
+  "telefone_fixo": null,
+  "referencia": "Em frente à padaria",
+  "cliente_desde": "2025-04-01",
+  "vencimento": 20,
+  "fidelidade": true
  },
  {
   "n": 22,
@@ -481,7 +691,17 @@
   "serial": "485754431A2B0016",
   "mac": "02:1a:2b:00:00:16",
   "pon": "0/1/1",
-  "rx_dbm": -19.63
+  "rx_dbm": -19.63,
+  "nascimento": "2003-10-26",
+  "rg": "6.124.380",
+  "rg_orgao": "SDS/PE",
+  "mae": "Rita Pessoa Pessoa",
+  "whatsapp": "81 98837-1292",
+  "telefone_fixo": "81 3543-9859",
+  "referencia": "Em frente à padaria",
+  "cliente_desde": "2025-04-20",
+  "vencimento": 15,
+  "fidelidade": false
  },
  {
   "n": 23,
@@ -503,7 +723,17 @@
   "serial": "485754431A2B0017",
   "mac": "02:1a:2b:00:00:17",
   "pon": "0/1/1",
-  "rx_dbm": -17.16
+  "rx_dbm": -17.16,
+  "nascimento": "2000-04-10",
+  "rg": "7.343.102",
+  "rg_orgao": "SDS/PE",
+  "mae": "Lúcia Rego Lacerda",
+  "whatsapp": "81 99669-6680",
+  "telefone_fixo": null,
+  "referencia": "Ao lado do mercadinho",
+  "cliente_desde": "2025-11-20",
+  "vencimento": 10,
+  "fidelidade": false
  },
  {
   "n": 24,
@@ -525,7 +755,17 @@
   "serial": "485754431A2B0018",
   "mac": "02:1a:2b:00:00:18",
   "pon": "0/1/1",
-  "rx_dbm": -20.38
+  "rx_dbm": -20.38,
+  "nascimento": "1983-02-14",
+  "rg": "9.457.776",
+  "rg_orgao": "SDS/PE",
+  "mae": "Rita Siqueira Barbosa",
+  "whatsapp": "81 99867-9242",
+  "telefone_fixo": null,
+  "referencia": "Próximo à igreja",
+  "cliente_desde": "2026-05-05",
+  "vencimento": 25,
+  "fidelidade": false
  },
  {
   "n": 25,
@@ -547,7 +787,17 @@
   "serial": "485754431A2B0019",
   "mac": "02:1a:2b:00:00:19",
   "pon": "0/1/1",
-  "rx_dbm": -26.1
+  "rx_dbm": -26.1,
+  "nascimento": "1979-04-13",
+  "rg": "6.811.296",
+  "rg_orgao": "SDS/PE",
+  "mae": "Rita Pessoa Uchôa",
+  "whatsapp": "81 99779-3898",
+  "telefone_fixo": null,
+  "referencia": "Ao lado do mercadinho",
+  "cliente_desde": "2026-08-01",
+  "vencimento": 20,
+  "fidelidade": true
  },
  {
   "n": 26,
@@ -569,7 +819,17 @@
   "serial": "485754431A2B001A",
   "mac": "02:1a:2b:00:00:1a",
   "pon": "0/1/1",
-  "rx_dbm": -20.96
+  "rx_dbm": -20.96,
+  "nascimento": "1980-08-05",
+  "rg": "9.910.384",
+  "rg_orgao": "SDS/PE",
+  "mae": "Rita Ferraz Rego",
+  "whatsapp": "81 99632-5286",
+  "telefone_fixo": null,
+  "referencia": "Primeiro andar",
+  "cliente_desde": "2026-09-02",
+  "vencimento": 20,
+  "fidelidade": true
  },
  {
   "n": 27,
@@ -591,7 +851,17 @@
   "serial": "485754431A2B001B",
   "mac": "02:1a:2b:00:00:1b",
   "pon": "0/1/1",
-  "rx_dbm": -22.04
+  "rx_dbm": -22.04,
+  "nascimento": "1997-02-15",
+  "rg": "7.442.656",
+  "rg_orgao": "SDS/PE",
+  "mae": "Socorro Nóbrega Tavares",
+  "whatsapp": "81 99324-1594",
+  "telefone_fixo": null,
+  "referencia": "Primeiro andar",
+  "cliente_desde": "2026-08-27",
+  "vencimento": 15,
+  "fidelidade": true
  },
  {
   "n": 28,
@@ -613,7 +883,17 @@
   "serial": "485754431A2B001C",
   "mac": "02:1a:2b:00:00:1c",
   "pon": "0/1/1",
-  "rx_dbm": -21.37
+  "rx_dbm": -21.37,
+  "nascimento": "1974-06-08",
+  "rg": "5.854.431",
+  "rg_orgao": "SDS/PE",
+  "mae": "Fátima Wanderley Nóbrega",
+  "whatsapp": "81 98471-2026",
+  "telefone_fixo": null,
+  "referencia": "Ao lado do mercadinho",
+  "cliente_desde": "2026-06-21",
+  "vencimento": 20,
+  "fidelidade": false
  },
  {
   "n": 29,
@@ -635,7 +915,17 @@
   "serial": "485754431A2B001D",
   "mac": "02:1a:2b:00:00:1d",
   "pon": "0/1/1",
-  "rx_dbm": -19.69
+  "rx_dbm": -19.69,
+  "nascimento": "1969-03-02",
+  "rg": "2.635.209",
+  "rg_orgao": "SDS/PE",
+  "mae": "Francisca Queiroga Cavalcanti",
+  "whatsapp": "81 98095-9908",
+  "telefone_fixo": null,
+  "referencia": "Esquina com farmácia",
+  "cliente_desde": "2026-08-25",
+  "vencimento": 20,
+  "fidelidade": true
  },
  {
   "n": 30,
@@ -657,6 +947,16 @@
   "serial": "485754431A2B001E",
   "mac": "02:1a:2b:00:00:1e",
   "pon": "0/1/1",
-  "rx_dbm": -21.17
+  "rx_dbm": -21.17,
+  "nascimento": "1975-05-15",
+  "rg": "1.904.537",
+  "rg_orgao": "SDS/PE",
+  "mae": "Maria Siqueira Holanda",
+  "whatsapp": "81 99490-6348",
+  "telefone_fixo": null,
+  "referencia": "Perto da escola municipal",
+  "cliente_desde": "2026-02-06",
+  "vencimento": 25,
+  "fidelidade": true
  }
 ]

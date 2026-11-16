@@ -33,7 +33,7 @@ for (const [nome, rota] of (process.env.ROTAS || "").split(",").map(x => [x.slic
     await page.waitForTimeout(12000);
     const el = page.getByText(process.env.ROLAR, { exact: false }).first(); await el.scrollIntoViewIfNeeded();
   }
-  await page.screenshot({ path: `/out/${nome}.png`, fullPage: !process.env.ROLAR });
+  await page.screenshot({ path: `/out/${nome}.png`, fullPage: false });
   const txt = (await page.locator(process.env.ABA ? "[role=dialog]" : "main").innerText().catch(() => "")).replace(/\s+/g, " ").slice(0, 700);
   console.log(`== ${nome} ${rota}\n${txt}\n`);
 }
