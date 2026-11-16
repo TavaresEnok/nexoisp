@@ -185,7 +185,7 @@ export default function MapCanvas(props: Props) {
             positions={cable.path.map(
               (p) => [p.lat, p.lng] as [number, number],
             )}
-            pathOptions={{ color: "#ffffff", weight: 2.5, opacity: 0.8 }}
+            pathOptions={{ color: "#ffffff", weight: 3.5, opacity: 0.8 }}
             interactive={false}
           />
         ))}
@@ -195,7 +195,7 @@ export default function MapCanvas(props: Props) {
             positions={cable.path.map(
               (p) => [p.lat, p.lng] as [number, number],
             )}
-            pathOptions={{ color: MAP_COLORS.cable, weight: 1.2, opacity: 1 }}
+            pathOptions={{ color: MAP_COLORS.cable, weight: 1.8, opacity: 1 }}
           >
             <Popup>
               <div className={styles.popup}>
