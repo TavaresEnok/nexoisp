@@ -128,6 +128,9 @@ export default function MapCanvas(props: Props) {
         <TileLayer
           url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
           maxZoom={19}
+          // A política de uso do OSM exige o Referer; o painel usa Referrer-Policy same-origin,
+          // então só os blocos do mapa enviam a origem do site (sem caminho nem parâmetros).
+          referrerPolicy="strict-origin-when-cross-origin"
           attribution="&copy; OpenStreetMap contributors"
           eventHandlers={{ tileerror: () => setFailed(true) }}
         />
