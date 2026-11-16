@@ -173,7 +173,6 @@ export default function MapCanvas(props: Props) {
           // A política de uso do OSM exige o Referer; o painel usa Referrer-Policy same-origin,
           // então só os blocos do mapa enviam a origem do site (sem caminho nem parâmetros).
           referrerPolicy="strict-origin-when-cross-origin"
-          className="nexo-mapa-base"
           attribution="&copy; OpenStreetMap contributors"
           eventHandlers={{ tileerror: () => setFailed(true) }}
         />
@@ -185,7 +184,7 @@ export default function MapCanvas(props: Props) {
             positions={cable.path.map(
               (p) => [p.lat, p.lng] as [number, number],
             )}
-            pathOptions={{ color: "#ffffff", weight: 7, opacity: 0.9 }}
+            pathOptions={{ color: "#ffffff", weight: 4, opacity: 0.85 }}
             interactive={false}
           />
         ))}
@@ -195,7 +194,7 @@ export default function MapCanvas(props: Props) {
             positions={cable.path.map(
               (p) => [p.lat, p.lng] as [number, number],
             )}
-            pathOptions={{ color: MAP_COLORS.cable, weight: 3.5, opacity: 1 }}
+            pathOptions={{ color: MAP_COLORS.cable, weight: 2, opacity: 1 }}
           >
             <Popup>
               <div className={styles.popup}>

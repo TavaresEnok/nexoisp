@@ -103,9 +103,9 @@ function MapLegend({
     <div className={styles.legend}>
       {layers.contracts && (
         <>
-          <span>{html(contractMarkerHtml("online", 12))}Online</span>
-          <span>{html(contractMarkerHtml("offline", 12))}Offline</span>
-          <span>{html(contractMarkerHtml("suspended", 12))}Suspenso</span>
+          <span>{html(contractMarkerHtml("online", 18))}Online</span>
+          <span>{html(contractMarkerHtml("offline", 18))}Offline</span>
+          <span>{html(contractMarkerHtml("suspended", 18))}Suspenso</span>
         </>
       )}
       {layers.boxes && (
@@ -118,7 +118,7 @@ function MapLegend({
             style={{
               display: "inline-block",
               width: 18,
-              height: 4,
+              height: 2,
               borderRadius: 2,
               background: MAP_COLORS.cable,
             }}

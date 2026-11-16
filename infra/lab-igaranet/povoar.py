@@ -584,6 +584,38 @@ def extras(st, t):
     print("extras: adicionais, modelos de aviso, token de API e agenda do dia")
 
 
+def _rota_pela_rua(a, b):
+    """Geometria pelas ruas entre dois pontos (OSRM público do OpenStreetMap). Só coordenadas fictícias do laboratório."""
+    import urllib.request
+    url = (f"https://router.project-osrm.org/route/v1/driving/{a[1]},{a[0]};{b[1]},{b[0]}"
+           "?overview=full&geometries=geojson")
+    req = urllib.request.Request(url, headers={"User-Agent": "nexoisp-lab/1.0"})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        d = json.loads(r.read())
+    pts = [{"lat": round(lat, 6), "lng": round(lng, 6)} for lng, lat in d["routes"][0]["geometry"]["coordinates"]]
+    if len(pts) > 480:  # limite da API: 500 pontos
+        passo = len(pts) / 480
+        pts = [pts[int(i * passo)] for i in range(480)]
+    return [{"lat": a[0], "lng": a[1]}] + pts + [{"lat": round(b[0], 6), "lng": round(b[1], 6)}]
+
+
+@etapa
+def tracado(st, t):
+    """Cabos seguindo as ruas (como a fibra lançada nos postes), em vez de linha reta CEO -> CTO."""
+    import time
+    pv = st["povoar"]
+    ceo = (POP[0] + 0.0004, POP[1] + 0.0003)
+    for nome, cto in sorted(pv["ctos"].items()):
+        k = f"tracado:{nome}"
+        if feito(st, k):
+            continue
+        path = _rota_pela_rua(ceo, (cto["lat"], cto["lng"]))
+        P.call("PATCH", f"/ftth/cables/{pv['cabo:' + nome]}", {"path": path}, t)
+        marcar(st, k, len(path))
+        time.sleep(1.1)  # política de uso do servidor público: no máximo 1 pedido por segundo
+    print("traçado: cabos pelas ruas")
+
+
 @etapa
 def datas(st, t):
     """Datas históricas (só neste provedor de laboratório; a API não aceita cadastro retroativo): contratos e assinantes
