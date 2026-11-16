@@ -17,7 +17,7 @@ SERIAL, ONU = "FHTT1A2B3C4D", "0a1b2c3d-0000-4000-8000-000000000001"
 
 
 def onu_delivery(action="onu.authorize", version=1, op=None, recover=False, vlan=100, profile="residencial", port="0/1/1"):
-    state = "authorized" if action == "onu.authorize" else "removed"
+    state = "removed" if action == "onu.deauthorize" else "authorized"
     env = json.dumps({
         "operation_id": op or str(uuid.uuid4()), "tenant_id": TENANT, "resource_id": ONU, "device_id": DEVICE, "agent_id": AGENT,
         "action": action, "schema_version": 1, "desired_version": version,

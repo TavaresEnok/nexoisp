@@ -87,7 +87,7 @@ class Envelope(BaseModel):
     resource_id: str
     device_id: str
     agent_id: str
-    action: Literal["subscriber.provision", "subscriber.suspend", "subscriber.resume", "subscriber.disconnect", "onu.authorize", "onu.deauthorize"]
+    action: Literal["subscriber.provision", "subscriber.suspend", "subscriber.resume", "subscriber.disconnect", "onu.authorize", "onu.deauthorize", "onu.reboot"]
     schema_version: int
     desired_version: int = Field(gt=0)
     parameters: Union[Parameters, OnuParameters]
@@ -119,7 +119,7 @@ def verify_envelope(raw: str, signature_b64: str, public_key_b64: str, *, agent_
     if is_onu:
         if env.parameters.description != f"nexo:{env.resource_id[:8]}:v{env.desired_version}":
             raise EnvelopeError("marcador ONU não corresponde ao recurso/versão assinados")
-        if env.parameters.state != {"onu.authorize": "authorized", "onu.deauthorize": "removed"}[env.action]:
+        if env.parameters.state != {"onu.authorize": "authorized", "onu.deauthorize": "removed", "onu.reboot": "authorized"}[env.action]:
             raise EnvelopeError("estado incompatível com a ação")
     else:
         expected = {"subscriber.suspend": "suspended", "subscriber.resume": "active"}.get(env.action)

@@ -78,6 +78,33 @@ class Huawei(unittest.TestCase):
         cmds = self.commands()
         self.assertLess(cmds.index("undo service-port 10"), cmds.index("ont delete 0 0"))
 
+    def test_reinicia_onu_pela_olt_com_confirmacao(self):
+        self.olt.authorize(SN, **KW)
+        self.state.d["reboot_s"] = 30
+        r = self.olt.reboot(SN)
+        self.assertEqual((r["rebooted"], r["pon_port"], r["ont_id"]), (1, "0/1/0", 0))
+        cmds = self.commands()
+        i = cmds.index("ont reset 0 0")
+        self.assertEqual(cmds[i + 1], "y")   # respondeu à pergunta (y/n)[n]: da OLT
+        st = self.olt.read_onu(SN)
+        self.assertTrue(st.authorized)
+        self.assertFalse(st.online)          # fora do ar enquanto reinicia
+        self.assertEqual(st.extra["last_down_cause"], "ONT reset")
+        with self.assertRaises(OltCommandError):
+            self.olt.reboot(SN)              # já está reiniciando: nada a fazer
+        self.state.d["rebooting"][SN] = 0    # o tempo de reinício passou
+        st = self.olt.read_onu(SN)
+        self.assertTrue(st.online)
+        self.assertIsNotNone(st.rx_dbm)
+        with self.assertRaises(OltCommandError):
+            self.olt.reboot("485754430000FFFF")   # ONU não autorizada
+
+    def test_reinicio_respeita_escrita_desabilitada(self):
+        self.olt.authorize(SN, **KW)
+        self.olt.allow_writes = False
+        with self.assertRaises(OltCommandError):
+            self.olt.reboot(SN)
+
     def test_ont_id_reusado_nao_deixa_remocao_atrasada_atingir_outra_onu(self):
         """Estudo de campo: 23% das adições reusam um ONT-ID liberado no mesmo dia. A identidade é sempre o serial:
         a desautorização atrasada da ONU A não pode remover a ONU B que herdou o mesmo ID na mesma PON."""
@@ -217,6 +244,35 @@ class Huawei(unittest.TestCase):
         self.assertIn("remoção da configuração anterior", str(out["steps"]))
         self.assertEqual(self.olt.read_onu(SN).service_vlan, 999)
         self.assertEqual(out["onu_observed"]["state"], "authorized")
+
+
+    def test_executor_reinicia_onu_por_operacao_assinada(self):
+        """onu.reboot: autoriza (v1), depois reinicia pela operação assinada sem mudar a versão; recusa ONU de outra versão."""
+        import base64, json
+        from tests.test_recuperacao import KEY
+        d = tempfile.mkdtemp()
+        cloud = FakeCloud(); cloud.go = {"go": True}
+        ident = {"agent_id": AGENT, "tenant_id": TENANT, "public_key": PUB, "device_ids": {DEVICE}}
+        ex = Executor(Store(os.path.join(d, "agent.sqlite")), cloud, lambda _: self.olt, lambda: ident)
+
+        def deliver(action, version):
+            x = onu_delivery(action=action, version=version, profile="residencial", port="0/1/0", vlan=100)
+            env = json.loads(x["envelope"]); env["parameters"]["serial"] = SN; env["parameters"]["service_profile"] = "bridge-1ge"
+            raw = json.dumps(env); x["envelope"] = raw; x["signature"] = base64.b64encode(KEY.sign(raw.encode())).decode()
+            return x
+        ex.handle(deliver("onu.authorize", 1))
+        self.assertEqual(cloud.results[-1][1]["outcome"], "SUCCEEDED")
+        ex.handle(deliver("onu.reboot", 1))
+        out = cloud.results[-1][1]
+        self.assertEqual(out["outcome"], "SUCCEEDED")
+        self.assertIn("ont reset 0 0", self.commands())
+        self.assertFalse(out["onu_observed"]["online"])                       # reiniciando
+        self.assertEqual(out["onu_observed"]["detail"]["last_down_cause"], "ONT reset")
+        self.assertTrue(self.olt.read_onu(SN).authorized)                       # configuração intacta
+        self.state.d["rebooting"].clear()
+        ex.handle(deliver("onu.reboot", 2))                                     # versão que a OLT não tem
+        self.assertEqual(cloud.results[-1][1]["outcome"], "FAILED")
+        self.assertEqual(self.commands().count("ont reset 0 0"), 1)
 
 
 if __name__ == "__main__":

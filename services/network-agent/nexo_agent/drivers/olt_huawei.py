@@ -176,7 +176,7 @@ class NetmikoCli:
     """Sessão CLI via netmiko (huawei_smartax por SSH moderno, SSH legado ou telnet; ver cli_transport). Lê até o prompt
     aparecer (sem esperas fixas) e responde às confirmações "{ <cr>|... }:" e à paginação "---- More ----"."""
 
-    _END = r"(?:[>#]|\}\s*:|More[^\n]*----)\s*$"
+    _END = r"(?:[>#]|\}\s*:|\(y/n\)\[n\]\s*:|More[^\n]*----)\s*$"
 
     def __init__(self, host: str, port: int, username: str, password: str, known_hosts_file: str = "", options: Optional[dict] = None):
         from ..cli_transport import connect
@@ -220,7 +220,7 @@ class NetmikoCli:
         try:
             return self._run_command(command)
         except Exception:
-            if re.match(r"^(ont (add|delete|modify)\b|ont port native-vlan\b|ont tr069-server-config\b|service-port\b|undo service-port\b)", command):
+            if re.match(r"^(ont (add|delete|modify|reset)\b|ont port native-vlan\b|ont tr069-server-config\b|service-port\b|undo service-port\b)", command):
                 raise AckLost("confirmação SSH ausente após comando mutante; consultar estado") from None
             raise
 
@@ -460,6 +460,30 @@ class HuaweiOltDriver:
             s.run(f"ont delete {p} {info['ont_id']}")
             s.run("quit")
         return {"removed": 1, "service_ports_removed": len(ports), "ont_id": info["ont_id"]}
+
+    def reboot(self, serial: str) -> dict:
+        """Reinicia a ONU pela OLT (`ont reset`), confirmando a pergunta "(y/n)[n]:" da MA5600/MA5800. Não altera configuração:
+        a ONU volta com os mesmos perfis e service-ports. Recusa ONU desconhecida ou fora do ar (nada a reiniciar)."""
+        sn = normalize_serial(serial)
+        self._require_write_capability()
+        with self._session() as s:
+            raw = s.run(f"display ont info by-sn {sn}", tolerate=True)
+            if re.search(r"Failure\s*:\s*The required ONT does not exist", raw, re.I):
+                raise OltCommandError("ONT não autorizada nesta OLT; nada para reiniciar")
+            check_failure(raw)
+            info = parse_ont_info(raw)
+            if not info or _readback_sn(raw) != sn:
+                raise OltCommandError("identidade/estado ONT desconhecido; reinício recusado")
+            if info["run_state"] != "online":
+                raise OltCommandError("ONT fora do ar; reinício pela OLT não é possível")
+            fs, p = split_port(info["pon_port"])
+            s.run(f"interface gpon {fs}")
+            out = s.run(f"ont reset {p} {info['ont_id']}", tolerate=True)
+            if re.search(r"\(y/n\)", out, re.I):
+                out = s.run("y", tolerate=True)
+            check_failure(out)
+            s.run("quit")
+        return {"rebooted": 1, "pon_port": info["pon_port"], "ont_id": info["ont_id"]}
 
     # --- migração: adotar ONUs provisionadas por outro sistema (SGP/IXC) sem derrubar o serviço ------------------------
     def foreign_onus(self) -> list[dict]:

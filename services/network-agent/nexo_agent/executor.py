@@ -175,6 +175,8 @@ class OnuFamily:
     def execute(driver, env: Envelope, go: dict, step, checkpoint) -> bool:
         p = env.parameters
         st = driver.read_onu(p.serial)
+        if env.action == "onu.reboot":
+            return OnuFamily._reboot(driver, env, st, step, checkpoint)
         if st.authorized and (not st.description or st.description.rsplit(":v", 1)[0] != p.description.rsplit(":v", 1)[0]):
             raise ValueError("ONU existente não pertence a este recurso; adoção/remoção automática recusada")
         uncertain = False
@@ -200,6 +202,24 @@ class OnuFamily:
         step("verificação", "ok" if ok else "falha", {"authorized": st.authorized, "pon_port": st.pon_port, "line_profile": st.line_profile,
                                                        "service_vlan": st.service_vlan, "applied_version": st.applied_version, "online": st.online})
         return ok
+
+
+    @staticmethod
+    def _reboot(driver, env: Envelope, st: OnuState, step, checkpoint) -> bool:
+        """Comando pontual: só reinicia a ONU que está na configuração desta versão (nossa e aplicada). Não altera nada na OLT."""
+        if not hasattr(driver, "reboot"):
+            raise ValueError("driver desta OLT não oferece reinício de ONU")
+        if not onu_applied(st, env):
+            raise ValueError("ONU não está autorizada nesta versão na OLT; reinício recusado")
+        try:
+            step("reinício da ONU pela OLT", "ok", driver.reboot(env.parameters.serial))
+        except AckLost as e:
+            step("reinício da ONU pela OLT", "incerto", f"{e}; será verificado por consulta")
+        checkpoint("VERIFYING")
+        st = driver.read_onu(env.parameters.serial)
+        step("verificação", "ok" if st.authorized else "falha",
+             {"authorized": st.authorized, "online": st.online, "last_down_cause": (st.extra or {}).get("last_down_cause")})
+        return st.authorized
 
 
 def family_of(env: Envelope):

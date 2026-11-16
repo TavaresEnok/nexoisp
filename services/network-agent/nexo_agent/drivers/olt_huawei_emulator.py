@@ -4,6 +4,7 @@ Não é software da Huawei e não reproduz o firmware: serve para exercitar o dr
 Uso como servidor de laboratório:  python -m nexo_agent.drivers.olt_huawei_emulator <porta> <arquivo_de_estado.json> [ssh|ssh-legacy|telnet]"""
 import json
 import os
+import random
 import re
 import threading
 import time
@@ -22,10 +23,24 @@ class OltState:
                   "line_profiles": ["residencial", "residencial-200", "residencial-500"], "srv_profiles": ["bridge-1ge", "router-4ge"], "vlans": [100, 120, 200]}
         if path and os.path.exists(path):
             self.d = json.load(open(path))
+        self.listener = None   # gancho de laboratório: chamado após cada comando (ex.: aplicar bloqueio de tráfego por ONU)
 
     def save(self):
         if self.path:
             json.dump(self.d, open(self.path, "w"))
+        if self.listener:
+            try:
+                self.listener(self)
+            except Exception:  # pragma: no cover - o gancho de laboratório nunca derruba a CLI
+                pass
+
+    def is_online(self, sn: str) -> bool:
+        """Online = não está na lista de desligadas nem reiniciando (o reinício dura `reboot_s` segundos)."""
+        until = self.d.get("rebooting", {}).get(sn)
+        if until and until <= time.time():
+            self.d["rebooting"].pop(sn, None)
+            until = None
+        return sn not in self.d["offline"] and not until
 
 
 class HuaweiCliEmulator:
@@ -33,9 +48,12 @@ class HuaweiCliEmulator:
 
     def __init__(self, state: OltState, hostname: str = "MA5800-EMU"):
         self.s, self.host, self.mode, self.fs = state, hostname, "config", None
+        self.pending = None   # comando à espera da confirmação "(y/n)[n]:"
         self.log: list[str] = []
 
     def prompt(self) -> str:
+        if self.pending:
+            return ""
         return {"user": f"{self.host}>", "enable": f"{self.host}#", "config": f"{self.host}(config)#"}.get(self.mode, f"{self.host}(config-if-gpon-{self.fs})#")
 
     def close(self) -> None:
@@ -51,6 +69,16 @@ class HuaweiCliEmulator:
     # ---- comandos ----
     def _run(self, c: str) -> str:
         d = self.s.d
+        if self.pending:
+            pending, self.pending = self.pending, None
+            if c.lower() not in ("y", "yes"):
+                return ""
+            o = pending
+            reboot_s = float(d.get("reboot_s", 60))
+            d.setdefault("rebooting", {})[o["sn"]] = time.time() + reboot_s
+            o["last_down"] = "ONT reset"
+            o["up_at"] = time.time() + reboot_s
+            return ""
         if c in ("", "undo smart", "undo interactive") or c.startswith("scroll"):
             return ""
         if c == "enable":
@@ -80,12 +108,14 @@ class HuaweiCliEmulator:
             o = next((x for x in d["onts"] if x["sn"] == m.group(1).upper()), None)
             if not o:
                 return "  Failure: The required ONT does not exist"
-            online = o["sn"] not in d["offline"]
+            online = self.s.is_online(o["sn"])
+            down = o.get("last_down", "dying-gasp") if (not online or "last_down" in o) else "-"
+            up = time.strftime("%Y-%m-%d %H:%M:%S-03:00", time.localtime(o.get("up_at", 1791619210)))
             return (f"{LINE}\n  F/S/P                   : {o['fsp']}\n  ONT-ID                  : {o['id']}\n  Control flag            : active\n"
                     f"  Run state               : {'online' if online else 'offline'}\n  Config state            : {'normal' if online else 'initial'}\n  Match state             : {'match' if online else 'initial'}\n"
                     f"  DBA type                : SR\n  ONT distance(m)         : {1200 + o['id'] * 37 if online else '-'}\n  Authentic type          : SN-auth\n  SN                      : {o['sn']} ({bytes.fromhex(o['sn'][:8]).decode('ascii', 'ignore')}-{o['sn'][8:]})\n"
-                    f"  Management mode         : OMCI\n  Description             : {o['desc']}\n  Last down cause         : {'-' if online else 'dying-gasp'}\n"
-                    f"  Last up time            : 2026-10-10 05:00:10-03:00\n{LINE}\n  Line profile ID      : 10\n  Line profile name    : {o['line']}\n{LINE}\n"
+                    f"  Management mode         : OMCI\n  Description             : {o['desc']}\n  Last down cause         : {down}\n"
+                    f"  Last up time            : {up}\n{LINE}\n  Line profile ID      : 10\n  Line profile name    : {o['line']}\n{LINE}\n"
                     f"  Service profile ID   : 10\n  Service profile name : {o['srv']}\n{LINE}\n")
         m = re.fullmatch(r"display service-port port (\d+/\d+/\d+) ont (\d+)", c)
         if m:
@@ -156,13 +186,24 @@ class HuaweiCliEmulator:
             o = next((x for x in d["onts"] if x["fsp"] == f"{self.fs}/{m.group(1)}" and x["id"] == int(m.group(2))), None)
             if not o:
                 return "  Failure: The ONT does not exist"
-            if o["sn"] in d["offline"]:
+            if not self.s.is_online(o["sn"]):
                 return "  Failure: The ONT is not online"
             k = int(o["sn"][-4:], 16) % 800 / 100
+            if "rx_base" in o:   # laboratório: potência definida por ONU (ex.: cliente com sinal ruim), com leve oscilação
+                k = -17 - float(o["rx_base"]) + random.uniform(-0.3, 0.3)
             return (f"{LINE}\n  ONU NNI port ID                        : 0\n  Module type                            : GPON\n  Module sub-type                        : CLASS B+\n"
                     f"  Optical power precision(dBm)           : 3.0\n  Rx optical power(dBm)                  : {-17 - k:.2f}\n  Tx optical power(dBm)                  : {2 + k / 10:.2f}\n"
                     f"  Laser bias current(mA)                 : 12\n  Temperature(C)                         : 44\n  Voltage(V)                             : 3.300\n"
                     f"  OLT Rx ONT optical power(dBm)          : {-18 - k:.2f}\n{LINE}\n")
+        m = re.fullmatch(r"ont reset (\d+) (\d+)", c)
+        if m and self.mode == "if":
+            o = next((x for x in d["onts"] if x["fsp"] == f"{self.fs}/{m.group(1)}" and x["id"] == int(m.group(2))), None)
+            if not o:
+                return "  Failure: The ONT does not exist"
+            if not self.s.is_online(o["sn"]):
+                return "  Failure: The ONT is not online"
+            self.pending = o
+            return "  Are you sure to reset the ONT(s)? (y/n)[n]:"
         m = re.fullmatch(r"service-port vlan (\d+) gpon (\d+/\d+/\d+) ont (\d+) gemport (\d+) multi-service user-vlan (\d+) tag-transform translate", c)
         if m and self.mode == "config":
             vlan, fsp, oid, gem, uvlan = int(m.group(1)), m.group(2), int(m.group(3)), int(m.group(4)), int(m.group(5))
@@ -325,13 +366,19 @@ def telnet_client(conn, state: "OltState"):  # pragma: no cover
         conn.close()
 
 
-def serve(port: int, state_path: str, mode: str = "ssh"):  # pragma: no cover - servidor de laboratório
+def serve(port: int, state_path: str, mode: str = "ssh", state: "OltState | None" = None):  # pragma: no cover - servidor de laboratório
     """Servidor de laboratório. mode: ssh (moderno), ssh-legacy (só algoritmos antigos) ou telnet. Usuário/senha: emu / emu-lab."""
     import socket
     import paramiko
 
-    key = paramiko.RSAKey.generate(2048)
-    state = OltState(state_path)
+    # Chave do servidor persistida ao lado do estado: o agente confere a impressão digital (known_hosts) a cada conexão.
+    key_path = os.path.join(os.path.dirname(os.path.abspath(state_path)), "host_key")
+    if os.path.exists(key_path):
+        key = paramiko.RSAKey.from_private_key_file(key_path)
+    else:
+        key = paramiko.RSAKey.generate(2048)
+        key.write_private_key_file(key_path)
+    state = state or OltState(state_path)
     if mode == "telnet":
         handler = lambda conn: telnet_client(conn, state)  # noqa: E731
     elif mode in ("ssh", "ssh-legacy"):

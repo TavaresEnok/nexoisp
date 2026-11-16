@@ -103,13 +103,16 @@ func (s Service) createONU(ctx context.Context, tx *db.Tx, id string, b map[stri
 func (s Service) onuAction(ctx context.Context, tx *db.Tx, id string, b map[string]any) (any, error) {
 	action := parameter(ctx, "action")
 	q := validate.Query{Values: url.Values{"action": []string{action}}}
-	q.Enum("action", "", "authorize", "deauthorize")
+	q.Enum("action", "", "authorize", "deauthorize", "reboot")
 	if err := q.Err(); err != nil {
 		return nil, err
 	}
 	reason := "desautorização manual"
-	if action == "authorize" {
+	switch action {
+	case "authorize":
 		reason = "reaplicar autorização"
+	case "reboot":
+		reason = "reinício da ONU pela OLT"
 	}
 	if jsonx.Truthy(b["reason"]) {
 		reason = b["reason"].(string)

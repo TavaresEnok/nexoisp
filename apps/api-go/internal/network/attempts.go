@@ -338,25 +338,39 @@ func RequestONU(ctx context.Context, tx *db.Tx, tenant, onu, action string, auth
 	if action == "onu.authorize" && n.Get("contract_status") != "active" {
 		return nil, apierr.New(400, "contrato encerrado: a ONU não pode ser autorizada")
 	}
+	// Reiniciar é um comando pontual: não muda a intenção (estado/versão desejados) da ONU. Vale só enquanto a ONU
+	// deve estar autorizada e por pouco tempo — um reinício esquecido na fila não deve derrubar o cliente horas depois.
+	reboot := action == "onu.reboot"
+	if reboot && n.Get("desired_state") != "authorized" {
+		return nil, apierr.New(400, "ONU não está autorizada: não há o que reiniciar")
+	}
 	state := "removed"
-	if action == "onu.authorize" {
+	if action == "onu.authorize" || reboot {
 		state = "authorized"
 	}
-	version := number(n.Get("desired_version")) + 1
-	if err = tx.Exec(ctx, query(name, 1), onu, version, state, authz.Reason); err != nil {
-		return nil, err
-	}
-	if err = tx.Exec(ctx, query(name, 2), onu, jsonx.String(version)); err != nil {
-		return nil, err
+	version := number(n.Get("desired_version"))
+	validity := 10 * time.Minute
+	if !reboot {
+		version++
+		validity = 24 * time.Hour
+		if err = tx.Exec(ctx, query(name, 1), onu, version, state, authz.Reason); err != nil {
+			return nil, err
+		}
+		if err = tx.Exec(ctx, query(name, 2), onu, jsonx.String(version)); err != nil {
+			return nil, err
+		}
 	}
 	identity, err := one(ctx, tx, name, 3)
 	if err != nil {
 		return nil, err
 	}
 	id := identity.Get("id")
-	validUntil := time.Now().Add(24 * time.Hour).UTC().Format("2006-01-02T15:04:05.000Z")
+	validUntil := time.Now().Add(validity).UTC().Format("2006-01-02T15:04:05.000Z")
 	parameters := jsonx.Object{{Name: "serial", Value: n.Get("serial")}, {Name: "pon_port", Value: n.Get("pon_port")}, {Name: "line_profile", Value: n.Get("line_profile")}, {Name: "service_profile", Value: n.Get("service_profile")}, {Name: "service_vlan", Value: n.Get("service_vlan")}, {Name: "state", Value: state}, {Name: "description", Value: "nexo:" + onu[:8] + ":v" + jsonx.String(version)}}
 	key := "onu:" + onu + ":v" + jsonx.String(version)
+	if reboot {
+		key = "onu:" + onu + ":reboot:" + jsonx.String(id)
+	}
 	authorization := jsonx.Object{{Name: "type", Value: authz.Type}, {Name: "id", Value: authz.ID}}
 	envelope, err := encode(jsonx.Object{{Name: "operation_id", Value: id}, {Name: "tenant_id", Value: tenant}, {Name: "resource_id", Value: onu}, {Name: "device_id", Value: n.Get("device_id")}, {Name: "agent_id", Value: n.Get("agent_id")}, {Name: "action", Value: action}, {Name: "schema_version", Value: 1}, {Name: "desired_version", Value: version}, {Name: "parameters", Value: parameters}, {Name: "idempotency_key", Value: key}, {Name: "valid_until", Value: validUntil}, {Name: "authorization", Value: authorization}})
 	if err != nil {

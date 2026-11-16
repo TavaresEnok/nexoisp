@@ -1,0 +1,16 @@
+#!/bin/bash
+# Ferramenta de console do nó CLIENTES (IgaraNet). Ex.: clientes status | clientes log 7 | clientes reiniciar 7
+case "${1:-status}" in
+  status)
+    on=0
+    while IFS=$'\t' read -r n login _ _ nome bairro; do
+      ip=$(ip -o -4 addr show dev "ppp$n" 2>/dev/null | awk '{print $4}' | cut -d/ -f1)
+      [ -n "$ip" ] && on=$((on+1))
+      if [ -n "$ip" ]; then estado="ONLINE $ip"; else estado="offline"; fi
+      printf '%2s %-9s %-28.28s %-20.20s %s\n' "$n" "$login" "$nome" "$bairro" "$estado"
+    done < /lab/clientes.tsv
+    echo; echo "$on/30 clientes com sessão PPPoE ativa" ;;
+  log) tail -n "${3:-20}" "/var/log/pppd-$2.log" ;;
+  reiniciar) pkill -f "linkname c$2 " ; echo "pppd do cliente $2 reiniciado (redisca sozinho)" ;;
+  *) echo "uso: clientes [status|log N|reiniciar N]" ;;
+esac

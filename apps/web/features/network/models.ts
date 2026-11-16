@@ -133,6 +133,7 @@ export const actionLabels: Record<string, string> = {
   "subscriber.disconnect": "Desconectar",
   "onu.authorize": "Autorizar ONU",
   "onu.deauthorize": "Desautorizar ONU",
+  "onu.reboot": "Reiniciar ONU",
 };
 export const operationSchema = z.object({
   id: z.string().uuid(),

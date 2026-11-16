@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<lab name="IgaraNet" id="6a1f3c2e-4b7d-4e8a-9c11-1a2b2026e116" version="1" scripttimeout="300" password="" countdown="" darkmode="" mode3d="" nogrid="" joinable="" joinable_emails="" openable="" openable_emails="" editable="" editable_emails="" multi_config_active="">
+  <description>Provedor de LABORATÓRIO IgaraNet (Igarassu-PE) para testar o NexoISP: MikroTik CHR real como concentrador PPPoE autenticando no RADIUS integrado pelo túnel WireGuard, OLT Huawei EMULADA (CLI MA5800 por SSH; não é equipamento real) e 30 assinantes FICTÍCIOS com pppd. Montado por infra/lab-igaranet/igaranet.sh.</description>
+  <topology>
+    <nodes>
+      <node id="1" type="qemu" template="mikrotik" config="0" config_data="" multi_config="W10=" delay="0" icon="Router.png" console="telnet" image="mikrotik-7.17" left="540" name="IGARA-BRAS" top="150" size="0" ethernet="4" ram="512" mtu="1500" backspace="127" terminaltype="linux" uuid="9b3e1c52-7d41-4c0e-a2f5-1a2b2026e101" cpu="1" cpulimit="1" firstmac="50:51:26:16:01:00" first_nic="" qemu_options="-machine type=pc,accel=kvm -serial mon:stdio -nographic -no-user-config -nodefaults -display none -vga std -rtc base=utc" qemu_version="2.12.0" qemu_arch="x86_64" qemu_nic="e1000-82545em" username="" password="" eth_format="" pci_mode="" console_2nd="" map_port="" map_port_2nd="" TPM="" UEFI="0" inject_as_first_nic="0" script_timeout="0" config_script="">
+        <interface id="0" name="ether1" type="ethernet" network_id="1" vid="1" style="solid" linkstyle="Straight" color="#1f77b4" label="" linkcfg="" labelpos="" srcpos="" dstpos="" width="2" fontsize=""/>
+        <interface id="1" name="ether2" type="ethernet" network_id="2" vid="1" style="solid" linkstyle="Straight" color="#2ca02c" label="" linkcfg="" labelpos="" srcpos="" dstpos="" width="2" fontsize=""/>
+      </node>
+      <node id="2" type="docker" template="docker" config="0" delay="0" icon="Switch.png" console="telnet" image="igaranet-olt:lab" left="540" name="OLT-HUAWEI-MA5800" top="330" size="0" ethernet="4" ram="256" cpu="1" docker_options="--privileged -v igaranet-olt-state:/state" eth_format="" username="" password="" console_2nd="" map_port="" map_port_2nd="" uuid="9b3e1c52-7d41-4c0e-a2f5-1a2b2026e102" firstmac="50:51:26:16:02:00">
+        <interface id="1" name="eth1" type="ethernet" network_id="2" vid="1" style="solid" linkstyle="Straight" color="#2ca02c" label="" linkcfg="" labelpos="" srcpos="" dstpos="" width="2" fontsize=""/>
+        <interface id="2" name="eth2" type="ethernet" network_id="3" vid="1" style="solid" linkstyle="Straight" color="#ff7f0e" label="" linkcfg="" labelpos="" srcpos="" dstpos="" width="2" fontsize=""/>
+        <interface id="3" name="eth3" type="ethernet" network_id="1" vid="1" style="dashed" linkstyle="Straight" color="#1f77b4" label="" linkcfg="" labelpos="" srcpos="" dstpos="" width="2" fontsize=""/>
+      </node>
+      <node id="3" type="docker" template="docker" config="0" delay="0" icon="Server.png" console="telnet" image="igaranet-agente:lab" left="240" name="NEXO-AGENTE" top="150" size="0" ethernet="2" ram="256" cpu="1" docker_options="--privileged -v igaranet-agente-data:/data" eth_format="" username="" password="" console_2nd="" map_port="" map_port_2nd="" uuid="9b3e1c52-7d41-4c0e-a2f5-1a2b2026e103" firstmac="50:51:26:16:03:00">
+        <interface id="1" name="eth1" type="ethernet" network_id="1" vid="1" style="solid" linkstyle="Straight" color="#1f77b4" label="" linkcfg="" labelpos="" srcpos="" dstpos="" width="2" fontsize=""/>
+      </node>
+      <node id="4" type="docker" template="docker" config="0" delay="0" icon="Desktop.png" console="telnet" image="igaranet-clientes:lab" left="540" name="CLIENTES-30-ONUS" top="510" size="0" ethernet="2" ram="512" cpu="1" docker_options="--privileged" eth_format="" username="" password="" console_2nd="" map_port="" map_port_2nd="" uuid="9b3e1c52-7d41-4c0e-a2f5-1a2b2026e104" firstmac="50:51:26:16:04:00">
+        <interface id="1" name="eth1" type="ethernet" network_id="3" vid="1" style="solid" linkstyle="Straight" color="#ff7f0e" label="" linkcfg="" labelpos="" srcpos="" dstpos="" width="2" fontsize=""/>
+      </node>
+    </nodes>
+    <networks>
+      <network id="1" type="nat0" name="Gerência NexoISP (NAT 10.0.137.0/24)" left="240" top="330" visibility="1" icon="global.png" size="" smart="0" vlan8021ad="0"/>
+      <network id="2" type="bridge" name="Uplink OLT -> BRAS (PPPoE)" left="0" top="0" visibility="0" icon="lan.png" size="" smart="0" vlan8021ad="0"/>
+      <network id="3" type="bridge" name="PON 0/1/0 e 0/1/1 (ONUs dos 30 clientes)" left="0" top="0" visibility="0" icon="lan.png" size="" smart="0" vlan8021ad="0"/>
+    </networks>
+  </topology>
+</lab>

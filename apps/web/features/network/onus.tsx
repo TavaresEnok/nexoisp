@@ -414,6 +414,18 @@ export function ContractOnu({ id, status }: { id: string; status: string }) {
                 {n?.desired_state === "authorized" && (
                   <>
                     <ActionButton
+                      disabled={n.observed_online !== true}
+                      confirm="Reiniciar esta ONU pela OLT? O assinante fica sem conexão por cerca de um minuto, até a ONU voltar."
+                      onClick={async () => {
+                        await api(`/onus/${n.id}/reboot`, {
+                          body: { reason: "reinício da ONU pela OLT" },
+                        });
+                        await refresh();
+                      }}
+                    >
+                      Reiniciar ONU
+                    </ActionButton>
+                    <ActionButton
                       danger
                       confirm="Desautorizar esta ONU na OLT? O assinante ficará sem sinal de dados."
                       onClick={async () => {
