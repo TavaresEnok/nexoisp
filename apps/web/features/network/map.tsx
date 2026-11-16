@@ -118,7 +118,7 @@ function MapLegend({
             style={{
               display: "inline-block",
               width: 18,
-              height: 2,
+              height: 1.5,
               borderRadius: 2,
               background: MAP_COLORS.cable,
             }}

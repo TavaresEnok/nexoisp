@@ -126,18 +126,19 @@ function contractState(point: OperationalMapPoint): ContractState {
   return point.online ? "online" : "offline";
 }
 function pointIcon(point: OperationalMapPoint, selected: boolean) {
+  // Clientes são o foco: maiores e sempre à frente; caixa óptica e POP ficam menores, por trás.
   const size =
     point.kind === "pops"
       ? selected
-        ? 40
-        : 34
+        ? 32
+        : 26
       : point.kind === "boxes"
         ? selected
-          ? 30
-          : 24
+          ? 24
+          : 18
         : selected
-          ? 22
-          : 16;
+          ? 36
+          : 30;
   return divIcon({
     className: "",
     iconSize: [size, size],
@@ -184,7 +185,7 @@ export default function MapCanvas(props: Props) {
             positions={cable.path.map(
               (p) => [p.lat, p.lng] as [number, number],
             )}
-            pathOptions={{ color: "#ffffff", weight: 4, opacity: 0.85 }}
+            pathOptions={{ color: "#ffffff", weight: 2.5, opacity: 0.8 }}
             interactive={false}
           />
         ))}
@@ -194,7 +195,7 @@ export default function MapCanvas(props: Props) {
             positions={cable.path.map(
               (p) => [p.lat, p.lng] as [number, number],
             )}
-            pathOptions={{ color: MAP_COLORS.cable, weight: 2, opacity: 1 }}
+            pathOptions={{ color: MAP_COLORS.cable, weight: 1.2, opacity: 1 }}
           >
             <Popup>
               <div className={styles.popup}>
@@ -216,7 +217,11 @@ export default function MapCanvas(props: Props) {
             position={[point.lat, point.lng]}
             icon={pointIcon(point, point.id === props.selectedId)}
             zIndexOffset={
-              point.kind === "pops" ? 1000 : point.kind === "boxes" ? 500 : 0
+              point.kind === "contracts"
+                ? 1000
+                : point.kind === "pops"
+                  ? 500
+                  : 0
             }
             eventHandlers={{ click: () => props.onSelect(point) }}
           >

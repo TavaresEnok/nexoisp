@@ -3,7 +3,7 @@
 // Ícones: desenhos do lucide (ISC), os mesmos da interface.
 
 export const MAP_COLORS = {
-  online: "#15803d",
+  online: "#00c853",
   offline: "#dc2626",
   suspended: "#d97706",
   ended: "#6b7280",
@@ -22,7 +22,8 @@ const POP_GLYPH =
 const HOUSE_GLYPH =
   '<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>';
 
-const shadow = "box-shadow:0 1px 4px rgba(0,0,0,.45)";
+// borda branca + contorno escuro fino: separa o marcador de qualquer fundo (mata, rua, água)
+const shadow = "box-shadow:0 0 0 1px rgba(0,0,0,.55),0 1px 4px rgba(0,0,0,.4)";
 
 /** Cliente: círculo na cor da situação com ícone de casa branco; encerrado fica vazado (ícone cinza). */
 export function contractMarkerHtml(state: ContractState, size: number): string {
