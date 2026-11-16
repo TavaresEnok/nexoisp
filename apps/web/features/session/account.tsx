@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactNode } from "react";
 import qrcode from "qrcode-generator";
-import { ShieldAlert, Smartphone, ScanLine, KeyRound } from "lucide-react";
+import { Smartphone, ScanLine, KeyRound } from "lucide-react";
 import { PageHeading, Panel } from "@/components/workspace-ui";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -101,25 +101,16 @@ export function Account() {
         </Alert>
       )}
       {me?.mfa_pending && !me.password_change_required && (
-        <Alert className="mb-4 border-warning bg-warning-bg px-4 py-3">
-          <ShieldAlert className="text-warning" />
-          <AlertTitle className="text-base font-semibold">
-            Falta só um passo: ative a verificação em duas etapas
-          </AlertTitle>
-          <AlertDescription className="grid gap-3">
-            <p>
-              Por segurança, contas de administrador precisam do código de um
-              aplicativo autenticador no celular. Enquanto isso não for feito, o
-              menu do NexoISP fica bloqueado e só esta página aparece. Leva
-              menos de um minuto.
-            </p>
-            {!setup && (
-              <div>
-                <Button onClick={startSetup}>Configurar agora</Button>
-              </div>
-            )}
-          </AlertDescription>
-        </Alert>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-foreground px-4 py-3 text-background">
+          <strong className="text-sm font-semibold">
+            Obrigatório configurar 2FA
+          </strong>
+          {!setup && (
+            <Button variant="outline" size="sm" onClick={startSetup}>
+              Configurar agora
+            </Button>
+          )}
+        </div>
       )}
       <div className="erp-stack">
         {!me?.password_change_required && (
@@ -154,22 +145,13 @@ export function Account() {
                   <Passo
                     n={1}
                     icon={Smartphone}
-                    title="Instale um aplicativo autenticador no celular"
-                  >
-                    <p className="text-sm text-muted-foreground">
-                      Google Authenticator, Microsoft Authenticator, Authy ou
-                      2FAS.
-                    </p>
-                  </Passo>
-                  <Passo
-                    n={2}
-                    icon={ScanLine}
-                    title="No aplicativo, escolha adicionar conta e leia o QR code"
-                  >
+                    title="Instale um app autenticador"
+                  />
+                  <Passo n={2} icon={ScanLine} title="Leia o QR code">
                     <TotpQr value={setup.otpauth_url} />
                     <details className="text-sm text-muted-foreground">
                       <summary className="cursor-pointer">
-                        Não consegue ler? Digite a chave manualmente
+                        Digitar a chave
                       </summary>
                       <div className="mt-2 max-w-md">
                         <Input
@@ -182,11 +164,7 @@ export function Account() {
                       </div>
                     </details>
                   </Passo>
-                  <Passo
-                    n={3}
-                    icon={KeyRound}
-                    title="Digite o código de 6 dígitos que o aplicativo mostrar"
-                  >
+                  <Passo n={3} icon={KeyRound} title="Digite o código">
                     <div className="max-w-48">
                       <FormField label="Código do aplicativo">
                         <Input
