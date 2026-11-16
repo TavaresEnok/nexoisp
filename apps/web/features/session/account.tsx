@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
+import qrcode from "qrcode-generator";
+import { ShieldAlert, Smartphone, ScanLine, KeyRound } from "lucide-react";
 import { PageHeading, Panel } from "@/components/workspace-ui";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -7,6 +9,62 @@ import { Badge } from "@/components/ui/badge";
 import { MutationForm, FormField } from "@/features/shared/form";
 import { api } from "@/platform/erp-client";
 import { useSession } from "./provider";
+/** QR code do endereço otpauth gerado NO NAVEGADOR: o segredo nunca vai para um serviço externo de QR. */
+function TotpQr({ value }: { value: string }) {
+  const { size, path } = useMemo(() => {
+    const qr = qrcode(0, "M");
+    qr.addData(value);
+    qr.make();
+    const n = qr.getModuleCount();
+    let d = "";
+    for (let r = 0; r < n; r++)
+      for (let c = 0; c < n; c++)
+        if (qr.isDark(r, c)) d += `M${c + 4} ${r + 4}h1v1h-1z`;
+    return { size: n + 8, path: d };
+  }, [value]);
+  return (
+    <svg
+      role="img"
+      aria-label="QR code para o aplicativo autenticador"
+      viewBox={`0 0 ${size} ${size}`}
+      width={208}
+      height={208}
+      shapeRendering="crispEdges"
+      className="rounded-md"
+      style={{ background: "#ffffff" }}
+    >
+      <path d={path} fill="#111111" />
+    </svg>
+  );
+}
+
+function Passo({
+  n,
+  icon: Icon,
+  title,
+  children,
+}: {
+  n: number;
+  icon: typeof Smartphone;
+  title: string;
+  children?: ReactNode;
+}) {
+  return (
+    <li className="flex gap-3">
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+        {n}
+      </span>
+      <div className="grid gap-1.5">
+        <p className="flex items-center gap-1.5 font-medium">
+          <Icon size={15} aria-hidden />
+          {title}
+        </p>
+        {children}
+      </div>
+    </li>
+  );
+}
+
 export function Account() {
   const { me, reload } = useSession();
   const [setup, setSetup] = useState<{
@@ -18,6 +76,14 @@ export function Account() {
   const [password, setPassword] = useState({ current: "", next: "" });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  async function startSetup() {
+    setError("");
+    try {
+      setSetup(await api("/me/mfa/setup", { method: "POST" }));
+    } catch (error) {
+      setError((error as Error).message);
+    }
+  }
   return (
     <>
       <PageHeading
@@ -35,11 +101,23 @@ export function Account() {
         </Alert>
       )}
       {me?.mfa_pending && !me.password_change_required && (
-        <Alert>
-          <AlertTitle>Configure a verificação em duas etapas</AlertTitle>
-          <AlertDescription>
-            Sua conta exige essa configuração para acessar o restante do
-            sistema.
+        <Alert className="mb-4 border-warning bg-warning-bg px-4 py-3">
+          <ShieldAlert className="text-warning" />
+          <AlertTitle className="text-base font-semibold">
+            Falta só um passo: ative a verificação em duas etapas
+          </AlertTitle>
+          <AlertDescription className="grid gap-3">
+            <p>
+              Por segurança, contas de administrador precisam do código de um
+              aplicativo autenticador no celular. Enquanto isso não for feito, o
+              menu do NexoISP fica bloqueado e só esta página aparece. Leva
+              menos de um minuto.
+            </p>
+            {!setup && (
+              <div>
+                <Button onClick={startSetup}>Configurar agora</Button>
+              </div>
+            )}
           </AlertDescription>
         </Alert>
       )}
@@ -60,18 +138,7 @@ export function Account() {
               </Alert>
             )}
             {!me?.mfa_enabled && !setup && (
-              <Button
-                onClick={async () => {
-                  setError("");
-                  try {
-                    setSetup(await api("/me/mfa/setup", { method: "POST" }));
-                  } catch (error) {
-                    setError((error as Error).message);
-                  }
-                }}
-              >
-                Configurar autenticação
-              </Button>
+              <Button onClick={startSetup}>Configurar autenticação</Button>
             )}
             {!me?.mfa_enabled && setup && (
               <MutationForm
@@ -83,29 +150,61 @@ export function Account() {
                   await reload();
                 }}
               >
-                <FormField label="Chave de configuração">
-                  <Input
-                    readOnly
-                    value={setup.secret}
-                    onFocus={(e) => e.target.select()}
-                  />
-                </FormField>
-                <FormField label="Endereço otpauth">
-                  <Input
-                    readOnly
-                    value={setup.otpauth_url}
-                    onFocus={(e) => e.target.select()}
-                  />
-                </FormField>
-                <FormField label="Código do aplicativo">
-                  <Input
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    required
-                  />
-                </FormField>
+                <ol className="grid gap-5">
+                  <Passo
+                    n={1}
+                    icon={Smartphone}
+                    title="Instale um aplicativo autenticador no celular"
+                  >
+                    <p className="text-sm text-muted-foreground">
+                      Google Authenticator, Microsoft Authenticator, Authy ou
+                      2FAS.
+                    </p>
+                  </Passo>
+                  <Passo
+                    n={2}
+                    icon={ScanLine}
+                    title="No aplicativo, escolha adicionar conta e leia o QR code"
+                  >
+                    <TotpQr value={setup.otpauth_url} />
+                    <details className="text-sm text-muted-foreground">
+                      <summary className="cursor-pointer">
+                        Não consegue ler? Digite a chave manualmente
+                      </summary>
+                      <div className="mt-2 max-w-md">
+                        <Input
+                          readOnly
+                          aria-label="Chave de configuração"
+                          value={setup.secret}
+                          onFocus={(e) => e.target.select()}
+                          className="font-mono"
+                        />
+                      </div>
+                    </details>
+                  </Passo>
+                  <Passo
+                    n={3}
+                    icon={KeyRound}
+                    title="Digite o código de 6 dígitos que o aplicativo mostrar"
+                  >
+                    <div className="max-w-48">
+                      <FormField label="Código do aplicativo">
+                        <Input
+                          inputMode="numeric"
+                          autoComplete="one-time-code"
+                          maxLength={6}
+                          placeholder="000000"
+                          value={code}
+                          onChange={(e) =>
+                            setCode(e.target.value.replace(/\D/g, ""))
+                          }
+                          className="font-mono tracking-widest"
+                          required
+                        />
+                      </FormField>
+                    </div>
+                  </Passo>
+                </ol>
               </MutationForm>
             )}
             {me?.mfa_enabled && (
