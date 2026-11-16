@@ -10,6 +10,7 @@ export const MAP_COLORS = {
   box: "#1d4ed8",
   pop: "#111827",
   cable: "#1d4ed8",
+  drop: "#475569",
 } as const;
 
 export type ContractState = "online" | "offline" | "suspended" | "ended";

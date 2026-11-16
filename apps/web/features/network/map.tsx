@@ -35,6 +35,9 @@ const contractPoint = point.extend({
   status: z.string(),
   policy: z.string().nullable(),
   online: z.boolean().optional(),
+  box_lat: z.coerce.number().nullable().optional(),
+  box_lng: z.coerce.number().nullable().optional(),
+  box_name: z.string().nullable().optional(),
   address: z.string().nullable(),
 });
 const simplePoint = point.extend({
@@ -76,6 +79,7 @@ export type OperationalMapPoint = {
   state: string;
   address: string;
   online?: boolean;
+  box?: { lat: number; lng: number; name: string };
 };
 export type { MapCable };
 export type MapPlacement = {
@@ -112,6 +116,19 @@ function MapLegend({
         <span>{html(infraMarkerHtml("boxes", 18))}Caixa óptica</span>
       )}
       {layers.pops && <span>{html(infraMarkerHtml("pops", 20))}POP</span>}
+      {layers.contracts && layers.boxes && (
+        <span>
+          <i
+            style={{
+              display: "inline-block",
+              width: 18,
+              height: 0,
+              borderTop: `1.5px dashed ${MAP_COLORS.drop}`,
+            }}
+          />
+          Drop
+        </span>
+      )}
       {layers.cables && (
         <span>
           <i
@@ -207,6 +224,14 @@ export function NetworkMap() {
       name: p.subscriber_name,
       kind: "contracts" as const,
       online: p.online ?? false,
+      box:
+        p.box_lat != null && p.box_lng != null
+          ? {
+              lat: p.box_lat,
+              lng: p.box_lng,
+              name: p.box_name ?? "Caixa óptica",
+            }
+          : undefined,
       state:
         p.status === "ended"
           ? "Encerrado"

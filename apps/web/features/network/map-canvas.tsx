@@ -179,6 +179,27 @@ export default function MapCanvas(props: Props) {
         />
         <ZoomControl position="bottomright" />
         <MapControls {...props} />
+        {props.rows.map((point) =>
+          // drop só aparece com a camada de caixas ligada
+          point.kind === "contracts" &&
+          point.box &&
+          props.rows.some((r) => r.kind === "boxes") ? (
+            <Polyline
+              key={`drop/${point.id}`}
+              positions={[
+                [point.lat, point.lng],
+                [point.box.lat, point.box.lng],
+              ]}
+              pathOptions={{
+                color: MAP_COLORS.drop,
+                weight: 1.5,
+                opacity: 0.85,
+                dashArray: "4 4",
+              }}
+              interactive={false}
+            />
+          ) : null,
+        )}
         {(props.lines ?? []).map((cable) => (
           <Polyline
             key={`cable-casing/${cable.id}`}
