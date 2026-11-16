@@ -33,6 +33,7 @@ const contractPoint = point.extend({
   subscriber_name: z.string(),
   status: z.string(),
   policy: z.string().nullable(),
+  online: z.boolean().optional(),
   address: z.string().nullable(),
 });
 const simplePoint = point.extend({
@@ -73,6 +74,7 @@ export type OperationalMapPoint = {
   kind: "contracts" | "boxes" | "pops";
   state: string;
   address: string;
+  online?: boolean;
 };
 export type { MapCable };
 export type MapPlacement = {
@@ -80,6 +82,60 @@ export type MapPlacement = {
   name: string;
   kind: "contracts" | "pops";
 };
+function MapLegend({
+  layers,
+}: {
+  layers: {
+    contracts?: boolean;
+    boxes?: boolean;
+    pops?: boolean;
+    cables?: boolean;
+  };
+}) {
+  const sq = (size: number) => (
+    <i
+      style={{
+        display: "inline-block",
+        width: size,
+        height: size,
+        borderRadius: 2,
+        background: "var(--foreground)",
+      }}
+    />
+  );
+  return (
+    <div className={styles.legend}>
+      {layers.contracts && (
+        <>
+          <span>
+            <i className={styles.onlineDot} />
+            Online
+          </span>
+          <span>
+            <i className={styles.offlineDot} />
+            Offline
+          </span>
+        </>
+      )}
+      {layers.boxes && <span>{sq(8)}Caixa óptica</span>}
+      {layers.pops && <span>{sq(11)}POP</span>}
+      {layers.cables && (
+        <span>
+          <i
+            style={{
+              display: "inline-block",
+              width: 16,
+              height: 3,
+              background: "var(--muted-foreground)",
+            }}
+          />
+          Cabo
+        </span>
+      )}
+    </div>
+  );
+}
+
 export function NetworkMap() {
   const { me } = useSession();
   const navigate = useNavigate();
@@ -156,6 +212,7 @@ export function NetworkMap() {
       lng: p.lng,
       name: p.subscriber_name,
       kind: "contracts" as const,
+      online: p.online ?? false,
       state:
         p.status === "ended"
           ? "Encerrado"
@@ -352,6 +409,7 @@ export function NetworkMap() {
       }
       overlay={
         <>
+          {!placing && <MapLegend layers={layers} />}
           {placing && (
             <div className={styles.legend}>
               <span>Clique no mapa para posicionar {placing.name}</span>

@@ -3,13 +3,14 @@ import {
   MapContainer,
   TileLayer,
   CircleMarker,
+  Marker,
   Polyline,
   Popup,
   useMap,
   useMapEvents,
   ZoomControl,
 } from "react-leaflet";
-import { latLngBounds } from "leaflet";
+import { divIcon, latLngBounds } from "leaflet";
 import { LocateFixed } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -114,6 +115,20 @@ function MapControls({
     </div>
   );
 }
+// Caixa óptica e POP: quadrados neutros (preto no tema claro, branco no escuro). Cliente: círculo verde/cinza (v0).
+function squareIcon(size: number, selected: boolean) {
+  const s = selected ? size + 4 : size;
+  return divIcon({
+    className: "",
+    iconSize: [s, s],
+    iconAnchor: [s / 2, s / 2],
+    popupAnchor: [0, -s / 2],
+    html: `<span style="display:block;width:${s}px;height:${s}px;border-radius:2px;background:var(--foreground);border:2px solid var(--background);box-shadow:0 0 0 1px var(--foreground)"></span>`,
+  });
+}
+const contractColor = (point: OperationalMapPoint) =>
+  point.online ? "var(--success, #22c55e)" : "var(--map-offline, #94a3b8)";
+
 export default function MapCanvas(props: Props) {
   const [failed, setFailed] = useState(false);
   return (
@@ -142,7 +157,11 @@ export default function MapCanvas(props: Props) {
             positions={cable.path.map(
               (p) => [p.lat, p.lng] as [number, number],
             )}
-            pathOptions={{ color: "var(--primary)", weight: 4, opacity: 0.75 }}
+            pathOptions={{
+              color: "var(--muted-foreground)",
+              weight: 3,
+              opacity: 0.9,
+            }}
           >
             <Popup>
               <div className={styles.popup}>
@@ -158,38 +177,62 @@ export default function MapCanvas(props: Props) {
             </Popup>
           </Polyline>
         ))}
-        {props.rows.map((point) => (
-          <CircleMarker
-            key={`${point.kind}/${point.id}`}
-            center={[point.lat, point.lng]}
-            radius={point.id === props.selectedId ? 10 : 7}
-            pathOptions={{
-              fillColor:
-                point.kind === "boxes"
-                  ? "var(--primary)"
-                  : point.kind === "pops"
-                    ? "var(--info)"
-                    : point.state === "Suspenso"
-                      ? "var(--warning)"
-                      : "var(--success)",
-              fillOpacity: 1,
-              color: "var(--background)",
-              weight: 2,
-            }}
-            eventHandlers={{ click: () => props.onSelect(point) }}
-          >
-            <Popup>
-              <div className={styles.popup}>
-                <span className={styles.overline}>{point.state}</span>
-                <strong>{point.name}</strong>
-                <p>{point.address}</p>
-                <Button size="sm" onClick={() => props.onSelect(point)}>
-                  Detalhar ponto
-                </Button>
-              </div>
-            </Popup>
-          </CircleMarker>
-        ))}
+        {props.rows.map((point) =>
+          point.kind === "contracts" ? (
+            <CircleMarker
+              key={`${point.kind}/${point.id}`}
+              center={[point.lat, point.lng]}
+              radius={point.id === props.selectedId ? 9 : 6}
+              pathOptions={{
+                fillColor: contractColor(point),
+                fillOpacity: point.state === "Encerrado" ? 0 : 1,
+                color:
+                  point.state === "Encerrado"
+                    ? "var(--map-offline, #94a3b8)"
+                    : "#ffffff",
+                weight: 2,
+              }}
+              eventHandlers={{ click: () => props.onSelect(point) }}
+            >
+              <Popup>
+                <div className={styles.popup}>
+                  <span className={styles.overline}>
+                    {point.kind === "contracts"
+                      ? `${point.online ? "Online" : "Offline"} · ${point.state}`
+                      : point.state}
+                  </span>
+                  <strong>{point.name}</strong>
+                  <p>{point.address}</p>
+                  <Button size="sm" onClick={() => props.onSelect(point)}>
+                    Detalhar ponto
+                  </Button>
+                </div>
+              </Popup>
+            </CircleMarker>
+          ) : (
+            <Marker
+              key={`${point.kind}/${point.id}`}
+              position={[point.lat, point.lng]}
+              icon={squareIcon(
+                point.kind === "pops" ? 14 : 10,
+                point.id === props.selectedId,
+              )}
+              zIndexOffset={point.kind === "pops" ? 1000 : 500}
+              eventHandlers={{ click: () => props.onSelect(point) }}
+            >
+              <Popup>
+                <div className={styles.popup}>
+                  <span className={styles.overline}>{point.state}</span>
+                  <strong>{point.name}</strong>
+                  <p>{point.address}</p>
+                  <Button size="sm" onClick={() => props.onSelect(point)}>
+                    Detalhar ponto
+                  </Button>
+                </div>
+              </Popup>
+            </Marker>
+          ),
+        )}
       </MapContainer>
       {failed && (
         <div role="status" className={styles.tileError}>
