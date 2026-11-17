@@ -205,14 +205,12 @@ try {
     due_day: 15,
     start_date: "2026-10-18",
   });
-  for (const path of [
-    "/rede/equipamentos/concentradores",
-    "/rede/ftth/fttx-olt",
+  for (const [path, heading] of [
+    ["/rede/equipamentos/concentradores", "Concentradores e agentes"],
+    ["/rede/ftth/fttx-olt", "OLTs"],
   ]) {
     await page.goto(`${base}${path}`);
-    await page
-      .getByRole("heading", { name: "Monitoramento de rede", exact: true })
-      .waitFor();
+    await page.getByRole("heading", { name: heading, exact: true }).waitFor();
     assert.equal(
       await page
         .getByRole("heading", { name: "Recurso planejado", exact: true })
@@ -221,7 +219,7 @@ try {
     );
   }
   check(
-    "R01: submenus NAS e OLT abrem equipamento operacional em vez de planejado",
+    "R01: endereços antigos de NAS e OLT abrem as páginas operacionais de concentradores e de OLTs",
   );
   await command(admin, `/subscribers/${subscriber.id}/notes`, {
     body: "Alerta de atendimento persistido no Go",

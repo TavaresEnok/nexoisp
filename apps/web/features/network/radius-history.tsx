@@ -155,6 +155,7 @@ export function RadiusAccountingHistory() {
                   {[
                     "Usuário",
                     "IP",
+                    "IPv6",
                     "Início",
                     "Último pacote",
                     "Fim",
@@ -170,11 +171,25 @@ export function RadiusAccountingHistory() {
                 {result.data.items.map((item) => (
                   <TableRow
                     key={item.id}
-                    title={`Sessão ${item.session_id} · NAS ${item.nas_ip ?? "não registrado"}`}
+                    title={`Sessão ${item.session_id} · NAS ${item.nas_ip ?? "não registrado"}${item.port_interface || item.port_vlan ? ` · ${item.port_interface ?? ""}${item.port_vlan ? ` VLAN ${item.port_vlan}` : ""}` : ""}`}
                   >
-                    <TableCell className="mono">{item.username}</TableCell>
+                    <TableCell className="mono">
+                      {item.username}
+                      <small className="table-subline">{item.id}</small>
+                    </TableCell>
                     <TableCell className="mono">
                       {item.framed_ip ?? "—"}
+                    </TableCell>
+                    <TableCell className="mono">
+                      {item.delegated_ipv6_prefix ??
+                        item.ipv6_prefix ??
+                        item.ipv6_address ??
+                        "—"}
+                      {item.delegated_ipv6_prefix && item.ipv6_address && (
+                        <small className="table-subline">
+                          {item.ipv6_address}
+                        </small>
+                      )}
                     </TableCell>
                     <TableCell>{stamp(item.started_at)}</TableCell>
                     <TableCell>{stamp(item.seen_at)}</TableCell>

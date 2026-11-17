@@ -5,7 +5,7 @@ const base=process.env.BASE;assert.ok(base?.startsWith('http://127.0.0.1:'));
 const browser=await chromium.launch({args:['--no-sandbox']});const context=await browser.newContext({viewport:{width:390,height:844}});const page=await context.newPage();page.setDefaultTimeout(15000);const errors=[];page.on('pageerror',e=>errors.push(e.message));
 try{
  const r=await context.request.post(`${base}/api/auth/login`,{data:{email:process.env.NEXO_HEALTH_EMAIL??'admin@alfa.demo',password:'demo1234'}});assert.equal(r.status(),200);
- await page.goto(`${base}/rede`);await page.getByRole('heading',{name:'Autenticação integrada',exact:true}).waitFor();
+ await page.goto(`${base}/rede/equipamentos?aba=radius`);await page.getByRole('heading',{name:'Autenticação integrada',exact:true}).waitFor();
  await page.getByText('Registro de autorização',{exact:true}).waitFor();await page.getByText('Leitura de accounting',{exact:true}).waitFor();
  await page.getByText(/Envio desabilitado · \d+ resultado/).waitFor();
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);

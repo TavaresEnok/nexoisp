@@ -213,6 +213,7 @@ export function NetworkOnuList() {
                       {operate && (
                         <Button
                           size="sm"
+                          aria-label={`Autorizar ONU ${d.serial}`}
                           onClick={() => setAuthorizing({ discovery: d })}
                         >
                           Autorizar

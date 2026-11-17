@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "base": "http://127.0.0.1:18390",
-  "verified_at": "2026-11-09T22:41:16.097Z",
+  "base": "http://127.0.0.1:3000",
+  "verified_at": "2026-11-17T00:24:01.039Z",
   "backend": "Go/PostgreSQL isolados; provedor criado exclusivamente para validação",
   "checks": [
     "Novo provedor e primeiro administrador criados na UI autenticam no Go com contexto próprio",

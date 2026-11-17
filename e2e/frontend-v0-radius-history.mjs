@@ -12,7 +12,7 @@ page.on('pageerror', e => errors.push(e.message));
 try {
   const login = await context.request.post(`${base}/api/auth/login`, { data: { email: 'admin@alfa.demo', password: 'demo1234' } });
   assert.equal(login.status(), 200);
-  await page.goto(`${base}/rede`);
+  await page.goto(`${base}/rede/equipamentos?aba=radius`);
   const section = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Histórico de sessões RADIUS', exact: true }) });
   await section.getByLabel('Usuário RADIUS exato').fill('history-browser-synthetic');
   await section.getByRole('button', { name: 'Consultar histórico', exact: true }).click();

@@ -31,7 +31,8 @@ try {
   // Catálogo de ONU
   const code = `HG${token}`.slice(0, 20);
   await page.goto(`${base}/rede/ftth/fttx-onu-tipo`);
-  await page.getByRole('heading', { name: 'Hardware com perfil definido.', exact: true }).waitFor();
+  await page.waitForURL((url) => url.pathname === '/rede/cadastros/onus');
+  await page.getByRole('tab', { name: 'Modelos de ONU', exact: true, selected: true }).waitFor();
   await page.getByRole('button', { name: 'Novo modelo', exact: true }).click();
   await dialog('Novo modelo de ONU').getByLabel('Código do modelo', { exact: true }).fill(code);
   await dialog('Novo modelo de ONU').getByLabel('Fabricante', { exact: true }).fill('Huawei');
@@ -60,16 +61,18 @@ try {
 
   // Portas PON (dados do cenário óptico anterior na fumaça)
   await page.goto(`${base}/rede/ftth/fttx-pon`);
-  await page.getByRole('heading', { name: 'Portas PON', exact: true }).waitFor();
+  await page.waitForURL((url) => url.pathname === '/rede/olts');
+  await page.getByRole('heading', { name: 'OLTs', exact: true }).waitFor();
   const ports = await request('/olt/pon-ports', null, 'GET');
   const linked = ports.find((port) => port.subscribers.length);
   if (linked) {
-    await page.getByRole('button', { name: new RegExp(`^Assinantes de ${linked.olt.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`) }).first().click();
-    await page.getByRole('button', { name: new RegExp(linked.subscribers[0].name) }).first().waitFor();
+    await page.goto(`${base}/rede/olts/${linked.device_id}?pon=${encodeURIComponent(linked.pon_port)}`);
+    await page.getByRole('heading', { name: `ONUs da PON ${linked.pon_port}`, exact: true }).waitFor();
+    await page.getByRole('button', { name: linked.subscribers[0].name, exact: true }).first().waitFor();
   } else {
-    await page.getByText('Nenhuma porta PON identificada', { exact: true }).waitFor();
+    await page.getByRole('heading', { name: 'OLTs cadastradas', exact: true }).waitFor();
   }
-  check(`Portas PON: ${ports.length} porta(s) derivadas das ONUs e descobertas; assinantes da porta abertos pela tela do v0`);
+  check(`Portas PON: ${ports.length} porta(s) derivadas das ONUs; endereço antigo abre OLTs e a página da OLT lista os clientes da PON`);
 
   // SLA no expediente
   await page.goto(`${base}/administracao/catalogos-sla?aba=sla`);

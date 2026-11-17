@@ -28,7 +28,8 @@ try {
   await page.waitForURL(url => url.pathname !== '/login');
   const listed = response('GET', /^\/api\/acs\/templates$/);
   await page.goto(`${base}/rede/ftth/acs-template`);
-  await page.getByRole('heading', { name: 'Templates ACS', exact: true }).first().waitFor();
+  await page.waitForURL(url => url.pathname === '/rede/cadastros/acs');
+  await page.getByRole('tab', { name: 'Templates ACS', exact: true, selected: true }).waitFor();
   assert.equal((await listed).status(), 200);
   assert.equal(await page.getByText('Recurso planejado', { exact: true }).count(), 0);
   await page.getByRole('button', { name: 'Novo template ACS', exact: true }).click();

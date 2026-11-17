@@ -8,7 +8,7 @@ const context=await browser.newContext({viewport:{width:1280,height:900}});const
 try{
  const r=await context.request.post(`${base}/api/auth/login`,{data:{email:'admin@alfa.demo',password:'demo1234'}});assert.equal(r.status(),200);
  const noCSRF=await context.request.post(`${base}/api/radius/accounting/events/${id}/reconcile`,{data:{reason:'Tentativa sem CSRF deve ser recusada'}});assert.equal(noCSRF.status(),403);
- await page.goto(`${base}/rede`);
+ await page.goto(`${base}/rede/equipamentos?aba=radius`);
  await page.getByRole('heading',{name:'Eventos de accounting em quarentena',exact:true}).waitFor();
  await page.getByRole('button',{name:`Conciliar evento ${id}`,exact:true}).click();
  await page.getByLabel('Justificativa').fill('Conferido o Start sintético que chegou depois do Stop órfão');

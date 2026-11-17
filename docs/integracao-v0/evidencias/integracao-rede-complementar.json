@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "base": "http://127.0.0.1:3004",
-  "verified_at": "2026-10-19T15:37:33.536Z",
+  "base": "http://127.0.0.1:3000",
+  "verified_at": "2026-11-17T00:46:10.798Z",
   "backend": "Go/PostgreSQL isolados; chave pública VPN, associação de certificado e timestamp de handshake preparados em fixture; nenhum serviço WireGuard/IPsec ou NAS físico iniciado",
   "checks": [
     "Associação de certificado preparada no banco isolado é removida pela UI e pelo Go com confirmação; não há alegação de novo handshake mTLS",

@@ -96,8 +96,9 @@ try {
   // Fusões na ficha da caixa: registro, recusa de fibra repetida e remoção.
   const branch = await request('/ftth/cables', { pop_id: pop.id, name: branchName, kind: 'drop', fiber_count: 2, path: [{ lat: -5.1, lng: -42.8 }, { lat: -5.1, lng: -42.801 }] });
   await page.getByRole('tab', { name: 'Caixas', exact: true }).click();
-  await page.getByRole('button', { name: `Portas de ${boxName}`, exact: true }).click();
-  await page.getByRole('heading', { name: `${boxName} · portas`, exact: true }).waitFor();
+  await page.getByRole('link', { name: boxName, exact: true }).click();
+  await page.waitForURL(url => url.pathname.startsWith('/rede/caixas/'));
+  await page.getByRole('heading', { name: boxName, exact: true }).waitFor();
   await page.getByText('Nenhuma fusão registrada nesta caixa.', { exact: true }).waitFor();
   for (const attempt of ['first', 'duplicate']) {
     await page.getByRole('button', { name: 'Registrar fusão', exact: true }).click();
@@ -122,14 +123,14 @@ try {
       await fusion.waitFor({ state: 'hidden' });
     }
   }
-  console.log('Fusões: fibra a fibra na ficha da caixa; o Go recusa a mesma fibra duas vezes na caixa.');
+  console.log('Fusões: fibra a fibra na página da caixa; o Go recusa a mesma fibra duas vezes na caixa.');
   await page.getByRole('button', { name: `Remover fusão ${cableName} fibra 1`, exact: true }).click();
   const removed = responseOf('DELETE', /^\/api\/ftth\/fusions\/[^/]+$/);
   await confirm();
   assert.equal((await removed).status(), 200);
   await page.getByText('Nenhuma fusão registrada nesta caixa.', { exact: true }).waitFor();
-  await page.keyboard.press('Escape');
-  await page.waitForURL(url => !url.searchParams.has('caixa'));
+  await page.getByRole('link', { name: 'Planta óptica', exact: true }).first().click();
+  await page.waitForURL(url => url.pathname === '/rede/ftth');
   console.log('Fusões: remoção confirmada libera a fibra na caixa.');
 
   // Importação KML: prévia sem gravação, aplicação explícita e recusas.
@@ -158,6 +159,8 @@ try {
   const after = await request('/ftth/boxes', null, 'GET');
   assert.equal(importedBoxes.every(name => after.some(item => item.name === name)), true);
   console.log('KML: aplicação explícita grava caixas e cabos do POP numa única operação.');
+  // O aviso de sucesso fica sobre o canto da tela; espera ele sair antes de reenviar o arquivo.
+  await page.locator('[data-sonner-toast]').first().waitFor({ state: 'detached', timeout: 15000 }).catch(() => {});
   await page.getByLabel('Arquivo KML do projeto', { exact: true }).setInputFiles({ name: 'projeto.kml', mimeType: 'application/vnd.google-earth.kml+xml', buffer: project });
   await page.getByRole('button', { name: 'Gerar prévia da importação', exact: true }).click();
   await page.getByText('já existe caixa com este nome', { exact: false }).first().waitFor();
@@ -177,7 +180,7 @@ try {
   console.log('Mapa: camada de cabos ópticos desenha os traçados ativos da área consultada.');
 
   // Arquivamento e isolamento entre provedores.
-  await page.goto(`${base}/rede/ftth/fttx-cto?aba=cabos`);
+  await page.goto(`${base}/rede/ftth?aba=cabos`);
   await page.getByLabel('Buscar cabos', { exact: true }).fill(cableName);
   await row(cableName).getByRole('button', { name: `Arquivar cabo ${cableName}`, exact: true }).click();
   const archived = responseOf('PATCH', /^\/api\/ftth\/cables\/[^/]+$/);

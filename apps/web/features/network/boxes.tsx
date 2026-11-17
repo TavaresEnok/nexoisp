@@ -215,6 +215,7 @@ export function NetworkBox() {
                                   <Button
                                     size="xs"
                                     variant="ghost"
+                                    aria-label={`ONU da porta ${number}`}
                                     onClick={() => setOnuId(n.id)}
                                   >
                                     ONU
@@ -224,6 +225,7 @@ export function NetworkBox() {
                                   <ActionButton
                                     size="xs"
                                     variant="ghost"
+                                    label={`Liberar porta ${number}`}
                                     confirm={`Liberar a porta ${number}?`}
                                     onClick={async () => {
                                       await api(`/ftth/drops/${drop.id}`, {
@@ -248,6 +250,7 @@ export function NetworkBox() {
                                   size="xs"
                                   variant="outline"
                                   className="mt-auto self-start"
+                                  aria-label={`Ligar cliente à porta ${number}`}
                                   onClick={() => setPort(number)}
                                 >
                                   Ligar cliente

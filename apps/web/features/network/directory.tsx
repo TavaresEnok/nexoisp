@@ -11,6 +11,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { normalize } from "@/lib/format";
 import { QueryBoundary } from "@/features/shared/feedback";
 import { useSession } from "@/features/session/provider";
 import { can } from "@/features/session/model";
@@ -64,7 +66,13 @@ export function NetworkDirectory() {
     ? params.get("aba")!
     : "concentradores";
   const all = devices.data ?? [];
-  const rows = all.filter((d) => !isOlt(d));
+  const [query, setQuery] = useState("");
+  const concentrators = all.filter((d) => !isOlt(d));
+  const rows = concentrators.filter((d) =>
+    normalize(`${d.name} ${d.nas_ip ?? ""} ${d.host ?? ""}`).includes(
+      normalize(query.trim()),
+    ),
+  );
   const selected = all.find((d) => d.id === params.get("equipamento"));
   const online = new Map<string, number>();
   for (const s of sessions.data ?? [])
@@ -103,8 +111,15 @@ export function NetworkDirectory() {
       {tab === "concentradores" && (
         <Panel
           title="Concentradores"
-          description={`${rows.length} equipamento(s)`}
+          description={`${rows.length} de ${concentrators.length}`}
         >
+          <Input
+            aria-label="Buscar equipamentos"
+            placeholder="Nome ou IP"
+            className="mb-4 max-w-xs"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
           <QueryBoundary
             loading={devices.isLoading}
             error={devices.error}
@@ -140,7 +155,21 @@ export function NetworkDirectory() {
                       }
                     >
                       <TableCell>
-                        <span className="font-medium">{d.name}</span>
+                        <button
+                          type="button"
+                          className="font-medium hover:underline"
+                          aria-label={`Detalhes de ${d.name}`}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setParams((current) => {
+                              const next = new URLSearchParams(current);
+                              next.set("equipamento", d.id);
+                              return next;
+                            });
+                          }}
+                        >
+                          {d.name}
+                        </button>
                         <small className="table-subline">
                           {d.driver === "radius"
                             ? `Autenticação integrada · ${vendors[d.vendor ?? ""] ?? d.vendor ?? "RADIUS"}`
