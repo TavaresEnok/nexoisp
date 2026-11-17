@@ -19,6 +19,8 @@ type PageDefinition = {
   // Caminho com curinga para páginas com sub-rotas próprias.
   nested?: boolean;
   aliases?: readonly string[];
+  // Endereços antigos que abrem uma aba específica da página.
+  redirects?: Readonly<Record<string, string>>;
 };
 
 export const operationalPages = {
@@ -103,14 +105,17 @@ export const operationalPages = {
     aliases: ["/ipam"],
   },
   fiber: {
-    paths: ["/rede/ftth", "/rede/ftth/fttx-cto"],
+    paths: ["/rede/ftth"],
     access: ["network:read", "ftth"],
-    aliases: ["/ftth"],
+    title: "Planta óptica",
+    aliases: ["/ftth", "/rede/ftth/fttx-cto"],
   },
-  pops: {
-    paths: ["/pops"],
-    access: ["contracts:read"],
-    title: "Pontos de presença",
+  box: {
+    // Página de cada caixa: /rede/caixas/<id>.
+    paths: ["/rede/caixas"],
+    access: ["network:read", "ftth"],
+    title: "Caixa óptica",
+    nested: true,
   },
   maintenance: {
     paths: ["/rede/manutencoes"],
@@ -118,30 +123,43 @@ export const operationalPages = {
     title: "Manutenções",
     aliases: ["/manutencoes"],
   },
-  onus: {
-    // Destino do item "Relatório > Consultar ONU" do menu original do v0.
-    paths: ["/relatorios/consultar-onu", "/rede/ftth/fttx-onu"],
-    access: ["network:read", "olt"],
-    title: "ONUs e autorizações",
-    aliases: ["/onus", "/rede/onus"],
-  },
-  ponPorts: {
-    paths: ["/rede/ftth/fttx-pon"],
-    access: ["network:read", "olt"],
-  },
-  acsTemplates: {
-    paths: ["/rede/ftth/acs-template"],
+  networkOverview: {
+    paths: ["/rede/visao-geral"],
     access: ["network:read"],
-    title: "Templates ACS",
+    title: "Rede",
+    aliases: ["/rede", "/noc", "/rede/noc"],
   },
-  onuCatalog: {
-    paths: ["/rede/ftth/fttx-onu-tipo", "/rede/ftth/fttx-onu-template"],
+  onus: {
+    paths: ["/rede/onus"],
     access: ["network:read", "olt"],
+    title: "ONUs",
+    aliases: ["/onus", "/relatorios/consultar-onu", "/rede/ftth/fttx-onu"],
   },
-  noc: { paths: ["/noc"], access: ["network:read", "noc"], title: "NOC" },
+  olts: {
+    // Lista em /rede/olts e página de cada OLT em /rede/olts/<id>.
+    paths: ["/rede/olts"],
+    access: ["network:read", "olt"],
+    title: "OLTs",
+    nested: true,
+    aliases: ["/rede/ftth/fttx-olt", "/rede/ftth/fttx-pon"],
+  },
+  registry: {
+    paths: ["/rede/cadastros"],
+    access: ["network:read"],
+    title: "Cadastros de rede",
+    nested: true,
+    redirects: {
+      "/pops": "/rede/cadastros/pops",
+      "/rede/pops": "/rede/cadastros/pops",
+      "/rede/ftth/fttx-onu-tipo": "/rede/cadastros/onus",
+      "/rede/ftth/fttx-onu-template": "/rede/cadastros/onus?tab=templates",
+      "/rede/ftth/acs-template": "/rede/cadastros/acs",
+    },
+  },
   online: {
     paths: ["/rede/online"],
     access: ["network:read"],
+    title: "Clientes online",
     aliases: ["/online"],
   },
   operations: {
@@ -153,11 +171,8 @@ export const operationalPages = {
   equipment: {
     paths: ["/rede/equipamentos"],
     access: ["network:read"],
-    aliases: [
-      "/rede",
-      "/rede/equipamentos/concentradores",
-      "/rede/ftth/fttx-olt",
-    ],
+    title: "Concentradores e agentes",
+    aliases: ["/rede/equipamentos/concentradores"],
   },
   stock: {
     paths: ["/estoque"],
@@ -243,9 +258,10 @@ export const recordLinks = [
 ] as const;
 
 export const pageAliases: Readonly<Record<string, string>> = Object.fromEntries(
-  pageList.flatMap((page) =>
-    (page.aliases ?? []).map((alias) => [alias, page.paths[0]]),
-  ),
+  pageList.flatMap((page) => [
+    ...(page.aliases ?? []).map((alias) => [alias, page.paths[0]]),
+    ...Object.entries(page.redirects ?? {}),
+  ]),
 );
 
 export const pageTitles: Readonly<Record<string, string>> = Object.fromEntries(

@@ -94,8 +94,8 @@ export function CgnatDirectory() {
       tab="cgnat"
       tabs={coreTabs(me)}
       onTab={navigate}
-      title="Planos de CGNAT"
-      description="Planejamento de endereços e portas com cálculo e rastreio no servidor."
+      title="IP e CGNAT"
+      description="Planos de tradução de portas e rastreio de conexão."
       actions={
         write && (
           <Button onClick={() => setCreating(true)}>Novo plano de CGNAT</Button>
@@ -103,9 +103,7 @@ export function CgnatDirectory() {
       }
     >
       <p className="profile-footnote">
-        O script RouterOS exige revisão e aplicação manual pela equipe de rede.
-        O servidor não aplica regras ao equipamento; a validação existente é de
-        laboratório.
+        O script RouterOS é aplicado no equipamento pela equipe de rede.
       </p>
       <QueryBoundary
         loading={plans.isLoading}

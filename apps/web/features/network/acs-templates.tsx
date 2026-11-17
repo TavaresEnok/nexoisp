@@ -24,7 +24,9 @@ import {
 
 const informLabel = (seconds: number | null) =>
   seconds == null ? "Não altera" : `${seconds} s`;
-export function AcsTemplates() {
+export function AcsTemplates({
+  embedded = false,
+}: { embedded?: boolean } = {}) {
   const { me } = useSession();
   // A escrita vale para todo o provedor; o servidor recusa sessões limitadas por POP.
   const write = can(me, "network:write");
@@ -42,11 +44,13 @@ export function AcsTemplates() {
   const editing = editor && editor !== "create" ? editor : null;
   return (
     <>
-      <PageHeading
-        eyebrow="REDE ÓPTICA · ACS"
-        title="Templates ACS"
-        description="Provisionamento TR-069 por fabricante, modelo e firmware. A aplicação ocorre na ficha do contrato e gera uma intenção durável, confirmada somente por leitura do roteador."
-      />
+      {!embedded && (
+        <PageHeading
+          eyebrow="REDE ÓPTICA · ACS"
+          title="Templates ACS"
+          description="Provisionamento TR-069 por fabricante, modelo e firmware."
+        />
+      )}
       <Panel
         title="Variáveis disponíveis"
         description="Use nos valores do tipo xsd:string. Senhas só entram por variável e nunca são exibidas em claro."

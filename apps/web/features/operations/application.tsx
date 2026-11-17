@@ -38,26 +38,7 @@ import { ErpOverview } from "./overview";
 import { OperationalContracts } from "@/features/contracts/directory";
 import { AddonCatalog } from "@/features/contracts/addons";
 import { OperationalPlans } from "@/features/plans/catalog";
-import {
-  navigationAreas,
-  findNavigationPage,
-  searchNavigation,
-} from "@/lib/navigation";
-const PonPorts = lazy(() =>
-  import("@/features/network/pon").then((module) => ({
-    default: module.PonPorts,
-  })),
-);
-const OnuCatalogPage = lazy(() =>
-  import("@/features/network/onu-catalog").then((module) => ({
-    default: module.OnuCatalogPage,
-  })),
-);
-const AcsTemplates = lazy(() =>
-  import("@/features/network/acs-templates").then((module) => ({
-    default: module.AcsTemplates,
-  })),
-);
+import { findNavigationPage } from "@/lib/navigation";
 const OperationalMonitoring = lazy(() =>
   import("./monitoring").then((module) => ({
     default: module.OperationalMonitoring,
@@ -193,6 +174,31 @@ const NetworkMap = lazy(() =>
     default: module.NetworkMap,
   })),
 );
+const NetworkOverview = lazy(() =>
+  import("@/features/network/overview").then((module) => ({
+    default: module.NetworkOverview,
+  })),
+);
+const NetworkOnuList = lazy(() =>
+  import("@/features/network/onu-list").then((module) => ({
+    default: module.NetworkOnuList,
+  })),
+);
+const NetworkOlts = lazy(() =>
+  import("@/features/network/olts").then((module) => ({
+    default: module.NetworkOlts,
+  })),
+);
+const NetworkBox = lazy(() =>
+  import("@/features/network/boxes").then((module) => ({
+    default: module.NetworkBox,
+  })),
+);
+const NetworkRegistry = lazy(() =>
+  import("@/features/network/registry").then((module) => ({
+    default: module.NetworkRegistry,
+  })),
+);
 const LegalIpLookup = lazy(() =>
   import("@/features/network/legal").then((module) => ({
     default: module.LegalIpLookup,
@@ -213,24 +219,9 @@ const FiberDirectory = lazy(() =>
     default: module.FiberDirectory,
   })),
 );
-const NetworkPops = lazy(() =>
-  import("@/features/network/pops").then((module) => ({
-    default: module.NetworkPops,
-  })),
-);
 const NetworkMaintenance = lazy(() =>
   import("@/features/network/maintenance").then((module) => ({
     default: module.NetworkMaintenance,
-  })),
-);
-const NetworkOnus = lazy(() =>
-  import("@/features/network/onus").then((module) => ({
-    default: module.NetworkOnus,
-  })),
-);
-const NetworkNoc = lazy(() =>
-  import("@/features/network/noc").then((module) => ({
-    default: module.NetworkNoc,
   })),
 );
 const OnlineConnections = lazy(() =>
@@ -368,15 +359,14 @@ export function OperationalApplication() {
     cgnat: <CgnatDirectory />,
     addresses: <AddressDirectory />,
     fiber: <FiberDirectory />,
-    pops: <NetworkPops />,
+    box: <NetworkBox />,
     maintenance: <NetworkMaintenance />,
-    onus: <NetworkOnus />,
-    noc: <NetworkNoc />,
-    onuCatalog: <OnuCatalogPage />,
-    acsTemplates: <AcsTemplates />,
+    networkOverview: <NetworkOverview />,
+    onus: <NetworkOnuList />,
+    olts: <NetworkOlts />,
+    registry: <NetworkRegistry />,
     monitoring: <OperationalMonitoring />,
     assistant: <OperationalAssistant />,
-    ponPorts: <PonPorts />,
     online: <OnlineConnections />,
     operations: <NetworkOperations />,
     equipment: <NetworkDirectory />,

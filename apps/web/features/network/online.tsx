@@ -31,6 +31,9 @@ export const onlineSchema = z.object({
       pop: z.string().nullable(),
       desired_policy: z.string(),
       observed_at: z.string().nullable(),
+      plan_name: z.string().nullable().optional(),
+      olt: z.string().nullable().optional(),
+      pon: z.string().nullable().optional(),
     }),
   ),
 });
@@ -70,8 +73,10 @@ export function OnlineConnections() {
     contract: row.contract_id,
     pop: row.pop || "POP não informado",
     nas: row.nas,
-    plan: "Não informado",
+    plan: row.plan_name ?? "—",
     access: {
+      olt: row.olt ?? undefined,
+      pon: row.pon ?? undefined,
       login: row.login,
       ip: row.ip ?? undefined,
       mac: row.mac ?? undefined,
@@ -127,6 +132,8 @@ export function OnlineConnections() {
       >
         {data && (
           <NetworkOnlineView
+            title="Clientes online"
+            subtitle="Sessões PPPoE abertas agora."
             rows={rows}
             visible={visible}
             metrics={metrics}
@@ -160,7 +167,7 @@ export function OnlineConnections() {
                 .sort()
                 .at(-1) ?? null,
             )}`}
-            sourceNote="Atualização a cada 15 segundos. Até 5.000 acessos; tráfego, plano e IPv6 não são retornados por esta consulta."
+            sourceNote="Atualiza a cada 15 segundos."
             actions={
               <div className="erp-inline-actions">
                 <ActionButton

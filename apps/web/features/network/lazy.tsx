@@ -84,3 +84,16 @@ export function LazyContractFiber(props: { id: string }) {
     </Suspense>
   );
 }
+
+const ContractNetworkSummary = lazy(() =>
+  import("./contract-summary").then((module) => ({
+    default: module.ContractNetworkSummary,
+  })),
+);
+export function LazyContractNetworkSummary(props: { id: string }) {
+  return (
+    <Suspense fallback={null}>
+      <ContractNetworkSummary {...props} />
+    </Suspense>
+  );
+}

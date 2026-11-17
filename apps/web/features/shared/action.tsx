@@ -16,6 +16,8 @@ export function ActionButton({
   danger = false,
   disabled = false,
   label,
+  size = "sm",
+  variant,
 }: {
   children: ReactNode;
   /** Nome acessível completo quando o texto visível é curto. */
@@ -24,6 +26,8 @@ export function ActionButton({
   confirm?: string;
   danger?: boolean;
   disabled?: boolean;
+  size?: "sm" | "xs";
+  variant?: "outline" | "ghost";
 }) {
   const [busy, setBusy] = useState(false);
   const locked = useRef(false);
@@ -45,8 +49,8 @@ export function ActionButton({
   return (
     <>
       <Button
-        variant={danger ? "destructive" : "outline"}
-        size="sm"
+        variant={danger ? "destructive" : (variant ?? "outline")}
+        size={size}
         aria-label={label}
         disabled={disabled || busy}
         onClick={() => (confirm ? setOpen(true) : void run())}

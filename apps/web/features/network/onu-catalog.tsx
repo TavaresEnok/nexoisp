@@ -85,7 +85,9 @@ const toTemplate = (row: TemplateRow): OnuTemplate => ({
 });
 
 // Catálogo de referência do provedor (FTTx - ONU Tipo e FTTx - ONU Template do v0).
-export function OnuCatalogPage() {
+export function OnuCatalogPage({
+  embedded = false,
+}: { embedded?: boolean } = {}) {
   const { me } = useSession();
   const location = useLocation();
   const write = can(me, "network:write");
@@ -125,6 +127,7 @@ export function OnuCatalogPage() {
         }}
         initialTab={tab}
         operational={{
+          embedded,
           noticeTitle: "Referência técnica do provedor",
           notice:
             "Catálogo cadastrado pela equipe. Compatibilidade e parâmetros são documentação: nada é enviado à OLT nem altera ONUs, e a compatibilidade de referência não substitui homologação. O testador apenas substitui variáveis no texto.",

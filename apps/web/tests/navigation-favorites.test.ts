@@ -143,10 +143,12 @@ test("validação estrita de candidatos a favoritos de equipe", () => {
   // Nenhum destino permanece planejado; destinos não conectados continuam inválidos.
   assert.equal(plannedPaths.size, 0);
   assert.equal(isValidFavoriteCandidate("/rede/ftth/fttx-pon", shell), false);
+  // Endereços antigos de rede redirecionam e não viram favoritos; o item novo vira.
   assert.equal(
     isValidFavoriteCandidate("/rede/ftth/acs-template", shell),
-    true,
+    false,
   );
+  assert.equal(isValidFavoriteCandidate("/rede/onus", shell), true);
   assert.equal(isValidFavoriteCandidate("/assistente", shell), true);
   assert.equal(isValidFavoriteCandidate("/acompanhamento", shell), true);
   assert.equal(

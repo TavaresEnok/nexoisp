@@ -1,9 +1,9 @@
-import { useState, lazy, Suspense } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { MAP_COLORS, contractMarkerHtml, infraMarkerHtml } from "./map-markers";
 import useSWR from "swr";
 import { z } from "zod";
 import { Check, Layers, ListFilter, MapPin, Radio, X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -259,6 +259,15 @@ export function NetworkMap() {
       address: p.city || "Cidade não informada",
     })),
   ];
+  // ?foco=<id> abre o mapa já no ponto (vindo da página da caixa ou do contrato).
+  const [params] = useSearchParams();
+  const focus = params.get("foco");
+  useEffect(() => {
+    if (!focus || selected?.id === focus) return;
+    const point = rows.find((row) => row.id === focus);
+    if (point) setSelected(point);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focus, points.data]);
   const refresh = async () => {
     await Promise.all([points.mutate(), coverage.mutate(), cables.mutate()]);
   };
@@ -529,8 +538,8 @@ export function NetworkMap() {
                   selected.kind === "contracts"
                     ? `/contratos?contrato=${selected.id}`
                     : selected.kind === "boxes"
-                      ? `/rede/ftth/fttx-cto?caixa=${selected.id}`
-                      : "/pops",
+                      ? `/rede/caixas/${selected.id}`
+                      : "/rede/cadastros/pops",
                 )
               }
             >

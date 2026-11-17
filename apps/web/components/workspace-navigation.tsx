@@ -114,7 +114,11 @@ function NavigationBranch({
           className={cn(
             "context-link",
             (isNavigationCurrent(node, pathname) ||
-              (operational && node.href === pathname)) &&
+              (operational &&
+                (node.href === pathname ||
+                  (!node.children.length &&
+                    node.href !== "/" &&
+                    shell?.findPage(pathname)?.href === node.href)))) &&
               "active",
           )}
           onClick={onNavigate}
@@ -453,12 +457,24 @@ export function WorkspaceNavigation({
               )}
               onClick={onNavigate}
               aria-current={pathname === "/acompanhamento" ? "page" : undefined}
-              title={shell ? "Acompanhamento operacional" : "Consolidação e evidências"}
-              aria-label={shell ? "Acompanhamento operacional" : "Consolidação e evidências"}
+              title={
+                shell
+                  ? "Acompanhamento operacional"
+                  : "Consolidação e evidências"
+              }
+              aria-label={
+                shell
+                  ? "Acompanhamento operacional"
+                  : "Consolidação e evidências"
+              }
             >
               <ShieldCheck size={17} />
               {/* A demonstração mantém a tela original de consolidação; o ERP abre o painel operacional. */}
-              <span>{shell ? "Acompanhamento operacional" : "Consolidação e evidências"}</span>
+              <span>
+                {shell
+                  ? "Acompanhamento operacional"
+                  : "Consolidação e evidências"}
+              </span>
             </Link>
           )}
         </div>

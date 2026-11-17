@@ -134,7 +134,8 @@ export function AddressDirectory() {
       tab="pools"
       tabs={coreTabs(me)}
       onTab={navigate}
-      description="Blocos IPv4 e IPv6, reservas individuais e prefixos dos contratos."
+      title="IP e CGNAT"
+      description="Blocos IPv4 e IPv6, reservas e prefixos dos contratos."
       actions={
         <>
           <Button

@@ -33,7 +33,7 @@ const popSchema = z.object({
   ended_contracts: z.coerce.number(),
 });
 type Pop = z.infer<typeof popSchema>;
-export function NetworkPops() {
+export function NetworkPops({ embedded = false }: { embedded?: boolean } = {}) {
   const { me } = useSession();
   const navigate = useNavigate();
   const result = useSWR(me ? ["erp-pops", sessionScope(me)] : null, async () =>
@@ -43,7 +43,8 @@ export function NetworkPops() {
   const write = can(me, "network:write");
   const editing = editor && editor !== "create" ? editor : null;
   return (
-    <CoreNetworkFrame
+    <Frame
+      embedded={embedded}
       tab="pops"
       tabs={coreTabs(me)}
       onTab={navigate}
@@ -171,6 +172,27 @@ export function NetworkPops() {
           }}
         />
       )}
-    </CoreNetworkFrame>
+    </Frame>
+  );
+}
+
+// Dentro de Rede › Cadastros a página perde o cabeçalho próprio e as abas do Core Network.
+function Frame({
+  embedded,
+  actions,
+  children,
+  ...frame
+}: React.ComponentProps<typeof CoreNetworkFrame> & { embedded: boolean }) {
+  if (!embedded)
+    return (
+      <CoreNetworkFrame actions={actions} {...frame}>
+        {children}
+      </CoreNetworkFrame>
+    );
+  return (
+    <div className="erp-stack">
+      {actions && <div className="flex justify-end gap-2">{actions}</div>}
+      {children}
+    </div>
   );
 }

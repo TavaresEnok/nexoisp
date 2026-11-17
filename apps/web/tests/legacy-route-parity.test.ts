@@ -295,34 +295,58 @@ test("menu e busca operacionais mostram páginas e abas, não subações sem des
     ...planned,
   ])
     assert.ok(hrefs.has(href), href);
+  // Rede é organizada pelo trabalho do técnico, sem subações no menu.
   const network = operationalNavigationAreas().find(
     (area) => area.id === "rede",
   )!;
-  for (const href of ["/noc", "/pops"]) {
-    assert.ok(
-      network.pages.some((page) => page.href === href),
-      href,
-    );
-    assert.equal(navigate(href).kind, "page", href);
+  assert.deepEqual(
+    network.pages.map((page) => page.href),
+    [
+      "/rede/visao-geral",
+      "/rede/mapa",
+      "/rede/online",
+      "/rede/onus",
+      "/rede/olts",
+      "/rede/ftth",
+      "/rede/equipamentos",
+      "/rede/enderecos-ip",
+      "/rede/consulta-ip",
+      "/rede/operacoes",
+      "/rede/manutencoes",
+      "/rede/cadastros",
+    ],
+  );
+  for (const page of network.pages) {
+    assert.equal(page.children.length, 0, page.href);
+    assert.equal(navigate(page.href).kind, "page", page.href);
   }
+  // A área Relatório do v0 só tinha páginas de rede: na operação ela some.
+  assert.equal(
+    operationalNavigationAreas().find((area) => area.id === "relatorio")!.pages.length,
+    0,
+  );
   assert.ok(
     searchOperationalNavigation("novo plano").some(
       (page) => page.href === "/planos/novo-plano",
     ),
   );
   assert.ok(
-    searchOperationalNavigation("noc").some((page) => page.href === "/noc"),
+    searchOperationalNavigation("onus").some((page) => page.href === "/rede/onus"),
   );
-  // ONUs ficam só no item original do v0 (Relatório > Consultar ONU).
-  const onuEntries = operationalNavigationAreas()
-    .flatMap((area) => area.pages)
-    .filter((page) => /onu/i.test(page.label) && !page.parentHref);
-  assert.deepEqual(
-    onuEntries.map((page) => page.href),
-    ["/relatorios/consultar-onu"],
-  );
-  assert.equal(navigate("/relatorios/consultar-onu").kind, "page");
-  assert.equal(canonicalErpPath("/rede/onus"), "/relatorios/consultar-onu");
+  // Endereços antigos continuam abrindo a página nova.
+  for (const [from, to] of [
+    ["/noc", "/rede/visao-geral"],
+    ["/rede", "/rede/visao-geral"],
+    ["/relatorios/consultar-onu", "/rede/onus"],
+    ["/rede/ftth/fttx-olt", "/rede/olts"],
+    ["/rede/ftth/fttx-pon", "/rede/olts"],
+    ["/rede/ftth/fttx-cto", "/rede/ftth"],
+    ["/pops", "/rede/cadastros/pops"],
+    ["/rede/ftth/acs-template", "/rede/cadastros/acs"],
+  ])
+    assert.equal(canonicalErpPath(from), to, from);
+  assert.equal(navigate("/rede/olts/3f8a1d2e-0000-4000-8000-000000000001").kind, "page");
+  assert.equal(navigate("/rede/caixas/3f8a1d2e-0000-4000-8000-000000000001").kind, "page");
 });
 test("subações redirecionam à página que as atende e abas levam o parâmetro da aba", () => {
   assert.deepEqual(resolveCatalogueNode("/planos/novo-plano"), {

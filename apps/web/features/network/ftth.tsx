@@ -1,18 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { z } from "zod";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { Cable, Users, Workflow, Signal } from "lucide-react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { PageHeading, Panel } from "@/components/workspace-ui";
-import { OpticalMetrics } from "@/components/optical-ui";
-import { OpticalPage } from "@/components/optical-network";
 import {
   ProfileSection,
   ProfileFacts,
 } from "@/components/subscriber-profile-sections";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableHeader,
@@ -21,13 +17,6 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
 import {
   Dialog,
   DialogContent,
@@ -39,15 +28,14 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { QueryBoundary } from "@/features/shared/feedback";
 import { RecordEditor } from "@/features/shared/record-editor";
 import { MutationForm, FormField } from "@/features/shared/form";
-import { ActionButton } from "@/features/shared/action";
 import { can } from "@/features/session/model";
 import { useSession } from "@/features/session/provider";
 import { api } from "@/platform/erp-client";
 import { normalize } from "@/lib/format";
 import { useDevices } from "./queries";
 import { FiberCables } from "./ftth-cables";
-import { BoxFusions } from "./ftth-fusions";
 import { KmlImport } from "./ftth-kml";
+import { boxHref, Kpi, Meter } from "./kit";
 const designTabs = [
   ["caixas", "Caixas"],
   ["cabos", "Cabos"],
@@ -79,8 +67,8 @@ const dropSchema = z.object({
   subscriber_name: z.string().nullable(),
   note: z.string().nullable(),
 });
-const detailSchema = boxSchema.extend({ drops: z.array(dropSchema) });
-function useFiberRefresh() {
+export const detailSchema = boxSchema.extend({ drops: z.array(dropSchema) });
+export function useFiberRefresh() {
   const { mutate } = useSWRConfig();
   return () =>
     mutate(
@@ -88,16 +76,18 @@ function useFiberRefresh() {
         key === "erp-ftth-boxes" ||
         key === "erp-noc" ||
         (Array.isArray(key) &&
-          ["erp-ftth-box", "erp-contract-ftth", "erp-map"].includes(key[0])),
+          ["erp-ftth-box", "erp-contract-ftth", "erp-map"].includes(key[0])) ||
+        key === "erp-ftth-box-page",
     );
 }
 export function FiberDirectory() {
   const { me } = useSession();
+  const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const result = useSWR("erp-ftth-boxes", async () =>
     z.array(boxSchema).parse(await api("/ftth/boxes")),
   );
-  const [editor, setEditor] = useState<FiberBox | "create" | null>(null);
+  const [creating, setCreating] = useState(false);
   const [view, setView] = useState("list");
   const [query, setQuery] = useState("");
   const refresh = useFiberRefresh();
@@ -107,29 +97,27 @@ export function FiberDirectory() {
     requested === "cabos" || (requested === "kml" && write)
       ? requested
       : "caixas";
+  // Links antigos (?caixa=<id>) abrem a página da caixa.
+  const legacy = params.get("caixa");
+  useEffect(() => {
+    if (legacy) navigate(boxHref(legacy), { replace: true });
+  }, [legacy, navigate]);
   const boxes = result.data ?? [];
-  const rows = boxes.filter((box) =>
-    normalize(
-      `${box.name} ${box.address ?? ""} ${box.device_name ?? ""} ${box.pon_port ?? ""}`,
-    ).includes(normalize(query)),
-  );
-  const total = boxes.reduce((sum, b) => sum + b.ports, 0);
-  const used = boxes.reduce((sum, b) => sum + b.used, 0);
-  const open = (id: string) =>
-    setParams((previous) => {
-      const next = new URLSearchParams(previous);
-      next.set("caixa", id);
-      return next;
-    });
-  const close = () =>
-    setParams(
-      (previous) => {
-        const next = new URLSearchParams(previous);
-        next.delete("caixa");
-        return next;
-      },
-      { replace: true },
+  const rows = boxes
+    .filter((box) =>
+      normalize(
+        `${box.name} ${box.address ?? ""} ${box.device_name ?? ""} ${box.pon_port ?? ""}`,
+      ).includes(normalize(query)),
+    )
+    .sort(
+      (a, b) =>
+        Number(a.kind === "cto") - Number(b.kind === "cto") ||
+        a.name.localeCompare(b.name, undefined, { numeric: true }),
     );
+  const ctos = boxes.filter((b) => b.kind === "cto");
+  const total = ctos.reduce((sum, b) => sum + b.ports, 0);
+  const used = ctos.reduce((sum, b) => sum + b.used, 0);
+  const full = ctos.filter((b) => b.used >= b.ports).length;
   const changeTab = (value: string) =>
     setParams((previous) => {
       const next = new URLSearchParams(previous);
@@ -139,29 +127,21 @@ export function FiberDirectory() {
       return next;
     });
   return (
-    <OpticalPage
-      title={
-        tab === "cabos"
-          ? "Cabos ópticos e traçado"
-          : tab === "kml"
-            ? "Importação de projeto GIS"
-            : "Caixas de terminação óptica"
-      }
-      description={
-        tab === "caixas"
-          ? "Organização de caixas, portas e assinantes da rede FTTH."
-          : "Projeto físico da rede FTTH: cabos, traçado, fusões, OTDR e importação KML."
-      }
-      mode="cto"
-      actions={
-        tab === "caixas" &&
-        write && (
-          <Button onClick={() => setEditor("create")}>Nova caixa óptica</Button>
-        )
-      }
-    >
-      <Tabs value={tab} onValueChange={(value) => changeTab(String(value))}>
-        <TabsList aria-label="Projeto da rede óptica">
+    <>
+      <PageHeading
+        title="Planta óptica"
+        description="Caixas, cabos e fusões da rede de fibra."
+        actions={
+          tab === "caixas" &&
+          write && <Button onClick={() => setCreating(true)}>Nova caixa</Button>
+        }
+      />
+      <Tabs
+        className="view-tabs"
+        value={tab}
+        onValueChange={(value) => changeTab(String(value))}
+      >
+        <TabsList variant="line" aria-label="Planta óptica">
           {designTabs
             .filter(([value]) => value !== "kml" || write)
             .map(([value, label]) => (
@@ -179,39 +159,27 @@ export function FiberDirectory() {
           error={result.error}
           retry={() => result.mutate()}
         >
-          <OpticalMetrics
-            items={[
-              {
-                label: "Caixas cadastradas",
-                value: boxes.length,
-                detail: `${boxes.filter((b) => b.kind === "cto").length} CTOs · ${boxes.filter((b) => b.kind === "ceo").length} CEOs`,
-                icon: Cable,
-              },
-              {
-                label: "Portas ocupadas",
-                value: used,
-                detail: "Vínculos e reservas registrados",
-                icon: Users,
-              },
-              {
-                label: "Portas disponíveis",
-                value: total - used,
-                detail: "Capacidade cadastrada",
-                icon: Workflow,
-              },
-              {
-                label: "Ocupação da rede",
-                value: total
-                  ? `${((used / total) * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`
-                  : "—",
-                detail: "Ocupação dos registros disponíveis",
-                icon: Signal,
-              },
-            ]}
-          />
+          <div className="metrics-grid">
+            <Kpi
+              label="Caixas"
+              value={boxes.length}
+              detail={`${ctos.length} CTO · ${boxes.length - ctos.length} CEO`}
+            />
+            <Kpi
+              label="Portas ocupadas"
+              value={`${used} / ${total}`}
+              detail="Nas CTOs"
+            />
+            <Kpi
+              label="Ocupação"
+              value={total ? `${Math.round((used / total) * 100)}%` : "—"}
+              detail={<Meter value={used} total={total} label=" " />}
+            />
+            <Kpi label="CTOs lotadas" value={full} detail="Sem porta livre" />
+          </div>
           <Panel
-            title="Inventário de caixas ópticas"
-            description="Coordenadas e hierarquia registradas; o desenho esquemático não comprova o trajeto físico de fibra."
+            title="Caixas"
+            description={`${rows.length} de ${boxes.length}`}
           >
             <div className="list-toolbar">
               <Tabs
@@ -223,122 +191,95 @@ export function FiberDirectory() {
                   <TabsTrigger value="map">Esquema</TabsTrigger>
                 </TabsList>
               </Tabs>
-              <FormField label="Buscar caixas ópticas">
-                <Input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Identificação, endereço ou OLT"
-                />
-              </FormField>
+              <Input
+                aria-label="Buscar caixa"
+                className="max-w-xs"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Nome, endereço ou PON"
+              />
             </div>
             {view === "map" ? (
-              <FiberDiagram boxes={rows} onOpen={open} />
+              <FiberDiagram
+                boxes={rows}
+                onOpen={(id) => navigate(boxHref(id))}
+              />
             ) : rows.length ? (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    {[
-                      "Identificação",
-                      "Tipo / anterior",
-                      "OLT / PON",
-                      "Endereço",
-                      "Portas",
-                      "Localização",
-                      "Ações",
-                    ].map((label) => (
-                      <TableHead key={label}>{label}</TableHead>
-                    ))}
+                    {["Caixa", "Origem", "Endereço", "Ocupação"].map(
+                      (label) => (
+                        <TableHead key={label}>{label}</TableHead>
+                      ),
+                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {rows.map((box) => (
-                    <TableRow key={box.id}>
-                      <TableCell>{box.name}</TableCell>
+                    <TableRow
+                      key={box.id}
+                      className="cursor-pointer"
+                      onClick={() => navigate(boxHref(box.id))}
+                    >
                       <TableCell>
-                        {box.kind.toUpperCase()}
+                        <Link
+                          className="font-medium hover:underline"
+                          to={boxHref(box.id)}
+                        >
+                          {box.name}
+                        </Link>
                         <small className="table-subline">
-                          {box.parent_name || "Sem caixa anterior"}
+                          {box.kind === "cto" ? "CTO" : "CEO"}
+                          {box.children
+                            ? ` · ${box.children} caixa(s) depois`
+                            : ""}
                         </small>
                       </TableCell>
                       <TableCell>
-                        {box.device_name || "Não informada"}
+                        {box.device_name
+                          ? `${box.device_name} · ${box.pon_port ?? "—"}`
+                          : "—"}
                         <small className="table-subline">
-                          {box.pon_port || "PON não informada"}
+                          {box.parent_name
+                            ? `Depois de ${box.parent_name}`
+                            : "Início do ramal"}
                         </small>
                       </TableCell>
-                      <TableCell>{box.address || "Não informado"}</TableCell>
+                      <TableCell>{box.address || "—"}</TableCell>
                       <TableCell>
-                        {box.used} / {box.ports}
-                      </TableCell>
-                      <TableCell>
-                        {box.latitude != null && box.longitude != null
-                          ? `${box.latitude}, ${box.longitude}`
-                          : "Sem coordenadas"}
-                      </TableCell>
-                      <TableCell>
-                        <div className="erp-inline-actions">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            aria-label={`Portas de ${box.name}`}
-                            onClick={() => open(box.id)}
-                          >
-                            Portas
-                          </Button>
-                          {write && (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                aria-label={`Editar ${box.name}`}
-                                onClick={() => setEditor(box)}
-                              >
-                                Editar
-                              </Button>
-                              <ActionButton
-                                danger
-                                confirm={`Excluir a caixa ${box.name}? O servidor verifica vínculos, reservas e caixas derivadas.`}
-                                onClick={async () => {
-                                  await api(`/ftth/boxes/${box.id}`, {
-                                    method: "DELETE",
-                                  });
-                                  await refresh();
-                                }}
-                              >
-                                Excluir caixa
-                              </ActionButton>
-                            </>
-                          )}
-                        </div>
+                        {box.kind === "cto" ? (
+                          <Meter value={box.used} total={box.ports} />
+                        ) : (
+                          <span className="text-xs text-muted-foreground">
+                            {box.ports} fibras
+                          </span>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             ) : (
-              <p className="profile-footnote">Nenhuma caixa nesta consulta.</p>
+              <p className="profile-footnote">Nenhuma caixa nesta busca.</p>
             )}
           </Panel>
         </QueryBoundary>
       )}
-      {editor && (
+      {creating && (
         <BoxEditor
-          box={editor === "create" ? undefined : editor}
           boxes={boxes}
-          onClose={() => setEditor(null)}
+          onClose={() => setCreating(false)}
           onDone={async () => {
-            setEditor(null);
+            setCreating(false);
             await refresh();
           }}
         />
       )}
-      {params.get("caixa") && (
-        <BoxPorts id={params.get("caixa")!} onClose={close} />
-      )}
-    </OpticalPage>
+    </>
   );
 }
-function BoxEditor({
+export function BoxEditor({
   box,
   boxes,
   onClose,
@@ -463,153 +404,7 @@ function BoxEditor({
     />
   );
 }
-function BoxPorts({ id, onClose }: { id: string; onClose: () => void }) {
-  const { me } = useSession();
-  const navigate = useNavigate();
-  const result = useSWR(["erp-ftth-box", id], async () =>
-    detailSchema.parse(await api(`/ftth/boxes/${id}`)),
-  );
-  const refresh = useFiberRefresh();
-  const b = result.data;
-  const byPort = new Map(b?.drops.map((drop) => [drop.port, drop]));
-  const [port, setPort] = useState<number | null>(null);
-  const write = can(me, "network:write");
-  return (
-    <Sheet
-      open
-      onOpenChange={(open) => {
-        if (!open) onClose();
-      }}
-    >
-      <SheetContent className="ticket-sheet">
-        <SheetHeader>
-          <SheetTitle>
-            {b ? `${b.name} · portas` : "Portas da caixa"}
-          </SheetTitle>
-          <SheetDescription>
-            Ocupação, reservas e fusões persistidas na rede óptica.
-          </SheetDescription>
-        </SheetHeader>
-        <div className="sheet-content-body erp-stack">
-          <QueryBoundary
-            loading={result.isLoading}
-            error={result.error}
-            retry={() => result.mutate()}
-          >
-            {b && (
-              <>
-                <ProfileFacts
-                  items={[
-                    ["Tipo", b.kind.toUpperCase()],
-                    ["Caixa anterior", b.parent_name || "Não informada"],
-                    [
-                      "OLT / PON",
-                      `${b.device_name || "Não informada"} · ${b.pon_port || "Não informada"}`,
-                    ],
-                    ["Endereço", b.address || "Não informado"],
-                    ["Ocupação", `${b.used} de ${b.ports}`],
-                  ]}
-                />
-                {b.latitude != null && b.longitude != null && (
-                  <a
-                    target="_blank"
-                    rel="noreferrer"
-                    className="profile-text-action"
-                    href={`https://www.openstreetmap.org/?mlat=${b.latitude}&mlon=${b.longitude}#map=18/${b.latitude}/${b.longitude}`}
-                  >
-                    Abrir coordenadas no mapa
-                  </a>
-                )}
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Porta</TableHead>
-                      <TableHead>Ocupação</TableHead>
-                      <TableHead>Ação</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {Array.from(
-                      { length: b.ports },
-                      (_, index) => index + 1,
-                    ).map((number) => {
-                      const drop = byPort.get(number);
-                      return (
-                        <TableRow key={number}>
-                          <TableCell>{number}</TableCell>
-                          <TableCell>
-                            {drop ? (
-                              drop.contract_id ? (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    onClose();
-                                    navigate(
-                                      `/contratos?contrato=${drop.contract_id}`,
-                                    );
-                                  }}
-                                >
-                                  {drop.subscriber_name || "Abrir contrato"}
-                                </Button>
-                              ) : (
-                                `Reservada · ${drop.note || "Sem anotação"}`
-                              )
-                            ) : (
-                              <Badge variant="outline">Livre</Badge>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {write &&
-                              (drop ? (
-                                <ActionButton
-                                  danger
-                                  confirm={`Liberar a porta ${number} da caixa ${b.name}?`}
-                                  onClick={async () => {
-                                    await api(`/ftth/drops/${drop.id}`, {
-                                      method: "DELETE",
-                                    });
-                                    await refresh();
-                                  }}
-                                >
-                                  Liberar porta {number}
-                                </ActionButton>
-                              ) : (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => setPort(number)}
-                                >
-                                  Ocupar porta {number}
-                                </Button>
-                              ))}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-                <BoxFusions boxId={b.id} ports={b.ports} />
-              </>
-            )}
-          </QueryBoundary>
-        </div>
-        {port !== null && (
-          <DropEditor
-            boxId={id}
-            port={port}
-            onClose={() => setPort(null)}
-            onDone={async () => {
-              setPort(null);
-              await refresh();
-            }}
-          />
-        )}
-      </SheetContent>
-    </Sheet>
-  );
-}
-function DropEditor({
+export function DropEditor({
   boxId,
   port,
   onClose,
@@ -825,6 +620,7 @@ export function ContractFiber({ id }: { id: string }) {
   const result = useSWR(["erp-contract-ftth", id], () =>
     api<{
       drop: {
+        box_id: string;
         box_name: string;
         port: number;
         device_name: string | null;
@@ -858,9 +654,9 @@ export function ContractFiber({ id }: { id: string }) {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => navigate("/rede/ftth/fttx-cto")}
+          onClick={() => navigate(drop ? boxHref(drop.box_id) : "/rede/ftth")}
         >
-          Gerenciar caixas e portas
+          {drop ? "Abrir caixa" : "Planta óptica"}
         </Button>
       </QueryBoundary>
     </ProfileSection>

@@ -95,7 +95,7 @@ A imagem `nexo-fase1-playwright:local` e as dependências de `e2e/node_modules` 
 ```bash
 S=~/.local/share/nexoisp/igaranet; python3 -c "import json;s=json.load(open('$S/estado.json'));print(f\"EMAIL=automacao@igaranet.lab\nSENHA={s['senha_automacao']}\nTOTP={s['mfa_automacao']}\")" > $S/tour.env
 sudo docker run --rm --network host --ipc=host --security-opt seccomp=unconfined --env-file $S/tour.env \
-  -e ROTAS="mapa=/rede/mapa,online=/rede/online,onus=/relatorios/consultar-onu" \
+  -e ROTAS="mapa=/rede/mapa,online=/rede/online,onus=/rede/onus,olts=/rede/olts" \
   -v "$PWD/e2e:/e2e" -v "$PWD/infra/lab-igaranet/tour.mjs:/e2e/tour.mjs:ro" -v /tmp:/out -w /e2e nexo-fase1-playwright:local node tour.mjs
 ```
 

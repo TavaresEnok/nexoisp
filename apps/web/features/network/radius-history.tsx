@@ -3,11 +3,16 @@ import useSWR from "swr";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
-  ProfileSection,
-  ProfileFacts,
-} from "@/components/subscriber-profile-sections";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { ProfileSection } from "@/components/subscriber-profile-sections";
 import { QueryBoundary } from "@/features/shared/feedback";
 import { api, download } from "@/platform/erp-client";
 import { stamp } from "./models";
@@ -132,14 +137,6 @@ export function RadiusAccountingHistory() {
           Exportar esta página CSV
         </Button>
       </form>
-      <p className="profile-footnote">
-        Cada registro representa uma geração, inclusive quando o identificador
-        externo se repete. Sem encerramento registrado não comprova conexão
-        ativa. O CSV consulta a página novamente e pode refletir pacotes
-        recebidos após a exibição; percorra as páginas para consultar o
-        restante. O histórico está sujeito à retenção configurada e não
-        substitui arquivo regulatório.
-      </p>
       <QueryBoundary
         loading={result.isLoading}
         error={result.error}
@@ -150,49 +147,53 @@ export function RadiusAccountingHistory() {
             Nenhuma sessão para os filtros informados.
           </p>
         )}
-        {result.data?.items.map((item) => (
-          <div key={item.id} className="border-t py-4">
-            <ProfileFacts
-              items={[
-                ["Geração / sessão", `${item.id} · ${item.session_id}`],
-                ["Usuário", item.username],
-                [
-                  "NAS",
-                  `${item.nas_device_id ?? "Identidade não comprovada"} · ${item.nas_ip ?? "Origem não registrada"}`,
-                ],
-                ["Início", stamp(item.started_at)],
-                ["Último pacote recebido", stamp(item.seen_at)],
-                [
-                  "Encerramento",
-                  item.stopped_at
-                    ? stamp(item.stopped_at)
-                    : "Sem encerramento registrado",
-                ],
-                ["Duração informada (segundos)", item.session_seconds],
-                ["Enviado pelo assinante (bytes)", item.bytes_in],
-                ["Recebido pelo assinante (bytes)", item.bytes_out],
-                [
-                  "Interface / VLAN",
-                  item.port_interface || item.port_vlan
-                    ? `${item.port_interface ?? "—"}${item.port_vlan ? ` · VLAN ${item.port_vlan}${item.port_inner_vlan ? ` (cliente ${item.port_inner_vlan})` : ""}` : ""}`
-                    : "Não informado",
-                ],
-                ["Serviço PPPoE", item.called_station || "Não informado"],
-                ["IPv4", item.framed_ip ?? "Não informado"],
-                ["Endereço IPv6", item.ipv6_address ?? "Não informado"],
-                ["Prefixo IPv6", item.ipv6_prefix ?? "Não informado"],
-                [
-                  "Prefixo delegado IPv6",
-                  item.delegated_ipv6_prefix ?? "Não informado",
-                ],
-                [
-                  "Causa de encerramento",
-                  item.terminate_cause ?? "Não informada",
-                ],
-              ]}
-            />
+        {!!result.data?.items.length && (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  {[
+                    "Usuário",
+                    "IP",
+                    "Início",
+                    "Último pacote",
+                    "Fim",
+                    "Duração",
+                    "Baixou / enviou",
+                    "Causa",
+                  ].map((label) => (
+                    <TableHead key={label}>{label}</TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {result.data.items.map((item) => (
+                  <TableRow
+                    key={item.id}
+                    title={`Sessão ${item.session_id} · NAS ${item.nas_ip ?? "não registrado"}`}
+                  >
+                    <TableCell className="mono">{item.username}</TableCell>
+                    <TableCell className="mono">
+                      {item.framed_ip ?? "—"}
+                    </TableCell>
+                    <TableCell>{stamp(item.started_at)}</TableCell>
+                    <TableCell>{stamp(item.seen_at)}</TableCell>
+                    <TableCell>
+                      {item.stopped_at ? stamp(item.stopped_at) : "Aberta"}
+                    </TableCell>
+                    <TableCell className="tabular-nums">
+                      {duration(item.session_seconds)}
+                    </TableCell>
+                    <TableCell className="tabular-nums">
+                      {bytes(item.bytes_out)} / {bytes(item.bytes_in)}
+                    </TableCell>
+                    <TableCell>{item.terminate_cause ?? "—"}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
-        ))}
+        )}
       </QueryBoundary>
       {result.data?.next_before && !result.error && (
         <Button
@@ -209,4 +210,22 @@ export function RadiusAccountingHistory() {
       )}
     </ProfileSection>
   );
+}
+
+function duration(value: unknown) {
+  const total = Number(value);
+  if (!Number.isFinite(total) || total <= 0) return "—";
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  return h ? `${h}h${String(m).padStart(2, "0")}` : `${m} min`;
+}
+function bytes(value: unknown) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return "0";
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.min(
+    units.length - 1,
+    Math.floor(Math.log(n) / Math.log(1024)),
+  );
+  return `${(n / 1024 ** i).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} ${units[i]}`;
 }

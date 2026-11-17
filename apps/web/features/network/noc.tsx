@@ -1,22 +1,13 @@
 import { useState } from "react";
 import useSWR from "swr";
 import { z } from "zod";
-import { useNavigate } from "react-router-dom";
-import { PageHeading, Panel } from "@/components/workspace-ui";
+import { Panel } from "@/components/workspace-ui";
 import {
   ProfileSection,
   ProfileFacts,
 } from "@/components/subscriber-profile-sections";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableHeader,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -29,10 +20,6 @@ import { RecordEditor } from "@/features/shared/record-editor";
 import { ActionButton } from "@/features/shared/action";
 import { can } from "@/features/session/model";
 import { useSession } from "@/features/session/provider";
-import {
-  canonicalErpPath,
-  canAccessPath,
-} from "@/features/operations/navigation";
 import { api } from "@/platform/erp-client";
 import { stamp } from "./models";
 const n = z.coerce.number();
@@ -42,6 +29,7 @@ const itemSchema = z.object({
   subscriber_name: z.string().nullable().optional(),
   target: z.string().nullable().optional(),
   serial: z.string().nullable().optional(),
+  device_id: z.string().nullable().optional(),
   device_name: z.string().nullable().optional(),
   pon_port: z.string().nullable().optional(),
   observed_rx_dbm: z.coerce.number().nullable().optional(),
@@ -51,7 +39,7 @@ const itemSchema = z.object({
   observed_at: z.string().nullable().optional(),
   updated_at: z.string().nullable().optional(),
 });
-const overviewSchema = z.object({
+export const overviewSchema = z.object({
   generated_at: z.string(),
   counters: z.object({
     agents_offline: n,
@@ -72,6 +60,7 @@ const overviewSchema = z.object({
   alerts: z.array(
     z.object({
       severity: z.string(),
+      kind: z.string().optional(),
       title: z.string(),
       detail: z.string().optional(),
       link: z.string().optional(),
@@ -110,281 +99,6 @@ export function Severity({ value }: { value: string }) {
         } as Record<string, string>
       )[value] ?? value}
     </Badge>
-  );
-}
-export function NetworkNoc() {
-  const { me } = useSession();
-  const navigate = useNavigate();
-  const result = useSWR(
-    "erp-noc",
-    async () => overviewSchema.parse(await api("/noc/overview")),
-    { refreshInterval: 10000 },
-  );
-  const [editing, setEditing] = useState(false);
-  const [expanded, setExpanded] = useState<number | null>(null);
-  const data = result.data;
-  const c = data?.counters;
-  const open = (path: string) => {
-    const [pathname, query] = path.split("?");
-    const canonical = canonicalErpPath(pathname);
-    if (canAccessPath(me, canonical))
-      navigate(`${canonical}${query ? `?${query}` : ""}`);
-  };
-  return (
-    <>
-      <PageHeading
-        title="NOC"
-        description="Leituras e alertas da operação de rede."
-        actions={
-          can(me, "network:write") &&
-          data && (
-            <Button variant="outline" onClick={() => setEditing(true)}>
-              Limiares e regras
-            </Button>
-          )
-        }
-      />
-      <QueryBoundary
-        loading={result.isLoading}
-        error={result.error}
-        retry={() => result.mutate()}
-      >
-        {data && c && (
-          <>
-            <p className="profile-footnote">
-              Atualizado em {stamp(data.generated_at)} · os alertas usam regras
-              sobre as leituras dos agentes e não alteram a rede.
-            </p>
-            <section className="metrics-grid" aria-label="Indicadores do NOC">
-              {[
-                [c.agents_offline, "Agentes offline"],
-                [`${c.sessions} / ${c.accounts}`, "Sessões online / acessos"],
-                [c.suspended, "Acessos suspensos"],
-                [`${c.onus_down} / ${c.onus}`, "ONUs sem sinal / total"],
-                [
-                  c.work_orders,
-                  `OS em aberto · ${c.work_orders_late} vencida(s)`,
-                ],
-                [c.tickets_technical, "Atendimentos técnicos abertos"],
-              ].map(([value, label]) => (
-                <div className="metric-card" key={label}>
-                  <div className="metric-heading">
-                    <span>{label}</span>
-                  </div>
-                  <div className="metric-main">
-                    <strong>{value}</strong>
-                  </div>
-                </div>
-              ))}
-            </section>
-            <div className="erp-stack">
-              <Panel title={`Alertas (${data.alerts.length})`}>
-                {data.alerts.length ? (
-                  data.alerts.map((alert, index) => (
-                    <ProfileSection
-                      key={index}
-                      title={alert.title}
-                      caption={alert.detail}
-                      action={<Severity value={alert.severity} />}
-                    >
-                      <div className="erp-inline-actions">
-                        {alert.items && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              setExpanded(expanded === index ? null : index)
-                            }
-                          >
-                            {expanded === index
-                              ? "Ocultar itens"
-                              : `Ver ${alert.items.length} item(ns)`}
-                          </Button>
-                        )}
-                        {alert.link &&
-                          canAccessPath(
-                            me,
-                            canonicalErpPath(alert.link.split("?")[0]),
-                          ) && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => open(alert.link!)}
-                            >
-                              Abrir destino
-                            </Button>
-                          )}
-                      </div>
-                      {expanded === index &&
-                        alert.items?.map((item) => (
-                          <div key={item.id} className="erp-contract-card">
-                            <strong>
-                              {item.subscriber_name ||
-                                item.target ||
-                                item.serial ||
-                                item.id}
-                            </strong>
-                            <p className="profile-footnote">
-                              {[
-                                item.device_name,
-                                item.pon_port && `PON ${item.pon_port}`,
-                                item.observed_rx_dbm != null &&
-                                  `RX ${item.observed_rx_dbm} dBm`,
-                                item.action,
-                                item.status,
-                                item.note,
-                              ]
-                                .filter(Boolean)
-                                .join(" · ")}{" "}
-                              ·{" "}
-                              {stamp(
-                                item.observed_at ?? item.updated_at ?? null,
-                              )}
-                            </p>
-                            {item.contract_id && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() =>
-                                  navigate(
-                                    `/contratos?contrato=${item.contract_id}`,
-                                  )
-                                }
-                              >
-                                Abrir contrato
-                              </Button>
-                            )}
-                          </div>
-                        ))}
-                    </ProfileSection>
-                  ))
-                ) : (
-                  <p className="profile-footnote">Nenhum alerta agora.</p>
-                )}
-              </Panel>
-              <Panel title="Portas PON">
-                {data.pons.length ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        {[
-                          "OLT",
-                          "Porta PON",
-                          "ONUs autorizadas",
-                          "Sem sinal",
-                          "Situação",
-                          "Última leitura",
-                        ].map((label) => (
-                          <TableHead key={label}>{label}</TableHead>
-                        ))}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {data.pons.map((row) => (
-                        <TableRow key={`${row.device_id}/${row.pon_port}`}>
-                          <TableCell>{row.device_name}</TableCell>
-                          <TableCell>{row.pon_port}</TableCell>
-                          <TableCell>{row.total}</TableCell>
-                          <TableCell>{row.down}</TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={
-                                row.outage
-                                  ? "destructive"
-                                  : row.down
-                                    ? "warning"
-                                    : "outline"
-                              }
-                            >
-                              {row.outage
-                                ? "Possível falha coletiva"
-                                : row.down
-                                  ? "Falhas isoladas"
-                                  : "Normal"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{stamp(row.read_at)}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                ) : (
-                  <p className="profile-footnote">
-                    Nenhuma porta PON com leitura.
-                  </p>
-                )}
-                <p className="profile-footnote">
-                  Sinal fraco:{" "}
-                  {data.settings.onu_rx_min_dbm == null
-                    ? "sem limite definido pelo provedor"
-                    : `abaixo de ${data.settings.onu_rx_min_dbm} dBm`}
-                  . Falha coletiva: ao menos {data.settings.pon_outage_min} ONUs
-                  e metade da porta.
-                </p>
-              </Panel>
-            </div>
-          </>
-        )}
-      </QueryBoundary>
-      {editing && data && (
-        <RecordEditor
-          title="Limiares e regras de rede"
-          description="Os limites dependem do equipamento e do projeto óptico do provedor."
-          initial={{
-            rx:
-              data.settings.onu_rx_min_dbm == null
-                ? ""
-                : String(data.settings.onu_rx_min_dbm),
-            pon: String(data.settings.pon_outage_min),
-            remove: String(data.settings.onu_remove_on_contract_end),
-          }}
-          fields={[
-            {
-              key: "rx",
-              label: "RX mínimo da ONU em dBm",
-              hint: "Em branco: mostra o sinal sem classificá-lo.",
-            },
-            {
-              key: "pon",
-              label: "Mínimo de ONUs sem sinal na mesma PON",
-              type: "number",
-              min: 2,
-              max: 500,
-              required: true,
-            },
-            {
-              key: "remove",
-              label: "Desautorizar ONU ao encerrar contrato",
-              type: "select",
-              options: [
-                { value: "false", label: "Não · remoção manual" },
-                {
-                  value: "true",
-                  label: "Sim · solicitar desautorização automaticamente",
-                },
-              ],
-            },
-          ]}
-          onClose={() => setEditing(false)}
-          onSubmit={async (values) => {
-            const rx =
-              values.rx === "" ? null : Number(values.rx.replace(",", "."));
-            if (rx !== null && !Number.isFinite(rx))
-              throw new Error("Informe um RX válido.");
-            await api("/noc/settings", {
-              method: "PUT",
-              body: {
-                onu_rx_min_dbm: rx,
-                pon_outage_min: Number(values.pon),
-                onu_remove_on_contract_end: values.remove === "true",
-              },
-            });
-            setEditing(false);
-            await result.mutate();
-          }}
-        />
-      )}
-    </>
   );
 }
 const diagnosisSchema = z.object({
@@ -485,5 +199,117 @@ export function ContractDiagnosisButton({ id }: { id: string }) {
       </Button>
       {open && <ContractDiagnosis id={id} onClose={() => setOpen(false)} />}
     </>
+  );
+}
+
+/** Limiares usados nos alertas de rede (Rede › Cadastros › Limiares). */
+export function NocThresholds() {
+  const { me } = useSession();
+  const result = useSWR(
+    "erp-noc",
+    async () => overviewSchema.parse(await api("/noc/overview")),
+    { refreshInterval: 10000 },
+  );
+  const [editing, setEditing] = useState(false);
+  const data = result.data;
+  return (
+    <Panel
+      title="Limiares dos alertas"
+      action={
+        can(me, "network:write") &&
+        data && (
+          <Button variant="outline" onClick={() => setEditing(true)}>
+            Editar
+          </Button>
+        )
+      }
+    >
+      <QueryBoundary
+        loading={result.isLoading}
+        error={result.error}
+        retry={() => result.mutate()}
+      >
+        {data && (
+          <ProfileFacts
+            items={[
+              [
+                "Sinal fraco da ONU",
+                data.settings.onu_rx_min_dbm == null
+                  ? "Sem limite"
+                  : `Abaixo de ${data.settings.onu_rx_min_dbm} dBm`,
+              ],
+              [
+                "Falha coletiva na PON",
+                `${data.settings.pon_outage_min} ONUs e metade da porta sem sinal`,
+              ],
+              [
+                "Contrato encerrado",
+                data.settings.onu_remove_on_contract_end
+                  ? "Desautoriza a ONU automaticamente"
+                  : "ONU removida manualmente",
+              ],
+            ]}
+          />
+        )}
+      </QueryBoundary>
+      {editing && data && (
+        <RecordEditor
+          title="Limiares e regras de rede"
+          description="Os limites dependem do equipamento e do projeto óptico do provedor."
+          initial={{
+            rx:
+              data.settings.onu_rx_min_dbm == null
+                ? ""
+                : String(data.settings.onu_rx_min_dbm),
+            pon: String(data.settings.pon_outage_min),
+            remove: String(data.settings.onu_remove_on_contract_end),
+          }}
+          fields={[
+            {
+              key: "rx",
+              label: "RX mínimo da ONU em dBm",
+              hint: "Em branco: mostra o sinal sem classificá-lo.",
+            },
+            {
+              key: "pon",
+              label: "Mínimo de ONUs sem sinal na mesma PON",
+              type: "number",
+              min: 2,
+              max: 500,
+              required: true,
+            },
+            {
+              key: "remove",
+              label: "Desautorizar ONU ao encerrar contrato",
+              type: "select",
+              options: [
+                { value: "false", label: "Não · remoção manual" },
+                {
+                  value: "true",
+                  label: "Sim · solicitar desautorização automaticamente",
+                },
+              ],
+            },
+          ]}
+          onClose={() => setEditing(false)}
+          onSubmit={async (values) => {
+            const rx =
+              values.rx === "" ? null : Number(values.rx.replace(",", "."));
+            if (rx !== null && !Number.isFinite(rx))
+              throw new Error("Informe um RX válido.");
+            await api("/noc/settings", {
+              method: "PUT",
+              body: {
+                onu_rx_min_dbm: rx,
+                pon_outage_min: Number(values.pon),
+                onu_remove_on_contract_end: values.remove === "true",
+              },
+            });
+            setEditing(false);
+            await result.mutate();
+          }}
+        />
+      )}
+    </Panel>
   );
 }

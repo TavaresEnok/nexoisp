@@ -105,14 +105,18 @@ function connections(status: RadiusStatus | undefined, vendor: string) {
       : []),
   ];
 }
-export function RadiusOverview() {
+export function RadiusOverview({
+  creatable = true,
+}: { creatable?: boolean } = {}) {
   const { me } = useSession();
   const result = useRadiusStatus();
   const [creating, setCreating] = useState(false);
   useCreateRequest(
     "concentrador",
     () => setCreating(true),
-    result.data ? can(me, "network:write") && result.data.enabled : undefined,
+    creatable && result.data
+      ? can(me, "network:write") && result.data.enabled
+      : undefined,
   );
   const [shown, setShown] = useState<Setup | null>(null);
   return (
@@ -121,6 +125,7 @@ export function RadiusOverview() {
       description="Concentradores que autenticam diretamente no NexoISP."
       contentClassName="min-w-0"
       action={
+        creatable &&
         can(me, "network:write") && (
           <Button
             disabled={!result.data?.enabled}
@@ -190,12 +195,8 @@ export function RadiusOverview() {
               ]}
             />
             <p className="profile-footnote">
-              Os comandos de configuração não são aplicados automaticamente ao
-              concentrador. Túneis dependem dos recursos habilitados nesta
-              instalação. Pacote recente e banco acessível não comprovam a
-              aplicação de perfil no equipamento. Sessões antigas são
-              sinalizadas para conferência; esta tela não as encerra
-              automaticamente.
+              Os comandos de configuração são aplicados no concentrador pela
+              equipe; o NexoISP não os envia sozinho.
             </p>
             {!result.data.host_configured && (
               <Badge variant="warning" className="h-auto whitespace-normal">
@@ -804,4 +805,18 @@ function RepointPlan({
       </DialogContent>
     </Dialog>
   );
+}
+
+/** Cadastro de concentrador com autenticação integrada, aberto pela página de concentradores. */
+export function ConcentratorCreator({ onClose }: { onClose: () => void }) {
+  const result = useRadiusStatus();
+  const [shown, setShown] = useState<Setup | null>(null);
+  return shown ? (
+    <RadiusSetup value={shown} onClose={onClose} />
+  ) : (
+    <RadiusEditor status={result.data} onClose={onClose} onDone={setShown} />
+  );
+}
+export function useRadiusEnabled() {
+  return useRadiusStatus().data?.enabled ?? false;
 }

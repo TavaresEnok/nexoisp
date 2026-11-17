@@ -1,230 +1,201 @@
+// Rede › Concentradores e agentes. As OLTs têm página própria (Rede › OLTs).
 import { useState } from "react";
-import useSWR from "swr";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { Activity, Network, Server, AlertTriangle } from "lucide-react";
-import { PageHeading } from "@/components/workspace-ui";
+import { useSearchParams } from "react-router-dom";
+import { PageHeading, Panel, Status } from "@/components/workspace-ui";
 import {
-  NetworkEquipmentTable,
-  NetworkTopGrid,
-} from "@/components/network-center";
-import { EmptyState } from "@/components/workspace-feedback";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { QueryBoundary, ConnectedNotice } from "@/features/shared/feedback";
+import { QueryBoundary } from "@/features/shared/feedback";
 import { useSession } from "@/features/session/provider";
 import { can } from "@/features/session/model";
-import { canAccessPath } from "@/features/operations/navigation";
-import { useQueryState } from "@/lib/use-query-state";
-import { normalize } from "@/lib/format";
-import { api } from "@/platform/erp-client";
+import { useCreateRequest } from "@/features/shared/create-request";
 import { useDevices } from "./queries";
-import { projectDevice, healthSchema } from "./models";
-import { RadiusActions, RadiusOverview } from "./radius";
+import { drivers, vendors } from "./models";
+import {
+  ConcentratorCreator,
+  RadiusActions,
+  RadiusOverview,
+  useRadiusEnabled,
+} from "./radius";
 import { AgentDirectory } from "./agents";
 import { DeviceCreator, DeviceDetails } from "./devices";
-import { useCreateRequest } from "@/features/shared/create-request";
+import { deviceStatus, isOlt } from "./olts";
+import { ago, PageTabs, useSessions } from "./kit";
+
+const tabs = [
+  {
+    value: "concentradores",
+    label: "Concentradores",
+    href: "/rede/equipamentos",
+  },
+  {
+    value: "agentes",
+    label: "Agentes",
+    href: "/rede/equipamentos?aba=agentes",
+  },
+  {
+    value: "radius",
+    label: "Autenticação",
+    href: "/rede/equipamentos?aba=radius",
+  },
+];
+
 export function NetworkDirectory() {
   const { me } = useSession();
-  const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const devices = useDevices();
-  const health = useSWR(
-    "erp-network-health",
-    async () => healthSchema.parse(await api("/network/health")),
-    { refreshInterval: 5000 },
-  );
-  const [creating, setCreating] = useState(false);
+  const sessions = useSessions();
+  const radiusEnabled = useRadiusEnabled();
+  const [creating, setCreating] = useState<"radius" | "api" | null>(null);
+  const write = can(me, "network:write");
   useCreateRequest(
-    "equipamento",
-    () => setCreating(true),
-    can(me, "network:write"),
+    "concentrador",
+    () => setCreating("radius"),
+    write && radiusEnabled,
   );
-  const statuses = [
-    "Todos",
-    "Operacional",
-    "Atenção",
-    "Não verificado",
-    "Manutenção",
-  ];
-  const [filter, setFilter] = useQueryState("situacao", "Todos", statuses);
-  const [query, setQuery] = useQueryState("busca", "");
-  const selected = devices.data?.find(
-    (device) => device.id === params.get("equipamento"),
-  );
-  const online = useSWR(
-    "erp-online-summary",
-    async () =>
-      (
-        await api<{ rows: { nas: string; pop: string | null }[] }>(
-          "/network/online?q=",
-        )
-      ).rows,
-    { refreshInterval: 30000 },
-  );
-  const byNas = Object.entries(
-    (online.data ?? []).reduce<Record<string, { pop: string | null }[]>>(
-      (groups, row) => {
-        (groups[row.nas] ??= []).push(row);
-        return groups;
+  useCreateRequest("equipamento", () => setCreating("api"), write);
+  const tab = tabs.some((t) => t.value === params.get("aba"))
+    ? params.get("aba")!
+    : "concentradores";
+  const all = devices.data ?? [];
+  const rows = all.filter((d) => !isOlt(d));
+  const selected = all.find((d) => d.id === params.get("equipamento"));
+  const online = new Map<string, number>();
+  for (const s of sessions.data ?? [])
+    if (s.nas) online.set(s.nas, (online.get(s.nas) ?? 0) + 1);
+  const close = () =>
+    setParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        next.delete("equipamento");
+        return next;
       },
-      {},
-    ),
-  ).sort((a, b) => b[1].length - a[1].length);
-  const rows = (devices.data ?? [])
-    .map(projectDevice)
-    .filter(
-      (device) =>
-        (filter === "Todos" || device.status === filter) &&
-        normalize(
-          `${device.name} ${device.ip} ${device.type} ${device.vendor}`,
-        ).includes(normalize(query.trim())),
+      { replace: true },
     );
-  const close = () => {
-    const next = new URLSearchParams(params);
-    next.delete("equipamento");
-    setParams(next, { replace: true });
-  };
   return (
     <>
-      <ConnectedNotice demo={me?.demo} />
       <PageHeading
-        title="Monitoramento de rede"
-        description="Disponibilidade, equipamentos e impacto no assinante em uma visão só."
+        title="Concentradores e agentes"
+        description="Onde os clientes autenticam e quem fala com os equipamentos."
         actions={
-          can(me, "network:write") && (
-            <Button onClick={() => setCreating(true)}>Novo equipamento</Button>
+          write && (
+            <>
+              <Button variant="outline" onClick={() => setCreating("api")}>
+                Equipamento por API
+              </Button>
+              <Button
+                disabled={!radiusEnabled}
+                onClick={() => setCreating("radius")}
+              >
+                Novo concentrador
+              </Button>
+            </>
           )
         }
       />
-      <QueryBoundary
-        loading={health.isLoading}
-        error={health.error}
-        retry={() => health.mutate()}
-      >
-        {health.data && (
-          <div className="metrics-grid">
-            {[
-              {
-                title: "Agentes offline",
-                value: `${health.data.agents_offline} / ${health.data.agents}`,
-                detail: "Conforme o último contato recebido",
-                icon: Server,
-              },
-              {
-                title: "Operações incertas",
-                value: health.data.uncertain,
-                detail: "Verificar evidências antes de repetir",
-                icon: AlertTriangle,
-              },
-              {
-                title: "Falhas e expirações",
-                value: health.data.failed_recent,
-                detail: "Últimos sete dias",
-                icon: Activity,
-              },
-              {
-                title: "Divergências de estado",
-                value: health.data.drift,
-                detail: `${health.data.in_progress} em andamento${health.data.oldest_pending_s == null ? "" : ` · fila mais antiga: ${health.data.oldest_pending_s}s`}`,
-                icon: Network,
-              },
-            ].map((metric) => (
-              <div className="metric-card" key={metric.title}>
-                <div className="metric-heading">
-                  <span>{metric.title}</span>
-                  <metric.icon size={17} />
-                </div>
-                <div className="metric-main">
-                  <strong>{metric.value}</strong>
-                </div>
-                <p>{metric.detail}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </QueryBoundary>
-      <NetworkTopGrid
-        chart={{
-          title: "De ponta a ponta",
-          description:
-            "Sessões online por concentrador · último accounting recebido",
-          label: "Sessões online",
-          unit: "",
-          rows: byNas.map(([name, rows]) => ({ name, value: rows.length })),
-          empty: (
-            <EmptyState
-              icon={Network}
-              title={
-                online.isLoading
-                  ? "Consultando sessões…"
-                  : "Nenhuma sessão online registrada"
-              }
-              description="O gráfico usa o accounting recebido dos concentradores."
-            />
-          ),
-        }}
-        concentrators={{
-          title: "Sessões por concentrador",
-          description: "Participação de cada concentrador nas sessões online",
-          rows: byNas.map(([name, rows]) => ({
-            id: name,
-            name,
-            sessions: rows.length,
-            total: online.data?.length ?? 0,
-            pop: rows[0]?.pop || "POP não informado",
-            note: "das sessões online",
-            onClick: () =>
-              navigate(`/rede/online?busca=${encodeURIComponent(name)}`),
-          })),
-          empty: (
-            <EmptyState
-              icon={Server}
-              title="Nenhum concentrador com sessão"
-              description="Concentradores aparecem aqui quando enviam accounting."
-            />
-          ),
-        }}
-      />
-      <div className="erp-stack">
-        <RadiusOverview />
-        <QueryBoundary
-          loading={devices.isLoading}
-          error={devices.error}
-          retry={() => devices.mutate()}
+      <PageTabs value={tab} tabs={tabs} />
+      {tab === "concentradores" && (
+        <Panel
+          title="Concentradores"
+          description={`${rows.length} equipamento(s)`}
         >
-          <NetworkEquipmentTable
-            operational
-            statusOptions={statuses}
-            rows={rows}
-            filter={filter}
-            setFilter={setFilter}
-            query={query}
-            setQuery={setQuery}
-            onOpen={(node) => {
-              const next = new URLSearchParams(params);
-              next.set("equipamento", node.id);
-              setParams(next);
-            }}
-            actions={
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate("/rede/operacoes")}
-              >
-                Operações de rede
-              </Button>
-            }
-          />
-        </QueryBoundary>
-        <AgentDirectory />
-      </div>
-      {creating && <DeviceCreator onClose={() => setCreating(false)} />}
+          <QueryBoundary
+            loading={devices.isLoading}
+            error={devices.error}
+            retry={() => devices.mutate()}
+          >
+            {rows.length ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {[
+                      "Concentrador",
+                      "Conexão",
+                      "Online",
+                      "Contas",
+                      "Contato",
+                      "Situação",
+                    ].map((label) => (
+                      <TableHead key={label}>{label}</TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {rows.map((d) => (
+                    <TableRow
+                      key={d.id}
+                      className="cursor-pointer"
+                      onClick={() =>
+                        setParams((current) => {
+                          const next = new URLSearchParams(current);
+                          next.set("equipamento", d.id);
+                          return next;
+                        })
+                      }
+                    >
+                      <TableCell>
+                        <span className="font-medium">{d.name}</span>
+                        <small className="table-subline">
+                          {d.driver === "radius"
+                            ? `Autenticação integrada · ${vendors[d.vendor ?? ""] ?? d.vendor ?? "RADIUS"}`
+                            : (drivers[d.driver] ?? d.driver)}
+                        </small>
+                      </TableCell>
+                      <TableCell>
+                        <span className="mono">
+                          {d.nas_ip ?? d.host ?? "—"}
+                        </span>
+                        <small className="table-subline">
+                          {d.tunnel
+                            ? `${d.tunnel.kind === "wireguard" ? "WireGuard" : d.tunnel.kind.toUpperCase()} · ${d.tunnel.endpoint ?? "sem endpoint"}`
+                            : "Sem túnel"}
+                        </small>
+                      </TableCell>
+                      <TableCell className="tabular-nums">
+                        {online.get(d.name) ?? 0}
+                      </TableCell>
+                      <TableCell className="tabular-nums">
+                        {d.accounts}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {ago(d.tunnel?.handshake_at ?? d.last_check_at)}
+                      </TableCell>
+                      <TableCell>
+                        <Status value={deviceStatus(d)} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="profile-footnote">
+                Nenhum concentrador cadastrado.
+              </p>
+            )}
+          </QueryBoundary>
+        </Panel>
+      )}
+      {tab === "agentes" && <AgentDirectory />}
+      {tab === "radius" && <RadiusOverview creatable={false} />}
+      {creating === "radius" && (
+        <ConcentratorCreator onClose={() => setCreating(null)} />
+      )}
+      {creating === "api" && (
+        <DeviceCreator onClose={() => setCreating(null)} />
+      )}
       {selected && (
         <DeviceDetails
           key={selected.id}
           device={selected}
           onClose={close}
           extra={
-            can(me, "network:write") &&
+            write &&
             ["radius", "demo", "mikrotik_radius"].includes(selected.driver) && (
               <RadiusActions device={selected} />
             )

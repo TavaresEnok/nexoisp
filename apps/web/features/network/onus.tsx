@@ -1,21 +1,11 @@
 import { useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { z } from "zod";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { PageHeading, Panel } from "@/components/workspace-ui";
-import { OpticalPage } from "@/components/optical-network";
+import { useSearchParams } from "react-router-dom";
 import {
   ProfileSection,
   ProfileFacts,
 } from "@/components/subscriber-profile-sections";
-import {
-  Table,
-  TableHeader,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -75,6 +65,18 @@ export const onuSchema = z.object({
   agent_online: z.boolean(),
   agent_name: z.string().nullable(),
   drift: z.boolean(),
+  subscriber_id: z.string().nullable().optional(),
+  contract_status: z.string().nullable().optional(),
+  maintenance: z.boolean().optional(),
+  observed_detail: z
+    .object({
+      distance_m: z.coerce.number().nullable().optional(),
+      last_down_cause: z.string().nullable().optional(),
+      ont_id: z.coerce.number().nullable().optional(),
+    })
+    .passthrough()
+    .nullable()
+    .optional(),
 });
 const dbm = (value: number | null) =>
   value == null ? "Não informado" : `${value.toFixed(2)} dBm`;
@@ -105,191 +107,6 @@ function useOnuRefresh() {
             "erp-diagnosis",
           ].includes(key[0])),
     );
-}
-export function NetworkOnus() {
-  const { me } = useSession();
-  const navigate = useNavigate();
-  const operate = can(me, "network:operate");
-  const found = useSWR(
-    "erp-discoveries",
-    async () => z.array(discoverySchema).parse(await api("/olt/discoveries")),
-    { refreshInterval: 5000 },
-  );
-  const linked = useSWR(
-    "erp-onus",
-    async () => z.array(onuSchema).parse(await api("/onus")),
-    { refreshInterval: 5000 },
-  );
-  const [authorization, setAuthorization] = useState<{
-    discovery?: z.infer<typeof discoverySchema>;
-  } | null>(null);
-  const refresh = useOnuRefresh();
-  return (
-    <OpticalPage
-      title="ONUs e autorizações"
-      description="Descobertas e vínculos reportados pelas OLTs do provedor."
-      mode="onu"
-      actions={
-        operate && (
-          <Button onClick={() => setAuthorization({})}>
-            Autorizar por serial
-          </Button>
-        )
-      }
-    >
-      <div className="erp-stack">
-        <Panel
-          title="Aguardando autorização"
-          description="A lista vem dos relatos dos agentes. A descoberta não confirma o vínculo a um contrato."
-        >
-          <QueryBoundary
-            loading={found.isLoading}
-            error={found.error}
-            retry={() => found.mutate()}
-          >
-            {found.data?.length ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    {[
-                      "Serial",
-                      "OLT",
-                      "Porta PON",
-                      "Fabricante / modelo",
-                      "Primeira leitura",
-                      "Última leitura",
-                      "Ação",
-                    ].map((label) => (
-                      <TableHead key={label}>{label}</TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {found.data.map((n) => (
-                    <TableRow key={n.id}>
-                      <TableCell>{n.serial}</TableCell>
-                      <TableCell>
-                        {n.device_name}
-                        {n.driver === "olt_demo" && (
-                          <Badge variant="warning">Simulada</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>{n.pon_port}</TableCell>
-                      <TableCell>
-                        {[n.vendor, n.model].filter(Boolean).join(" · ") ||
-                          "Não informado"}
-                      </TableCell>
-                      <TableCell>{stamp(n.first_seen_at)}</TableCell>
-                      <TableCell>{stamp(n.last_seen_at)}</TableCell>
-                      <TableCell>
-                        {operate && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            aria-label={`Autorizar ONU ${n.serial}`}
-                            onClick={() => setAuthorization({ discovery: n })}
-                          >
-                            Autorizar
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <p className="profile-footnote">
-                Nenhuma ONU aguardando autorização.
-              </p>
-            )}
-          </QueryBoundary>
-        </Panel>
-        <Panel title="ONUs vinculadas a contratos">
-          <QueryBoundary
-            loading={linked.isLoading}
-            error={linked.error}
-            retry={() => linked.mutate()}
-          >
-            {linked.data?.length ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    {[
-                      "Assinante / serial",
-                      "OLT / PON",
-                      "Perfil / VLAN",
-                      "Intenção",
-                      "Estado na OLT",
-                      "RX / TX",
-                      "Última leitura",
-                    ].map((label) => (
-                      <TableHead key={label}>{label}</TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {linked.data.map((n) => (
-                    <TableRow key={n.id}>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() =>
-                            navigate(`/contratos?contrato=${n.contract_id}`)
-                          }
-                        >
-                          {n.subscriber_name}
-                        </Button>
-                        <small className="table-subline">{n.serial}</small>
-                      </TableCell>
-                      <TableCell>
-                        {n.device_name}
-                        <small className="table-subline">{n.pon_port}</small>
-                      </TableCell>
-                      <TableCell>
-                        {n.line_profile}
-                        <small className="table-subline">
-                          VLAN {n.service_vlan}
-                        </small>
-                      </TableCell>
-                      <TableCell>
-                        {n.desired_state === "authorized"
-                          ? "Autorizada"
-                          : "Removida"}
-                        {n.drift && (
-                          <Badge variant="warning">Divergência</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>{state(n)}</TableCell>
-                      <TableCell>
-                        {dbm(n.observed_rx_dbm)}
-                        <small className="table-subline">
-                          {dbm(n.observed_tx_dbm)}
-                        </small>
-                      </TableCell>
-                      <TableCell>{stamp(n.observed_at)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <p className="profile-footnote">Nenhuma ONU vinculada.</p>
-            )}
-          </QueryBoundary>
-        </Panel>
-      </div>
-      {authorization && (
-        <AuthorizeOnu
-          discovery={authorization.discovery}
-          onClose={() => setAuthorization(null)}
-          onDone={async () => {
-            setAuthorization(null);
-            await refresh();
-          }}
-        />
-      )}
-    </OpticalPage>
-  );
 }
 export function ContractOnu({ id, status }: { id: string; status: string }) {
   const { me } = useSession();
@@ -496,7 +313,7 @@ export function ContractOnu({ id, status }: { id: string; status: string }) {
     </ProfileSection>
   );
 }
-function AuthorizeOnu({
+export function AuthorizeOnu({
   contractId,
   discovery,
   onClose,

@@ -22,7 +22,13 @@ import { api } from "@/platform/erp-client";
 import { useAgents, useNetworkRefresh } from "./queries";
 import { drivers, vendors, stamp, type Device } from "./models";
 import { DeviceConfigBackups, configBackupDrivers } from "./config-backups";
-export function DeviceCreator({ onClose }: { onClose: () => void }) {
+export function DeviceCreator({
+  onClose,
+  driver = "mikrotik_radius",
+}: {
+  onClose: () => void;
+  driver?: string;
+}) {
   const { me } = useSession();
   const agents = useAgents();
   const refresh = useNetworkRefresh();
@@ -35,7 +41,7 @@ export function DeviceCreator({ onClose }: { onClose: () => void }) {
       retry={() => agents.mutate()}
       initial={{
         name: "",
-        driver: "mikrotik_radius",
+        driver,
         host: "",
         api_port: "",
         credential_ref: "",

@@ -81,6 +81,8 @@ export function ContractCpe({ id }: { id: string }) {
     await commands.send(kind);
     await result.mutate();
   };
+  // Sem TR-069 na instalação a seção não tem o que mostrar.
+  if (result.data && !result.data.enabled) return null;
   return (
     <ProfileSection
       title="Roteador do assinante · TR-069"

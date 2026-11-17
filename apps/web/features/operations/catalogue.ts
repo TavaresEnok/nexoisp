@@ -26,12 +26,32 @@ const extensions: Record<string, NavigationNode[]> = {
     extension("Financeiro", "/relatorios/indicacoes", "Indicações"),
     extension("Financeiro", "/financeiro/contas-a-pagar", "Contas a pagar"),
   ],
-  rede: [
-    extension("Rede / FTTx", "/noc", "NOC"),
-    extension("Rede / FTTx", "/pops", "Pontos de presença"),
-  ],
 };
-const extensionPages = Object.values(extensions).flat();
+// Área Rede da operação, organizada pelo trabalho do técnico: primeiro o que se
+// consulta todo dia, depois a estrutura e, por fim, o que se cadastra uma vez.
+// Substitui a árvore do v0 (Rede / FTTx + Relatório), que misturava ações e páginas.
+const networkPages: NavigationNode[] = (
+  [
+    ["/rede/visao-geral", "Visão geral"],
+    ["/rede/mapa", "Mapa"],
+    ["/rede/online", "Clientes online"],
+    ["/rede/onus", "ONUs"],
+    ["/rede/olts", "OLTs"],
+    ["/rede/ftth", "Planta óptica"],
+    ["/rede/equipamentos", "Concentradores e agentes"],
+    ["/rede/enderecos-ip", "IP e CGNAT"],
+    ["/rede/consulta-ip", "Consulta de IP"],
+    ["/rede/operacoes", "Operações"],
+    ["/rede/manutencoes", "Manutenções"],
+    ["/rede/cadastros", "Cadastros"],
+  ] as const
+).map(([href, label]) => extension("Rede / FTTx", href, label));
+// Páginas internas que pertencem a um item do menu.
+const networkOwners: Record<string, string> = {
+  "/rede/caixas": "/rede/ftth",
+};
+const networkAreas = new Set(["REDE / FTTX", "RELATÓRIO"]);
+const extensionPages = [...Object.values(extensions).flat(), ...networkPages];
 
 // Recursos do desenho v0 sem suporte no backend Go. Todos os destinos do
 // catálogo têm página operacional; o mecanismo permanece para novos recursos.
@@ -55,9 +75,9 @@ const destinations: Record<string, string | [string, Guard]> = {
   "/rede/equipamentos/concentradores": "/rede/equipamentos",
   "/rede/equipamentos/agentes-locais": "/rede/equipamentos",
   "/rede/equipamentos/equipamentos-e-olts": "/rede/equipamentos",
-  "/rede/ftth/fttx-olt": "/rede/equipamentos",
-  "/rede/ftth/fttx-cto": "/rede/ftth/fttx-cto",
-  "/rede/ftth/acs-template": "/rede/ftth/acs-template",
+  "/rede/ftth/fttx-olt": "/rede/olts",
+  "/rede/ftth/fttx-cto": "/rede/ftth",
+  "/rede/ftth/acs-template": "/rede/cadastros/acs",
   "/rede/enderecos-ip/blocos-de-enderecos":
     "/rede/enderecos-ip/blocos-de-enderecos",
   "/rede/enderecos-ip/planos-de-cgnat": "/rede/enderecos-ip/planos-de-cgnat",
@@ -224,19 +244,32 @@ export function operationalBranch(node: NavigationNode): NavigationNode {
 export function operationalNavigationAreas() {
   return navigationAreas.map((area) => ({
     ...area,
-    pages: [
-      ...area.pages.map(operationalBranch),
-      ...(extensions[area.id] ?? []),
-    ],
+    pages:
+      area.id === "rede"
+        ? networkPages
+        : area.id === "relatorio"
+          ? []
+          : [
+              ...area.pages.map(operationalBranch),
+              ...(extensions[area.id] ?? []),
+            ],
   }));
 }
 export function findOperationalPage(path: string) {
-  return extensionPages.find((page) => page.href === path);
+  const exact = extensionPages.find((page) => page.href === path);
+  if (exact) return exact;
+  const owner = Object.entries(networkOwners).find(([prefix]) =>
+    path.startsWith(`${prefix}/`),
+  )?.[1];
+  if (owner) return networkPages.find((page) => page.href === owner);
+  return networkPages.find((page) => path.startsWith(`${page.href}/`));
 }
 export function searchOperationalNavigation(query: string) {
   const terms = normalize(query).trim().split(/\s+/).filter(Boolean);
   return [
-    ...searchNavigation(query).filter(visible),
+    ...searchNavigation(query).filter(
+      (page) => visible(page) && !networkAreas.has(page.area),
+    ),
     ...extensionPages.filter((page) =>
       terms.every((term) => normalize(page.trail.join(" ")).includes(term)),
     ),

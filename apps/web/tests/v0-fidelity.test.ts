@@ -10,6 +10,7 @@ const demoOnly: Record<string, string> = {
   "demo-assistant.tsx": "assistente demonstrativo sem modelo ou ferramenta conectados",
   "ip-traceability.tsx": "rastreio sobre o cenário local; a consulta legal real usa contrato e regras próprias do Go",
   "management.tsx": "relatório agregado calculado sobre a amostra fictícia",
+  "optical-network.tsx": "telas FTTx - OLT/PON/CTO do v0; por pedido do dono (16/11/2026) a operação usa páginas por OLT e por caixa em Rede",
   "navigation-directory.tsx": "diretório do catálogo demonstrativo; a operação usa o mapa filtrado por permissão",
   "navigation-scope.tsx": "escopo pendente do catálogo demonstrativo",
   "navigation-views.tsx": "views do roteador demonstrativo",

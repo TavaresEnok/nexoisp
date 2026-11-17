@@ -30,6 +30,7 @@ import {
   LazyContractOnu,
   LazyContractAddresses,
   LazyContractFiber,
+  LazyContractNetworkSummary,
 } from "@/features/network/lazy";
 import { ContractActions } from "./actions";
 import { ContractConditions } from "./conditions";
@@ -144,6 +145,7 @@ export function OperationalContractSheet({
                       label: "Acesso",
                       content: (
                         <>
+                          <LazyContractNetworkSummary id={contract.id} />
                           <LazyContractService
                             id={contract.id}
                             status={contract.status}

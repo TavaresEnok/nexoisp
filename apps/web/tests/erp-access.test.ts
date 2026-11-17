@@ -4,7 +4,7 @@ import { canAccessPath, canonicalErpPath } from "../features/operations/navigati
 import { sessionScope, type Session } from "../features/session/model";
 const user: Session = { id: "u", name: "Financeiro", email: "financeiro@example.invalid", role: "finance", perms: ["subscribers:read", "finance:read", "contracts:read", "portal:self"], modules: [], tenant: { id: "a", name: "Alfa", slug: "alfa" }, support: false, demo: false, mfa_enabled: false, mfa_pending: false };
 test("permissões e módulos protegem URLs diretas e mantêm os significados do Go", () => {
- assert.equal(canonicalErpPath("/operacoes"), "/rede/operacoes"); assert.equal(canonicalErpPath("/rede"), "/rede/equipamentos");
+ assert.equal(canonicalErpPath("/operacoes"), "/rede/operacoes"); assert.equal(canonicalErpPath("/rede"), "/rede/visao-geral"); assert.equal(canonicalErpPath("/noc"), "/rede/visao-geral");
  assert.equal(canAccessPath(user, "/assinantes"), true); assert.equal(canAccessPath(user, "/financeiro/faturas"), true); assert.equal(canAccessPath(user, "/rede/equipamentos"), false); assert.equal(canAccessPath(user, "/provedores"), false);
  const tech = { ...user, role: "noc" as const, perms: ["network:read", "os:read"], modules: [] };
  assert.equal(canAccessPath(tech, "/rede/equipamentos"), true); assert.equal(canAccessPath(tech, "/ordens-de-servico"), false); assert.equal(canAccessPath({ ...tech, modules: ["field"] }, "/ordens-de-servico"), true);
